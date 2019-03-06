@@ -7,3 +7,6 @@
 [submodule "vendor/gli"]
 	path = vendor/gli
 	url = https://github.com/g-truc/gli.git
+[submodule "vendor/openal-soft"]
+	path = vendor/openal-soft
+	url = https://github.com/kcat/openal-soft
