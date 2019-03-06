@@ -1,0 +1,14 @@
+*.suo
+*.pdb
+*.dll
+*.tlog
+*.obj
+*.log
+*.xcf
+*.opendb
+*.db
+
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
