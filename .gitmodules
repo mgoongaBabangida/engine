@@ -13,3 +13,6 @@
 [submodule "vendor/freealut"]
 	path = vendor/freealut
 	url = https://github.com/vancegroup/freealut.git
+[submodule "vendor/assimp"]
+	path = vendor/assimp
+	url = https://github.com/assimp/assimp.git
