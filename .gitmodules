@@ -16,3 +16,6 @@
 [submodule "vendor/assimp"]
 	path = vendor/assimp
 	url = https://github.com/assimp/assimp.git
+[submodule "vendor/libdevil"]
+	path = vendor/libdevil
+	url = https://github.com/LuaDist/libdevil.git
