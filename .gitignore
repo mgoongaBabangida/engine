@@ -7,8 +7,11 @@
 *.xcf
 *.opendb
 *.db
-
+.vs/*
 *.sln
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
+bin/*
+bin-int/*
+vendor/*

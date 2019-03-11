@@ -1,3 +1,7 @@
 1 Исходники и ресурсы И ДЛЛКИ на гите теперь все.(нет только моделей, они были в раре на флешке.)
 2 По адрессу C:\Middleware должнны находится: 
 	Qt, IL, gli, glew-2.0, assimp-3.3 openal, glm, freealut 1.1.9-bin, freealut-1.1.0-src
+
+3 Upd:
+	generate projects requires premake5.exe and lua
+	set path to premake.exe in generate_projects.bat
