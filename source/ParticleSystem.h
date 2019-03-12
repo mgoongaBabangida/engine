@@ -1,8 +1,8 @@
 #pragma once
 #include "Particle.h"
-#include <glm\glm\glm.hpp>
-#include <glm\glm\gtc\matrix_transform.hpp>
-#include <glm\glm\gtx\transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
 #include <vector>
 #include "Clock.h"
 #include <memory>

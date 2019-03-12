@@ -1,6 +1,6 @@
 #include "ShapeGenerator.h"
-#include <glm\glm\glm.hpp>
-#include <glm\glm\gtc\matrix_transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "Vertex.h"
 #include "ShapeData.h"
 #include <assert.h>

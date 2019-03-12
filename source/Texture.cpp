@@ -3,7 +3,7 @@
 #include <IL/ilu.h>
 #include <IL/ilut.h>
 #include <iostream>
-#include <glm\glm/gtc/noise.hpp>
+#include <glm/gtc/noise.hpp>
 
 bool Texture::loadTextureFromFile(const std::string & path, GLenum format, GLenum wrap)
 {

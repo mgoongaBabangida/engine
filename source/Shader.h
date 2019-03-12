@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glew-2.0.0\include\GL\glew.h>
+#include <GL/glew.h>
 #include <string>
 
 struct Shader

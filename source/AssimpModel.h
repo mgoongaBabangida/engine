@@ -1,11 +1,11 @@
 #pragma once
-#include <assimp-3.3/include/assimp/Importer.hpp>
-#include <assimp-3.3/include/assimp/scene.h>
-#include <assimp-3.3/include/assimp/postprocess.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 #include <vector>
 #include <string>
-#include <glew-2.0.0\include\GL\glew.h>
+#include <GL/glew.h>
 #include "AssimpMesh.h"
 #include "MyModel.h"
 #include "Bone.h"

@@ -1,9 +1,9 @@
 #include "Transform.h"
 
-#include <glm\glm\glm.hpp>
-#include <glm\glm\gtc\matrix_transform.hpp>
-#include <glm\glm\gtx\transform.hpp>
-#include <glm\glm/gtc/constants.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include "Structures.h"
 

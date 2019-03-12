@@ -1,9 +1,9 @@
 #ifndef DB_GL_WINDOW
 #define DB_GL_WINDOW
 
-#include <SDL2-2.0.9/include/SDL.h>
-#include <glew-2.0.0/include/GL/glew.h>
-#include <SDL2-2.0.9/include/SDL_opengl.h>
+#include <SDL.h>
+#include <GL/glew.h>
+#include <SDL_opengl.h>
 #include "MainContext.h"
 #include "InputController.h"
 #include "Timer.h"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "InterfacesDB.h"
-#include <glm\glm\glm.hpp>
+#include <glm/glm.hpp>
 #include <iostream>
 #include <vector>
 #include <memory>
