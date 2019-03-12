@@ -14,4 +14,6 @@
 *.vcxproj.user
 bin/*
 bin-int/*
-vendor/* !vendor/glew/* !*.bat 
+
+vendor/*
+!vendor/generate_vendor_projects.bat
