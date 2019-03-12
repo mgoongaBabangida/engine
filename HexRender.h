@@ -1,8 +1,7 @@
 #pragma once
-#include <glm\glm.hpp>
-#include <qobject.h>
-#include <glm\gtc\matrix_transform.hpp>
-#include <glm\gtx\transform.hpp>
+#include <glm\glm\glm.hpp>
+#include <glm\glm\gtc\matrix_transform.hpp>
+#include <glm\glm\gtx\transform.hpp>
 #include "Shader.h"
 #include <vector>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm\glm.hpp>
+#include <glm\glm\glm.hpp>
 #include <string>
 #include "Object.h"
 #include <memory>
@@ -42,7 +42,7 @@ struct ParticleSystemInfo
 
 namespace str 
 {
-	const float PI = 3.14159265359;
+	const float PI = 3.14159265359f;
 }
 
 const glm::vec3 XAXIS = glm::vec3(1.0f, 0.0f, 0.0f);

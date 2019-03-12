@@ -1,7 +1,6 @@
 #ifndef COLORFBO_H 
 #define COLORFBO_H
 
-#include <GL/glew.h>
 #include "Texture.h"
 
 class eColorFBO

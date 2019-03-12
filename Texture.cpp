@@ -3,7 +3,7 @@
 #include <IL/ilu.h>
 #include <IL/ilut.h>
 #include <iostream>
-#include <glm/gtc/noise.hpp>
+#include <glm\glm/gtc/noise.hpp>
 
 bool Texture::loadTextureFromFile(const std::string & path, GLenum format, GLenum wrap)
 {
@@ -15,7 +15,7 @@ bool Texture::loadTextureFromFile(const std::string & path, GLenum format, GLenu
 
 	//Load image
 	//ILboolean success = ilLoadImage( path.c_str() );
-	ILboolean success = ilLoadImage((const char*)(path.c_str)());
+	ILboolean success = ilLoadImage((const wchar_t*)(path.c_str)());
 	std::cout << path.c_str() << std::endl;
 	int i = ilGetError();
 	if (!success)
@@ -79,7 +79,7 @@ bool Texture::saveToFile( const std::string &path )
 	ilEnable(IL_FILE_OVERWRITE);
 
 	// actually save out as png
-	ilSave(IL_PNG, (const char*) path.c_str());
+	ilSave(IL_PNG, (const wchar_t*) path.c_str());
 
 	// now try saving as jpg
 	//ilSave(IL_JPG, (const wchar_t*)"output.jpg");
@@ -166,7 +166,7 @@ bool Texture::loadCubemap(std::vector<std::string> faces)
 
 		//Load image
 		//ILboolean success = ilLoadImage( path.c_str() );
-		ILboolean success = ilLoadImage((const char*)(faces[i].c_str)());
+		ILboolean success = ilLoadImage((const wchar_t*)(faces[i].c_str)());
 		int i0 = ilGetError();
 		if (!success)
 			std::cout << "error loading image" << std::endl;

@@ -116,7 +116,7 @@ void remSnd::loadListner(float x, float y, float z)
 bool SoundContext::LoadWavFile(const std::string & Filename)
 {
 	FILE* fp = NULL;
-	fp = fopen(Filename.c_str(), "rb");
+	fopen_s(&fp, Filename.c_str(), "rb");
 	////create variables to store file info
 	char type[4];
 	DWORD size, chunkSize;

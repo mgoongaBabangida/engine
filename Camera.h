@@ -1,5 +1,5 @@
 #pragma once
-#include <glm\glm.hpp>
+#include <glm\glm\glm.hpp>
 
 class Camera
 {
@@ -8,7 +8,7 @@ private:
 	glm::vec3 viewDirection;
 	const glm::vec3 Up;
 	glm::vec2 oldMousePosition;
-	const float MOVEMENT_SPEED = 0.2f;
+	const float MOVEMENT_SPEED = 0.05f;
 	glm::vec3 strafeDirection;
 	glm::mat3 rotationMatrix;
 public:

@@ -1,7 +1,7 @@
 #include "RenderManager.h"
 
-#include <ShapeGenerator.h>
-#include <ShapeData.h>
+#include "ShapeGenerator.h"
+#include "ShapeData.h"
 
 void eRenderManager::Initialize(ModelManager& modelManager, TextureManager& texManager, remSnd* sound, Texture* pTex)
 {

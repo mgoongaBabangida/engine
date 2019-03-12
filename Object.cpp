@@ -10,6 +10,7 @@ eObject::eObject()
 	script.reset(nullptr);
 	rigger.reset(nullptr);
 	movementApi = new MovementAPI;
+	movementApi->setObject(this);
 }
 
 eObject::eObject(IModel * m) :m_model(m)
@@ -21,6 +22,7 @@ eObject::eObject(IModel * m) :m_model(m)
 	script.reset(nullptr);
 	rigger.reset(nullptr);
 	movementApi = new MovementAPI;
+	movementApi->setObject(this);
 	collider->calculateExtremDots(m_model->getPositions());
 }
 
