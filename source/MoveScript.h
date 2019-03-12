@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <memory>
-#include <glm\glm.hpp>
+#include <glm\glm\glm.hpp>
 #include "Camera.h"
 #include "InterfacesDB.h"
 

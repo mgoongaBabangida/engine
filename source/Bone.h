@@ -1,9 +1,9 @@
 #pragma once
 
-#include <glm/gtx/euler_angles.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/norm.hpp>
+#include <glm\glm/gtx/euler_angles.hpp>
+#include <glm\glm/gtc/quaternion.hpp>
+#include <glm\glm/gtx/quaternion.hpp>
+#include <glm\glm/gtx/norm.hpp>
 #include <vector>
 #include <string>
 
@@ -41,6 +41,6 @@ public:
 	const glm::mat4&		getBindTransform()const			{ return localBindTransform; }
 	const glm::mat4&		getMTransform()   const			{ return mTransform; }
 	void					setMTransform(glm::mat4 trans)	{ mTransform = trans; }
-	int						NumChildren() const				{ return children.size(); }
+	size_t						NumChildren() const				{ return children.size(); }
 	std::vector<Bone*>		getChildren() const				{ return children; }
 };

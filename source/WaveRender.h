@@ -1,8 +1,8 @@
 #pragma once
 
-#include <glm\glm.hpp>
-#include <glm\gtc\matrix_transform.hpp>
-#include <glm\gtx\transform.hpp>
+#include <glm\glm\glm.hpp>
+#include <glm\glm\gtc\matrix_transform.hpp>
+#include <glm\glm\gtx\transform.hpp>
 #include "Shader.h"
 #include "Texture.h"
 #include "Camera.h"
@@ -30,9 +30,9 @@ private:
 	
 	Clock							clock;
 	float							time		= 0.0f;
-	float							Freq		= 2.5;
-	float							Velocity	= 2.5;
-	float							Amp			= 0.6;
+	float							Freq		= 2.5f;
+	float							Velocity	= 2.5f;
+	float							Amp			= 0.6f;
 	//
 	GLuint fullTransformationUniformLocation;  
 	GLuint modelToWorldMatrixUniformLocation; 

@@ -4,7 +4,7 @@
 #include "Structures.h"
 #include "MyMesh.h"
 
-class Texture;
+struct Texture;
 
 class ITerrainModel: IModel
 {

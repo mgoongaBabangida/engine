@@ -1,16 +1,16 @@
 #ifndef  INTERFACESDB_H
 #define  INTERFACESDB_H
 
-#include <GL\glew.h>
+#include <glew-2.0.0\include\GL\glew.h>
 
 #include <memory>
 #include <string>
 #include <vector>
 
-#include <glm\glm.hpp>
-#include <glm\glm.hpp>
-#include <glm\gtc\matrix_transform.hpp>
-#include <glm\gtx\transform.hpp>
+#include <glm\glm\glm.hpp>
+#include <glm\glm\glm.hpp>
+#include <glm\glm\gtc\matrix_transform.hpp>
+#include <glm\glm\gtx\transform.hpp>
 
 //PARTICLE SYSTEM PACKAGE
 class Particle;

@@ -1,6 +1,8 @@
 #pragma once
-#include <GL\glew.h>
+
+#include <glew-2.0.0\include\GL\glew.h>
 #include <string>
+
 struct Shader
 {
 	GLuint ID;

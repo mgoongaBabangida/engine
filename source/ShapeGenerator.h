@@ -1,6 +1,8 @@
 #pragma once
-#include <ShapeData.h>
-#include <Vertex.h>
+#include <glew-2.0.0\include\GL\glew.h>
+#include "ShapeData.h"
+#include "Vertex.h"
+
 typedef unsigned int uint;
 
 class ShapeGenerator

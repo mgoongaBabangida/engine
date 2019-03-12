@@ -111,7 +111,7 @@ void Model::loadModel(string path)
 		root_bone = &m_bones[this->m_BoneMapping.find(m_scene->mRootNode->mName.C_Str())->second];
 	if (root_bone != nullptr)
 		root_bone->calculateInverseBindTransform(glm::mat4());
-	for (int i = 0; i < m_scene->mNumAnimations; ++i)
+	for (uint32_t i = 0; i < m_scene->mNumAnimations; ++i)
 		ProccessAnimations(m_scene->mAnimations[i]);
 }
 
@@ -178,7 +178,7 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 	}
 	////////Bones Set Up ///////////////////////////
 	boneData.resize(vertices.size());
-	for (int i = 0; i < mesh->mNumBones; i++) 
+	for (uint32_t i = 0; i < mesh->mNumBones; i++) 
 	{
 		int BoneIndex = 0;
 		string BoneName(mesh->mBones[i]->mName.C_Str());
@@ -313,7 +313,7 @@ void Model::loadNodesToBone(aiNode * node) //all nodes have names
 
 void Model::loadBoneChildren(aiNode * node)
 {
-	for (int i = 0; i< node->mNumChildren; ++i)
+	for (uint32_t i = 0; i< node->mNumChildren; ++i)
 		loadBoneChildren(node->mChildren[i]);
 
 	std::vector<Bone>::iterator CurBoneIter = std::find_if(m_bones.begin(), m_bones.end(), [node](const Bone& bone)

@@ -1,8 +1,6 @@
 #ifndef SHADOWMAPFBO_H 
 #define SHADOWMAPFBO_H
 
-
- #include <GL/glew.h>
 #include "Texture.h"
 
  class ShadowMapFBO

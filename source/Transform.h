@@ -1,13 +1,13 @@
 #pragma once
 
-#include <glm/gtx/euler_angles.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/norm.hpp>
-#include <glm\glm.hpp>
-#include <glm\gtc\matrix_transform.hpp>
-#include <glm\gtx\transform.hpp>
-#include <glm/gtc/constants.hpp>
+#include <glm\glm/gtx/euler_angles.hpp>
+#include <glm\glm/gtc/quaternion.hpp>
+#include <glm\glm/gtx/quaternion.hpp>
+#include <glm\glm/gtx/norm.hpp>
+#include <glm\glm\glm.hpp>
+#include <glm\glm\gtc\matrix_transform.hpp>
+#include <glm\glm\gtx\transform.hpp>
+#include <glm\glm/gtc/constants.hpp>
 
 class Transform
 {

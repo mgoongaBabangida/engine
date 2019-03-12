@@ -27,10 +27,12 @@ eMainContext::~eMainContext()
 {
 }
 
-void eMainContext::UpdateLight(uint x, uint y, uint z)
+void eMainContext::UpdateLight(uint32_t x, uint32_t y, uint32_t z)
 {
-	lightObject->getTransform()->setTranslation(glm::vec3(x,y,z));
-	m_light.light_vector.x = x; m_light.light_vector.y = y; m_light.light_vector.z = z;
+	lightObject->getTransform()->setTranslation(glm::vec3(x , y, z));
+	m_light.light_vector.x = (float)x; 
+	m_light.light_vector.y = (float)y; 
+	m_light.light_vector.z = (float)z;
 }
 
 void eMainContext::InitializeGL()
@@ -42,7 +44,7 @@ void eMainContext::InitializeGL()
 	ilutRenderer(ILUT_OPENGL);
 
 	//glew
-	glewInit();
+	//glewInit(); init above
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_STENCIL_TEST);
@@ -187,6 +189,7 @@ void eMainContext::InitializeModels()
 
 	shObject wolf = shObject(new eObject(modelManager.find("wolf").get()));
 	wolf->getTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);
+	wolf->getTransform()->setTranslation(vec3(5.0f, 3.0f, 0.0f));
 	wolf->setRigger(new Rigger((Model*)modelManager.find("wolf").get()));
 	wolf->getRigger()->ChangeName(std::string(), "Running");
 	m_Objects.push_back(wolf);
@@ -385,7 +388,7 @@ void eMainContext::Pipeline()
 	}
 	//***********************************************************
 
-	//8.1 Texture visualisation
+	//8.1 Texture visualization
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);

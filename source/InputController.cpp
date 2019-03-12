@@ -1,97 +1,158 @@
 #include "InputController.h"
 
-void eInputController::OnMouseMove(uint x, uint y)
+enum ASCII
+{
+	ASCII_W = 119,//87,
+	ASCII_S = 115,//83
+	ASCII_D = 100,//68,
+	ASCII_A = 97, //65,
+	ASCII_R = 114,//82,
+	ASCII_F = 102,//70,
+	ASCII_Q = 81,
+	ASCII_J = 74,
+	ASCII_L = 76,
+	ASCII_K = 75,
+	ASCII_I = 73,
+	ASCII_Z = 90,
+	ASCII_X = 88,
+	ASCII_C = 67,
+	ASCII_V = 86,
+	ASCII_B = 66,
+	ASCII_N = 78,
+	ASCII_U = 85,
+	ASCII_H = 72,
+	ASCII_G = 71,
+};
+
+void eInputController::OnMouseMove(uint32_t x, uint32_t y)
 {
 	mainContext->GetCamera().mouseUpdate(glm::vec2(x, y));
 }
 
-void eInputController::OnKeyPress(uint asci)
+void eInputController::OnKeyPress(uint32_t asci)
 {
 	//std::cout << "press" << std::endl;
 	//std::cout <<"Camera= "<< m_camera.getPosition().x << " " << m_camera.getPosition().y << " " << m_camera.getPosition().z << " " << std::endl;
-	switch(asci)
+	switch (asci)
 	{
-	case 87://W
+	case ASCII_W:
+	{
 		mainContext->GetCamera().moveForward();
-		break;
-	case 83://S
+	}
+	break;
+	case ASCII_S:
+	{
 		mainContext->GetCamera().moveBackword();
-		break;
-	case Qt::Key::Key_D:
+	}
+	break;
+	case ASCII_D:
+	{
 		mainContext->GetCamera().strafeLeft();
+	}
 		break;
-	case Qt::Key::Key_A:
+	case ASCII_A:
+	{
 		mainContext->GetCamera().strafeRight();
+	}
 		break;
-	case Qt::Key::Key_R:
+	case ASCII_R:
+	{
 		mainContext->GetCamera().moveUp();
+	}
 		break;
-	case Qt::Key::Key_F:
+	case ASCII_F:
+	{
 		mainContext->GetCamera().moveDown();
+	}
 		break;
-	case Qt::Key::Key_Q:
+	case ASCII_Q:
+	{
 
+	}
 		break;
-
-	case Qt::Key::Key_J:
-		//if(m_focused!=nullptr)
-		mainContext->GetFocusedObject()->MoveLeft(mainContext->GetObjects());
+	case ASCII_J:
+	{
+		if (mainContext->GetFocusedObject() != nullptr)
+			mainContext->GetFocusedObject()->MoveLeft(mainContext->GetObjects());
+	}
+	break;
+	case ASCII_L:
+	{
+		if (mainContext->GetFocusedObject() != nullptr)
+			mainContext->GetFocusedObject()->MoveRight(mainContext->GetObjects());
+	}
+	break;
+	case ASCII_K:
+	{
+		if (mainContext->GetFocusedObject() != nullptr)
+			mainContext->GetFocusedObject()->MoveBack(mainContext->GetObjects());
+	}
+	break;
+	case ASCII_I:
+	{
+		if (mainContext->GetFocusedObject() != nullptr)
+			mainContext->GetFocusedObject()->MoveForward(mainContext->GetObjects());
+	}
+	break;
+	case ASCII_Z:
+	{
+		if (mainContext->GetFocusedObject() != nullptr)
+			mainContext->GetFocusedObject()->MoveUp(mainContext->GetObjects());
+	}
+	break;
+	case ASCII_X:
+	{
+		if (mainContext->GetFocusedObject() != nullptr)
+			mainContext->GetFocusedObject()->MoveDown(mainContext->GetObjects());
+	}
+	break;
+	case ASCII_C:
+	{
+		if (mainContext->GetFocusedObject() != nullptr)
+			mainContext->GetFocusedObject()->TurnRight(mainContext->GetObjects());
+	}
+	break;
+	case ASCII_V:
+	{
+		if (mainContext->GetFocusedObject() != nullptr)
+			mainContext->GetFocusedObject()->TurnLeft(mainContext->GetObjects());
+	}
+	break;
+	case ASCII_B:
+	{
+		if (mainContext->GetFocusedObject() != nullptr)
+			mainContext->GetFocusedObject()->LeanRight(mainContext->GetObjects());
+	}
+	break;
+	case ASCII_N:
+	{
+		if (mainContext->GetFocusedObject() != nullptr)
+			mainContext->GetFocusedObject()->LeanLeft(mainContext->GetObjects());
+	}
+	break;
+	case ASCII_U:
+	{
+		if (mainContext->GetFocusedObject() != nullptr)
+			mainContext->GetFocusedObject()->LeanForward(mainContext->GetObjects());
+	}
 		break;
-	case Qt::Key::Key_L:
-		//if (m_focused != nullptr)
-		mainContext->GetFocusedObject()->MoveRight(mainContext->GetObjects());
+	case ASCII_H:
+	{
+		if (mainContext->GetFocusedObject() != nullptr)
+			mainContext->GetFocusedObject()->LeanBack(mainContext->GetObjects());
+	}
 		break;
-	case Qt::Key::Key_K:
-		//if (m_focused != nullptr)
-		mainContext->GetFocusedObject()->MoveBack(mainContext->GetObjects());
-		break;
-	case Qt::Key::Key_I:
-		//if (m_focused != nullptr)
-		mainContext->GetFocusedObject()->MoveForward(mainContext->GetObjects());
-		break;
-	case Qt::Key::Key_Z:
-		//if (m_focused != nullptr)
-		mainContext->GetFocusedObject()->MoveUp(mainContext->GetObjects());
-		break;
-	case Qt::Key::Key_X:
-		//if (m_focused != nullptr)
-		mainContext->GetFocusedObject()->MoveDown(mainContext->GetObjects());
-		break;
-	case Qt::Key::Key_C:
-		//if (m_focused != nullptr)
-		mainContext->GetFocusedObject()->TurnRight(mainContext->GetObjects());
-		break;
-	case Qt::Key::Key_V:
-		//if (m_focused != nullptr)
-		mainContext->GetFocusedObject()->TurnLeft(mainContext->GetObjects());
-		break;
-	case Qt::Key::Key_B:
-		//if (m_focused != nullptr)
-		mainContext->GetFocusedObject()->LeanRight(mainContext->GetObjects());
-		break;
-	case Qt::Key::Key_N:
-		//if (m_focused != nullptr)
-		mainContext->GetFocusedObject()->LeanLeft(mainContext->GetObjects());
-		break;
-	case Qt::Key::Key_U:
-		//if (m_focused != nullptr)
-		mainContext->GetFocusedObject()->LeanForward(mainContext->GetObjects());
-		break;
-	case Qt::Key::Key_H:
-		//if (m_focused != nullptr)
-		mainContext->GetFocusedObject()->LeanBack(mainContext->GetObjects());
-		break;
-	case Qt::Key::Key_G:
+	case ASCII_G:
 	{
 		auto script = mainContext->GetFocusedObject()->getScript();
 		if (script != nullptr)
 			script->shoot();
-		break;
 	}
+		break;
 	}
 }
 
-void eInputController::OnMousePress(uint x, uint y, bool left)
+void eInputController::OnMousePress(uint32_t x, uint32_t y, bool left)
 {
 	//std::cout <<"e->x()"<< e->x() << " " << e->y() << std::endl;
 	if(left)
@@ -102,15 +163,17 @@ void eInputController::OnMousePress(uint x, uint y, bool left)
 				gui.Perssed();
 		}
 
-		mainContext->GetCameraRey().press(x, y);
-		mainContext->GetCameraRey().Update(mainContext->GetCamera(), x, y, mainContext->Width(), mainContext->Height());
-		mainContext->GetFocusedObject() = mainContext->GetCameraRey().calculateIntersaction(mainContext->GetObjects());
+		mainContext->GetCameraRay().press(x, y);
+		mainContext->GetCameraRay().Update(mainContext->GetCamera(), x, y, mainContext->Width(), mainContext->Height());
+		mainContext->GetFocusedObject() = mainContext->GetCameraRay().calculateIntersaction(mainContext->GetObjects());
 	}
 	else
 	{
-		dbb::plane pl(glm::vec3(1.0f, mainContext->WaterHeight(), 1.0f), glm::vec3(0.0f, mainContext->WaterHeight(), 0.0f), glm::vec3(0.0f, mainContext->WaterHeight(), 1.0f)); // arbitrary triangle on waterHeight plane
-		mainContext->GetCameraRey().Update(mainContext->GetCamera(), x, y, mainContext->Width(), mainContext->Height());
-		glm::vec3 target = dbb::intersection(pl, mainContext->GetCameraRey().getLine());
+		dbb::plane pl(glm::vec3(1.0f, mainContext->WaterHeight(), 1.0f), 
+					  glm::vec3(0.0f, mainContext->WaterHeight(), 0.0f),
+					  glm::vec3(0.0f, mainContext->WaterHeight(), 1.0f)); // arbitrary triangle on waterHeight plane
+		mainContext->GetCameraRay().Update(mainContext->GetCamera(), x, y, mainContext->Width(), mainContext->Height());
+		glm::vec3 target = dbb::intersection(pl, mainContext->GetCameraRay().getLine());
 
 		if(mainContext->GetFocusedObject() != nullptr)
 		{
@@ -135,5 +198,5 @@ void eInputController::OnMousePress(uint x, uint y, bool left)
 
 void eInputController::OnMouseRelease()
 {
-	mainContext->GetCameraRey().release();
+	mainContext->GetCameraRay().release();
 }

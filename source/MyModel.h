@@ -1,12 +1,12 @@
 #pragma once
 
 #include "InterfacesDB.h"
-#include <glm\glm.hpp>
+#include <glm\glm\glm.hpp>
 #include <iostream>
-#include "Shader.h"
 #include <vector>
 #include <memory>
-#include <MyMesh.h>
+#include "Shader.h"
+#include "MyMesh.h"
 
 struct Texture;
 

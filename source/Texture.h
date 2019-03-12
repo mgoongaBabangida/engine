@@ -1,6 +1,6 @@
 #pragma once
-#include <GL\glew.h>
-#include <glm\glm.hpp>
+#include <glew-2.0.0\include\GL\glew.h>
+#include <glm\glm\glm.hpp>
 #include <string>
 #include <vector>
 #include <type_traits>
@@ -17,7 +17,7 @@ struct Texture {
 	GLuint mTextureHeight;
 	GLuint mChannels=1;
 	int numberofRows=1;
-	Texture() { type = "default", path = "empty", id = glm::pow(2,8)-1, mTextureWidth = 1, mTextureHeight = 1; loadTexture1x1(YELLOW); }
+	Texture() { type = "default", path = "empty", id = (GLuint)glm::pow(2,8)- 1, mTextureWidth = 1, mTextureHeight = 1; loadTexture1x1(YELLOW); }
 	Texture(GLuint Width, GLuint Height) :Texture() { mTextureWidth = Width;  mTextureHeight = Height; }
 	Texture& operator=(const Texture& t) { id = t.id, mTextureWidth = t.mTextureWidth, mTextureHeight = t.mTextureHeight, type = t.type,path=t.path; return *this; }
 	Texture(GLuint ID, GLuint TextureWidth, GLuint TextureHeight) :id(ID), mTextureWidth(TextureWidth), mTextureHeight(TextureHeight) {  }

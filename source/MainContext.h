@@ -1,7 +1,7 @@
 #ifndef MAIN_CONTEXT_H
 #define MAIN_CONTEXT_H
 
-#include <GL\glew.h>
+#include <glew-2.0.0\include\GL\glew.h>
 #include "Structures.h"
 #include "TerrainModel.h"
 #include "Camera.h"
@@ -23,15 +23,15 @@ public:
 
 	void			InitializeGL();
 	void			PaintGL();
-	void			UpdateLight(uint x, uint y, uint z);
+	void			UpdateLight(uint32_t x, uint32_t y, uint32_t z);
 
 	Camera&					GetCamera()			{ return m_camera;		}
-	dbb::CameraRay&			GetCameraRey()		{ return camRay;		}
+	dbb::CameraRay&			GetCameraRay()		{ return camRay;		}
 	shObject&				GetFocusedObject()	{ return m_focused;		}
 	std::vector<shObject>&  GetObjects()		{ return m_Objects;		}
 	std::vector<GUI>&		GetGuis()			{ return guis;			}
-	uint					Width()				{ return width;			}
-	uint					Height()			{ return height;		}
+	uint32_t				Width()				{ return width;			}
+	uint32_t				Height()			{ return height;		}
 	float					WaterHeight()		{ return waterHeight;	}
 
 private:
@@ -56,8 +56,8 @@ private:
 
 	float								waterHeight = 2.0f;
 	bool								mts			= true;
-	uint								width		= 1200;
-	uint								height		= 600;
+	uint32_t							width		= 1200;
+	uint32_t							height		= 600;
 	Texture								text;
 	bool								mousepress = false;
 	GLenum								drawBufs[1];
