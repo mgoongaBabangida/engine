@@ -1,6 +1,6 @@
+#include "stdafx.h"
 #include "MainContext.h"
 #include "GlBufferContext.h"
-#include <iostream>
 #include "ParticleSystem.h"
 #include "ShootingParticleSystem.h"
 #include "MoveScript.h"
@@ -8,9 +8,6 @@
 #include "InterfacesDB.h"
 
 //texture
-#include <IL/IL.h>
-#include <IL/ilu.h>
-#include <IL/ilut.h>
 #include "Texture.h"
 
 using glm::vec3;

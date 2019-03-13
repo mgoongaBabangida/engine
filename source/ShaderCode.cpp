@@ -1,3 +1,4 @@
+#include "stdafx.h"
 
 const char* VertexShaderCode =
 "#version 430\r\n"

@@ -14,6 +14,8 @@ project "OpenGLProject"
     kind "ConsoleApp"
 	toolset ("v140")
     language "C++"
+	pchheader "stdafx.h"
+	pchsource "source/stdafx.cpp"
 
     targetdir ("bin/" .. outputdir .. "/%{cfg.architecture}")
     objdir ("bin-int/" .. outputdir .. "/%{cfg.architecture}")
@@ -21,37 +23,48 @@ project "OpenGLProject"
     files
     {
         "source/**.h",
-        "source/**.cpp"
+        "source/**.cpp",
+		"shaders/**.glsl"
     }
+
+	vpaths
+	{
+	 	["Headers"] = "**.h",
+		["Sources"] = "**.cpp",
+		["Shaders"] = "**.glsl"
+	}
 
     includedirs
     {
         "vendor/glew/include/",
-        "vendor/openal-soft/include/",
+        "vendor/AL/include/",
         "vendor/assimp/include/",
-        "vendor/freealut/include/",
-        "vendor/openal-soft/include/",
         "vendor/gli/",
         "vendor/glm/",
-        "vendor/libdevil/include/",
+        "vendor/IL/include/",
 		"vendor/SDL2/include/"
     }
 
 	libdirs
 	{
 		"vendor/glew/lib/Release/x64/",
-		"vendor/assimp/lib/Debug/",
+		"vendor/assimp/lib/",
 		"vendor/SDL2/lib/x64/",
-		"vendor/openal-soft/Debug/"
+		"vendor/AL/lib/Win64/",
+		"vendor/IL/"
 	}
+
     links
     {
+		"opengl32.lib",
 		"glew32.lib",
 		"assimp-vc140-mt.lib",
 		"SDL2.lib",
 		"SDL2main.lib",
-		"OpenAL32.lib",
-		"OpenGL32.lib"		
+		"DevIL.lib",
+		"ILU.lib",
+		"ILUT.lib",
+		"OpenAL32.lib"
     }
 
     filter "system:windows"
@@ -79,7 +92,5 @@ project "OpenGLProject"
     filter "configurations:Dist"
         defines ""
         optimize "On"
-    
 
---project "OpenAL"
---    location "vendor/openal-soft"
+

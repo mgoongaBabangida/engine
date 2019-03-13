@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "ModelManager.h"
 #include "ShapeGenerator.h"
 #include "ShapeData.h"

@@ -1,11 +1,10 @@
+#include "stdafx.h"
 #include "ParticleRender.h"
 #include "Object.h"
 #include "MyModel.h"
 #include "MyMesh.h"
 #include "ParticleSystem.h"
 #include "Transform.h"
-#include <iostream>
-#include <algorithm>
 
 eParticleRender::eParticleRender(MyModel *			_model, 
 								ParticleMesh*		_mesh, 

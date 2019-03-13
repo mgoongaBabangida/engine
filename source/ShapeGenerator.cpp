@@ -1,11 +1,9 @@
+#include "stdafx.h"
 #include "ShapeGenerator.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include "Vertex.h"
 #include "ShapeData.h"
-#include <assert.h>
 #include "TeapotData.h"
-#include <iostream>
+
 #define PI 3.14159265359
 using glm::vec3;
 using glm::mat4;

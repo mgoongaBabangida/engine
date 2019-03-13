@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "BrightFilterrender.h"
 #include "GlBufferContext.h"
 

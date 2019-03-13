@@ -1,6 +1,5 @@
+#include "stdafx.h"
 #include "Timer.h"
-#include <thread>
-#include <future>
 
 dbb::Timer::Timer(std::function<bool()> c):callable(c)
 {

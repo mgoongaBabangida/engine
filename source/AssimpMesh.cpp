@@ -1,6 +1,5 @@
+#include "stdafx.h"
 #include "AssimpMesh.h"
-#include <sstream>
-#include <iostream>
 
 AssimpMesh::AssimpMesh(vector<AssimpVertex> vertices, vector<GLuint> indices, vector<Texture> textures)
 {

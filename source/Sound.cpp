@@ -1,8 +1,5 @@
+#include "stdafx.h"
 #include "Sound.h"
-#include <fstream>
-#include <cstdlib>
-#include <iostream>
-#include <Windows.h>
 
 bool SoundContext::endWithError(std::string str)
 {

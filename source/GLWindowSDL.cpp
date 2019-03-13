@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "GLWindowSDL.h"
 #include "SharedData.h"
 

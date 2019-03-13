@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "ShadowRender.h"
 
 eShadowRender::eShadowRender()

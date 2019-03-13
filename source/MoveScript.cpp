@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "MoveScript.h"
 #include "Structures.h"
 #include "ParticleRender.h"

@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "WaveRender.h"
 #include "TerrainModel.h"
 #include "Structures.h"

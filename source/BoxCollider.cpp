@@ -1,5 +1,5 @@
+#include "stdafx.h"
 #include "BoxCollider.h"
-#include <iostream>
 
 void BoxCollider::calculateExtremDots(const std::vector<glm::vec3>& positions)
 {

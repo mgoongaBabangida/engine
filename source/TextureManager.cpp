@@ -1,5 +1,5 @@
+#include "stdafx.h"
 #include "TextureManager.h"
-#include <iostream>
 
 void TextureManager::loadAllTextures()
 {

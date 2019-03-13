@@ -1,6 +1,6 @@
+#include "stdafx.h"
 #include "TerrainModel.h"
 #include "Texture.h"
-#include <algorithm>
 
 TerrainModel::TerrainModel(Texture* diffuse, Texture* specular, Texture* normal, Texture* heightMap) :m_diffuse(diffuse), m_specular(specular), m_normal(normal), m_fourth(diffuse)
 {

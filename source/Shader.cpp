@@ -1,6 +1,5 @@
+#include "stdafx.h"
 #include "Shader.h"
-#include <iostream>
-#include <fstream>
 
 Shader::Shader()
 {

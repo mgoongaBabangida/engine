@@ -1,6 +1,6 @@
+#include "stdafx.h"
 #include "Particle.h"
 #include "Texture.h"
-#include <iostream>
 
 void Particle::updateTextureCoordInfo()
 {

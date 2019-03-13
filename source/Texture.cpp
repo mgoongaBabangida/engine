@@ -1,9 +1,5 @@
+#include "stdafx.h"
 #include "Texture.h"
-#include <IL/IL.h>
-#include <IL/ilu.h>
-#include <IL/ilut.h>
-#include <iostream>
-#include <glm/gtc/noise.hpp>
 
 bool Texture::loadTextureFromFile(const std::string & path, GLenum format, GLenum wrap)
 {

@@ -1,6 +1,5 @@
+#include "stdafx.h"
 #include "MyMesh.h"
-#include <sstream>
-#include<iostream>
 
 MyMesh::MyMesh(vector<MyVertex> vertices, vector<GLuint> indices, vector<Texture> textures)
 {

@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "GlBufferContext.h"
 
 void eGlBufferContext::BufferInit(eBuffer _buffer, unsigned int _width, unsigned int _height)

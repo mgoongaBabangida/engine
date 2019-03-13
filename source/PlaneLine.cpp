@@ -1,5 +1,5 @@
+#include "stdafx.h"
 #include "PlaneLine.h"
-#include <iostream>
 
 glm::vec3 dbb::intersection(dbb::plane P, dbb::line L)
 {

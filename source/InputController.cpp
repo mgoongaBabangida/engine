@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "InputController.h"
 
 enum ASCII

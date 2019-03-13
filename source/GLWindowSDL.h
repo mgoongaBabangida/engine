@@ -2,7 +2,6 @@
 #define DB_GL_WINDOW
 
 #include <SDL.h>
-#include <GL/glew.h>
 #include <SDL_opengl.h>
 #include "MainContext.h"
 #include "InputController.h"

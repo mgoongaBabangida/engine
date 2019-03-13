@@ -1,5 +1,5 @@
+#include "stdafx.h"
 #include "colorFBO.h"
-#include <iostream>
 
 eColorFBO::eColorFBO()
 {

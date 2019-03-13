@@ -1,20 +1,21 @@
+#include "stdafx.h"
 #include "CameraRay.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/transform.hpp>
-#include <glm/gtc/constants.hpp>
-#include <map>
-#include <iostream>
 
-dbb::CameraRay::CameraRay(float w, float h, float n, float f,float pers_angle ):Width(w), Height(h), near_plane(n), far_plane(f),
-																				perspective_angle_degrees(pers_angle)
+dbb::CameraRay::CameraRay(float w, float h, float n, float f,float pers_angle )
+: Width(w)
+, Height(h)
+, near_plane(n)
+, far_plane(f)
+, perspective_angle_degrees(pers_angle)
+{}
+
+void dbb::CameraRay::init(float _width, float _height, float _near, float _far, float _pers_angle)
 {
-
-}
-
-void dbb::CameraRay::init(float Width, float Height, float near, float far, float pers_angle )
-{
-	Width = Width; Height = Height; near_plane = near; far_plane = far; perspective_angle_degrees = pers_angle;
+	Width = _width;
+	Height = _height;
+	near_plane = _near;
+	far_plane = _far;
+	perspective_angle_degrees = _pers_angle;
 }
 
 void dbb::CameraRay::Update(Camera& camera, float click_x, float click_y,float w,float h)

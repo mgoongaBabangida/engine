@@ -1,10 +1,7 @@
+#include "stdafx.h"
 #include "ParticleSystem.h"
-#include <algorithm>
 #include "Texture.h"
 #include "Structures.h"
-#include <chrono>
-#include <iostream>
-#include <random>
 #include "Sound.h"
 
 ParticleSystem::ParticleSystem(float pps, float speed, float gravityComplient, float lifeLength, remSnd* s, float dur):duration(dur) {

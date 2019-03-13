@@ -1,7 +1,6 @@
+#include "stdafx.h"
 #include "Rigger.h"
 #include "AssimpModel.h"
-#include <algorithm>
-#include <iostream>
 
 Rigger::Rigger(Model * _model):model(_model)
 {

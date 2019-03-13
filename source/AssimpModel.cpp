@@ -1,6 +1,5 @@
+#include "stdafx.h"
 #include "AssimpModel.h"
-#include <iostream>
-#include <algorithm>
 #include "Transform.h"
 
 using namespace std;

@@ -1,5 +1,5 @@
+#include "stdafx.h"
 #include "ShootingParticleSystem.h"
-#include <algorithm>
 #include "Texture.h"
 #include "Structures.h"
 #include "Random.h"

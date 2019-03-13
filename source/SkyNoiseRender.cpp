@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "SkyNoiseRender.h"
 #include "Object.h"
 #include "MyModel.h"

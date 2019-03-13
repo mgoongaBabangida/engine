@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "MovementAPI.h"
 
 bool MovementAPI::CollidesWith(eObject* _other, Side _side)

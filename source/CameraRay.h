@@ -35,4 +35,4 @@ namespace dbb
 		glm::vec2	press_start;
 		glm::vec2	press_curr;
 	};
-};
+}

@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "SkyBoxRender.h"
 
 eSkyBoxRender::eSkyBoxRender(Texture _texture )

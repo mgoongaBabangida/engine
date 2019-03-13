@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Object.h"
 #include "MyModel.h"
 #include "MovementAPI.h"

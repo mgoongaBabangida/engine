@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "RenderManager.h"
 
 #include "ShapeGenerator.h"
