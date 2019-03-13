@@ -3,9 +3,6 @@
 
 #include "Transform.h"
 #include "Clock.h"
-#include <string>
-#include <map>
-#include <vector>
 
 struct Frame
 {

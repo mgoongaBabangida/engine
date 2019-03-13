@@ -1,15 +1,10 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/transform.hpp>
 #include "Shader.h"
 #include "Texture.h"
 #include "Camera.h"
 #include "Structures.h"
 #include "Clock.h"
-#include <memory>
-#include <vector>
 
 class TerrainModel;
 

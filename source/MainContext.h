@@ -1,7 +1,6 @@
 #ifndef MAIN_CONTEXT_H
 #define MAIN_CONTEXT_H
 
-#include <GL/glew.h>
 #include "Structures.h"
 #include "TerrainModel.h"
 #include "Camera.h"

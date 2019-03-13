@@ -1,9 +1,6 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <string>
 #include "Object.h"
-#include <memory>
 
 typedef std::shared_ptr<eObject> shObject;
 

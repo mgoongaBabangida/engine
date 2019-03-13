@@ -1,9 +1,6 @@
 #ifndef TIMER_H
 #define TIMER_H
 #include "Clock.h"
-#include <functional>
-#include <thread>
-#include <future>
 
 namespace dbb {
 

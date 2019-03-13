@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 #include "Texture.h"
 #include "Structures.h"
 

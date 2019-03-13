@@ -6,7 +6,6 @@
 #include "Structures.h"
 #include "Clock.h"
 #include "Timer.h"
-#include <memory>
 
 //#include "colorFBO.h"
 

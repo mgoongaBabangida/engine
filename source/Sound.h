@@ -1,12 +1,5 @@
 #pragma once
 
-#include <AL/al.h>
-#include <AL/alc.h>
-#include <map>
-#include <string>
-
-//#pragma comment(lib, "OpenAL32.lib")
-
 class SoundContext //singleton
 {
 	ALCdevice* device;

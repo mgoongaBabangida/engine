@@ -1,9 +1,4 @@
 #pragma once
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/transform.hpp>
-#include <assert.h>
-#include <exception>
 
 using glm::vec3;
 using glm::vec4;

@@ -1,12 +1,5 @@
 #pragma once
 
-#include <glm/gtx/euler_angles.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/norm.hpp>
-#include <vector>
-#include <string>
-
 class Bone
 {
 	int					index;

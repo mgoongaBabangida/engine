@@ -3,7 +3,6 @@
 #include "Structures.h"
 #include "Texture.h"
 #include "InterfacesDB.h"
-#include <memory>
 #include <iostream>
 
 class GUI

@@ -1,11 +1,7 @@
 #pragma once
-#include <set>
-#include <memory>
 #include "MyModel.h" //temp
 #include "AssimpModel.h" //temp
 #include "TerrainModel.h" //temp
-
-#include <string>
 
 class ModelManager
 {

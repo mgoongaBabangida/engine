@@ -1,8 +1,6 @@
 #ifndef DB_GL_WINDOW
 #define DB_GL_WINDOW
 
-#include <SDL.h>
-#include <SDL_opengl.h>
 #include "MainContext.h"
 #include "InputController.h"
 #include "Timer.h"

@@ -1,7 +1,6 @@
 #pragma once
 #include "Bone.h"
 #include "SceletalAnimation.h"
-#include <string>
 
 class Model;
 

@@ -8,10 +8,6 @@
 #include "InterfacesDB.h"
 #include "Timer.h"
 
-#include <chrono>
-#include <memory>
-#include <vector>
-
 class eObject;
 class MyModel;
 class ParticleMesh;

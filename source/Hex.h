@@ -1,6 +1,5 @@
 #pragma once
 #include "PlaneLine.h"
-#include <vector>
 
 class Hex
 {

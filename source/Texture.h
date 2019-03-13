@@ -1,10 +1,4 @@
 #pragma once
-#include <GL/glew.h>
-#include <glm/glm.hpp>
-#include <string>
-#include <vector>
-#include <type_traits>
-#include <assert.h>
 
 enum TColor { WHITE, BLACK, BLUE, PINK,YELLOW};
 

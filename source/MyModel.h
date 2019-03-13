@@ -1,10 +1,6 @@
 #pragma once
 
 #include "InterfacesDB.h"
-#include <glm/glm.hpp>
-#include <iostream>
-#include <vector>
-#include <memory>
 #include "Shader.h"
 #include "MyMesh.h"
 

@@ -1,6 +1,5 @@
 #pragma once
 #include "Camera.h"
-#include <vector>
 #include "Structures.h"
 #include "Transform.h"
 
