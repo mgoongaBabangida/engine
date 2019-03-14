@@ -14,6 +14,10 @@
 *.vcxproj.user
 bin/*
 bin-int/*
+vendor/glfw/*
+vendor/assimp/*
+vendor/SDL2/*
+vendor/AL/*
+vendor/IL/*
 
-vendor/*
 !vendor/generate_vendor_projects.bat

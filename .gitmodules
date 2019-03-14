@@ -4,3 +4,6 @@
 [submodule "vendor/gli"]
 	path = vendor/gli
 	url = https://github.com/g-truc/gli.git
+[submodule "vendor/spdlog"]
+	path = vendor/spdlog
+	url = https://github.com/gabime/spdlog
