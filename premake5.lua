@@ -42,7 +42,8 @@ project "OpenGLProject"
         "vendor/gli/",
         "vendor/glm/",
         "vendor/IL/include/",
-		"vendor/SDL2/include/"
+		"vendor/SDL2/include/",
+		"vendor/spdlog/include/"
     }
 
 	libdirs
