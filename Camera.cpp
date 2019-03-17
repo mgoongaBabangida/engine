@@ -3,35 +3,31 @@
 #include <iostream>
 
 Camera::Camera() : viewDirection(0.0f,0.0f,1.0f),Up(0.0f,1.0f,0.0f),position(2.0f,4.0f,-3.0f),strafeDirection(1.0f,0.0f,0.0f)
-{
-
-}
+{}
 
 Camera::Camera(const Camera & other)
 {
-	position=other.position;
-	viewDirection=other.viewDirection;
-	oldMousePosition=other.oldMousePosition;
-	strafeDirection=other.strafeDirection;
-	rotationMatrix=other.rotationMatrix;
+	position		 = other.position;
+	viewDirection	 = other.viewDirection;
+	oldMousePosition = other.oldMousePosition;
+	strafeDirection	 = other.strafeDirection;
+	rotationMatrix	 = other.rotationMatrix;
 }
 
-Camera & Camera::operator=(const Camera & other)
+Camera& Camera::operator=(const Camera & other)
 {
-	//if (other != *this) {  //IDIOM!!!
-	position = other.position;
-	viewDirection = other.viewDirection;
-	oldMousePosition = other.oldMousePosition;
-	strafeDirection = other.strafeDirection;
-	rotationMatrix = other.rotationMatrix;
-	//}
+	if (&other != this) 
+	{  
+		position = other.position;
+		viewDirection = other.viewDirection;
+		oldMousePosition = other.oldMousePosition;
+		strafeDirection = other.strafeDirection;
+		rotationMatrix = other.rotationMatrix;
+	}
 	return *this;
 }
 
-Camera::~Camera()
-{
-
-}
+Camera::~Camera() {}
 
 glm::mat4 Camera::getWorldToViewMatrix() const
 {
@@ -56,7 +52,7 @@ glm::vec3 Camera::getDirection() const
 void Camera::mouseUpdate(const glm::vec2& newMousePosition)
 {
 	glm::vec2 mouseDelta = newMousePosition - oldMousePosition;
-	if(glm::length(mouseDelta)>10.0f)
+	if(glm::length(mouseDelta) > 5.0f)
 	{
 		oldMousePosition = newMousePosition;
 	}

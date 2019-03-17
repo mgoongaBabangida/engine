@@ -8,9 +8,7 @@
 
 dbb::CameraRay::CameraRay(float w, float h, float n, float f,float pers_angle ):Width(w), Height(h), near_plane(n), far_plane(f),
 																				perspective_angle_degrees(pers_angle)
-{
-
-}
+{}
 
 void dbb::CameraRay::init(float Width, float Height, float near, float far, float pers_angle )
 {
@@ -113,7 +111,7 @@ std::vector<shObject> dbb::CameraRay::onMove(Camera& camera, std::vector<shObjec
 {
 	press_curr = glm::vec2(click_x, click_y);
 	std::vector<shObject> ret;
-	if (pressed)
+	if(pressed)
 	{
 		dbb::line  line1 = getLine(camera, press_start);
 		dbb::line  line2 = getLine(camera, press_curr);

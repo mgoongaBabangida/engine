@@ -12,7 +12,7 @@
 class eOutlineRender
 {
 public:
-	eOutlineRender();
+	eOutlineRender(const std::string& vS, const std::string& fS);
 	void Render(const glm::mat4&		projectionMatrix, 
 				const Camera&			camera, 
 				const Light&			light, 

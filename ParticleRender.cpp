@@ -1,19 +1,21 @@
 #include "ParticleRender.h"
+#include "ParticleSystem.h"
 #include "Object.h"
 #include "MyModel.h"
 #include "MyMesh.h"
-#include "ParticleSystem.h"
 #include "Transform.h"
-#include <iostream>
+#include "ShapeGenerator.h"
+#include "ShapeData.h"
+
 #include <algorithm>
 
-eParticleRender::eParticleRender(MyModel *			_model, 
-								ParticleMesh*		_mesh, 
-								IParticleSystem*	_sys, 
-								ParticleSystemInfo _info)
-: instancedBuffer(ParticleMesh::MAXPARTICLES * _mesh->getStep() / sizeof(float), 0.0f)
+eParticleRender::eParticleRender(std::shared_ptr<MyMesh> _mesh,
+								 Texture*				 _texture,
+								 const string&			 _vertexShaderPath,
+								 const string&			 _fragmentShaderPath)
+: instancedBuffer(ParticleMesh::MAXPARTICLES  * ParticleMesh::SIZEOF / sizeof(float), 0.0f)
 {
-	particleShader.installShaders("ParticleVertexShader.glsl", "ParticleFragmentShader.glsl");
+	particleShader.installShaders(_vertexShaderPath.c_str(), _fragmentShaderPath.c_str());
 
 	modelToWorldMatrixUniformLocation		= glGetUniformLocation(particleShader.ID, "modelToWorldMatrix");
 	fullTransformationUniformLocation		= glGetUniformLocation(particleShader.ID, "modelToProjectionMatrix");
@@ -24,41 +26,36 @@ eParticleRender::eParticleRender(MyModel *			_model,
 	texOffset2Location						= glGetUniformLocation(particleShader.ID, "texOffset2");
 	texCoordInfoLocation					= glGetUniformLocation(particleShader.ID, "texCoordInfo");
 
-	systems.push_back(std::shared_ptr<IParticleSystem>(_sys));
-	infos.push_back(_info);
-	//get particle texture
-	_model->SetTexture(_info.texture);
-	object = new eObject(_model);
-	mesh = _mesh;
+	model.reset(new MyModel(_mesh, _texture));
+	object.reset(new eObject(model.get())); // prob transform will do
+
+	ShapeData quad	= ShapeGenerator::makeQuad();
+	mesh.reset(new ParticleMesh(quad));
+	quad.cleanup();
 }
 
 void eParticleRender::Render(const glm::mat4 & _projectionMatrix, const Camera & _camera)
 {
 	glUseProgram(particleShader.ID);
-
-	mat4 worldToProjectionMatrix = _projectionMatrix * _camera.getWorldToViewMatrix();
-	glUniformMatrix4fv(ProjectionMatrixUniformLocation, 1, GL_FALSE, &_projectionMatrix[0][0]);  //Projection
+	glUniformMatrix4fv(ProjectionMatrixUniformLocation, 1, GL_FALSE, &_projectionMatrix[0][0]);
 
 	int info = 0;
-	for (auto& system : systems)
+	for(auto& system : systems)
 	{
 		object->getTransform()->billboard(_camera.getDirection());
-		object->getTransform()->setScale(glm::vec3(infos[info].scale, infos[info].scale, infos[info].scale));
+		object->getTransform()->setScale(system->Scale());
 
-		system->generateParticles(infos[info].systemCenter, infos[info].texture);  
+		system->generateParticles();  
 
+		int counter		= 0;
+		int instances	= 0;
 		std::vector<Particle>::iterator n_end = system->prepareParticles(_camera.getPosition());
-
-		int counter = 0;
-		//std::cout << "cycle--------------" << std::endl;
-		int debug = 0;
 		std::vector<Particle>::iterator iter = system->getParticles().begin();
-		if (iter != system->getParticles().end() && n_end != system->getParticles().begin() ) 
+		if(iter != system->getParticles().end() && n_end != system->getParticles().begin()) 
 		{
-			while (iter != n_end) 
+			while(iter != n_end) 
 			{
-				debug++;
-				/*std::cout << "here alive" << std::endl;*/
+				instances++;
 				object->getTransform()->setTranslation(iter->getPosition());
 				mat4 modelViewMatrix = _camera.getWorldToViewMatrix() * object->getTransform()->getModelMatrix();
 				glUniformMatrix4fv(modelViewMatrixLocation, 1, GL_FALSE, &modelViewMatrix[0][0]);  //modelView
@@ -79,25 +76,27 @@ void eParticleRender::Render(const glm::mat4 & _projectionMatrix, const Camera &
 
 				++iter;
 			}
-		}
-		//std::cout <<"debug count "<< debug << std::endl;
-		
+		}	
 		mesh->updateInstancedData(instancedBuffer);
-		mesh->SetUpInstances(debug);
+		mesh->SetUpInstances(instances);
 
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, this->infos[info].texture->id);
+		glBindTexture(GL_TEXTURE_2D, system->GetTexture()->id);
 		glUniform1i(glGetUniformLocation(particleShader.ID, "texture_diffuse1"), 2);
 		mesh->Draw();
 
 		++info;
 	}
+	auto toRemove = std::remove_if(systems.begin(), systems.end(),[](std::shared_ptr<IParticleSystem> sys){return sys->IsFinished();});
+	if(toRemove != systems.end())
+	{
+		systems.erase(toRemove);
+	}
 }
    
-void eParticleRender::AddParticleSystem(IParticleSystem* sys, ParticleSystemInfo info)
+void eParticleRender::AddParticleSystem(IParticleSystem* sys)
 {
 	systems.push_back(std::shared_ptr<IParticleSystem>(sys));
-	infos.push_back(info);
 }
 
 void eParticleRender::LoadOffsetsInfo(glm::vec2 offset1, glm::vec2 offset2, float numRows, float blend)

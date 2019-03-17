@@ -16,7 +16,12 @@ class TerrainModel;
 class eWaveRender
 {
 public:
-	eWaveRender(std::unique_ptr<TerrainModel> model, Texture* tex, Texture* normals, Texture* Height);
+	eWaveRender(std::unique_ptr<TerrainModel> model, 
+				Texture*						tex, 
+				Texture*						normals, 
+				Texture*						Height,
+				const std::string&				vS, 
+				const std::string&				fS);
 	void Render(const glm::mat4&  ProjectionMatrix,
 				const Camera&	  camera,
 				const Light&	  light,

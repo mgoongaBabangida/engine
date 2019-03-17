@@ -1,8 +1,8 @@
 #include "ShadowRender.h"
 
-eShadowRender::eShadowRender()
+eShadowRender::eShadowRender(const std::string& vS, const std::string& fS)
 {
-	shader.installShaders("VertexShades.glsl", "FragmentShades.glsl");  //shadows
+	shader.installShaders(vS.c_str(), fS.c_str());  //shadows
 
 	MVPUniformLocation = glGetUniformLocation(shader.ID, "MVP");
 }

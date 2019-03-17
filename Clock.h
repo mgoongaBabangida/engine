@@ -11,15 +11,15 @@ protected:
 	bool paused = false;
 
 public:
-	void start();
-	int timeEllapsedMsc();
-	int newFrame();
-	int timeEllapsedLastFrameMsc();
-	void restart();
-	bool isActive();
-	void pause();
-	void goOn();
-	bool isPaused() { return paused; }
+	void		start();
+	int64_t		timeEllapsedMsc();
+	int			newFrame();
+	int			timeEllapsedLastFrameMsc();
+	void		restart();
+	bool		isActive();
+	void		pause();
+	void		goOn();
+	bool		isPaused() { return paused; }
 };
 
 #endif

@@ -12,7 +12,10 @@ class eBrightFilterRender
 	GLuint textureLoc;
 	GLuint TexWidthLoc;
 public:
-	eBrightFilterRender(GLuint widtht, GLuint Height);
+	eBrightFilterRender(GLuint				widtht, 
+						GLuint				Height, 
+						const std::string&	vS,
+						const std::string&	fS);
 	void Render();
 	void SetTexture(Texture t) { texture = t; }
 };

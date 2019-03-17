@@ -1,8 +1,8 @@
 #include "MainRender.h"
 
-eMainRender::eMainRender()
+eMainRender::eMainRender(const std::string& vS, const std::string& fS)
 {
-	mainShader.installShaders("VertexShaderCode.glsl", "FragmentShaderCode.glsl"); //main pass
+	mainShader.installShaders(vS.c_str(), fS.c_str()); //main pass
 
 	glUseProgram(mainShader.ID);
 	//Light

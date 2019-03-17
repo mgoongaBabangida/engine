@@ -1,94 +1,52 @@
 #include "Texture.h"
-#include <IL/IL.h>
-#include <IL/ilu.h>
-#include <IL/ilut.h>
 #include <iostream>
 #include <glm\glm/gtc/noise.hpp>
+#include "TextureImplDevIl.h"
+#include "TextureImplSDL.h"
 
-bool Texture::loadTextureFromFile(const std::string & path, GLenum format, GLenum wrap)
+bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenum wrap)
 {
-	//freeTexture();
-	//Generate and set current image ID
-	ILuint imgID = 0;
-	ilGenImages(1, &imgID);
-	ilBindImage(imgID);
+	path		= _path;
+	uint32_t ilId;
+	mChannels = eTextureImplSDL::LoadTexture(path, ilId, mTextureWidth, mTextureHeight);
+	uint8_t* pixmap = nullptr;// = new uint8_t[mTextureWidth * mTextureHeight * mChannels]; //Devil
+	eTextureImplSDL::AssignPixels(pixmap, mTextureWidth, mTextureHeight); //Devil copy / SDL assign
 
-	//Load image
-	//ILboolean success = ilLoadImage( path.c_str() );
-	ILboolean success = ilLoadImage((const wchar_t*)(path.c_str)());
-	std::cout << path.c_str() << std::endl;
-	int i = ilGetError();
-	if (!success)
-	 std::cout << "error loading image" << std::endl;
-	int i1 = IL_COULD_NOT_OPEN_FILE;
-	int i2 = IL_ILLEGAL_OPERATION;
-	int i3 = IL_INVALID_PARAM;
-	//Image loaded successfully
-	mTextureWidth = ilGetInteger(IL_IMAGE_WIDTH);
-	mTextureHeight = ilGetInteger(IL_IMAGE_HEIGHT);
-
-	//std::cout << ilGetInteger(IL_IMAGE_BPP) << std::endl;
-
-	auto pixmap = new BYTE[mTextureWidth * mTextureHeight * 4]; /////
-	//Convert image to RGBA
-	success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
-	if (!success)
-		std::cout << "error converting image" << std::endl;
-	ilCopyPixels(0, 0, 0, mTextureWidth, mTextureHeight, 1, IL_RGBA, IL_UNSIGNED_BYTE, pixmap); //////
 	// Load textures
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D, id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLuint*)ilGetData());
-	mChannels = 4;//RGBA
-	//
-	ilDeleteImages(1, &imgID);
-	//
+	glTexImage2D(GL_TEXTURE_2D, 
+				0, 
+				mChannels == 4 ? GL_RGBA : GL_RGB, 
+				mTextureWidth, 
+				mTextureHeight, 
+				0, 
+				mChannels == 4 ? GL_RGBA : GL_RGB, 
+				GL_UNSIGNED_BYTE, 
+				(GLubyte*)pixmap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	delete[] pixmap;
-	return success;
-	
+	eTextureImplSDL::DeleteImage(ilId);
+	//delete[] pixmap; //Devil
+	return true;
 }
 
-bool Texture::saveToFile( const std::string &path )
+bool Texture::saveToFile(const std::string &path)
 {
-	int sizeOfByte = sizeof(unsigned char); //!??
-	int bytesToUsePerPixel = 4;  // RGB
+	int sizeOfByte = sizeof(unsigned char);
+	int bytesToUsePerPixel = mChannels;
 	int theSize = mTextureWidth * mTextureHeight * sizeOfByte * bytesToUsePerPixel;
-	unsigned char * imData = (unsigned char*)malloc(theSize);
+	uint8_t* imData = (uint8_t*)malloc(theSize);
+	
 	glBindTexture(GL_TEXTURE_2D, this->id);
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA,GL_UNSIGNED_BYTE,(void*)imData); //generic
 	glBindTexture(GL_TEXTURE_2D, 0);
-	ILuint imageID = ilGenImage();
-	ilBindImage(imageID);
 	
-	ilTexImage(	
-		mTextureWidth,
-		mTextureHeight,
-		1,  // OpenIL supports 3d textures!  but we don't want it to be 3d.  so
-			// we just set this to be 1
-		4,  // 3 channels:  one for R , one for G, one for B
-		IL_RGBA,  // duh, yeah use rgb!  coulda been rgba if we wanted trans
-		IL_UNSIGNED_BYTE,  // the type of data the imData array contains (next)
-		imData  // and the array of bytes represneting the actual image data
-	);
-
-	ilEnable(IL_FILE_OVERWRITE);
-
-	// actually save out as png
-	ilSave(IL_PNG, (const wchar_t*) path.c_str());
-
-	// now try saving as jpg
-	//ilSave(IL_JPG, (const wchar_t*)"output.jpg");
-
-	// now save as bmp
-	//ilSave(IL_BMP, (const wchar_t*) "output.bmp");
-
+	eTextureImplDevIl::SaveToFile(imData, path, mTextureWidth, mTextureHeight, mChannels);
 	return true;
-
 }
 
 void Texture::freeTexture()
@@ -99,14 +57,8 @@ void Texture::freeTexture()
 		glDeleteTextures(1, &id);
 		id = 0;
 	}
-
 	mTextureWidth = 0;
 	mTextureHeight = 0;
-}
-
-void Texture::Render(GLfloat x, GLfloat y)
-{
-
 }
 
 bool Texture::loadTexture1x1(TColor color)
@@ -144,51 +96,26 @@ bool Texture::loadTexture1x1(TColor color)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	
-
 	return true;
 }
 
 bool Texture::loadCubemap(std::vector<std::string> faces)
 {
-	//unsigned char* image;
-
+	mChannels = 4;
 	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
 	for (GLuint i = 0; i < faces.size(); i++)
 	{
-
-		//	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-
-
-		//Generate and set current image ID
-		ILuint imgID = 0;
-		ilGenImages(1, &imgID);
-		ilBindImage(imgID);
-
-		//Load image
-		//ILboolean success = ilLoadImage( path.c_str() );
-		ILboolean success = ilLoadImage((const wchar_t*)(faces[i].c_str)());
-		int i0 = ilGetError();
-		if (!success)
-			std::cout << "error loading image" << std::endl;
-		int i1 = IL_COULD_NOT_OPEN_FILE;
-		int i2 = IL_ILLEGAL_OPERATION;
-		int i3 = IL_INVALID_PARAM;
-		//Image loaded successfully
-		mTextureWidth = ilGetInteger(IL_IMAGE_WIDTH);
-		mTextureHeight = ilGetInteger(IL_IMAGE_HEIGHT);
-		auto pixmap = new BYTE[mTextureWidth * mTextureHeight * 3];
-		ilCopyPixels(0, 0, 0, mTextureWidth, mTextureHeight, 1, IL_RGB, IL_UNSIGNED_BYTE, pixmap);
-		//Convert image to RGBA
-		success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
-		if (!success)
-			std::cout << "error converting image" << std::endl;
+		uint32_t ilId;
+		eTextureImplDevIl::LoadTexture(faces[i], ilId, mTextureWidth, mTextureHeight);
+		uint8_t* pixmap = new uint8_t[mTextureWidth * mTextureHeight * mChannels];
+		eTextureImplDevIl::AssignPixels(pixmap, mTextureWidth, mTextureHeight);
 		// Load textures
 		glGenTextures(1, &id);
 		glBindTexture(GL_TEXTURE_2D,id);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLuint*)ilGetData());
-		//
-		ilDeleteImages(1, &imgID);
-		//
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLubyte*)pixmap);
+
+		eTextureImplDevIl::DeleteImage(ilId);
+		delete[] pixmap;
 	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -196,7 +123,7 @@ bool Texture::loadCubemap(std::vector<std::string> faces)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	mChannels = 4;
+
 	return true;
 }
 

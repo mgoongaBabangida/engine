@@ -1,8 +1,10 @@
 #include "SkyBoxRender.h"
 
-eSkyBoxRender::eSkyBoxRender(Texture _texture )
+eSkyBoxRender::eSkyBoxRender(Texture			_texture, 
+							const std::string& vertexShaderPath, 
+							const std::string& fragmentShaderPath)
 {
-	skyboxShader.installShaders("SkyBoxVertexShader.glsl", "SkyBoxFragmentShader.glsl");
+	skyboxShader.installShaders(vertexShaderPath.c_str(), fragmentShaderPath.c_str());
 	skyBox.reset(new eSkyBoxMesh(_texture));
 
 	viewLoc			= glGetUniformLocation(skyboxShader.ID, "view");

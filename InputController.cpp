@@ -8,31 +8,31 @@ enum ASCII
 	ASCII_A = 97, //65,
 	ASCII_R = 114,//82,
 	ASCII_F = 102,//70,
-	ASCII_Q = 81,
-	ASCII_J = 74,
-	ASCII_L = 76,
-	ASCII_K = 75,
-	ASCII_I = 73,
-	ASCII_Z = 90,
-	ASCII_X = 88,
-	ASCII_C = 67,
-	ASCII_V = 86,
-	ASCII_B = 66,
-	ASCII_N = 78,
-	ASCII_U = 85,
-	ASCII_H = 72,
-	ASCII_G = 71,
+	ASCII_Q = 113,//81
+	ASCII_J = 106,//74,
+	ASCII_L = 108,//76,
+	ASCII_K = 107,//75,
+	ASCII_I = 105,//73,
+	ASCII_Z = 122,//90,
+	ASCII_X = 120,//88,
+	ASCII_C = 99,//67,
+	ASCII_V = 118,//86,
+	ASCII_B = 98,//66,
+	ASCII_N = 110,//78,
+	ASCII_U = 117,//85,
+	ASCII_H = 104,//72,
+	ASCII_G = 103,//71,
 };
 
 void eInputController::OnMouseMove(uint32_t x, uint32_t y)
 {
 	mainContext->GetCamera().mouseUpdate(glm::vec2(x, y));
+	//framedObjects = mainContext->GetCameraRay().onMove(mainContext->GetCamera(), mainContext->GetObjects(), x, y);
+	//to draw a frame
 }
 
 void eInputController::OnKeyPress(uint32_t asci)
 {
-	//std::cout << "press" << std::endl;
-	//std::cout <<"Camera= "<< m_camera.getPosition().x << " " << m_camera.getPosition().y << " " << m_camera.getPosition().z << " " << std::endl;
 	switch (asci)
 	{
 	case ASCII_W:
@@ -154,7 +154,6 @@ void eInputController::OnKeyPress(uint32_t asci)
 
 void eInputController::OnMousePress(uint32_t x, uint32_t y, bool left)
 {
-	//std::cout <<"e->x()"<< e->x() << " " << e->y() << std::endl;
 	if(left)
 	{
 		for (auto& gui : mainContext->GetGuis())
@@ -173,9 +172,10 @@ void eInputController::OnMousePress(uint32_t x, uint32_t y, bool left)
 					  glm::vec3(0.0f, mainContext->WaterHeight(), 0.0f),
 					  glm::vec3(0.0f, mainContext->WaterHeight(), 1.0f)); // arbitrary triangle on waterHeight plane
 		mainContext->GetCameraRay().Update(mainContext->GetCamera(), x, y, mainContext->Width(), mainContext->Height());
+		
 		glm::vec3 target = dbb::intersection(pl, mainContext->GetCameraRay().getLine());
 
-		if(mainContext->GetFocusedObject() != nullptr)
+		if(mainContext->GetFocusedObject() != nullptr && mainContext->GetFocusedObject()->getScript() != nullptr)
 		{
 			mainContext->GetFocusedObject()->getScript()->setDestination(target);
 		}

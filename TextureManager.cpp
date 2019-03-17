@@ -1,6 +1,32 @@
 #include "TextureManager.h"
 #include <iostream>
 
+#include <IL/IL.h>
+#include <IL/ilu.h>
+#include <IL/ilut.h>
+
+#include "SDL2-2.0.9/include/SDL.h"
+#include "SDL2_image-2.0.4/SDL_image.h"
+
+TextureManager::~TextureManager()
+{
+	{ IMG_Quit(); } //ifdef
+}
+
+void TextureManager::InitContext()
+{
+	ilInit();
+	iluInit();
+	ilutInit();
+	ilutRenderer(ILUT_OPENGL);
+
+	int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
+	if(!(IMG_Init(imgFlags) & imgFlags))
+	{
+		std::cout << "error initing SDL Image" << std::endl;
+	}
+}
+
 void TextureManager::loadAllTextures()
 {
 	Texture text;
@@ -56,6 +82,7 @@ void TextureManager::loadAllTextures()
 	text.loadTextureFromFile("ocean1.jpg");
 	m_Textures.insert(std::pair<std::string, Texture>("TOcean0_s", text));
 	text.loadTextureFromFile("bloom_test.jpg");
+	text.setNumRows(4);
 	m_Textures.insert(std::pair<std::string, Texture>("Tbloom_test", text));
 	// Cubemap (Skybox)
 	std::vector<std::string> faces;
@@ -67,7 +94,9 @@ void TextureManager::loadAllTextures()
 	faces.push_back("front.jpg");
 	text.loadCubemap(faces);
 	m_Textures.insert(std::pair<std::string, Texture>("TcubeSkyWater1", text));
-
+	text.loadTextureFromFile("atlas2.png");
+	text.setNumRows(4);
+	m_Textures.insert(std::pair<std::string, Texture>("Tatlas2", text));
 }
 
 Texture* TextureManager::find(std::string texture_name)

@@ -8,7 +8,9 @@
 class eSkyBoxRender
 {
 public:
-	eSkyBoxRender(Texture cubeTexture);
+	eSkyBoxRender(Texture			 cubeTexture,
+				  const std::string& vertexShaderPath,
+				  const std::string& fragmentShaderPath);
 	void Render(const glm::mat4& projectionMatrix, const Camera& camera);	
 
 protected:

@@ -18,8 +18,8 @@ class remSnd;
 class eMainContext 
 {
 public:
-	eMainContext();
-	virtual ~eMainContext();
+	eMainContext()			= default;
+	virtual ~eMainContext() = default;
 
 	void			InitializeGL();
 	void			PaintGL();
@@ -35,7 +35,6 @@ public:
 	float					WaterHeight()		{ return waterHeight;	}
 
 private:
-	//std::unique_ptr<dbb::Timer>			dTimer;
 	Camera								m_camera;
 	dbb::CameraRay						camRay;
 	
@@ -59,8 +58,8 @@ private:
 	uint32_t							width		= 1200;
 	uint32_t							height		= 600;
 	Texture								text;
-	bool								mousepress = false;
-	GLenum								drawBufs[1];
+	bool								mousepress = false; //to draw framed objects
+	//GLenum								drawBufs[1];
 
 protected:
 	void								InitializeBuffers();

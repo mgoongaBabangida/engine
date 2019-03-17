@@ -1,10 +1,13 @@
 #include "GaussianBlurRender.h"
 #include "GlBufferContext.h"
 
-eGaussianBlurRender::eGaussianBlurRender(GLuint _width, GLuint _height)
+eGaussianBlurRender::eGaussianBlurRender(GLuint				_width, 
+										GLuint				_height, 
+										const std::string&	vS,
+										const std::string&	fS)
 : width(_width/2), height(_height/2)
 {
-	shader.installShaders("GaussianVertexShader.glsl", "GaussianFragmentShader.glsl");
+	shader.installShaders(vS.c_str(), fS.c_str());
 
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_ONE, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_TWO, width, height);

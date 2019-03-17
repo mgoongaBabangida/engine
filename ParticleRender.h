@@ -7,6 +7,7 @@
 #include "Particle.h"
 #include "InterfacesDB.h"
 #include "Timer.h"
+#include "MyMesh.h"
 
 #include <chrono>
 #include <memory>
@@ -14,22 +15,22 @@
 
 class eObject;
 class MyModel;
-class ParticleMesh;
 
 class eParticleRender
 {
 public:
-	eParticleRender(MyModel* model, ParticleMesh* mesh, IParticleSystem* sys, ParticleSystemInfo info);
+	eParticleRender(std::shared_ptr<MyMesh>, Texture*, const string&, const string&);
 	
 	void	Render(const glm::mat4 &ProjectionMatrix, const Camera &camera);
-	void	AddParticleSystem(IParticleSystem* sys, ParticleSystemInfo info);
+	void	AddParticleSystem(IParticleSystem* sys);
 
 protected:
 	Shader											particleShader;
-	ParticleMesh*									mesh;//uniq?
-	eObject*										object;//uniq?
+	std::unique_ptr<MyModel>						model;
+	std::unique_ptr<ParticleMesh>					mesh;
+	std::unique_ptr<eObject>						object;
+	
 	std::vector<std::shared_ptr<IParticleSystem> >	systems;
-	std::vector<ParticleSystemInfo>					infos;
 	std::vector<float>								instancedBuffer;
 
 	GLuint	fullTransformationUniformLocation;
