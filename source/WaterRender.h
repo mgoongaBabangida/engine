@@ -7,23 +7,22 @@
 #include "Clock.h"
 #include "Timer.h"
 
-//#include "colorFBO.h"
-
-class eObject;
 class MyModel;
+class eObject;
 
 class eWaterRender 
 {
 public:
-	eWaterRender(std::unique_ptr<MyModel> model, Texture* waves, Texture* DUDV);
+	eWaterRender(std::unique_ptr<MyModel> model, 
+				Texture* waves, 
+				Texture* DUDV,
+				const std::string& vertexShaderPath,
+				const std::string& fragmentShaderPath);
 	virtual ~eWaterRender();
 
-	void		Render(const glm::mat4& projectionMatrix, const Camera& camera, const Light& light);
-	
-	//void		BindReflectionFBO()		{ reflectionFBO->BindForWriting(); }
-	//void		BindRefractionFBO()		{ refractionFBO->BindForWriting(); }
-	//Texture		GetReflectionTexture()  { return reflectionFBO->GetTexture(); }
-	//Texture		GetRefractionTexture()  { return refractionFBO->GetTexture(); }
+	void						Render(const glm::mat4& projectionMatrix, 
+									   const Camera&	camera, 
+									   const Light&		light);
 
 protected:
 	void						Update();
@@ -31,9 +30,6 @@ protected:
 	Shader						waterShader;
 	std::unique_ptr<MyModel>	water;
 	std::unique_ptr<eObject>	object;
-
-	//eColorFBO* reflectionFBO;
-	//eColorFBO* refractionFBO;
 
 	GLuint						fullTransformationUniformLocation;
 	GLuint						modelToWorldMatrixUniformLocation;
@@ -44,7 +40,7 @@ protected:
 	GLuint						clipPlaneLoc;
 	
 	Clock						clock;
-	float						move_factor=0.0f;
-	bool						incr = true;
+	float						move_factor	= 0.0f;
+	bool						incr		= true;
 	std::unique_ptr<dbb::Timer> timer;
 };

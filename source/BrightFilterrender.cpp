@@ -2,9 +2,12 @@
 #include "BrightFilterrender.h"
 #include "GlBufferContext.h"
 
-eBrightFilterRender::eBrightFilterRender(GLuint width, GLuint height)
+eBrightFilterRender::eBrightFilterRender(GLuint				width, 
+										GLuint				height, 
+										const std::string&	vS,
+										const std::string&	fS)
 {
-	shader.installShaders("PostProcessingVertexShader.glsl", "BrightFilterFragment.glsl");
+	shader.installShaders(vS.c_str(), fS.c_str());
 
 	/*TexWidthLoc = glGetUniformLocation(shader.ID, "targetWidth");
 	textureLoc = glGetUniformLocation(shader.ID, "screenTexture");*/

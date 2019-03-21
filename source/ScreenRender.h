@@ -8,7 +8,7 @@
 class eScreenRender
 {
 public:
-	eScreenRender(Texture tex);
+	eScreenRender(Texture tex, const std::string& vS, const std::string& fS);
 
 	void Render(const glm::mat4& projectionMatrix, const Camera& camera);
 	void RenderContrast(const glm::mat4& projectionMatrix, const Camera& camera);

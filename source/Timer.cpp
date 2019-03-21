@@ -11,7 +11,7 @@ bool dbb::Timer::start(unsigned int period)
 	active = true;
 	clock.start();
 	std::function<bool()> func = [this,period]()->bool {
-		while (active)
+		while(active)
 		{
 			if (clock.timeEllapsedLastFrameMsc() >= period)
 			{
@@ -32,9 +32,10 @@ bool dbb::Timer::start(unsigned int period)
 
 bool dbb::Timer::stop()
 {
-	this->active = false;
-	if (thrd.joinable())
+	if(thrd.joinable())
 		thrd.join();
+	active = false;
+	fut.get();
 	return true;
 }
 

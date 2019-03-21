@@ -4,9 +4,13 @@
 #include "MyModel.h"
 #include "GlBufferContext.h"
 
-eWaterRender::eWaterRender(std::unique_ptr<MyModel> model, Texture* waves, Texture* DUDV)
+eWaterRender::eWaterRender(std::unique_ptr<MyModel> model, 
+							Texture*				waves, 
+							Texture*				DUDV, 
+							const string&			vertexShaderPath,
+							const string&			fragmentShaderPath)
 {
-	waterShader.installShaders("WaterVertexShader.glsl", "WaterFragmentShader.glsl");
+	waterShader.installShaders(vertexShaderPath.c_str(), fragmentShaderPath.c_str());
 	
 	modelToWorldMatrixUniformLocation	= glGetUniformLocation(waterShader.ID, "modelToWorldMatrix");
 	fullTransformationUniformLocation	= glGetUniformLocation(waterShader.ID, "modelToProjectionMatrix");

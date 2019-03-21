@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "OutlinRender.h"
 
-eOutlineRender::eOutlineRender()
+eOutlineRender::eOutlineRender(const std::string& vS, const std::string& fS)
 {
-	shader.installShaders("VertexShaderCode.glsl", "StencilFragmentShader.glsl"); //outlining
+	shader.installShaders(vS.c_str(), fS.c_str());
 
 	fullTransformationUniformLocation	= glGetUniformLocation(shader.ID, "modelToProjectionMatrix");
 	modelToWorldMatrixUniformLocation	= glGetUniformLocation(shader.ID, "modelToWorldMatrix");

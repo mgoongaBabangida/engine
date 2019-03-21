@@ -14,7 +14,10 @@ class eGaussianBlurRender
 	GLuint height;
 
 public:
-	eGaussianBlurRender(GLuint width, GLuint height);
+	eGaussianBlurRender(GLuint				width, 
+						GLuint				height, 
+						const std::string&	vS,
+						const std::string&	fS);
 	void Render();
 	void SetTexture(Texture t) { texture = t; }
 	virtual ~eGaussianBlurRender() = default;

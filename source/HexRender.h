@@ -11,6 +11,6 @@ class eHexRender
 
 	std::vector<glm::vec3> dots;
 public:
-	eHexRender();
+	eHexRender(const std::string& vS, const std::string& fS, const std::string&	gS);
 	void Render(glm::mat4 mvp);
 };

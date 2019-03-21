@@ -14,7 +14,7 @@ MoveScript::MoveScript(Texture* flag_texture, eParticleRender* prt, Texture* sho
 
 void MoveScript::Update(std::vector<std::shared_ptr<eObject> > objs)
 {
-	if (object != nullptr && destination != glm::vec3(-100.0f, -100.0f, -100.0f) )
+	if (object != nullptr && destination != NONE )
 	{
 		if (!object->getTransform()->turnTo(destination, turn_speed)
 			&& glm::length2(object->getTransform()->getTranslation() - destination) > 0.1f) //change 0.1f
@@ -28,7 +28,7 @@ void MoveScript::Update(std::vector<std::shared_ptr<eObject> > objs)
 void MoveScript::setDestination(glm::vec3 dst) { destination = dst; }
 
 
-Flag* MoveScript::getFlag(const Camera& camera)
+Flag MoveScript::getFlag(const Camera& camera)
 {
 	//getting top 4 corners of the model
 	glm::vec4 top_corners[4];
@@ -42,17 +42,16 @@ Flag* MoveScript::getFlag(const Camera& camera)
 	{
 		position = glm::length2(camera.getPosition() - glm::vec3(top_corners[i])) < glm::length2(camera.getPosition() - glm::vec3(position)) ? top_corners[i] : position;
 	}
-	return new Flag(position,flag_tex);
+	return Flag(position, flag_tex);
 }
 
 void MoveScript::shoot()
 {
-	ParticleSystemInfo info;
-	info.texture			= shoot_tex;
-	info.scale				= 0.05;
-	
-	glm::vec4 modelCenter	= object->getTransform()->getModelMatrix() * glm::vec4(object->getCollider()->getCenter(), 1.0f);//glm::vec3(0.0f, 4.0f, -0.5f);
-	info.systemCenter		= modelCenter + object->getTransform()->getRotationVector();
-	IParticleSystem* system = new ShootingParticleSystem(10, 0, 0, 10000, new remSnd(*shoot_snd),10000); //TODO: check leaks
-	prt_renderer->AddParticleSystem(system, info);
+	glm::vec4 modelCenter	= object->getTransform()->getModelMatrix() * glm::vec4(object->getCollider()->getCenter(), 1.0f);
+	IParticleSystem* system = new ShootingParticleSystem(10, 0, 0, 10000, 
+														modelCenter + object->getTransform()->getRotationVector(), 
+														shoot_tex, 
+														shoot_snd,
+														10000);
+	prt_renderer->AddParticleSystem(system);
 }

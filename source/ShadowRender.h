@@ -9,7 +9,7 @@
 class eShadowRender 
 {
 public:
-	eShadowRender();
+	eShadowRender(const std::string& vS, const std::string& fS);
 
 	void	Render( const glm::mat4&		projectionMatrix, 
 					const Camera&			camera, 

@@ -3,9 +3,14 @@
 #include "TerrainModel.h"
 #include "Structures.h"
 
-eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model, Texture* tex,Texture* normals, Texture* Height)
+eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model, 
+						Texture* tex,
+						Texture* normals, 
+						Texture* Height, 
+						const std::string& vS, 
+						const std::string& fS)
 {
-	wave_shader.installShaders("WaveVertexShader.glsl", "FragmentShaderCode.glsl");
+	wave_shader.installShaders(vS.c_str(), fS.c_str());
 
 	modelToWorldMatrixUniformLocation	= glGetUniformLocation(wave_shader.ID, "modelToWorldMatrix");
 	fullTransformationUniformLocation	= glGetUniformLocation(wave_shader.ID, "MVP");

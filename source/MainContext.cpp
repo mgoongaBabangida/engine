@@ -6,23 +6,15 @@
 #include "MoveScript.h"
 #include "Sound.h"
 #include "InterfacesDB.h"
-
-//texture
 #include "Texture.h"
+
+#include <iostream>
 
 using glm::vec3;
 using glm::vec4;
 using glm::mat4;
 
 const std::string ModelFolderPath = "Resources/";
-
-eMainContext::eMainContext()
-{
-}
-
-eMainContext::~eMainContext()
-{
-}
 
 void eMainContext::UpdateLight(uint32_t x, uint32_t y, uint32_t z)
 {
@@ -34,14 +26,7 @@ void eMainContext::UpdateLight(uint32_t x, uint32_t y, uint32_t z)
 
 void eMainContext::InitializeGL()
 {
-	//texture
-	ilInit();
-	iluInit();
-	ilutInit();
-	ilutRenderer(ILUT_OPENGL);
-
-	//glew
-	//glewInit(); init above
+	texManager.InitContext();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_STENCIL_TEST);
@@ -203,29 +188,31 @@ void eMainContext::InitializeModels()
 
 void eMainContext::InitializeRenders()
 {
-	// Particle Render
-	remSnd* sound = new remSnd(context->buffers.find("Cannon+5.wav")->second, true);
+	sound.reset(new remSnd(context->buffers.find("Cannon+5.wav")->second, true));
 	sound->loadListner(m_camera.getPosition().x, m_camera.getPosition().y, m_camera.getPosition().z);
-	Texture* pTex = new Texture();
-	pTex->setNumRows(4);
-	pTex->loadTextureFromFile("atlas2.png");
 
-	renderManager.Initialize(modelManager, texManager, sound, pTex);
-	m_Objects[4]->setScript(new MoveScript(texManager.find("TSpanishFlag0_s"), renderManager.ParticleRender(), pTex, sound));
+	renderManager.Initialize(modelManager, texManager);
+
+	renderManager.ParticleRender()->AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f), texManager.find("Tatlas2"), sound.get()));
+
+	m_Objects[4]->setScript(new MoveScript(texManager.find("TSpanishFlag0_s"), 
+											renderManager.ParticleRender(), 
+											texManager.find("Tatlas2"),
+											sound.get()));
 }
 
 void eMainContext::PaintGL()
-{
-	Pipeline();
-}
-
-void eMainContext::Pipeline()
 {
 	for (auto &object : m_Objects)
 	{
 		if (object->getScript() != nullptr)
 			object->getScript()->Update(m_Objects);
 	}
+	Pipeline();
+}
+
+void eMainContext::Pipeline()
+{
 	glViewport(0, 0, width, height);
 #define GLM_FORCE_RADIANS 
 	mat4 viewToProjectionMatrix = glm::perspective(glm::radians(60.0f), ((float)width) / height, 0.1f, 20.0f);
@@ -332,7 +319,7 @@ void eMainContext::Pipeline()
 
 	// Render Flags
 	MoveScript* script = dynamic_cast<MoveScript*>(m_Objects[4]->getScript()); //magic number to change
-	renderManager.WaveRender()->Render(viewToProjectionMatrix, m_camera, m_light, shadow_matrix, std::vector<Flag>{ Flag(*(script->getFlag(m_camera)))  });
+	renderManager.WaveRender()->Render(viewToProjectionMatrix, m_camera, m_light, shadow_matrix, std::vector<Flag>{script->getFlag(m_camera)});
 
 	//6. Rendering WaterQuad
 	mts ? eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS)
@@ -389,7 +376,8 @@ void eMainContext::Pipeline()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
-	//m_screenRender->renderFrame();
+	//if(mousepress)
+	//{m_screenRender->renderFrame();}
 	guis[0].SetTexture(&eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFLECTION));
 	glViewport(guis[0].getViewPort().x, guis[0].getViewPort().y, guis[0].getViewPort().z, guis[0].getViewPort().w);
 	renderManager.ScreenRender()->SetTexture(*(guis[0].GetTexture())); //copy texture

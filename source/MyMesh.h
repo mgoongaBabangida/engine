@@ -37,7 +37,8 @@ public:
 	vector<Texture>		textures;
 	GLuint				instances;
 
-	static const int MAXPARTICLES = 1000;
+	static const int		MAXPARTICLES	= 1000;
+	static const GLsizei	SIZEOF = sizeof(glm::mat4) + sizeof(glm::vec2) * 3;
 	/*  Functions  */
 	ParticleMesh(vector< MyVertex> vertices, vector<GLuint> indices, vector<Texture> textures);
 	ParticleMesh(const ShapeData & data);
@@ -45,7 +46,6 @@ public:
 	void				SetUpInstances(GLuint _instances)				{ instances = _instances;  }
 	virtual void		Draw() override;
 	void				updateInstancedData(std::vector<float>& buffer);
-	int					getStep()										{ return STEP;}
 
 protected:
 	/*  Render data  */
@@ -53,6 +53,4 @@ protected:
 	GLuint VBOinstanced;
 	/*  Functions    */
 	virtual void		setupMesh();
-
-	GLsizei STEP;
 };

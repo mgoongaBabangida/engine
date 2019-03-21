@@ -114,7 +114,7 @@ std::vector<shObject> dbb::CameraRay::onMove(Camera& camera, std::vector<shObjec
 {
 	press_curr = glm::vec2(click_x, click_y);
 	std::vector<shObject> ret;
-	if (pressed)
+	if(pressed)
 	{
 		dbb::line  line1 = getLine(camera, press_start);
 		dbb::line  line2 = getLine(camera, press_curr);

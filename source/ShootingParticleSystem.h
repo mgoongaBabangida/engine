@@ -5,15 +5,17 @@
 #include "InterfacesDB.h"
 #include "Sound.h"
 
-//FireWork
-
 class ShootingParticleSystem :public ParticleSystem
 {
-protected:
-
-	virtual void emitParticles(glm::vec3 systemCenter, Texture* texture) override;
 public:
-	ShootingParticleSystem(float pps, float speed, float gravityComplient, float lifeLength, remSnd* s, float dur = 10000.0f);
-	static const int MAX_PARTICLES = 1000;
-	//virtual void generateParticles(glm::vec3 systemCenter, Texture* texture) override;
+	ShootingParticleSystem(float	 _pps,
+						   float	 _speed,
+						   float	 _gravityComplient,
+						   float	 _lifeLength,
+						   glm::vec3 _systemCenter,
+						   Texture*  _texture,
+						   remSnd*	 _sound,
+						   float	 _duration = 10000.0f);
+protected:
+	virtual void emitParticles() override;
 };

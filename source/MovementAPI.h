@@ -26,7 +26,7 @@ public:
 protected:
 	bool CollidesWith(eObject*, Side);
 
-	eObject* object = nullptr;
-	float turnSpeed = 3.14 / 12;
-	float SPEED		= 0.1f;
+	eObject* object		= nullptr;
+	float	 turnSpeed	= 3.14f / 12.0f;
+	float	 SPEED		= 0.1f;
 };

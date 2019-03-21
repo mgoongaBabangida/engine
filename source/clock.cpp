@@ -7,7 +7,7 @@ void Clock::start()
 	m_start = last_frame = std::chrono::system_clock::now();
 }
 
-int Clock::timeEllapsedMsc()
+int64_t Clock::timeEllapsedMsc()
 {
 	if (!paused)
 	{

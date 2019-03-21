@@ -47,28 +47,6 @@ std::string Model::RootBoneName()
 
 void Model::Draw()
 {
-	//auto scene = m_scene;
-	//std::cout << "precriak!"<< m_scene->mRootNode->mName.C_Str() << std::endl;
-	//if (!m_animations.empty())
-	//{
-	//	//std::cout << "criak!" << std::endl;
-	//	auto root = std::find_if(m_bones.begin(), m_bones.end(), [scene](const Bone& bone) { return scene->mRootNode->mName.C_Str() == bone.Name(); });
-	//	this->updateAnimation(*(root), m_animations[0].getCurrentFrame(), glm::mat4()); //transfer to rigger
-	//	//std::cout << "after anim" << std::endl;
-	//	std::vector<glm::mat4> matrices(100);//m_bones.size())
-	//	for (auto& bone : m_bones)
-	//		matrices[bone.ID()] = bone.getAnimatedTransform(); 
-
-	//	int loc = glGetUniformLocation(shader, "gBones");
-	//	glUniformMatrix4fv(loc,m_bones.size(), GL_FALSE, &matrices[0][0][0]);
-	//}
-	//else 
-	//{
-	//	std::vector<glm::mat4> matrices(100);
-	//	int loc = glGetUniformLocation(shader, "gBones");
-	//	glUniformMatrix4fv(loc, m_bones.size(), GL_FALSE, &matrices[0][0][0]);
-	//}
-
 	for (GLuint i = 0; i < this->meshes.size(); i++)
 		this->meshes[i].Draw();
 }
@@ -486,17 +464,16 @@ void Model::DumpAiAnimation(const aiAnimation * anim)
 	int qframes = anim->mChannels[0]->mNumPositionKeys; //check if it is the same for all 
 	std::cout << "Animation " << anim->mName.C_Str() << " length msc " << durationMsc << " Bones " << qNodes << " Frames" << qframes << std::endl;
 
-	for (int i = 0; i < anim->mNumChannels; ++i)
+	for (uint32_t i = 0; i < anim->mNumChannels; ++i)
 	{
 		std::cout << anim->mChannels[i]->mNodeName.C_Str() << anim->mChannels[i]->mNumPositionKeys << " "<<
 			anim->mChannels[i]->mNumRotationKeys <<" "<< anim->mChannels[i]->mNumScalingKeys << std::endl;
 	}
 
-	for (int i = 0; i < anim->mChannels[0]->mNumPositionKeys ; ++i)
+	for (uint32_t i = 0; i < anim->mChannels[0]->mNumPositionKeys ; ++i)
 	{
 		std::cout << anim->mChannels[0]->mPositionKeys[i].mTime   << std::endl;
 	}
-
 }
 
 void Model::DumpAssimpMeshes()
@@ -522,30 +499,3 @@ void Model::DumpAssimpMeshes()
 		std::cout << "Mesh " << "max= "<< maxID << "min= " << minID<<"one "<<ones<<"zero "<<zeros<<"other "<<other<< std::endl;
 	}
 }
-
-
-
-
-//GLint TextureFromFile(const char* path, string directory)
-//{
-//	Generate texture ID and load texture data 
-//	string filename = string(path);
-//	filename = directory + '/' + filename;
-//	GLuint textureID;
-//	glGenTextures(1, &textureID);
-//	int Width, Height;
-//	unsigned char* image = SOIL_load_image(filename.c_str(), &Width, &Height, 0, SOIL_LOAD_RGB);
-//	 Assign texture to ID
-//	glBindTexture(GL_TEXTURE_2D, textureID);
-//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-//	glGenerateMipmap(GL_TEXTURE_2D);
-//
-//	 Parameters
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//	glBindTexture(GL_TEXTURE_2D, 0);
-//	SOIL_free_image_data(image);
-//	return textureID;
-//}

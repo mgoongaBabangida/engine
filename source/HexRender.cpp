@@ -4,16 +4,19 @@
 const float dist = 1.75f;
 const float Height = 2.0f;
 
-eHexRender::eHexRender() :dots{ glm::vec3(glm::sin(glm::radians(30.0f)) * dist,Height, glm::cos(glm::radians(30.0f)) * dist),
-						glm::vec3(glm::sin(glm::radians(90.0f)) * dist, Height,glm::cos(glm::radians(90.0f)) * dist),
-						glm::vec3(glm::sin(glm::radians(150.0f)) * dist, Height, glm::cos(glm::radians(150.0f)) * dist),
-						glm::vec3(glm::sin(glm::radians(210.0f)) * dist, Height, glm::cos(glm::radians(210.0f)) * dist),
-						glm::vec3(glm::sin(glm::radians(270.0f)) * dist, Height,glm::cos(glm::radians(270.0f)) * dist),
-						glm::vec3(glm::sin(glm::radians(330.0f)) * dist,Height, glm::cos(glm::radians(330.0f)) * dist),
-						glm::vec3(glm::sin(glm::radians(30.0f)) * dist*2,Height, glm::cos(glm::radians(30.0f)) * dist*2),
-						glm::vec3(0, Height, 0) }
+eHexRender::eHexRender(const std::string&	vS,
+					   const std::string&	fS,
+					   const std::string&	gS)
+	: dots{ glm::vec3(glm::sin(glm::radians(30.0f)) * dist,Height, glm::cos(glm::radians(30.0f)) * dist),
+	glm::vec3(glm::sin(glm::radians(90.0f)) * dist, Height,glm::cos(glm::radians(90.0f)) * dist),
+	glm::vec3(glm::sin(glm::radians(150.0f)) * dist, Height, glm::cos(glm::radians(150.0f)) * dist),
+	glm::vec3(glm::sin(glm::radians(210.0f)) * dist, Height, glm::cos(glm::radians(210.0f)) * dist),
+	glm::vec3(glm::sin(glm::radians(270.0f)) * dist, Height,glm::cos(glm::radians(270.0f)) * dist),
+	glm::vec3(glm::sin(glm::radians(330.0f)) * dist,Height, glm::cos(glm::radians(330.0f)) * dist),
+	glm::vec3(glm::sin(glm::radians(30.0f)) * dist*2,Height, glm::cos(glm::radians(30.0f)) * dist*2),
+	glm::vec3(0, Height, 0) }
 {
-	hex_shader.installShaders("VertexShades.glsl", "StencilFragmentShader.glsl", "HexGeometry.glsl");
+	hex_shader.installShaders(vS.c_str(), fS.c_str(), gS.c_str());
 
 	MVPLoc = glGetUniformLocation(hex_shader.ID, "MVP");
 
