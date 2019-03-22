@@ -43,6 +43,7 @@ project "OpenGLProject"
         "vendor/glm/",
         "vendor/IL/include/",
 		"vendor/SDL2/include/",
+		"vendor/SDL2_image/include/",
 		"vendor/spdlog/include/"
     }
 
@@ -51,6 +52,7 @@ project "OpenGLProject"
 		"vendor/glew/lib/Release/x64/",
 		"vendor/assimp/lib/",
 		"vendor/SDL2/lib/x64/",
+		"vendor/SDL2_image/lib/x64/",
 		"vendor/AL/lib/Win64/",
 		"vendor/IL/"
 	}
@@ -62,6 +64,7 @@ project "OpenGLProject"
 		"assimp-vc140-mt.lib",
 		"SDL2.lib",
 		"SDL2main.lib",
+		"SDL2_image.lib",
 		"DevIL.lib",
 		"ILU.lib",
 		"ILUT.lib",
