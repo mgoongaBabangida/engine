@@ -1,13 +1,6 @@
 #include "stdafx.h"
 #include "TextureManager.h"
 
-#include <IL/IL.h>
-#include <IL/ilu.h>
-#include <IL/ilut.h>
-
-#include "SDL2-2.0.9/include/SDL.h"
-#include "SDL2_image-2.0.4/SDL_image.h"
-
 TextureManager::~TextureManager()
 {
 	{ IMG_Quit(); } //ifdef

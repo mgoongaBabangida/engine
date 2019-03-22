@@ -1,5 +1,5 @@
+#include "stdafx.h"
 #include "TextureImplSDL.h"
-#include <iostream>
 
 static SDL_Surface* current_surface;
 

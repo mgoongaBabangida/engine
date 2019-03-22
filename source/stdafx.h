@@ -28,9 +28,16 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
-// SDL@ headers
+// SDL2 headers
 #include <SDL.h>
 #include <SDL_opengl.h>
+
+// SDL2_image headers
+#include <SDL_image.h>
+
+// spdlog headers
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 // std library headers
 #include <map>

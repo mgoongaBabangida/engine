@@ -6,11 +6,7 @@ public:
 	virtual ~tLogger() = default;
 
 protected:
-	std::shared_ptr<spdlog::logger>	fileLogger		= nullptr;
-	std::unique_ptr<spdlog::logger>	consoleLogger	= nullptr;
-
-	std::unique_ptr<spdlog::sinks::basic_file_sink_mt> fileSink;
-
+	static std::shared_ptr<spdlog::logger> consoleLogger;
 private:
-	tLogger(const std::string& fileName);
+	tLogger(const std::string& name);
 };

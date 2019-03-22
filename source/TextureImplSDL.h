@@ -1,8 +1,4 @@
 #pragma once
-#include <stdint.h>
-#include <string>
-#include "SDL2-2.0.9/include/SDL.h"
-#include "SDL2_image-2.0.4/SDL_image.h"
 
 class eTextureImplSDL
 {

@@ -1,9 +1,5 @@
+#include "stdafx.h"
 #include "TextureImplDevIl.h"
-#include <iostream>
-
-#include <IL/IL.h>
-#include <IL/ilu.h>
-#include <IL/ilut.h>
 
 uint8_t eTextureImplDevIl::LoadTexture(const std::string& path, uint32_t& id, int32_t& width, int32_t& height)
 {

@@ -1,19 +1,11 @@
 #include "stdafx.h"
 #include "logger.h"
 
-tLogger::tLogger(const std::string& fileName)
+std::shared_ptr<spdlog::logger> tLogger::consoleLogger;
+
+tLogger::tLogger(const std::string& name)
 {
-	std::ofstream outFile;
-
-	outFile.open(fileName, std::ios::out);
-	outFile.close();
-
-	fileSink = std::make_unique<spdlog::sinks::basic_file_sink_mt>("file_sink", fileName);
-
 	spdlog::set_pattern("%^[%T] %n: %v%$");
-	fileLogger = spdlog::sinks::basic_file_sink_mt("file_logger", fileSink);
-	fileLogger->set_level(spdlog::level::trace);
-
-	consoleLogger = std::make_unique<spdlog::logger>("console_logger");
+	consoleLogger = spdlog::stdout_color_mt(name.c_str());
 	consoleLogger->set_level(spdlog::level::trace);
 }
