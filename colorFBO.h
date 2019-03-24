@@ -6,7 +6,7 @@
 class eColorFBO
 {
 public:
-	eColorFBO();
+	eColorFBO() = default;
 	~eColorFBO();
 	bool		Init(unsigned int WindowWidth, unsigned int WindowHeight, bool multisample = false);
 	void		ResolveToFBO(eColorFBO* other);

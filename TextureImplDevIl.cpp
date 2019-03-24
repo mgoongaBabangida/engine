@@ -1,9 +1,9 @@
 #include "TextureImplDevIl.h"
 #include <iostream>
 
-#include <IL/IL.h>
-#include <IL/ilu.h>
-#include <IL/ilut.h>
+#ifdef DEVIL_IMAGE
+
+static uint8_t* pixmap;
 
 uint8_t eTextureImplDevIl::LoadTexture(const std::string& path, uint32_t& id, int32_t& width, int32_t& height)
 {
@@ -42,8 +42,10 @@ uint8_t eTextureImplDevIl::LoadTexture(const std::string& path, uint32_t& id, in
 	return 4; //RGBA
 }
 
-void eTextureImplDevIl::AssignPixels(uint8_t* buffer, int32_t width, int32_t height)
+void eTextureImplDevIl::AssignPixels(uint8_t*& buffer, int32_t width, int32_t height)
 {
+	pixmap = new uint8_t[width * height * 4];
+	buffer = pixmap;
 	//Convert image to RGBA
 	ILboolean success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
 	if (!success)
@@ -54,6 +56,7 @@ void eTextureImplDevIl::AssignPixels(uint8_t* buffer, int32_t width, int32_t hei
 void eTextureImplDevIl::DeleteImage(uint32_t id)
 {
 	ilDeleteImages(1, (const ILuint*)&id);
+	delete[] pixmap;
 }
 
 void eTextureImplDevIl::SaveToFile(const uint8_t * buffer, const std::string & path, int32_t width, int32_t height, int32_t channels)
@@ -82,3 +85,5 @@ void eTextureImplDevIl::SaveToFile(const uint8_t * buffer, const std::string & p
 
 	ilDeleteImages(1, &imageID);
 }
+
+#endif

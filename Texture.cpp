@@ -1,16 +1,17 @@
 #include "Texture.h"
-#include <iostream>
 #include <glm\glm/gtc/noise.hpp>
 #include "TextureImplDevIl.h"
 #include "TextureImplSDL.h"
+
+#include <iostream>
 
 bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenum wrap)
 {
 	path		= _path;
 	uint32_t ilId;
 	mChannels = eTextureImplSDL::LoadTexture(path, ilId, mTextureWidth, mTextureHeight);
-	uint8_t* pixmap = nullptr;// = new uint8_t[mTextureWidth * mTextureHeight * mChannels]; //Devil
-	eTextureImplSDL::AssignPixels(pixmap, mTextureWidth, mTextureHeight); //Devil copy / SDL assign
+	uint8_t* pixmap = nullptr;
+	eTextureImplSDL::AssignPixels(pixmap, mTextureWidth, mTextureHeight);
 
 	// Load textures
 	glGenTextures(1, &id);
@@ -30,7 +31,6 @@ bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenu
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	eTextureImplSDL::DeleteImage(ilId);
-	//delete[] pixmap; //Devil
 	return true;
 }
 
@@ -107,7 +107,7 @@ bool Texture::loadCubemap(std::vector<std::string> faces)
 	{
 		uint32_t ilId;
 		eTextureImplDevIl::LoadTexture(faces[i], ilId, mTextureWidth, mTextureHeight);
-		uint8_t* pixmap = new uint8_t[mTextureWidth * mTextureHeight * mChannels];
+		uint8_t* pixmap;
 		eTextureImplDevIl::AssignPixels(pixmap, mTextureWidth, mTextureHeight);
 		// Load textures
 		glGenTextures(1, &id);
@@ -115,7 +115,6 @@ bool Texture::loadCubemap(std::vector<std::string> faces)
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLubyte*)pixmap);
 
 		eTextureImplDevIl::DeleteImage(ilId);
-		delete[] pixmap;
 	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -131,16 +130,16 @@ bool Texture::generatePerlin(GLuint Width, GLuint Height,bool periodic)
 {
 	this->mTextureWidth = Width;
 	this->mTextureHeight = Height;
-	int a = 1; int b = 2;
+	float a = 1.0f; float b = 2.0f;
 	GLubyte *data = new GLubyte[Width*Height * 4];
 	float xFactor = 1.0f / (Width - 1);
 	float yFactor = 1.0f / (Height - 1);
 	mChannels = 4; //octaves
-	for (int row = 0; row < Height; row++) {
-		for (int col = 0; col < Width; col++) {  //row?
+	for (uint32_t row = 0; row < Height; row++) {
+		for (uint32_t col = 0; col < Width; col++) {  //row?
 			float x = xFactor* col;
 			float y = yFactor * row;
-			float sum = 0;
+			float sum = 0.0f;
 			float freq = a;
 			float scale = b;
 			for (int oct = 0; oct < 4; ++oct) {

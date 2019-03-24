@@ -50,8 +50,7 @@ void eMainRender::Render(const glm::mat4&		projectionMatrix,
 	glm::mat4 worldToViewMatrix = camera.getWorldToViewMatrix();
 	glm::mat4 worldToProjectionMatrix = projectionMatrix * worldToViewMatrix;
 
-	glm::vec3 eyePosition = camera.getPosition();
-	glUniform3fv(eyePositionWorldUniformLocation, 1, &eyePosition[0]);
+	glUniform3fv(eyePositionWorldUniformLocation, 1, &camera.getPosition()[0]);
 
 	for (auto &object : objects) 
 	{

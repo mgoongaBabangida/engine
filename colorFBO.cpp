@@ -1,10 +1,6 @@
 #include "colorFBO.h"
 #include <iostream>
 
-eColorFBO::eColorFBO()
-{
-}
-
 eColorFBO::~eColorFBO()
 {
 	if (m_fbo != 0) {
@@ -19,9 +15,6 @@ bool eColorFBO::Init(unsigned int WindowWidth, unsigned int WindowHeight, bool m
 	// Framebuffers
 	glGenFramebuffers(1, &m_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-	// What enum to use?
-	GLenum attachment_type;
-	attachment_type = GL_RGB;
 
 	if (!multisample)
 	{

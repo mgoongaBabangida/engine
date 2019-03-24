@@ -137,7 +137,7 @@ std::vector<shObject> dbb::CameraRay::onMove(Camera& camera, std::vector<shObjec
 				}
 			}
 		}
-		std::cout << "Grabed " << ret.size() << " Objects" << std::endl;
+		//std::cout << "Grabed " << ret.size() << " Objects" << std::endl;
 	}
 	return ret;
 }

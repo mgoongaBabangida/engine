@@ -1,4 +1,5 @@
 #include "BoxCollider.h"
+#include "Structures.h"
 #include <iostream>
 
 void BoxCollider::calculateExtremDots(const std::vector<glm::vec3>& positions)
@@ -107,54 +108,54 @@ std::vector<dbb::line> BoxCollider::getRays(const Transform & trans, Side moveDi
 	glm::vec3 center = getCenter();
 	std::vector<dbb::line> rays;
 	glm::vec3 fwd, fwd_dwn_l, fwd_dwn_r, fwd_up_l, fwd_up_r;
-	switch (moveDirection ) 
+	switch (moveDirection) 
 	{
 	case FORWARD:
-		fwd = trans.getForward(); //suppose +Z  1 
-		fwd_dwn_l = glm::vec3(dots.MaxX, dots.MinY, dots.MaxZ);  //2
-		fwd_dwn_r = glm::vec3(dots.MinX, dots.MinY, dots.MaxZ);  //3
-		fwd_up_l = glm::vec3(dots.MaxX, dots.MaxY, dots.MaxZ);  //4
-		fwd_up_r = glm::vec3(dots.MinX, dots.MaxY, dots.MaxZ);  //5
+		fwd			= trans.getForward(); //suppose +Z  1 
+		fwd_dwn_l	= glm::vec3(dots.MaxX, dots.MinY, dots.MaxZ);  //2
+		fwd_dwn_r	= glm::vec3(dots.MinX, dots.MinY, dots.MaxZ);  //3
+		fwd_up_l	= glm::vec3(dots.MaxX, dots.MaxY, dots.MaxZ);  //4
+		fwd_up_r	= glm::vec3(dots.MinX, dots.MaxY, dots.MaxZ);  //5
 		break;
 
 	case BACK:
-		fwd = -trans.getForward(); //suppose +Z  1 
-		fwd_dwn_l = glm::vec3(dots.MaxX, dots.MinY, dots.MinZ);  //2
-		fwd_dwn_r = glm::vec3(dots.MinX, dots.MinY, dots.MinZ);  //3
-		fwd_up_l = glm::vec3(dots.MaxX, dots.MaxY, dots.MinZ);  //4
-		fwd_up_r = glm::vec3(dots.MinX, dots.MaxY, dots.MinZ);  //5
+		fwd			= -trans.getForward(); //suppose +Z  1 
+		fwd_dwn_l	= glm::vec3(dots.MaxX, dots.MinY, dots.MinZ);  //2
+		fwd_dwn_r	= glm::vec3(dots.MinX, dots.MinY, dots.MinZ);  //3
+		fwd_up_l	= glm::vec3(dots.MaxX, dots.MaxY, dots.MinZ);  //4
+		fwd_up_r	= glm::vec3(dots.MinX, dots.MaxY, dots.MinZ);  //5
 		break;
 
 	case LEFT:
-		fwd = glm::vec3(glm::normalize(glm::cross(trans.getForward(), trans.getUp()))); //suppose +Z  1 
-		fwd_dwn_l = glm::vec3(dots.MaxX, dots.MinY, dots.MaxZ);  //2
-		fwd_dwn_r = glm::vec3(dots.MaxX, dots.MinY, dots.MinZ);  //3
-		fwd_up_l = glm::vec3(dots.MaxX, dots.MaxY, dots.MaxZ);  //4
-		fwd_up_r = glm::vec3(dots.MaxX, dots.MaxY, dots.MinZ);  //5
+		fwd			= glm::vec3(glm::normalize(glm::cross(trans.getForward(), trans.getUp()))); //suppose +Z  1 
+		fwd_dwn_l	= glm::vec3(dots.MaxX, dots.MinY, dots.MaxZ);  //2
+		fwd_dwn_r	= glm::vec3(dots.MaxX, dots.MinY, dots.MinZ);  //3
+		fwd_up_l	= glm::vec3(dots.MaxX, dots.MaxY, dots.MaxZ);  //4
+		fwd_up_r	= glm::vec3(dots.MaxX, dots.MaxY, dots.MinZ);  //5
 		break;
 
 	case RIGHT:
-		fwd = glm::vec3(glm::normalize(glm::cross(trans.getUp(), trans.getForward()))); //suppose +Z  1 
-		fwd_dwn_l = glm::vec3(dots.MinX, dots.MinY, dots.MaxZ);  //2
-		fwd_dwn_r = glm::vec3(dots.MinX, dots.MinY, dots.MinZ);  //3
-		fwd_up_l = glm::vec3(dots.MinX, dots.MaxY, dots.MaxZ);  //4
-		fwd_up_r = glm::vec3(dots.MinX, dots.MaxY, dots.MinZ);  //5
+		fwd			= glm::vec3(glm::normalize(glm::cross(trans.getUp(), trans.getForward()))); //suppose +Z  1 
+		fwd_dwn_l	= glm::vec3(dots.MinX, dots.MinY, dots.MaxZ);  //2
+		fwd_dwn_r	= glm::vec3(dots.MinX, dots.MinY, dots.MinZ);  //3
+		fwd_up_l	= glm::vec3(dots.MinX, dots.MaxY, dots.MaxZ);  //4
+		fwd_up_r	= glm::vec3(dots.MinX, dots.MaxY, dots.MinZ);  //5
 		break;
 
 	case UP:
-		fwd = glm::vec3(glm::normalize(trans.getUp())); //suppose +Z  1 
-		fwd_dwn_l = glm::vec3(dots.MinX, dots.MaxY, dots.MaxZ);  //2
-		fwd_dwn_r = glm::vec3(dots.MinX, dots.MaxY, dots.MinZ);  //3
-		fwd_up_l = glm::vec3(dots.MaxX, dots.MaxY, dots.MaxZ);  //4
-		fwd_up_r = glm::vec3(dots.MaxX, dots.MaxY, dots.MinZ);  //5
+		fwd			= glm::vec3(glm::normalize(trans.getUp())); //suppose +Z  1 
+		fwd_dwn_l	= glm::vec3(dots.MinX, dots.MaxY, dots.MaxZ);  //2
+		fwd_dwn_r	= glm::vec3(dots.MinX, dots.MaxY, dots.MinZ);  //3
+		fwd_up_l	= glm::vec3(dots.MaxX, dots.MaxY, dots.MaxZ);  //4
+		fwd_up_r	= glm::vec3(dots.MaxX, dots.MaxY, dots.MinZ);  //5
 		break;
 
 	case DOWN:
-		fwd = glm::vec3(glm::normalize(-trans.getUp())); //suppose +Z  1 
-		fwd_dwn_l = glm::vec3(dots.MaxX, dots.MinY, dots.MaxZ);  //2
-		fwd_dwn_r = glm::vec3(dots.MaxX, dots.MinY, dots.MinZ);  //3
-		fwd_up_l = glm::vec3(dots.MinX, dots.MinY, dots.MaxZ);  //4
-		fwd_up_r = glm::vec3(dots.MinX, dots.MinY, dots.MinZ);  //5
+		fwd			= glm::vec3(glm::normalize(-trans.getUp())); //suppose +Z  1 
+		fwd_dwn_l	= glm::vec3(dots.MaxX, dots.MinY, dots.MaxZ);  //2
+		fwd_dwn_r	= glm::vec3(dots.MaxX, dots.MinY, dots.MinZ);  //3
+		fwd_up_l	= glm::vec3(dots.MinX, dots.MinY, dots.MaxZ);  //4
+		fwd_up_r	= glm::vec3(dots.MinX, dots.MinY, dots.MinZ);  //5
 		break;
 	}
 
@@ -173,14 +174,11 @@ std::vector<dbb::line> BoxCollider::getRays(const Transform & trans, Side moveDi
 	glm::vec4 center4 = glm::vec4(center, 1.0f);
 	getForwardRayLengths(trans, moveDirection, lengths);
 	glm::mat4 scal_mat = trans.getScale();
-	//std::cout << scal_mat[0][0] << scal_mat[0][1] << scal_mat[0][2] << std::endl;
+
 	lengths.push_back(glm::length(scal_mat * (glm::vec4(fwd_dwn_l, 1.0f) - center4)));
 	lengths.push_back(glm::length(scal_mat *( glm::vec4(fwd_dwn_r, 1.0f) - center4)));
 	lengths.push_back(glm::length(scal_mat *( glm::vec4(fwd_up_l, 1.0f) - center4)));
 	lengths.push_back(glm::length(scal_mat * (glm::vec4(fwd_up_r, 1.0f) - center4)));
-	/*for (auto& l : lengths)
-		std::cout << l << " ";
-	std::cout << std::endl;*/
 
 	return rays;
 }
@@ -214,8 +212,7 @@ void BoxCollider::getForwardRayLengths(const Transform & trans, Side moveDirecti
 	}
 }
 
-
-bool BoxCollider::collidesWith(const Transform & trans1, const Transform & trans2, const BoxCollider & other, Side moveDirection)
+bool BoxCollider::collidesWith(const Transform & trans1, const Transform & trans2, const BoxCollider & other, Side moveDirection, eCollision& collision)
 {
 	std::vector<float> lengths;
 	std::vector<dbb::line> rays = getRays(trans1, moveDirection, lengths);
@@ -228,10 +225,12 @@ bool BoxCollider::collidesWith(const Transform & trans1, const Transform & trans
 		for (auto& triangle : boundings)
 		{
 			dbb::plane Plane(triangle);
-			glm::vec3 inters = dbb::intersection(Plane, rays[i]);
-			if (dbb::IsInside(triangle, inters) && glm::dot(rays[i].p, glm::vec3(inters - rays[i].M)) > 0.0f) // if not behind
-				if (glm::length(inters - center) <= lengths[i]) {
-				//	std::cout << "Collision found!"  << std::endl;
+			glm::vec3 intersaction = dbb::intersection(Plane, rays[i]);
+			if (dbb::IsInside(triangle, intersaction) && glm::dot(rays[i].p, glm::vec3(intersaction - rays[i].M)) > 0.0f) // if not behind
+				if(glm::length(intersaction - center) <= lengths[i])
+				{
+					collision.intersaction  = intersaction;
+					collision.triangle		= triangle;
 					return true; // Collision found!
 				}
 		}

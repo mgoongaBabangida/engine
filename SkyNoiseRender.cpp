@@ -14,7 +14,7 @@ eSkyNoiseRender::eSkyNoiseRender(MyModel* model, Texture* noise)
 	m_model->setTextureFourth(noise);
 	object = new eObject(m_model);
 	object->getTransform()->setTranslation(glm::vec3(0.0f, 5.0f, 0.0f));  // HEIGHT!
-	object->getTransform()->setRotation(str::PI / 2, 0.0f, 0.0f);
+	object->getTransform()->setRotation(PI / 2, 0.0f, 0.0f);
 }
 
 void eSkyNoiseRender::Render(const glm::mat4& ProjectionMatrix, const Camera& camera)

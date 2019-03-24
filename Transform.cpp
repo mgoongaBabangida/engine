@@ -82,24 +82,24 @@ void Transform::billboard(glm::vec3 direction)
 	
 	float Yrot = direction.x > 0.0f 
 				? acos(glm::dot(projXZ, glm::vec3(0.0f, 0.0f, 1.0f))) 
-				: (float)str::PI * 2 - acos(glm::dot(projXZ, glm::vec3(0.0f, 0.0f, 1.0f)));
+				: (float)PI * 2 - acos(glm::dot(projXZ, glm::vec3(0.0f, 0.0f, 1.0f)));
 
 	// Rotation aroun X
 	float Xrot = glm::dot(glm::normalize(direction), glm::vec3(0.0f, 1.0f, 0.0f)) > 0 
-				? -(str::PI / 2 - acos(glm::dot(direction, glm::vec3(0.0f, 1.0f, 0.0f)))) 
-				: -(str::PI / 2 - acos(glm::dot(direction, glm::vec3(0.0f, 1.0f, 0.0f))));
+				? -(PI / 2 - acos(glm::dot(direction, glm::vec3(0.0f, 1.0f, 0.0f)))) 
+				: -(PI / 2 - acos(glm::dot(direction, glm::vec3(0.0f, 1.0f, 0.0f))));
 
 	setRotation(Xrot, Yrot, 0);
 }
 
-bool Transform::turnTo(glm::vec3 dest, float speed) //speed ?
+bool Transform::turnTo(glm::vec3 dest, float speed) //$todo speed is not used
 {	
-	glm::vec3 target_dir	= glm::normalize( glm::vec3(dest - m_translation) );
+	glm::vec3 target_dir	= glm::normalize(glm::vec3(dest - m_translation) );
 	glm::vec3 cur_directoin = glm::normalize(forward * glm::mat3(glm::toMat4(q_rotation)));
 	cur_directoin.x			= -cur_directoin.x;
 	float angle				= glm::dot(target_dir, cur_directoin);
 
-	glm::vec3 ASIX = glm::normalize(glm::cross( target_dir, cur_directoin ) );
+	glm::vec3 ASIX = glm::cross(target_dir, cur_directoin);
 
 	//float rot_angle = ASIX.y > 0.0f ? 
 	//if (abs(angle) < 0.001f)
@@ -120,12 +120,12 @@ bool Transform::turnTo(glm::vec3 dest, float speed) //speed ?
 	}
 	else if(ASIX.y <= 0.0f && angle < 0) 
 	{   //x+ z -
-		rot = glm::toQuat(glm::rotate(glm::mat4(), 2.0f * str::PI - (glm::acos(angle)), ASIX));
+		rot = glm::toQuat(glm::rotate(glm::mat4(), 2.0f * PI - (glm::acos(angle)), ASIX));
 		//std::cout << "third case" << std::endl;
 	}
 	else if(ASIX.y > 0.0f && angle < 0) 
 	{   //x- z -
-		rot = glm::toQuat(glm::rotate(glm::mat4(), 2.0f * str::PI - (glm::acos(angle)), ASIX));
+		rot = glm::toQuat(glm::rotate(glm::mat4(), 2.0f * PI - (glm::acos(angle)), ASIX));
 		//std::cout << "fourth case" << std::endl;
 	}
 	else 

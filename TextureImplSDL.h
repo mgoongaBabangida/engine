@@ -1,6 +1,10 @@
 #pragma once
 #include <stdint.h>
 #include <string>
+
+#define SDL_IMAGE
+#ifdef SDL_IMAGE
+
 #include "SDL2-2.0.9/include/SDL.h"
 #include "SDL2_image-2.0.4/SDL_image.h"
 
@@ -12,3 +16,5 @@ public:
 	static void		DeleteImage(uint32_t id);
 	static void		SaveToFile(const uint8_t* buffer, const std::string& path, int32_t width, int32_t height, int32_t channels);
 };
+
+#endif

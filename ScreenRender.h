@@ -13,6 +13,7 @@ public:
 	void Render(const glm::mat4& projectionMatrix, const Camera& camera);
 	void RenderContrast(const glm::mat4& projectionMatrix, const Camera& camera);
 	void RenderFrame();
+	
 	void SetTexture(Texture t)			{ screenMesh->SetTextureOne(t); }
 	void SetTextureContrast(Texture t)	{ screenMesh->SetTextureTwo(t); }
 

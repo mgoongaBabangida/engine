@@ -24,11 +24,8 @@ protected:
 	Shader mainShader;
 	GLuint fullTransformationUniformLocation;
 	GLuint modelToWorldMatrixUniformLocation;
-	GLuint modelViewMatrixLocation;
-	GLuint normalMatrixLocation;
-	GLuint normalMapingLocation;  //?
-	GLuint eyePositionWorldUniformLocation; //
-	GLuint shadowMatrixUniformLocation;  //
+	GLuint eyePositionWorldUniformLocation;
+	GLuint shadowMatrixUniformLocation;
 
 	GLuint matAmbientLoc;
 	GLuint matDiffuseLoc;

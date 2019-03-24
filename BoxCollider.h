@@ -3,14 +3,12 @@
 #define BOX_COLLIDER_H
 
 #include "Transform.h"
-
-#include <glm\glm\glm.hpp>
-#include <glm\glm\gtc\matrix_transform.hpp>
-#include <glm\glm\gtx\transform.hpp>
 #include <glm\glm/gtc/constants.hpp>
 
 #include "PlaneLine.h"
 #include <vector>
+
+struct eCollision;
 
 struct extremDots 
 {
@@ -42,7 +40,7 @@ private:
 
 public:
 	void calculateExtremDots(const std::vector<glm::vec3>& positions);
-	bool collidesWith(const Transform& trans1, const Transform& trans2, const BoxCollider& other, Side moveDirection);
+	bool collidesWith(const Transform& trans1, const Transform& trans2, const BoxCollider& other, Side moveDirection, eCollision& collision);
 	float getMaxX()const { return dots.MaxX; }
 	float getMaxY()const { return dots.MaxY; }
 	float getMaxZ()const { return dots.MaxZ; }

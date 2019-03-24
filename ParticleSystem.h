@@ -43,6 +43,6 @@ protected:
 	std::vector<Particle>		m_particles;
 	Clock						clock;
 	std::unique_ptr<dbb::Timer> timer;
-	std::unique_ptr<remSnd>		sound;
+	remSnd*						sound;
 	float						duration;
 };

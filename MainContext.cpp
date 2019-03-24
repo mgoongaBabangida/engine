@@ -2,7 +2,7 @@
 #include "GlBufferContext.h"
 #include "ParticleSystem.h"
 #include "ShootingParticleSystem.h"
-#include "MoveScript.h"
+#include "ShipScript.h"
 #include "Sound.h"
 #include "InterfacesDB.h"
 #include "Texture.h"
@@ -13,7 +13,11 @@ using glm::vec3;
 using glm::vec4;
 using glm::mat4;
 
-const std::string ModelFolderPath = "Resources/";
+eMainContext::eMainContext(eInputController* _input, 
+						   const std::string& _modelsPath,
+						   const std::string& _assetsPath, 
+						   const std::string& _shadersPath)
+:inputController(_input), modelFolderPath(_modelsPath), assetsFolderPath(_assetsPath), shadersFolderPath(_shadersPath){}
 
 void eMainContext::UpdateLight(uint32_t x, uint32_t y, uint32_t z)
 {
@@ -23,9 +27,135 @@ void eMainContext::UpdateLight(uint32_t x, uint32_t y, uint32_t z)
 	m_light.light_vector.z = (float)z;
 }
 
+bool eMainContext::OnMouseMove(uint32_t x, uint32_t y)
+{
+	m_framed = camRay.onMove(m_camera, m_Objects, x, y); 	//to draw a frame
+	return true;
+}
+
+bool eMainContext::OnKeyPress(uint32_t asci)
+{
+	switch (asci)
+	{
+	case ASCII_J:
+	{
+		if (m_focused != nullptr)
+			m_focused->MoveLeft(m_Objects);
+	}
+	return true;
+	case ASCII_L:
+	{
+		if (m_focused != nullptr)
+			m_focused->MoveRight(m_Objects);
+	}
+	return true;
+	case ASCII_K:
+	{
+		if (m_focused != nullptr)
+			m_focused->MoveBack(m_Objects);
+	}
+	return true;
+	case ASCII_I:
+	{
+		if (m_focused != nullptr)
+			m_focused->MoveForward(m_Objects);
+	}
+	return true;
+	case ASCII_Z:
+	{
+		if (m_focused != nullptr)
+			m_focused->MoveUp(m_Objects);
+	}
+	return true;
+	case ASCII_X:
+	{
+		if (m_focused != nullptr)
+			m_focused->MoveDown(m_Objects);
+	}
+	return true;
+	case ASCII_C:
+	{
+		if (m_focused != nullptr)
+			m_focused->TurnRight(m_Objects);
+	}
+	return true;
+	case ASCII_V:
+	{
+		if (m_focused != nullptr)
+			m_focused->TurnLeft(m_Objects);
+	}
+	return true;
+	case ASCII_B:
+	{
+		if (m_focused != nullptr)
+			m_focused->LeanRight(m_Objects);
+	}
+	return true;
+	case ASCII_N:
+	{
+		if (m_focused != nullptr)
+			m_focused->LeanLeft(m_Objects);
+	}
+	return true;
+	case ASCII_U:
+	{
+		if (m_focused != nullptr)
+			m_focused->LeanForward(m_Objects);
+	}
+	return true;
+	case ASCII_H:
+	{
+		if (m_focused != nullptr)
+			m_focused->LeanBack(m_Objects);
+	}
+	return true;
+	case ASCII_G:
+	{
+		if (m_focused != nullptr)
+			m_focused->getScript()->OnKeyPress(ASCII_G);
+	}
+	default: return false;
+	}
+}
+
+bool eMainContext::OnMousePress(uint32_t x, uint32_t y, bool left)
+{
+	camRay.Update(m_camera, x, y, width, height);
+	if(left)
+	{
+		camRay.press(x, y);
+		m_focused = camRay.calculateIntersaction(m_Objects);
+	}
+	if(m_focused && m_focused->getScript())
+	{
+		m_focused->getScript()->OnMousePress(x,y,left);
+	}
+	return true;
+#ifdef DEBUG_HANDLERS
+		std::cout << "TARGET=" << "x= " << target.x << "y= " << target.y << "z= " << target.z << std::endl;
+
+		glm::vec3 position = glm::vec3(0.0f, 2.0f, 0.0f);
+		glm::vec3 direction = glm::vec3(0.0f, 0.0f, 1.0f);
+		glm::vec3 target_dir = glm::normalize(target - position);
+		float angle = glm::dot(glm::normalize(target_dir), glm::normalize(direction));
+		std::cout << "in press" << std::endl;
+		std::cout << "dot= " << angle << "radians= " << glm::acos(angle) << " degrees= " << glm::degrees(glm::acos(angle)) << std::endl;
+		glm::quat rot = glm::toQuat(glm::rotate(glm::mat4(), glm::acos(angle), glm::vec3(0, 1, 0)));
+
+		glm::vec3 ASIX = glm::normalize(glm::cross(target_dir, direction));
+		std::cout << "Asix=" << ASIX.x << ASIX.y << ASIX.z << std::endl;
+#endif
+}
+
+bool eMainContext::OnMouseRelease()
+{
+	camRay.release();
+	return true;
+}
+
 void eMainContext::InitializeGL()
 {
-	texManager.InitContext();
+	texManager.InitContext(assetsFolderPath);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_STENCIL_TEST);
@@ -70,6 +200,19 @@ void eMainContext::InitializeGL()
 	guis[0].setCommand(std::shared_ptr<ICommand>(new AnimStart(m_Objects[6])));
 	guis.push_back(GUI(width / 4 * 3, height / 4 * 3, width / 4, height / 4, width, height));
 	guis[1].setCommand(std::shared_ptr<ICommand>(new AnimStop(m_Objects[6])));
+
+	inputController->AddObserver(this, STRONG);
+	inputController->AddObserver(&guis[0], MONOPOLY);
+	inputController->AddObserver(&guis[1], MONOPOLY);
+	inputController->AddObserver(&m_camera, WEAK);
+	inputController->AddObserver(&camRay, WEAK);
+
+	#define GLM_FORCE_RADIANS
+	viewToProjectionMatrix = glm::perspective(glm::radians(60.0f), ((float)width) / height, nearPlane, farPlane);
+	scale_bias_matrix = mat4(vec4(0.5f, 0.0f, 0.0f, 0.0f),
+		vec4(0.0f, 0.5f, 0.0f, 0.0f),
+		vec4(0.0f, 0.0f, 0.5f, 0.0f),
+		vec4(0.5f, 0.5f, 0.5f, 1.0f));
 }
 
 void eMainContext::InitializeBuffers()
@@ -79,6 +222,7 @@ void eMainContext::InitializeBuffers()
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_REFLECTION, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_REFRACTION, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW, width * 2, height * 2);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFFERED, width, height);
 }
 
 void eMainContext::InitializeModels()
@@ -125,13 +269,13 @@ void eMainContext::InitializeModels()
 			texManager.find("Tbricks2_dp"))));
 
 	//MODELS
-	modelManager.add("nanosuit", (GLchar*)std::string(ModelFolderPath + "nanosuit/nanosuit.obj").c_str());
+	modelManager.add("nanosuit", (GLchar*)std::string(modelFolderPath + "nanosuit/nanosuit.obj").c_str());
 	//modelManager.add("boat", (GLchar*)std::string(ModelFolderPath + "Medieval Boat/Medieval Boat.obj").c_str());
 	//modelManager.add("spider", (GLchar*)std::string(ModelFolderPath + "ogldev-master/Content/spider.obj").c_str());
-	modelManager.add("wolf", (GLchar*)std::string(ModelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
+	modelManager.add("wolf", (GLchar*)std::string(modelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
 	//(GLchar*)ModelFolderPath.append("Wolf Rigged and Game Ready/Wolf_One_obj.obj").c_str()
 	//modelManager.add("guard", (GLchar*)ModelFolderPath.append("ogldev-master/Content/guard/boblampclean.md5mesh").c_str());
-	modelManager.add("stairs", (GLchar*)std::string(ModelFolderPath + "stairs.blend").c_str());
+	modelManager.add("stairs", (GLchar*)std::string(modelFolderPath + "stairs.blend").c_str());
 
 	//TERRAIN
 	m_TerrainModel.swap(modelManager.cloneTerrain("simple"));
@@ -163,7 +307,7 @@ void eMainContext::InitializeModels()
 	nanosuit->getTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
 	m_Objects.push_back(nanosuit);
 
-	shObject terrain = shObject(new eObject((IModel*)m_TerrainModel.get()));
+	shObject terrain = shObject(new eObject((IModel*)m_TerrainModel.get(),"Terrain"));
 	terrain->getTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
 	terrain->getTransform()->setTranslation(vec3(0.0f, 1.8f, 0.0f));
 	m_Objects.push_back(terrain);
@@ -187,24 +331,26 @@ void eMainContext::InitializeModels()
 
 void eMainContext::InitializeRenders()
 {
-	sound.reset(new remSnd(context->buffers.find("Cannon+5.wav")->second, true));
+	sound.reset(new remSnd(context->buffers.find(assetsFolderPath + "Cannon+5.wav")->second, true));
 	sound->loadListner(m_camera.getPosition().x, m_camera.getPosition().y, m_camera.getPosition().z);
 
-	renderManager.Initialize(modelManager, texManager);
+	renderManager.Initialize(modelManager, texManager, shadersFolderPath);
 
 	renderManager.ParticleRender()->AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f), texManager.find("Tatlas2"), sound.get()));
 
-	m_Objects[4]->setScript(new MoveScript(texManager.find("TSpanishFlag0_s"), 
+	m_Objects[4]->setScript(new eShipScript(texManager.find("TSpanishFlag0_s"), 
 											renderManager.ParticleRender(), 
 											texManager.find("Tatlas2"),
-											sound.get()));
+											sound.get(),
+											&camRay,
+											waterHeight));
 }
 
 void eMainContext::PaintGL()
 {
-	for (auto &object : m_Objects)
+	for(auto &object : m_Objects)
 	{
-		if (object->getScript() != nullptr)
+		if(object->getScript())
 			object->getScript()->Update(m_Objects);
 	}
 	Pipeline();
@@ -212,10 +358,7 @@ void eMainContext::PaintGL()
 
 void eMainContext::Pipeline()
 {
-	glViewport(0, 0, width, height);
-#define GLM_FORCE_RADIANS 
-	mat4 viewToProjectionMatrix = glm::perspective(glm::radians(60.0f), ((float)width) / height, 0.1f, 20.0f);
-
+	glViewport(0, 0, width, height); 
 	//1 Shadow Render Pass
 	glViewport(0, 0, width * 2, height * 2);
 	glEnable(GL_CULL_FACE);
@@ -242,10 +385,6 @@ void eMainContext::Pipeline()
 
 	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW, GL_TEXTURE1);
 	//shadow
-	mat4 scale_bias_matrix = mat4(vec4(0.5f, 0.0f, 0.0f, 0.0f),
-		vec4(0.0f, 0.5f, 0.0f, 0.0f),
-		vec4(0.0f, 0.0f, 0.5f, 0.0f),
-		vec4(0.5f, 0.5f, 0.5f, 1.0f));
 	mat4 worldToViewMatrix = glm::lookAt(glm::vec3(m_light.light_vector), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
 	mat4 shadow_matrix = scale_bias_matrix * viewToProjectionMatrix * worldToViewMatrix;
 
@@ -263,7 +402,6 @@ void eMainContext::Pipeline()
 	glEnable(GL_CLIP_DISTANCE0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_STENCIL_TEST);
-	//glBlitFramebuffer(0, 0, Width(), Height(), 0, 0, Width(), Height(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 	renderManager.MainRender()->SetClipPlane(-waterHeight);
 
@@ -296,7 +434,7 @@ void eMainContext::Pipeline()
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 	glStencilFunc(GL_ALWAYS, 1, 0xFF);
 	glStencilMask(0xFF);
-	if (m_focused != nullptr)
+	if(m_focused)
 	{
 		renderManager.MainRender()->Render(viewToProjectionMatrix, m_camera, m_light, shadow_matrix, std::vector<shObject>{m_focused });
 	}
@@ -317,8 +455,8 @@ void eMainContext::Pipeline()
 	glClear(GL_STENCIL_BUFFER_BIT);
 
 	// Render Flags
-	MoveScript* script = dynamic_cast<MoveScript*>(m_Objects[4]->getScript()); //magic number to change
-	renderManager.WaveRender()->Render(viewToProjectionMatrix, m_camera, m_light, shadow_matrix, std::vector<Flag>{script->getFlag(m_camera)});
+	eShipScript* script = dynamic_cast<eShipScript*>(m_Objects[4]->getScript()); //magic number to change
+	renderManager.WaveRender()->Render(viewToProjectionMatrix, m_camera, m_light, shadow_matrix, std::vector<Flag>{script->GetFlag(m_camera)});
 
 	//6. Rendering WaterQuad
 	mts ? eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS)
@@ -343,12 +481,11 @@ void eMainContext::Pipeline()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	glDepthMask(GL_FALSE);
-	//glCullFace(GL_TRUE);
+	glCullFace(GL_TRUE);
 	renderManager.ParticleRender()->Render(viewToProjectionMatrix, m_camera);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_BLEND);
 	glDepthMask(GL_TRUE);
-	//glCullFace(GL_TRUE);
 
 	//**************************MTS CODE*************************
 	if(mts)

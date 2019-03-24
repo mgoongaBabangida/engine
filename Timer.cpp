@@ -33,11 +33,15 @@ bool dbb::Timer::start(unsigned int period)
 
 bool dbb::Timer::stop()
 {
-	if(thrd.joinable())
-		thrd.join();
-	active = false;
-	fut.get();
-	return true;
+	if(active)
+	{
+		active = false;
+		fut.get();
+		if (thrd.joinable())
+			thrd.join();
+		return true;
+	}
+	return false;
 }
 
 dbb::Timer::~Timer()
