@@ -169,7 +169,7 @@ void eMainContext::InitializeGL()
 	//initialize sound
 	context.reset(new SoundContext());
 	context->init();
-	context->LoadWavFile("Cannon+5.wav");
+	context->LoadWavFile(assetsFolderPath + "Cannon+5.wav");
 
 	modelManager.initializePrimitives();
 

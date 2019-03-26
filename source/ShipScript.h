@@ -1,9 +1,6 @@
 #pragma once
 
 #include "InterfacesDB.h"
-#include <vector>
-#include <memory>
-#include <glm\glm\glm.hpp>
 #include "Camera.h"
 #include "CameraRay.h"
 

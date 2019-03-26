@@ -9,7 +9,7 @@ struct Flag;
 struct Texture;
 class remSnd;
 
-static const glm::vec3 NONE{ glm::vec3(-100.0f, -100.0f, -100.0f) };
+//static const glm::vec3 NONE{ glm::vec3(-100.0f, -100.0f, -100.0f) };
 
 class MoveScript : public IScript
 {

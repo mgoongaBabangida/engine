@@ -1,5 +1,5 @@
+#include "stdafx.h"
 #include "GFBO.h"
-#include <iostream>
 
 eGFBO::~eGFBO()
 {

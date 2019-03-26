@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "ShipScript.h"
 #include "Structures.h"
 #include "ParticleRender.h"

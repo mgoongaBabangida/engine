@@ -1,12 +1,15 @@
 #include "stdafx.h"
 #include "TextureManager.h"
+
 #define DEVIL_IMAGE
 #define SDL_IMAGE
+
 #ifdef DEVIL_IMAGE
 	#include "TextureImplDevIl.h"
 #endif
+
 #ifdef SDL_IMAGE
-#include <IL/ilut.h>
+	#include "TextureImplSDL.h"
 #endif
 
 TextureManager::~TextureManager()

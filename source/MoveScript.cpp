@@ -8,7 +8,7 @@
 MoveScript::MoveScript(Texture* flag_texture, eParticleRender* prt, Texture* shoting_texture, remSnd* shooting_sound)
 	:flag_tex(flag_texture), prt_renderer(prt),shoot_tex(shoting_texture),shoot_snd(shooting_sound)
 {
-	turn_speed = str::PI / 4.0f / 60.0f;
+	turn_speed = PI / 4.0f / 60.0f;
 	move_speed = 1.0f / 120.0f;
 }
 

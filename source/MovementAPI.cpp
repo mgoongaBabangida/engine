@@ -3,9 +3,10 @@
 
 bool MovementAPI::CollidesWith(eObject* _other, Side _side)
 {
-	return object->getCollider()->collidesWith(*(object->getTransform()), 
-											   *(_other->getTransform()),
-											   *(_other->getCollider()), _side);
+	return false;
+//	return object->getCollider()->collidesWith(*(object->getTransform()), 
+//											   *(_other->getTransform()),
+//											   *(_other->getCollider()), _side, *(_other->getRigidBody()->));
 }
 
 void MovementAPI::MoveForward(std::vector<std::shared_ptr<eObject> > objects)
