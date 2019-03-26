@@ -25,7 +25,7 @@ eWaterRender::eWaterRender(std::unique_ptr<MyModel> model,
 
 	object.reset(new eObject(water.get()));
 	object->getTransform()->setTranslation(glm::vec3(0.0f, 2.0f, 0.0f));  // HEIGHT!
-	object->getTransform()->setRotation(str::PI / 2, 0.0f, 0.0f);
+	object->getTransform()->setRotation(PI / 2, 0.0f, 0.0f);
 
 	clock.start();
 	timer.reset(new dbb::Timer([this]()->bool {this->Update(); return true; }));

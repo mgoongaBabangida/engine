@@ -4,9 +4,9 @@
 
 SDL_GLContext					context;
 
-dbGLWindowSDL::dbGLWindowSDL() 
-	:mainContext(), 
-	inputController(&mainContext)
+dbGLWindowSDL::dbGLWindowSDL()
+	:inputController()
+	,mainContext(&inputController, "Resources/", "assets/", "shaders/")
 {}
 
 dbGLWindowSDL::~dbGLWindowSDL()

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "TextureImplSDL.h"
 
+#ifdef SDL_IMAGE
+
 static SDL_Surface* current_surface;
 
 uint8_t eTextureImplSDL::LoadTexture(const std::string& path, uint32_t& id, int32_t& width, int32_t& height)
@@ -54,3 +56,5 @@ void eTextureImplSDL::SaveToFile(const uint8_t* buffer, const std::string& path,
 {
 
 }
+
+#endif

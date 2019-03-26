@@ -1,10 +1,20 @@
 #ifndef  INTERFACESDB_H
 #define  INTERFACESDB_H
 
+#include "Structures.h"
 #include "Texture.h"
 //PARTICLE SYSTEM PACKAGE
-class Particle;
+class  Particle;
+class  eObject;
 struct Texture;
+class IInputObserver
+{
+public:
+	virtual bool OnMouseMove(uint32_t x, uint32_t y)				{ return false; }
+	virtual bool OnKeyPress(uint32_t asci)							{ return false; }
+	virtual bool OnMousePress(uint32_t x, uint32_t y, bool left)	{ return false; }
+	virtual bool OnMouseRelease()									{ return false; }
+};
 
 class IParticleSystem
 {
@@ -30,22 +40,15 @@ class ICommand
 public:
 	virtual ~ICommand() = default;
 	virtual void execute() = 0;
-
 };
 
-struct Collission;
-class eObject;
-
-class IScript
+class IScript : public IInputObserver
 {
 protected:
 	eObject* object = nullptr;
 public:
 	virtual ~IScript() = default;
-	virtual void	ReactCollision(const Collission& col) {}
 	virtual void	Update(std::vector< std::shared_ptr<eObject> > objs) = 0;
-	virtual void	setDestination(glm::vec3) = 0;
-	virtual void	shoot() = 0;
 	void			setObject(eObject* obj) { object = obj; }
 };
 

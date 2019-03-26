@@ -44,7 +44,7 @@
 //
 //	//	if(m_focused != nullptr)
 //	//	{
-//	//		m_focused->getScript()->setDestination(target);
+//	//		m_focused->getScript()->SetDestination(target);
 //	//	}
 //#ifdef DEBUG_HANDLERS
 //		std::cout << "TARGET=" <<"x= "<< target.x << "y= " << target.y << "z= " << target.z << std::endl;

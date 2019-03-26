@@ -45,7 +45,7 @@ eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model,
 	object.reset(new eObject((IModel*)m_model.get()));
 	object->getTransform()->setTranslation(glm::vec3(3.0f, 2.0f, 0.0f));
 	object->getTransform()->setScale(glm::vec3(0.1f, 0.1f, 0.1f));
-	object->getTransform()->setRotation(str::PI / 2, 0.0f, 0.0f);
+	object->getTransform()->setRotation(PI / 2, 0.0f, 0.0f);
 }
 
 void eWaveRender::Render(const glm::mat4&	ProjectionMatrix, 
@@ -89,7 +89,7 @@ void eWaveRender::Render(const glm::mat4&	ProjectionMatrix,
 		object->getTransform()->setScale(glm::vec3(0.1f, 0.1f, 0.1f));
 		object->getTransform()->billboard(-camera.getDirection());
 		glm::quat cur = object->getTransform()->getRotation();
-		glm::quat plus = glm::toQuat(glm::rotate(mat4(),(float) str::PI / 2, glm::vec3(1, 0, 0)));
+		glm::quat plus = glm::toQuat(glm::rotate(mat4(),(float) PI / 2, glm::vec3(1, 0, 0)));
 		object->getTransform()->setRotation(cur * plus);
 
 		m_model->setDiffuse(flag.tex);

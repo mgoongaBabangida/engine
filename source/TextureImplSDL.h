@@ -1,5 +1,9 @@
 #pragma once
 
+#define SDL_IMAGE
+#ifdef SDL_IMAGE
+
+
 class eTextureImplSDL
 {
 public:
@@ -8,3 +12,5 @@ public:
 	static void		DeleteImage(uint32_t id);
 	static void		SaveToFile(const uint8_t* buffer, const std::string& path, int32_t width, int32_t height, int32_t channels);
 };
+
+#endif

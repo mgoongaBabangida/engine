@@ -1,37 +1,44 @@
 #ifndef GUI_H
 #define GUI_H
 #include "Structures.h"
-#include "Texture.h"
 #include "InterfacesDB.h"
+#include "Texture.h"
+
 #include <iostream>
 
-class GUI
+class GUI : public IInputObserver
 {
-	int							screenWidth;
-	int							screenHeight;
+	int32_t						screenWidth;
+	int32_t						screenHeight;
 	Texture*					texture;
-	int							topleftX;
-	int							topleftY;
-	int							Width;
-	int							Height;
+	int32_t						topleftX;
+	int32_t						topleftY;
+	int32_t						Width;
+	int32_t						Height;
 	std::shared_ptr<ICommand>	cmd;
+	bool						isVisible = true;
 
 public:
 	GUI(int topleftX, int topleftY, int Width, int Height,int scWidth,int scHeight) 
 		:topleftX(topleftX), topleftY(topleftY), Width(Width), Height(Height), screenWidth(scWidth), screenHeight(scHeight){}
-	virtual void Draw(GLuint shader); //do we need?
-	void setCommand(std::shared_ptr<ICommand> com) { cmd = com; }
-	void SetTexture (Texture* t) { texture = t; }
-	Texture* GetTexture() { return texture; }
+	
+	virtual bool OnMousePress(uint32_t x, uint32_t y, bool left) override;
+
+	void			setCommand(std::shared_ptr<ICommand> com) { cmd = com; }
+	void			SetTexture (Texture* t) { texture = t; }
+	Texture*		GetTexture() { return texture; }
+	
 	void Perssed() 
 	{ 
 		cmd->execute(); 
 	//std::cout << topleftX <<" "<< screenHeight - topleftY << " " << Width << " " << Height << " " << screenWidth << " " << screenHeight<< std::endl;
 	}
+	
 	bool isPressed(int x, int y) 
 	{
 		return x > topleftX && y > topleftY && x < (topleftX + Width) && y < (topleftY + Height); //test!
 	}
+	
 	glm::vec4 getViewPort()const 
 	{
 		return glm::vec4(topleftX, screenHeight - topleftY- Height, Width, Height); 

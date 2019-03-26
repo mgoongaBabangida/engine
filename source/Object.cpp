@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "Object.h"
 #include "MyModel.h"
-#include "MovementAPI.h"
+#include "RigidBody.h"
+#include "InterfacesDB.h"
 
 eObject::eObject() 
 {
@@ -10,11 +11,11 @@ eObject::eObject()
 	transform->setScale(glm::vec3(1.0f, 1.0f, 1.0f)); // transfer to transform
 	script.reset(nullptr);
 	rigger.reset(nullptr);
-	movementApi = new MovementAPI;
+	movementApi = new eRigidBody; // ?
 	movementApi->setObject(this);
 }
 
-eObject::eObject(IModel * m) :m_model(m)
+eObject::eObject(IModel * m, const std::string& _name) :m_model(m), name(_name)
 { 
 	transform.reset(new Transform);
 	collider.reset(new BoxCollider);
@@ -22,7 +23,7 @@ eObject::eObject(IModel * m) :m_model(m)
 	transform->setScale(glm::vec3(1.0f, 1.0f, 1.0f));
 	script.reset(nullptr);
 	rigger.reset(nullptr);
-	movementApi = new MovementAPI;
+	movementApi = new eRigidBody; // ?
 	movementApi->setObject(this);
 	collider->calculateExtremDots(m_model->getPositions());
 }
@@ -41,6 +42,11 @@ bool eObject::operator==(const eObject& _other)
 bool eObject::operator!=(const eObject& _other)
 {
 	return !operator==(_other);
+}
+
+void eObject::setScript(IScript* scr)
+{
+	 script.reset(scr); scr->setObject(this);
 }
 
 void eObject::TurnRight(std::vector<std::shared_ptr<eObject> > objects)
@@ -104,13 +110,13 @@ void eObject::Debug()
 //{
 //	float thrsh = 0.001f;
 //	glm::vec3 dir = glm::mat3(transform->getModelMatrix()) * transform->getForward();
-//	transform->setTranslation(transform->getTranslation() += glm::normalize(dir) * (SPEED - thrsh));
+//	transform->setTranslation(transform->getTranslation() += glm::normalize(dir) * (speed - thrsh));
 //	for (auto& obj : objects) {
 //		if(this->transform->getTranslation() != obj->transform->getTranslation() && this->m_model != obj->m_model)  // self-check! ??
 //		{
 //			if(collider->collidesWith(*(transform.get()), *(obj->transform.get()), *(obj->collider.get()), FORWARD)) 
 //			{
-//				transform->setTranslation(transform->getTranslation() -= glm::normalize(dir) * (SPEED - thrsh));
+//				transform->setTranslation(transform->getTranslation() -= glm::normalize(dir) * (speed - thrsh));
 //				break;
 //			}
 //		}
@@ -121,14 +127,14 @@ void eObject::Debug()
 //{
 //	float thrsh = 0.001f;
 //	glm::vec3 dir = glm::mat3(transform->getModelMatrix()) * transform->getForward();
-//	transform->setTranslation(transform->getTranslation() += glm::normalize(-dir) * (SPEED - thrsh));
+//	transform->setTranslation(transform->getTranslation() += glm::normalize(-dir) * (speed - thrsh));
 //	for (auto& obj : objects) 
 //	{
 //		if (this->transform->getTranslation() != obj->transform->getTranslation() && this->m_model != obj->m_model)  // self-check! ??
 //		{
 //			if (collider->collidesWith(*(transform.get()), *(obj->transform.get()), *(obj->collider.get()), BACK))
 //			{
-//				transform->setTranslation(transform->getTranslation() -= glm::normalize(-dir) * (SPEED - thrsh));
+//				transform->setTranslation(transform->getTranslation() -= glm::normalize(-dir) * (speed - thrsh));
 //				break;
 //			}
 //		}
@@ -139,14 +145,14 @@ void eObject::Debug()
 //{
 //	float thrsh = 0.001f;
 //	glm::vec3 dir = glm::mat3(transform->getModelMatrix()) * transform->getForward();
-//	transform->setTranslation(transform->getTranslation() += glm::normalize(glm::cross(dir, YAXIS))* (SPEED - thrsh));
+//	transform->setTranslation(transform->getTranslation() += glm::normalize(glm::cross(dir, YAXIS))* (speed - thrsh));
 //	for (auto& obj : objects) 
 //	{
 //		if (this->transform->getTranslation() != obj->transform->getTranslation() && this->m_model != obj->m_model)  // self-check! ??
 //		{
 //			if (collider->collidesWith(*(transform.get()), *(obj->transform.get()), *(obj->collider.get()), RIGHT)) 
 //			{
-//				transform->setTranslation(transform->getTranslation() -= glm::normalize(glm::cross(dir, YAXIS))* (SPEED - thrsh));
+//				transform->setTranslation(transform->getTranslation() -= glm::normalize(glm::cross(dir, YAXIS))* (speed - thrsh));
 //				break;
 //			}
 //		}
@@ -157,14 +163,14 @@ void eObject::Debug()
 //{
 //	float thrsh = 0.001f;
 //	glm::vec3 dir = glm::mat3(transform->getModelMatrix()) * transform->getForward();
-//	transform->setTranslation(transform->getTranslation() += glm::normalize(glm::cross(YAXIS, dir)) * (SPEED - thrsh));
+//	transform->setTranslation(transform->getTranslation() += glm::normalize(glm::cross(YAXIS, dir)) * (speed - thrsh));
 //	for (auto& obj : objects) 
 //	{
 //		if (this->transform->getTranslation() != obj->transform->getTranslation() && this->m_model != obj->m_model)  // self-check! ??
 //		{
 //			if (collider->collidesWith(*(transform.get()), *(obj->transform.get()), *(obj->collider.get()), LEFT)) 
 //			{
-//				transform->setTranslation(transform->getTranslation() -= glm::normalize(glm::cross(YAXIS, dir)) * (SPEED - thrsh));
+//				transform->setTranslation(transform->getTranslation() -= glm::normalize(glm::cross(YAXIS, dir)) * (speed - thrsh));
 //				break;
 //			}
 //		}
@@ -175,14 +181,14 @@ void eObject::Debug()
 //{
 //	float thrsh = 0.001f;
 //	glm::vec3 dir = glm::mat3(transform->getModelMatrix()) * transform->getUp();
-//	transform->setTranslation(transform->getTranslation() += glm::normalize(dir) * (SPEED - thrsh));
+//	transform->setTranslation(transform->getTranslation() += glm::normalize(dir) * (speed - thrsh));
 //	for (auto& obj : objects) 
 //	{
 //		if (this->transform->getTranslation() != obj->transform->getTranslation() && this->m_model != obj->m_model)  // self-check! ??
 //		{
 //			if (collider->collidesWith(*(transform.get()), *(obj->transform.get()), *(obj->collider.get()), UP))
 //			{
-//				transform->setTranslation(transform->getTranslation() -= glm::normalize(dir) * (SPEED - thrsh));
+//				transform->setTranslation(transform->getTranslation() -= glm::normalize(dir) * (speed - thrsh));
 //				break;
 //			}
 //		}
@@ -193,14 +199,14 @@ void eObject::Debug()
 //{
 //	float thrsh = 0.001f;
 //	glm::vec3 dir = glm::mat3(transform->getModelMatrix()) * transform->getUp();
-//	transform->setTranslation(transform->getTranslation() -= glm::normalize(dir) * (SPEED - thrsh));
+//	transform->setTranslation(transform->getTranslation() -= glm::normalize(dir) * (speed - thrsh));
 //	for (auto& obj : objects)
 //	{
 //		if (this->transform->getTranslation() != obj->transform->getTranslation() && this->m_model != obj->m_model)  // self-check! ??
 //		{
 //			if (collider->collidesWith(*(transform.get()), *(obj->transform.get()), *(obj->collider.get()), DOWN))
 //			{
-//				transform->setTranslation(transform->getTranslation() += glm::normalize(dir) * (SPEED - thrsh));
+//				transform->setTranslation(transform->getTranslation() += glm::normalize(dir) * (speed - thrsh));
 //				break;
 //			}
 //		}

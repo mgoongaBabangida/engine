@@ -13,20 +13,39 @@ Camera::Camera(const Camera & other)
 	rotationMatrix	 = other.rotationMatrix;
 }
 
-Camera& Camera::operator=(const Camera & other)
+Camera& Camera::operator=(const Camera& other)
 {
 	if (&other != this) 
 	{  
-		position = other.position;
-		viewDirection = other.viewDirection;
+		position		 = other.position;
+		viewDirection	 = other.viewDirection;
 		oldMousePosition = other.oldMousePosition;
-		strafeDirection = other.strafeDirection;
-		rotationMatrix = other.rotationMatrix;
+		strafeDirection	 = other.strafeDirection;
+		rotationMatrix	 = other.rotationMatrix;
 	}
 	return *this;
 }
 
-Camera::~Camera() {}
+bool Camera::OnMouseMove(uint32_t x, uint32_t y)
+{
+	mouseUpdate(glm::vec2(x, y));
+	return true;
+}
+
+bool Camera::OnKeyPress(uint32_t asci)
+{
+	switch(asci)
+	{
+		case ASCII_W: moveForward();  return true;
+		case ASCII_S: moveBackword(); return true;
+		case ASCII_D: strafeLeft();   return true;
+		case ASCII_A: strafeRight();  return true;
+		case ASCII_R: moveUp();		  return true;
+		case ASCII_F: moveDown();	  return true;
+		default:					  return false;
+	}
+	return false;
+}
 
 glm::mat4 Camera::getWorldToViewMatrix() const
 {

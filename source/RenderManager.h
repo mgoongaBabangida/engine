@@ -13,10 +13,10 @@
 #include "SkyNoiseRender.h"
 #include "WaveRender.h"
 #include "HexRender.h"
-#include "MoveScript.h"
 #include "GaussianBlurRender.h"
 #include "BrightFilterrender.h"
 #include "ShadowRender.h"
+#include "ShipScript.h"
 
 class eRenderManager
 {
@@ -36,7 +36,8 @@ protected:
 	std::string							 folderPath;
 public:
 	void				Initialize(ModelManager&	modelManager, 
-								   TextureManager&  texManager);
+								   TextureManager&  texManager,
+								   const string&	folderPath);
 	
 	eWaterRender*		WaterRender()		 { return m_waterRender.get();		}
 	eSkyBoxRender*		SkyBoxRender()		 { return m_skyboxRender.get();		}

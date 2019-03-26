@@ -4,36 +4,36 @@
 #include "Structures.h"
 #include "TerrainModel.h"
 #include "Camera.h"
-//#include "Timer.h"
 #include "CameraRay.h"
 #include "TextureManager.h"
 #include "ModelManager.h"
 #include "RenderManager.h"
 #include "GUI.h"
+#include "InputController.h"
 
 class SoundContext;
 class remSnd;
 
-class eMainContext 
+class eMainContext : public IInputObserver
 {
 public:
-	eMainContext()			= default;
+	eMainContext(eInputController*, const std::string& modelsPath, const std::string& assetsPath, const std::string& shadersPath);
 	virtual ~eMainContext() = default;
 
-	void			InitializeGL();
-	void			PaintGL();
-	void			UpdateLight(uint32_t x, uint32_t y, uint32_t z);
+	void					InitializeGL();
+	void					PaintGL();
+	void					UpdateLight(uint32_t x, uint32_t y, uint32_t z);
 
-	Camera&					GetCamera()			{ return m_camera;		}
-	dbb::CameraRay&			GetCameraRay()		{ return camRay;		}
-	shObject&				GetFocusedObject()	{ return m_focused;		}
-	std::vector<shObject>&  GetObjects()		{ return m_Objects;		}
-	std::vector<GUI>&		GetGuis()			{ return guis;			}
+	virtual bool			OnMouseMove(uint32_t x, uint32_t y)				override;
+	virtual bool			OnKeyPress(uint32_t asci)						override;
+	virtual bool			OnMousePress(uint32_t x, uint32_t y, bool left) override;
+	virtual bool			OnMouseRelease()								override;
+
 	uint32_t				Width()				{ return width;			}
 	uint32_t				Height()			{ return height;		}
-	float					WaterHeight()		{ return waterHeight;	}
 
 private:
+	eInputController*					inputController;
 	Camera								m_camera;
 	dbb::CameraRay						camRay;
 	
@@ -53,12 +53,20 @@ private:
 	eRenderManager						renderManager;
 
 	float								waterHeight = 2.0f;
-	bool								mts			= true;
 	uint32_t							width		= 1200;
 	uint32_t							height		= 600;
-	Texture								text;
-	bool								mousepress = false; //to draw framed objects
-	//GLenum								drawBufs[1];
+	float								nearPlane   = 0.1f;
+	float								farPlane    = 20.0f;
+	
+	bool								mts			= true;
+	bool								mousepress	= false; //to draw framed objects
+	
+	std::string							modelFolderPath;
+	std::string							assetsFolderPath;
+	std::string							shadersFolderPath;
+	
+	mat4								viewToProjectionMatrix;
+	mat4								scale_bias_matrix;
 
 protected:
 	void								InitializeBuffers();

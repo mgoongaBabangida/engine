@@ -2,6 +2,7 @@
 
 #include "colorFBO.h"
 #include "ShadowMapFbo.h"
+#include "GFBO.h"
 
 enum class eBuffer
 {
@@ -14,6 +15,9 @@ enum class eBuffer
 	BUFFER_REFRACTION,
 	BUFFER_SCREEN,
 	BUFFER_MTS,
+	BUFFER_DEFFERED,
+	BUFFER_DEFFERED1,
+	BUFFER_DEFFERED2,
 };
 
 class eGlBufferContext
@@ -27,6 +31,7 @@ public:
 	void EnableReadingBuffer(eBuffer, GLenum slot);
 	Texture GetTexture(eBuffer);
 	void ResolveMtsToScreen() { mtsFBO.ResolveToFBO(&screenFBO); }
+	void BlitDepthFromTo(eBuffer, eBuffer);
 	static eGlBufferContext& GetInstance() 
 	{
 		static eGlBufferContext  instance;
@@ -42,4 +47,5 @@ private:
 	eColorFBO		brightFilterFBO;
 	eColorFBO		gausian1FBO;
 	eColorFBO		gausian2FBO;
+	eGFBO			gFBO;
 };

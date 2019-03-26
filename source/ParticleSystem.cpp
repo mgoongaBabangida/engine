@@ -18,9 +18,8 @@ ParticleSystem::ParticleSystem(float	 _pps,
 , m_gravityComplient(_gravityComplient)
 , m_lifeLength(_lifeLength)
 , systemCenter(_systemCenter)
+, sound(_sound)
 {
-	sound.reset(_sound);
-
 	m_particles.reserve(MAX_PARTICLES);
 
 	clock.start();
@@ -56,8 +55,8 @@ void ParticleSystem::emitParticles()
 	glm::vec3 dir(0.0);
 	float theta, phi;
 	float angle = ((float)(1 + rand() % 100)) / 100;
-	theta		= glm::mix(0.0f, str::PI / 6.0f, angle);
-	phi			= glm::mix(0.0f, str::PI * 2, angle);
+	theta		= glm::mix(0.0f, PI / 6.0f, angle);
+	phi			= glm::mix(0.0f, PI * 2, angle);
 	dir.x = (sinf(theta)*cosf(phi)) / 50;// (30 + (1 + rand() % 20));
 	dir.y = (cosf(theta)) / 50;// (30 + (1 + rand() % 20));
 	dir.z = (sinf(theta) * sinf(phi)) / 50;// (30 + (1 + rand() % 20));

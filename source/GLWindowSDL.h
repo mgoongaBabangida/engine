@@ -16,8 +16,8 @@ public:
 
 protected:
 	std::unique_ptr<dbb::Timer>		dTimer;
-	eMainContext					mainContext;
 	eInputController				inputController;
+	eMainContext					mainContext;
 
 	SDL_Window*						window  = nullptr;
 

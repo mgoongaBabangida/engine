@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "RenderManager.h"
 
-void eRenderManager::Initialize(ModelManager& modelManager, TextureManager& texManager)
+void eRenderManager::Initialize(ModelManager& modelManager, TextureManager& texManager, const string& _folderPath)
 {
+	folderPath = _folderPath;
 	//Water Renderer adjust
 	m_waterRender.reset(new eWaterRender(modelManager.clonePrimitive("brick_square"),
 										texManager.find("Twaves0_n"),
@@ -40,6 +41,6 @@ void eRenderManager::Initialize(ModelManager& modelManager, TextureManager& texM
 	// Particle Renderer
 	m_particleRender.reset(new eParticleRender(modelManager.findMesh("square"),
 											   texManager.find("Tatlas2"),
-											   "ParticleVertexShader.glsl",
-											   "ParticleFragmentShader.glsl"));
+												folderPath + "ParticleVertexShader.glsl",
+												folderPath + "ParticleFragmentShader.glsl"));
 }
