@@ -129,14 +129,14 @@ void eRigidBody::Move(std::vector<std::shared_ptr<eObject>> objects)
 	}
 }
 
-void eRigidBody::Turn(glm::vec3 direction, std::vector<std::shared_ptr<eObject>> objects)
+void eRigidBody::Turn(glm::vec3 direction, std::vector<std::shared_ptr<eObject>> objects) // $todo include speed
 {
 	glm::vec3 forward = glm::mat3(object->getTransform()->getModelMatrix()) * object->getTransform()->getForward();
-	float angle		  = glm::dot(direction, forward);
-	glm::vec3 asix	  = glm::cross(direction, forward);
+	float angle		  = glm::dot(forward, direction);
+	glm::vec3 asix	  = glm::cross(forward, direction);
 	glm::quat rotation;
-	angle >= 0 ? rotation = glm::toQuat(glm::rotate(glm::mat4(), glm::acos(angle), -asix))
-			   : rotation = glm::toQuat(glm::rotate(glm::mat4(), 2.0f * PI - (glm::acos(angle)), asix));
+	angle >= 0 ? rotation = glm::toQuat(glm::rotate(glm::mat4(), glm::acos(angle), asix))
+			   : rotation = glm::toQuat(glm::rotate(glm::mat4(), 2.0f * PI - (glm::acos(angle)), -asix));
 	object->getTransform()->setRotation(rotation * object->getTransform()->getRotation());
 	for (auto& obj : objects)
 	{
@@ -145,8 +145,8 @@ void eRigidBody::Turn(glm::vec3 direction, std::vector<std::shared_ptr<eObject>>
 								|| CollidesWith(obj.get(), UP) 
 								|| CollidesWith(obj.get(), DOWN)) )
 		{
-			angle >= 0 ? rotation = glm::toQuat(glm::rotate(glm::mat4(), -glm::acos(angle), -asix))
-					   : rotation = glm::toQuat(glm::rotate(glm::mat4(), -(2.0f * PI - (glm::acos(angle))), asix));
+			angle >= 0 ? rotation = glm::toQuat(glm::rotate(glm::mat4(), -glm::acos(angle), asix))
+					   : rotation = glm::toQuat(glm::rotate(glm::mat4(), -(2.0f * PI - (glm::acos(angle))), -asix));
 			object->getTransform()->setRotation(rotation * object->getTransform()->getRotation());
 			ReactCollision(collision);
 			break;

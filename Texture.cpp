@@ -9,9 +9,9 @@ bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenu
 {
 	path		= _path;
 	uint32_t ilId;
-	mChannels = eTextureImplSDL::LoadTexture(path, ilId, mTextureWidth, mTextureHeight);
+	mChannels = eTextureImplDevIl::LoadTexture(path, ilId, mTextureWidth, mTextureHeight);
 	uint8_t* pixmap = nullptr;
-	eTextureImplSDL::AssignPixels(pixmap, mTextureWidth, mTextureHeight);
+	eTextureImplDevIl::AssignPixels(pixmap, mTextureWidth, mTextureHeight);
 
 	// Load textures
 	glGenTextures(1, &id);
@@ -30,7 +30,7 @@ bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenu
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	eTextureImplSDL::DeleteImage(ilId);
+	eTextureImplDevIl::DeleteImage(ilId);
 	return true;
 }
 
