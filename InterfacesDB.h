@@ -1,7 +1,7 @@
 #ifndef  INTERFACESDB_H
 #define  INTERFACESDB_H
 
-#include <glew-2.0.0\include\GL\glew.h>
+#include <glew-2.1.0\include\GL\glew.h>
 
 #include <memory>
 #include <string>

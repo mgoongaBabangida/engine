@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glew-2.0.0\include\GL\glew.h>
+#include <glew-2.1.0\include\GL\glew.h>
 #include <string>
 
 struct Shader
@@ -9,7 +9,7 @@ struct Shader
 	GLuint vertexShaderID;
 	GLuint fragmentShaderID;
 	GLuint geometryShaderID;
-	Shader();
+	Shader() = default;
 	void installShaders(const char* VertexShaderName, const char* FragmentShaderName);
 	void installShaders(const char * VertexShaderName, const char * FragmentShaderName, const char * GeometryShaderName);
 	bool checkShaderStatus(GLint shaderID);

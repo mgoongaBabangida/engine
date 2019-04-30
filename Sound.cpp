@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Sound.h"
 #include <fstream>
 #include <cstdlib>

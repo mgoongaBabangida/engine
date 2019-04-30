@@ -1,30 +1,32 @@
+#include "stdafx.h"
 #include "MainContext.h"
+#include "ImGuiContext.h"
 #include "GlBufferContext.h"
-#include "ParticleSystem.h"
-#include "ShootingParticleSystem.h"
+
 #include "ShipScript.h"
 #include "Sound.h"
-#include "InterfacesDB.h"
 #include "Texture.h"
 
-#include <iostream>
+#include "ParticleSystem.h"
+#include "ShootingParticleSystem.h"
 
 using glm::vec3;
 using glm::vec4;
 using glm::mat4;
 
-eMainContext::eMainContext(eInputController* _input, 
+eMainContext::eMainContext(eInputController* _input,
+						   IWindowImGui*	 _guiWnd,
 						   const std::string& _modelsPath,
 						   const std::string& _assetsPath, 
 						   const std::string& _shadersPath)
-:inputController(_input), modelFolderPath(_modelsPath), assetsFolderPath(_assetsPath), shadersFolderPath(_shadersPath){}
-
-void eMainContext::UpdateLight(uint32_t x, uint32_t y, uint32_t z)
+:inputController(_input)
+, modelFolderPath(_modelsPath)
+, assetsFolderPath(_assetsPath)
+, shadersFolderPath(_shadersPath)
 {
-	lightObject->getTransform()->setTranslation(glm::vec3(x , y, z));
-	m_light.light_vector.x = (float)x; 
-	m_light.light_vector.y = (float)y; 
-	m_light.light_vector.z = (float)z;
+	_guiWnd->Add(SLIDER_FLOAT, "Ydir", m_light.light_vector.y);
+	_guiWnd->Add(SLIDER_FLOAT, "Zdir", m_light.light_vector.z);
+	_guiWnd->Add(SLIDER_FLOAT, "Xdir", m_light.light_vector.x);
 }
 
 bool eMainContext::OnMouseMove(uint32_t x, uint32_t y)
@@ -128,7 +130,7 @@ bool eMainContext::OnMousePress(uint32_t x, uint32_t y, bool left)
 	}
 	if(m_focused && m_focused->getScript())
 	{
-		m_focused->getScript()->OnMousePress(x,y,left);
+		m_focused->getScript()->OnMousePress(x, y, left);
 	}
 	return true;
 #ifdef DEBUG_HANDLERS
@@ -140,7 +142,7 @@ bool eMainContext::OnMousePress(uint32_t x, uint32_t y, bool left)
 		float angle = glm::dot(glm::normalize(target_dir), glm::normalize(direction));
 		std::cout << "in press" << std::endl;
 		std::cout << "dot= " << angle << "radians= " << glm::acos(angle) << " degrees= " << glm::degrees(glm::acos(angle)) << std::endl;
-		glm::quat rot = glm::toQuat(glm::rotate(glm::mat4(), glm::acos(angle), glm::vec3(0, 1, 0)));
+		glm::quat rot = glm::toQuat(glm::rotate(UNIT_MATRIX, glm::acos(angle), glm::vec3(0, 1, 0)));
 
 		glm::vec3 ASIX = glm::normalize(glm::cross(target_dir, direction));
 		std::cout << "Asix=" << ASIX.x << ASIX.y << ASIX.z << std::endl;
@@ -163,6 +165,9 @@ void eMainContext::InitializeGL()
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_LINE_SMOOTH);
 
+	/*glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
+
 	InitializeBuffers();
 
 	//initialize sound
@@ -173,14 +178,13 @@ void eMainContext::InitializeGL()
 	modelManager.initializePrimitives();
 
 	//Light init!
-	m_light.ambient = vec3(0.1f, 0.1f, 0.1f);
-	m_light.diffuse = vec3(0.75f, 0.75f, 0.75f);
-	m_light.specular = vec3(0.5f, 0.5f, 0.5f);
-	m_light.light_vector = vec4(1.0f, 2.0f, 1.0f, 1.0f);
+	m_light.ambient		 = vec3(0.1f, 0.1f, 0.1f);
+	m_light.diffuse		 = vec3(0.75f, 0.75f, 0.75f);
+	m_light.specular	 = vec3(0.5f, 0.5f, 0.5f);
+	m_light.light_vector = vec4(1.0f, 3.0f, 1.0f, 1.0f);
 
 	texManager.loadAllTextures();
 	//m_Textures.find("Tbricks0_d")->second.saveToFile("MyTexture");  Saving texture debug
-	GLuint t = (*(texManager.find("Tpink"))).id;
 
 	InitializeModels();
 
@@ -208,11 +212,16 @@ void eMainContext::InitializeGL()
 	inputController->AddObserver(&camRay, WEAK);
 
 	#define GLM_FORCE_RADIANS
+
 	viewToProjectionMatrix = glm::perspective(glm::radians(60.0f), ((float)width) / height, nearPlane, farPlane);
 	scale_bias_matrix = mat4(vec4(0.5f, 0.0f, 0.0f, 0.0f),
-		vec4(0.0f, 0.5f, 0.0f, 0.0f),
-		vec4(0.0f, 0.0f, 0.5f, 0.0f),
-		vec4(0.5f, 0.5f, 0.5f, 1.0f));
+							vec4(0.0f, 0.5f, 0.0f, 0.0f),
+							vec4(0.0f, 0.0f, 0.5f, 0.0f),
+							vec4(0.5f, 0.5f, 0.5f, 1.0f));
+
+	//test
+	shader.installShaders("D:/projects/OpenGlSdlProject/OpenGlSdlProject/shaders/VertexShaderCodeTest.glsl",
+						  "D:/projects/OpenGlSdlProject/OpenGlSdlProject/shaders/FragmentShaderCodeTest.glsl");
 }
 
 void eMainContext::InitializeBuffers()
@@ -273,9 +282,9 @@ void eMainContext::InitializeModels()
 	//modelManager.add("boat", (GLchar*)std::string(ModelFolderPath + "Medieval Boat/Medieval Boat.obj").c_str());
 	//modelManager.add("spider", (GLchar*)std::string(ModelFolderPath + "ogldev-master/Content/spider.obj").c_str());
 	modelManager.add("wolf", (GLchar*)std::string(modelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
-	//(GLchar*)ModelFolderPath.append("Wolf Rigged and Game Ready/Wolf_One_obj.obj").c_str()
-	//modelManager.add("guard", (GLchar*)ModelFolderPath.append("ogldev-master/Content/guard/boblampclean.md5mesh").c_str());
-	modelManager.add("stairs", (GLchar*)std::string(modelFolderPath + "stairs.blend").c_str());
+	//(GLchar*)ModelFolderPath.append("Wolf Rigged and Game Ready/Wolf_One_obj.obj").c_str();
+	modelManager.add("guard", (GLchar*)std::string(modelFolderPath + "ogldev-master/Content/guard/boblampclean.md5mesh").c_str());
+	//modelManager.add("stairs", (GLchar*)std::string(modelFolderPath + "stairs.blend").c_str());
 
 	//TERRAIN
 	m_TerrainModel.swap(modelManager.cloneTerrain("simple"));
@@ -307,7 +316,7 @@ void eMainContext::InitializeModels()
 	nanosuit->getTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
 	m_Objects.push_back(nanosuit);
 
-	shObject terrain = shObject(new eObject((IModel*)m_TerrainModel.get(),"Terrain"));
+	shObject terrain = shObject(new eObject((IModel*)m_TerrainModel.get(), "Terrain"));
 	terrain->getTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
 	terrain->getTransform()->setTranslation(vec3(0.0f, 1.8f, 0.0f));
 	m_Objects.push_back(terrain);
@@ -323,10 +332,12 @@ void eMainContext::InitializeModels()
 	brickCube->getTransform()->setTranslation(vec3(0.5f, 3.0f, 3.5f));
 	m_Objects.push_back(brickCube);
 
-	shObject stairs = shObject(new eObject(modelManager.find("stairs").get()));
-	stairs->getTransform()->setTranslation(vec3(4.5f, 3.0f, 5.5f));
-	stairs->getTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);
-	m_Objects.push_back(stairs);
+	shObject guard = shObject(new eObject(modelManager.find("guard").get()));
+	guard->getTransform()->setTranslation(vec3(2.0f, 2.0f, 0.0f));
+	guard->getTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);
+	guard->getTransform()->setScale(glm::vec3(0.03f, 0.03f, 0.03f));
+	guard->setRigger(new Rigger((Model*)modelManager.find("guard").get()));
+	m_Objects.push_back(guard);
 }
 
 void eMainContext::InitializeRenders()
@@ -338,8 +349,8 @@ void eMainContext::InitializeRenders()
 
 	renderManager.ParticleRender()->AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f), texManager.find("Tatlas2"), sound.get()));
 
-	m_Objects[4]->setScript(new eShipScript(texManager.find("TSpanishFlag0_s"), 
-											renderManager.ParticleRender(), 
+	m_Objects[4]->setScript(new eShipScript(texManager.find("TSpanishFlag0_s"),
+											renderManager.ParticleRender(),
 											texManager.find("Tatlas2"),
 											sound.get(),
 											&camRay,
@@ -348,17 +359,17 @@ void eMainContext::InitializeRenders()
 
 void eMainContext::PaintGL()
 {
-	for(auto &object : m_Objects)
+	for (auto &object : m_Objects)
 	{
-		if(object->getScript())
+		if (object->getScript())
 			object->getScript()->Update(m_Objects);
 	}
 	Pipeline();
+	//Test();
 }
 
 void eMainContext::Pipeline()
 {
-	glViewport(0, 0, width, height); 
 	//1 Shadow Render Pass
 	glViewport(0, 0, width * 2, height * 2);
 	glEnable(GL_CULL_FACE);
@@ -418,23 +429,24 @@ void eMainContext::Pipeline()
 	renderManager.MainRender()->SetClipPlane(waterHeight);
 	renderManager.MainRender()->Render(viewToProjectionMatrix, m_camera, m_light, shadow_matrix, m_Objects);
 	renderManager.MainRender()->SetClipPlane(10);
-	
+
 	//glDisable(GL_CLIP_DISTANCE0);
 
-	//sky noise
-	/* glDisable(GL_CULL_FACE);
-	glEnable(GL_BLEND);
-	m_skynoiseRender->render(viewToProjectionMatrix, m_camera);
-	glDisable(GL_BLEND);
-	glEnable(GL_CULL_FACE);*/
-
-	//4. Rendering to main FBO with stencil
 	mts ? eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS)
 		: eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
+	
+	//sky noise
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	renderManager.SkyNoiseRender()->Render(viewToProjectionMatrix, m_camera);
+	glDisable(GL_BLEND);
+	glEnable(GL_CULL_FACE);
+
+	//4. Rendering to main FBO with stencil
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 	glStencilFunc(GL_ALWAYS, 1, 0xFF);
 	glStencilMask(0xFF);
-	if(m_focused)
+	if (m_focused)
 	{
 		renderManager.MainRender()->Render(viewToProjectionMatrix, m_camera, m_light, shadow_matrix, std::vector<shObject>{m_focused });
 	}
@@ -445,7 +457,7 @@ void eMainContext::Pipeline()
 	glEnable(GL_STENCIL_TEST);
 
 	//5. Rendering Stencil Outlineing
-	if (m_focused != nullptr)
+	if(m_focused != nullptr)
 	{
 		renderManager.OutlineRender()->Render(viewToProjectionMatrix, m_camera, m_light, shadow_matrix, std::vector<shObject> {m_focused});
 	}
@@ -472,7 +484,10 @@ void eMainContext::Pipeline()
 
 	//2  Draw skybox firs
 	glDepthFunc(GL_LEQUAL);
-	renderManager.SkyBoxRender()->Render(viewToProjectionMatrix, m_camera);
+	if(skybox)
+	{
+		renderManager.SkyBoxRender()->Render(viewToProjectionMatrix, m_camera);
+	}
 
 	//7  Particles
 	mts ? eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS)
@@ -488,7 +503,7 @@ void eMainContext::Pipeline()
 	glDepthMask(GL_TRUE);
 
 	//**************************MTS CODE*************************
-	if(mts)
+	if (mts)
 	{
 		eGlBufferContext::GetInstance().ResolveMtsToScreen();
 		renderManager.BrightFilterRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));
@@ -512,8 +527,10 @@ void eMainContext::Pipeline()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
+	
 	//if(mousepress)
 	//{m_screenRender->renderFrame();}
+
 	guis[0].SetTexture(&eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFLECTION));
 	glViewport(guis[0].getViewPort().x, guis[0].getViewPort().y, guis[0].getViewPort().z, guis[0].getViewPort().w);
 	renderManager.ScreenRender()->SetTexture(*(guis[0].GetTexture())); //copy texture
@@ -524,3 +541,97 @@ void eMainContext::Pipeline()
 	renderManager.ScreenRender()->SetTexture(*(guis[1].GetTexture()));
 	renderManager.ScreenRender()->Render(viewToProjectionMatrix, m_camera);
 }
+
+void eMainContext::Test()
+{
+	glUseProgram(shader.ID);
+
+	unsigned int VBO, VAO;
+
+	float vertices[] = {
+		// first triangle
+		-0.9f, -0.5f, 0.0f,  // left 
+		-0.0f, -0.5f, 0.0f,  // right
+		-0.45f, debug, 0.0f,  // top 
+							 // second triangle
+							 0.0f, -0.5f, 0.0f,  // left
+							 0.9f, -0.5f, 0.0f,  // right
+							 0.45f, 0.5f, 0.0f   // top 
+	};
+
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	// bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+	glBindVertexArray(VAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+	// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
+	// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
+	glBindVertexArray(0);
+
+	glViewport(0, 0, width, height);
+
+	GLuint fullTransformationUniformLocation = glGetUniformLocation(shader.ID, "modelToProjectionMatrix");
+	//GLuint modelToWorldMatrixUniformLocation = glGetUniformLocation(shader.ID, "modelToWorldMatrix");
+	//GLuint shadowMatrixUniformLocation		 = glGetUniformLocation(shader.ID, "shadowMatrix"); //shadow
+	//GLuint eyePositionWorldUniformLocation	 = glGetUniformLocation(shader.ID, "eyePositionWorld");
+
+	//***************************************************************
+	// Clear the colorbuffer and render
+	//***************************************************************
+	//glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	//glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	////////////////////////////////////////////////////////////////////
+	glm::mat4 worldToViewMatrix = m_camera.getWorldToViewMatrix();
+	glm::mat4 worldToProjectionMatrix = viewToProjectionMatrix * worldToViewMatrix;
+	mat4 shadow_matrix = scale_bias_matrix * viewToProjectionMatrix * worldToViewMatrix;
+	//glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE, &shadow_matrix[0][0]);  //shadow
+
+	//glUniform3fv(eyePositionWorldUniformLocation, 1, &m_camera.getPosition()[0]);
+	
+	for (auto &object : m_Objects)
+	{
+		glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * object->getTransform()->getModelMatrix();
+		glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
+		//glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &object->getTransform()->getModelMatrix()[0][0]);
+		//*********************
+		std::vector<glm::mat4> matrices(100);
+		for(auto&m : matrices)
+		{
+			m = UNIT_MATRIX;
+		}
+		if(object->getRigger() != nullptr)
+		{
+			matrices = object->getRigger()->GetMatrices();
+		}
+		int loc = glGetUniformLocation(shader.ID, "gBones");
+		glUniformMatrix4fv(loc, 100, GL_FALSE, &matrices[0][0][0]);
+		//*********************
+		object->getModel()->Draw();
+	}
+
+	/*glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * m_Objects[0]->getTransform()->getModelMatrix();
+	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
+	m_Objects[6]->getModel()->Draw();*/
+
+	//***************************************************************
+	// Draw our first triangle
+	//***************************************************************
+	/*glBindVertexArray(VAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);*/
+
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+}
+

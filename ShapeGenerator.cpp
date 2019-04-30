@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "ShapeGenerator.h"
 #include <glm\glm\glm.hpp>
 #include <glm\glm\gtc\matrix_transform.hpp>
@@ -6,7 +7,8 @@
 #include <assert.h>
 #include "TeapotData.h"
 #include <iostream>
-#define PI 3.14159265359
+#include "Structures.h"
+
 using glm::vec3;
 using glm::mat4;
 using glm::mat3;
@@ -689,8 +691,8 @@ ShapeData ShapeGenerator::makeTorus(uint tesselation)
 		// Generate a circle on the xy plane, then
 		// translate then rotate it into position
 		glm::mat4 transform =
-			glm::rotate(glm::mat4(), round1 * sliceAngle, glm::vec3(0.0f, 1.0f, 0.0f)) *
-			glm::translate(glm::mat4(), glm::vec3(torusRadius, 0.0f, 0.0f));
+			glm::rotate(UNIT_MATRIX, round1 * sliceAngle, glm::vec3(0.0f, 1.0f, 0.0f)) *
+			glm::translate(UNIT_MATRIX, glm::vec3(torusRadius, 0.0f, 0.0f));
 		glm::mat3 normalTransform = (glm::mat3)transform;
 		for (uint round2 = 0; round2 < tesselation; round2++)
 		{

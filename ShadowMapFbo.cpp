@@ -1,4 +1,4 @@
-
+#include "stdafx.h"
 #include "ShadowMapFbo.h"
 #include <stdio.h>
 #include <iostream>

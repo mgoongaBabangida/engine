@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "MainRender.h"
 
 eMainRender::eMainRender(const std::string& vS, const std::string& fS)
@@ -59,6 +60,10 @@ void eMainRender::Render(const glm::mat4&		projectionMatrix,
 		glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &object->getTransform()->getModelMatrix()[0][0]);
 		//*********************
 		std::vector<glm::mat4> matrices(100);
+		for(auto& m : matrices)
+		{
+			m = UNIT_MATRIX;
+		}
 		if(object->getRigger() != nullptr)
 		{
 			matrices = object->getRigger()->GetMatrices();

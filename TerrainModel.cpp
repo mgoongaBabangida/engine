@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "TerrainModel.h"
 #include "Texture.h"
 #include <algorithm>

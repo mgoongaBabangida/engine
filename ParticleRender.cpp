@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "ParticleRender.h"
 #include "ParticleSystem.h"
 #include "Object.h"

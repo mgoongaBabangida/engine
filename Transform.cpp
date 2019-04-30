@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Transform.h"
 
 #include <glm\glm\glm.hpp>
@@ -109,11 +110,11 @@ bool Transform::turnTo(glm::vec3 dest, float speed) //$todo speed is not used
 
 	if(angle >= 0) 
 	{
-		rot = glm::toQuat(glm::rotate(glm::mat4(), glm::acos(angle), ASIX));
+		rot = glm::toQuat(glm::rotate(UNIT_MATRIX, glm::acos(angle), ASIX));
 	}
 	else if(angle < 0) 
 	{
-		rot = glm::toQuat(glm::rotate(glm::mat4(), 2 * PI - (glm::acos(angle)), -ASIX));
+		rot = glm::toQuat(glm::rotate(UNIT_MATRIX, 2 * PI - (glm::acos(angle)), -ASIX));
 	}
 	else 
 	{

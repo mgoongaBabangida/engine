@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "ShadowRender.h"
 
 eShadowRender::eShadowRender(const std::string& vS, const std::string& fS)
@@ -25,7 +26,6 @@ void eShadowRender::Render(const glm::mat4&			projectionMatrix,
 	
 	glUniformMatrix4fv(MVPUniformLocation, 1, GL_FALSE, &MVP[0][0]);
 
-
 	//RENDER DEPTH
 	for (auto &object : objects) 
 	{
@@ -33,6 +33,10 @@ void eShadowRender::Render(const glm::mat4&			projectionMatrix,
 		glUniformMatrix4fv(MVPUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 		//*********************
 		std::vector<glm::mat4> matrices(100);
+		for(auto&m : matrices)
+		{
+			m = UNIT_MATRIX;
+		}
 		if (object->getRigger() != nullptr)
 		{
 			matrices = object->getRigger()->GetMatrices();

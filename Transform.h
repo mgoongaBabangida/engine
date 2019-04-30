@@ -1,28 +1,28 @@
 #pragma once
 
-#include <glm\glm/gtx/euler_angles.hpp>
-#include <glm\glm/gtc/quaternion.hpp>
-#include <glm\glm/gtx/quaternion.hpp>
-#include <glm\glm/gtx/norm.hpp>
+#include <glm\glm\gtx\euler_angles.hpp>
+#include <glm\glm\gtc\quaternion.hpp>
+#include <glm\glm\gtx\quaternion.hpp>
+#include <glm\glm\gtx\norm.hpp>
 #include <glm\glm\glm.hpp>
 #include <glm\glm\gtc\matrix_transform.hpp>
 #include <glm\glm\gtx\transform.hpp>
-#include <glm\glm/gtc/constants.hpp>
+#include <glm\glm\gtc\constants.hpp>
 
 class Transform
 {
 protected:
 	glm::vec3 m_translation;
 	glm::vec3 m_scale;
-	glm::quat q_rotation;
+	glm::quat q_rotation	 = glm::quat(0.0f, 0.0f, 0.0f, 1.0f);
 	glm::vec3 forward		 = glm::vec3(0.f, 0.0f, 1.0f); 
 	glm::vec3 Up			 = glm::vec3(0.0f, 1.0f, 0.0f);
-	glm::mat4 totalTransform = glm::mat4();
+	glm::mat4 totalTransform;
 
 	void				UpdateModelMatrix();
 
 public:
-	Transform() { m_scale = glm::vec3(1.0f, 1.0f, 1.0f);  UpdateModelMatrix();}
+	Transform(): m_translation(0.0f, 0.0f, 0.0f) , m_scale(1.0f, 1.0f, 1.0f), q_rotation(0.0f, 0.0f, 1.0f, 0.0f) {UpdateModelMatrix();}
 	
 	glm::mat4			getModelMatrix() const;
 
@@ -41,8 +41,8 @@ public:
 	glm::vec3			getForward()		const { return forward; }
 	glm::vec3			getUp()				const { return Up; }
 	
-	void				incrementScale() { m_scale.x += 0.01f, m_scale.y += 0.01f, m_scale.z += 0.01f;  UpdateModelMatrix();}
-	void				decrementScale() { m_scale.x -= 0.01f, m_scale.y -= 0.01f, m_scale.z -= 0.01f;  UpdateModelMatrix();}
+	void				incrementScale() { m_scale.x += (0.01f *m_scale.x), m_scale.y += (0.01f *m_scale.y), m_scale.z += (0.01f *m_scale.z);  UpdateModelMatrix();}
+	void				decrementScale() { m_scale.x -= (0.01f *m_scale.x), m_scale.y -= (0.01f *m_scale.y), m_scale.z -= (0.01f *m_scale.z);  UpdateModelMatrix();}
 	void				billboard(glm::vec3 direction);
 	bool				turnTo(glm::vec3 dest, float speed);	
 };

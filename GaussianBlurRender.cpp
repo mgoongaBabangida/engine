@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "GaussianBlurRender.h"
 #include "GlBufferContext.h"
 

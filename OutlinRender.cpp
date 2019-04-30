@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "OutlinRender.h"
 
 eOutlineRender::eOutlineRender(const std::string& vS, const std::string& fS)
@@ -28,6 +29,10 @@ void eOutlineRender::Render(const glm::mat4 & ProjectionMatrix, const Camera & c
 		glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &object->getTransform()->getModelMatrix()[0][0]);
 		//*********************
 		std::vector<glm::mat4> matrices(100);
+		for (auto& m : matrices)
+		{
+			m = UNIT_MATRIX;
+		}
 		if (object->getRigger() != nullptr)
 		{
 			matrices = object->getRigger()->GetMatrices();

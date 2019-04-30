@@ -1,7 +1,7 @@
 #pragma once
 
-#include <al.h>
-#include <alc.h>
+#include <AL\include\al.h>
+#include <AL\include\alc.h>
 #include <map>
 #include <string>
 

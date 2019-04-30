@@ -37,9 +37,13 @@ const float PI = 3.14159265359f;
 
 static const glm::vec3 NONE{ glm::vec3(-100.0f, -100.0f, -100.0f) };
 
-const glm::vec3 XAXIS = glm::vec3(1.0f, 0.0f, 0.0f);
-const glm::vec3 YAXIS = glm::vec3(0.0f, 1.0f, 0.0f);
-const glm::vec3 ZAXIS = glm::vec3(0.0f, 0.0f, 1.0f);
+const glm::vec3 XAXIS		= glm::vec3(1.0f, 0.0f, 0.0f);
+const glm::vec3 YAXIS		= glm::vec3(0.0f, 1.0f, 0.0f);
+const glm::vec3 ZAXIS		= glm::vec3(0.0f, 0.0f, 1.0f);
+const glm::mat4 UNIT_MATRIX = glm::mat4(1.0f, 0.0f, 0.0f, 0.0f, 
+										0.0f, 1.0f, 0.0f, 0.0f, 
+										0.0f, 0.0f, 1.0f, 0.0f, 
+										0.0f, 0.0f, 0.0f, 1.0f);
 
 struct MyVertex
 {
@@ -49,7 +53,7 @@ struct MyVertex
 	glm::vec2	TexCoords;	//3
 	glm::vec3	tangent;	//4
 	glm::vec3	bitangent;	//5
-	glm::ivec4	boneIDs;	//6
+	glm::ivec4	boneIDs{ 0,	   0	,0	  ,0 };		//6
 	glm::vec4	weights{ 0.0f, 0.0f ,0.0f ,1.0f };	//7
 };
 
@@ -60,8 +64,8 @@ struct AssimpVertex
 	glm::vec2	TexCoords;	//2
 	glm::vec3	tangent;	//3
 	glm::vec3	bitangent;	//4
-	glm::ivec4	boneIDs;	//5
-	glm::vec4	weights;	//6
+	glm::ivec4	boneIDs;	//5 !?
+	glm::vec4	weights{ 0.0f, 0.0f ,0.0f ,1.0f };	//6	!?
 };
 
 struct eCollision

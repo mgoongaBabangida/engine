@@ -1,21 +1,29 @@
+#include "stdafx.h"
 #include "CameraRay.h"
 #include <glm\glm\glm.hpp>
 #include <glm\glm\gtc\matrix_transform.hpp>
 #include <glm\glm\gtx\transform.hpp>
 #include <glm\glm/gtc/constants.hpp>
 #include <map>
-#include <iostream>
 
-dbb::CameraRay::CameraRay(float w, float h, float n, float f,float pers_angle ):Width(w), Height(h), near_plane(n), far_plane(f),
-																				perspective_angle_degrees(pers_angle)
+dbb::CameraRay::CameraRay(float w, float h, float n, float f,float pers_angle )
+:Width(w), 
+Height(h), 
+near_plane(n), 
+far_plane(f),
+perspective_angle_degrees(pers_angle)
 {}
 
 void dbb::CameraRay::init(float Width, float Height, float near, float far, float pers_angle )
 {
-	Width = Width; Height = Height; near_plane = near; far_plane = far; perspective_angle_degrees = pers_angle;
+	Width						= Width; 
+	Height						= Height; 
+	near_plane					= near; 
+	far_plane					= far; 
+	perspective_angle_degrees	= pers_angle;
 }
 
-void dbb::CameraRay::Update(Camera& camera, float click_x, float click_y,float w,float h)
+void dbb::CameraRay::Update(Camera& camera, float click_x, float click_y, float w, float h)
 {
 	//glm::quat rot = Transform::RotationBetweenVectors(glm::vec3(0.0f, 0.0f, 1.0f), camera.getDirection()); //?
 	//this->transform.setRotation(rot);
@@ -52,9 +60,6 @@ void dbb::CameraRay::Update(Camera& camera, float click_x, float click_y,float w
 
 shObject dbb::CameraRay::calculateIntersaction(std::vector<shObject> objects)
 {
-#ifdef DEBUG_CAMERA_RAY
-	std::cout << "----Try-----------" << std::endl;
-#endif // DEBUG
 	std::multimap<shObject, glm::vec3> intersections;
 	int debug_counter = 0;
 	for (auto &obj : objects) 
@@ -68,39 +73,27 @@ shObject dbb::CameraRay::calculateIntersaction(std::vector<shObject> objects)
 		{
 			dbb::plane plane(triangle);
 			glm::vec3 inters = dbb::intersection(plane, line);
-			if (dbb::IsInside(triangle, inters) /*&& glm::dot(line.p, glm::vec3(inters - line.M))> 0.0f*/ ) //check if behind 
+			if(dbb::IsInside(triangle, inters) /*&& glm::dot(line.p, glm::vec3(inters - line.M))> 0.0f*/ ) //check if behind 
 			{
 				intersections.insert(std::pair<shObject, glm::vec3>(obj, inters));
-#ifdef DEBUG_CAMERA_RAY
-				std::cout << "Object= " << debug_counter << std::endl;
-#endif
 			}
 		}
 		++debug_counter;
 	}
-	if (intersections.empty())
+	if(intersections.empty())
 	{
-#ifdef DEBUG_CAMERA_RAY
-		std::cout << "No intersactions found!" << std::endl;
-#endif
 		return nullptr;
 	}
 	else 
 	{
-#ifdef DEBUG_CAMERA_RAY
-		std::cout << "Intersactions found!!!" << std::endl;
-#endif
 		float length = 1000.0f;  //should be in line with far plane!!!!!!!
 		shObject obj = nullptr;
 		for (auto &inter : intersections)
 		{
-			if (glm::length(m_line.M - inter.second) < length) 
+			if(glm::length(m_line.M - inter.second) < length) 
 			{ 
 				length = glm::length( m_line.M - inter.second);
 				obj = inter.first;
-#ifdef DEBUG_CAMERA_RAY
-				std::cout << "length=" << length << std::endl;
-#endif
 			}
 		}
 		return obj;

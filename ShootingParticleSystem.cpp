@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "ShootingParticleSystem.h"
 #include <algorithm>
 #include "Texture.h"

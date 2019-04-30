@@ -1,6 +1,7 @@
+#include "stdafx.h"
 #include "ParticleSystem.h"
-#include <algorithm>
 #include "Structures.h"
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <random>

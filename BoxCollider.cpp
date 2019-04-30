@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "BoxCollider.h"
 #include "Structures.h"
 #include <iostream>
@@ -212,7 +213,11 @@ void BoxCollider::getForwardRayLengths(const Transform & trans, Side moveDirecti
 	}
 }
 
-bool BoxCollider::collidesWith(const Transform & trans1, const Transform & trans2, const BoxCollider & other, Side moveDirection, eCollision& collision)
+bool BoxCollider::collidesWith(const Transform & trans1, 
+							   const Transform & trans2, 
+							   const BoxCollider & other, 
+							   Side moveDirection, 
+							   eCollision& collision)
 {
 	std::vector<float> lengths;
 	std::vector<dbb::line> rays = getRays(trans1, moveDirection, lengths);

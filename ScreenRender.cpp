@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "ScreenRender.h"
 
 eScreenRender::eScreenRender(Texture tex, const std::string& vS, const std::string& fS)

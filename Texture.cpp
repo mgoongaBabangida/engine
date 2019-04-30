@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Texture.h"
 #include <glm\glm/gtc/noise.hpp>
 #include "TextureImplDevIl.h"

@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "WaterRender.h"
 #include "Object.h"
 #include "MyModel.h"

@@ -1,5 +1,6 @@
 #pragma once
-#include <glew-2.0.0\include\GL\glew.h>
+#include "stdafx.h"
+#include <glew-2.1.0\include\GL\glew.h>
 #include <glm\glm\glm.hpp>
 #include <string>
 #include <vector>

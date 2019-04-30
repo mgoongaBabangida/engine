@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include <glm\glm\glm.hpp>
 #include <glm\glm\gtc\matrix_transform.hpp>
 #include <glm\glm\gtx\transform.hpp>
@@ -58,7 +59,7 @@
 //		float angle = glm::dot(glm::normalize(target_dir), glm::normalize(direction));
 //		std::cout << "in press" << std::endl;
 //		std::cout << "dot= " << angle << "radians= " << glm::acos(angle) << " degrees= " << glm::degrees(glm::acos(angle)) << std::endl;
-//		glm::quat rot = glm::toQuat(glm::rotate(glm::mat4(), glm::acos(angle), glm::vec3(0,1,0)));
+//		glm::quat rot = glm::toQuat(glm::rotate(UNIT_MATRIX, glm::acos(angle), glm::vec3(0,1,0)));
 //
 //		glm::vec3 ASIX = glm::normalize(glm::cross(target_dir, direction));
 //		std::cout <<"Asix="<< ASIX.x << ASIX.y << ASIX.z << std::endl;

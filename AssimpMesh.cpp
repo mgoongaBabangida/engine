@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "AssimpMesh.h"
 #include <sstream>
 #include <iostream>

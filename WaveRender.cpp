@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "WaveRender.h"
 #include "TerrainModel.h"
 #include "Structures.h"
@@ -64,10 +65,9 @@ void eWaveRender::Render(const glm::mat4&	ProjectionMatrix,
 	glUniform4f(lightPosLoc, light.light_vector.x, light.light_vector.y, light.light_vector.z, light.light_vector.w);
 
 	glUniform1f(glGetUniformLocation(wave_shader.ID, "light.constant"), 1.0f); // transfer to light
-	glUniform1f(glGetUniformLocation(wave_shader.ID, "light.linear"), 0.09f);
+	glUniform1f(glGetUniformLocation(wave_shader.ID, "light.linear"),	0.09f);
 	glUniform1f(glGetUniformLocation(wave_shader.ID, "light.quadratic"), 0.032f);
 	//light end
-
 
 	glm::vec3 eyePosition = camera.getPosition();
 	glUniform3fv(eyePositionWorldUniformLocation, 1, &eyePosition[0]);
@@ -80,15 +80,16 @@ void eWaveRender::Render(const glm::mat4&	ProjectionMatrix,
 	float dur = (float)msc / 1000.0f;
 	time += dur;
 
-	glDisable(GL_CULL_FACE);
+	glDisable(GL_CULL_FACE); //todo transfer
 	glUniform1i(glGetUniformLocation(wave_shader.ID, "normalMapping"), GL_FALSE);
-	for (auto& flag : flags)
+	for(auto& flag : flags)
 	{
 		object->getTransform()->setTranslation(flag.position);
 		object->getTransform()->setScale(glm::vec3(0.1f, 0.1f, 0.1f));
 		object->getTransform()->billboard(-camera.getDirection());
+		
 		glm::quat cur = object->getTransform()->getRotation();
-		glm::quat plus = glm::toQuat(glm::rotate(mat4(),(float) PI / 2, glm::vec3(1, 0, 0)));
+		glm::quat plus = glm::toQuat(glm::rotate(UNIT_MATRIX, (float) PI / 2, XAXIS));
 		object->getTransform()->setRotation(cur * plus);
 
 		m_model->setDiffuse(flag.tex);
@@ -104,5 +105,5 @@ void eWaveRender::Render(const glm::mat4&	ProjectionMatrix,
 		object->getModel()->Draw();
 	}
 	glUniform1i(glGetUniformLocation(wave_shader.ID, "normalMapping"), GL_TRUE);
-	glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE); //todo transfer
 }

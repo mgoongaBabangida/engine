@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "HexRender.h"
 
 const float dist = 1.75f;

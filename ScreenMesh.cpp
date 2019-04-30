@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "ScreenMesh.h"
 
 eScreenMesh::eScreenMesh(Texture _textureOne, Texture _textureTwo): textureOne(_textureOne), textureTwo(_textureTwo)
