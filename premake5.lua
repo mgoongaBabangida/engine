@@ -10,6 +10,11 @@ workspace "OpenGLProject"
 
 outputdir = "%{cfg.buildcfg}"
 
+IncludeDir = {}
+IncludeDir["ImGui"] = "vendor/imgui/"
+
+include "vendor/imgui"
+
 project "OpenGLProject"
     kind "ConsoleApp"
 	toolset ("v140")
@@ -44,7 +49,8 @@ project "OpenGLProject"
         "vendor/IL/include/",
 		"vendor/SDL2/include/",
 		"vendor/SDL2_image/include/",
-		"vendor/spdlog/include/"
+		"vendor/spdlog/include/",
+		"%{IncludeDir.ImGui}",
     }
 
 	libdirs
@@ -68,7 +74,8 @@ project "OpenGLProject"
 		"DevIL.lib",
 		"ILU.lib",
 		"ILUT.lib",
-		"OpenAL32.lib"
+		"OpenAL32.lib",
+		"ImGui"
     }
 
     filter "system:windows"
@@ -96,5 +103,4 @@ project "OpenGLProject"
     filter "configurations:Dist"
         defines ""
         optimize "On"
-
-
+	

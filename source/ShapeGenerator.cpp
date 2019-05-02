@@ -3,6 +3,7 @@
 #include "Vertex.h"
 #include "ShapeData.h"
 #include "TeapotData.h"
+#include "Structures.h"
 
 #define PI 3.14159265359
 using glm::vec3;

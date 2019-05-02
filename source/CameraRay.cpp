@@ -9,13 +9,13 @@ far_plane(f),
 perspective_angle_degrees(pers_angle)
 {}
 
-void dbb::CameraRay::init(float Width, float Height, float near, float far, float pers_angle )
+void dbb::CameraRay::init(float _width, float _height, float _near, float _far, float _pers_angle)
 {
-	Width						= Width; 
-	Height						= Height; 
-	near_plane					= near; 
-	far_plane					= far; 
-	perspective_angle_degrees	= pers_angle;
+	Width						= _width;
+	Height						= _height;
+	near_plane					= _near;
+	far_plane					= _far;
+	perspective_angle_degrees	= _pers_angle;
 }
 
 void dbb::CameraRay::Update(Camera& camera, float click_x, float click_y, float w, float h)

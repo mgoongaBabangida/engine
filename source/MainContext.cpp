@@ -218,10 +218,6 @@ void eMainContext::InitializeGL()
 							vec4(0.0f, 0.5f, 0.0f, 0.0f),
 							vec4(0.0f, 0.0f, 0.5f, 0.0f),
 							vec4(0.5f, 0.5f, 0.5f, 1.0f));
-
-	//test
-	shader.installShaders("D:/projects/OpenGlSdlProject/OpenGlSdlProject/shaders/VertexShaderCodeTest.glsl",
-						  "D:/projects/OpenGlSdlProject/OpenGlSdlProject/shaders/FragmentShaderCodeTest.glsl");
 }
 
 void eMainContext::InitializeBuffers()
@@ -279,8 +275,8 @@ void eMainContext::InitializeModels()
 
 	//MODELS
 	modelManager.add("nanosuit", (GLchar*)std::string(modelFolderPath + "nanosuit/nanosuit.obj").c_str());
-	//modelManager.add("boat", (GLchar*)std::string(ModelFolderPath + "Medieval Boat/Medieval Boat.obj").c_str());
-	//modelManager.add("spider", (GLchar*)std::string(ModelFolderPath + "ogldev-master/Content/spider.obj").c_str());
+	modelManager.add("boat", (GLchar*)std::string(modelFolderPath + "Medieval Boat/Medieval Boat.obj").c_str());
+	modelManager.add("spider", (GLchar*)std::string(modelFolderPath + "ogldev-master/Content/spider.obj").c_str());
 	modelManager.add("wolf", (GLchar*)std::string(modelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
 	//(GLchar*)ModelFolderPath.append("Wolf Rigged and Game Ready/Wolf_One_obj.obj").c_str();
 	modelManager.add("guard", (GLchar*)std::string(modelFolderPath + "ogldev-master/Content/guard/boblampclean.md5mesh").c_str());

@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "ImGuiContext.h"
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_sdl.h"
-#include "imgui/imgui_impl_opengl3.h"
+#include "imgui.h"
+#include "examples/imgui_impl_sdl.h"
+#include "examples/imgui_impl_opengl3.h"
 
 eImGuiContext::eImGuiContext(SDL_GLContext* _context, SDL_Window* _window)
 	:context(_context), window(_window)

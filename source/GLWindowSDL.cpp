@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "GLWindowSDL.h"
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_sdl.h"
-#include "imgui/imgui_impl_opengl3.h"
+#include "imgui.h"
+#include "examples/imgui_impl_sdl.h"
+#include "examples/imgui_impl_opengl3.h"
 #include "ImGuiContext.h"
 
 SDL_GLContext					context;
@@ -14,7 +14,9 @@ SDL_GLContext					context;
 dbGLWindowSDL::dbGLWindowSDL()
 :inputController()
 , guiWnd(new eWindowImGui("Gui"))
-,mainContext(&inputController, guiWnd, "Resources/", "assets/", "shaders/")
+,mainContext(&inputController, guiWnd,	"c:/dev/engine/source/Resources/",
+										"c:/dev/engine/source/assets/",
+										"c:/dev/engine/source/shaders/")
 {}
 //======================================
 //dbGLWindowSDL::~dbGLWindowSDL
@@ -36,8 +38,8 @@ bool dbGLWindowSDL::InitializeGL()
 	
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -55,7 +57,13 @@ bool dbGLWindowSDL::InitializeGL()
 		std::cout << SDL_GetError() << std::endl;
 		return false;
 	}
+
 	context = SDL_GL_CreateContext(window);
+	if(!context)
+	{
+		cout << "SDL create context error: " << (const char*)SDL_GetError() << endl;
+		return false;
+	}
 
 	glewExperimental = GL_TRUE;
 
