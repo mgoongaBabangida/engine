@@ -1,33 +1,55 @@
 #include "stdafx.h"
 #include "GLWindowSDL.h"
-#include "SharedData.h"
+
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_sdl.h"
+#include "imgui/imgui_impl_opengl3.h"
+#include "ImGuiContext.h"
 
 SDL_GLContext					context;
 
+//***************************************
+//dbGLWindowSDL::~dbGLWindowSDL
+//---------------------------------------
 dbGLWindowSDL::dbGLWindowSDL()
-	:inputController()
-	,mainContext(&inputController, "c:/dev/engine/bin/Debug/x86_64/Resources/", "c:/dev/engine/assets/", "c:/dev/engine/shaders/")
+:inputController()
+, guiWnd(new eWindowImGui("Gui"))
+,mainContext(&inputController, guiWnd, "Resources/", "assets/", "shaders/")
 {}
-
+//======================================
+//dbGLWindowSDL::~dbGLWindowSDL
+//---------------------------------------
 dbGLWindowSDL::~dbGLWindowSDL()
 {
+	eImGuiContext::GetInstance(&context, window).CleanUp();
 	SDL_GL_DeleteContext(context);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
+	delete guiWnd;
 }
-////======================================
-////dbGLWindowSDL::initializeGL
-////---------------------------------------
+//======================================
+//dbGLWindowSDL::initializeGL
+//---------------------------------------
 bool dbGLWindowSDL::InitializeGL()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-	//SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
 
-	window	= SDL_CreateWindow("OpenGl", 0, 0, WIDTH, HEIGHT, SDL_WINDOW_OPENGL);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	
+	SDL_DisplayMode current;
+	SDL_GetCurrentDisplayMode(0, &current);
+	
+	window	= SDL_CreateWindow("OpenGl", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, 
+		SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+	SDL_GL_SetSwapInterval(1); // Enable vsync
+	
 	if(window == nullptr)
 	{
 		std::cout << SDL_GetError() << std::endl;
@@ -42,6 +64,8 @@ bool dbGLWindowSDL::InitializeGL()
 	{
 		return false;
 	}
+	eImGuiContext::GetInstance(&context, window).Init();
+
 	mainContext.InitializeGL();
 	SDL_GL_MakeCurrent(window, NULL);
 	dTimer.reset(new dbb::Timer([this]()->bool
@@ -97,13 +121,15 @@ void dbGLWindowSDL::paintGL()
 		SDL_GL_MakeCurrent(window, context);
 		flag = true;
 	}
+	
+	eImGuiContext::GetInstance(&context, window).NewFrame();
+
+	//eWindowImGuiDemo demo;
+	//demo.Render();
+	guiWnd->Render();
+
+	eImGuiContext::GetInstance(&context, window).PreRender();
 	mainContext.PaintGL();
+	eImGuiContext::GetInstance(&context, window).Render();
 	SDL_GL_SwapWindow(window);
-}
-//======================================
-//dbGLWindowSDL::updateSharedData
-//---------------------------------------
-void dbGLWindowSDL::updateSharedData()
-{
-	//mainContext.UpdateLight(m_sData->vec_data[0].x, m_sData->vec_data[0].y, m_sData->vec_data[0].z);
 }

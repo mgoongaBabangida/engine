@@ -24,8 +24,12 @@ void eRenderManager::Initialize(ModelManager& modelManager, TextureManager& texM
 	m_shadowRender.reset(new eShadowRender(folderPath + "VertexShades.glsl", folderPath + "FragmentShades.glsl"));
 	//eOutlineRender
 	m_outlineRender.reset(new eOutlineRender(folderPath + "VertexShaderCode.glsl", folderPath + "StencilFragmentShader.glsl"));
-
-	//m_skynoiseRender = new eSkyNoiseRender(&m_MyModels[5], texManager.find("Tperlin_n"));
+	
+	//eSkyNoiseRender
+	m_skynoiseRender.reset(new eSkyNoiseRender(modelManager.clonePrimitive("brick_square"),
+											   texManager.find("Tperlin_n"), 
+											   folderPath + "SkyNoiseVertexShader.glsl", 
+											   folderPath + "SkyNoiseFragmentShader.glsl"));
 
 	m_waverender.reset(new eWaveRender(modelManager.cloneTerrain("simple"),
 										texManager.find("TSpanishFlag0_s"),

@@ -20,6 +20,12 @@ public:
 	vector<Texture>		textures;
 	/*  Functions  */
 	MyMesh() {  }
+	virtual ~MyMesh() 
+	{
+		glDeleteVertexArrays(1, &VAO);
+		glDeleteBuffers(1, &VBO);
+		glDeleteBuffers(1, &EBO);
+	}
 	MyMesh(vector< MyVertex> vertices, vector<GLuint> indices, vector<Texture> textures);
 	MyMesh(const ShapeData& data);
 	
@@ -32,16 +38,23 @@ class ParticleMesh : public IMesh
 {
 public:
 	/*  Mesh Data  */
-	vector< MyVertex>	vertices;
+	vector<MyVertex>	vertices;
 	vector<GLuint>		indices;
 	vector<Texture>		textures;
 	GLuint				instances;
 
 	static const int		MAXPARTICLES	= 1000;
 	static const GLsizei	SIZEOF = sizeof(glm::mat4) + sizeof(glm::vec2) * 3;
+	
 	/*  Functions  */
 	ParticleMesh(vector< MyVertex> vertices, vector<GLuint> indices, vector<Texture> textures);
 	ParticleMesh(const ShapeData & data);
+	virtual ~ParticleMesh()
+	{
+		glDeleteVertexArrays(1, &VAO);
+		glDeleteBuffers(1, &VBO);
+		glDeleteBuffers(1, &EBO);
+	}
 
 	void				SetUpInstances(GLuint _instances)				{ instances = _instances;  }
 	virtual void		Draw() override;

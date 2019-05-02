@@ -4,9 +4,6 @@
 
 void MyModel::Draw()
 {
-	//int loc = glGetUniformLocation(Program, "gBones");
-	//glUniformMatrix4fv(loc, 1, GL_FALSE, &glm::mat4()[0][0]);
-
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_diffuse->id);
 	//glUniform1i(glGetUniformLocation(Program, "texture_diffuse1"), 2);

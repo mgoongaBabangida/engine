@@ -30,12 +30,12 @@ void ModelManager::initializePrimitives()
 	square.cleanup();
 }
 
-ModelManager::ModelManager():terrain(new TerrainModel)
+ModelManager::ModelManager(): terrain(new TerrainModel)
 {
 
 }
 
-std::shared_ptr<IModel> ModelManager::find(std::string name)
+std::shared_ptr<IModel> ModelManager::find(const std::string& name)
 {
 	return  models.find(name)->second;
 }
@@ -51,7 +51,7 @@ void ModelManager::addPrimitive(std::string name, std::shared_ptr<MyModel> model
 	models.insert(std::pair<std::string, std::shared_ptr<IModel> >(name, new MyModel(*(model.get()))));   
 }
 
-std::unique_ptr<MyModel> ModelManager::clonePrimitive(std::string name)
+std::unique_ptr<MyModel> ModelManager::clonePrimitive(const std::string& name)
 {
 	if (primitves.find(name) == primitves.end())
 		std::cout << "ENDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD" << std::endl;

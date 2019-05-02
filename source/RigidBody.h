@@ -26,6 +26,7 @@ public:
 	virtual void Move(std::vector<std::shared_ptr<eObject> > objects);
 	virtual void Turn(glm::vec3 direction, std::vector<std::shared_ptr<eObject>> objects);
 	glm::vec3	 Velocity()	const { return velocity; }
+
 protected:
 	bool		CollidesWith(eObject*, Side);
 	void		ReactCollision(const eCollision& col) {}

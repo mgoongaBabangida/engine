@@ -687,8 +687,8 @@ ShapeData ShapeGenerator::makeTorus(uint tesselation)
 		// Generate a circle on the xy plane, then
 		// translate then rotate it into position
 		glm::mat4 transform =
-			glm::rotate(glm::mat4(), round1 * sliceAngle, glm::vec3(0.0f, 1.0f, 0.0f)) *
-			glm::translate(glm::mat4(), glm::vec3(torusRadius, 0.0f, 0.0f));
+			glm::rotate(UNIT_MATRIX, round1 * sliceAngle, glm::vec3(0.0f, 1.0f, 0.0f)) *
+			glm::translate(UNIT_MATRIX, glm::vec3(torusRadius, 0.0f, 0.0f));
 		glm::mat3 normalTransform = (glm::mat3)transform;
 		for (uint round2 = 0; round2 < tesselation; round2++)
 		{

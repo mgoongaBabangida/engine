@@ -1,10 +1,6 @@
 #include "stdafx.h"
 #include "Shader.h"
 
-Shader::Shader()
-{
-}
-
 void Shader::installShaders(const char* VertexShaderName, const char* FragmentShaderName)
 {
 	vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -114,5 +110,7 @@ std::string Shader::readShaderCode(const char * filename) {
 
 Shader::~Shader()
 {
+	glDeleteShader(vertexShaderID);
+	glDeleteShader(fragmentShaderID);
 	glDeleteProgram(ID);
 }

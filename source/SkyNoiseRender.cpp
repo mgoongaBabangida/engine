@@ -4,16 +4,19 @@
 #include "MyModel.h"
 #include "Structures.h"
 
-eSkyNoiseRender::eSkyNoiseRender(MyModel* model, Texture* noise)
+eSkyNoiseRender::eSkyNoiseRender(std::unique_ptr<MyModel>	_model, 
+								 Texture*					_noise, 
+								 const std::string&			_vS, 
+								 const std::string&			_fS)
 {
-	skynoise_shader.installShaders("SkyNoiseVertexShader.glsl", "SkyNoiseFragmentShader.glsl");
+	skynoise_shader.installShaders(_vS.c_str(), _fS.c_str());
 
 	fullTransformationUniformLocation = glGetUniformLocation(skynoise_shader.ID, "modelToProjectionMatrix");
 
-	m_model = model;
-	m_model->setTextureBump(noise);
-	m_model->setTextureFourth(noise);
-	object = new eObject(m_model);
+	model.swap(_model);
+	model->setTextureBump(_noise);
+	model->setTextureFourth(_noise);
+	object.reset(new eObject(model.get()));
 	object->getTransform()->setTranslation(glm::vec3(0.0f, 5.0f, 0.0f));  // HEIGHT!
 	object->getTransform()->setRotation(PI / 2, 0.0f, 0.0f);
 }

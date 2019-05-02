@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "AssimpModel.h"
 #include "Transform.h"
+#include <algorithm>
 
 using namespace std;
 
@@ -87,7 +88,7 @@ void Model::loadModel(string path)
 	if (m_scene->mRootNode->mNumMeshes)
 		root_bone = &m_bones[this->m_BoneMapping.find(m_scene->mRootNode->mName.C_Str())->second];
 	if (root_bone != nullptr)
-		root_bone->calculateInverseBindTransform(glm::mat4());
+		root_bone->calculateInverseBindTransform(UNIT_MATRIX);
 	for (uint32_t i = 0; i < m_scene->mNumAnimations; ++i)
 		ProccessAnimations(m_scene->mAnimations[i]);
 }
@@ -279,7 +280,7 @@ void Model::loadNodesToBone(aiNode * node) //all nodes have names
 	{ return bone.Name() == node->mName.C_Str(); });
 	if (CurBoneIter == m_bones.end()) //not a bone
 	{
-		m_bones.push_back(Bone(m_NumBones, node->mName.C_Str(), glm::mat4(),false));
+		m_bones.push_back(Bone(m_NumBones, node->mName.C_Str(), UNIT_MATRIX,false));
 		CurBoneIter = --m_bones.end();
 		CurBoneIter->setMTransform(toMat4(node->mTransformation));
 		m_BoneMapping[node->mName.C_Str()] = m_NumBones;

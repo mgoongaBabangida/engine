@@ -1,7 +1,9 @@
 #ifndef MAIN_CONTEXT_H
 #define MAIN_CONTEXT_H
 
+#include "InterfacesDB.h"
 #include "Structures.h"
+
 #include "TerrainModel.h"
 #include "Camera.h"
 #include "CameraRay.h"
@@ -13,16 +15,20 @@
 
 class SoundContext;
 class remSnd;
+class IWindowImGui;
 
 class eMainContext : public IInputObserver
 {
 public:
-	eMainContext(eInputController*, const std::string& modelsPath, const std::string& assetsPath, const std::string& shadersPath);
+	eMainContext(eInputController*,
+				IWindowImGui*,
+				const std::string& modelsPath, 
+				const std::string& assetsPath, 
+				const std::string& shadersPath);
 	virtual ~eMainContext() = default;
 
 	void					InitializeGL();
 	void					PaintGL();
-	void					UpdateLight(uint32_t x, uint32_t y, uint32_t z);
 
 	virtual bool			OnMouseMove(uint32_t x, uint32_t y)				override;
 	virtual bool			OnKeyPress(uint32_t asci)						override;
@@ -31,7 +37,11 @@ public:
 
 	uint32_t				Width()				{ return width;			}
 	uint32_t				Height()			{ return height;		}
-
+	
+	Shader					shader;
+	float					debug = 0.5f;
+	void Test();
+	void TestDebug();
 private:
 	eInputController*					inputController;
 	Camera								m_camera;
@@ -59,14 +69,15 @@ private:
 	float								farPlane    = 20.0f;
 	
 	bool								mts			= true;
+	bool								skybox		= true;
 	bool								mousepress	= false; //to draw framed objects
 	
 	std::string							modelFolderPath;
 	std::string							assetsFolderPath;
 	std::string							shadersFolderPath;
 	
-	mat4								viewToProjectionMatrix;
-	mat4								scale_bias_matrix;
+	glm::mat4							viewToProjectionMatrix;
+	glm::mat4							scale_bias_matrix;
 
 protected:
 	void								InitializeBuffers();

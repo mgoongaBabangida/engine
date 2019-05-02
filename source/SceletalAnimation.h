@@ -9,7 +9,7 @@ struct Frame
 	int									 timeStamp; //can be const?
 	std::map<std::string, Transform>	 pose; //45
 	
-	Frame(int timeStamp, std::map<std::string, Transform> pose) :timeStamp(timeStamp), pose(pose) {};
+	Frame(int timeStamp, std::map<std::string, Transform> pose) : timeStamp(timeStamp), pose(pose) {}
 	Frame(){} //improve
 	
 	void addTimeStemp(int stamp)						{ timeStamp = stamp; }
@@ -34,12 +34,12 @@ public:
 	void Start()						{ clock.start(); }
 	void Stop()							{ clock.pause(); }
 	void Continue()						{ clock.goOn(); }
-	bool IsPaused()						{return clock.isPaused(); }
-	const std::string& Name()const		{ return name; }
+	bool IsPaused()						{ return clock.isPaused(); }
+	const std::string& Name() const		{ return name; }
 	void SetName(const std::string& n)	{ name = n; }
 
 	void Debug();
 };
 
-#endif // ! 
+#endif 
 

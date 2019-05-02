@@ -6,7 +6,7 @@ struct Shader
 	GLuint vertexShaderID;
 	GLuint fragmentShaderID;
 	GLuint geometryShaderID;
-	Shader();
+	Shader() = default;
 	void installShaders(const char* VertexShaderName, const char* FragmentShaderName);
 	void installShaders(const char * VertexShaderName, const char * FragmentShaderName, const char * GeometryShaderName);
 	bool checkShaderStatus(GLint shaderID);

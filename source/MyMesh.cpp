@@ -19,7 +19,6 @@ MyMesh::MyMesh(const ShapeData & data)
 	tex[2] = glm::vec2(0.0f, 0.0f); 
 	tex[3] = glm::vec2(1.0f, 0.0f); 
 	
-
 	for (uint32_t i = 0; i < data.numVertices; ++i)
 	{
 		MyVertex vert;

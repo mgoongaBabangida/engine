@@ -3,16 +3,16 @@
 
 Frame SceletalAnimation::getCurrentFrame()
 {
-	if (clock.timeEllapsedMsc() > duration) //need to improve
+	if(clock.timeEllapsedMsc() > duration) //need to improve
 		clock.restart();
 
 	float time = clock.timeEllapsedMsc();
 	//std::cout << "time " << time << std::endl;
 	int i = 0;
 
-	for (; i < frames.size()-1; i++)
+	for (; i < frames.size() - 1; ++i)
 	{
-		if (frames[i].timeStamp > time) //shoul de sorted
+		if(frames[i].timeStamp > time) //should de sorted
 			break;
 	}
 	if(i == 0) 

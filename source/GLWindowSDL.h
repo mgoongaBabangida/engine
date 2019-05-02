@@ -5,6 +5,11 @@
 #include "InputController.h"
 #include "Timer.h"
 
+class IWindowImGui;
+
+//***************************************
+//dbGLWindowSDL
+//---------------------------------------
 class dbGLWindowSDL
 {
 public:
@@ -15,17 +20,17 @@ public:
 	void		Run();
 
 protected:
-	std::unique_ptr<dbb::Timer>		dTimer;
-	eInputController				inputController;
-	eMainContext					mainContext;
+	std::unique_ptr<dbb::Timer>	dTimer;
+	IWindowImGui*				guiWnd;
+	eInputController			inputController;
+	eMainContext				mainContext;
 
-	SDL_Window*						window  = nullptr;
+	SDL_Window*					window  = nullptr;
 
-	const GLint						WIDTH	= 1200;
-	const GLint						HEIGHT	= 600;
+	const GLint					WIDTH	= 1200;
+	const GLint					HEIGHT	= 600;
 
-	void							paintGL();
-	void							updateSharedData();
+	void						paintGL();
 };
 
 #endif

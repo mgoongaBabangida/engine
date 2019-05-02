@@ -52,6 +52,10 @@ void eDefferedRender::Render(const glm::mat4 & projectionMatrix, const Camera & 
 		glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &object->getTransform()->getModelMatrix()[0][0]);
 		//*********************
 		std::vector<glm::mat4> matrices(100);
+		for (auto&m : matrices)
+		{
+			m = glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+		}
 		if (object->getRigger() != nullptr)
 		{
 			matrices = object->getRigger()->GetMatrices();

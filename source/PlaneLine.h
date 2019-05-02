@@ -18,6 +18,7 @@ namespace dbb
 		plane(float a, float b, float c, float d);
 		plane(glm::vec3 dot1, glm::vec3 dot2, glm::vec3 dot3);
 		plane(glm::mat3 dots);
+		
 		bool isOn(glm::vec3 dot);
 		bool isSame(plane other);
 	};
@@ -29,13 +30,12 @@ namespace dbb
 		glm::vec3 p; //vector direction
 
 		line(glm::vec3 dot, glm::vec3 direction);
-		bool isOn(glm::vec3 dot);
-		float findT(glm::vec3 dot);
-		glm::vec3 getDotFromT(float t);
-		line() :M(glm::vec3()), p(glm::vec3()) {};
-
+		line() :M(glm::vec3()), p(glm::vec3()) {}
+		
+		bool		isOn(glm::vec3 dot);
+		float		findT(glm::vec3 dot);
+		glm::vec3	getDotFromT(float t);
 	};
-
 
 	glm::vec3 intersection(dbb::plane P, dbb::line L);
 

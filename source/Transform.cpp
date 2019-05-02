@@ -91,11 +91,10 @@ void Transform::billboard(glm::vec3 direction)
 bool Transform::turnTo(glm::vec3 dest, float speed) //$todo speed is not used
 {	
 	glm::vec3 target_dir	= glm::normalize(glm::vec3(dest - m_translation) );
-	glm::vec3 cur_directoin = glm::normalize(forward * glm::mat3(glm::toMat4(q_rotation)));
-	cur_directoin.x			= -cur_directoin.x;
-	float angle				= glm::dot(target_dir, cur_directoin);
+	glm::vec3 cur_directoin = glm::normalize(glm::mat3(glm::toMat4(q_rotation)) * forward);
+	float angle				= glm::dot(cur_directoin, target_dir);
 
-	glm::vec3 ASIX = glm::cross(target_dir, cur_directoin);
+	glm::vec3 ASIX = glm::cross(cur_directoin, target_dir);
 
 	//float rot_angle = ASIX.y > 0.0f ? 
 	//if (abs(angle) < 0.001f)
@@ -104,25 +103,13 @@ bool Transform::turnTo(glm::vec3 dest, float speed) //$todo speed is not used
 
 	glm::quat rot;
 
-	if(ASIX.y <= 0.0f && angle >= 0) 
-	{ //x+ z+
-		rot = glm::toQuat(glm::rotate(glm::mat4(), glm::acos(angle),-ASIX)); // turn left less then 90
-		//std::cout << "first case" << std::endl;
+	if(angle >= 0) 
+	{
+		rot = glm::toQuat(glm::rotate(UNIT_MATRIX, glm::acos(angle), ASIX));
 	}
-	else if(ASIX.y > 0.0f && angle >= 0) 
-	{ //x- z+
-		rot = glm::toQuat(glm::rotate(glm::mat4(), (glm::acos(angle)), -ASIX));// turn right less then 90
-		//std::cout << "second case" << std::endl;
-	}
-	else if(ASIX.y <= 0.0f && angle < 0) 
-	{   //x+ z -
-		rot = glm::toQuat(glm::rotate(glm::mat4(), 2.0f * PI - (glm::acos(angle)), ASIX));
-		//std::cout << "third case" << std::endl;
-	}
-	else if(ASIX.y > 0.0f && angle < 0) 
-	{   //x- z -
-		rot = glm::toQuat(glm::rotate(glm::mat4(), 2.0f * PI - (glm::acos(angle)), ASIX));
-		//std::cout << "fourth case" << std::endl;
+	else if(angle < 0) 
+	{
+		rot = glm::toQuat(glm::rotate(UNIT_MATRIX, 2 * PI - (glm::acos(angle)), -ASIX));
 	}
 	else 
 	{
