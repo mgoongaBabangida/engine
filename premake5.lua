@@ -1,5 +1,5 @@
 workspace "OpenGLProject"
-    architecture    "x64"
+    architecture "x64"
     
     configurations
     {
@@ -10,10 +10,10 @@ workspace "OpenGLProject"
 
 outputdir = "%{cfg.buildcfg}"
 
+include "premake5_imgui.lua"
+
 IncludeDir = {}
 IncludeDir["ImGui"] = "vendor/imgui/"
-
-include "vendor/imgui"
 
 project "OpenGLProject"
     kind "ConsoleApp"
@@ -50,7 +50,7 @@ project "OpenGLProject"
 		"vendor/SDL2/include/",
 		"vendor/SDL2_image/include/",
 		"vendor/spdlog/include/",
-		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.ImGui}"
     }
 
 	libdirs
@@ -90,4 +90,3 @@ project "OpenGLProject"
     
     filter "configurations:Dist"
         optimize "On"
-	

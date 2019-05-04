@@ -14,9 +14,9 @@ SDL_GLContext					context;
 dbGLWindowSDL::dbGLWindowSDL()
 :inputController()
 , guiWnd(new eWindowImGui("Gui"))
-,mainContext(&inputController, guiWnd,	"c:/dev/engine/source/Resources/",
-										"c:/dev/engine/source/assets/",
-										"c:/dev/engine/source/shaders/")
+,mainContext(&inputController, guiWnd,	"c:/dev/engine/assets/Resources/",
+										"c:/dev/engine/assets/",
+										"c:/dev/engine/shaders/")
 {}
 //======================================
 //dbGLWindowSDL::~dbGLWindowSDL

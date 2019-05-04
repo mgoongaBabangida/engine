@@ -20,5 +20,4 @@ vendor/SDL2/*
 vendor/AL/*
 vendor/IL/*
 vendor/SDL2_image/*
-
-
+assets/Resources/*
