@@ -62,7 +62,7 @@ void eWaveRender::Render(const glm::mat4&	ProjectionMatrix,
 	glUniform3f(lightAmbientLoc, light.ambient.x, light.ambient.y, light.ambient.z);  //!? diffuse
 	glUniform3f(lightDiffuseLoc, light.diffuse.x, light.diffuse.y, light.diffuse.z);
 	glUniform3f(lightSpecularLoc, light.specular.x, light.specular.y, light.specular.z);
-	glUniform4f(lightPosLoc, light.light_vector.x, light.light_vector.y, light.light_vector.z, light.light_vector.w);
+	glUniform4f(lightPosLoc, light.light_position.x, light.light_position.y, light.light_position.z, light.light_position.w);
 
 	glUniform1f(glGetUniformLocation(wave_shader.ID, "light.constant"), 1.0f); // transfer to light
 	glUniform1f(glGetUniformLocation(wave_shader.ID, "light.linear"),	0.09f);

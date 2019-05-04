@@ -16,7 +16,7 @@ namespace dbb {
 		 virtual bool stop();
 		 virtual ~Timer();
 	 protected:
-		 Clock clock;
+		 eClock clock;
 		 bool active = false;
 		 std::function<bool()> callable;
 		 std::thread thrd;

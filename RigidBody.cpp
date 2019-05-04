@@ -1,15 +1,22 @@
 #include "stdafx.h"
 #include "RigidBody.h"
+#include "InterfacesDB.h"
 
 bool eRigidBody::CollidesWith(eObject* _other, Side _side)
 {
 	collision.collider = object;
 	collision.collidee = _other;
 	return object->getCollider()->collidesWith(*(object->getTransform()), 
-									    *(_other->getTransform()),
-									    *(_other->getCollider()), 
-										_side, 
-										collision);
+											   *(_other->getTransform()),
+											   *(_other->getCollider()), 
+											   _side, 
+											   collision);
+}
+
+void eRigidBody::ReactCollision(const eCollision& _col)
+{
+	if(_col.collider->getScript())_col.collider->getScript()->CollisionCallback(_col);
+	if(_col.collidee->getScript())_col.collidee->getScript()->CollisionCallback(_col);
 }
 
 void eRigidBody::MoveForward(std::vector<std::shared_ptr<eObject> > objects)
@@ -156,6 +163,8 @@ void eRigidBody::Turn(glm::vec3 direction, std::vector<std::shared_ptr<eObject>>
 		}
 	}
 }
+
+void eRigidBody::setObject(eObject * obj) { object = obj; }
 
 void eRigidBody::TurnRight(std::vector<std::shared_ptr<eObject>> objects)
 {

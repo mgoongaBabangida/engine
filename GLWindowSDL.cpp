@@ -6,16 +6,20 @@
 #include "imgui/imgui_impl_opengl3.h"
 #include "ImGuiContext.h"
 
+//#include "MainContext.h"
+#include "SandBoxGame.h"
+
 SDL_GLContext					context;
 
 //***************************************
 //dbGLWindowSDL::~dbGLWindowSDL
 //---------------------------------------
 dbGLWindowSDL::dbGLWindowSDL()
-:inputController()
+: inputController()
 , guiWnd(new eWindowImGui("Gui"))
-,mainContext(&inputController, guiWnd, "Resources/", "assets/", "shaders/")
-{}
+{
+	mainContext.reset(new eSandBoxGame(&inputController, guiWnd, "Resources/", "assets/", "shaders/"));
+}
 //======================================
 //dbGLWindowSDL::~dbGLWindowSDL
 //---------------------------------------
@@ -66,7 +70,7 @@ bool dbGLWindowSDL::InitializeGL()
 	}
 	eImGuiContext::GetInstance(&context, window).Init();
 
-	mainContext.InitializeGL();
+	mainContext->InitializeGL();
 	SDL_GL_MakeCurrent(window, NULL);
 	dTimer.reset(new dbb::Timer([this]()->bool
 								{
@@ -129,7 +133,7 @@ void dbGLWindowSDL::paintGL()
 	guiWnd->Render();
 
 	eImGuiContext::GetInstance(&context, window).PreRender();
-	mainContext.PaintGL();
+	mainContext->PaintGL();
 	eImGuiContext::GetInstance(&context, window).Render();
 	SDL_GL_SwapWindow(window);
 }

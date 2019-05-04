@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SHIP_SCRIPT_H
+#define SHIP_SCRIPT_H
 
 #include "InterfacesDB.h"
 #include <vector>
@@ -15,20 +16,6 @@ class remSnd;
 
 class eShipScript : public IScript
 {
-protected:
-	float			 turn_speed;
-	float			 move_speed;
-	glm::vec3		 destination = NONE;
-	Texture*		 flag_tex;
-	eParticleRender* prt_renderer;
-	Texture*		 shoot_tex;
-	remSnd*			 shoot_snd;
-	float			 waterHeight;
-	dbb::CameraRay*	 camRay;
-
-	void			 SetDestination(glm::vec3 dst) { destination = dst; }
-	void			 Shoot();
-
 public:
 	eShipScript(Texture*, 
 			   eParticleRender*	prt,
@@ -42,4 +29,20 @@ public:
 
 	virtual void	Update(std::vector<std::shared_ptr<eObject> > objs) override;
 	Flag			GetFlag(const Camera& camera);
+
+protected:
+	float			 turn_speed;
+	float			 move_speed;
+	glm::vec3		 destination = NONE;
+	Texture*		 flag_tex;
+	eParticleRender* prt_renderer;
+	Texture*		 shoot_tex;
+	remSnd*			 shoot_snd;
+	float			 waterHeight;
+	dbb::CameraRay*	 camRay;
+
+	void			 SetDestination(glm::vec3 dst) { destination = dst; }
+	void			 Shoot();
 };
+
+#endif // SHIP_SCRIPT_H

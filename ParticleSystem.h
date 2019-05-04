@@ -41,7 +41,7 @@ protected:
 	float						m_gravityComplient;
 	float						m_lifeLength;
 	std::vector<Particle>		m_particles;
-	Clock						clock;
+	eClock						clock;
 	std::unique_ptr<dbb::Timer> timer;
 	remSnd*						sound;
 	float						duration;

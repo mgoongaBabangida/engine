@@ -18,7 +18,7 @@ struct Material
 
 struct Light 
 {
-	glm::vec4 light_vector;
+	glm::vec4 light_position;
 	glm::vec3 ambient;
 	glm::vec3 diffuse;
 	glm::vec3 specular;

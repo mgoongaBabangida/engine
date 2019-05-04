@@ -23,7 +23,7 @@ struct Frame
 class SceletalAnimation
 {
 protected:
-	Clock				clock;
+	eClock				clock;
 	std::vector<Frame>  frames;
 	int					duration; // msc
 	std::string			name;

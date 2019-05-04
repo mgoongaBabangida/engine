@@ -4,11 +4,12 @@
 
 eDefferedRender::eDefferedRender(const std::string & vS, const std::string & fS, const std::string & vSS, const std::string & fSS)
 {
+	//$todo screenMesh
 	gShader.installShaders(vS.c_str(), fS.c_str());
 
 	fullTransformationUniformLocation = glGetUniformLocation(gShader.ID, "modelToProjectionMatrix");
 	modelToWorldMatrixUniformLocation = glGetUniformLocation(gShader.ID, "modelToWorldMatrix");
-	eyePositionWorldUniformLocation = glGetUniformLocation(gShader.ID, "eyePositionWorld");
+	eyePositionWorldUniformLocation	  = glGetUniformLocation(gShader.ID, "eyePositionWorld");
 
 	screenShader.installShaders(vSS.c_str(), fSS.c_str());
 
@@ -17,8 +18,6 @@ eDefferedRender::eDefferedRender(const std::string & vS, const std::string & fS,
 	// lighting info
 	// -------------
 	const unsigned int NR_LIGHTS = 32;
-	lightPositions;
-	lightColors;
 	srand(13);
 	for (unsigned int i = 0; i < NR_LIGHTS; i++)
 	{
@@ -54,7 +53,7 @@ void eDefferedRender::Render(const glm::mat4 & projectionMatrix, const Camera & 
 		std::vector<glm::mat4> matrices(100);
 		for (auto&m : matrices)
 		{
-			m = glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+			m = UNIT_MATRIX;
 		}
 		if (object->getRigger() != nullptr)
 		{
@@ -76,7 +75,7 @@ void eDefferedRender::RenderScreen(const Camera& camera)
 	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_DEFFERED2, GL_TEXTURE3);
 	
 	// send light relevant uniforms
-	for (unsigned int i = 0; i < lightPositions.size(); i++)
+	for (unsigned int i = 0; i < lightPositions.size(); ++i)
 	{
 		glUniform3f(glGetUniformLocation(screenShader.ID, (const GLchar*)std::string("lights[" + std::to_string(i) + "].Position").c_str()), 1, GL_FALSE, lightPositions[i][0]);
 		glUniform3f(glGetUniformLocation(screenShader.ID, (const GLchar*)std::string("lights[" + std::to_string(i) + "].Color").c_str()), 1, GL_FALSE, lightColors[i][0]);

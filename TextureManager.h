@@ -2,14 +2,15 @@
 #include <map>
 #include "Texture.h"
 
-class TextureManager
+class eTextureManager
 {
-private:
-	std::map<std::string, Texture> m_Textures;
-	std::string folderPath;
 public:
-	~TextureManager();
-	void InitContext(const std::string& folderPath);
-	void loadAllTextures();
-	Texture* find(const std::string&);
+	eTextureManager() = default;
+	~eTextureManager();
+	void		InitContext(const std::string& folderPath);
+	void		LoadAllTextures();
+	Texture*	Find(const std::string&);
+private:
+	std::map<std::string, Texture>	m_Textures;
+	std::string						folderPath;
 };

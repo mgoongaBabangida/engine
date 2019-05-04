@@ -40,7 +40,7 @@ protected:
 	GLuint						lightColorLoc;
 	GLuint						clipPlaneLoc;
 	
-	Clock						clock;
+	eClock						clock;
 	float						move_factor	= 0.0f;
 	bool						incr		= true;
 	std::unique_ptr<dbb::Timer> timer;

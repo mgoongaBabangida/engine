@@ -33,7 +33,7 @@ private:
 	std::unique_ptr<eObject>		object;
 	std::unique_ptr<TerrainModel>	m_model;
 	
-	Clock							clock;
+	eClock							clock;
 	float							time		= 0.0f;
 	float							Freq		= 2.5f;
 	float							Velocity	= 2.5f;

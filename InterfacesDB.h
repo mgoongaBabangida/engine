@@ -3,11 +3,12 @@
 
 #include <glew-2.1.0\include\GL\glew.h>
 
+#include "Structures.h"
+#include "Texture.h"
+
 #include <memory>
 #include <string>
 #include <vector>
-#include "Structures.h"
-#include "Texture.h"
 
 #include <glm\glm\glm.hpp>
 #include <glm\glm\glm.hpp>
@@ -58,7 +59,9 @@ protected:
 	eObject* object = nullptr;
 public:
 	virtual ~IScript() = default;
-	virtual void	Update(std::vector< std::shared_ptr<eObject> > objs) = 0;
+	virtual void	Update(std::vector<std::shared_ptr<eObject>> objs) = 0;
+	virtual void	CollisionCallback(const eCollision&)				{}
+
 	void			setObject(eObject* obj) { object = obj; }
 };
 

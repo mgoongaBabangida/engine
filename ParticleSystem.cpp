@@ -81,7 +81,7 @@ std::vector<Particle>::iterator ParticleSystem::prepareParticles(glm::vec3 camer
 	std::sort(m_particles.begin(), m_particles.end(), [](Particle& prt1, Particle& prt2) {return prt1.isAlive() > prt2.isAlive(); });
 	std::vector<Particle>::iterator n_end = m_particles.begin();
 	
-	//find last alive and set distance
+	//Find last alive and set distance
 	while(n_end != m_particles.end() && n_end->isAlive()) 
 	{
 		n_end->setDistance(glm::length(glm::vec3(cameraPosition - n_end->getPosition())));

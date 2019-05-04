@@ -1,13 +1,12 @@
 #pragma once
 
-#include "InterfacesDB.h"
 #include "Structures.h"
 #include "Object.h"
 
 class eRigidBody
 {
 public:
-	void setObject(eObject* obj) { object = obj; }
+	void setObject(eObject* obj);
 
 	virtual void TurnRight(std::vector<std::shared_ptr<eObject> > objects);
 	virtual void TurnLeft(std::vector<std::shared_ptr<eObject> > objects);
@@ -25,11 +24,13 @@ public:
 
 	virtual void Move(std::vector<std::shared_ptr<eObject> > objects);
 	virtual void Turn(glm::vec3 direction, std::vector<std::shared_ptr<eObject>> objects);
-	glm::vec3	 Velocity()	const { return velocity; }
+	
+	void		 SetCurrentVelocity(glm::vec3 _vel) { velocity = _vel; }
+	glm::vec3	 Velocity()	const					{ return velocity; }
 
 protected:
 	bool		CollidesWith(eObject*, Side);
-	void		ReactCollision(const eCollision& col) {}
+	void		ReactCollision(const eCollision& col);
 
 	eObject*	object		= nullptr;
 	float		turnSpeed	= PI / 12.0f;

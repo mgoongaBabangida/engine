@@ -35,8 +35,8 @@ protected:
 	std::unique_ptr<eBrightFilterRender> m_brightRender;
 	std::string							 folderPath;
 public:
-	void				Initialize(ModelManager&	modelManager, 
-								   TextureManager&  texManager,
+	void				Initialize(eModelManager&	modelManager, 
+								   eTextureManager&  texManager,
 								   const string&	folderPath);
 	
 	eWaterRender*		WaterRender()		 { return m_waterRender.get();		}

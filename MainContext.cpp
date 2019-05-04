@@ -19,14 +19,17 @@ eMainContext::eMainContext(eInputController* _input,
 						   const std::string& _modelsPath,
 						   const std::string& _assetsPath, 
 						   const std::string& _shadersPath)
-:inputController(_input)
-, modelFolderPath(_modelsPath)
-, assetsFolderPath(_assetsPath)
-, shadersFolderPath(_shadersPath)
+: eMainContextBase(_input, _guiWnd, _modelsPath, _assetsPath, _shadersPath)
 {
-	_guiWnd->Add(SLIDER_FLOAT, "Ydir", m_light.light_vector.y);
-	_guiWnd->Add(SLIDER_FLOAT, "Zdir", m_light.light_vector.z);
-	_guiWnd->Add(SLIDER_FLOAT, "Xdir", m_light.light_vector.x);
+	_guiWnd->Add(SLIDER_FLOAT, "Ydir", m_light.light_position.y);
+	_guiWnd->Add(SLIDER_FLOAT, "Zdir", m_light.light_position.z);
+	_guiWnd->Add(SLIDER_FLOAT, "Xdir", m_light.light_position.x);
+
+	//Light init!
+	m_light.ambient			= vec3(0.1f, 0.1f, 0.1f);
+	m_light.diffuse			= vec3(0.75f, 0.75f, 0.75f);
+	m_light.specular		= vec3(0.5f, 0.5f, 0.5f);
+	m_light.light_position	= vec4(1.0f, 4.0f, 1.0f, 1.0f);
 }
 
 bool eMainContext::OnMouseMove(uint32_t x, uint32_t y)
@@ -116,6 +119,7 @@ bool eMainContext::OnKeyPress(uint32_t asci)
 		if (m_focused != nullptr)
 			m_focused->getScript()->OnKeyPress(ASCII_G);
 	}
+	return true;
 	default: return false;
 	}
 }
@@ -133,20 +137,6 @@ bool eMainContext::OnMousePress(uint32_t x, uint32_t y, bool left)
 		m_focused->getScript()->OnMousePress(x, y, left);
 	}
 	return true;
-#ifdef DEBUG_HANDLERS
-		std::cout << "TARGET=" << "x= " << target.x << "y= " << target.y << "z= " << target.z << std::endl;
-
-		glm::vec3 position = glm::vec3(0.0f, 2.0f, 0.0f);
-		glm::vec3 direction = glm::vec3(0.0f, 0.0f, 1.0f);
-		glm::vec3 target_dir = glm::normalize(target - position);
-		float angle = glm::dot(glm::normalize(target_dir), glm::normalize(direction));
-		std::cout << "in press" << std::endl;
-		std::cout << "dot= " << angle << "radians= " << glm::acos(angle) << " degrees= " << glm::degrees(glm::acos(angle)) << std::endl;
-		glm::quat rot = glm::toQuat(glm::rotate(UNIT_MATRIX, glm::acos(angle), glm::vec3(0, 1, 0)));
-
-		glm::vec3 ASIX = glm::normalize(glm::cross(target_dir, direction));
-		std::cout << "Asix=" << ASIX.x << ASIX.y << ASIX.z << std::endl;
-#endif
 }
 
 bool eMainContext::OnMouseRelease()
@@ -158,47 +148,31 @@ bool eMainContext::OnMouseRelease()
 void eMainContext::InitializeGL()
 {
 	texManager.InitContext(assetsFolderPath);
+	texManager.LoadAllTextures();
+	//m_Textures.Find("Tbricks0_d")->second.saveToFile("MyTexture");  Saving texture debug
 
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_STENCIL_TEST);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_MULTISAMPLE);
-	glEnable(GL_LINE_SMOOTH);
-
-	/*glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
+	InitializePipline();
 
 	InitializeBuffers();
 
-	//initialize sound
-	context.reset(new SoundContext());
-	context->init();
-	context->LoadWavFile(assetsFolderPath + "Cannon+5.wav");
+	InitializeSounds();
 
-	modelManager.initializePrimitives();
-
-	//Light init!
-	m_light.ambient		 = vec3(0.1f, 0.1f, 0.1f);
-	m_light.diffuse		 = vec3(0.75f, 0.75f, 0.75f);
-	m_light.specular	 = vec3(0.5f, 0.5f, 0.5f);
-	m_light.light_vector = vec4(1.0f, 3.0f, 1.0f, 1.0f);
-
-	texManager.loadAllTextures();
-	//m_Textures.find("Tbricks0_d")->second.saveToFile("MyTexture");  Saving texture debug
+	modelManager.InitializePrimitives();
 
 	InitializeModels();
-
-	//light_cube
-	lightObject = shObject(new eObject(modelManager.find("white_cube").get()));  //std::shared_ptr<Object>
-	lightObject->getTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
-	lightObject->getTransform()->setTranslation(m_light.light_vector);
-
-	//Camera Ray
-	camRay.init(width, height, 0.1f, 20.0f);
-
-	m_focused = m_Objects[4];
-
+	
 	InitializeRenders();
+	
+	//Camera Ray
+	camRay.init(width, height, nearPlane, farPlane);
+	
+	m_Objects[4]->setScript(new eShipScript(texManager.Find("TSpanishFlag0_s"),
+											renderManager.ParticleRender(),
+											texManager.Find("Tatlas2"),
+											sound.get(),
+											&camRay,
+											waterHeight));
+	m_focused = m_Objects[4];
 
 	guis.push_back(GUI(0, 0, width / 4, height / 4, width, height));
 	guis[0].setCommand(std::shared_ptr<ICommand>(new AnimStart(m_Objects[6])));
@@ -210,18 +184,35 @@ void eMainContext::InitializeGL()
 	inputController->AddObserver(&guis[1], MONOPOLY);
 	inputController->AddObserver(&m_camera, WEAK);
 	inputController->AddObserver(&camRay, WEAK);
+}
 
-	#define GLM_FORCE_RADIANS
+void eMainContext::InitializeSounds()
+{
+	context.reset(new SoundContext());
+	context->init();
+	context->LoadWavFile(assetsFolderPath + "Cannon+5.wav");
+
+	sound.reset(new remSnd(context->buffers.find(assetsFolderPath + "Cannon+5.wav")->second, true));
+	sound->loadListner(m_camera.getPosition().x, m_camera.getPosition().y, m_camera.getPosition().z);
+}
+
+void eMainContext::InitializePipline()
+{
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_STENCIL_TEST);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_MULTISAMPLE);
+	glEnable(GL_LINE_SMOOTH);
+	/*glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
+
+#define GLM_FORCE_RADIANS
 
 	viewToProjectionMatrix = glm::perspective(glm::radians(60.0f), ((float)width) / height, nearPlane, farPlane);
 	scale_bias_matrix = mat4(vec4(0.5f, 0.0f, 0.0f, 0.0f),
-							vec4(0.0f, 0.5f, 0.0f, 0.0f),
-							vec4(0.0f, 0.0f, 0.5f, 0.0f),
-							vec4(0.5f, 0.5f, 0.5f, 1.0f));
-
-	//test
-	shader.installShaders("D:/projects/OpenGlSdlProject/OpenGlSdlProject/shaders/VertexShaderCodeTest.glsl",
-						  "D:/projects/OpenGlSdlProject/OpenGlSdlProject/shaders/FragmentShaderCodeTest.glsl");
+		vec4(0.0f, 0.5f, 0.0f, 0.0f),
+		vec4(0.0f, 0.0f, 0.5f, 0.0f),
+		vec4(0.5f, 0.5f, 0.5f, 1.0f));
 }
 
 void eMainContext::InitializeBuffers()
@@ -236,82 +227,42 @@ void eMainContext::InitializeBuffers()
 
 void eMainContext::InitializeModels()
 {
-	//PRIMITIVES
-	modelManager.addPrimitive("wall_cube",
-		std::shared_ptr<MyModel>(new MyModel(modelManager.findMesh("cube"),
-			texManager.find("Tbrickwall0_d"),
-			texManager.find("Tbrickwall0_d"),
-			texManager.find("Tbrickwall0_n"),
-			texManager.find("Tblack"))));
-	modelManager.addPrimitive("container_cube",
-		std::shared_ptr<MyModel>(new MyModel(modelManager.findMesh("cube"),
-			texManager.find("Tcontainer0_d"),
-			texManager.find("Tcontainer0_s"),
-			texManager.find("Tblue"),
-			texManager.find("Tblack"))));
-	modelManager.addPrimitive("arrow",
-		std::shared_ptr<MyModel>(new MyModel(modelManager.findMesh("arrow"),
-			texManager.find("Tcontainer0_d"),
-			texManager.find("Tcontainer0_s"),
-			texManager.find("Tblue"),
-			texManager.find("Tblack"))));
-	modelManager.addPrimitive("grass_plane",
-		std::shared_ptr<MyModel>(new MyModel(modelManager.findMesh("plane"),
-			texManager.find("Tgrass0_d"),
-			texManager.find("Tgrass0_d"),
-			texManager.find("Tblue"),
-			texManager.find("Tblack"))));
-	modelManager.addPrimitive("white_cube",
-		std::shared_ptr<MyModel>(new MyModel(modelManager.findMesh("cube"),
-			texManager.find("Twhite"))));
-	modelManager.addPrimitive("brick_square",
-		std::shared_ptr<MyModel>(new MyModel(modelManager.findMesh("square"),
-			texManager.find("Tbricks0_d"),
-			texManager.find("Tbricks0_d"),
-			texManager.find("Tblue"),
-			texManager.find("Tblack"))));
-	modelManager.addPrimitive("brick_cube",
-		std::shared_ptr<MyModel>(new MyModel(modelManager.findMesh("cube"),
-			texManager.find("Tbricks2_d"),
-			texManager.find("Tbricks2_d"),
-			texManager.find("Tbricks2_n"),
-			texManager.find("Tbricks2_dp"))));
+	eMainContextBase::InitializeModels();
 
 	//MODELS
-	modelManager.add("nanosuit", (GLchar*)std::string(modelFolderPath + "nanosuit/nanosuit.obj").c_str());
-	//modelManager.add("boat", (GLchar*)std::string(ModelFolderPath + "Medieval Boat/Medieval Boat.obj").c_str());
-	//modelManager.add("spider", (GLchar*)std::string(ModelFolderPath + "ogldev-master/Content/spider.obj").c_str());
-	modelManager.add("wolf", (GLchar*)std::string(modelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
-	//(GLchar*)ModelFolderPath.append("Wolf Rigged and Game Ready/Wolf_One_obj.obj").c_str();
-	modelManager.add("guard", (GLchar*)std::string(modelFolderPath + "ogldev-master/Content/guard/boblampclean.md5mesh").c_str());
-	//modelManager.add("stairs", (GLchar*)std::string(modelFolderPath + "stairs.blend").c_str());
+	modelManager.Add("nanosuit", (GLchar*)std::string(modelFolderPath + "nanosuit/nanosuit.obj").c_str());
+	modelManager.Add("boat", (GLchar*)std::string(modelFolderPath + "Medieval Boat/Medieval Boat.obj").c_str());
+	//modelManager.Add("spider", (GLchar*)std::string(ModelFolderPath + "ogldev-master/Content/spider.obj").c_str());
+	modelManager.Add("wolf", (GLchar*)std::string(modelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
+	modelManager.Add("guard", (GLchar*)std::string(modelFolderPath + "ogldev-master/Content/guard/boblampclean.md5mesh").c_str());
+	//modelManager.Add("stairs", (GLchar*)std::string(modelFolderPath + "stairs.blend").c_str());
 
 	//TERRAIN
-	m_TerrainModel.swap(modelManager.cloneTerrain("simple"));
-	m_TerrainModel->initialize(texManager.find("Tgrass0_d"),
-		texManager.find("Tgrass0_d"),
-		texManager.find("Tblue"),
-		texManager.find("TOcean0_s"));
+	m_TerrainModel.swap(modelManager.CloneTerrain("simple"));
+	m_TerrainModel->initialize(texManager.Find("Tgrass0_d"),
+		texManager.Find("Tgrass0_d"),
+		texManager.Find("Tblue"),
+		texManager.Find("TOcean0_s"));
 
 	//OBJECTS
-	shObject wallCube = shObject(new eObject(modelManager.find("wall_cube").get()));
+	shObject wallCube = shObject(new eObject(modelManager.Find("wall_cube").get()));
 	wallCube->getTransform()->setTranslation(vec3(3.0f, 3.0f, 3.0f));
 	m_Objects.push_back(wallCube);
 
-	shObject containerCube = shObject(new eObject(modelManager.find("container_cube").get()));
+	shObject containerCube = shObject(new eObject(modelManager.Find("container_cube").get()));
 	containerCube->getTransform()->setTranslation(vec3(0.5f, 3.0f, -3.5f));
 	containerCube->getTransform()->setScale(vec3(0.2f, 0.2f, 0.2f));
 	m_Objects.push_back(containerCube);
 
-	shObject arrow = shObject(new eObject(modelManager.find("arrow").get()));
+	shObject arrow = shObject(new eObject(modelManager.Find("arrow").get()));
 	arrow->getTransform()->setTranslation(vec3(1.0f, 1.0f, -1.0f));
 	m_Objects.push_back(arrow);
 
-	shObject grassPlane = shObject(new eObject(modelManager.find("grass_plane").get()));
+	shObject grassPlane = shObject(new eObject(modelManager.Find("grass_plane").get()));
 	grassPlane->getTransform()->setTranslation(vec3(0.0f, -2.0f, 0.0f));
 	m_Objects.push_back(grassPlane);
 
-	shObject nanosuit = shObject(new eObject(modelManager.find("nanosuit").get()));
+	shObject nanosuit = shObject(new eObject(modelManager.Find("nanosuit").get()));
 	nanosuit->getTransform()->setTranslation(vec3(0.0f, 2.0f, 0.0f));
 	nanosuit->getTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
 	m_Objects.push_back(nanosuit);
@@ -321,40 +272,40 @@ void eMainContext::InitializeModels()
 	terrain->getTransform()->setTranslation(vec3(0.0f, 1.8f, 0.0f));
 	m_Objects.push_back(terrain);
 
-	shObject wolf = shObject(new eObject(modelManager.find("wolf").get()));
+	shObject wolf = shObject(new eObject(modelManager.Find("wolf").get()));
 	wolf->getTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);
 	wolf->getTransform()->setTranslation(vec3(5.0f, 3.0f, 0.0f));
-	wolf->setRigger(new Rigger((Model*)modelManager.find("wolf").get()));
+	wolf->setRigger(new Rigger((Model*)modelManager.Find("wolf").get()));
 	wolf->getRigger()->ChangeName(std::string(), "Running");
 	m_Objects.push_back(wolf);
 
-	shObject brickCube = shObject(new eObject(modelManager.find("brick_cube").get()));
+	shObject brickCube = shObject(new eObject(modelManager.Find("brick_cube").get()));
 	brickCube->getTransform()->setTranslation(vec3(0.5f, 3.0f, 3.5f));
 	m_Objects.push_back(brickCube);
 
-	shObject guard = shObject(new eObject(modelManager.find("guard").get()));
+	shObject guard = shObject(new eObject(modelManager.Find("guard").get()));
 	guard->getTransform()->setTranslation(vec3(2.0f, 2.0f, 0.0f));
 	guard->getTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);
 	guard->getTransform()->setScale(glm::vec3(0.03f, 0.03f, 0.03f));
-	guard->setRigger(new Rigger((Model*)modelManager.find("guard").get()));
+	guard->setRigger(new Rigger((Model*)modelManager.Find("guard").get()));
 	m_Objects.push_back(guard);
+
+	//light_cube
+	lightObject = shObject(new eObject(modelManager.Find("white_sphere").get()));
+	lightObject->getTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
+	lightObject->getTransform()->setTranslation(m_light.light_position);
+	m_Objects.push_back(lightObject);
+
+	/*shObject boat = shObject(new eObject(modelManager.Find("boat").get()));
+	boat->getTransform()->setScale(vec3(0.0001f, 0.0001f, 0.0001f));
+	m_Objects.push_back(boat);*/
 }
 
 void eMainContext::InitializeRenders()
 {
-	sound.reset(new remSnd(context->buffers.find(assetsFolderPath + "Cannon+5.wav")->second, true));
-	sound->loadListner(m_camera.getPosition().x, m_camera.getPosition().y, m_camera.getPosition().z);
+	eMainContextBase::InitializeRenders();
 
-	renderManager.Initialize(modelManager, texManager, shadersFolderPath);
-
-	renderManager.ParticleRender()->AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f), texManager.find("Tatlas2"), sound.get()));
-
-	m_Objects[4]->setScript(new eShipScript(texManager.find("TSpanishFlag0_s"),
-											renderManager.ParticleRender(),
-											texManager.find("Tatlas2"),
-											sound.get(),
-											&camRay,
-											waterHeight));
+	renderManager.ParticleRender()->AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f), texManager.Find("Tatlas2"), sound.get()));
 }
 
 void eMainContext::PaintGL()
@@ -364,8 +315,9 @@ void eMainContext::PaintGL()
 		if (object->getScript())
 			object->getScript()->Update(m_Objects);
 	}
+	lightObject->getTransform()->setTranslation(m_light.light_position);
+	
 	Pipeline();
-	//Test();
 }
 
 void eMainContext::Pipeline()
@@ -395,10 +347,12 @@ void eMainContext::Pipeline()
 	glViewport(0, 0, width, height);
 
 	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW, GL_TEXTURE1);
+	
 	//shadow
-	mat4 worldToViewMatrix = glm::lookAt(glm::vec3(m_light.light_vector), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+	mat4 worldToViewMatrix = glm::lookAt(glm::vec3(m_light.light_position), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
 	mat4 shadow_matrix = scale_bias_matrix * viewToProjectionMatrix * worldToViewMatrix;
-
+	
+	//$todo optimize
 	mts ? eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS)
 		: eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -528,8 +482,8 @@ void eMainContext::Pipeline()
 	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
 	
-	//if(mousepress)
-	//{m_screenRender->renderFrame();}
+	if(mousepress)
+	{renderManager.ScreenRender()->RenderFrame();}
 
 	guis[0].SetTexture(&eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFLECTION));
 	glViewport(guis[0].getViewPort().x, guis[0].getViewPort().y, guis[0].getViewPort().z, guis[0].getViewPort().w);
@@ -541,97 +495,3 @@ void eMainContext::Pipeline()
 	renderManager.ScreenRender()->SetTexture(*(guis[1].GetTexture()));
 	renderManager.ScreenRender()->Render(viewToProjectionMatrix, m_camera);
 }
-
-void eMainContext::Test()
-{
-	glUseProgram(shader.ID);
-
-	unsigned int VBO, VAO;
-
-	float vertices[] = {
-		// first triangle
-		-0.9f, -0.5f, 0.0f,  // left 
-		-0.0f, -0.5f, 0.0f,  // right
-		-0.45f, debug, 0.0f,  // top 
-							 // second triangle
-							 0.0f, -0.5f, 0.0f,  // left
-							 0.9f, -0.5f, 0.0f,  // right
-							 0.45f, 0.5f, 0.0f   // top 
-	};
-
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	// bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-	glBindVertexArray(VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
-	// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-	// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-	glBindVertexArray(0);
-
-	glViewport(0, 0, width, height);
-
-	GLuint fullTransformationUniformLocation = glGetUniformLocation(shader.ID, "modelToProjectionMatrix");
-	//GLuint modelToWorldMatrixUniformLocation = glGetUniformLocation(shader.ID, "modelToWorldMatrix");
-	//GLuint shadowMatrixUniformLocation		 = glGetUniformLocation(shader.ID, "shadowMatrix"); //shadow
-	//GLuint eyePositionWorldUniformLocation	 = glGetUniformLocation(shader.ID, "eyePositionWorld");
-
-	//***************************************************************
-	// Clear the colorbuffer and render
-	//***************************************************************
-	//glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-	//glClear(GL_COLOR_BUFFER_BIT);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-	////////////////////////////////////////////////////////////////////
-	glm::mat4 worldToViewMatrix = m_camera.getWorldToViewMatrix();
-	glm::mat4 worldToProjectionMatrix = viewToProjectionMatrix * worldToViewMatrix;
-	mat4 shadow_matrix = scale_bias_matrix * viewToProjectionMatrix * worldToViewMatrix;
-	//glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE, &shadow_matrix[0][0]);  //shadow
-
-	//glUniform3fv(eyePositionWorldUniformLocation, 1, &m_camera.getPosition()[0]);
-	
-	for (auto &object : m_Objects)
-	{
-		glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * object->getTransform()->getModelMatrix();
-		glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
-		//glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &object->getTransform()->getModelMatrix()[0][0]);
-		//*********************
-		std::vector<glm::mat4> matrices(100);
-		for(auto&m : matrices)
-		{
-			m = UNIT_MATRIX;
-		}
-		if(object->getRigger() != nullptr)
-		{
-			matrices = object->getRigger()->GetMatrices();
-		}
-		int loc = glGetUniformLocation(shader.ID, "gBones");
-		glUniformMatrix4fv(loc, 100, GL_FALSE, &matrices[0][0][0]);
-		//*********************
-		object->getModel()->Draw();
-	}
-
-	/*glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * m_Objects[0]->getTransform()->getModelMatrix();
-	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
-	m_Objects[6]->getModel()->Draw();*/
-
-	//***************************************************************
-	// Draw our first triangle
-	//***************************************************************
-	/*glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	glBindVertexArray(0);*/
-
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-}
-

@@ -13,14 +13,14 @@
 	#include "TextureImplSDL.h"
 #endif
 
-TextureManager::~TextureManager()
+eTextureManager::~eTextureManager()
 {
 #ifdef SDL_IMAGE
 	{ IMG_Quit(); }
 #endif
 }
 
-void TextureManager::InitContext(const std::string& _folderPath)
+void eTextureManager::InitContext(const std::string& _folderPath)
 {
 	folderPath = _folderPath;
 #ifdef DEVIL_IMAGE
@@ -39,7 +39,7 @@ void TextureManager::InitContext(const std::string& _folderPath)
 #endif
 }
 
-void TextureManager::loadAllTextures()
+void eTextureManager::LoadAllTextures()
 {
 	Texture text;
 	text.loadTextureFromFile(folderPath + "bricks.jpg");
@@ -108,7 +108,7 @@ void TextureManager::loadAllTextures()
 	m_Textures.insert(std::pair<std::string, Texture>("Tatlas2", text));
 }
 
-Texture* TextureManager::find(const std::string& texture_name)
+Texture* eTextureManager::Find(const std::string& texture_name)
 {
 	if (m_Textures.find(texture_name) != m_Textures.end())
 		return &m_Textures.find(texture_name)->second;

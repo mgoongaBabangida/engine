@@ -53,7 +53,7 @@ void eWaterRender::Render(const glm::mat4& ProjectionMatrix, const Camera& camer
 		move_factor = -0.05f;
 
 	glUniform3f(CameraPosLoc,	camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
-	glUniform3f(lightPosLoc,	light.light_vector.x,	light.light_vector.y,	light.light_vector.z);// , light.light_vector.w);
+	glUniform3f(lightPosLoc,	light.light_position.x,	light.light_position.y,	light.light_position.z);// , light.light_position.w);
 	glUniform3f(lightColorLoc,	light.diffuse.x,		light.diffuse.y,		light.diffuse.z);
 	
 	mat4 modelToProjectionMatrix = worldToProjectionMatrix * object->getTransform()->getModelMatrix();

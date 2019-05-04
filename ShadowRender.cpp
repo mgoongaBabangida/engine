@@ -15,12 +15,12 @@ void eShadowRender::Render(const glm::mat4&			projectionMatrix,
 {
 	glUseProgram(shader.ID);
 
-	glm::mat4 ModelToWorldMatrix = glm::translate(glm::vec3(light.light_vector));
+	glm::mat4 ModelToWorldMatrix = glm::translate(glm::vec3(light.light_position));
 	GLfloat near_plane = 0.1f, far_plane = 20.0f; //!!!!!!!!!!!!!!!!!!!!!!!!!!
 	//mat4 viewToProjectionMatrix = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
 	
 	glm::mat4 viewToProjectionMatrix = projectionMatrix;
-	glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_vector), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 worldToProjectionMatrix = viewToProjectionMatrix * worldToViewMatrix; //matrix for shading
 	glm::mat4 MVP = viewToProjectionMatrix * worldToViewMatrix * ModelToWorldMatrix;
 	
@@ -33,11 +33,11 @@ void eShadowRender::Render(const glm::mat4&			projectionMatrix,
 		glUniformMatrix4fv(MVPUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 		//*********************
 		std::vector<glm::mat4> matrices(100);
-		for(auto&m : matrices)
+		for(auto& m : matrices)
 		{
 			m = UNIT_MATRIX;
 		}
-		if (object->getRigger() != nullptr)
+		if(object->getRigger() != nullptr)
 		{
 			matrices = object->getRigger()->GetMatrices();
 		}

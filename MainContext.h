@@ -2,23 +2,19 @@
 #define MAIN_CONTEXT_H
 
 #include <glew-2.1.0\include\GL\glew.h>
-#include "InterfacesDB.h"
+#include "MainContextBase.h"
 #include "Structures.h"
 
 #include "TerrainModel.h"
 #include "Camera.h"
 #include "CameraRay.h"
-#include "TextureManager.h"
-#include "ModelManager.h"
-#include "RenderManager.h"
 #include "GUI.h"
-#include "InputController.h"
 
 class SoundContext;
 class remSnd;
 class IWindowImGui;
 
-class eMainContext : public IInputObserver
+class eMainContext : public eMainContextBase
 {
 public:
 	eMainContext(eInputController*,
@@ -28,23 +24,15 @@ public:
 				const std::string& shadersPath);
 	virtual ~eMainContext() = default;
 
-	void					InitializeGL();
-	void					PaintGL();
+	virtual void			InitializeGL()									override;
+	virtual void			PaintGL()										override;
 
 	virtual bool			OnMouseMove(uint32_t x, uint32_t y)				override;
 	virtual bool			OnKeyPress(uint32_t asci)						override;
 	virtual bool			OnMousePress(uint32_t x, uint32_t y, bool left) override;
 	virtual bool			OnMouseRelease()								override;
-
-	uint32_t				Width()				{ return width;			}
-	uint32_t				Height()			{ return height;		}
 	
-	Shader					shader;
-	float					debug = 0.5f;
-	void Test();
-	void TestDebug();
-private:
-	eInputController*					inputController;
+protected:
 	Camera								m_camera;
 	dbb::CameraRay						camRay;
 	
@@ -52,39 +40,30 @@ private:
 	std::vector<shObject>				m_Objects;
 	std::vector<shObject>				m_framed;
 	Light								m_light;
+	
 	shObject							lightObject; //debuging
 	std::unique_ptr<TerrainModel>		m_TerrainModel;
 	
 	std::unique_ptr<SoundContext>		context; //test
 	std::unique_ptr<remSnd>				sound;  //test
 	std::vector<GUI>					guis;
-	//managers
-	TextureManager						texManager;
-	ModelManager						modelManager;
-	eRenderManager						renderManager;
 
 	float								waterHeight = 2.0f;
-	uint32_t							width		= 1200;
-	uint32_t							height		= 600;
-	float								nearPlane   = 0.1f;
-	float								farPlane    = 20.0f;
 	
 	bool								mts			= true;
 	bool								skybox		= true;
 	bool								mousepress	= false; //to draw framed objects
 	
-	std::string							modelFolderPath;
-	std::string							assetsFolderPath;
-	std::string							shadersFolderPath;
-	
 	glm::mat4							viewToProjectionMatrix;
 	glm::mat4							scale_bias_matrix;
 
 protected:
-	void								InitializeBuffers();
-	void								InitializeModels();
-	void								InitializeRenders();
-	void								Pipeline();
+	virtual void						InitializePipline()		override;
+	virtual void						InitializeBuffers()		override;
+	virtual void						InitializeModels()		override;
+	virtual void						InitializeRenders()		override;
+	virtual void						Pipeline()				override;
+	void								InitializeSounds();
 };
 
 #endif

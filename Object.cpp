@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "Object.h"
 #include "MyModel.h"
-#include "RigidBody.h"
 #include "InterfacesDB.h"
+#include "RigidBody.h"
 
 eObject::eObject() 
 {
@@ -47,6 +47,11 @@ bool eObject::operator!=(const eObject& _other)
 void eObject::setScript(IScript* scr)
 {
 	 script.reset(scr); scr->setObject(this);
+}
+
+eRigidBody * eObject::getRigidBody() const
+{
+	return movementApi;
 }
 
 void eObject::TurnRight(std::vector<std::shared_ptr<eObject> > objects)
@@ -97,6 +102,15 @@ void eObject::MoveUp(std::vector<std::shared_ptr<eObject> > objects)
 void eObject::MoveDown(std::vector<std::shared_ptr<eObject> > objects)
 {
 	movementApi->MoveDown(objects);
+}
+
+void eObject::Move(std::vector<std::shared_ptr<eObject>> objects)
+{
+	movementApi->Move(objects);
+}
+void eObject::Turn(glm::vec3 direction, std::vector<std::shared_ptr<eObject>> objects)
+{
+	movementApi->Turn(direction, objects);
 }
 
 void eObject::Debug()

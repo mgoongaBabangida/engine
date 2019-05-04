@@ -5,7 +5,7 @@
 #include "MyMesh.h"
 #include "AssimpModel.h"
 
-void ModelManager::initializePrimitives()
+void eModelManager::InitializePrimitives()
 {
 	ShapeData cube = ShapeGenerator::makeCube();
 	ShapeData arrow = ShapeGenerator::makeArrow();
@@ -30,28 +30,26 @@ void ModelManager::initializePrimitives()
 	square.cleanup();
 }
 
-ModelManager::ModelManager(): terrain(new TerrainModel)
-{
+eModelManager::eModelManager(): terrain(new TerrainModel)
+{}
 
-}
-
-std::shared_ptr<IModel> ModelManager::find(const std::string& name)
+std::shared_ptr<IModel> eModelManager::Find(const std::string& name)
 {
 	return  models.find(name)->second;
 }
 
-void ModelManager::add(std::string name, GLchar* path)
+void eModelManager::Add(const std::string& name, GLchar* path)
 {
 	models.insert(std::pair<std::string, std::shared_ptr<IModel> >(name, new Model(path)) );
 }
 
-void ModelManager::addPrimitive(std::string name, std::shared_ptr<MyModel> model)
+void eModelManager::AddPrimitive(const std::string& name, std::shared_ptr<MyModel> model)
 {
 	primitves.insert(std::pair<std::string, std::shared_ptr<MyModel> >(name, model));
 	models.insert(std::pair<std::string, std::shared_ptr<IModel> >(name, new MyModel(*(model.get()))));   
 }
 
-std::unique_ptr<MyModel> ModelManager::clonePrimitive(const std::string& name)
+std::unique_ptr<MyModel> eModelManager::ClonePrimitive(const std::string& name)
 {
 	if (primitves.find(name) == primitves.end())
 		std::cout << "ENDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD" << std::endl;
@@ -59,12 +57,12 @@ std::unique_ptr<MyModel> ModelManager::clonePrimitive(const std::string& name)
 	return std::unique_ptr<MyModel>(new MyModel(*(model.get())));
 }
 
-std::unique_ptr<TerrainModel> ModelManager::cloneTerrain(std::string name)
+std::unique_ptr<TerrainModel> eModelManager::CloneTerrain(const std::string& name)
 {
 	return std::unique_ptr<TerrainModel>(new TerrainModel(*(terrain.get())));
 }
 
-std::shared_ptr<MyMesh> ModelManager::findMesh(std::string name)
+std::shared_ptr<MyMesh> eModelManager::FindMesh(const std::string& name)
 {
 	return  myMeshes.find(name)->second;	
 }

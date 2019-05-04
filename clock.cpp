@@ -1,13 +1,13 @@
 #include "stdafx.h"
 #include "Clock.h"
 
-void Clock::start()
+void eClock::start()
 {
 	if(m_start == std::chrono::system_clock::time_point() )
 	m_start = last_frame = std::chrono::system_clock::now();
 }
 
-int64_t Clock::timeEllapsedMsc()
+int64_t eClock::timeEllapsedMsc()
 {
 	if (!paused)
 	{
@@ -22,7 +22,7 @@ int64_t Clock::timeEllapsedMsc()
 	}
 }
 
-int Clock::newFrame()
+int64_t eClock::newFrame()
 {
 	if (!paused)
 	{
@@ -39,9 +39,9 @@ int Clock::newFrame()
 	}
 }
 
-int Clock::timeEllapsedLastFrameMsc()
+int64_t eClock::timeEllapsedLastFrameMsc()
 {
-	if (!paused)
+	if(!paused)
 	{
 		auto now = std::chrono::system_clock::now();
 		std::chrono::milliseconds duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_frame);
@@ -54,13 +54,13 @@ int Clock::timeEllapsedLastFrameMsc()
 	}
 }
 
-void Clock::restart()
+void eClock::restart()
 {
 	m_start = last_frame = std::chrono::system_clock::now();
 	paused = false;
 }
 
-bool Clock::isActive()
+bool eClock::isActive()
 {
 	if (m_start == std::chrono::system_clock::time_point()) // && !paused
 		return false;
@@ -68,13 +68,13 @@ bool Clock::isActive()
 		return true;
 }
 
-void Clock::pause()
+void eClock::pause()
 {
 	pause_time = std::chrono::system_clock::now();
 	paused = true;
 }
 
-void Clock::goOn()
+void eClock::goOn()
 {
 	if (paused) // if pasued time > m_start
 	{

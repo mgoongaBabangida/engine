@@ -29,7 +29,7 @@ Frame SceletalAnimation::getCurrentFrame()
 	////names !?
 	//for (auto & entry : frames[i - 1].pose)
 	//{
-	//	auto dest = *(frames[i].pose.find(entry.first));
+	//	auto dest = *(frames[i].pose.Find(entry.first));
 	//	Transform trans = Transform::interpolate(entry.second, dest.second, progression);
 	//	newFrame.insert(std::pair<std::string, Transform>(entry.first, trans));
 	//}

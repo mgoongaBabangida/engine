@@ -21,15 +21,17 @@ public:
 	bool operator!=(const eObject&);
 
 	//Setters
-	void		 setRigger(Rigger* r)		{ rigger.reset(r); }
-	void		 setScript(IScript* scr);
+	void				setRigger(Rigger* r)		{ rigger.reset(r); }
+	void				setScript(IScript* scr);
 	//Getters
-	IScript*	 getScript()		const	{ return script.get();		}
-	Transform*	 getTransform()		const	{ return transform.get();	}
-	BoxCollider* getCollider()		const	{ return collider.get();	}
-	IModel*		 getModel()			const	{ return m_model;			}
-	Rigger*		 getRigger()		const	{ return rigger.get();		}
-	const std::string& Name()		const	{ return name;				}
+	IScript*			getScript()		const	{ return script.get();		}
+	Transform*			getTransform()	const	{ return transform.get();	}
+	BoxCollider*		getCollider()	const	{ return collider.get();	}
+	IModel*				getModel()		const	{ return m_model;			}
+	Rigger*				getRigger()		const	{ return rigger.get();		}
+	eRigidBody*			getRigidBody()	const;
+	const std::string&	Name()			const	{ return name;				}
+
 
 	virtual void TurnRight(std::vector<std::shared_ptr<eObject> > objects);
 	virtual void TurnLeft(std::vector<std::shared_ptr<eObject> > objects);
@@ -45,6 +47,8 @@ public:
 	virtual void MoveUp(std::vector<std::shared_ptr<eObject> > objects);
 	virtual void MoveDown(std::vector<std::shared_ptr<eObject> > objects);
 
+	virtual void Move(std::vector<std::shared_ptr<eObject> > objects);
+	virtual void Turn(glm::vec3 direction, std::vector<std::shared_ptr<eObject>> objects);
 	void		 Debug();
 
 protected:
