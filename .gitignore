@@ -14,10 +14,5 @@
 *.vcxproj.user
 bin/*
 bin-int/*
-vendor/glfw/*
-vendor/assimp/*
-vendor/SDL2/*
-vendor/AL/*
-vendor/IL/*
-vendor/SDL2_image/*
+vendor/**
 assets/Resources/*
