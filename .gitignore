@@ -21,4 +21,4 @@ vendor/AL/*
 vendor/IL/*
 vendor/SDL2_image/*
 
-!vendor/generate_vendor_projects.bat
+

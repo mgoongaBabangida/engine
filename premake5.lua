@@ -5,7 +5,7 @@ workspace "OpenGLProject"
     {
         "Debug",
         "Release",
-        "ReleaseDist"
+        "Dist"
     }
 
 outputdir = "%{cfg.buildcfg}"
@@ -82,25 +82,12 @@ project "OpenGLProject"
         cppdialect "C++17"
         systemversion "latest"
 
-        defines
-        {
-            "",
-            ""
-        } 
-        
---        postbuildcommands
---        {
---            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "")
---        }
     filter "configurations:Debug"
-        defines ""
         symbols "On"
     
     filter "configurations:Release"
-        defines ""
         symbols "On"
     
     filter "configurations:Dist"
-        defines ""
         optimize "On"
 	
