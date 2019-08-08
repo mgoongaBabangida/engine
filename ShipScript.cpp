@@ -5,7 +5,7 @@
 #include "ShootingParticleSystem.h"
 #include "Sound.h"
 
-eShipScript::eShipScript(Texture* flag_texture, eParticleRender* prt, Texture* shoting_texture, remSnd* shooting_sound, dbb::CameraRay* _camRay, float _waterHeight)
+eShipScript::eShipScript(Texture* flag_texture, eParticleRender* prt, Texture* shoting_texture, RemSnd* shooting_sound, dbb::CameraRay* _camRay, float _waterHeight)
 	:flag_tex(flag_texture), prt_renderer(prt),shoot_tex(shoting_texture),shoot_snd(shooting_sound), camRay(_camRay), waterHeight(_waterHeight)
 {
 	turn_speed = PI / 4.0f / 60.0f;

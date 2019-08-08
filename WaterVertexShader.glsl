@@ -22,12 +22,12 @@ const float tiling = 6.0f;
 void main()
 {
   vec4 v = vec4(position ,1.0);
-  vec4 ClipSpaceCoord= modelToProjectionMatrix * v;
-  gl_Position= ClipSpaceCoord;
-  TextureCoords=texcoord;
-  vec4 worldPositon = modelToWorldMatrix * vec4(position ,1.0);
-  ToCameraVector = cameraPosition - worldPositon.xyz;
-  FromLightVector = worldPositon.xyz - lightPosition;
+  vec4 ClipSpaceCoord = modelToProjectionMatrix * v;
+  gl_Position	      = ClipSpaceCoord;
+  TextureCoords	      = texcoord;
+  vec4 worldPositon   = modelToWorldMatrix * vec4(position ,1.0);
+  ToCameraVector      = cameraPosition - worldPositon.xyz;
+  FromLightVector     = worldPositon.xyz - lightPosition;
 
   //TextureCoords=vec2(texcoord.x/2+0.5,texcoord.y/2+0.5) * tiling;
 };

@@ -2,6 +2,7 @@
 #include "MainRender.h"
 
 eMainRender::eMainRender(const std::string& vS, const std::string& fS)
+: matrices(100)
 {
 	mainShader.installShaders(vS.c_str(), fS.c_str()); //main pass
 
@@ -27,6 +28,9 @@ eMainRender::eMainRender(const std::string& vS, const std::string& fS)
 	modelToWorldMatrixUniformLocation	= glGetUniformLocation(mainShader.ID, "modelToWorldMatrix");
 	shadowMatrixUniformLocation			= glGetUniformLocation(mainShader.ID, "shadowMatrix"); //shadow
 	eyePositionWorldUniformLocation		= glGetUniformLocation(mainShader.ID, "eyePositionWorld");
+
+	GLuint LightingIndex = glGetSubroutineIndex(mainShader.ID, GL_FRAGMENT_SHADER, "calculateBlindPhongPointSpecDif");
+	glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndex);
 }
 
 void eMainRender::Render(const glm::mat4&		projectionMatrix, 
@@ -59,7 +63,6 @@ void eMainRender::Render(const glm::mat4&		projectionMatrix,
 		glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 		glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &object->getTransform()->getModelMatrix()[0][0]);
 		//*********************
-		std::vector<glm::mat4> matrices(100);
 		for(auto& m : matrices)
 		{
 			m = UNIT_MATRIX;

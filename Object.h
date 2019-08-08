@@ -13,8 +13,8 @@ class eRigidBody;
 class eObject
 {
 public:
-	eObject();
-	eObject(IModel* m, const std::string& name = "empty");
+	explicit eObject();
+	explicit eObject(IModel* m, const std::string& name = "empty");
 	virtual ~eObject();
 
 	bool operator==(const eObject&);

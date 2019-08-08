@@ -1,10 +1,9 @@
 #ifndef SAND_BOX_GAME_H
 #define SAND_BOX_GAME_H
 
-#include <glew-2.1.0\include\GL\glew.h>
 #include "MainContextBase.h"
 #include "Structures.h"
-
+#include "Pipeline.h"
 #include "Camera.h"
 #include "CameraRay.h"
 
@@ -36,13 +35,11 @@ protected:
 	std::vector<shObject>				m_framed;
 	Light								m_light;
 
-	glm::mat4							viewToProjectionMatrix;
-	glm::mat4							scale_bias_matrix;
-
 	virtual void						InitializePipline() override;
 	virtual void						InitializeBuffers() override;
 	virtual void						InitializeModels()	override;
-	virtual void						Pipeline();
+
+	ePipeline							pipeline;
 };
 
 #endif //SAND_BOX_GAME_H

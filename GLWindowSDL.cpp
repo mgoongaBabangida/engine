@@ -6,8 +6,9 @@
 #include "imgui/imgui_impl_opengl3.h"
 #include "ImGuiContext.h"
 
-//#include "MainContext.h"
+#include "MainContext.h"
 #include "SandBoxGame.h"
+#include "AmericanTreasureGame.h"
 
 SDL_GLContext					context;
 
@@ -18,7 +19,7 @@ dbGLWindowSDL::dbGLWindowSDL()
 : inputController()
 , guiWnd(new eWindowImGui("Gui"))
 {
-	mainContext.reset(new eSandBoxGame(&inputController, guiWnd, "Resources/", "assets/", "shaders/"));
+	mainContext.reset(new eAmericanTreasureGame(&inputController, guiWnd, "Resources/", "assets/", "shaders/"));
 }
 //======================================
 //dbGLWindowSDL::~dbGLWindowSDL

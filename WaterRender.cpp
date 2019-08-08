@@ -24,8 +24,9 @@ eWaterRender::eWaterRender(std::unique_ptr<MyModel> model,
 	water->setTextureFourth(DUDV);
 
 	object.reset(new eObject(water.get()));
-	object->getTransform()->setTranslation(glm::vec3(0.0f, 2.0f, 0.0f));  // HEIGHT!
+	object->getTransform()->setTranslation(glm::vec3(0.0f, waterHeight, 0.0f));
 	object->getTransform()->setRotation(PI / 2, 0.0f, 0.0f);
+	object->getTransform()->setScale(glm::vec3(1.18f, 1.8f, 1.0f)); // the size of the pixture
 
 	clock.start();
 	timer.reset(new dbb::Timer([this]()->bool {this->Update(); return true; }));
@@ -44,10 +45,7 @@ void eWaterRender::Render(const glm::mat4& ProjectionMatrix, const Camera& camer
 	glUniform1f(WaterFactorLoc, move_factor);
 
 	int msc = clock.newFrame();
-	//if(incr)
 	move_factor += (float)msc / 10000.0f;
-	//else
-	//this->move_factor -= (float)msc / 10000.0f;
 
 	if (move_factor > 0.05f)
 		move_factor = -0.05f;

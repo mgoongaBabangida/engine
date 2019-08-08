@@ -2,8 +2,7 @@
 #include "SandBoxGame.h"
 
 #include "ImGuiContext.h"
-#include "GlBufferContext.h"
-
+#include "GUI.h"
 #include "SandBoxScript.h"
 
 eSandBoxGame::eSandBoxGame(eInputController*  _input,
@@ -12,6 +11,7 @@ eSandBoxGame::eSandBoxGame(eInputController*  _input,
 						   const std::string& _assetsPath,
 						   const std::string& _shadersPath)
 : eMainContextBase(_input, _guiWnd, _modelsPath, _assetsPath, _shadersPath)
+, pipeline(m_Objects, width, height, nearPlane, farPlane, 0)
 {
 	_guiWnd->Add(SLIDER_FLOAT, "Ydir", m_light.light_position.y);
 	_guiWnd->Add(SLIDER_FLOAT, "Zdir", m_light.light_position.z);
@@ -47,7 +47,7 @@ void eSandBoxGame::PaintGL()
 		if (object->getScript())
 			object->getScript()->Update(m_Objects);
 	}
-	Pipeline();
+	pipeline.RanderFrame(m_camera, m_light, std::vector<GUI> {}, std::vector<shObject> {});
 }
 
 bool eSandBoxGame::OnMouseMove(uint32_t x, uint32_t y)
@@ -92,25 +92,13 @@ bool eSandBoxGame::OnMouseRelease()
 
 void eSandBoxGame::InitializePipline()
 {
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_STENCIL_TEST);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_MULTISAMPLE);
-	glEnable(GL_LINE_SMOOTH);
-
-#define GLM_FORCE_RADIANS
-
-	viewToProjectionMatrix = glm::perspective(glm::radians(60.0f), ((float)width) / height, nearPlane, farPlane);
-	scale_bias_matrix = mat4(vec4(0.5f, 0.0f, 0.0f, 0.0f),
-		vec4(0.0f, 0.5f, 0.0f, 0.0f),
-		vec4(0.0f, 0.0f, 0.5f, 0.0f),
-		vec4(0.5f, 0.5f, 0.5f, 1.0f));
+	pipeline.Initialize();
+	// call all the enable pipeline functions
 }
 
 void eSandBoxGame::InitializeBuffers()
 {
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SCREEN, width, height);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW, width * 2, height * 2);
+	pipeline.InitializeBuffers(); //todo add possibility to choose buffers
 }
 
 void eSandBoxGame::InitializeModels()
@@ -125,45 +113,4 @@ void eSandBoxGame::InitializeModels()
 	shObject grassPlane = shObject(new eObject(modelManager.Find("grass_plane").get(), "Graund"));
 	grassPlane->getTransform()->setTranslation(vec3(0.0f, -2.0f, 0.0f));
 	m_Objects.push_back(grassPlane);
-}
-
-void eSandBoxGame::Pipeline()
-{
-	//1 Shadow Render Pass
-	glViewport(0, 0, width * 2, height * 2);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
-
-	// Bind the "depth only" FBO and set the viewport to the size of the depth texture 
-	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SHADOW);
-	// Clear
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	//glClearDepth(1.0f);
-	glClear(GL_DEPTH_BUFFER_BIT);
-	// Enable polygon offset to resolve depth-fighting isuses 
-	//glEnable(GL_POLYGON_OFFSET_FILL);
-	//glPolygonOffset(2.0f, -2000.0f);
-	// Draw from the light’s point of view DrawScene(true);
-
-	renderManager.ShadowRender()->Render(viewToProjectionMatrix, m_camera, m_light, m_Objects);
-
-	glDisable(GL_POLYGON_OFFSET_FILL);
-	glCullFace(GL_BACK);
-
-	glViewport(0, 0, width, height);
-
-	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW, GL_TEXTURE1);
-	//shadow
-	mat4 worldToViewMatrix = glm::lookAt(glm::vec3(m_light.light_position), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
-	mat4 shadow_matrix = scale_bias_matrix * viewToProjectionMatrix * worldToViewMatrix;
-
-	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	renderManager.MainRender()->Render(viewToProjectionMatrix, m_camera, m_light, shadow_matrix, m_Objects);
-
-	//glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	//glDisable(GL_DEPTH_TEST);
-	//renderManager.ScreenRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SHADOW)); //copy texture
-	//renderManager.ScreenRender()->Render(viewToProjectionMatrix, m_camera);
 }

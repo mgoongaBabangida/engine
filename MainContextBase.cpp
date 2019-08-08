@@ -10,10 +10,25 @@ eMainContextBase::eMainContextBase(eInputController*_input,
 , modelFolderPath(_modelsPath)
 , assetsFolderPath(_assetsPath)
 , shadersFolderPath(_shadersPath)
+, soundManager(_assetsPath)
 {}
 
 void eMainContextBase::InitializeGL()
-{}
+{
+	InitializeTextures();
+
+	InitializePipline();
+
+	InitializeBuffers();
+
+	InitializeSounds();
+
+	modelManager.InitializePrimitives();
+
+	InitializeModels();
+
+	InitializeRenders();
+}
 
 void eMainContextBase::PaintGL()
 {}
@@ -65,7 +80,9 @@ void eMainContextBase::InitializeModels()
 			texManager.Find("Twhite"))));
 }
 
-void eMainContextBase::InitializeRenders()
+void eMainContextBase::InitializeTextures()
 {
-	renderManager.Initialize(modelManager, texManager, shadersFolderPath);
+	texManager.InitContext(assetsFolderPath);
+	texManager.LoadAllTextures();
+	//m_Textures.Find("Tbricks0_d")->second.saveToFile("MyTexture");  Saving texture debug
 }

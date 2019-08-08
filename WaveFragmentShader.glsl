@@ -13,7 +13,7 @@
     vec3 diffuse;
     vec3 specular;
 
-	float constant;
+    float constant;
     float linear;
     float quadratic;
 };
@@ -62,7 +62,6 @@ void main()
   
  vec3 finNormal = -theNormal;
 	
-
   //Ambient
   vec3 ambientLight = light.ambient*vec3(texture(texture_diffuse1, Texcoord));// * material.ambient
 

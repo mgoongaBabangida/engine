@@ -26,9 +26,9 @@ out vec4 debug;
 
 void main()
 {
-	mat4 matrix = mat4(vec4(1,0,0,0),vec4(0,1,0,0),vec4(0,0,1,0),vec4(0,0,0,1));
+    mat4 matrix = mat4(vec4(1,0,0,0),vec4(0,1,0,0),vec4(0,0,1,0),vec4(0,0,0,1));
 	
-	mat4 BoneTransform = gBones[boneIDs[0]] * weights[0];
+    mat4 BoneTransform = gBones[boneIDs[0]] * weights[0];
     BoneTransform     += gBones[boneIDs[1]] * weights[1];
     BoneTransform     += gBones[boneIDs[2]] * weights[2];
     BoneTransform     += gBones[boneIDs[3]] * weights[3];
@@ -38,7 +38,7 @@ void main()
   gl_Position	= modelToProjectionMatrix * v;
   LightSpacePos = shadowMatrix * modelToWorldMatrix* v;
 
-  vec4 WorldPosV		= modelToWorldMatrix * v;		//water
+  vec4 WorldPosV	= modelToWorldMatrix * v;		//water
   gl_ClipDistance[0]	= dot(WorldPosV,clip_plane); //water
 
   Texcoord = texcoord;

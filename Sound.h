@@ -9,47 +9,54 @@
 
 class SoundContext //singleton
 {
-	ALCdevice* device;
-	ALCcontext* context;
-	bool endWithError(std::string str);
 public:
 	bool init();
 	bool exit();
 	std::map<std::string, ALuint> buffers;
-	bool LoadWavFile(const std::string &Filename);
+
+	bool		LoadWavFile(const std::string &Filename);
+
+private:
+	ALCdevice*	device;
+	ALCcontext* context;
+	bool		endWithError(std::string str);
 };
 
-class remSnd
+class RemSnd
 {
 public:
 	ALfloat mVel[3];
 	ALfloat mPos[3];
-	bool  mLooped;
-	bool playing;
-
-	// Functions
-	bool Open(const std::string &Filename, bool Looped, bool Streamed);
-	bool IsStreamed();
-	void Play();
-	void Close();
-	void Update();
-	void Move(float X, float Y, float Z);
-	void Stop();
-	bool isPlaying() { return playing; }
+	bool	mLooped;
+	bool	playing;
 
 	// Construction/destruction
-	remSnd(ALuint buffer, bool looped);
-	remSnd(const remSnd& cSnd);
-	void connectToBuffer(ALuint buffer);
-	virtual ~remSnd();
+	RemSnd(ALuint buffer, bool looped, const std::string& _name = "empty");
+	RemSnd(const RemSnd& cSnd);
+	virtual ~RemSnd();
+
+	// Functions
+	bool				Open(const std::string &Filename, bool Looped, bool Streamed);
+	bool				IsStreamed();
+	void				Play();
+	void				Close();
+	void				Update();
+	void				Move(float X, float Y, float Z);
+	void				Stop();
+	bool				isPlaying() { return playing; }
+	const std::string&	Name() const { return mName; }
+
+	void		connectToBuffer(ALuint buffer);
 	static bool init();
 	static bool exit();
 	static void loadListner(float x, float y, float z);
+
 private:
 	// Идентификатор источника
 	ALuint      mSourceID;
 	// Потоковый ли наш звук?
-	bool      mStreamed;
+	bool		mStreamed;
+	std::string mName;
 };
 
 

@@ -5,7 +5,7 @@
 #include "InputController.h"
 #include "TextureManager.h"
 #include "ModelManager.h"
-#include "RenderManager.h"
+#include "SoundManager.h"
 
 class IWindowImGui;
 
@@ -24,11 +24,14 @@ public:
 
 	uint32_t			Width()	 { return width; }
 	uint32_t			Height() { return height; }
+
 protected:
 	virtual void		InitializePipline() {}
 	virtual void		InitializeBuffers() {}
 	virtual void		InitializeModels();
-	virtual void		InitializeRenders();
+	virtual void		InitializeRenders() {}
+	virtual void		InitializeTextures();
+	virtual void		InitializeSounds()  {}
 	virtual void		Pipeline()			{}
 
 	eInputController*	inputController;
@@ -40,7 +43,7 @@ protected:
 	//managers
 	eTextureManager		texManager;
 	eModelManager		modelManager;
-	eRenderManager		renderManager;
+	eSoundManager		soundManager;
 
 	uint32_t			width		= 1200;
 	uint32_t			height		= 600;

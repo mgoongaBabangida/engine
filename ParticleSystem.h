@@ -20,7 +20,7 @@ public:
 				   float	 _lifeLength, 
 				   glm::vec3 _systemCenter, 
 				   Texture*  _texture, 
-				   remSnd*	 _sound, 
+				   RemSnd*	 _sound, 
 				   float	 _duration = 10000.0f);
 	
 	static const int MAX_PARTICLES = 1000;
@@ -43,6 +43,6 @@ protected:
 	std::vector<Particle>		m_particles;
 	eClock						clock;
 	std::unique_ptr<dbb::Timer> timer;
-	remSnd*						sound;
+	RemSnd*						sound;
 	float						duration;
 };

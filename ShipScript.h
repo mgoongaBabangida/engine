@@ -12,7 +12,7 @@ class eObject;
 class eParticleRender;
 struct Flag;
 struct Texture;
-class remSnd;
+class RemSnd;
 
 class eShipScript : public IScript
 {
@@ -20,10 +20,13 @@ public:
 	eShipScript(Texture*, 
 			   eParticleRender*	prt,
 			   Texture*			shoting_texture, 
-			   remSnd*			shooting_sound, 
+			   RemSnd*			shooting_sound, 
 			   dbb::CameraRay*,  
 			   float			waterHeight);
 	
+	eShipScript(const eShipScript&)				= delete;
+	eShipScript& operator=(const eShipScript&)	= delete;
+
 	virtual bool	OnKeyPress(uint32_t asci)							override;
 	virtual bool	OnMousePress(uint32_t x, uint32_t y, bool left)		override;
 
@@ -37,7 +40,7 @@ protected:
 	Texture*		 flag_tex;
 	eParticleRender* prt_renderer;
 	Texture*		 shoot_tex;
-	remSnd*			 shoot_snd;
+	RemSnd*			 shoot_snd;
 	float			 waterHeight;
 	dbb::CameraRay*	 camRay;
 

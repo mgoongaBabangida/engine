@@ -7,12 +7,14 @@ in layout(location=4) vec3 tangent;
 in layout(location=5) vec3 bitangent;
 
 uniform mat4 modelToProjectionMatrix;
+uniform float moveFactor;
 
 out vec2 TextureCoords;
 
 void main()
 {
   vec4 v = vec4(position ,1.0);
-  TextureCoords=texcoord;
+  TextureCoords = texcoord;
+  TextureCoords.y += moveFactor;
   gl_Position= modelToProjectionMatrix * v;
 };

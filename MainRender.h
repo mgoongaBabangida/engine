@@ -36,6 +36,8 @@ protected:
 	GLuint lightDiffuseLoc;
 	GLuint lightSpecularLoc;
 	GLuint lightPosLoc;
+
+	std::vector<glm::mat4> matrices;
 };
 
 #endif

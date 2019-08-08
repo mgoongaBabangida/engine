@@ -13,7 +13,7 @@ ParticleSystem::ParticleSystem(float	 _pps,
 							   float	 _lifeLength,
 							   glm::vec3 _systemCenter,
 							   Texture*  _texture,
-							   remSnd*	 _sound, 
+							   RemSnd*	 _sound, 
 							   float	 _duration)
 : IParticleSystem(_texture, 0.05f)
 , duration(_duration)

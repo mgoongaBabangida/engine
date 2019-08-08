@@ -11,48 +11,52 @@ bool SoundContext::endWithError(std::string str)
 	return false;
 }
 
-remSnd::remSnd(const remSnd& cSnd) :mLooped(cSnd.mLooped), mSourceID(cSnd.mSourceID), mStreamed(cSnd.mStreamed) { playing = false; }
+RemSnd::RemSnd(const RemSnd& cSnd) 
+: mLooped(cSnd.mLooped), mSourceID(cSnd.mSourceID), mStreamed(cSnd.mStreamed) 
+{ 
+	playing = false; 
+}
 
-bool remSnd::Open(const std::string & Filename, bool Looped, bool Streamed)
+bool RemSnd::Open(const std::string & Filename, bool Looped, bool Streamed)
 {
 	return false;
 }
 
-bool remSnd::IsStreamed()
+bool RemSnd::IsStreamed()
 {
 	return false;
 }
 
-void remSnd::Play()
+void RemSnd::Play()
 {
 	alSourcePlay(mSourceID);
 	playing = true;
 }
 
-void remSnd::Close()
+void RemSnd::Close()
 {
 	alSourceStop(mSourceID);
 	if (alIsSource(mSourceID)) alDeleteSources(1, &mSourceID);
 }
 
-void remSnd::Update()
+void RemSnd::Update()
 {
 }
 
-void remSnd::Move(float X, float Y, float Z)
+void RemSnd::Move(float X, float Y, float Z)
 {
 	ALfloat Pos[3] = { X, Y, Z };
 	alSourcefv(mSourceID, AL_POSITION, Pos);
 }
 
-void remSnd::Stop()
+void RemSnd::Stop()
 {
 	alSourceStop(mSourceID);
 	playing = false;
 	//std::cout << "Stop" << std::endl;
 }
 
-remSnd::remSnd(ALuint buffer, bool looped)
+RemSnd::RemSnd(ALuint buffer, bool looped, const std::string& _name)
 {
 	ALfloat SourcePos[] = { 0.0,0.0,0.0 };
 	ALfloat SourceVel[] = { 0.0,0.0,0.0 };
@@ -65,14 +69,15 @@ remSnd::remSnd(ALuint buffer, bool looped)
 	alSourcefv(mSourceID, AL_VELOCITY, SourceVel);
 	//alSourcei(mSourceID, AL_BUFFER, AL_FALSE);
 	alSourcei(mSourceID, AL_LOOPING, mLooped);
+	mName = _name;
 }
 
-void remSnd::connectToBuffer(ALuint buffer)
+void RemSnd::connectToBuffer(ALuint buffer)
 {
 	alSourcei(mSourceID, AL_BUFFER, buffer);
 }
 
-remSnd::~remSnd()
+RemSnd::~RemSnd()
 {
 	alSourceStop(mSourceID);
 	if (alIsSource(mSourceID)) alDeleteSources(1, &mSourceID);
@@ -101,7 +106,7 @@ bool SoundContext::exit()
 	return true;
 }
 
-void remSnd::loadListner(float x, float y, float z)
+void RemSnd::loadListner(float x, float y, float z)
 {
 	ALfloat ListnerPos[] = { 0.0,0.0,0.0 };
 	ALfloat ListnerVel[] = { 0.0,0.0,0.0 };
@@ -111,7 +116,6 @@ void remSnd::loadListner(float x, float y, float z)
 	alListenerfv(AL_POSITION, ListnerPos);
 	alListenerfv(AL_VELOCITY, ListnerVel);
 	alListenerfv(AL_ORIENTATION, ListnerOri);
-
 }
 
 bool SoundContext::LoadWavFile(const std::string & Filename)

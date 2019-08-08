@@ -18,7 +18,7 @@ public:
 						   float	 _lifeLength,
 						   glm::vec3 _systemCenter,
 						   Texture*  _texture,
-						   remSnd*	 _sound,
+						   RemSnd*	 _sound,
 						   float	 _duration = 10000.0f);
 protected:
 	virtual void emitParticles() override;
