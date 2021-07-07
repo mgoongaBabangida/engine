@@ -26,15 +26,16 @@ public:
 	
 	static const int32_t MAX_PARTICLES = 1000;
 	
-	virtual void								GenerateParticles();
+	virtual void								              GenerateParticles();
 	virtual std::vector<Particle>::iterator		PrepareParticles(glm::vec3 cameraPosition);
-	virtual std::vector<Particle>&				GetParticles()	{ return  m_particles; }
-	virtual bool								IsFinished()	{ return clock.timeEllapsedMsc() > duration + m_lifeLength;}
+	virtual std::vector<Particle>&				    GetParticles()	{ return  m_particles; }
+	virtual bool								              IsFinished()	{ return clock.timeEllapsedMsc() > duration + m_lifeLength;}
 
 	virtual ~ParticleSystem()					{ timer->stop(); }
+
 protected:
-	virtual void								Update();
-			void								emitParticles();
+	virtual void								  Update();
+	void								          emitParticles();
 	virtual	glm::vec3							_calculateParticles();
 
 	glm::vec3					systemCenter;

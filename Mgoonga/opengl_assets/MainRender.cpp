@@ -57,18 +57,19 @@ void eMainRender::Render(const Camera&			camera,
 	glUniform4f(lightDirLoc,	  light.light_direction.x, light.light_direction.y, light.light_direction.z, light.light_direction.w);
 	//light end
 	
-	glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position + light.light_direction), glm::vec3(0.0f, 1.0f, 0.0f));
 	if (light.type == eLightType::POINT)
 	{
+    glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position + light.light_direction), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniform1i(lightTypeLoc, 0);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexPoint);
 		shadowMatrix = camera.getProjectionBiasedMatrix() * worldToViewMatrix;
 	}
 	else if (light.type == eLightType::DIRECTION)
 	{
+    glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniform1i(lightTypeLoc, 1);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
-		shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
+    shadowMatrix = camera.getProjectionBiasedMatrix() * worldToViewMatrix; //$todo should be ortho projection
 	}
 	else // cut off
 	{

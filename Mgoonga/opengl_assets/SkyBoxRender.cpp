@@ -18,7 +18,7 @@ void eSkyBoxRender::Render(const Camera& _camera)
 {
 	glUseProgram(skyboxShader.ID);
 	moveFactor += 0.001f;
-	glm::mat4 trans = glm::toMat4(glm::quat(glm::vec3(PI, moveFactor, 0.0f)));
+	glm::mat4 trans = glm::toMat4(glm::quat(glm::vec3(0, moveFactor, 0.0f)));
 	glm::mat4 view	= glm::mat4(glm::mat3(_camera.getWorldToViewMatrix())) * trans;	// Remove any translation component of the view matrix
 
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);

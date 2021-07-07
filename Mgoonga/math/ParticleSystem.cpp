@@ -26,8 +26,9 @@ ParticleSystem::ParticleSystem(float	 _pps,
 , systemCenter(_systemCenter)
 , sound(_sound)
 , num_rows_in_texture(_num_rows_in_texture)
-, m_particles{ MAX_PARTICLES, {} }
+, m_particles(MAX_PARTICLES, Particle{})
 {
+  m_particles.resize(MAX_PARTICLES);
 	clock.start();
 
 	if(sound) sound->Play();

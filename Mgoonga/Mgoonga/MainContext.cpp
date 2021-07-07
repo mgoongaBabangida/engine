@@ -117,8 +117,8 @@ void eMainContext::InitializeGL()
 	guis[1].setCommand(std::make_shared<AnimStop>(AnimStop(m_objects[6])));
 
 	inputController->AddObserver(this, STRONG);
-	inputController->AddObserver(&guis[0], MONOPOLY);
-	inputController->AddObserver(&guis[1], MONOPOLY);
+  inputController->AddObserver(&guis[0], STRONG);//monopoly takes keyboard as well which is wrong
+  inputController->AddObserver(&guis[1], STRONG);
 	inputController->AddObserver(&m_camera, WEAK);
 	inputController->AddObserver(&camRay, WEAK);
 }
@@ -312,7 +312,8 @@ void eMainContext::PaintGL()
 		}
 	}
 
-	m_light.light_position = { lightObject->GetTransform()->getTranslation(), 1.0f };
+  lightObject->GetTransform()->setTranslation(m_light.light_position);
+	//m_light.light_position = { lightObject->GetTransform()->getTranslation(), 1.0f };
 	m_light.light_direction = { -m_light.light_position };
 	
 	std::vector<shObject> focused{ m_focused };

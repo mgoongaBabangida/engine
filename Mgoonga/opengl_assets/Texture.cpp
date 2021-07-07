@@ -103,28 +103,76 @@ bool Texture::loadTexture1x1(TColor color)
 
 bool Texture::loadCubemap(std::vector<std::string> faces)
 {
-	mChannels = 4;
-	glGenTextures(1, &id);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
-	for (GLuint i = 0; i < faces.size(); i++)
-	{
-		uint32_t ilId;
-		eTextureImplDevIl::LoadTexture(faces[i], ilId, mTextureWidth, mTextureHeight);
-		uint8_t* pixmap;
-		eTextureImplDevIl::AssignPixels(pixmap, mTextureWidth, mTextureHeight);
-		// Load textures
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLubyte*)pixmap);
-		eTextureImplDevIl::DeleteImage(ilId);
-	}
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+  //unsigned char* image;
+  glGenTextures(1, &id);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+  for (GLuint i = 0; i < faces.size(); i++)
+  {
+    //	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    //Generate and set current image ID
+    ILuint imgID = 0;
+    ilGenImages(1, &imgID);
+    ilBindImage(imgID);
 
-	return true;
+    //Load image
+    //ILboolean success = ilLoadImage( path.c_str() );
+    ILboolean success = ilLoadImage((const wchar_t*)(faces[i].c_str)());
+    int i0 = ilGetError();
+    if (!success)
+      std::cout << "error loading image" << std::endl;
+    int i1 = IL_COULD_NOT_OPEN_FILE;
+    int i2 = IL_ILLEGAL_OPERATION;
+    int i3 = IL_INVALID_PARAM;
+    //Image loaded successfully
+    mTextureWidth = ilGetInteger(IL_IMAGE_WIDTH);
+    mTextureHeight = ilGetInteger(IL_IMAGE_HEIGHT);
+    auto pixmap = new BYTE[mTextureWidth * mTextureHeight * 3];
+    ilCopyPixels(0, 0, 0, mTextureWidth, mTextureHeight, 1, IL_RGB, IL_UNSIGNED_BYTE, pixmap);
+    //Convert image to RGBA
+    success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+    if (!success)
+      std::cout << "error converting image" << std::endl;
+    // Load textures
+    glBindTexture(GL_TEXTURE_2D, id);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLuint*)ilGetData());
+    //
+    ilDeleteImages(1, &imgID);
+    //
+  }
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+  mChannels = 4;
+
+  return true;
 }
+
+//bool Texture::loadCubemap(std::vector<std::string> faces)
+//{
+//	mChannels = 4;
+//	glGenTextures(1, &id);
+//	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+//	for (GLuint i = 0; i < faces.size(); i++)
+//	{
+//		uint32_t ilId;
+//    eTextureImplDevIl::LoadTexture(faces[i], ilId, mTextureWidth, mTextureHeight);
+//		uint8_t* pixmap;
+//    eTextureImplDevIl::AssignPixels(pixmap, mTextureWidth, mTextureHeight);
+//		// Load textures
+//		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLubyte*)pixmap);
+//    eTextureImplDevIl::DeleteImage(ilId);
+//	}
+//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+//	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+//
+//	return true;
+//}
 
 bool Texture::makeCubemap(Texture* _texture)
 {

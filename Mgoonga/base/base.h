@@ -18,18 +18,18 @@ class eObject;
 struct Texture;
 
 //-------------------------------------------------------
-struct Material 
+struct Material
 {
-	glm::vec3	ambient;
-	glm::vec3	diffuse;
-	glm::vec3	specular;
-	float		shininess;
+	glm::vec3 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
+	float     shininess;
 };
 
 enum class eLightType {POINT, DIRECTION, SPOT};
 
 //-------------------------------------------------------
-struct Light 
+struct Light
 {
 	glm::vec4  light_position;
 	glm::vec4  light_direction;
@@ -57,22 +57,23 @@ static const glm::vec3 NONE{ glm::vec3(-100.0f, -100.0f, -100.0f) };
 const glm::vec3 XAXIS		= glm::vec3(1.0f, 0.0f, 0.0f);
 const glm::vec3 YAXIS		= glm::vec3(0.0f, 1.0f, 0.0f);
 const glm::vec3 ZAXIS		= glm::vec3(0.0f, 0.0f, 1.0f);
-const glm::mat4 UNIT_MATRIX = glm::mat4(1.0f, 0.0f, 0.0f, 0.0f, 
-										0.0f, 1.0f, 0.0f, 0.0f, 
-										0.0f, 0.0f, 1.0f, 0.0f, 
-										0.0f, 0.0f, 0.0f, 1.0f);
+
+const glm::mat4 UNIT_MATRIX = glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+                                        0.0f, 1.0f, 0.0f, 0.0f,
+                                        0.0f, 0.0f, 1.0f, 0.0f,
+                                        0.0f, 0.0f, 0.0f, 1.0f);
 
 //-------------------------------------------------------
 struct MyVertex
 {
-	glm::vec3	position;	//0
-	glm::vec3	color;		//1
-	glm::vec3	Normal;		//2
+	glm::vec3	position;	  //0
+	glm::vec3	color;		  //1
+	glm::vec3	Normal;		  //2
 	glm::vec2	TexCoords;	//3
-	glm::vec3	tangent;	//4
+	glm::vec3	tangent;	  //4
 	glm::vec3	bitangent;	//5
-	glm::ivec4	boneIDs{ 0,	   0	,0	  ,0 };		//6
-	glm::vec4	weights{ 0.0f, 0.0f ,0.0f ,1.0f };	//7
+	glm::ivec4	boneIDs{ 0, 0 ,0 ,0};		//6
+	glm::vec4	weights{ 0.0f, 0.0f ,0.0f ,1.0f};	//7
 };
 
 //-------------------------------------------------------

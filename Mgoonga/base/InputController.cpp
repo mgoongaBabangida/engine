@@ -5,7 +5,7 @@
 void eInputController::OnMouseMove(uint32_t x, uint32_t y)
 {
 	bool taken = false;
-	for(auto observer : observersPriority)
+	for(auto& observer : observersPriority)
 	{
 		if(observer && observer->OnMouseMove(x, y))
 		{
@@ -15,7 +15,7 @@ void eInputController::OnMouseMove(uint32_t x, uint32_t y)
 	}
 	if(!taken)
 	{
-		for(auto observer : observers)
+		for(auto& observer : observers)
 		{
 			if (observer)
 				observer->OnMouseMove(x, y);
@@ -26,7 +26,7 @@ void eInputController::OnMouseMove(uint32_t x, uint32_t y)
 bool eInputController::OnKeyPress(uint32_t asci)
 {
 	bool taken = false;
-	for (auto observer : observersPriority)
+	for (auto& observer : observersPriority)
 	{
 		if (observer)
 		{
@@ -38,11 +38,11 @@ bool eInputController::OnKeyPress(uint32_t asci)
 	}
 	if (!taken)
 	{
-		for (auto observer : observers)
+		for (auto& observer : observers)
 		{
-			if (observer)
-				if (!observer->OnKeyPress(asci))
-					return false;
+      if (observer)
+        if (observer->OnKeyPress(asci))
+          break;
 		}
 	}
 	return true;
@@ -51,7 +51,7 @@ bool eInputController::OnKeyPress(uint32_t asci)
 void eInputController::OnMousePress(uint32_t x, uint32_t y, bool left)
 {
 	bool taken = false;
-	for (auto observer : observersPriority)
+	for (auto& observer : observersPriority)
 	{
 		if (observer && observer->OnMousePress(x,y,left))
 		{
@@ -61,7 +61,7 @@ void eInputController::OnMousePress(uint32_t x, uint32_t y, bool left)
 	}
 	if (!taken)
 	{
-		for (auto observer : observers)
+		for (auto& observer : observers)
 		{
 			if (observer)
 				observer->OnMousePress(x, y, left);
@@ -72,7 +72,7 @@ void eInputController::OnMousePress(uint32_t x, uint32_t y, bool left)
 void eInputController::OnMouseRelease()
 {
 	bool taken = false;
-	for (auto observer : observersPriority)
+	for (auto& observer : observersPriority)
 	{
 		if (observer && observer->OnMouseRelease())
 		{
@@ -82,7 +82,7 @@ void eInputController::OnMouseRelease()
 	}
 	if (!taken)
 	{
-		for (auto observer : observers)
+		for (auto& observer : observers)
 		{
 			if (observer)
 				observer->OnMouseRelease();

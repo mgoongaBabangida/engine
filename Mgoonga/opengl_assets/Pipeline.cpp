@@ -117,6 +117,8 @@ void ePipeline::RanderFrame(Camera& _camera, const Light& _light ,std::vector<GU
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		RanderRefraction(_camera, _light, m_objects);
 	}
+  glDisable(GL_CLIP_DISTANCE0);
+
 		mts ? eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS)
 			: eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -208,6 +210,7 @@ void ePipeline::RanderSkybox(const Camera& _camera)
 {
 	glDepthFunc(GL_LEQUAL);
 	renderManager->SkyBoxRender()->Render(_camera);
+  glDepthFunc(GL_LESS);
 }
 
 void ePipeline::RanderReflection(Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
