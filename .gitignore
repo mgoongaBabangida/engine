@@ -1,0 +1,99 @@
+# Important!
+# In order to avoid merge conflicts, please:
+#   1) Put your exclusions into the correspond section (or create a new one)
+#   2) Inside a section keep items in the alphabetical order
+#   3) Try to make your exclusion as more specific as possible
+
+
+# [Common artifact extentions]
+*.cdb
+*.inp
+*.pyc
+*.stl
+*.user
+*.aps
+*.suo
+*.cpp.bak
+*.c.bak
+*.h.bak
+*.ipch
+*.db
+*.dll
+*.exe
+*.exp
+*.lib
+*.tlog
+*.pdb
+*.idb
+*.obj
+*.ilk
+*.log
+*.cache
+*.vcxproj
+*.ini
+*.opendb
+*.sln
+*.filters
+*.db-sch
+*.db-wal
+*.VC.db-scm
+*.obj.enc
+Thumbs.db
+
+
+# [Common artifact folders]
+.vs/*
+.azuredevops/
+**/__pycache__/*
+
+
+# [Common build artifacts]
+Binaries/*
+Libraries/*
+ThirdParty/*
+Build/*
+BuildRW/*
+!Build/*.bat
+!Build/*.py
+!Build/_PublishBuildExcludeList.txt
+
+# [Deployment local builds artifacts] - Enlight/Mitral/MIS
+/Deployment/Mitral/Bootstrapper/obj/*
+/Deployment/Mitral/Bootstrapper/bin/*
+/Deployment/Mitral/BootstrapperApplication/obj/*
+/Deployment/Mitral/BootstrapperApplication/bin/*
+/Deployment/Mitral/MimicsStandalone/Setups/*
+/Deployment/Mitral/MitralDeployment/.vs/*
+/Deployment/Mitral/MitralDeployment/MitralWorkflow/x64/*
+/Deployment/Mitral/MitralDeployment/CMFWorkflow/x64/*
+/Deployment/Mitral/MitralDeployment/TendyneWorkflow/x64/*
+/Deployment/Mitral/Packages/*
+/Deployment/Mitral/MitralWorkflow/Setups/*
+/Deployment/Mitral/CMFWorkflow/Setups/*
+/Deployment/Mitral/TendyneWorkflow/Setups/*
+/Deployment/Enlight/Setups/*
+/Deployment/Enlight/vs/Logs/*
+/Deployment/Enlight/vs/x64/*
+/Deployment/MIS/SupportFiles/Mimics/x64/MimicsResearchModule.msm
+/Deployment/MIS/SupportFiles/Subfolders/Subfolders.msm
+/Deployment/MIS/SupportFiles/DemoFiles/Medical/
+
+
+# [Mimics build artifacts] - TODO: make more specific
+obj/*
+tmp/*
+
+# [Microsoft Office temporary files]
+~$*.docx
+~$*.pptx
+
+
+# PyCharm project files
+**/.idea/*
+*.idea
+
+# Planner local builds artifacts - TODO: make more specific
+temp
+
+# custom developer files with cmake project options overrides
+*.local.cmake
