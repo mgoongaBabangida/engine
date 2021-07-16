@@ -31,13 +31,14 @@ public:
 	static glm::quat	RotationBetweenVectors(glm::vec3 start, glm::vec3 dest);
 	static Transform	interpolate(const Transform& first, const Transform& second, float progression);
 	
-	virtual glm::mat4	getScale()			const { return  glm::scale(glm::vec3(m_scale.x, m_scale.y, m_scale.z)) ; }
-	virtual glm::vec3	getTranslation()	const { return  m_translation; }
-	glm::vec3&			getTranslationRef()		  { return  m_translation; }
-	virtual glm::quat	getRotation()		const { return  q_rotation; }
-	glm::vec4			getRotationVector() const;
-	glm::vec3			getForward()		const { return forward; }
-	glm::vec3			getUp()				const { return Up; }
+	virtual glm::mat4	   getScale()			const { return  glm::scale(glm::vec3(m_scale.x, m_scale.y, m_scale.z)) ; }
+  glm::vec3            getScaleAsVector() const { return m_scale; }
+	virtual glm::vec3	   getTranslation()	const { return  m_translation; }
+	glm::vec3&			     getTranslationRef()		  { return  m_translation; }
+	virtual glm::quat	   getRotation()		const { return  q_rotation; }
+	glm::vec4			       getRotationVector() const;
+	glm::vec3			       getForward()		const { return forward; }
+	glm::vec3			       getUp()				const { return Up; }
 	
 	void				incrementScale() { m_scale.x += (0.01f *m_scale.x), m_scale.y += (0.01f *m_scale.y), m_scale.z += (0.01f *m_scale.z);  UpdateModelMatrix();}
 	void				decrementScale() { m_scale.x -= (0.01f *m_scale.x), m_scale.y -= (0.01f *m_scale.y), m_scale.z -= (0.01f *m_scale.z);  UpdateModelMatrix();}

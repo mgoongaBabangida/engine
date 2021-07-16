@@ -22,24 +22,123 @@
 
 //---------------------------------------------------------------------------
 eMainContext::eMainContext(eInputController*  _input,
-						   IWindowImGui*	  _guiWnd,
+  std::vector<IWindowImGui*> _externalGui,
 						   const std::string& _modelsPath,
 						   const std::string& _assetsPath, 
 						   const std::string& _shadersPath)
-: eMainContextBase(_input, _guiWnd, _modelsPath, _assetsPath, _shadersPath)
+: eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
 , pipeline(m_objects, width, height, nearPlane, farPlane, waterHeight)
 , m_camera(width, height, nearPlane, farPlane)
 {
-	_guiWnd->Add(SLIDER_FLOAT, "Ydir", &m_light.light_position.y);
-	_guiWnd->Add(SLIDER_FLOAT, "Zdir", &m_light.light_position.z);
-	_guiWnd->Add(SLIDER_FLOAT, "Xdir", &m_light.light_position.x);
-
 	//Light init!
 	m_light.ambient			= vec3(0.05f, 0.05f, 0.05f);
 	m_light.diffuse			= vec3(0.75f, 0.75f, 0.75f);
 	m_light.specular		= vec3(0.5f, 0.5f, 0.5f);
-	m_light.light_position	= vec4(1.0f, 4.0f, 1.0f, 1.0f);
+	m_light.light_position	= vec4(0.0f, 4.0f, -1.0f, -1.0f);
 	m_light.type			= eLightType::DIRECTION;
+  m_camera.setPosition(glm::vec3(-1.0f, 4.0f, -2.5f));
+  m_camera.setDirection(glm::vec3(0.6f, -0.10f, 0.8f));
+}
+
+//--------------------------------------------------------------------------
+void eMainContext::InitializeExternalGui()
+{
+  externalGui[0]->Add(TEXT, "Light", nullptr);
+  externalGui[0]->Add(SLIDER_FLOAT, "Y direction", &m_light.light_position.y);
+  externalGui[0]->Add(SLIDER_FLOAT, "Z direction", &m_light.light_position.z);
+  externalGui[0]->Add(SLIDER_FLOAT, "X direction", &m_light.light_position.x);
+  externalGui[0]->Add(CHECKBOX, "Show bounding boxes", &pipeline.GetBoundingBoxBoolRef());
+  externalGui[0]->Add(CHECKBOX, "Use Multi sampling", &pipeline.GetMultiSamplingBoolRef());
+  externalGui[0]->Add(CHECKBOX, "Sky box", &pipeline.GetSkyBoxOnRef());
+  externalGui[0]->Add(SLIDER_FLOAT, "Blur coefficients", &pipeline.GetBlurCoefRef());
+  externalGui[0]->Add(SLIDER_FLOAT_3_CALLBACK, "Camera pos.", &m_camera.PositionRef());
+  externalGui[0]->Add(SLIDER_FLOAT_3_CALLBACK, "Camera dir.", &m_camera.ViewDirectionRef());
+  emit_partilces_callback = [this]()
+  {
+    pipeline.GetRenderManager().AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f),
+                                                  texManager->Find("Tatlas2"),
+                                                  soundManager->GetSound("shot_sound"),
+                                                  texManager->Find("Tatlas2")->numberofRows));
+  };
+  externalGui[0]->Add(BUTTON, "Emit particle system", (void*)&play_callback);
+
+  externalGui[1]->Add(TEXTURE, "Reflection buffer", (void*)pipeline.GetReflectionBufferTexture().id);
+  externalGui[1]->Add(TEXTURE, "Refraction buffer", (void*)pipeline.GetRefractionBufferTexture().id);
+  externalGui[1]->Add(TEXTURE, "Shadow buffer", (void*)pipeline.GetShadowBufferTexture().id);
+  externalGui[1]->Add(TEXTURE, "Gaussian buffer", (void*)pipeline.GetGausian2BufferTexture().id);
+  externalGui[1]->Add(TEXTURE, "Bright filter buffer", (void*)pipeline.GetBrightFilter().id);
+
+  transfer_data_position.callback = [this]()
+  {
+    if (m_focused)
+    {
+      m_focused->GetTransform()->setTranslation(glm::vec3{ transfer_data_position.data[0],
+                                                           transfer_data_position.data[1],
+                                                           transfer_data_position.data[2] });
+    }
+  };
+  transfer_data_position.min = -10.0f;
+  transfer_data_position.max = 10.0f;
+  transfer_data_rotation.callback = [this]()
+  {
+    if (m_focused)
+    {
+      m_focused->GetTransform()->setRotation(transfer_data_rotation.data[0] * PI * 2,
+                                             transfer_data_rotation.data[1] * PI * 2,
+                                             transfer_data_rotation.data[2] * PI * 2);
+    }
+  };
+  transfer_data_rotation.min = 0.0;
+  transfer_data_rotation.max = 1.0f;
+  transfer_data_scale.callback = [this]()
+  {
+    if (m_focused)
+    {
+      m_focused->GetTransform()->setScale(glm::vec3{ transfer_data_scale.data[0],
+                                                     transfer_data_scale.data[1],
+                                                     transfer_data_scale.data[2] });
+    }
+  };
+  transfer_data_scale.min = 0.0f;
+  transfer_data_scale.max = 5.0f;
+  transfer_meshes.callback = [this](size_t _current)
+  {
+    if (m_focused)
+    {
+      transfer_textures = m_focused->GetModel()->GetMeshes()[_current]->GetTextures();
+      if (transfer_textures.empty())
+        transfer_textures = m_focused->GetModel()->GetTexturesModelLevel();
+    }
+  };
+
+  transfer_animations.callback = [this](size_t _current)
+  {
+    cur_animation = _current - 1;
+  };
+
+  play_callback = [this]()
+  {
+   m_focused->GetRigger()->Apply(cur_animation);
+  };
+
+  stop_callback = [this]()
+  {
+    m_focused->GetRigger()->Stop();
+  };
+  externalGui[2]->Add(SLIDER_FLOAT_3_CALLBACK, "Position", (void*)&transfer_data_position);
+  externalGui[2]->Add(SLIDER_FLOAT_3_CALLBACK, "Rotation", (void*)&transfer_data_rotation);
+  externalGui[2]->Add(SLIDER_FLOAT_3_CALLBACK, "Scale", (void*)&transfer_data_scale);
+  externalGui[2]->Add(TEXT_INT, "Number of vertices ", (void*)&transfer_num_vertices);
+  externalGui[2]->Add(TEXT_INT, "Number of meshes ", (void*)&transfer_num_meshes);
+  externalGui[2]->Add(COMBO_BOX, "Current mesh ", (void*)&transfer_meshes);
+  externalGui[2]->Add(TEXTURE_ARRAY, "Textures ", (void*)&transfer_textures);
+  externalGui[2]->Add(TEXT_INT, "Number of animations ", (void*)&transfer_num_animations);
+  externalGui[2]->Add(COMBO_BOX, "Current animations ", (void*)&transfer_animations);
+  externalGui[2]->Add(BUTTON, "Play current animations ", (void*)&play_callback);
+  externalGui[2]->Add(BUTTON, "Stop current animations ", (void*)&stop_callback);
+
+  m_focused = m_objects[4];
+  OnFocusedChanged();
 }
 
 //--------------------------------------------------------------------------
@@ -79,7 +178,12 @@ bool eMainContext::OnMousePress(uint32_t x, uint32_t y, bool left)
 	if(left)
 	{
 		camRay.press(x, y);
-		m_focused = camRay.calculateIntersaction(m_objects);
+		auto new_focused = camRay.calculateIntersaction(m_objects);
+    if (new_focused != m_focused)
+    {
+      m_focused = new_focused;
+      OnFocusedChanged();
+    }
 	}
 	if(m_focused && m_focused->GetScript())
 	{
@@ -93,6 +197,50 @@ bool eMainContext::OnMouseRelease()
 {
 	camRay.release();
 	return true;
+}
+
+//------------------------------------------------------------------------------
+void eMainContext::OnFocusedChanged()
+{
+  if (m_focused)
+  {
+    transfer_data_position.data[0] = m_focused->GetTransform()->getTranslation().x;
+    transfer_data_position.data[1] = m_focused->GetTransform()->getTranslation().y;
+    transfer_data_position.data[2] = m_focused->GetTransform()->getTranslation().z;
+    glm::vec3 rot = glm::eulerAngles(m_focused->GetTransform()->getRotation());
+    transfer_data_rotation.data[0] = rot.x / (PI * 2);
+    transfer_data_rotation.data[1] = rot.y / (PI * 2);
+    transfer_data_rotation.data[2] = rot.z / (PI * 2);
+    transfer_data_scale.data[0] = m_focused->GetTransform()->getScaleAsVector().x;
+    transfer_data_scale.data[1] = m_focused->GetTransform()->getScaleAsVector().y;
+    transfer_data_scale.data[2] = m_focused->GetTransform()->getScaleAsVector().z;
+    transfer_num_vertices = m_focused->GetModel()->GetVertexCount();
+    transfer_num_meshes = m_focused->GetModel()->GetMeshCount();
+    transfer_meshes.data.clear();
+    for (int i = 0; i < transfer_num_meshes; ++i)
+      transfer_meshes.data.push_back(std::to_string(i+1));
+
+    transfer_num_animations = m_focused->GetModel()->GetAnimationCount();
+    transfer_animations.data.clear();
+    for (int i = 0; i < transfer_num_animations; ++i)
+      transfer_animations.data.push_back(std::to_string(i + 1));
+    transfer_textures = m_focused->GetModel()->GetMeshes()[0]->GetTextures();
+    if (transfer_textures.empty())
+      transfer_textures = m_focused->GetModel()->GetTexturesModelLevel();
+    current_animations = m_focused->GetModel()->GetAnimations();
+  }
+  else
+  {
+    transfer_data_position.data[0] = 0.0f;
+    transfer_data_position.data[1] = 0.0f;
+    transfer_data_position.data[2] = 0.0f;
+    transfer_data_rotation.data[0] = 0.0f;
+    transfer_data_rotation.data[1] = 0.0f;
+    transfer_data_rotation.data[2] = 0.0f;
+    transfer_data_scale.data[0] = 0.0f;
+    transfer_data_scale.data[1] = 0.0f;
+    transfer_data_scale.data[2] = 0.0f;
+  }
 }
 
 //-------------------------------------------------------------------------------
@@ -109,18 +257,20 @@ void eMainContext::InitializeGL()
 											soundManager->GetSound("shot_sound"),
 											&camRay,
 											waterHeight));
-	m_focused = m_objects[4];
 
 	guis.emplace_back(GUI(0, 0, width / 4, height / 4, width, height));
-	guis[0].setCommand(std::make_shared<AnimStart>(AnimStart(m_objects[6])));
+	//guis[0].setCommand(std::make_shared<AnimStart>(AnimStart(m_objects[6])));
 	guis.emplace_back(GUI(width / 4 * 3, height / 4 * 3, width / 4, height / 4, width, height));
-	guis[1].setCommand(std::make_shared<AnimStop>(AnimStop(m_objects[6])));
+	//guis[1].setCommand(std::make_shared<AnimStop>(AnimStop(m_objects[6])));
 
 	inputController->AddObserver(this, STRONG);
-  inputController->AddObserver(&guis[0], STRONG);//monopoly takes keyboard as well which is wrong
-  inputController->AddObserver(&guis[1], STRONG);
+  inputController->AddObserver(&guis[0], MONOPOLY);//monopoly takes only mouse
+  inputController->AddObserver(&guis[1], MONOPOLY);
 	inputController->AddObserver(&m_camera, WEAK);
 	inputController->AddObserver(&camRay, WEAK);
+  inputController->AddObserver(externalGui[0], MONOPOLY);
+  inputController->AddObserver(externalGui[1], MONOPOLY);
+  inputController->AddObserver(externalGui[2], MONOPOLY);
 }
 
 //-------------------------------------------------------------------------------
@@ -152,8 +302,9 @@ void eMainContext::InitializeModels()
 	modelManager->Add("boat", (GLchar*)std::string(modelFolderPath + "Medieval Boat/Medieval Boat.obj").c_str());
 	//modelManager.Add("spider", (GLchar*)std::string(ModelFolderPath + "ogldev-master/Content/spider.obj").c_str());
 	modelManager->Add("wolf", (GLchar*)std::string(modelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
-	modelManager->Add("guard", (GLchar*)std::string(modelFolderPath + "ogldev-master/Content/guard/boblampclean.md5mesh").c_str());
+	modelManager->Add("guard", (GLchar*)std::string(modelFolderPath + "ogldev-master/Content/guard/boblampclean.md5mesh").c_str(), true);
 	//modelManager.Add("stairs", (GLchar*)std::string(modelFolderPath + "stairs.blend").c_str());
+  modelManager->Add("zombie", (GLchar*)std::string(modelFolderPath + "Thriller Part 3/Thriller Part 3.dae").c_str());
 
 	//TERRAIN
 	m_TerrainModel.swap(modelManager->CloneTerrain("simple"));
@@ -179,8 +330,7 @@ void eMainContext::InitializeModels()
 	containerCube->SetRigidBody(new eRigidBody);
 	containerCube->GetRigidBody()->SetObject(containerCube.get());
 	containerCube->GetCollider()->CalculateExtremDots(containerCube->GetModel()->GetPositions());
-	containerCube->GetTransform()->setTranslation(vec3(0.5f, 3.0f, -3.5f));
-	containerCube->GetTransform()->setScale(vec3(0.2f, 0.2f, 0.2f));
+	containerCube->GetTransform()->setTranslation(vec3(-2.5f, 3.0f, 3.5f));
 	m_objects.push_back(containerCube);
 
 	shObject arrow = shObject(new eObject);
@@ -212,20 +362,20 @@ void eMainContext::InitializeModels()
 	nanosuit->GetRigidBody()->SetObject(nanosuit.get());
 	nanosuit->GetCollider()->CalculateExtremDots(nanosuit->GetModel()->GetPositions());
 	nanosuit->GetTransform()->setTranslation(vec3(0.0f, 2.0f, 0.0f));
-	nanosuit->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
+	nanosuit->GetTransform()->setScale(vec3(0.12f, 0.12f, 0.12f));
 	m_objects.push_back(nanosuit);
 
-	shObject terrain = shObject(new eObject);
-	terrain->SetModel((IModel*)m_TerrainModel.get());
-	terrain->SetTransform(new Transform);
-	terrain->SetCollider(new BoxCollider);
-	terrain->SetRigidBody(new eRigidBody);
-	terrain->GetRigidBody()->SetObject(terrain.get());
-	terrain->GetCollider()->CalculateExtremDots(terrain->GetModel()->GetPositions());
-	terrain->SetName("Terrain");
-	terrain->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
-	terrain->GetTransform()->setTranslation(vec3(0.0f, 1.8f, 0.0f));
-	m_objects.push_back(terrain);
+  shObject terrain = shObject(new eObject);
+  terrain->SetModel((IModel*)m_TerrainModel.get());
+  terrain->SetTransform(new Transform);
+  terrain->SetCollider(new BoxCollider);
+  terrain->SetRigidBody(new eRigidBody);
+  terrain->GetRigidBody()->SetObject(terrain.get());
+  terrain->GetCollider()->CalculateExtremDots(terrain->GetModel()->GetPositions());
+  terrain->SetName("Terrain");
+  terrain->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
+  terrain->GetTransform()->setTranslation(vec3(0.0f, 1.8f, 0.0f));
+  m_objects.push_back(terrain);
 
 	shObject wolf = shObject(new eObject);
 	wolf->SetModel(modelManager->Find("wolf").get());
@@ -235,7 +385,7 @@ void eMainContext::InitializeModels()
 	wolf->GetRigidBody()->SetObject(wolf.get());
 	wolf->GetCollider()->CalculateExtremDots(wolf->GetModel()->GetPositions());
 	wolf->GetTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);
-	wolf->GetTransform()->setTranslation(vec3(5.0f, 3.0f, 0.0f));
+	wolf->GetTransform()->setTranslation(vec3(4.0f, 3.0f, 0.0f));
 	wolf->SetRigger(new Rigger((Model*)modelManager->Find("wolf").get()));
 	wolf->GetRigger()->ChangeName(std::string(), "Running");
 	m_objects.push_back(wolf);
@@ -250,18 +400,30 @@ void eMainContext::InitializeModels()
 	brickCube->GetTransform()->setTranslation(vec3(0.5f, 3.0f, 3.5f));
 	m_objects.push_back(brickCube);
 
-	shObject guard = shObject(new eObject);
-	guard->SetModel(modelManager->Find("guard").get());
-	guard->SetTransform(new Transform);
-	guard->SetCollider(new BoxCollider);
-	guard->SetRigidBody(new eRigidBody);
-	guard->GetRigidBody()->SetObject(guard.get());
-	guard->GetCollider()->CalculateExtremDots(guard->GetModel()->GetPositions());
-	guard->GetTransform()->setTranslation(vec3(2.0f, 2.0f, 0.0f));
-	guard->GetTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);
-	guard->GetTransform()->setScale(glm::vec3(0.03f, 0.03f, 0.03f));
-	guard->SetRigger(new Rigger((Model*)modelManager->Find("guard").get()));
-	m_objects.push_back(guard);
+  shObject guard = shObject(new eObject);
+  guard->SetModel(modelManager->Find("guard").get());
+  guard->SetTransform(new Transform);
+  guard->SetCollider(new BoxCollider);
+  guard->SetRigidBody(new eRigidBody);
+  guard->GetRigidBody()->SetObject(guard.get());
+  guard->GetCollider()->CalculateExtremDots(guard->GetModel()->GetPositions());
+  guard->GetTransform()->setTranslation(vec3(2.0f, 2.0f, 0.0f));
+  guard->GetTransform()->setRotation(glm::radians(-90.0f), glm::radians(-90.0f), 0.0f);
+  guard->GetTransform()->setScale(glm::vec3(0.03f, 0.03f, 0.03f));
+  guard->SetRigger(new Rigger((Model*)modelManager->Find("guard").get()));
+  m_objects.push_back(guard);
+
+  shObject zombie = shObject(new eObject);
+  zombie->SetModel(modelManager->Find("zombie").get());
+  zombie->SetTransform(new Transform);
+  zombie->SetCollider(new BoxCollider);
+  zombie->SetRigidBody(new eRigidBody);
+  zombie->GetRigidBody()->SetObject(zombie.get());
+  zombie->GetCollider()->CalculateExtremDots(zombie->GetModel()->GetPositions());
+  zombie->GetTransform()->setTranslation(vec3(1.0f, 2.0f, 0.0f));
+  zombie->GetTransform()->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
+  zombie->SetRigger(new Rigger((Model*)modelManager->Find("zombie").get()));
+  m_objects.push_back(zombie);
 
 	//light_cube
 	lightObject = shObject(new eObject);
@@ -284,22 +446,16 @@ void eMainContext::InitializeModels()
 void eMainContext::InitializeRenders()
 {
 	pipeline.InitializeRenders(*modelManager.get(), *texManager.get(), shadersFolderPath);
-	pipeline.GetRenderManager().AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f), texManager->Find("Tatlas2"), soundManager->GetSound("shot_sound"), texManager->Find("Tatlas2")->numberofRows));
+	pipeline.GetRenderManager().AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f),
+                                                                   texManager->Find("Tatlas2"),
+                                                                   soundManager->GetSound("shot_sound"),
+                                                                   texManager->Find("Tatlas2")->numberofRows));
 }
 
-//#include "GlBufferContext.h" //temp need to get rid
 //-------------------------------------------------------------------------------
 void eMainContext::PaintGL()
 {
 	eMainContextBase::PaintGL();
-
-	//just for test
-	//if (!guis.empty())
-	//{
-	//	guis[0].SetTexture(&eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFLECTION));
-	//	//8.2 Second quad
-	//	guis[1].SetTexture(&eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFRACTION));
-	//}
 
 	std::vector<Flag> flags;
 	for (auto &object : m_objects)

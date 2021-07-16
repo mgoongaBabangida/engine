@@ -36,9 +36,24 @@ public:
 	void			AddHex(glm::vec3 _v);
 	void			SetHexRadius(float _r);
 	
-	void			SwitchSkyBox(bool on) { skybox = on; }	
+	void			SwitchSkyBox(bool on) { skybox = on; }
 	void			SwitchWater(bool on)  { water = on; }
-	Texture			GetSkyNoiseTexture(const Camera& _camera);
+
+	Texture	  GetSkyNoiseTexture(const Camera& _camera);
+
+  bool& GetBoundingBoxBoolRef() { return draw_bounding_boxes; }
+  bool& GetMultiSamplingBoolRef() { return mts; }
+  bool& GetSkyBoxOnRef() { return skybox; }
+  float& GetBlurCoefRef() { return blur_coef; }
+
+  Texture GetReflectionBufferTexture() const;
+  Texture GetRefractionBufferTexture() const;
+  Texture GetShadowBufferTexture() const;
+  Texture GetGausian1BufferTexture() const;
+  Texture GetGausian2BufferTexture() const;
+  Texture GetMtsBufferTexture() const;
+  Texture GetScreenBufferTexture() const;
+  Texture GetBrightFilter() const;
 
 protected:
 	void			RanderShadows(const Camera&, const Light&, std::vector<shObject>&);
@@ -69,16 +84,17 @@ protected:
 	bool			particles	= true;
 	bool			draw_bounding_boxes = false;
 
-	uint32_t		width		= 1200;
-	uint32_t		height		= 600;
-	float			nearPlane	= 0.1f;
-	float			farPlane	= 0.0f;
+	uint32_t  width		  = 1200;
+	uint32_t  height		= 600;
+	float			nearPlane	  = 0.1f;
+	float			farPlane	  = 0.0f;
 	float			waterHeight = 2.0f;
+  float     blur_coef   = 1.0f;
 
 	std::reference_wrapper<std::vector<shObject>>	m_objects;
 	
 	std::unique_ptr<eRenderManager>			renderManager;
-	Texture									sky_noise_texture;
+	Texture									            sky_noise_texture;
 };
 
 #endif // PIPELINE_H

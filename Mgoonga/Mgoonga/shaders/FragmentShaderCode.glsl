@@ -117,7 +117,7 @@ subroutine(LightingPtr) vec3 calculatePhongFlashSpecDif(	Light light, vec3 norma
 	 return vec3(0.0f,0.0f,0.0f);
 }
 
-subroutine(LightingPtr) vec3 calculateBlindPhongPointSpecDif(	Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
+subroutine(LightingPtr) vec3 calculateBlindPhongPointSpecDif (Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
 {
   float shininess = 32.0f;
 
@@ -158,7 +158,7 @@ void main()
 	if(normalMapping)
 	{
 		// Obtain normal from normal map in range [0,1]
-		bNormal = texture(texture_normal1, fTexCoords).rgb;
+		bNormal = texture(texture_normal1, Texcoord).rgb;
 		// Transform normal vector to range [-1,1]
 		bNormal = normalize(bNormal * 2.0 - 1.0);   
 		bNormal = normalize(TBN * bNormal);
@@ -167,7 +167,7 @@ void main()
 		bNormal = theNormal;
 
   //Ambient
-  vec3 ambientLight = light.ambient * vec3(texture(texture_diffuse1, fTexCoords));// * material.ambient  
+  vec3 ambientLight = light.ambient * vec3(texture(texture_diffuse1, Texcoord));// * material.ambient  
 
      float shadow; 
      if(shadow_directional)
@@ -175,12 +175,12 @@ void main()
      else
 		shadow =  ShadowCalculationCubeMap(thePosition);
 
-  vec3 difspec = LightingFunction(light, bNormal, thePosition, fTexCoords);
+  vec3 difspec = LightingFunction(light, bNormal, thePosition, Texcoord);
 
   if(shadow < 0.9)
 	daColor = vec4(ambientLight, 1.0);
   else
-    	daColor= vec4(ambientLight+(difspec) * shadow, 1.0); //vec4(shadow,shadow,shadow,1.0);
+    daColor= vec4(ambientLight+(difspec) * shadow, 1.0); //vec4(shadow,shadow,shadow,1.0);
 };
 
 float ShadowCalculation(vec4 fragPosLightSpace )

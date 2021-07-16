@@ -12,7 +12,7 @@ public:
 	eScreenRender(Texture tex, const std::string& vS, const std::string& fS);
 
 	void Render(const Camera& camera);
-	void RenderContrast(const Camera& camera);
+	void RenderContrast(const Camera& camera, float blur_coef);
 	void RenderFrame();
 	
 	void SetTexture(Texture t)			{ screenMesh->SetTextureOne(t); }
@@ -26,5 +26,6 @@ protected:
 	GLuint							textureLoc;
 	GLuint							frameLoc;
 	GLuint							blendLoc;
+  GLuint              blurCoefLoc;
 }; 
 

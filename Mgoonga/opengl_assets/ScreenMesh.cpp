@@ -38,6 +38,14 @@ void eScreenMesh::Draw()
 	glBindVertexArray(0);
 }
 
+std::vector<const Texture*> eScreenMesh::GetTextures() const
+{
+  std::vector<const Texture*> ret;
+  ret.push_back(&textureOne);
+  ret.push_back(&textureTwo);
+  return ret;
+}
+
 eFrameMesh::eFrameMesh()
 {
 	GLfloat frameVertices[] = {

@@ -32,7 +32,7 @@ bool eInputController::OnKeyPress(uint32_t asci)
 		{
 			if(observer->OnKeyPress(asci))
 				return false;
-			taken = true;
+			taken = false; //do not take keyboard, only mouse
 			break;
 		}
 	}

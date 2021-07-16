@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "AssimpMesh.h"
+
 #include <sstream>
 #include <iostream>
 
@@ -8,77 +9,84 @@ AssimpMesh::AssimpMesh(vector<AssimpVertex> vertices, vector<GLuint> indices, ve
 	this->vertices = vertices;
 	this->indices = indices;
 	this->textures = textures;
-
-	//for (int i = 0; i < indices.size(); i += 3)
-	//{
-	//	glm::vec3 pos1 = vertices[indices[i]].Position;
-	//	glm::vec3 pos2 = vertices[indices[i + 1]].Position;
-	//	glm::vec3 pos3 = vertices[indices[i + 2]].Position;
-	//	glm::vec2 uv1 = vertices[indices[i]].TexCoords;
-	//	glm::vec2 uv2 = vertices[indices[i + 1]].TexCoords;
-	//	glm::vec2 uv3 = vertices[indices[i + 2]].TexCoords;
-	//	// calculate tangent/bitangent vectors of both triangles
-	//	glm::vec3 tangent1, bitangent1;
-	//	// - triangle 1
-	//	glm::vec3 edge1 = pos2 - pos1;
-	//	glm::vec3 edge2 = pos3 - pos1;
-	//	glm::vec2 deltaUV1 = uv2 - uv1;
-	//	glm::vec2 deltaUV2 = uv3 - uv1;
-
-	//	GLfloat f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
-
-	//	tangent1.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
-	//	tangent1.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
-	//	tangent1.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
-	//	tangent1 = glm::normalize(tangent1);
-
-	//	bitangent1.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
-	//	bitangent1.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
-	//	bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
-	//	bitangent1 = glm::normalize(bitangent1);
-
-	//	vertices[indices[i]].tangent = tangent1;
-	//	vertices[indices[i + 1]].tangent = tangent1;
-	//	vertices[indices[i + 2]].tangent = tangent1;
-	//	vertices[indices[i]].bitangent = bitangent1;
-	//	vertices[indices[i + 1]].bitangent = bitangent1;
-	//	vertices[indices[i + 2]].bitangent = bitangent1;
-	//}
-
 	this->setupMesh();
-
+  default_diffuse_mapping.loadTexture1x1(YELLOW);
+  default_specular_mapping.loadTexture1x1(BLACK);
+  default_normal_mapping.loadTexture1x1(BLUE);
 }
 
 void AssimpMesh::Draw()
 {
-	//std::cout << "-----------Mesh-----------" << std::endl;
-	GLuint diffuseNr = 1;
-	GLuint specularNr = 1;
-	GLuint normalNr = 1;
+	GLuint diffuseNr = 0;
+	GLuint specularNr = 0;
+	GLuint normalNr = 0;
 	for (GLuint i = 0; i < this->textures.size(); i++)
 	{
-		glActiveTexture(GL_TEXTURE2 + i); // Activate proper texture unit before binding
-										  // Retrieve texture number (the N in diffuse_textureN)
-		stringstream ss;
-		string number;
-		string name = this->textures[i].type;
-		if (name == "texture_diffuse")
-			ss << diffuseNr++; // Transfer GLuint to stream
-		else if (name == "texture_specular")
-			ss << specularNr++; // Transfer GLuint to stream
-		else if(name == "texture_normal")
-			ss << normalNr++;
-		number = ss.str();
-		//std::cout << (name + number).c_str() << " bound to texture unit " << i + 2 <<std::endl;
-		//glUniform1f(glGetUniformLocation(Program, (/*"material." +*/ name + number).c_str()), i);
+    string name = textures[i].type;
+    if (name == "texture_diffuse")
+    {
+      glActiveTexture(GL_TEXTURE2);
+      diffuseNr++;
+    }
+    else if (name == "texture_specular")
+    {
+      glActiveTexture(GL_TEXTURE3);
+      specularNr++;
+    }
+    else if (name == "texture_normal")
+    {
+      glActiveTexture(GL_TEXTURE4);
+      normalNr++;
+    }
 		glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
 	}
-	glActiveTexture(GL_TEXTURE0);
+
+  if (diffuseNr == 0)
+  {
+    glBindTexture(GL_TEXTURE_2D, default_diffuse_mapping.id);
+    diffuseNr++;
+  }
+  if (specularNr == 0)
+  {
+    glActiveTexture(GL_TEXTURE3);
+    auto spec = std::find_if(textures.begin(), textures.end(), [](Texture& t) { return t.type == "texture_diffuse"; });
+    if (spec != textures.end())
+    {
+      glBindTexture(GL_TEXTURE_2D, spec->id);
+      specularNr++;
+    }
+    else
+    {
+      glBindTexture(GL_TEXTURE_2D, default_specular_mapping.id);
+      specularNr++;
+    }
+  }
+  if (normalNr == 0)
+  {
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, default_normal_mapping.id);
+    normalNr++;
+  }
+
+  if (!diffuseNr || !specularNr || !normalNr)
+  {
+    assert(false, "some texture is not assigned!");
+  }
+
+  glActiveTexture(GL_TEXTURE0);
 
 	// Draw mesh
 	glBindVertexArray(this->VAO);
 	glDrawElements(GL_TRIANGLES, (GLsizei)this->indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+}
+
+std::vector<const Texture*> AssimpMesh::GetTextures() const
+{
+  std::vector<const Texture*> ret;
+  for (const Texture& t : textures)
+    ret.push_back(&t);
+  return ret;
 }
 
 void AssimpMesh::setupMesh()
@@ -127,5 +135,4 @@ void AssimpMesh::setupMesh()
 		(GLvoid*)offsetof(AssimpVertex, weights));
 
 	glBindVertexArray(0);
-
 }

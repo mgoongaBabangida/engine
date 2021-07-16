@@ -18,7 +18,7 @@ class DLL_SDL_ASSETS eMainContextBase : public IInputObserver
 {
 public:
 	eMainContextBase(eInputController* _input,
-		IWindowImGui*,
+    std::vector<IWindowImGui*> _externalGui,
 		const std::string& _modelsPath,
 		const std::string& _assetsPath,
 		const std::string& _shadersPath);
@@ -38,6 +38,7 @@ protected:
 	virtual void		InitializeRenders() {}
 	virtual void		InitializeTextures();
 	virtual void		InitializeSounds()  {}
+  virtual void    InitializeExternalGui() {}
 	virtual void		Pipeline()			{}
 
 	eInputController*	inputController;
@@ -50,6 +51,7 @@ protected:
 	std::unique_ptr<eTextureManager>	texManager;
 	std::unique_ptr<eModelManager>		modelManager;
 	std::unique_ptr<eSoundManager>		soundManager;
+  std::vector<IWindowImGui*>        externalGui;
 
 	size_t			width		= 1200;
 	size_t			height		= 600;
@@ -62,5 +64,5 @@ class IGameFactory
 {
 public:
 	virtual eMainContextBase* CreateGame(eInputController*  _input,
-										 IWindowImGui*		_imgui_window) const = 0;
+                                       std::vector<IWindowImGui*>		_imgui_windows) const = 0;
 };

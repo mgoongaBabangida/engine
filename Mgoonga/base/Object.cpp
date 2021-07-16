@@ -1,44 +1,10 @@
 #include "stdafx.h"
 #include "Object.h"
 
-#include "interfaces.h"
-
-//#include "RigidBody.h"
-//#include "BoxCollider.h"
+void IModelDeleter::operator()(IModel * p){}
 
 //----------------------------------------------------------------------------
-//eObject::eObject() 
-//{
-//	transform.reset(new Transform);
-//	transform->setScale(glm::vec3(1.0f, 1.0f, 1.0f)); // transfer to transform
-//	collider.reset(new BoxCollider);
-//	movementApi.reset(new eRigidBody);
-//	movementApi->SetObject(this);
-//
-//	script.reset(nullptr);
-//	rigger.reset(nullptr);
-//}
-
-//----------------------------------------------------------------------------
-//eObject::eObject(IModel* m, const std::string& _name) 
-//	: model(m), 
-//	  name(_name)
-//{ 
-//	transform.reset(new Transform);
-//	transform->setScale(glm::vec3(1.0f, 1.0f, 1.0f));
-//	collider.reset(new BoxCollider);
-//	collider->CalculateExtremDots(model->GetPositions());
-//	movementApi.reset(new eRigidBody);
-//	movementApi->SetObject(this);
-//
-//	script.reset(nullptr);
-//	script.reset(nullptr);
-//	rigger.reset(nullptr);
-//}
-
-//----------------------------------------------------------------------------
-eObject::~eObject()
-{}
+eObject::~eObject() = default;
 
 //----------------------------------------------------------------------------
 bool eObject::operator==(const eObject& _other)

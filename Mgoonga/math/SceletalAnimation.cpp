@@ -13,7 +13,7 @@ Frame SceletalAnimation::getCurrentFrame()
 
 	for (; i < frames.size() - 1; ++i)
 	{
-		if(frames[i].timeStamp > time) //should de sorted
+		if(frames[i].timeStamp > time) //should be sorted
 			break;
 	}
 	if(i == 0) 

@@ -18,17 +18,17 @@
 
 //-------------------------------------------------------------------------
 eSandBoxGame::eSandBoxGame(eInputController*  _input,
-						   IWindowImGui*	  _guiWnd,
+  std::vector<IWindowImGui*> _externalGui,
 						   const std::string& _modelsPath,
 						   const std::string& _assetsPath,
 						   const std::string& _shadersPath)
-: eMainContextBase(_input, _guiWnd, _modelsPath, _assetsPath, _shadersPath)
+: eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
 , pipeline(m_objects, width, height, nearPlane, farPlane, 0)
 , m_camera(width, height, nearPlane, farPlane)
 {
-	_guiWnd->Add(SLIDER_FLOAT, "Ydir", &m_light.light_position.y);
-	_guiWnd->Add(SLIDER_FLOAT, "Zdir", &m_light.light_position.z);
-	_guiWnd->Add(SLIDER_FLOAT, "Xdir", &m_light.light_position.x);
+	_externalGui[0]->Add(SLIDER_FLOAT, "Ydir", &m_light.light_position.y);
+	_externalGui[0]->Add(SLIDER_FLOAT, "Zdir", &m_light.light_position.z);
+	_externalGui[0]->Add(SLIDER_FLOAT, "Xdir", &m_light.light_position.x);
 
 	//Light init!
 	m_light.ambient = vec3(0.4f, 0.4f, 0.4f);

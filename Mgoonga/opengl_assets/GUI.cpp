@@ -52,6 +52,7 @@ Texture * GUI::GetTexture()
 
 void GUI::Perssed()
 {
+  if(cmd)
 	cmd->Execute();
 }
 

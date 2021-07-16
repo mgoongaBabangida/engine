@@ -12,8 +12,6 @@ eBrightFilterRender::eBrightFilterRender(GLuint				width,
 	/*TexWidthLoc = glGetUniformLocation(shader.ID, "targetWidth");
 	textureLoc = glGetUniformLocation(shader.ID, "screenTexture");*/
 
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_BRIGHT_FILTER, width, height);
-
 	GLfloat quadVertices[] = {
 		// Positions   // TexCoords
 		-1.0f,  1.0f,  0.0f, 1.0f,

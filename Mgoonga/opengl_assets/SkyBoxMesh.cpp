@@ -71,6 +71,13 @@ void eSkyBoxMesh::Draw()
 	glBindVertexArray(0);
 }
 
+std::vector<const Texture*> eSkyBoxMesh::GetTextures() const
+{
+  std::vector<const Texture*> ret;
+  ret.push_back(texture);
+  return ret;
+}
+
 void eSkyBoxMesh::SetTexture(Texture * _t)
 {
 	texture = _t;

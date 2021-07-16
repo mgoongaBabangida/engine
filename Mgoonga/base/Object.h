@@ -4,6 +4,11 @@
 #include <vector>
 #include "interfaces.h"
 
+struct IModelDeleter
+{
+  void operator()(IModel *p);
+};
+
 //---------------------------------------------------------------------------------
 class DLL_BASE eObject
 {
@@ -33,7 +38,7 @@ public:
 	const std::string&	Name()			const	{ return name;				}
 
 protected:
-	std::unique_ptr<IModel>			model;
+	std::unique_ptr<IModel, IModelDeleter>			model;
 	std::unique_ptr<IScript>		script;
 	std::unique_ptr<ITransform>		transform;
 	std::unique_ptr<ICollider>		collider;

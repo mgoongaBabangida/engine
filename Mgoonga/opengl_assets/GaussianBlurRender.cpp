@@ -10,8 +10,8 @@ eGaussianBlurRender::eGaussianBlurRender(GLuint				_width,
 {
 	shader.installShaders(vS.c_str(), fS.c_str());
 
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_ONE, width, height);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_TWO, width, height);
+  eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_ONE, width, height);
+  eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_TWO, width, height);
 	
 	TexWidthLoc = glGetUniformLocation(shader.ID, "targetWidth");
 	textureLoc	= glGetUniformLocation(shader.ID, "screenTexture");

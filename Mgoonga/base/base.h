@@ -2,6 +2,9 @@
 
 #include <string>
 #include <memory>
+#include <vector>
+#include <functional>
+#include <array>
 
 #pragma warning( disable : 4251) // vector & unique_ptr have to be exported or not used @todo
 
@@ -40,7 +43,7 @@ struct Light
 };
 
 //-------------------------------------------------------
-struct Flag
+struct Flag //@todo delete it and make it an object
 {
 	glm::vec3	position;
 	glm::vec3	scale;
@@ -143,4 +146,19 @@ enum ASCII
 	ASCII_U = 117,//85,
 	ASCII_H = 104,//72,
 	ASCII_G = 103,//71,
+};
+
+//-------------------------------------------------------
+struct eThreeFloatCallback
+{
+  std::array<float, 3> data = {0.f, 0.f, 0.f};
+  std::function<void()> callback;
+  float min, max;
+};
+
+//-------------------------------------------------------
+struct eVectorStringsCallback
+{
+  std::vector<std::string> data;
+  std::function<void(size_t)> callback;
 };

@@ -20,6 +20,7 @@ class DLL_MATH Rigger : public IRigger
 public:
 	explicit Rigger(eAnimatedModel* _model);
 	virtual bool							Apply(const std::string& _animation);
+  virtual bool							Apply(size_t _animation_index);
 	virtual void							Stop();
 	virtual bool							ChangeName(const std::string& _oldName, const std::string& _newName);
 	virtual const std::vector<glm::mat4>&	GetMatrices();

@@ -369,7 +369,18 @@ void TerrainModel::Draw()
 	//glUniform1i(glGetUniformLocation(Program, "normalMapping"), GL_TRUE);
 }
 
-std::vector<glm::vec3> TerrainModel::GetPositions() const {
+size_t TerrainModel::GetVertexCount() const
+{
+  return mesh->vertices.size();
+}
+
+std::vector<const IMesh*> TerrainModel::GetMeshes() const
+{
+  return std::vector<const IMesh*>{mesh};
+}
+
+std::vector<glm::vec3> TerrainModel::GetPositions() const
+{
 	std::vector<glm::vec3> ret;
 	for (auto& vert : mesh->vertices)
 		ret.push_back(vert.position);

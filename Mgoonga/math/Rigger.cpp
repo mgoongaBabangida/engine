@@ -75,6 +75,24 @@ bool Rigger::Apply(const std::string & _animation)
 }
 
 //-------------------------------------------------------------------------------------------
+bool Rigger::Apply(size_t _animation_index)
+{
+  if (currentAnim != nullptr && currentAnim == &animations[_animation_index])
+  {
+    currentAnim->Continue();
+    return true;
+  }
+  else if(_animation_index < animations.size())
+  {
+    currentAnim = &animations[_animation_index];
+    currentAnim->Start();
+    return true;
+  }
+  else
+    return false;
+}
+
+//-------------------------------------------------------------------------------------------
 void Rigger::Stop()
 {
 	currentAnim->Stop();

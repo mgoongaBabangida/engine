@@ -17,7 +17,7 @@ MyMesh::~MyMesh()
 	glDeleteBuffers(1, &EBO);
 }
 
-MyMesh::MyMesh(std::vector<MyVertex> vertices, std::vector<GLuint> indices, std::vector<Texture> textures)
+MyMesh::MyMesh(std::vector<MyVertex> vertices, std::vector<GLuint> indices, std::vector<Texture*> textures)
 {
 	this->vertices = vertices;
 	this->indices = indices;
@@ -89,6 +89,19 @@ void MyMesh::Draw()
 	glBindVertexArray(this->VAO);
 	glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+}
+
+std::vector<const Texture*> MyMesh::GetTextures() const
+{
+  std::vector<const Texture*> ret;
+  for (const Texture* t : textures)
+    ret.push_back(t);
+  return ret;
+}
+
+void MyMesh::setTextures(std::vector<Texture*> _textures)
+{
+  textures = _textures;
 }
 
 void MyMesh::setupMesh()
@@ -251,6 +264,14 @@ void ParticleMesh::Draw()
 	glBindVertexArray(this->VAO);
 	glDrawElementsInstanced(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0, instances);
 	glBindVertexArray(0);
+}
+
+std::vector<const Texture*> ParticleMesh::GetTextures() const
+{
+  std::vector<const Texture*> ret;
+  for (const Texture& t : textures)
+    ret.push_back(&t);
+  return ret;
 }
 
 void ParticleMesh::setupMesh()

@@ -71,12 +71,27 @@ public:
 	void			SetObject(eObject* obj) { object = obj; }
 };
 
+//-----------------------------------------------------------------------------
+class IAnimation
+{
+public:
+  virtual ~IAnimation() = default;
+
+  virtual void Start() = 0;
+  virtual void Stop() = 0;
+  virtual void Continue() = 0;
+  virtual bool IsPaused() = 0;
+  virtual const std::string& Name() const = 0;
+};
+
 //----------------------------------------------------------------------------------------------
 class IMesh
 {
 public:
 	virtual ~IMesh() = default;
 	virtual void Draw() = 0;
+  virtual size_t GetVertexCount() const = 0;
+  virtual std::vector<const Texture*> GetTextures() const = 0;
 };
 
 //----------------------------------------------------------------------------------------------
@@ -84,9 +99,17 @@ class IModel
 {
 public:
 	virtual ~IModel() = default;
-	virtual void						Draw()					= 0;
+	virtual void						          Draw()					= 0;
 	virtual std::vector<glm::vec3>		GetPositions()	const	= 0;
 	virtual std::vector<unsigned int>	GetIndeces()	const	= 0;
+  virtual size_t                    GetVertexCount() const = 0;
+  virtual size_t                    GetMeshCount() const = 0;
+  virtual std::vector<const IMesh*> GetMeshes() const = 0;
+  virtual size_t                    GetAnimationCount() const = 0;
+  virtual std::vector<const IAnimation*> GetAnimations() const = 0;
+  virtual std::vector<const Texture*> GetTexturesModelLevel() const {
+    return std::vector<const Texture*>();
+  } //$todo delete later
 };
 
 //----------------------------------------------------------------------------------------------
@@ -110,17 +133,18 @@ public:
 	virtual void		setScale(glm::vec3 sc) = 0;
 	virtual bool		isRotationValid() = 0;
 
-	virtual glm::mat4	getScale()			const = 0;
-	virtual glm::vec3	getTranslation()	const = 0;
+	virtual glm::mat4	  getScale()			const = 0;
+  virtual glm::vec3   getScaleAsVector() const = 0;
+	virtual glm::vec3	  getTranslation()	const = 0;
 	virtual glm::vec3&	getTranslationRef() = 0;
-	virtual glm::quat	getRotation()		const = 0;
+	virtual glm::quat	  getRotation()		const = 0;
 	virtual glm::vec4   getRotationVector() const = 0;
 	virtual glm::vec3   getForward()		const = 0;
 	virtual glm::vec3   getUp()				const = 0;
-	virtual void		incrementScale() = 0;
-	virtual void		decrementScale() = 0;
-	virtual void		billboard(glm::vec3 direction) = 0;
-	virtual bool		turnTo(glm::vec3 dest, float speed) = 0;
+	virtual void		    incrementScale() = 0;
+	virtual void		    decrementScale() = 0;
+	virtual void		    billboard(glm::vec3 direction) = 0;
+	virtual bool		    turnTo(glm::vec3 dest, float speed) = 0;
 };
 
 //----------------------------------------------------------------------------------------------
@@ -153,6 +177,7 @@ class IRigger
 public:
 	virtual ~IRigger() = default;
 	virtual bool							Apply(const std::string& _animation)								 = 0;
+  virtual bool							Apply(size_t _animation_index) = 0;
 	virtual void							Stop()																 = 0;
 	virtual bool							ChangeName(const std::string& _oldName, const std::string& _newName) = 0;
 	virtual const std::vector<glm::mat4>&	GetMatrices()														 = 0;
@@ -191,6 +216,7 @@ public:
 class ISound
 {
 public:
+  virtual ~ISound() = default;
 	virtual void Play()		 = 0;
 	virtual bool isPlaying() = 0;
 	virtual void Stop()		 = 0;

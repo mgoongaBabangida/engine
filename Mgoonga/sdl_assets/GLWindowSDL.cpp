@@ -17,8 +17,14 @@ SDL_GLContext					context;
 //---------------------------------------
 dbGLWindowSDL::dbGLWindowSDL(const IGameFactory& _factory)
 : inputController()
-, guiWnd(new eWindowImGui("Gui"))
 {
+  guiWnd.push_back(new eWindowImGui("Gui"));
+  guiWnd.push_back(new eWindowImGui("Debug"));
+  guiWnd.push_back(new eWindowImGui("Object"));
+
+  on_close = std::function<void()>{ [this](){this->Close(); } };
+  guiWnd[0]->Add(MENU, "Close", reinterpret_cast<void*>(&on_close));
+
 	mainContext.reset(_factory.CreateGame(&inputController, guiWnd));
 }
 
@@ -27,11 +33,13 @@ dbGLWindowSDL::dbGLWindowSDL(const IGameFactory& _factory)
 //---------------------------------------
 dbGLWindowSDL::~dbGLWindowSDL()
 {
+  dTimer->stop();
 	eImGuiContext::GetInstance(&context, window).CleanUp();
 	SDL_GL_DeleteContext(context);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
-	delete guiWnd;
+  for(auto* gui : guiWnd)
+	  delete gui;
 }
 
 //======================================
@@ -89,13 +97,14 @@ bool dbGLWindowSDL::InitializeGL()
 void dbGLWindowSDL::Run()
 {
 	SDL_Event windowEvent;
-	while(true)
+	while(running)
 	{
 		if(SDL_PollEvent(&windowEvent))
 		{
-			if(SDL_QUIT == windowEvent.type)
+      if (windowEvent.type == SDL_KEYDOWN && windowEvent.key.keysym.sym == SDLK_ESCAPE)
 			{
 				dTimer->stop();
+        running = false;
 				break;
 			}
 			else if(SDL_KEYDOWN == windowEvent.type)
@@ -120,6 +129,15 @@ void dbGLWindowSDL::Run()
 		}
 	}
 }
+
+//======================================
+//dbGLWindowSDL::Close
+//---------------------------------------
+void dbGLWindowSDL::Close()
+{
+  running = false;
+}
+
 //======================================
 //dbGLWindowSDL::paintGL
 //---------------------------------------
@@ -135,17 +153,20 @@ void dbGLWindowSDL::PaintGL()
 	eImGuiContext::GetInstance(&context, window).NewFrame();
 
 	//eWindowImGuiDemo demo;
-	//demo.Render();
-	if(guiWnd)
-		guiWnd->Render();
+  //demo.Render();
 
-	if (guiWnd)
-		eImGuiContext::GetInstance(&context, window).PreRender();
+  for(auto* gui : guiWnd)
+    gui->Render();
+
+  for (auto* gui : guiWnd)
+	  if (gui)
+		  eImGuiContext::GetInstance(&context, window).PreRender();
 
 	mainContext->PaintGL();
 	
-	if (guiWnd)
-		eImGuiContext::GetInstance(&context, window).Render();
+  for (auto* gui : guiWnd)
+    if (gui)
+		  eImGuiContext::GetInstance(&context, window).Render();
 
 	SDL_GL_SwapWindow(window);
 }

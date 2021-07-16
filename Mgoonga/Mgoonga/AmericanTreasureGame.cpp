@@ -26,7 +26,7 @@
 class eTurnController : public ICommand
 {
 public:
-	eTurnController(eAmericanTreasureGame& gc) :game_context(gc) {}
+	eTurnController(eAmericanTreasureGame& gc) : game_context(gc) {}
 
 	virtual void Execute() override
 	{
@@ -38,13 +38,16 @@ public:
 	}
 
 	//-------------------------------------------------------------------------------------------
-	void Update()
-	{
-		if (glm::length(shooter->GetTransform()->getTranslation() - target->GetTransform()->getTranslation()) <= (radius) ) //hex_distance multiplied by shooting distance
-		{
-			//Calculate fight outcome
-		}
-	}
+  void Update()
+  {
+    //hex_distance multiplied by shooting distance
+    {
+      if (glm::length(shooter->GetTransform()->getTranslation() - target->GetTransform()->getTranslation()) <= (radius))
+      {
+        //Calculate fight outcome
+      }
+    }
+  }
 
 	//-------------------------------------------------------------------------------------------
 	Texture* GetDiceTexture()
@@ -91,6 +94,7 @@ public:
 
 	std::shared_ptr<eShip> shooter = nullptr; //make setters or friend?
 	std::shared_ptr<eShip> target  = nullptr;
+
 protected:
 	std::reference_wrapper<eAmericanTreasureGame> game_context;
 	int32_t	current_dice = 6;
@@ -100,23 +104,22 @@ protected:
 
 //-------------------------------------------------------------------------------------------
 eAmericanTreasureGame::eAmericanTreasureGame(eInputController*  _input,
-											 IWindowImGui*		_guiWnd,
+                       std::vector<IWindowImGui*> _externalGui,
 											 const std::string& _modelsPath,
 											 const std::string& _assetsPath,
 											 const std::string& _shadersPath)
-: eMainContextBase(_input, _guiWnd, _modelsPath, _assetsPath, _shadersPath)
-, gui(_guiWnd)
+: eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
 , pipeline(new ePipeline(objects, width, height, nearPlane, farPlane, 2.0f)) //waterHeight is not initialized! @better design
 , camera(new Camera(width, height, nearPlane, farPlane))
 , camRay(new dbb::CameraRay())
 {
-	_guiWnd->Add(SLIDER_FLOAT, "Ydir", &light.light_position.y);
-	_guiWnd->Add(SLIDER_FLOAT, "Zdir", &light.light_position.z);
-	_guiWnd->Add(SLIDER_FLOAT, "Xdir", &light.light_position.x);
+	_externalGui[0]->Add(SLIDER_FLOAT, "Ydir", &light.light_position.y);
+	_externalGui[0]->Add(SLIDER_FLOAT, "Zdir", &light.light_position.z);
+	_externalGui[0]->Add(SLIDER_FLOAT, "Xdir", &light.light_position.x);
 
-	_guiWnd->Add(SLIDER_FLOAT, "camera positoin X", &camera->ViewDirectionRef().x);
-	_guiWnd->Add(SLIDER_FLOAT, "camera positoin Y", &camera->ViewDirectionRef().y);
-	_guiWnd->Add(SLIDER_FLOAT, "camera positoin Z", &camera->ViewDirectionRef().z);
+	_externalGui[0]->Add(SLIDER_FLOAT, "camera positoin X", &camera->ViewDirectionRef().x);
+	_externalGui[0]->Add(SLIDER_FLOAT, "camera positoin Y", &camera->ViewDirectionRef().y);
+	_externalGui[0]->Add(SLIDER_FLOAT, "camera positoin Z", &camera->ViewDirectionRef().z);
 	
 	//Light init!
 	light.ambient = vec3(0.3f, 0.3f, 0.3f);
@@ -245,9 +248,9 @@ bool eAmericanTreasureGame::OnMousePress(uint32_t x, uint32_t y, bool left)
 
 	if (focused)
 	{
-		gui->Add(SLIDER_FLOAT, "focused positoin X", &focused->GetTransform()->getTranslationRef().x);
-		gui->Add(SLIDER_FLOAT, "focused positoin Y", &focused->GetTransform()->getTranslationRef().y);
-		gui->Add(SLIDER_FLOAT, "focused positoin Z", &focused->GetTransform()->getTranslationRef().z);
+		externalGui[0]->Add(SLIDER_FLOAT, "focused positoin X", &focused->GetTransform()->getTranslationRef().x);
+    externalGui[0]->Add(SLIDER_FLOAT, "focused positoin Y", &focused->GetTransform()->getTranslationRef().y);
+    externalGui[0]->Add(SLIDER_FLOAT, "focused positoin Z", &focused->GetTransform()->getTranslationRef().z);
 	}
 	return true;
 }

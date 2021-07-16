@@ -12,7 +12,7 @@
 
 //-----------------------------------------------------------------
 eMainContextBase::eMainContextBase(eInputController* _input,
-	                               IWindowImGui*,
+	                               std::vector<IWindowImGui*> _externalGui,
 	                               const std::string& _modelsPath,
 	                               const std::string& _assetsPath,
 	                               const std::string& _shadersPath)
@@ -23,6 +23,7 @@ eMainContextBase::eMainContextBase(eInputController* _input,
 , texManager(new eTextureManager)
 , modelManager(new eModelManager)
 , soundManager(new eSoundManager(_assetsPath))
+, externalGui(_externalGui)
 {}
 
 //-------------------------------------------------------------------------
@@ -52,6 +53,8 @@ void eMainContextBase::InitializeGL()
 	InitializeModels();
 
 	InitializeRenders();
+
+  InitializeExternalGui();
 }
 
 //-------------------------------------------------------------------------------

@@ -26,7 +26,7 @@ public:
 	friend class eTurnController;
 
 	eAmericanTreasureGame(eInputController*,
-						  IWindowImGui*,
+              std::vector<IWindowImGui*> _externalGui,
 						  const std::string& modelsPath,
 						  const std::string& assetsPath,
 						  const std::string& shadersPath);
@@ -60,8 +60,6 @@ protected:
 	Light								light;
 	float								waterHeight = 2.0f;
 	float								angle		= 0.0f;
-
-	IWindowImGui*						gui;
 };
 
 #endif //AMERICAN_TREASURE_H

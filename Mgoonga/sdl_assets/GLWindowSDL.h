@@ -25,18 +25,20 @@ public:
 
 	bool		InitializeGL();
 	void		Run();
+  void    Close();
 
 protected:
 	std::unique_ptr<math::Timer>		dTimer;
-	IWindowImGui*						guiWnd;
-	eInputController					inputController;
+	std::vector<IWindowImGui*>			guiWnd;
+	eInputController					       inputController;
 	std::unique_ptr<eMainContextBase>	mainContext; 
 
 	SDL_Window*							window  = nullptr;
 
 	const GLint							WIDTH	= 1200;
 	const GLint							HEIGHT	= 600;
-
+  bool                    running = true;
+  std::function<void()> on_close;
 	void								PaintGL();
 };
 

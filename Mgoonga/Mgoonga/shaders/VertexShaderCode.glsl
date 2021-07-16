@@ -48,7 +48,7 @@ void main()
   vec3 nnormal		= mat3(BoneTransform) * normal;
 
   theNormal		= normalize(mat3(modelToWorldMatrix)* normal);
-  thePosition		= vec3(modelToWorldMatrix * v);// vec4(position ,1.0)
+  thePosition	= vec3(modelToWorldMatrix * v);// vec4(position ,1.0)
 
   vec3 T = normalize(vec3(modelToWorldMatrix * vec4(tangent,   0.0)));
   vec3 B = normalize(vec3(modelToWorldMatrix * vec4(bitangent, 0.0)));

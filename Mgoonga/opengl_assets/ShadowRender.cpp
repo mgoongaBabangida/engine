@@ -65,7 +65,7 @@ void eShadowRender::Render(const Camera&			camera,
 	}
 	else // cut off
 	{
-		assert("");
+		assert(false, "");
 	}
 
 		//*********************

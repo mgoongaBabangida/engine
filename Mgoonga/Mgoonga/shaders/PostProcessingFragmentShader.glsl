@@ -4,6 +4,7 @@ in vec2 TexCoords;
 out vec4 color;
 uniform bool frame = false;
 uniform bool blend = false;
+uniform float blurCoef = 1.0f;
 layout(binding=1) uniform sampler2D screenTexture;
 layout(binding=2) uniform sampler2D contrastTexture;
 
@@ -17,7 +18,7 @@ void main()
 	 {
 	   col = texture(screenTexture, TexCoords);
 	   contr = texture(contrastTexture, TexCoords);
-	   col = col + contr;
+	   col = col + (contr * clamp(blurCoef,0,1));
 	 }
     else
     col = texture(screenTexture, TexCoords);

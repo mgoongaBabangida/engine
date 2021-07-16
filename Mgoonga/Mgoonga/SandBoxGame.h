@@ -14,7 +14,7 @@ class eSandBoxGame : public eMainContextBase
 {
 public:
 	eSandBoxGame(eInputController*,
-				IWindowImGui*,
+    std::vector<IWindowImGui*> _externalGui,
 				const std::string& modelsPath,
 				const std::string& assetsPath,
 				const std::string& shadersPath);

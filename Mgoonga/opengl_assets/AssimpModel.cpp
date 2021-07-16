@@ -1,9 +1,11 @@
 #include "stdafx.h"
+
 #include "AssimpModel.h"
 #include <math/Transform.h>
 
 #include <algorithm>
 #include <iostream>
+#include <assert.h>
 
 using namespace std;
 
@@ -26,7 +28,8 @@ Transform createTransform(const aiVectorKey& PositionKey,const aiQuatKey& Rotati
 { 	
 	Transform trans;
 
-	glm::vec3 s(ScalingKey.mValue.x, ScalingKey.mValue.y, ScalingKey.mValue.z);
+  glm::vec3 s(1.0f, 1.0f, 1.0f);
+  //glm::vec3 s(ScalingKey.mValue.x, ScalingKey.mValue.y, ScalingKey.mValue.z);
 	glm::quat q(RotationKey.mValue.w, RotationKey.mValue.x, RotationKey.mValue.y, RotationKey.mValue.z);
 	glm::vec3 t(PositionKey.mValue.x, PositionKey.mValue.y, PositionKey.mValue.z);
 	
@@ -50,10 +53,43 @@ std::string Model::RootBoneName()
 	return root_bone->Name();
 }
 
+Model::~Model()
+{
+
+}
+
 void Model::Draw()
 {
 	for (GLuint i = 0; i < this->meshes.size(); i++)
 		this->meshes[i].Draw();
+}
+
+//---------------------------------------------------------------------------
+size_t Model::GetVertexCount() const
+{
+  size_t count = 0;
+  for (auto& mesh : meshes)
+    count += mesh.vertices.size();
+  return count;
+}
+
+//----------------------------------------------------------------------------
+std::vector<const IMesh*> Model::GetMeshes() const
+{
+  std::vector<const IMesh*> ret;
+  for (const AssimpMesh& mesh : meshes)
+    ret.push_back(&mesh);
+  return ret;
+}
+
+std::vector<const IAnimation*> Model::GetAnimations() const
+{
+  std::vector<const IAnimation*> ret;
+  for (auto& anim : m_animations)
+  {
+    ret.push_back(&anim);
+  }
+  return ret;
 }
 
 void Model::loadModel(string path)
@@ -73,13 +109,10 @@ void Model::loadModel(string path)
 	this->processNode(m_scene->mRootNode, m_scene);
 	
 	this->m_GlobalInverseTransform = glm::inverse(toMat4(m_scene->mRootNode->mTransformation));
-	/////Bones///////////////////////////////////////
+	
+  //Bones
 	this->loadNodesToBone(m_scene->mRootNode);
 	this->loadBoneChildren(m_scene->mRootNode);
-
-	///////////////Dump///////////////////////////////////
-	//DumpBone();
-	DumpAssimpMeshes();
 
 	if (m_scene->mRootNode->mNumMeshes)
 		root_bone = &m_bones[this->m_BoneMapping.find(m_scene->mRootNode->mName.C_Str())->second];
@@ -97,7 +130,6 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		this->meshes.push_back(this->processMesh(mesh, scene));
 	}
-	//std::cout << "ENTERED-------------" << std::endl;
 	// Then do the same for each of its children
 	for (GLuint i = 0; i < node->mNumChildren; i++)
 	{
@@ -138,15 +170,20 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		vector.z = mesh->mBitangents[i].z;
 		vertex.bitangent = vector;
 
-		if (mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
+		if (mesh->HasTextureCoords(0)) // Does the mesh contain texture coordinates?
 		{
 			glm::vec2 vec;
 			vec.x = mesh->mTextureCoords[0][i].x;
-			vec.y = mesh->mTextureCoords[0][i].y;
+			vec.y = m_invert_y_uv ? 1.0f - mesh->mTextureCoords[0][i].y : mesh->mTextureCoords[0][i].y;
 			vertex.TexCoords = vec;
 		}
 		else
 			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+
+    if (mesh->HasTextureCoords(1))
+    {
+      assert("mesh has multiple texture coordinates!");
+    }
 
 		vertices.push_back(vertex);
 	}
@@ -210,14 +247,13 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		if (mesh->mMaterialIndex >= 0)
 		{
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-			vector<Texture> diffuseMaps = this->loadMaterialTextures(material,
-				aiTextureType_DIFFUSE, "texture_diffuse");
+			vector<Texture> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-			vector<Texture> specularMaps = this->loadMaterialTextures(material,
-				aiTextureType_SPECULAR, "texture_specular");
+			
+      vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-			vector<Texture> normalMaps = loadMaterialTextures(material, 
-				aiTextureType_HEIGHT, "texture_normal");
+			
+      vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
 			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 		}
 
@@ -299,7 +335,7 @@ void Model::loadBoneChildren(aiNode * node)
 	}
 }
 
-SceletalAnimation Model::ProccessAnimations(const aiAnimation * anim)
+SceletalAnimation Model::ProccessAnimations(const aiAnimation* anim)
 {
 	int durationMsc = (int)(anim->mDuration / anim->mTicksPerSecond * 1000);//mTicksPerSecond can be 0 ?
 	int qNodes = anim->mNumChannels; //quantity of nodes(bones) in anim 45
@@ -319,9 +355,9 @@ SceletalAnimation Model::ProccessAnimations(const aiAnimation * anim)
 		for (int j = 0; j <qframes; ++j) // numTransforms ? frames?
 		{
 			frames[j].addTrnasform(anim->mChannels[i]->mNodeName.C_Str(),
-									createTransform(anim->mChannels[i]->mPositionKeys[j], 
-													anim->mChannels[i]->mRotationKeys[j], 
-													anim->mChannels[i]->mScalingKeys[j]));
+									createTransform(anim->mChannels[i]->mPositionKeys[j],
+													        anim->mChannels[i]->mRotationKeys[j],
+													        anim->mChannels[i]->mScalingKeys[j]));
 		}
 	}
 	m_animations.push_back(SceletalAnimation(durationMsc, frames, anim->mName.C_Str())); // duration ?
@@ -349,11 +385,12 @@ void Model::VertexBoneData::AddBoneData(int BoneID, float Weight)
  {
 		++numTries;
 	     for (int i = 0; i < NUM_BONES_PER_VEREX; i++) { //ARRAY_SIZE_IN_ELEMENTS(IDs)
-		        if (Weights[i] == 0.0) {
-			             IDs[i] = BoneID;
-			            Weights[i] = Weight;
-			            return;			
-		  }
+		        if (Weights[i] == 0.0)
+            {
+              IDs[i] = BoneID;
+              Weights[i] = Weight;
+              return;
+		        }
 		
 	}
 	

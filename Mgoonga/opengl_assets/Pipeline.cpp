@@ -68,6 +68,10 @@ void ePipeline::InitializeBuffers(bool _needsShadowCubeMap)
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW, width * 2, height * 2, _needsShadowCubeMap);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFFERED, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SQUERE, height, height); //squere
+  eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_BRIGHT_FILTER, width, height);
+  //eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_ONE, width, height); //$todo transfer here
+  //eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_TWO, width, height);
+  //eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFFERED2, width, height);
 }
 
 void ePipeline::InitializeRenders(eModelManager& modelManager, eTextureManager& texManager, const std::string& shadersFolderPath)
@@ -107,7 +111,7 @@ void ePipeline::RanderFrame(Camera& _camera, const Light& _light ,std::vector<GU
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_STENCIL_TEST);
 
-	//if (sky) { RanderSkyNoise(m_camera); }
+	if (sky) { RanderSkyNoise(_camera); }
 
 	if (water)
 	{
@@ -179,6 +183,54 @@ void ePipeline::RanderFrame(Camera& _camera, const Light& _light ,std::vector<GU
 	}
 
 	RanderGui(guis, _camera);
+}
+
+//-------------------------------------------------------
+Texture ePipeline::GetReflectionBufferTexture() const
+{
+  return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFLECTION);
+}
+
+//-------------------------------------------------------
+Texture ePipeline::GetRefractionBufferTexture() const
+{
+  return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFRACTION);
+}
+
+//-------------------------------------------------------
+Texture ePipeline::GetShadowBufferTexture() const
+{
+  return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SHADOW);
+}
+
+//-------------------------------------------------------
+Texture ePipeline::GetGausian1BufferTexture() const
+{
+  return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_GAUSSIAN_ONE);
+}
+
+//-------------------------------------------------------
+Texture ePipeline::GetGausian2BufferTexture() const
+{
+  return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_GAUSSIAN_TWO);
+}
+
+//-------------------------------------------------------
+Texture ePipeline::GetMtsBufferTexture() const
+{
+  return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_MTS);
+}
+
+//-------------------------------------------------------
+Texture ePipeline::GetScreenBufferTexture() const
+{
+  return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN);
+}
+
+//----------------------------------------------------
+Texture ePipeline::GetBrightFilter() const
+{
+  return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_BRIGHT_FILTER);
 }
 
 void ePipeline::RanderShadows(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
@@ -321,13 +373,13 @@ void ePipeline::RanderBlur(const Camera& _camera)
 	renderManager->BrightFilterRender()->Render();
 	renderManager->GaussianBlurRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_BRIGHT_FILTER));
 	renderManager->GaussianBlurRender()->Render();
-	glBindFramebuffer(GL_FRAMEBUFFER, 0); //default?
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); //default?
 	glViewport(0, 0, width, height);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
 	renderManager->ScreenRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));
 	renderManager->ScreenRender()->SetTextureContrast(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_GAUSSIAN_TWO));
-	renderManager->ScreenRender()->Render(_camera);
+	renderManager->ScreenRender()->RenderContrast(_camera, blur_coef);
 }
 
 void ePipeline::RanderGui(std::vector<GUI>& guis, const Camera& _camera)

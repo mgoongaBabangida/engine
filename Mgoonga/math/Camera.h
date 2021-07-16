@@ -12,8 +12,8 @@ public:
 		            float _nearPlane,
 		            float _farPlane,
 					float _perspective_ratio = 60.0f,
-					glm::vec3 _position		 = glm::vec3( 4.0f, 3.5f, 1.0f ), 
-					glm::vec3 _viewDirection = glm::vec3(-0.95f, -0.45f, 0.0f));
+					glm::vec3 _position		 = glm::vec3( -1.0f, 4.0f, -2.5f ),
+					glm::vec3 _viewDirection = glm::vec3(0.6f, -0.10f, 0.8f));
 
 	Camera(const Camera& other);
 	Camera&				operator=(const Camera & other);

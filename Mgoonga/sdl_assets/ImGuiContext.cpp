@@ -10,6 +10,10 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 #include <algorithm>
+#include <functional>
+
+#include <base/base.h>
+#include <opengl_assets/Texture.h>
 
 eImGuiContext::eImGuiContext(SDL_GLContext* _context, SDL_Window* _window)
 	:context(_context), window(_window)
@@ -108,17 +112,107 @@ void eWindowImGuiDemo::Render()
 	}
 }
 
+eWindowImGui::eWindowImGui(const std::string & _name)
+  :name(_name)
+{
+}
+
 void eWindowImGui::Render()
 {
-	ImGui::SetNextWindowSize({ 500, 250 });
-	ImGui::Begin(name.c_str(), &visible);
-	for(auto& item : lines)
-	{
-		switch(std::get<1>(item))
-		{
-			case SLIDER_FLOAT: ImGui::SliderFloat(std::get<0>(item).c_str(), static_cast<float*>(std::get<2>(item)), -10.0f, 10.0f); // -10 10 $todo
-		}
-	}
+  //ImGui::SetNextWindowSize({ 500, 250 });
+  ImGui::Begin(name.c_str(), &visible);
+
+  for (auto& item : lines)
+  {
+    switch (std::get<1>(item))
+    {
+      case SLIDER_FLOAT: ImGui::SliderFloat(std::get<0>(item).c_str(), static_cast<float*>(std::get<2>(item)), -10.0f, 10.0f); break; // -10 10 $todo
+      case TEXT:         ImGui::Text(std::get<0>(item).c_str()); break;
+      case CHECKBOX:     ImGui::Checkbox(std::get<0>(item).c_str(), static_cast<bool*>(std::get<2>(item))); break;
+      case TEXTURE:
+      {
+        ImGui::Text(std::get<0>(item).c_str());
+        ImGui::Image((void*)(intptr_t)(std::get<2>(item)), ImVec2(240, 160), ImVec2(1, 1), ImVec2(0, 0));
+      }
+      break;
+      case MENU:
+      {
+        ImGui::BeginMainMenuBar();
+        if (ImGui::BeginMenu("File"))
+        {
+          if (ImGui::MenuItem(std::get<0>(item).c_str()))
+          {
+            auto callback = reinterpret_cast<std::function<void()>*>(std::get<2>(item));
+            (*callback)();
+          }
+          ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+      }
+      break;
+      case SLIDER_FLOAT_3_CALLBACK:
+      {
+        eThreeFloatCallback* transfer_data = static_cast<eThreeFloatCallback*>(std::get<2>(item));
+        ImGui::Text(std::get<0>(item).c_str());
+        ImGui::PushItemWidth(ImGui::GetWindowWidth());
+        if (ImGui::SliderFloat3(std::get<0>(item).c_str(), &transfer_data->data[0], transfer_data->min, transfer_data->max))
+          transfer_data->callback();
+      }
+      break;
+      case TEXT_INT:
+      {
+        size_t* data = static_cast<size_t*>(std::get<2>(item));
+        std::string text = std::get<0>(item) + std::to_string(*data);
+        ImGui::Text(text.c_str()); break;
+      }
+      break;
+      case COMBO_BOX:
+      {
+        eVectorStringsCallback* transfer_data = static_cast<eVectorStringsCallback*>(std::get<2>(item));
+        std::vector<char*> cstrings;
+        cstrings.reserve(transfer_data->data.size());
+
+        for (size_t i = 0; i < transfer_data->data.size(); ++i)
+          cstrings.push_back(const_cast<char*>(transfer_data->data[i].c_str()));
+
+        static int item_current = 0;
+        if (!cstrings.empty())
+        {
+          if (ImGui::Combo(std::get<0>(item).c_str(), &item_current, &cstrings[0], transfer_data->data.size()))
+            transfer_data->callback(item_current);
+        }
+      }
+      break;
+      case TEXTURE_ARRAY:
+      {
+        std::vector<const Texture*>* transfer_data = static_cast<std::vector<const Texture*>*>(std::get<2>(item));
+        ImGui::Text(std::get<0>(item).c_str());
+        for (const Texture* t : *transfer_data)
+        {
+          ImGui::Image((void*)(intptr_t)(t->id), ImVec2(240, 160)/* ImVec2(t->mTextureWidth, t->mTextureHeight)*/, ImVec2(1, 1), ImVec2(0, 0));
+        }
+      }
+      break;
+      case BUTTON:
+      {
+        if (ImGui::Button(std::get<0>(item).c_str()))
+        {
+          std::function<void()> callback = *static_cast<std::function<void()>*>(std::get<2>(item));
+          callback();
+        }
+      }
+      break;
+    }
+  }
+
+  ImVec2 pos = ImGui::GetWindowPos();
+  window_pos_x = pos.x;
+  window_pos_y = pos.y;
+  ImVec2 size = ImGui::GetWindowSize();
+  window_size_x =size.x;
+  window_size_y =size.y;
+  ImGui::SetNextWindowPos(ImVec2{ window_pos_x , window_pos_y + window_size_y });
+  ImGui::SetNextWindowContentWidth(window_size_x);
 	ImGui::End();
 }
 
@@ -130,4 +224,24 @@ void eWindowImGui::Add(TypeImGui _type, const std::string & _name, void* _data)
 		lines.push_back(eItem(_name, _type, _data));
 	else
 		std::get<2>(*it) = _data;
+}
+
+//---------------------------------------------------------------------
+bool eWindowImGui::OnMousePress(uint32_t x, uint32_t y, bool left)
+{
+  bool is_pressed = x > window_pos_x && y > window_pos_y && x < (window_pos_x + window_size_x) && y < (window_pos_y + window_size_y);
+  if (is_pressed)
+    return true;
+  else
+    return false;
+}
+
+//---------------------------------------------------------------------
+bool eWindowImGui::OnMouseMove(uint32_t x, uint32_t y)
+{
+  bool is_pressed = x > window_pos_x && y > window_pos_y && x < (window_pos_x + window_size_x) && y < (window_pos_y + window_size_y);
+  if (is_pressed)
+    return true;
+  else
+    return false;
 }

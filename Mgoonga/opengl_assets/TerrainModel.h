@@ -19,15 +19,24 @@ public:
 	void initialize(Texture* diffuse, Texture* specular);
 	void initialize(Texture* diffuse, Texture* specular, Texture* normal, Texture* heightMap);
 	
-	virtual void			Draw()							override;
-	float					GetHeight(float x , float z)	override;
-	glm::vec3				GetNormal(float x, float z)		override;
+	virtual void			                Draw()							override;
+  virtual size_t                    GetVertexCount() const;
+  virtual size_t                    GetMeshCount() const { return 1; }
+  virtual std::vector<const IMesh*> GetMeshes() const;
+  virtual size_t                    GetAnimationCount() const { return 0; }
+  virtual std::vector<const IAnimation*> GetAnimations() const {
+    return std::vector<const IAnimation*>();
+  }
+
+	float					   GetHeight(float x , float z)	override;
+	glm::vec3				 GetNormal(float x, float z)		override;
 
 	void					makePlaneIndices(unsigned int rows, unsigned int columns);
 	
 	std::vector<glm::vec3>	GetPositions()			const;
-	std::vector<GLuint>		GetIndeces()			const;
-	std::vector<MyMesh*>	getMeshes()				const;
+	std::vector<GLuint>		  GetIndeces()			const;
+
+	std::vector<MyMesh*>	  getMeshes()				const;
 	
 	void					setDiffuse(Texture* t);
 	void					setSpecular(Texture* t);
