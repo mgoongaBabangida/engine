@@ -1,0 +1,6 @@
+1. Download the project from https://github.com/mgoongaBabangida/engine
+2. Download third_party folder and put it one level above the repository. Now it should compile but would not link.
+3. Download third_party_dlls and put all of them to Mgoonga exe. EXCEPT of SDL_2_image.dll and assimpd.dll. You should build them yourself on your PC.
+4. Go to third_party\SDL2_image-2.0.4\ generate and build the project. Put the dll to Mgoonga.exe
+5  Build third_party\assimp-3.1.1 with CMake (for example use this tutorial https://www.youtube.com/watch?v=oci7xJEg6sU) Put assimpd.dll to Mgoonga.exe
+(be careful with dll type x32/x64)
