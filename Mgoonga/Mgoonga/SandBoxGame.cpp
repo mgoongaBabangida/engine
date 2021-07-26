@@ -23,7 +23,7 @@ eSandBoxGame::eSandBoxGame(eInputController*  _input,
 						   const std::string& _assetsPath,
 						   const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
-, pipeline(m_objects, width, height, nearPlane, farPlane, 0)
+, pipeline(m_objects, camRay, width, height)
 , m_camera(width, height, nearPlane, farPlane)
 {
 	_externalGui[0]->Add(SLIDER_FLOAT, "Ydir", &m_light.light_position.y);
@@ -57,7 +57,7 @@ void eSandBoxGame::PaintGL()
 		if (object->GetScript())
 			object->GetScript()->Update(m_objects);
 	}
-	pipeline.RanderFrame(m_camera, m_light, std::vector<GUI> {}, std::vector<shObject> {}, std::vector<Flag>{});
+	pipeline.RenderFrame(m_camera, m_light, std::vector<GUI> {}, std::vector<shObject> {}, std::vector<eObject*>{});
 }
 
 bool eSandBoxGame::OnMouseMove(uint32_t x, uint32_t y)

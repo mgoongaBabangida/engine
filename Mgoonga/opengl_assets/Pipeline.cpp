@@ -22,24 +22,21 @@
 #include "BrightFilterrender.h"
 #include "ShadowRender.h"
 #include "LinesRender.h"
+#include "TextRender.h"
 
 void	ePipeline::SetSkyBoxTexture(Texture* _t)  { renderManager->SkyBoxRender()->SetSkyBoxTexture(_t); }
 void	ePipeline::AddHex(glm::vec3 _v) { renderManager->AddHex(_v); }
 void	ePipeline::SetHexRadius(float _r) { renderManager->SetHexRadius(_r); }
 
 //-------------------------------------------------------------------------------------------
-ePipeline::ePipeline(std::vector<shObject>& _objs, 
-					 uint32_t				_width, 
-					 uint32_t				_height, 
-					 float					_nearPlane, 
-					 float					_farPlane, 
-					 float					_waterHeight)
+ePipeline::ePipeline(std::vector<shObject>& _objs,
+                     dbb::CameraRay& _cam_ray,
+                     uint32_t				_width,
+                     uint32_t				_height)
 : m_objects(_objs),
+  camRay(_cam_ray),
   width(_width),
   height(_height),
-  nearPlane(_nearPlane),
-  farPlane(_farPlane),
-  waterHeight(_waterHeight),
   renderManager(new eRenderManager)
 {}
 
@@ -69,30 +66,36 @@ void ePipeline::InitializeBuffers(bool _needsShadowCubeMap)
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFFERED, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SQUERE, height, height); //squere
   eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_BRIGHT_FILTER, width, height);
-  //eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_ONE, width, height); //$todo transfer here
-  //eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_TWO, width, height);
+  eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_ONE, 600, 300);
+  eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_TWO, 600, 300);
   //eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFFERED2, width, height);
 }
 
+//-----------------------------------------------------------------------------------------------
 void ePipeline::InitializeRenders(eModelManager& modelManager, eTextureManager& texManager, const std::string& shadersFolderPath)
 {
 	renderManager->Initialize(modelManager, texManager, shadersFolderPath);
 }
 
+//-----------------------------------------------------------------------------------------------
 Texture ePipeline::GetSkyNoiseTexture(const Camera& _camera)
 {
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SQUERE);
-	RanderSkyNoise(_camera); //do we need camera?
+	RenderSkyNoise(_camera); //do we need camera?
 	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SQUERE);
 }
 
 //-----------------------------------------------------------------------------------------------
-void ePipeline::RanderFrame(Camera& _camera, const Light& _light ,std::vector<GUI>& guis, std::vector<shObject> m_focused, std::vector<Flag>& _flags)
+void ePipeline::RenderFrame(Camera& _camera, const Light& _light ,std::vector<GUI>& guis, std::vector<shObject> _focused, std::vector<eObject*>& _flags)
 {
+  /*std::sort(_focused.begin(), _focused.end(), [_camera](const shObject& obj1, const shObject& obj2)
+    { return glm::length2(_camera.getPosition() - obj1->GetTransform()->getTranslation())
+    > glm::length2(_camera.getPosition() - obj2->GetTransform()->getTranslation()); });*/
+	  
 	//1 Shadow Render Pass
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SHADOW);
 
-	if (shadows) { RanderShadows(_camera, _light, m_objects); }
+	if (shadows) { RenderShadows(_camera, _light, m_objects); }
 
 	if (_light.type == eLightType::DIRECTION)
 		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW, GL_TEXTURE1);
@@ -101,25 +104,22 @@ void ePipeline::RanderFrame(Camera& _camera, const Light& _light ,std::vector<GU
 	else
 		assert("spot light is not yet supported");
 
-	//3 Rendering reflaction and refraction to Textures
+	//3 Rendering reflection and refraction to Textures
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_REFLECTION);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	/*if (skybox)*/ { RanderSkybox(_camera); }
+	/*if (skybox)*/ { RenderSkybox(_camera); }
 
 	glEnable(GL_CLIP_DISTANCE0); //?
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_STENCIL_TEST);
 
-	if (sky) { RanderSkyNoise(_camera); }
-
 	if (water)
 	{
-		RanderReflection(_camera, _light, m_objects);
-
+		RenderReflection(_camera, _light, m_objects);
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_REFRACTION);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		RanderRefraction(_camera, _light, m_objects);
+		RenderRefraction(_camera, _light, m_objects);
 	}
   glDisable(GL_CLIP_DISTANCE0);
 
@@ -127,40 +127,50 @@ void ePipeline::RanderFrame(Camera& _camera, const Light& _light ,std::vector<GU
 			: eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	//if (sky) { RanderSkyNoise(m_camera); }
+	if (sky) { RenderSkyNoise(_camera); }
 
 	//4. Rendering to main FBO with stencil
-	if (focuse) { RanderFocused(_camera, _light, m_focused); }
+	if (focuse)
+	{
+	  for (auto& obj : _focused)
+	  {
+	    RenderFocused(_camera, _light, std::vector<shObject>{ obj });
+	    RenderOutlineFocused(_camera, _light, std::vector<shObject>{ obj });
+	  }
+	}
+	std::vector<shObject> not_outlined;
+	std::set_difference(m_objects.get().begin(), m_objects.get().end(),
+		                  _focused.begin(), _focused.end(),
+		                  std::back_inserter(not_outlined),
+		                  [](auto& a, auto& b) { return &a < &b; });
 
-	RanderMain(_camera, _light, m_objects);
+	RenderMain(_camera, _light, not_outlined);
 
-	if (focuse) { RanderOutlineFocused(_camera, _light, m_focused); }
-
-	if (flags) { RanderFlags(_camera, _light, _flags); }
+	if (flags) { RenderFlags(_camera, _light, _flags); }
 
 	mts ? eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS)
 		: eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 
 	// Rendering WaterQuad
-	if (water) { RanderWater(_camera, _light); }
+	if (water) { RenderWater(_camera, _light); }
 
 	// Hexes
-	if (geometry) { RanderGeometry(_camera); }	//$need to transfer dots every frame
+	if (geometry) { RenderGeometry(_camera); }	//$need to transfer dots every frame
 
 	//  Draw skybox firs
 	if (skybox)
 	{
-		RanderSkybox(_camera);
+		RenderSkybox(_camera);
 	}
-	glDepthFunc(GL_LEQUAL); //?
+	glDepthFunc(GL_LEQUAL);
 
 	//7  Particles
 	mts ? eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS)
 		: eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 
-	if (particles) { RanderParticles(_camera); }
+	if (particles) { RenderParticles(_camera); }
 
-	if (mts) { RanderBlur(_camera); }
+	if (mts) { RenderBlur(_camera); }
 	
 	if (draw_bounding_boxes)
 	{
@@ -177,12 +187,24 @@ void ePipeline::RanderFrame(Camera& _camera, const Light& _light ,std::vector<GU
 	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
 
-	if(mousepress)
+	if(mousepress  && camRay.get().IsPressed())
 	{
-		renderManager->ScreenRender()->RenderFrame();
+		renderManager->ScreenRender()->RenderFrame(camRay.get().GetFrame().first, camRay.get().GetFrame().second, width, height);
 	}
 
-	RanderGui(guis, _camera);
+	RenderGui(guis, _camera);
+
+  static math::eClock clock;
+  std::string fps;
+  if (clock.isActive())
+    fps = { "FPS " + std::to_string(1000 / clock.newFrame()) };
+  if (!clock.isActive())
+    clock.start();
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	renderManager->TextRender()->RenderText(fps, 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f), width, height);
+	glDisable(GL_BLEND);
 }
 
 //-------------------------------------------------------
@@ -233,7 +255,7 @@ Texture ePipeline::GetBrightFilter() const
   return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_BRIGHT_FILTER);
 }
 
-void ePipeline::RanderShadows(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
+void ePipeline::RenderShadows(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
 {
 	// Bind the "depth only" FBO and set the viewport to the size of the depth texture 
 	glViewport(0, 0, width * 2, height * 2);
@@ -258,14 +280,14 @@ void ePipeline::RanderShadows(const Camera& _camera, const Light& _light, std::v
 	glViewport(0, 0, width, height);
 }
 
-void ePipeline::RanderSkybox(const Camera& _camera)
+void ePipeline::RenderSkybox(const Camera& _camera)
 {
 	glDepthFunc(GL_LEQUAL);
 	renderManager->SkyBoxRender()->Render(_camera);
   glDepthFunc(GL_LESS);
 }
 
-void ePipeline::RanderReflection(Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
+void ePipeline::RenderReflection(Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
 {
 	renderManager->MainRender()->SetClipPlane(-waterHeight);
 
@@ -273,20 +295,20 @@ void ePipeline::RanderReflection(Camera& _camera, const Light& _light, std::vect
 	_camera.setPosition(glm::vec3(tem_cam.getPosition().x, 2 * (tem_cam.getPosition().y - waterHeight), tem_cam.getPosition().z));
 	_camera.setDirection(glm::reflect(_camera.getDirection(), glm::vec3(0, 1, 0)));  //water normal
 
-	renderManager->MainRender()->Render(_camera, _light, m_objects);
+	renderManager->MainRender()->Render(_camera, _light, m_objects, false, false);
 	_camera = tem_cam;
 }
 
-void ePipeline::RanderRefraction(Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
+void ePipeline::RenderRefraction(Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
 {
 	renderManager->MainRender()->SetClipPlane(waterHeight);
-	renderManager->MainRender()->Render(_camera, _light, m_objects);
+	renderManager->MainRender()->Render(_camera, _light, m_objects, false, false);
 	renderManager->MainRender()->SetClipPlane(10);
 
 	//glDisable(GL_CLIP_DISTANCE0);
 }
 
-void ePipeline::RanderSkyNoise(const Camera& _camera)
+void ePipeline::RenderSkyNoise(const Camera& _camera)
 {
 	//sky noise
 	glDisable(GL_CULL_FACE);
@@ -303,24 +325,24 @@ void ePipeline::StencilFuncDefault()
 	glStencilMask(0xFF);
 }
 
-void ePipeline::RanderFocused(const Camera& _camera, const Light& _light, std::vector<shObject>& _focused)
+void ePipeline::RenderFocused(const Camera& _camera, const Light& _light, std::vector<shObject>& _focused)
 {
 	//4. Rendering to main FBO with stencil
 	StencilFuncDefault();
 	if(!_focused.empty())
 	{
-		renderManager->MainRender()->Render(_camera, _light, _focused);
+		renderManager->MainRender()->Render(_camera, _light, _focused, false, false);
 	}
 }
 
-void ePipeline::RanderMain(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
+void ePipeline::RenderMain(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
 {
 	glDisable(GL_STENCIL_TEST);
-	renderManager->MainRender()->Render(_camera, _light, _objects);
+	renderManager->MainRender()->Render(_camera, _light, _objects, debug_white, debug_texcoords);
 	glEnable(GL_STENCIL_TEST);
 }
 
-void ePipeline::RanderOutlineFocused(const Camera& _camera, const Light& _light, std::vector<shObject>& _focused)
+void ePipeline::RenderOutlineFocused(const Camera& _camera, const Light& _light, std::vector<shObject>& _focused)
 {
 	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 	glStencilMask(0x00);
@@ -333,25 +355,25 @@ void ePipeline::RanderOutlineFocused(const Camera& _camera, const Light& _light,
 	glClear(GL_STENCIL_BUFFER_BIT);
 }
 
-void ePipeline::RanderFlags(const Camera& _camera, const Light& _light, std::vector<Flag>& _flags)
+void ePipeline::RenderFlags(const Camera& _camera, const Light& _light, std::vector<eObject*>& _flags)
 {
 	renderManager->WaveRender()->Render(_camera, _light, _flags);
 }
 
-void ePipeline::RanderWater(const Camera& _camera, const Light& _light)
+void ePipeline::RenderWater(const Camera& _camera, const Light& _light)
 {
 	glDisable(GL_CULL_FACE);
 	renderManager->WaterRender()->Render(_camera, _light);
 	glEnable(GL_CULL_FACE);
 }
 
-void ePipeline::RanderGeometry(const Camera& _camera)
+void ePipeline::RenderGeometry(const Camera& _camera)
 {
 	glm::mat4 MVP = _camera.getProjectionMatrix() * _camera.getWorldToViewMatrix();
 	renderManager->HexRender()->Render(MVP);
 }
 
-void ePipeline::RanderParticles(const Camera& _camera)
+void ePipeline::RenderParticles(const Camera& _camera)
 {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -363,7 +385,7 @@ void ePipeline::RanderParticles(const Camera& _camera)
 	glDepthMask(GL_TRUE);
 }
 
-void ePipeline::RanderBlur(const Camera& _camera)
+void ePipeline::RenderBlur(const Camera& _camera)
 {
 	eGlBufferContext::GetInstance().ResolveMtsToScreen();
 	renderManager->BrightFilterRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));
@@ -382,7 +404,7 @@ void ePipeline::RanderBlur(const Camera& _camera)
 	renderManager->ScreenRender()->RenderContrast(_camera, blur_coef);
 }
 
-void ePipeline::RanderGui(std::vector<GUI>& guis, const Camera& _camera)
+void ePipeline::RenderGui(std::vector<GUI>& guis, const Camera& _camera)
 {
 	if (!guis.empty())
 	{
@@ -400,4 +422,5 @@ void ePipeline::RanderGui(std::vector<GUI>& guis, const Camera& _camera)
 			renderManager->ScreenRender()->Render(_camera);
 		}
 	}
+	glViewport(0, 0, width, height);
 }

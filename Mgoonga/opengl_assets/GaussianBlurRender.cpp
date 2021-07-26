@@ -3,15 +3,15 @@
 #include "GlBufferContext.h"
 
 eGaussianBlurRender::eGaussianBlurRender(GLuint				_width, 
-										GLuint				_height, 
-										const std::string&	vS,
-										const std::string&	fS)
+										                     GLuint				_height, 
+										                     const std::string&	vS,
+										                     const std::string&	fS)
 : width(_width/2), height(_height/2)
 {
 	shader.installShaders(vS.c_str(), fS.c_str());
 
-  eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_ONE, width, height);
-  eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_TWO, width, height);
+  /*eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_ONE, width, height);
+  eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_TWO, width, height);*/
 	
 	TexWidthLoc = glGetUniformLocation(shader.ID, "targetWidth");
 	textureLoc	= glGetUniformLocation(shader.ID, "screenTexture");
@@ -38,6 +38,12 @@ eGaussianBlurRender::eGaussianBlurRender(GLuint				_width,
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(2 * sizeof(GLfloat)));
 	glBindVertexArray(0);
+}
+
+eGaussianBlurRender::~eGaussianBlurRender()
+{
+  glDeleteVertexArrays(1, &quadVAO);
+  glDeleteBuffers(1, &quadVBO);
 }
 
 void eGaussianBlurRender::Render()
@@ -68,3 +74,4 @@ void eGaussianBlurRender::Render()
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);
 }
+

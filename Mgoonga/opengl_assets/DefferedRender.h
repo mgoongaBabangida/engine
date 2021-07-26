@@ -17,13 +17,14 @@ public:
 	void RenderScreen(const Camera& camera);
 
 protected:
-	Shader							gShader;
-	Shader							screenShader;
+	Shader							          gShader;
+	Shader							          screenShader;
 	std::unique_ptr<eScreenMesh>	screenMesh;
-	GLuint							fullTransformationUniformLocation;
-	GLuint							modelToWorldMatrixUniformLocation;
-	GLuint							eyePositionWorldUniformLocation;
-	GLuint							viewPosUniformLocation;
+
+	GLuint							          fullTransformationUniformLocation;
+	GLuint							          modelToWorldMatrixUniformLocation;
+	GLuint							          eyePositionWorldUniformLocation;
+	GLuint							          viewPosUniformLocation;
 
 	std::vector<glm::vec3>			lightPositions;
 	std::vector<glm::vec3>			lightColors;

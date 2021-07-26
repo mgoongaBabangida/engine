@@ -8,6 +8,8 @@ class eSkyBoxMesh : public IMesh
 {
 public:
 	eSkyBoxMesh(Texture*);
+  ~eSkyBoxMesh();
+
 	void Draw() override;
   virtual size_t GetVertexCount() const { return 4; }
   virtual std::vector<const Texture*> GetTextures() const;

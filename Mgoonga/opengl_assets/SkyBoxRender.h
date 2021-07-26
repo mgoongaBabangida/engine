@@ -12,15 +12,16 @@ public:
 	eSkyBoxRender(Texture*			 cubeTexture,
 				  const std::string& vertexShaderPath,
 				  const std::string& fragmentShaderPath);
+
 	void Render(const Camera& camera);	
 	void SetSkyBoxTexture(Texture*);
 
 protected:
-	Shader							skyboxShader;
+	Shader							          skyboxShader;
 	std::unique_ptr<eSkyBoxMesh>	skyBox;
-	GLuint							viewLoc;
-	GLuint							projectionLoc;
-	GLuint							skyboxLoc;
-	float							moveFactor = 0.0f;
+  GLuint							          viewLoc;
+  GLuint							          projectionLoc;
+  GLuint							          skyboxLoc;
+	float							            moveFactor = 0.0f;
 };
 

@@ -19,6 +19,7 @@ class eHexRender;
 class eGaussianBlurRender;
 class eBrightFilterRender;
 class eLinesRender;
+class eTextRender;
 
 //----------------------------------------------------------------------------------------------
 class DLL_OPENGL_ASSETS eRenderManager
@@ -51,6 +52,7 @@ private:
 	eGaussianBlurRender*GaussianBlurRender();
 	eBrightFilterRender*BrightFilterRender();
 	eLinesRender*		LinesRender();
+	eTextRender* TextRender();
 
 private:
 	std::unique_ptr<eWaterRender>		 m_waterRender;
@@ -66,8 +68,11 @@ private:
 	std::unique_ptr<eGaussianBlurRender> m_gaussianRender;
 	std::unique_ptr<eBrightFilterRender> m_brightRender;
 	std::unique_ptr<eLinesRender>		 m_linesRender;
+	std::unique_ptr<eTextRender>    m_textRender;
+
 	std::string							 folderPath;
 
-	std::vector<glm::vec3>				dots; //extra copy $change design
-	float								radius;
+	std::vector<glm::vec3>	 dots; //extra copy $change design
+	float								     radius;
 };
+

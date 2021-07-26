@@ -9,6 +9,8 @@
 #include "imgui/imgui_impl_sdl.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#include "ImFileBrowser.h"
+
 #include <algorithm>
 #include <functional>
 
@@ -119,7 +121,6 @@ eWindowImGui::eWindowImGui(const std::string & _name)
 
 void eWindowImGui::Render()
 {
-  //ImGui::SetNextWindowSize({ 500, 250 });
   ImGui::Begin(name.c_str(), &visible);
 
   for (auto& item : lines)

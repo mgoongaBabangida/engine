@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Texture.h"
-#include <glm\glm/gtc/noise.hpp>
+#include <glm/glm/gtc/noise.hpp>
 #include "TextureImplDevIl.h"
 #include "TextureImplSDL.h"
 
@@ -148,31 +148,6 @@ bool Texture::loadCubemap(std::vector<std::string> faces)
 
   return true;
 }
-
-//bool Texture::loadCubemap(std::vector<std::string> faces)
-//{
-//	mChannels = 4;
-//	glGenTextures(1, &id);
-//	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
-//	for (GLuint i = 0; i < faces.size(); i++)
-//	{
-//		uint32_t ilId;
-//    eTextureImplDevIl::LoadTexture(faces[i], ilId, mTextureWidth, mTextureHeight);
-//		uint8_t* pixmap;
-//    eTextureImplDevIl::AssignPixels(pixmap, mTextureWidth, mTextureHeight);
-//		// Load textures
-//		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLubyte*)pixmap);
-//    eTextureImplDevIl::DeleteImage(ilId);
-//	}
-//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-//	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-//
-//	return true;
-//}
 
 bool Texture::makeCubemap(Texture* _texture)
 {

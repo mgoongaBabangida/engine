@@ -200,6 +200,14 @@ ParticleMesh::ParticleMesh(std::vector<MyVertex> vertices, std::vector<GLuint> i
 	this->setupMesh();
 }
 
+ ParticleMesh::~ParticleMesh()
+{
+  glDeleteVertexArrays(1, &VAO);
+  glDeleteBuffers(1, &VBO);
+  glDeleteBuffers(1, &EBO);
+  glDeleteBuffers(1, &VBOinstanced);
+}
+
 ParticleMesh::ParticleMesh(const ShapeData & data)
 {
 	glm::vec2 tex[4];
@@ -324,22 +332,6 @@ void ParticleMesh::setupMesh()
 			(const GLvoid*)((sizeof(float) * 4)*i));
 		glVertexAttribDivisor(i+6, 1);
 	}
-	/*glEnableVertexAttribArray(6);
-	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, STEP,
-		(GLvoid*)0);
-	glVertexAttribDivisor(6, 1);
-	glEnableVertexAttribArray(7);
-	glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, STEP,
-		(GLvoid*)(sizeof(float)*4) );
-	glVertexAttribDivisor(7, 1);
-	glEnableVertexAttribArray(8);
-	glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, STEP,
-		(GLvoid*)(sizeof(float) * 8));
-	glVertexAttribDivisor(8, 1);
-	glEnableVertexAttribArray(9);
-	glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, STEP,
-		(GLvoid*)(sizeof(float) * 12));
-	glVertexAttribDivisor(9, 1);*/
 
 	glEnableVertexAttribArray(10);
 	glVertexAttribPointer(10, 2, GL_FLOAT, GL_FALSE, SIZEOF,

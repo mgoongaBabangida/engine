@@ -16,8 +16,9 @@ struct ShapeData
 {
 	ShapeData();
 	Vertex*		vertices;
-	GLuint		numVertices;
 	GLushort*	indices;
+
+  GLuint		numVertices;
 	GLuint		numIndices;
 	
 	GLsizeiptr vertexBufferSize() const;

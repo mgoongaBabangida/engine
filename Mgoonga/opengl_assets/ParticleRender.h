@@ -25,13 +25,15 @@ public:
 	void	AddParticleSystem(IParticleSystem* sys);
 
 protected:
-	Shader											particleShader;
+  void	LoadOffsetsInfo(glm::vec2	offset1, glm::vec2	offset2, float numRows, float blend);
+
+	Shader											        particleShader;
 	std::unique_ptr<MyModel>						model;
-	std::unique_ptr<ParticleMesh>					mesh;
+	std::unique_ptr<ParticleMesh>				mesh;
 	std::unique_ptr<eObject>						object;
 	
 	std::vector<std::shared_ptr<IParticleSystem> >	systems;
-	std::vector<float>								instancedBuffer;
+	std::vector<float>								              instancedBuffer;
 
 	GLuint	fullTransformationUniformLocation;
 	GLuint	modelToWorldMatrixUniformLocation;
@@ -41,9 +43,4 @@ protected:
 	GLuint	texOffset1Location;
 	GLuint	texOffset2Location;
 	GLuint	texCoordInfoLocation;
-
-	void	LoadOffsetsInfo(glm::vec2	offset1, 
-							glm::vec2	offset2, 
-							float		numRows, 
-							float		blend);
 };

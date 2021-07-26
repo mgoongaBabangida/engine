@@ -27,6 +27,12 @@ eHexRender::eHexRender(const std::string&	vS,
 	}
 }
 
+eHexRender::~eHexRender()
+{
+  glDeleteVertexArrays(1, &hexVAO);
+  glDeleteBuffers(1, &hexVBO);
+}
+
 void eHexRender::Render(glm::mat4 mvp)
 {
 	glUseProgram(hex_shader.ID);

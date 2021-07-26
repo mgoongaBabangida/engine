@@ -10,11 +10,12 @@ struct Shader
 	GLuint fragmentShaderID;
 	GLuint geometryShaderID;
 	Shader() = default;
+  ~Shader();
+
 	void installShaders(const char* VertexShaderName, const char* FragmentShaderName);
 	void installShaders(const char * VertexShaderName, const char * FragmentShaderName, const char * GeometryShaderName);
 	bool checkShaderStatus(GLint shaderID);
 	bool checkProgramStatus();
 	std::string readShaderCode(const char * filename);
-	~Shader();
 };
 

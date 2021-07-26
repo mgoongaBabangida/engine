@@ -5,10 +5,13 @@
 #include "Shader.h"
 #include <vector>
 
+//----------------------------------------------------
 class eHexRender
 {
 public:
 	eHexRender(const std::string& vS, const std::string& fS, const std::string&	gS, std::vector<glm::vec3>, float);
+  ~eHexRender();
+
 	void Render(glm::mat4 mvp);
 
 private:

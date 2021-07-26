@@ -50,14 +50,14 @@ public:
 	bool				isPlaying() { return playing; }
 	const std::string&	Name() const { return mName; }
 
-	void		connectToBuffer(ALuint buffer);
+	void		    connectToBuffer(ALuint buffer);
 	static bool init();
 	static bool exit();
 	static void loadListner(float x, float y, float z);
 
 private:
 	ALuint      mSourceID;
-	bool		mStreamed;
+	bool		    mStreamed;
 	std::string mName;
 };
 

@@ -1,24 +1,31 @@
 #pragma once
+
 #include "Texture.h"
 #include "Shader.h"
 
+//---------------------------------------------
 class eGaussianBlurRender
 {
-	Texture texture;
-	Shader shader;
-	GLuint quadVAO;
-	GLuint quadVBO;
-	GLuint textureLoc;
-	GLuint TexWidthLoc;
-	GLuint width;
-	GLuint height;
-
 public:
-	eGaussianBlurRender(GLuint				width, 
+	eGaussianBlurRender(GLuint	width,
 						GLuint				height, 
 						const std::string&	vS,
 						const std::string&	fS);
+  virtual ~eGaussianBlurRender();
+
 	void Render();
 	void SetTexture(Texture t) { texture = t; }
-	virtual ~eGaussianBlurRender() = default;
+
+private:
+  Texture texture;
+  Shader shader;
+
+  GLuint quadVAO;
+  GLuint quadVBO;
+
+  GLuint textureLoc;
+  GLuint TexWidthLoc;
+
+  GLuint width;
+  GLuint height;
 };

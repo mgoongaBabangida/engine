@@ -54,7 +54,6 @@ void RemSnd::Stop()
 {
 	alSourceStop(mSourceID);
 	playing = false;
-	//std::cout << "Stop" << std::endl;
 }
 
 RemSnd::RemSnd(ALuint buffer, bool looped, const std::string& _name)
@@ -81,7 +80,8 @@ void RemSnd::connectToBuffer(ALuint buffer)
 RemSnd::~RemSnd()
 {
 	alSourceStop(mSourceID);
-	if (alIsSource(mSourceID)) alDeleteSources(1, &mSourceID);
+	 if(alIsSource(mSourceID))
+     alDeleteSources(1, &mSourceID);
 }
 
 bool SoundContext::init()
@@ -102,8 +102,8 @@ bool SoundContext::exit()
 		alDeleteBuffers(1, &buf.second);*/
 
 	alcMakeContextCurrent(NULL);
-	/*alcDestroyContext(context);
-	alcCloseDevice(device);*/
+  alcDestroyContext(context);
+  alcCloseDevice(device);
 	return true;
 }
 

@@ -17,14 +17,19 @@
 class DLL_MATH Transform : public ITransform
 {
 public:
-	Transform(): m_translation(0.0f, 0.0f, 0.0f) , m_scale(1.0f, 1.0f, 1.0f), q_rotation(0.0f, 0.0f, 1.0f, 0.0f) {UpdateModelMatrix();}
+	Transform(): 
+		m_translation(0.0f, 0.0f, 0.0f)
+		, m_scale(1.0f, 1.0f, 1.0f)
+		, q_rotation(0.0f, 0.0f, 1.0f, 0.0f)
+		, scaleIncrement(m_scale.x * 0.015f)
+		{ UpdateModelMatrix();}
 	
 	glm::mat4			getModelMatrix() const;
 
-	void				setRotation(float x, float y, float z);
-	void				setRotation(glm::quat q)	 { q_rotation = q;		UpdateModelMatrix(); }
+	void				    setRotation(float x, float y, float z);
+	void				    setRotation(glm::quat q)	 { q_rotation = q;		UpdateModelMatrix(); }
 	virtual void		setTranslation(glm::vec3 tr) { m_translation = tr;	UpdateModelMatrix(); }
-	virtual void		setScale(glm::vec3 sc)		 { m_scale = sc;		UpdateModelMatrix(); }
+	virtual void		setScale(glm::vec3 sc) { m_scale = sc;	scaleIncrement = m_scale.x * 0.015f;	UpdateModelMatrix(); }
 	
 	bool				isRotationValid();
 
@@ -40,8 +45,8 @@ public:
 	glm::vec3			       getForward()		const { return forward; }
 	glm::vec3			       getUp()				const { return Up; }
 	
-	void				incrementScale() { m_scale.x += (0.01f *m_scale.x), m_scale.y += (0.01f *m_scale.y), m_scale.z += (0.01f *m_scale.z);  UpdateModelMatrix();}
-	void				decrementScale() { m_scale.x -= (0.01f *m_scale.x), m_scale.y -= (0.01f *m_scale.y), m_scale.z -= (0.01f *m_scale.z);  UpdateModelMatrix();}
+	void				incrementScale() { m_scale.x += scaleIncrement, m_scale.y += scaleIncrement, m_scale.z += scaleIncrement;  UpdateModelMatrix();}
+	void				decrementScale() { m_scale.x -= scaleIncrement, m_scale.y -= scaleIncrement, m_scale.z -= scaleIncrement;  UpdateModelMatrix();}
 	void				billboard(glm::vec3 direction);
 	bool				turnTo(glm::vec3 dest, float speed);
 
@@ -54,4 +59,5 @@ protected:
 	glm::vec3			forward			= glm::vec3(0.0f, 0.0f, 1.0f);
 	glm::vec3			Up				= glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::mat4			totalTransform;
+	float         scaleIncrement = 0.0f;
 };

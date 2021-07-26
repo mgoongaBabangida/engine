@@ -8,16 +8,15 @@
 #include <vector>
 
 //----------------------------------------------------------------------------------------------
-class MyMesh: public IMesh
+class DLL_OPENGL_ASSETS MyMesh: public IMesh
 {
 public:
-	/*  Functions  */
 	MyMesh();
-	MyMesh(const MyMesh&) = delete;
+	MyMesh(const MyMesh&) = default;
 	virtual ~MyMesh();
 
 	MyMesh(std::vector<MyVertex> vertices, std::vector<GLuint> indices, std::vector<Texture*> textures);
-	MyMesh(const ShapeData& data);
+	explicit MyMesh(const ShapeData& data);
 	
 	virtual void Draw()			override;
   virtual size_t GetVertexCount() const override { return vertices.size(); }
@@ -49,12 +48,7 @@ public:
 	ParticleMesh(const ShapeData & data);
 	ParticleMesh(const ParticleMesh&) = delete;
 
-	virtual ~ParticleMesh()
-	{
-		glDeleteVertexArrays(1, &VAO);
-		glDeleteBuffers(1, &VBO);
-		glDeleteBuffers(1, &EBO);
-	}
+  virtual ~ParticleMesh();
 
 	virtual void		Draw() override;
   virtual size_t GetVertexCount() const override { return vertices.size(); }

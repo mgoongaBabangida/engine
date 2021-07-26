@@ -17,22 +17,25 @@ public:
 
 	virtual bool	OnMousePress(uint32_t x, uint32_t y, bool left) override;
 
-	void			setCommand(std::shared_ptr<ICommand> com);
-	void			SetTexture(Texture* t);
+	void			  setCommand(std::shared_ptr<ICommand> com);
+	void			  SetTexture(Texture* t);
 	Texture*		GetTexture();
 	
-	void			Perssed();	
-	bool			isPressed(int x, int y);	
+	void			Perssed();
+	bool			isPressed(int x, int y);
 	glm::vec4		getViewPort() const; //vec int?
 
 protected:
 	int32_t						screenWidth;
 	int32_t						screenHeight;
+
 	Texture*					texture;
+
 	int32_t						topleftX;
 	int32_t						topleftY;
 	int32_t						Width;
 	int32_t						Height;
+
 	std::shared_ptr<ICommand>	cmd;
 	bool						isVisible = true;
 };

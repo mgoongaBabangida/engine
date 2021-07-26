@@ -43,13 +43,13 @@ public:
 
 private:
 	ShadowMapFBO	depthFBO;
-	eColorFBO		screenFBO;
-	eColorFBO		mtsFBO;
-	eColorFBO		reflectionFBO;
-	eColorFBO		refractionFBO;
-	eColorFBO		brightFilterFBO;
-	eColorFBO		gausian1FBO;
-	eColorFBO		gausian2FBO;
-	eColorFBO		squereFBO;
-	eGFBO			gFBO;
+  eColorFBO		  screenFBO;
+  eColorFBO		  mtsFBO;
+  eColorFBO		  reflectionFBO;
+  eColorFBO		  refractionFBO;
+  eColorFBO		  brightFilterFBO;
+  eColorFBO		  gausian1FBO;
+  eColorFBO		  gausian2FBO;
+  eColorFBO		  squereFBO;
+	eGFBO			    gFBO;
 };

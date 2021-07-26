@@ -15,11 +15,11 @@ class DLL_OPENGL_ASSETS eSoundManager
 public:
 	explicit eSoundManager(const std::string&);
 	SoundContext*					GetContext();
-	RemSnd*							GetSound(const std::string&); //should clone and give control 
+	RemSnd*							  GetSound(const std::string&); //should clone and give control
 	~eSoundManager();
 
 protected:
-	std::unique_ptr<SoundContext>			context;
-	std::vector<std::unique_ptr<RemSnd>>	sounds; //should clone and give control 
-	std::string								assetsFolderPath;
+	std::unique_ptr<SoundContext>			    context;
+	std::vector<std::unique_ptr<RemSnd>>	sounds; //should clone and give control
+	std::string								            assetsFolderPath;
 };

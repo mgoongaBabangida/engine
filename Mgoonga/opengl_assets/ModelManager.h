@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 
+//----------------------------------------------------------------------
 class DLL_OPENGL_ASSETS eModelManager
 {
   public:

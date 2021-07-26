@@ -66,7 +66,11 @@ project "opengl_assets"
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
    
-   includedirs { "./"; "../../third_party" }
+   includedirs 
+   {
+   "./"; "../../third_party",
+   "./"; "../../third_party/freetype-2.11.0/include"
+   }
 	
    libdirs 
    { 
@@ -76,7 +80,8 @@ project "opengl_assets"
    "../../third_party/SDL2-2.0.9/VisualC/x64/Debug/",
    "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
-   "../../third_party/IL"
+   "../../third_party/IL",
+   "../../third_party/freetype-2.11.0/objs"
    }
 
    links
@@ -93,8 +98,7 @@ project "opengl_assets"
    "SDL2_image", 
    "SDL2", 
    "SDL2main",  
-   "SDL2", 
-   "SDL2main", 
+   "freetype.lib",
    }
 	
    filter "configurations:Debug"
@@ -119,7 +123,11 @@ project "sdl_assets"
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
    
-   includedirs { "./"; "../../third_party" }
+   includedirs 
+   { 
+   "./"; "../../third_party",
+   "./"; "../../third_party/freetype-2.11.0/include"
+   }
 	
    libdirs 
    { 
@@ -129,7 +137,8 @@ project "sdl_assets"
    "../../third_party/SDL2-2.0.9/VisualC/x64/Debug/",
    "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
-   "../../third_party/IL"
+   "../../third_party/IL",
+   "../../third_party/freetype-2.11.0/objs"
    }
 
    links
@@ -146,9 +155,8 @@ project "sdl_assets"
    "OpenAl32", 
    "SDL2_image", 
    "SDL2", 
-   "SDL2main",  
-   "SDL2", 
-   "SDL2main", 
+   "SDL2main",
+   "freetype.lib",
    }
 	
    filter "configurations:Debug"
@@ -183,7 +191,8 @@ project "Mgoonga"
    "../../third_party/SDL2-2.0.9/VisualC/x64/Debug/",
    "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
-   "../../third_party/IL"
+   "../../third_party/IL",
+   "../../third_party/freetype-2.11.0/objs"
    }
 
    links
@@ -202,8 +211,7 @@ project "Mgoonga"
    "SDL2_image", 
    "SDL2", 
    "SDL2main",  
-   "SDL2", 
-   "SDL2main"
+   "freetype.lib",
    }
 	
    filter "configurations:Debug"

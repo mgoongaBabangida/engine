@@ -61,6 +61,12 @@ eSkyBoxMesh::eSkyBoxMesh(Texture* _texture)
 	glBindVertexArray(0);
 }
 
+eSkyBoxMesh::~eSkyBoxMesh()
+{
+  glGenVertexArrays(1, &skyboxVAO);
+  glGenBuffers(1, &skyboxVBO);
+}
+
 void eSkyBoxMesh::Draw()
 {
 	glBindVertexArray(skyboxVAO);

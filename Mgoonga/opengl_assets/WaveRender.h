@@ -22,9 +22,10 @@ public:
 				Texture*						Height,
 				const std::string&				vS, 
 				const std::string&				fS);
+
 	void Render(const Camera&	  camera,
 				const Light&	  light,
-				std::vector<Flag> flags);
+				std::vector<eObject*> flags);
 
 private:
 	Shader							wave_shader;
@@ -54,4 +55,5 @@ private:
 	GLuint lightPosLoc;
 	GLuint TimeFactorLoc;
 };
+
 

@@ -15,6 +15,13 @@ AssimpMesh::AssimpMesh(vector<AssimpVertex> vertices, vector<GLuint> indices, ve
   default_normal_mapping.loadTexture1x1(BLUE);
 }
 
+AssimpMesh::~AssimpMesh()
+{
+  glGenVertexArrays(1, &VAO);
+  glGenBuffers(1, &VBO);
+  glGenBuffers(1, &EBO);
+}
+
 void AssimpMesh::Draw()
 {
 	GLuint diffuseNr = 0;

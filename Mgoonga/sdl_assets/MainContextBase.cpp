@@ -60,12 +60,6 @@ void eMainContextBase::InitializeGL()
 //-------------------------------------------------------------------------------
 void eMainContextBase::PaintGL()
 {
-	static math::eClock clock;
-	if (clock.isActive())
-		std::cout << "FPS= " << 1000 / clock.newFrame() << std::endl;
-
-	if (!clock.isActive())
-		clock.start();
 }
 
 //--------------------------------------------------------------------------------
@@ -122,3 +116,4 @@ void eMainContextBase::InitializeTextures()
 	texManager->LoadAllTextures();
 	//m_Textures.Find("Tbricks0_d")->second.saveToFile("MyTexture");  //Saving texture debug
 }
+

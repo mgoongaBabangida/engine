@@ -4,8 +4,13 @@
 
 eGFBO::~eGFBO()
 {
-	if (m_fbo != 0) {
+	if (m_fbo != 0)
+  {
 		glDeleteFramebuffers(1, &m_fbo);
+    glDeleteTextures(1, &gPosition);
+    glDeleteTextures(1, &gNormal);
+    glDeleteTextures(1, &gAlbedoSpec);
+    glDeleteRenderbuffers(1, &rboDepth);
 	}
 }
 

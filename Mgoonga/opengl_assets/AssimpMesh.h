@@ -11,6 +11,7 @@ class AssimpMesh : public IMesh
 public:
 	/*  Functions  */
 	AssimpMesh(vector<AssimpVertex> vertices, vector<GLuint> indices, vector<Texture> textures);
+  ~AssimpMesh();
 
 	void Draw();
   virtual size_t GetVertexCount() const override { return vertices.size();}

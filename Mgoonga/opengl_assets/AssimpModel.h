@@ -124,8 +124,8 @@ private:
 	std::vector<std::string>		DumpAiMeshes();
 	std::vector<std::string>		DumpAiMesh(aiMesh* mesh);
 	std::vector<std::string>		DumpAiNodes();
-	void							DumpAiNode(aiNode* node, std::vector<std::string>& BoneNames);
-	void							DumpBone();
-	void							DumpAiAnimation(const aiAnimation * anim);
-	void							DumpAssimpMeshes();
+	void							          DumpAiNode(aiNode* node, std::vector<std::string>& BoneNames);
+	void							          DumpBone();
+	void							          DumpAiAnimation(const aiAnimation * anim);
+	void							          DumpAssimpMeshes();
 };

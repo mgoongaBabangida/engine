@@ -9,9 +9,6 @@ eBrightFilterRender::eBrightFilterRender(GLuint				width,
 {
 	shader.installShaders(vS.c_str(), fS.c_str());
 
-	/*TexWidthLoc = glGetUniformLocation(shader.ID, "targetWidth");
-	textureLoc = glGetUniformLocation(shader.ID, "screenTexture");*/
-
 	GLfloat quadVertices[] = {
 		// Positions   // TexCoords
 		-1.0f,  1.0f,  0.0f, 1.0f,
@@ -36,13 +33,19 @@ eBrightFilterRender::eBrightFilterRender(GLuint				width,
 	glBindVertexArray(0);
 }
 
+eBrightFilterRender::~eBrightFilterRender()
+{
+  glDeleteVertexArrays(1, &quadVAO);
+  glDeleteBuffers(1, &quadVBO);
+}
+
 void eBrightFilterRender::Render()
 {
 	glUseProgram(shader.ID);
 	glBindVertexArray(quadVAO);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture.id);	
-												
+	glBindTexture(GL_TEXTURE_2D, texture.id);
+
 	//glUniform1f(TexWidthLoc, FBO->Width());
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);

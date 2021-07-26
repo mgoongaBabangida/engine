@@ -12,10 +12,10 @@
  //-------------------------------------------------------------
  ShadowMapFBO::~ShadowMapFBO()
  {
-	     if (m_fbo != 0) 
-		 {
-		   glDeleteFramebuffers(1, &m_fbo);
-         }
+  if (m_fbo != 0) 
+	{
+		glDeleteFramebuffers(1, &m_fbo);
+  }
  }
 
  //-------------------------------------------------------------

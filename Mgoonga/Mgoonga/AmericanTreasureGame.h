@@ -33,7 +33,7 @@ public:
 	virtual ~eAmericanTreasureGame() = default;
 
 	virtual bool OnKeyPress(uint32_t asci)	override;
-	virtual	void PaintGL()					override;
+	virtual	void PaintGL()					        override;
 
 protected:
 	virtual bool OnMousePress(uint32_t x, uint32_t y, bool left) override;
@@ -44,22 +44,23 @@ protected:
 
 	void		_InitializeHexes();
 
-	std::shared_ptr<eTurnController>	turn_context;
+	std::shared_ptr<eTurnController>	  turn_context;
 	std::vector<std::shared_ptr<eShip>>	ships;
 	std::vector<std::shared_ptr<eBase>>	bases;
-	std::shared_ptr<eShip>				focused;
-	std::vector<shObject>				objects;
-	std::unique_ptr<TerrainModel>		terrainModel;
-	std::shared_ptr<eTerrain>			terrain;
+	std::shared_ptr<eShip>				      focused;
+	std::vector<shObject>				        objects;
+	std::unique_ptr<TerrainModel>		    terrainModel;
+	std::shared_ptr<eTerrain>			      terrain;
 	
+	std::unique_ptr<Camera>				  camera;
+	std::unique_ptr<dbb::CameraRay>	camRay;
 	std::unique_ptr<ePipeline>			pipeline;
-	std::unique_ptr<Camera>				camera;
-	std::unique_ptr<dbb::CameraRay>		camRay;
-	std::vector<GUI>					guis;
-	std::vector<Hex>					hexes;
-	Light								light;
-	float								waterHeight = 2.0f;
-	float								angle		= 0.0f;
+  std::vector<GUI>					      guis;
+  std::vector<Hex>					      hexes;
+  Light								            light;
+  float								            waterHeight = 2.0f;
+  float								            angle = 0.0f;
 };
 
 #endif //AMERICAN_TREASURE_H
+

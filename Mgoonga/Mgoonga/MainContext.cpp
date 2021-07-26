@@ -27,7 +27,7 @@ eMainContext::eMainContext(eInputController*  _input,
 						   const std::string& _assetsPath, 
 						   const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
-, pipeline(m_objects, width, height, nearPlane, farPlane, waterHeight)
+, pipeline(m_objects, camRay, width, height)
 , m_camera(width, height, nearPlane, farPlane)
 {
 	//Light init!
@@ -60,7 +60,9 @@ void eMainContext::InitializeExternalGui()
                                                   soundManager->GetSound("shot_sound"),
                                                   texManager->Find("Tatlas2")->numberofRows));
   };
-  externalGui[0]->Add(BUTTON, "Emit particle system", (void*)&play_callback);
+  externalGui[0]->Add(BUTTON, "Emit particle system", (void*)&emit_partilces_callback);
+  externalGui[0]->Add(CHECKBOX, "Debug white", &pipeline.GetDebugWhite());
+  externalGui[0]->Add(CHECKBOX, "Debug Tex Coords", &pipeline.GetDebugTexCoords());
 
   externalGui[1]->Add(TEXTURE, "Reflection buffer", (void*)pipeline.GetReflectionBufferTexture().id);
   externalGui[1]->Add(TEXTURE, "Refraction buffer", (void*)pipeline.GetRefractionBufferTexture().id);
@@ -118,7 +120,8 @@ void eMainContext::InitializeExternalGui()
 
   play_callback = [this]()
   {
-   m_focused->GetRigger()->Apply(cur_animation);
+    if(m_focused && m_focused->GetModel()->GetAnimationCount() != 0)
+      m_focused->GetRigger()->Apply(cur_animation);
   };
 
   stop_callback = [this]()
@@ -144,8 +147,12 @@ void eMainContext::InitializeExternalGui()
 //--------------------------------------------------------------------------
 bool eMainContext::OnMouseMove(uint32_t x, uint32_t y)
 {
-	m_framed = camRay.onMove(m_camera, m_objects, static_cast<float>(x), static_cast<float>(y)); 	//to draw a frame
-	return true;
+  if (camRay.IsPressed())
+    {
+    m_framed.reset(new std::vector<shObject>(camRay.onMove(m_camera, m_objects, static_cast<float>(x), static_cast<float>(y)))); 	//to draw a frame
+    return true;
+    }
+	return false;
 }
 
 //--------------------------------------------------------------------------
@@ -174,6 +181,9 @@ bool eMainContext::OnKeyPress(uint32_t asci)
 //--------------------------------------------------------------------------
 bool eMainContext::OnMousePress(uint32_t x, uint32_t y, bool left)
 {
+  if (m_framed)
+    m_framed->clear();
+
 	camRay.Update(m_camera, x, y, width, height);
 	if(left)
 	{
@@ -185,10 +195,10 @@ bool eMainContext::OnMousePress(uint32_t x, uint32_t y, bool left)
       OnFocusedChanged();
     }
 	}
+
 	if(m_focused && m_focused->GetScript())
-	{
 		m_focused->GetScript()->OnMousePress(x, y, left);
-	}
+
 	return true;
 }
 
@@ -253,21 +263,22 @@ void eMainContext::InitializeGL()
 	
 	m_objects[4]->SetScript(new eShipScript(texManager->Find("TSpanishFlag0_s"),
 											pipeline.GetRenderManager(),
+                      m_camera,
 											texManager->Find("Tatlas2"),
 											soundManager->GetSound("shot_sound"),
 											&camRay,
-											waterHeight));
+                      pipeline.GetWaterHeight()));
 
 	guis.emplace_back(GUI(0, 0, width / 4, height / 4, width, height));
 	//guis[0].setCommand(std::make_shared<AnimStart>(AnimStart(m_objects[6])));
 	guis.emplace_back(GUI(width / 4 * 3, height / 4 * 3, width / 4, height / 4, width, height));
 	//guis[1].setCommand(std::make_shared<AnimStop>(AnimStop(m_objects[6])));
 
-	inputController->AddObserver(this, STRONG);
+	inputController->AddObserver(this, MONOPOLY);
+  inputController->AddObserver(&camRay, WEAK);
+  inputController->AddObserver(&m_camera, WEAK);
   inputController->AddObserver(&guis[0], MONOPOLY);//monopoly takes only mouse
   inputController->AddObserver(&guis[1], MONOPOLY);
-	inputController->AddObserver(&m_camera, WEAK);
-	inputController->AddObserver(&camRay, WEAK);
   inputController->AddObserver(externalGui[0], MONOPOLY);
   inputController->AddObserver(externalGui[1], MONOPOLY);
   inputController->AddObserver(externalGui[2], MONOPOLY);
@@ -276,7 +287,7 @@ void eMainContext::InitializeGL()
 //-------------------------------------------------------------------------------
 void eMainContext::InitializeSounds()
 {
-	//sound->loadListner(m_camera.getPosition().x, m_camera.getPosition().y, m_camera.getPosition().z);
+	//sound->loadListner(m_camera.getPosition().x, m_camera.getPosition().y, m_camera.getPosition().z); //!!!
 }
 
 //-------------------------------------------------------------------------------
@@ -311,7 +322,8 @@ void eMainContext::InitializeModels()
 	m_TerrainModel->initialize(texManager->Find("Tgrass0_d"),
 							   texManager->Find("Tgrass0_d"),
 							   texManager->Find("Tblue"),
-							   texManager->Find("TOcean0_s"));
+							   texManager->Find("TOcean0_s"),
+                 true);
 	//OBJECTS
 	shObject wallCube = shObject(new eObject);
 	wallCube->SetModel(modelManager->Find("wall_cube").get());
@@ -457,21 +469,25 @@ void eMainContext::PaintGL()
 {
 	eMainContextBase::PaintGL();
 
-	std::vector<Flag> flags;
+	std::vector<eObject*> flags;
 	for (auto &object : m_objects)
 	{
 		if (object->GetScript())
 		{
 			object->GetScript()->Update(m_objects);
 			eShipScript* script = dynamic_cast<eShipScript*>(object->GetScript());
-			if(script) flags.push_back(script->GetFlag(m_camera));
+			if(script) flags.push_back(script->GetChildrenObjects()[0]);
 		}
 	}
 
   lightObject->GetTransform()->setTranslation(m_light.light_position);
-	//m_light.light_position = { lightObject->GetTransform()->getTranslation(), 1.0f };
 	m_light.light_direction = { -m_light.light_position };
-	
-	std::vector<shObject> focused{ m_focused };
-	pipeline.RanderFrame(m_camera, m_light, guis, m_focused ? focused : std::vector<shObject>{}, flags); //better design impl new standard
+  
+  //need better design less copying
+  std::shared_ptr<std::vector<shObject>> focused_output = m_framed;
+  if (!focused_output || !(focused_output->size() > 1))
+    focused_output = m_focused ? std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{ m_focused })
+                               : std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{});
+
+	pipeline.RenderFrame(m_camera, m_light, guis, *focused_output, flags); //better design impl new standard
 }

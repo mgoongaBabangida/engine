@@ -103,15 +103,15 @@ protected:
 };
 
 //-------------------------------------------------------------------------------------------
-eAmericanTreasureGame::eAmericanTreasureGame(eInputController*  _input,
+eAmericanTreasureGame::eAmericanTreasureGame(eInputController* _input,
                        std::vector<IWindowImGui*> _externalGui,
 											 const std::string& _modelsPath,
 											 const std::string& _assetsPath,
 											 const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
-, pipeline(new ePipeline(objects, width, height, nearPlane, farPlane, 2.0f)) //waterHeight is not initialized! @better design
-, camera(new Camera(width, height, nearPlane, farPlane))
 , camRay(new dbb::CameraRay())
+, pipeline(new ePipeline(objects, *camRay, width, height))
+, camera(new Camera(width, height, nearPlane, farPlane))
 {
 	_externalGui[0]->Add(SLIDER_FLOAT, "Ydir", &light.light_position.y);
 	_externalGui[0]->Add(SLIDER_FLOAT, "Zdir", &light.light_position.z);
@@ -331,9 +331,10 @@ void eAmericanTreasureGame::InitializeModels()
 
 	//SHIPS
 	//1
-	//need to load listners for sounds somewhere, sounds should be copied
+	//need to load listeners for sounds somewhere, sounds should be copied
 	auto* shipScript = new eShipScript(texManager->Find("TSpanishFlag0_s"),
 										pipeline->GetRenderManager(),
+		                *camera.get(),
 										texManager->Find("Tatlas2"),
 										soundManager->GetSound("shot_sound"),
 										camRay.get(),
@@ -349,6 +350,7 @@ void eAmericanTreasureGame::InitializeModels()
 	//need to load listners for sounds somewhere, sounds should be copied
 	auto* shipScript2 = new eShipScript(texManager->Find("TPirate_flag0_s"),
 		pipeline->GetRenderManager(),
+		*camera.get(),
 		texManager->Find("Tatlas2"),
 		soundManager->GetSound("shot_sound"),
 		camRay.get(),
@@ -361,9 +363,10 @@ void eAmericanTreasureGame::InitializeModels()
 	objects.push_back(nanosuit2);
 
 	//3
-	//need to load listners for sounds somewhere, sounds should be copied
+	//need to load listeners for sounds somewhere, sounds should be copied
 	auto* shipScript3 = new eShipScript(texManager->Find("TSpanishFlag0_s"),
 		pipeline->GetRenderManager(),
+		*camera.get(),
 		texManager->Find("Tatlas2"),
 		soundManager->GetSound("shot_sound"),
 		camRay.get(),
@@ -379,6 +382,7 @@ void eAmericanTreasureGame::InitializeModels()
 	//need to load listners for sounds somewhere, sounds should be copied
 	auto* shipScript4 = new eShipScript(texManager->Find("TPirate_flag0_s"),
 		pipeline->GetRenderManager(),
+		*camera.get(),
 		texManager->Find("Tatlas2"),
 		soundManager->GetSound("shot_sound"),
 		camRay.get(),
@@ -443,18 +447,19 @@ void eAmericanTreasureGame::PaintGL()
 	turn_context->Update();
 	guis[0].SetTexture(turn_context->GetDiceTexture());
 
-	std::vector<Flag> flags;
+	std::vector<eObject*> flags;
 	for (auto &ship : ships)
 	{
 		if (ship->GetScript())
 		{
 			ship->GetScript()->Update(objects);
-			flags.push_back(ship->getShipScript()->GetFlag(*camera));
+			flags.push_back(ship->getShipScript()->GetChildrenObjects()[0]);
 		}
 	}
-	for(auto &base : bases)
-		flags.push_back(base->getBaseScript()->GetFlag(*camera));
 
-	pipeline->RanderFrame(*camera.get(), light, guis, focused ? std::vector<shObject>{ focused } 
+	for(auto &base : bases)
+		flags.push_back(base->getBaseScript()->GetChildrenObjects()[0]);
+
+	pipeline->RenderFrame(*camera.get(), light, guis, focused ? std::vector<shObject>{ focused } 
 															  : std::vector<shObject>{},		flags); //better design
 }

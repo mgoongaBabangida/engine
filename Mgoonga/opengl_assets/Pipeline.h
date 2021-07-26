@@ -6,6 +6,7 @@
 
 #include <base/base.h>
 #include <base/Object.h>
+#include <math/CameraRay.h>
 
 #include "Texture.h"
 
@@ -20,10 +21,10 @@ class eTextureManager;
 class DLL_OPENGL_ASSETS ePipeline
 {
 public:
-	ePipeline(std::vector<shObject>&, uint32_t width, uint32_t height, float nearPlane, float farplane,float waterHeight);
+	ePipeline(std::vector<shObject>&, dbb::CameraRay&, uint32_t width, uint32_t height);
 	~ePipeline();
 
-	void			RanderFrame(Camera&, const Light&, std::vector<GUI>&, std::vector<shObject>, std::vector<Flag>&); //gui should be const latter ?, and camera prob
+	void			RenderFrame(Camera&, const Light&, std::vector<GUI>&, std::vector<shObject>, std::vector<eObject*>&); //gui should be const latter ?, and camera prob
 	
 	void			Initialize();
 	void			InitializeBuffers(bool _needsShadowCubeMap = false);
@@ -40,11 +41,15 @@ public:
 	void			SwitchWater(bool on)  { water = on; }
 
 	Texture	  GetSkyNoiseTexture(const Camera& _camera);
+	float			GetWaterHeight() const { return waterHeight; }
 
   bool& GetBoundingBoxBoolRef() { return draw_bounding_boxes; }
   bool& GetMultiSamplingBoolRef() { return mts; }
   bool& GetSkyBoxOnRef() { return skybox; }
   float& GetBlurCoefRef() { return blur_coef; }
+
+	bool& GetDebugWhite() { return debug_white; }
+	bool& GetDebugTexCoords() { return debug_texcoords; }
 
   Texture GetReflectionBufferTexture() const;
   Texture GetRefractionBufferTexture() const;
@@ -56,23 +61,23 @@ public:
   Texture GetBrightFilter() const;
 
 protected:
-	void			RanderShadows(const Camera&, const Light&, std::vector<shObject>&);
-	void			RanderSkybox(const Camera&);
-	void			RanderReflection(Camera&, const Light&, std::vector<shObject>&);
-	void			RanderRefraction(Camera&, const Light&, std::vector<shObject>&);
-	void			RanderSkyNoise(const Camera&);
+	void			RenderShadows(const Camera&, const Light&, std::vector<shObject>&);
+	void			RenderSkybox(const Camera&);
+	void			RenderReflection(Camera&, const Light&, std::vector<shObject>&);
+	void			RenderRefraction(Camera&, const Light&, std::vector<shObject>&);
+	void			RenderSkyNoise(const Camera&);
 	void			StencilFuncDefault();
-	void			RanderFocused(const Camera&, const Light&, std::vector<shObject>&);
-	void			RanderMain(const Camera&, const Light&, std::vector<shObject>&);
-	void			RanderOutlineFocused(const Camera&, const Light&, std::vector<shObject>&);
-	void			RanderFlags(const Camera&, const Light&, std::vector<Flag>&);
-	void			RanderWater(const Camera&, const Light&);
-	void			RanderGeometry(const Camera&);	//hex latter other things
-	void			RanderParticles(const Camera&);
-	void			RanderBlur(const Camera&);
-	void			RanderGui(std::vector<GUI>&, const Camera&);
+	void			RenderFocused(const Camera&, const Light&, std::vector<shObject>&);
+	void			RenderMain(const Camera&, const Light&, std::vector<shObject>&);
+	void			RenderOutlineFocused(const Camera&, const Light&, std::vector<shObject>&);
+	void			RenderFlags(const Camera&, const Light&, std::vector<eObject*>&);
+	void			RenderWater(const Camera&, const Light&);
+	void			RenderGeometry(const Camera&);	//hex latter other things
+	void			RenderParticles(const Camera&);
+	void			RenderBlur(const Camera&);
+	void			RenderGui(std::vector<GUI>&, const Camera&);
 
-	bool			mousepress	= false; //to draw framed objects
+	bool			mousepress	= true; //to draw framed objects
 	bool			mts			= true;
 	bool			skybox		= true;
 	bool			shadows		= true;
@@ -83,18 +88,20 @@ protected:
 	bool			geometry	= true;
 	bool			particles	= true;
 	bool			draw_bounding_boxes = false;
+	bool      debug_white = false;
+	bool      debug_texcoords = false;
 
 	uint32_t  width		  = 1200;
 	uint32_t  height		= 600;
 	float			nearPlane	  = 0.1f;
 	float			farPlane	  = 0.0f;
 	float			waterHeight = 2.0f;
-  float     blur_coef   = 1.0f;
+  float     blur_coef   = 0.7f;
 
 	std::reference_wrapper<std::vector<shObject>>	m_objects;
-	
-	std::unique_ptr<eRenderManager>			renderManager;
-	Texture									            sky_noise_texture;
+	std::reference_wrapper <dbb::CameraRay>				camRay;
+	std::unique_ptr<eRenderManager>								renderManager;
 };
 
 #endif // PIPELINE_H
+

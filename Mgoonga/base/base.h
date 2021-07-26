@@ -36,21 +36,10 @@ struct Light
 {
 	glm::vec4  light_position;
 	glm::vec4  light_direction;
-	glm::vec3  ambient;
-	glm::vec3  diffuse;
-	glm::vec3  specular;
+	glm::vec3  ambient = { 1.0f, 1.0f, 1.0f };
+	glm::vec3  diffuse = { 1.0f, 1.0f, 1.0f };
+	glm::vec3  specular = { 1.0f, 1.0f, 1.0f };
 	eLightType type = eLightType::POINT;
-};
-
-//-------------------------------------------------------
-struct Flag //@todo delete it and make it an object
-{
-	glm::vec3	position;
-	glm::vec3	scale;
-	Texture*	tex;
-	
-	Flag(glm::vec3 pos, Texture* t, glm::vec3 sc)
-		:position(pos), tex(t), scale(sc) {}
 };
 
 const float PI = 3.14159265359f;

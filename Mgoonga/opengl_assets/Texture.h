@@ -15,7 +15,7 @@ enum TColor { WHITE, BLACK, BLUE, PINK, YELLOW };
 
 struct /*DLL_OPENGL_ASSETS*/ Texture
 {
-	GLuint				id;
+	GLuint				  id;
 	std::string			type;
 	std::string			path;
 	
@@ -27,7 +27,8 @@ struct /*DLL_OPENGL_ASSETS*/ Texture
 	
 	Texture() { type = "default", path = "empty", id = (GLuint)glm::pow(2,8)- 1, mTextureWidth = 1, mTextureHeight = 1; loadTexture1x1(YELLOW); }
 	Texture(GLuint Width, GLuint Height) :Texture() { mTextureWidth = Width;  mTextureHeight = Height; }
-	Texture(GLuint ID, GLuint TextureWidth, GLuint TextureHeight, int32_t TextureChannels = 1) :id(ID), mTextureWidth(TextureWidth), mTextureHeight(TextureHeight), mChannels(TextureChannels) {}	
+	Texture(GLuint ID, GLuint TextureWidth, GLuint TextureHeight, int32_t TextureChannels = 1)
+    :id(ID), mTextureWidth(TextureWidth), mTextureHeight(TextureHeight), mChannels(TextureChannels) {}	
 	Texture(const Texture& t) { this->operator=(t);}
 	Texture& operator=(const Texture& t) 
 	{ 

@@ -29,5 +29,5 @@ RemSnd* eSoundManager::GetSound(const std::string& _name)
 
 eSoundManager::~eSoundManager()
 {
-	//$todo check if need destructor to clean up
+  context->exit();
 }

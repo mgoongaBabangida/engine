@@ -16,6 +16,9 @@
 
 eTextureManager::~eTextureManager()
 {
+  for (auto& node : m_Textures)
+    glDeleteTextures(1, &node.second.id);
+
 #ifdef SDL_IMAGE
 	{ IMG_Quit(); }
 #endif

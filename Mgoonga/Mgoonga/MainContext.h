@@ -12,8 +12,6 @@
 
 #include <sdl_assets/MainContextBase.h>
 
-class SoundContext;
-class RemSnd;
 class IWindowImGui;
 
 //-------------------------------------------------------------------------------
@@ -47,37 +45,35 @@ protected:
   virtual void      InitializeExternalGui()           override;
 
 protected:
-	Camera								m_camera;
-	dbb::CameraRay				camRay;
-	
-	shObject							      m_focused;
-	std::vector<shObject>				m_objects;
-	std::vector<shObject>				m_framed;
-	Light								        m_light;
-	
-	shObject							lightObject; //debuging
+	Camera								                 m_camera;
+	dbb::CameraRay				                 camRay;
+  ePipeline							                 pipeline;
+
+  shObject							                 m_focused;
+  std::vector<shObject>				           m_objects;
+  std::shared_ptr<std::vector<shObject>> m_framed;
+  Light								                   m_light;
+
+  shObject							          lightObject; //debuging
 
 	std::unique_ptr<TerrainModel>		m_TerrainModel;
-	
-	std::vector<GUI>					guis;
+	std::vector<GUI>					      guis;
 
-	float								waterHeight = 2.0f; //where should it be?
-	ePipeline							pipeline;
-
-  eThreeFloatCallback  transfer_data_position;
-  eThreeFloatCallback  transfer_data_rotation;
-  eThreeFloatCallback  transfer_data_scale;
-  size_t transfer_num_vertices = 0;
-  size_t transfer_num_meshes = 0;
-  eVectorStringsCallback transfer_meshes;
-  std::vector<const Texture*> transfer_textures;
-  size_t transfer_num_animations = 0;
-  eVectorStringsCallback transfer_animations;
-  size_t cur_animation = 0;
+  eThreeFloatCallback            transfer_data_position;
+  eThreeFloatCallback            transfer_data_rotation;
+  eThreeFloatCallback            transfer_data_scale;
+  size_t                         transfer_num_vertices = 0;
+  size_t                         transfer_num_meshes = 0;
+  eVectorStringsCallback         transfer_meshes;
+  std::vector<const Texture*>    transfer_textures;
+  size_t                         transfer_num_animations = 0;
+  eVectorStringsCallback         transfer_animations;
+  size_t                         cur_animation = 0;
   std::vector<const IAnimation*> current_animations;
-  std::function<void()> play_callback;
-  std::function<void()> stop_callback;
-  std::function<void()> emit_partilces_callback;
+  std::function<void()>          play_callback;
+  std::function<void()>          stop_callback;
+  std::function<void()>          emit_partilces_callback;
 };
 
 #endif
+

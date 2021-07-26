@@ -4,26 +4,31 @@
 #include <opengl_assets\RenderManager.h>
 #include <math/ShootingParticleSystem.h>
 #include <opengl_assets\Sound.h>
+#include <opengl_assets\MyModel.h>
 #include <math/BoxCollider.h>
 #include <math/RigidBdy.h>
 
 //----------------------------------------------------------------
 eShipScript::eShipScript(Texture*			_flagTexture,
 						 eRenderManager&	_render_manager, 
+	           Camera& _camera,
 						 Texture*			_shoting_texture, 
 						 RemSnd*			_shooting_sound, 
 						 dbb::CameraRay*	_camRay, 
 						 float				_waterHeight)
-: eBaseScript(_flagTexture)
-, render_manager(_render_manager)
+: render_manager(_render_manager)
+, camera(_camera)
 , shoot_tex(_shoting_texture)
 , shoot_snd(_shooting_sound)
 , camRay(_camRay)
 , waterHeight(_waterHeight)
+, flag_tex(_flagTexture)
+, flag(new eObject{})
 {
 	turn_speed = PI / 4.0f / 60.0f;
 	move_speed = 1.0f / 240.0f;
 	flag_scale = { 0.03f, 0.03f ,0.03f };
+	flag->SetTransform(new Transform);
 }
 
 bool eShipScript::OnKeyPress(uint32_t asci)
@@ -92,6 +97,29 @@ void eShipScript::Update(std::vector<std::shared_ptr<eObject> > objs)
 			}
 		}
 	}
+}
+
+std::vector<eObject*> eShipScript::GetChildrenObjects()
+{
+  //getting top 4 corners of the model
+  glm::vec4 top_corners[4];
+  top_corners[0] = object->GetTransform()->getModelMatrix() * glm::vec4(object->GetCollider()->getMaxX(), object->GetCollider()->getMaxY(), object->GetCollider()->getMaxZ(), 1.0f);
+  top_corners[1] = object->GetTransform()->getModelMatrix() * glm::vec4(object->GetCollider()->getMaxX(), object->GetCollider()->getMaxY(), object->GetCollider()->getMinZ(), 1.0f);
+  top_corners[2] = object->GetTransform()->getModelMatrix() * glm::vec4(object->GetCollider()->getMinX(), object->GetCollider()->getMaxY(), object->GetCollider()->getMaxZ(), 1.0f);
+  top_corners[3] = object->GetTransform()->getModelMatrix() * glm::vec4(object->GetCollider()->getMinX(), object->GetCollider()->getMaxY(), object->GetCollider()->getMinZ(), 1.0f);
+  glm::vec4 position = top_corners[0];
+  //Choosing the corner in relation to camera position
+  for (int i = 0; i < 4; ++i)
+  {
+  position = glm::length2(camera.get().getPosition() - glm::vec3(top_corners[i]))
+    < glm::length2(camera.get().getPosition() - glm::vec3(position)) ? top_corners[i] : position;
+  }
+
+  flag->GetTransform()->setTranslation(position);
+  flag->GetTransform()->setScale(flag_scale);
+	std::shared_ptr<MyMesh> mesh(new MyMesh());
+	flag->SetModel(new MyModel(mesh, flag_tex));
+  return { std::vector<eObject*> { flag.get()} };
 }
 
 //----------------------------------------------------------------------------------

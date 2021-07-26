@@ -30,9 +30,11 @@ void eScreenRender::RenderContrast(const Camera& camera, float blur_coef)
 	screenMesh->Draw();
 }
 
-void eScreenRender::RenderFrame()
+void eScreenRender::RenderFrame(glm::vec2 _top_left, glm::vec2 _right_botom, float viewport_width, float viewport_height)
 {
 	glUseProgram(screenShader.ID);
 	glUniform1i(frameLoc, GL_TRUE);
+	frameMesh->UpdateFrame(_top_left.x, _top_left.y, _right_botom.x, _right_botom.y, viewport_width, viewport_height);
 	frameMesh->Draw();
 }
+

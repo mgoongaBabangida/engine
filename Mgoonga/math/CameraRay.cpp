@@ -13,17 +13,17 @@ namespace dbb
 
 	//-------------------------------------------------------------------------------
 	CameraRay::CameraRay(float w, float h, float n, float f, float pers_angle)
-		: Width(w),
-		Height(h),
-		near_plane(n),
-		far_plane(f),
-		perspective_angle_degrees(pers_angle)
+		: width(w),
+		  height(h),
+		  near_plane(n),
+		  far_plane(f),
+		  perspective_angle_degrees(pers_angle)
 	{}
 
 	void CameraRay::init(float _width, float _height, float _near, float _far, float _pers_angle)
 	{
-		Width = _width;
-		Height = _height;
+		width = _width;
+		height = _height;
 		near_plane = _near;
 		far_plane = _far;
 		perspective_angle_degrees = _pers_angle;
@@ -35,15 +35,15 @@ namespace dbb
 		//this->transform.setRotation(rot);
 		this->transform.billboard(camera.getDirection());
 		this->transform.setTranslation(camera.getPosition());
-		this->Width = w;
-		this->Height = h;
+		this->width = w;
+		this->height = h;
 
-		float XOffsetCoef = click_x / Width;
-		float YOffsetCoef = click_y / Height;
+		float XOffsetCoef = click_x / width;
+		float YOffsetCoef = click_y / height;
 		float heightN = 2 * tan(glm::radians(perspective_angle_degrees / 2)) * near_plane;  //? glm::radians?
 		float heightF = 2 * tan(glm::radians(perspective_angle_degrees / 2)) * far_plane;   //?
-		float widthN = heightN* (Width / Height);
-		float widthF = heightF* (Width / Height);
+		float widthN = heightN* (width / height);
+		float widthF = heightF* (width / height);
 
 		glm::vec3 dot1 = glm::vec3(widthN / 2 - XOffsetCoef * widthN, heightN / 2 - YOffsetCoef * heightN, near_plane);
 		glm::vec3 dot2 = glm::vec3(widthF / 2 - XOffsetCoef * widthF, heightF / 2 - YOffsetCoef * heightF, far_plane);  // plus or minus Z ?
@@ -143,13 +143,13 @@ namespace dbb
 
 	void CameraRay::press(float click_x, float click_y)
 	{
-		press_start = glm::vec2(click_x, click_y);
+		press_start = press_curr = glm::vec2(click_x, click_y);
 		pressed = true;
 	}
 
 	void CameraRay::release()
 	{
-		press_start = glm::vec2(-1, -1);
+		press_start = press_curr = glm::vec2(-1, -1);
 		pressed = false;
 	}
 
@@ -159,12 +159,12 @@ namespace dbb
 		this->transform.billboard(camera.getDirection());
 		this->transform.setTranslation(camera.getPosition());
 
-		float XOffsetCoef = click.x / Width;
-		float YOffsetCoef = click.y / Height;
+		float XOffsetCoef = click.x / width;
+		float YOffsetCoef = click.y / height;
 		float heightN = 2 * tan(glm::radians(perspective_angle_degrees / 2)) * near_plane;  //? glm::radians?
 		float heightF = 2 * tan(glm::radians(perspective_angle_degrees / 2)) * far_plane;   //?
-		float widthN = heightN* (Width / Height);
-		float widthF = heightF* (Width / Height);
+		float widthN = heightN* (width / height);
+		float widthF = heightF* (width / height);
 
 		glm::vec3 dot1 = glm::vec3(widthN / 2 - XOffsetCoef * widthN, heightN / 2 - YOffsetCoef * heightN, near_plane);
 		glm::vec3 dot2 = glm::vec3(widthF / 2 - XOffsetCoef * widthF, heightF / 2 - YOffsetCoef * heightF, far_plane);  // plus or minus Z ?
@@ -186,3 +186,4 @@ namespace dbb
 	}
 
 }
+

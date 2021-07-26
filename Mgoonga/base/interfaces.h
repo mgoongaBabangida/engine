@@ -65,10 +65,10 @@ protected:
 	eObject* object = nullptr;
 public:
 	virtual ~IScript() = default;
-	virtual void	Update(std::vector<std::shared_ptr<eObject>> objs) = 0;
-	virtual void	CollisionCallback(const eCollision&)				{}
-
-	void			SetObject(eObject* obj) { object = obj; }
+	virtual void	                    Update(std::vector<std::shared_ptr<eObject>> objs) = 0;
+	virtual void	                    CollisionCallback(const eCollision&)				{}
+  virtual std::vector<eObject*>			GetChildrenObjects() { return std::vector<eObject*>{}; }
+	void			                        SetObject(eObject* obj) { object = obj; }
 };
 
 //-----------------------------------------------------------------------------
@@ -223,3 +223,4 @@ public:
 };
 
 #endif
+

@@ -14,8 +14,10 @@ public:
 	eMainRender(const std::string& vS, const std::string& fS);
 
 	void Render(const Camera&			camera,
-				const Light&			light,
-				std::vector<shObject>&	objects);
+				      const Light&			light,
+				      std::vector<shObject>&	objects,
+		          bool debug_white,
+		          bool debug_text_coords);
 
 	void	SetClipPlane(float Height);
 	void	SetShadowMatrix(glm::mat4 shadow_matrix);
@@ -43,9 +45,13 @@ protected:
 	GLuint LightingIndexDirectional;
 	GLuint lightTypeLoc;
 
+	GLuint DebugWhiteLoc;
+	GLuint DebugTexcoordsLoc;
+
 	std::vector<glm::mat4> matrices;
-	glm::mat4			   worldToProjectionMatrix;
-	glm::mat4			   shadowMatrix;
+	glm::mat4			         worldToProjectionMatrix;
+	glm::mat4			         shadowMatrix;
 };
 
 #endif
+

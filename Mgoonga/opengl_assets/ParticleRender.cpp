@@ -59,13 +59,12 @@ void eParticleRender::Render(const Camera& _camera)
 				instances++;
 				object->GetTransform()->setTranslation(iter->getPosition());
 				glm::mat4 modelViewMatrix = _camera.getWorldToViewMatrix() * object->GetTransform()->getModelMatrix();
-				//glUniformMatrix4fv(modelViewMatrixLocation, 1, GL_FALSE, &modelViewMatrix[0][0]);  //modelView
 				
 				LoadOffsetsInfo(iter->gettexOffset1(), iter->gettexOffset2(), iter->getNumRows(), iter->getBlend());
 
 				for (int i = 0; i < 4; ++i) {
 					for (int j = 0; j < 4; ++j) {
-						instancedBuffer[counter++] = modelViewMatrix[i][j]; // [i][j] ? [j][i]
+						instancedBuffer[counter++] = modelViewMatrix[i][j];
 					}
 				}
 				instancedBuffer[counter++] = iter->gettexOffset1().x;

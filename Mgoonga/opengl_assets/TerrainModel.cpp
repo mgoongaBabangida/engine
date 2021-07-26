@@ -4,57 +4,71 @@
 #include "Texture.h"
 
 #include <algorithm>
-#include <iostream>
 
+//----------------------------------------------------------------
 TerrainModel::TerrainModel()
-	:mesh(nullptr), m_diffuse(nullptr), m_specular(nullptr), m_normal(nullptr), m_fourth(nullptr), m_height(nullptr)
-{
-}
+	:mesh(nullptr),
+  m_diffuse(nullptr),
+  m_specular(nullptr),
+  m_normal(nullptr),
+  m_fourth(nullptr),
+  m_height(nullptr)
+{}
 
-TerrainModel::TerrainModel(Texture* diffuse, Texture* specular, Texture* normal, Texture* heightMap) :m_diffuse(diffuse), m_specular(specular), m_normal(normal), m_fourth(diffuse)
+//----------------------------------------------------------------
+TerrainModel::TerrainModel(Texture* diffuse, 
+  Texture* specular,
+  Texture* normal,
+  Texture* heightMap)
+  :m_diffuse(diffuse),
+  m_specular(specular),
+  m_normal(normal),
+  m_fourth(diffuse)
 {
-	mesh = new MyMesh(); //delete!
-	std::cout << "size texture " << heightMap->mTextureHeight << " " << heightMap->mTextureWidth << std::endl;
+	mesh = new MyMesh();
 	m_size = heightMap->mTextureHeight;
 	m_rows = heightMap->mTextureWidth;
 	m_columns = heightMap->mTextureHeight;
 	m_height = heightMap;
 	
-	makePlaneVerts(heightMap->mTextureWidth,heightMap->mTextureHeight);
+	makePlaneVerts(heightMap->mTextureWidth,heightMap->mTextureHeight, false);
 	makePlaneIndices(heightMap->mTextureWidth, heightMap->mTextureHeight);
 	assignHeights(*m_height);
 	generateNormals(heightMap->mTextureWidth, heightMap->mTextureHeight);
 	mesh->calculatedTangent();
 	mesh->setupMesh();
-	//debug();
 }
 
-void TerrainModel::initialize(Texture* diffuse, Texture* specular) 
+//----------------------------------------------------------------
+TerrainModel::TerrainModel(const TerrainModel& other)
+  : mesh(other.mesh)
+  , m_diffuse(other.m_diffuse)
+  , m_specular(other.m_specular)
+  , m_normal(other.m_normal)
+  , m_fourth(other.m_fourth)
+  , m_height(other.m_height)
+{}
+
+//----------------------------------------------------------------
+void TerrainModel::initialize(Texture* diffuse, Texture* specular, bool spreed_texture)
 {
 	m_diffuse = diffuse; 
 	m_specular = specular;
 	m_normal = nullptr;
 	m_fourth = diffuse;
 
-	mesh = new MyMesh(); //delete!
+  mesh = new MyMesh();
 	m_size = m_diffuse->mTextureHeight;
-	makePlaneVerts(m_diffuse->mTextureHeight);
+	makePlaneVerts(m_diffuse->mTextureHeight, m_diffuse->mTextureHeight, spreed_texture);
 	makePlaneIndices(m_diffuse->mTextureHeight);
 	generateNormals(m_size);
 	mesh->calculatedTangent();
 	mesh->setupMesh();
+  mesh->setTextures({ m_diffuse , m_specular , m_normal , m_height });
 }
 
-TerrainModel::TerrainModel(const TerrainModel& other)
-	: mesh(other.mesh)
-	, m_diffuse(other.m_diffuse)
-	, m_specular(other.m_specular)
-	, m_normal(other.m_normal)
-	, m_fourth(other.m_fourth)
-	, m_height(other.m_height)
-{}
-
-void TerrainModel::initialize(Texture* diffuse, Texture* specular, Texture* normal, Texture* heightMap)
+//----------------------------------------------------------------
+void TerrainModel::initialize(Texture* diffuse, Texture* specular, Texture* normal, Texture* heightMap, bool spreed_texture)
 {
 	m_diffuse = diffuse;
 	m_specular=specular;
@@ -63,41 +77,50 @@ void TerrainModel::initialize(Texture* diffuse, Texture* specular, Texture* norm
 	m_height = heightMap;
 	
 	if(mesh == nullptr)
-	 mesh = new MyMesh(); //delete!
+	 mesh = new MyMesh();
 
-	std::cout << "size texture " << heightMap->mTextureHeight << " " << heightMap->mTextureWidth << std::endl;
 	m_size = heightMap->mTextureHeight;
 	m_rows = heightMap->mTextureWidth;
 	m_columns = heightMap->mTextureHeight;
 	m_height = heightMap;
 
-	makePlaneVerts( heightMap->mTextureWidth, heightMap->mTextureHeight);
+	makePlaneVerts( heightMap->mTextureWidth, heightMap->mTextureHeight, spreed_texture);
 	makePlaneIndices(heightMap->mTextureWidth, heightMap->mTextureHeight);
 	assignHeights(*heightMap);
 	generateNormals(heightMap->mTextureWidth, heightMap->mTextureHeight);
 	
 	mesh->calculatedTangent();
 	mesh->setupMesh();
+  mesh->setTextures({ m_diffuse , m_specular , m_normal , heightMap });
 }
 
-TerrainModel::TerrainModel(Texture * color):m_diffuse(color), m_specular(color)
+//------------------------------------------------------------
+TerrainModel::TerrainModel(Texture * color)
+  :m_diffuse(color)
+  , m_specular(color)
 {
-	mesh = new MyMesh(); //delete!
+	mesh = new MyMesh();
 	m_size = 10;
 	makePlaneVerts(10);
 	makePlaneIndices(10);
 	generateNormals(m_size);
 	mesh->calculatedTangent();
 	mesh->setupMesh();
-	//debug();
-
 }
 
 //----------------------------------------------------------------
-std::vector<MyMesh*>	TerrainModel::getMeshes()				const { return std::vector<MyMesh*>{ mesh}; }
+std::vector<MyMesh*>	TerrainModel::getMeshes()				const 
+{ 
+  return std::vector<MyMesh*>{ mesh};
+}
 
-void					TerrainModel::setDiffuse(Texture* t)	{ m_diffuse = t; }
-void					TerrainModel::setSpecular(Texture* t)	{ m_specular = t; }
+//------------------------------------------------------------
+void					TerrainModel::setDiffuse(Texture* t)
+{ m_diffuse = t; }
+
+//------------------------------------------------------------
+void					TerrainModel::setSpecular(Texture* t)
+{ m_specular = t; }
 
 //----------------------------------------------------------------
  MyVertex TerrainModel::findVertex(float x, float z)
@@ -118,14 +141,12 @@ void					TerrainModel::setSpecular(Texture* t)	{ m_specular = t; }
 float TerrainModel::GetHeight(float x, float z)
 {
 	MyVertex vert = findVertex(x, z);
-	// if (findVertex(x,z) != MyVertex() )
 		return vert.position.y;
 }
 
 glm::vec3 TerrainModel::GetNormal(float x, float z)
 {
 	MyVertex vert = findVertex(x, z);
-	// if (findVertex(x,z) != MyVertex() )
 	return vert.Normal;
 }
 
@@ -136,7 +157,6 @@ void TerrainModel::assignHeights(Texture heightMap)
 	glBindTexture(GL_TEXTURE_2D, heightMap.id);
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buffer);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	std::cout << "total " << heightMap.mTextureHeight * heightMap.mTextureWidth * 4 << std::endl;
 	int counter = 0;
 	for (int i = 0; i < heightMap.mTextureHeight * heightMap.mTextureWidth * 4; i += 4) 
 	{
@@ -161,8 +181,6 @@ void TerrainModel::generateNormals(GLuint size)
 	for (unsigned int i = 0; i < mesh->vertices.size(); ++i) 
 	{
 		mesh->vertices[i].Normal = glm::normalize(mesh->vertices[i].Normal);
-		//if (mesh->vertices[i].Normal.y < 0)
-			//mesh->vertices[i].Normal = -mesh->vertices[i].Normal;
 	}
 
 	// Load to normal map
@@ -172,17 +190,15 @@ void TerrainModel::generateNormals(GLuint size)
 		buffer[i * 4 + 1] = mesh->vertices[i].Normal.z; //(mesh->vertices[i].Normal.y+1.0f)/2.0f;128
 		buffer[i * 4 + 2] = mesh->vertices[i].Normal.y;// (mesh->vertices[i].Normal.z + 1.0f) / 2.0f; //(mesh->vertices[i].Normal.z+1.0f)/2.0f;255
 		buffer[i * 4 + 3] = 1.0f;
-		//std::cout <<"x= "<< mesh->vertices[i].Normal.x << "y= " << mesh->vertices[i].Normal.y << "z= " << mesh->vertices[i].Normal.z << std::endl;
 	}
 
-	m_normal = new Texture(size, size); //delete
+  m_normal = new Texture(size, size);
 	m_normal->TextureFromBuffer(buffer, size, size);
 	delete[] buffer;
 }
 
 void TerrainModel::generateNormals(GLuint rows, GLuint columns)
 {
-	std::cout << "Normal start" << std::endl;
 	for (unsigned int i = 0; i < mesh->indices.size(); i += 3) 
 	{
 		glm::vec3& pos1 = mesh->vertices[mesh->indices[i]].position;
@@ -197,26 +213,6 @@ void TerrainModel::generateNormals(GLuint rows, GLuint columns)
 		mesh->vertices[mesh->indices[i + 2]].Normal += normal;
 	}
 
-	/*for (int i = 0; i < mesh->vertices.size(); ++i)
-	{
-		if ((i - 1) > 0 && (i - (int)m_rows) > 0 && (i + m_rows) < mesh->vertices.size())
-		{
-			glm::vec3& pos = mesh->vertices[i].position;
-			glm::vec3& pos1 = mesh->vertices[i - m_rows].position;
-			glm::vec3& pos2 = mesh->vertices[i + 1].position;
-			glm::vec3& pos3 = mesh->vertices[i + m_rows].position;
-			glm::vec3& pos4 = mesh->vertices[i - 1].position;
-			glm::vec3 normal = glm::normalize(glm::cross(glm::vec3(pos1 - pos), glm::vec3(pos2 - pos)));
-			normal += glm::normalize(glm::cross(glm::vec3(pos2 - pos), glm::vec3(pos3 - pos)));
-			normal += glm::normalize(glm::cross(glm::vec3(pos3 - pos), glm::vec3(pos4 - pos)));
-			normal += glm::normalize(glm::cross(glm::vec3(pos4 - pos), glm::vec3(pos1 - pos)));
-
-			if (normal.y < 0)
-				normal = -normal;
-			mesh->vertices[i].Normal = normal;
-		}
-	}*/
-
 	for (unsigned int i = 0; i < mesh->vertices.size(); ++i)
 	{
 		mesh->vertices[i].Normal = glm::normalize(mesh->vertices[i].Normal);
@@ -228,17 +224,15 @@ void TerrainModel::generateNormals(GLuint rows, GLuint columns)
 		buffer[i * 4 + 1] = (mesh->vertices[i].Normal.z + 1.0f) / 2.0f;
 		buffer[i * 4 + 2] = (mesh->vertices[i].Normal.y + 1.0f) / 2.0f;
 		buffer[i * 4 + 3] = 1.0f;
-		//std::cout <<"x= "<< mesh->vertices[i].Normal.x << "y= " << mesh->vertices[i].Normal.y << "z= " << mesh->vertices[i].Normal.z << std::endl;
 	}
 
-	m_normal = new Texture(rows, columns); //delete
+	m_normal = new Texture(rows, columns);
 	m_normal->TextureFromBuffer(buffer, rows, columns);
 	delete[] buffer;
 }
 
-void TerrainModel::makePlaneVerts(unsigned int dimensions)
+void TerrainModel::makePlaneVerts(unsigned int dimensions, bool spreed_texture)
 {
-	std::cout << "MakeVert1 start" << std::endl;
 	mesh->vertices.resize(dimensions * dimensions);
 	int half = dimensions / 2;
 	for (int i = 0; i < dimensions; i++)
@@ -250,15 +244,22 @@ void TerrainModel::makePlaneVerts(unsigned int dimensions)
 			thisVert.position.z = (float)(i - half) / devisor;
 			thisVert.position.y = 0;
 			thisVert.Normal = glm::vec3(0.0f, 1.0f, 0.0f);
-			thisVert.TexCoords.x = j / (float)dimensions;
-			thisVert.TexCoords.y = i / (float)dimensions;
+      if (spreed_texture)
+      {
+        thisVert.TexCoords.x = j / (float)dimensions;
+        thisVert.TexCoords.y = i / (float)dimensions;
+      }
+      else
+      {
+        thisVert.TexCoords.x = j % 2 ? 0.0f : 1.0f;
+        thisVert.TexCoords.y = i % 2 ? 0.0f : 1.0f;
+      }
 		}
 	}
 }
 
-void TerrainModel::makePlaneVerts(unsigned int rows, unsigned int columns)
+void TerrainModel::makePlaneVerts(unsigned int rows, unsigned int columns, bool spreed_texture)
 {
-	std::cout << "MakeVert start" << std::endl;
 	mesh->vertices.resize(rows * columns);
 	int half_r = rows / 2;
 	int half_c = columns / 2;
@@ -273,8 +274,16 @@ void TerrainModel::makePlaneVerts(unsigned int rows, unsigned int columns)
 			thisVert.position.z = (float)(i - half_c) / devisor;
 			thisVert.position.y = 0;
 			thisVert.Normal = glm::vec3(0.0f, 1.0f, 0.0f);
-			thisVert.TexCoords.x = j / (float)rows;
-			thisVert.TexCoords.y = i / (float)columns;
+      if (spreed_texture)
+      {
+        thisVert.TexCoords.x = j / (float)rows;
+        thisVert.TexCoords.y = i / (float)columns;
+      }
+      else
+      {
+        thisVert.TexCoords.x = j % 2 ? 0.0f : 1.0f;
+        thisVert.TexCoords.y = i % 2 ? 0.0f : 1.0f;
+      }
 			if (thisVert.position.x < MinX)  //debug only
 				MinX = thisVert.position.x;
 			if (thisVert.position.x > MaxX)
@@ -286,13 +295,10 @@ void TerrainModel::makePlaneVerts(unsigned int rows, unsigned int columns)
 			counter++;
 		}
 	}
-	std::cout << MinZ << " " << MaxZ << " " << MinX << " "<<MaxX << std::endl;
-	std::cout << "counter= " << counter << " " << mesh->vertices.size() << std::endl;
 }
 
 void TerrainModel::makePlaneIndices(unsigned int dimensions)
 {
-	std::cout << "MakeInd start1" << std::endl;
 	mesh->indices.resize((dimensions) * (dimensions) * 2 * 3);// 2 triangles per square, 3 indices per triangle dim-1???
 		int runner = 0;
 	for (int row = 0; row < dimensions - 1; row++)
@@ -312,7 +318,6 @@ void TerrainModel::makePlaneIndices(unsigned int dimensions)
 
 void TerrainModel::makePlaneIndices(unsigned int rows,unsigned int columns)
 {
-	std::cout << "MakeInd start" << std::endl;
 	mesh->indices.resize((rows) * (columns) * 2 * 3);// 2 triangles per square, 3 indices per triangle dim-1???
 	int runner = 0;
 	float MinX = 0, MinZ = 0, MaxX = 0, MaxZ = 0;
@@ -340,33 +345,23 @@ void TerrainModel::makePlaneIndices(unsigned int rows,unsigned int columns)
 			}
 		}
 	}
-	std::cout << MinZ << " " << MaxZ << " " << MinX << " " << MaxX << std::endl;
-	std::cout << "counter ind= " << runner << " " << mesh->indices.size() << std::endl;
 }
 
 void TerrainModel::Draw()
 {
-	//glUniform1i(glGetUniformLocation(Program, "normalMapping"),GL_FALSE);
-
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_diffuse->id);
-	//glUniform1i(glGetUniformLocation(Program, "texture_diffuse1"), 2);
 
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, m_specular->id);
-	//glUniform1i(glGetUniformLocation(Program, "texture_specular1"), 3);
 
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, m_normal->id);
-	//glUniform1i(glGetUniformLocation(Program, "texture_normal1"), 4);
 
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, m_fourth->id);
-	//glUniform1i(glGetUniformLocation(Program, "texture_fourth1"), 5);
 
 	mesh->Draw();
-
-	//glUniform1i(glGetUniformLocation(Program, "normalMapping"), GL_TRUE);
 }
 
 size_t TerrainModel::GetVertexCount() const
@@ -392,31 +387,14 @@ std::vector<GLuint> TerrainModel::GetIndeces() const
 	return mesh->indices;
 }
 
-void TerrainModel::debug()
-{
-	std::cout << "Terrain debug" << std::endl;
-	std::cout << "size vert= " << mesh->vertices.size() << std::endl;
-	std::cout << "size ind= " << mesh->indices.size() << std::endl;
-	for (int i = 0; i < mesh->vertices.size(); ++i) {
-		std::cout << "Vertex" << std::endl;
-		std::cout << "Position" << std::endl;
-		std::cout << "x "<< mesh->vertices[i].position.x   << "y " << mesh->vertices[i].position.y << "z" << mesh->vertices[i].position.z<< std::endl;
-		std::cout << "TexCoords" << std::endl;
-		std::cout << "x " << mesh->vertices[i].TexCoords.x << " y " << mesh->vertices[i].TexCoords.y << std::endl;
-		std::cout << "Normal" << std::endl;
-		std::cout << "x " << mesh->vertices[i].Normal.x << "y " << mesh->vertices[i].Normal.y << "z" << mesh->vertices[i].Normal.z << std::endl;
-	}
-	std::cout << "Indeices" << std::endl;
-	for (int i = 0; i < mesh->indices.size(); ++i) 
-		std::cout << " " << mesh->indices[i] <<std::endl;
-
-}
-
 TerrainModel::~TerrainModel()
 {
 	if (mesh != nullptr)
 		delete mesh;
-	if (m_normal != nullptr)
-		delete m_normal;
+  if (m_normal != nullptr)
+  {
+    m_normal->freeTexture();
+    delete m_normal;
+  }
 }
 

@@ -16,10 +16,11 @@ public:
 	TerrainModel(const TerrainModel& other);
 	virtual ~TerrainModel();
 
-	void initialize(Texture* diffuse, Texture* specular);
-	void initialize(Texture* diffuse, Texture* specular, Texture* normal, Texture* heightMap);
+	void initialize(Texture* diffuse, Texture* specular, bool spreed_texture = true);
+	void initialize(Texture* diffuse, Texture* specular, Texture* normal, Texture* heightMap, bool spreed_texture = true);
 	
 	virtual void			                Draw()							override;
+
   virtual size_t                    GetVertexCount() const;
   virtual size_t                    GetMeshCount() const { return 1; }
   virtual std::vector<const IMesh*> GetMeshes() const;
@@ -41,11 +42,9 @@ public:
 	void					setDiffuse(Texture* t);
 	void					setSpecular(Texture* t);
 
-	void					debug();
-
 private:
 	unsigned int	devisor = 10;
-	MyMesh*			mesh; // generate ourselfs inside constructor
+	MyMesh*			mesh; // generate ourself inside constructor
 	
 	Texture*		m_diffuse;
 	Texture*		m_specular;
@@ -57,12 +56,13 @@ private:
 	GLuint			m_rows;
 	GLuint			m_columns;
 
-	void			makePlaneVerts(unsigned int dimensions);
-	void			makePlaneVerts(unsigned int rows, unsigned int columns);
+	void			makePlaneVerts(unsigned int dimensions, bool spreed_texture = true);
+	void			makePlaneVerts(unsigned int rows, unsigned int columns, bool spreed_texture = true);
 	void			makePlaneIndices(unsigned int dimensions);
 	void			assignHeights(Texture heightMap);
 	void			generateNormals(GLuint size);
 	void			generateNormals(GLuint rows, GLuint columns);
-	MyVertex		findVertex(float x, float z);
+	MyVertex	findVertex(float x, float z);
 };
+
 

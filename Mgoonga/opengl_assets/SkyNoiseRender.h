@@ -19,9 +19,11 @@ public:
 private:
 	std::unique_ptr<MyModel> model;
 	std::unique_ptr<eObject> object;
+
 	Shader					 skynoise_shader;
+
 	GLuint					 fullTransformationUniformLocation;
 	GLuint					 moveFactorLocation;
-	float					 skyHegight = 5.0f;
+	float					   skyHegight = 5.0f;
 	float				     moveFactor = 0.0f;
 };

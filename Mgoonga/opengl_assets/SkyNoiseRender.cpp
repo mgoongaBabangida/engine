@@ -15,7 +15,7 @@ eSkyNoiseRender::eSkyNoiseRender(std::unique_ptr<MyModel>	_model,
 
 	fullTransformationUniformLocation = glGetUniformLocation(skynoise_shader.ID, "modelToProjectionMatrix");
 	moveFactorLocation = glGetUniformLocation(skynoise_shader.ID, "moveFactor");
-	//@todo object not used , model & transform
+	//@todo object not used , model &transform
 	model.swap(_model);
 	model->setTextureBump(_noise);
 	model->setTextureFourth(_noise);
@@ -23,7 +23,7 @@ eSkyNoiseRender::eSkyNoiseRender(std::unique_ptr<MyModel>	_model,
 	object->SetModel(model.get());
 	object->SetTransform(new Transform);
 	object->GetTransform()->setTranslation(glm::vec3(0.0f, skyHegight, 0.0f));
-	object->GetTransform()->setRotation(PI / 2, 0.0f, 0.0f);
+	object->GetTransform()->setRotation(PI/2, 0.0f, 0.0f);
 	object->GetTransform()->setScale(glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
@@ -31,10 +31,10 @@ eSkyNoiseRender::eSkyNoiseRender(std::unique_ptr<MyModel>	_model,
 void eSkyNoiseRender::Render(const Camera& camera)
 {
 	glUseProgram(this->skynoise_shader.ID);
-	//mat4 worldToProjectionMatrix = ProjectionMatrix * camera.getWorldToViewMatrix();
-	//mat4 modelToProjectionMatrix = worldToProjectionMatrix * object->GetTransform()->getModelMatrix();
-	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &UNIT_MATRIX[0][0]); //&modelToProjectionMatrix[0][0]
+	glm::mat4 worldToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
+	glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * object->GetTransform()->getModelMatrix();
+	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 	//moveFactor += 0.005f;
-	glUniform1f(moveFactorLocation, moveFactor);
+	//glUniform1f(moveFactorLocation, moveFactor);
 	object->GetModel()->Draw();
 }

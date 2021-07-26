@@ -17,15 +17,16 @@ class RemSnd;
 class eRenderManager;
 
 //----------------------------------------------------------------------------------
-class eShipScript : public eBaseScript
+class eShipScript : public IScript
 {
 public:
-	eShipScript(Texture*		flag_texture, 
-			   eRenderManager&	render_manager,
-			   Texture*			shoting_texture, 
-			   RemSnd*			shooting_sound, 
-			   dbb::CameraRay*,  
-			   float			waterHeight);
+	eShipScript(Texture*		flag_texture,
+			        eRenderManager&	render_manager,
+		          Camera& camera,
+			        Texture*			shoting_texture,
+			        RemSnd*			shooting_sound,
+			        dbb::CameraRay*,
+			        float			waterHeight);
 	
 	eShipScript(const eShipScript&)				= delete;
 	eShipScript& operator=(const eShipScript&)	= delete;
@@ -34,6 +35,7 @@ public:
 	virtual bool	OnMousePress(uint32_t x, uint32_t y, bool left)		override;
 
 	virtual void	Update(std::vector<std::shared_ptr<eObject> > objs) override;
+	virtual std::vector<eObject*>			GetChildrenObjects() override;
 
 	void			SetDestination(glm::vec3 dst) { destination = dst; }
 	
@@ -47,7 +49,12 @@ protected:
 	glm::vec3		  destination		= NONE;
 	bool			  shoot_after_move  = false;
 
+  Texture* flag_tex;
+  glm::vec3		  flag_scale = { 0.01f, 0.01f ,0.01f };
+  std::unique_ptr<eObject> flag;
+
 	std::reference_wrapper<eRenderManager> render_manager;
+	std::reference_wrapper<Camera> camera;
 	Texture*							   shoot_tex;
 	RemSnd*								   shoot_snd;
 

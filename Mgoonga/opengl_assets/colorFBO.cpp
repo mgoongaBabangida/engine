@@ -6,6 +6,7 @@ eColorFBO::~eColorFBO()
 {
 	if (m_fbo != 0) {
 		glDeleteFramebuffers(1, &m_fbo);
+    glDeleteTextures(1, &m_texture);
 	}
 }
 

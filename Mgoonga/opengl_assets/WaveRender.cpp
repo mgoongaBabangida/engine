@@ -8,7 +8,7 @@
 #include <math/Transform.h>
 
 //------------------------------------------------------------------------------------------
-eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model, 
+eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model,
 						Texture* tex,
 						Texture* normals, 
 						Texture* Height, 
@@ -59,7 +59,7 @@ eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model,
 //-------------------------------------------------------------------------------------------------
 void eWaveRender::Render(const Camera&		camera, 
 						 const Light&		light,
-						 std::vector<Flag>	flags)
+						 std::vector<eObject*>	flags)
 {
 	glUseProgram(wave_shader.ID);
 
@@ -107,16 +107,16 @@ void eWaveRender::Render(const Camera&		camera,
 	for(auto& flag : flags)
 	{
 		//move this outside
-		object->GetTransform()->setTranslation(flag.position);
-		object->GetTransform()->setScale(flag.scale);
+		object->GetTransform()->setTranslation(flag->GetTransform()->getTranslation());
+		object->GetTransform()->setScale(flag->GetTransform()->getScaleAsVector());
 		object->GetTransform()->billboard(-camera.getDirection());
 		
 		glm::quat cur = object->GetTransform()->getRotation();
 		glm::quat plus = glm::toQuat(glm::rotate(UNIT_MATRIX, (float) PI / 2, XAXIS));
 		object->GetTransform()->setRotation(cur * plus);
 
-		m_model->setDiffuse(flag.tex);
-		m_model->setSpecular(flag.tex);
+		m_model->setDiffuse(const_cast<Texture*>(flag->GetModel()->GetMeshes()[0]->GetTextures()[0]));
+		m_model->setSpecular(const_cast<Texture*>(flag->GetModel()->GetMeshes()[0]->GetTextures()[0]));
 
 		glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * object->GetTransform()->getModelMatrix();
 		glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
@@ -130,3 +130,4 @@ void eWaveRender::Render(const Camera&		camera,
 	glUniform1i(glGetUniformLocation(wave_shader.ID, "normalMapping"), GL_TRUE);
 	glEnable(GL_CULL_FACE); //todo transfer
 }
+
