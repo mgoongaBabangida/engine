@@ -40,17 +40,20 @@ uniform Light light;
 subroutine vec3 LightingPtr(Light light, vec3 normal, vec3 thePosition, vec2 TexCoords);
 subroutine uniform LightingPtr LightingFunction;
 
-layout(binding=0) uniform samplerCube 	  depth_cube_map;// Shadow point
-layout(binding=1) uniform sampler2DShadow depth_texture; // Shadow dir
-layout(binding=2) uniform sampler2D texture_diffuse1;
-layout(binding=3) uniform sampler2D texture_specular1;
-layout(binding=4) uniform sampler2D texture_normal1;
-layout(binding=5) uniform sampler2D texture_depth1;
+layout(binding=0) uniform samplerCube 	   depth_cube_map;// Shadow point
+layout(binding=1) uniform sampler2DShadow  depth_texture; // Shadow dir
+layout(binding=2) uniform sampler2D        texture_diffuse1;
+layout(binding=3) uniform sampler2D        texture_specular1;
+layout(binding=4) uniform sampler2D        texture_normal1;
+layout(binding=5) uniform sampler2D        texture_depth1;
 
 uniform vec3 eyePositionWorld;
 uniform bool normalMapping = true;
 uniform bool shadow_directional = true;
 uniform float far_plane;
+
+uniform bool debug_white_color = false;
+uniform bool debug_white_texcoords = false;
 
 float ShadowCalculation(vec4 fragPosLightSpace);
 float ShadowCalculationCubeMap(vec3 fragPos);
@@ -61,16 +64,16 @@ subroutine(LightingPtr) vec3 calculatePhongPointSpecDif(Light light, vec3 normal
 
   //Diffuse
   vec3 lightVector  = normalize(vec3(light.position)-thePosition);
-  float Brightness  = clamp(dot(lightVector, normal),0,1);
-  vec3 diffuseLight = vec3(light.diffuse * Brightness * vec3(texture(texture_diffuse1, TexCoords)));//Brightness*material.diffuse
+  float Brightness  = clamp(dot(lightVector, normal), 0, 1);
+  vec3 diffuseLight = vec3(light.diffuse * Brightness * vec3(texture(texture_diffuse1, TexCoords))); //Brightness * material.diffuse
   
   //Specular
   vec3 Reflaction = reflect(-lightVector,normal);
   vec3 eyeVector  = normalize(eyePositionWorld-thePosition); 
   float spec      = clamp(dot(Reflaction,eyeVector), 0, 1);
 
-  spec=pow(spec, shininess);
-  vec3 specularLight=vec3(light.specular *spec * vec3(texture(texture_specular1, TexCoords)));//* material.specular
+  spec = pow(spec, shininess);
+  vec3 specularLight = vec3(light.specular *spec * vec3(texture(texture_specular1, TexCoords)));//* material.specular
   specularLight=clamp(specularLight,0,1);
 
   // Attenuation
@@ -177,10 +180,14 @@ void main()
 
   vec3 difspec = LightingFunction(light, bNormal, thePosition, Texcoord);
 
-  if(shadow < 0.9)
+  if(debug_white_color)
+   daColor = vec4(1.0,1.0,1.0,1.0); 
+  else if(debug_white_texcoords)
+   daColor = vec4(Texcoord.x, Texcoord.x, Texcoord.x, 1.0);
+  else if(shadow < 0.9)
 	daColor = vec4(ambientLight, 1.0);
   else
-    daColor= vec4(ambientLight+(difspec) * shadow, 1.0); //vec4(shadow,shadow,shadow,1.0);
+    daColor= vec4(ambientLight +(difspec) * shadow, 1.0); //vec4(shadow,shadow,shadow,1.0);
 };
 
 float ShadowCalculation(vec4 fragPosLightSpace )

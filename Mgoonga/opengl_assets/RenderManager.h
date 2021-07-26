@@ -52,7 +52,7 @@ private:
 	eGaussianBlurRender*GaussianBlurRender();
 	eBrightFilterRender*BrightFilterRender();
 	eLinesRender*		LinesRender();
-	eTextRender* TextRender();
+	//eTextRender* TextRender();
 
 private:
 	std::unique_ptr<eWaterRender>		 m_waterRender;
@@ -68,7 +68,7 @@ private:
 	std::unique_ptr<eGaussianBlurRender> m_gaussianRender;
 	std::unique_ptr<eBrightFilterRender> m_brightRender;
 	std::unique_ptr<eLinesRender>		 m_linesRender;
-	std::unique_ptr<eTextRender>    m_textRender;
+	//std::unique_ptr<eTextRender>    m_textRender;
 
 	std::string							 folderPath;
 

@@ -14,7 +14,7 @@
 #include "BrightFilterrender.h"
 #include "ShadowRender.h"
 #include "LinesRender.h"
-#include "TextRender.h"
+//#include "TextRender.h"
 
 eWaterRender*		 eRenderManager::WaterRender() { return m_waterRender.get(); }
 eSkyBoxRender*		 eRenderManager::SkyBoxRender() { return m_skyboxRender.get(); }
@@ -29,7 +29,7 @@ eHexRender*			 eRenderManager::HexRender() { return m_hexrender.get(); }
 eGaussianBlurRender* eRenderManager::GaussianBlurRender() { return m_gaussianRender.get(); }
 eBrightFilterRender* eRenderManager::BrightFilterRender() { return m_brightRender.get(); }
 eLinesRender*		 eRenderManager::LinesRender() { return m_linesRender.get(); }
-eTextRender* eRenderManager::TextRender() { return m_textRender.get(); }
+//eTextRender* eRenderManager::TextRender() { return m_textRender.get(); }
 
 eRenderManager::eRenderManager()
 {
@@ -95,5 +95,5 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 	m_linesRender.reset(new eLinesRender(folderPath + "SkyBoxVertexShader.glsl",
 										 folderPath + "StencilFragmentShader.glsl"));
 
-	m_textRender.reset(new eTextRender(folderPath + "TextVertex.glsl", folderPath + "TextFragment.glsl"));
+	//m_textRender.reset(new eTextRender(folderPath + "TextVertex.glsl", folderPath + "TextFragment.glsl"));
 }
