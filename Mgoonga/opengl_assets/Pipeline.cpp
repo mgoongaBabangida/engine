@@ -436,16 +436,18 @@ void ePipeline::RenderGui(std::vector<GUI>& guis, const Camera& _camera)
 void ePipeline::RenderPBR(const Camera& _camera)
 {
   //lights
+	float dist = lightPBRDebugDist;
+	float lghtIntensity = lghtPBRDebugIntensity;
   std::vector<Light> lights;
   Light light1, light2, light3, light4;
-  light1.light_position = glm::vec4(-10.0f, 10.0f, 10.0f, 1.0);
-  light2.light_position = glm::vec4(10.0f, 10.0f, 10.0f, 1.0f);
-  light3.light_position = glm::vec4(-10.0f, -10.0f, 10.0f, 1.0f);
-  light4.light_position = glm::vec4(10.0f, -10.0f, 10.0f, 1.0f);
-  light1.diffuse = glm::vec3(300.0f, 300.0f, 300.0f);
-  light2.diffuse = glm::vec3(300.0f, 300.0f, 300.0f);
-  light3.diffuse = glm::vec3(300.0f, 300.0f, 300.0f);
-  light4.diffuse = glm::vec3(300.0f, 300.0f, 300.0f);
+  light1.light_position = glm::vec4(-dist, dist, dist, 1.0);
+  light2.light_position = glm::vec4(dist, dist, dist, 1.0f);
+  light3.light_position = glm::vec4(-dist, -dist, dist, 1.0f);
+  light4.light_position = glm::vec4(dist, -dist, dist, 1.0f);
+  light1.diffuse = glm::vec3(lghtIntensity, lghtIntensity, lghtIntensity);
+  light2.diffuse = glm::vec3(lghtIntensity, lghtIntensity, lghtIntensity);
+  light3.diffuse = glm::vec3(lghtIntensity, lghtIntensity, lghtIntensity);
+  light4.diffuse = glm::vec3(lghtIntensity, lghtIntensity, lghtIntensity);
   lights.push_back(light1);
   lights.push_back(light2);
   lights.push_back(light3);

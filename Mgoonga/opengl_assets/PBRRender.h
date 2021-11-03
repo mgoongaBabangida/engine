@@ -12,7 +12,7 @@ public:
   ePBRRender(const std::string& vS, const std::string& fS);
 
   void Render(const Camera& camera,
-              std::vector<Light> light,
+              const std::vector<Light>& light,
               std::vector<shObject>& objects);
 
 protected:
@@ -30,6 +30,4 @@ protected:
   GLuint fullTransformationUniformLocation;
   GLuint modelToWorldMatrixUniformLocation;
   GLuint shadowMatrixUniformLocation;
-  GLuint eyePositionWorldUniformLocation;
-  GLuint FarPlaneUniformLocation;
 };

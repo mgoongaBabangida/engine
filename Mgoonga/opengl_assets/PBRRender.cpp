@@ -21,12 +21,10 @@ ePBRRender::ePBRRender(const std::string& vS, const std::string& fS)
   fullTransformationUniformLocation = glGetUniformLocation(pbrShader.ID, "modelToProjectionMatrix");
   modelToWorldMatrixUniformLocation = glGetUniformLocation(pbrShader.ID, "modelToWorldMatrix");
   shadowMatrixUniformLocation = glGetUniformLocation(pbrShader.ID, "shadowMatrix"); //shadow
-  eyePositionWorldUniformLocation = glGetUniformLocation(pbrShader.ID, "eyePositionWorld");
-  FarPlaneUniformLocation = glGetUniformLocation(pbrShader.ID, "far_plane");
 }
 
 //-----------------------------------------------------------------------------------------------------------
-void ePBRRender::Render(const Camera& camera, std::vector<Light> lights, std::vector<shObject>& objects)
+void ePBRRender::Render(const Camera& camera, const std::vector<Light>& lights, std::vector<shObject>& objects)
 {
   glUseProgram(pbrShader.ID);
   glUniform3fv(camPosLoc, 1, &camera.getPosition()[0]);
@@ -34,20 +32,23 @@ void ePBRRender::Render(const Camera& camera, std::vector<Light> lights, std::ve
   glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(lights[0].light_position), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0f, 1.0f, 0.0f));
   glm::mat4 shadowMatrix = camera.getProjectionBiasedMatrix() * worldToViewMatrix;
   glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE, &shadowMatrix[0][0]);
-  glUniform1f(FarPlaneUniformLocation, camera.getFarPlane());
-  glUniform3fv(eyePositionWorldUniformLocation, 1, &camera.getPosition()[0]);
   glm::mat4 worldToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
   
+  std::vector<glm::vec3> lpositions;
+  std::vector<glm::vec3> lcolors;
   for (int i = 0; i < lights.size(); ++i)
   {
-    std::string loc_p = "lightPositions[" + std::to_string(i) + "]";
-    GLuint loc_pos = glGetUniformLocation(pbrShader.ID, loc_p.c_str());
-    glUniform3fv(loc_pos, 1, &lights[i].light_position[0]);
-    
-    std::string loc_c = "lightColors[" + std::to_string(i) + "]";
-    GLuint loc_col = glGetUniformLocation(pbrShader.ID, loc_c.c_str());
-    glUniform3fv(loc_col, 1, &lights[i].diffuse[0]);
+    lpositions.push_back(lights[i].light_position);
+    lcolors.push_back(lights[i].diffuse);
   }
+
+  std::string loc_p = "lightPositions";
+  GLuint loc_pos = glGetUniformLocation(pbrShader.ID, loc_p.c_str());
+  glUniform3fv(loc_pos, 4, &lpositions[0][0]);
+
+  std::string loc_c = "lightColors";
+  GLuint loc_col = glGetUniformLocation(pbrShader.ID, loc_c.c_str());
+  glUniform3fv(loc_col, 4, &lcolors[0][0]);
 
   for (auto& object : objects)
   {

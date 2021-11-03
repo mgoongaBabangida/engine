@@ -1,6 +1,7 @@
 #version 430 core
 
 out vec4 FragColor;
+
 in vec2 Texcoords;
 in vec3 thePosition; //WorldPos
 in vec3 theNormal;//theNormal

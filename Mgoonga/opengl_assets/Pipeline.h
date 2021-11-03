@@ -48,6 +48,9 @@ public:
   bool& GetSkyBoxOnRef() { return skybox; }
   float& GetBlurCoefRef() { return blur_coef; }
 
+	float& LightPBRDebugDist() { return lightPBRDebugDist; }
+	float& LightPBRDebugIntensity() { return lghtPBRDebugIntensity; }
+
 	bool& GetDebugWhite() { return debug_white; }
 	bool& GetDebugTexCoords() { return debug_texcoords; }
 
@@ -101,6 +104,8 @@ protected:
 	float			farPlane	  = 0.0f;
 	float			waterHeight = 2.0f;
   float     blur_coef   = 0.7f;
+	float     lightPBRDebugDist = 10.0f;
+	float     lghtPBRDebugIntensity = 150.0f;
 
 	std::reference_wrapper<std::vector<shObject>>	m_objects;
 	std::reference_wrapper <dbb::CameraRay>				camRay;
