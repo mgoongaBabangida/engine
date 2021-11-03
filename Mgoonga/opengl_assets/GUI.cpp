@@ -67,11 +67,12 @@ bool GUI::isPressed(int x, int y)
 	return x > topleftX && y > topleftY && x < (topleftX + Width) && y < (topleftY + Height); //test!
 }
 
-glm::vec4 GUI::getViewPort() const //vec int?
+glm::ivec4 GUI::getViewPort() const
 {
-	return glm::vec4(topleftX, screenHeight - topleftY - Height, Width, Height);
+	return glm::ivec4(topleftX, screenHeight - topleftY - Height, Width, Height);
 }
 
+//--------------------------------------------------
 AnimStart::AnimStart(shObject obj)
 	:m_obj(obj)
 {

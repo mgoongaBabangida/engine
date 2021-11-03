@@ -28,13 +28,13 @@ public:
 	glm::vec3			getPosition() const;
 	glm::vec3			getDirection() const;
 	glm::mat3			getRotationMatrix() const;
-	const glm::mat4&	getProjectionMatrix() const { return projectionMatrix; };
+	const glm::mat4& getProjectionMatrix() const;
 	glm::mat4			getProjectionBiasedMatrix() const;
 	const glm::mat4&	getProjectionOrthoMatrix() const { return projectionOrthoMatrix; };
 	uint32_t			getWidth() const { return width;  }
 	uint32_t			getHeight() const { return height; }
 	float				getNearPlane() const { return nearPlane; }
-	float				getFarPlane() const { return farPlane; }
+	float				getFarPlane() const;
 
 	void				moveForward();
 	void				moveBackword();
@@ -70,4 +70,5 @@ protected:
 	float				nearPlane;
 	float				farPlane;
 };
+
 

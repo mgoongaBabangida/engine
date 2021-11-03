@@ -31,9 +31,7 @@ public:
   virtual size_t                    GetMeshCount() const override { return 1; }
   virtual std::vector<const IMesh*> GetMeshes() const override;
   virtual size_t                    GetAnimationCount() const { return 0; }
-  virtual std::vector<const IAnimation*> GetAnimations() const {
-    return std::vector<const IAnimation*>();
-  }
+  virtual std::vector<const IAnimation*> GetAnimations() const { return std::vector<const IAnimation*>();}
   virtual std::vector<const Texture*> GetTexturesModelLevel() const override;
 
 	virtual void					Draw()					override;

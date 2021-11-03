@@ -50,19 +50,17 @@ void eDefferedRender::Render(const Camera& camera, std::vector<shObject>& object
 		glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * object->GetTransform()->getModelMatrix();
 		glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 		glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &object->GetTransform()->getModelMatrix()[0][0]);
-		//*********************
+
 		std::vector<glm::mat4> matrices(100);
 		for (auto&m : matrices)
-		{
 			m = UNIT_MATRIX;
-		}
+
 		if (object->GetRigger() != nullptr)
-		{
 			matrices = object->GetRigger()->GetMatrices();
-		}
+
 		int loc = glGetUniformLocation(gShader.ID, "gBones");
 		glUniformMatrix4fv(loc, 100, GL_FALSE, &matrices[0][0][0]);
-		//*********************
+
 		object->GetModel()->Draw();
 	}
 }
@@ -95,3 +93,4 @@ void eDefferedRender::RenderScreen(const Camera& camera)
 	// finally render quad
 	screenMesh->Draw();
 }
+

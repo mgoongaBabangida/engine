@@ -91,6 +91,11 @@ glm::vec3 Camera::getDirection() const
 	 return this->rotationMatrix;
 }
 
+const glm::mat4& Camera::getProjectionMatrix() const
+{
+  return projectionMatrix;
+}
+
  glm::mat4 Camera::getProjectionBiasedMatrix() const
  {
 	 return glm::mat4(glm::vec4(0.5f, 0.0f, 0.0f, 0.0f),
@@ -120,7 +125,12 @@ void Camera::mouseUpdate(const glm::vec2& newMousePosition)
 	}
 }
 
-void Camera::moveForward() 
+float Camera::getFarPlane() const
+{
+	return farPlane;
+}
+
+void Camera::moveForward()
 {
 	position += MOVEMENT_SPEED * viewDirection;
 }

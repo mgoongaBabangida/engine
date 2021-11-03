@@ -23,7 +23,7 @@ public:
 	
 	void			Perssed();
 	bool			isPressed(int x, int y);
-	glm::vec4		getViewPort() const; //vec int?
+	glm::ivec4		getViewPort() const;
 
 protected:
 	int32_t						screenWidth;
@@ -67,3 +67,4 @@ public:
 };
 
 #endif
+
