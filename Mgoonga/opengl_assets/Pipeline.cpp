@@ -23,6 +23,7 @@
 #include "ShadowRender.h"
 #include "LinesRender.h"
 #include "TextRender.h"
+#include "PBRRender.h"
 
 void	ePipeline::SetSkyBoxTexture(Texture* _t)  { renderManager->SkyBoxRender()->SetSkyBoxTexture(_t); }
 void	ePipeline::AddHex(glm::vec3 _v) { renderManager->AddHex(_v); }
@@ -75,6 +76,7 @@ void ePipeline::InitializeBuffers(bool _needsShadowCubeMap)
 void ePipeline::InitializeRenders(eModelManager& modelManager, eTextureManager& texManager, const std::string& shadersFolderPath)
 {
 	renderManager->Initialize(modelManager, texManager, shadersFolderPath);
+	PreparePBRDemo(); //temp
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -138,6 +140,7 @@ void ePipeline::RenderFrame(Camera& _camera, const Light& _light ,std::vector<GU
 	    RenderOutlineFocused(_camera, _light, std::vector<shObject>{ obj });
 	  }
 	}
+
 	std::vector<shObject> not_outlined;
 	std::set_difference(m_objects.get().begin(), m_objects.get().end(),
 		                  _focused.begin(), _focused.end(),
@@ -145,6 +148,8 @@ void ePipeline::RenderFrame(Camera& _camera, const Light& _light ,std::vector<GU
 		                  [](auto& a, auto& b) { return &a < &b; });
 
 	RenderMain(_camera, _light, not_outlined);
+
+	RenderPBR(_camera);
 
 	if (flags) { RenderFlags(_camera, _light, _flags); }
 
@@ -203,7 +208,7 @@ void ePipeline::RenderFrame(Camera& _camera, const Light& _light ,std::vector<GU
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//renderManager->TextRender()->RenderText(fps, 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f), width, height);
+	renderManager->TextRender()->RenderText(fps, 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f), width, height);
 	glDisable(GL_BLEND);
 }
 
@@ -423,4 +428,59 @@ void ePipeline::RenderGui(std::vector<GUI>& guis, const Camera& _camera)
 		}
 	}
 	glViewport(0, 0, width, height);
+}
+
+#include "ShpereTexturedModel.h"
+
+//------------------------------------------------
+void ePipeline::RenderPBR(const Camera& _camera)
+{
+  //lights
+  std::vector<Light> lights;
+  Light light1, light2, light3, light4;
+  light1.light_position = glm::vec4(-10.0f, 10.0f, 10.0f, 1.0);
+  light2.light_position = glm::vec4(10.0f, 10.0f, 10.0f, 1.0f);
+  light3.light_position = glm::vec4(-10.0f, -10.0f, 10.0f, 1.0f);
+  light4.light_position = glm::vec4(10.0f, -10.0f, 10.0f, 1.0f);
+  light1.diffuse = glm::vec3(300.0f, 300.0f, 300.0f);
+  light2.diffuse = glm::vec3(300.0f, 300.0f, 300.0f);
+  light3.diffuse = glm::vec3(300.0f, 300.0f, 300.0f);
+  light4.diffuse = glm::vec3(300.0f, 300.0f, 300.0f);
+  lights.push_back(light1);
+  lights.push_back(light2);
+  lights.push_back(light3);
+  lights.push_back(light4);
+
+	GetRenderManager().PBRRender()->Render(_camera, lights, spheres);
+}
+
+void ePipeline::PreparePBRDemo()
+{
+  int nrRows = 7;
+  int nrColumns = 7;
+  float spacing = 2.5;
+
+  // render rows * column number of spheres with varying metallic/roughness values scaled by rows and columns respectively
+  for (int row = 0; row < nrRows; ++row)
+    {
+    Material material;
+    material.diffuse = glm::vec3(0.5f, 0.0f, 0.0f);
+    material.ao = 1.0f;
+    material.metallic = (float)row / (float)nrRows;
+
+    for (int col = 0; col < nrColumns; ++col)
+      {
+      // we clamp the roughness to 0.05 - 1.0 as perfectly smooth surfaces (roughness of 0.0) tend to look a bit off
+      // on direct lighting.
+      material.roughness = glm::clamp((float)col / (float)nrColumns, 0.05f, 1.0f);
+      SphereTexturedMesh* mesh = new SphereTexturedMesh();
+      mesh->SetMaterial(material);
+
+      shObject obj = std::make_shared<eObject>();
+      obj->SetModel(new SphereTexturedModel(mesh));
+      obj->SetTransform(new Transform);
+      obj->GetTransform()->setTranslation(glm::vec3((col - (nrColumns / 2)) * spacing, (row - (nrRows / 2)) * spacing, 0.0f));
+      spheres.push_back(obj);
+      }
+    }
 }

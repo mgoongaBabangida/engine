@@ -76,6 +76,10 @@ protected:
 	void			RenderParticles(const Camera&);
 	void			RenderBlur(const Camera&);
 	void			RenderGui(std::vector<GUI>&, const Camera&);
+	void			RenderPBR(const Camera&);
+
+	void      PreparePBRDemo();
+	std::vector<shObject> spheres;
 
 	bool			mousepress	= true; //to draw framed objects
 	bool			mts			= true;

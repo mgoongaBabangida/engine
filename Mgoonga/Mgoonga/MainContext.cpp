@@ -303,6 +303,8 @@ void eMainContext::InitializeBuffers()
 	pipeline.InitializeBuffers(m_light.type == eLightType::POINT);
 }
 
+#include <opengl_assets/ShpereTexturedModel.h>
+
 //-----------------------------------------------------------------------------
 void eMainContext::InitializeModels()
 {

@@ -14,7 +14,8 @@
 #include "BrightFilterrender.h"
 #include "ShadowRender.h"
 #include "LinesRender.h"
-//#include "TextRender.h"
+#include "TextRender.h"
+#include "PBRRender.h"
 
 eWaterRender*		 eRenderManager::WaterRender() { return m_waterRender.get(); }
 eSkyBoxRender*		 eRenderManager::SkyBoxRender() { return m_skyboxRender.get(); }
@@ -29,7 +30,8 @@ eHexRender*			 eRenderManager::HexRender() { return m_hexrender.get(); }
 eGaussianBlurRender* eRenderManager::GaussianBlurRender() { return m_gaussianRender.get(); }
 eBrightFilterRender* eRenderManager::BrightFilterRender() { return m_brightRender.get(); }
 eLinesRender*		 eRenderManager::LinesRender() { return m_linesRender.get(); }
-//eTextRender* eRenderManager::TextRender() { return m_textRender.get(); }
+eTextRender* eRenderManager::TextRender() { return m_textRender.get(); }
+ePBRRender* eRenderManager::PBRRender(){ return m_pbrRender.get(); }
 
 eRenderManager::eRenderManager()
 {
@@ -91,9 +93,12 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 											   texManager.Find("Tatlas2"),
 											   folderPath + "ParticleVertexShader.glsl",
 											   folderPath + "ParticleFragmentShader.glsl"));
-
+	//Lines
 	m_linesRender.reset(new eLinesRender(folderPath + "SkyBoxVertexShader.glsl",
 										 folderPath + "StencilFragmentShader.glsl"));
 
-	//m_textRender.reset(new eTextRender(folderPath + "TextVertex.glsl", folderPath + "TextFragment.glsl"));
+	//Text
+	m_textRender.reset(new eTextRender(folderPath + "TextVertex.glsl", folderPath + "TextFragment.glsl"));
+	//PBR
+	m_pbrRender.reset(new ePBRRender(folderPath + "VertexShaderCode.glsl", folderPath + "PBRFragmentShader.glsl"));
 }

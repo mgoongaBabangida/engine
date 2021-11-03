@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <optional>
 
 #include <glm\glm\glm.hpp>
 #include <glm\glm\glm.hpp>
@@ -92,6 +93,9 @@ public:
 	virtual void Draw() = 0;
   virtual size_t GetVertexCount() const = 0;
   virtual std::vector<const Texture*> GetTextures() const = 0;
+	virtual bool HasMaterial() const { return false; }
+	virtual void SetMaterial(const Material&) {}
+	virtual std::optional<Material> GetMaterial() const { return std::nullopt; }
 };
 
 //----------------------------------------------------------------------------------------------
@@ -99,6 +103,7 @@ class IModel
 {
 public:
 	virtual ~IModel() = default;
+
 	virtual void						          Draw()					= 0;
 	virtual std::vector<glm::vec3>		GetPositions()	const	= 0;
 	virtual std::vector<unsigned int>	GetIndeces()	const	= 0;

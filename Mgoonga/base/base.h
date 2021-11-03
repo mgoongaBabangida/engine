@@ -23,13 +23,20 @@ struct Texture;
 //-------------------------------------------------------
 struct Material
 {
+	Material() = default;
+	~Material() noexcept = default;
+
 	glm::vec3 ambient;
-	glm::vec3 diffuse;
+	glm::vec3 diffuse; // or albedo
 	glm::vec3 specular;
 	float     shininess;
+
+	float     metallic;
+	float     roughness;
+	float     ao = 1.0f;
 };
 
-enum class eLightType {POINT, DIRECTION, SPOT};
+enum class eLightType { POINT, DIRECTION, SPOT};
 
 //-------------------------------------------------------
 struct Light
