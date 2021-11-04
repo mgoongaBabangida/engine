@@ -140,8 +140,8 @@ void eMainContext::InitializeExternalGui()
   externalGui[2]->Add(BUTTON, "Play current animations ", (void*)&play_callback);
   externalGui[2]->Add(BUTTON, "Stop current animations ", (void*)&stop_callback);
 
-  externalGui[0]->Add(SLIDER_FLOAT, "PBR light dist", (void*)&pipeline.LightPBRDebugDist());
-  externalGui[0]->Add(SLIDER_FLOAT, "PBR light intensity", (void*)&pipeline.LightPBRDebugIntensity());
+  externalGui[0]->Add(SLIDER_FLOAT, "PBR light dist", (void*)&pipeline.MaterialMetalness());
+  externalGui[0]->Add(SLIDER_FLOAT, "PBR light intensity", (void*)&pipeline.MaterialRoughness());
 
   m_focused = m_objects[4];
   OnFocusedChanged();

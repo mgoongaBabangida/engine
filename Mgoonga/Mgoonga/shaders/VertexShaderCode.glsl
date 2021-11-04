@@ -23,6 +23,7 @@ out vec2 Texcoord;
 out vec4 LightSpacePos;
 out mat3 TBN;
 out vec4 debug;
+out vec3 Normal;
 
 void main()
 {
@@ -49,7 +50,8 @@ void main()
 
   theNormal		= normalize(mat3(modelToWorldMatrix)* normal);
   thePosition	= vec3(modelToWorldMatrix * v);// vec4(position ,1.0)
-
+  Normal = normal;
+  
   vec3 T = normalize(vec3(modelToWorldMatrix * vec4(tangent,   0.0)));
   vec3 B = normalize(vec3(modelToWorldMatrix * vec4(bitangent, 0.0)));
   vec3 N = normalize(vec3(modelToWorldMatrix * vec4(normal,    0.0)));

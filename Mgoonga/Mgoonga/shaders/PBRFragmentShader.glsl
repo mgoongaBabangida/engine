@@ -5,6 +5,7 @@ out vec4 FragColor;
 in vec2 Texcoords;
 in vec3 thePosition; //WorldPos
 in vec3 theNormal;//theNormal
+in vec3 Normal;
 
 // material parameters
 uniform vec3  albedo;
@@ -13,8 +14,8 @@ uniform float roughness;
 uniform float ao;
 
 // lights
-uniform vec3 lightPositions[4];
-uniform vec3 lightColors[4];
+uniform vec3 lightPositions[1];
+uniform vec3 lightColors[1];
 
 uniform vec3 camPos;
 
@@ -27,7 +28,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0);
 
 void main()
 {		
-    vec3 N = normalize(theNormal);
+    vec3 N = normalize(Normal);
     vec3 V = normalize(camPos - thePosition);
 
     vec3 F0 = vec3(0.04); 

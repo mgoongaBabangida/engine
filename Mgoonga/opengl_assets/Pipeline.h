@@ -48,8 +48,8 @@ public:
   bool& GetSkyBoxOnRef() { return skybox; }
   float& GetBlurCoefRef() { return blur_coef; }
 
-	float& LightPBRDebugDist() { return lightPBRDebugDist; }
-	float& LightPBRDebugIntensity() { return lghtPBRDebugIntensity; }
+	float& MaterialMetalness() { return material.metallic; }
+	float& MaterialRoughness() { return material.roughness; }
 
 	bool& GetDebugWhite() { return debug_white; }
 	bool& GetDebugTexCoords() { return debug_texcoords; }
@@ -79,7 +79,7 @@ protected:
 	void			RenderParticles(const Camera&);
 	void			RenderBlur(const Camera&);
 	void			RenderGui(std::vector<GUI>&, const Camera&);
-	void			RenderPBR(const Camera&);
+	void			RenderPBR(const Camera&, const Light& _light);
 
 	void      PreparePBRDemo();
 	std::vector<shObject> spheres;
@@ -104,8 +104,8 @@ protected:
 	float			farPlane	  = 0.0f;
 	float			waterHeight = 2.0f;
   float     blur_coef   = 0.7f;
-	float     lightPBRDebugDist = 10.0f;
-	float     lghtPBRDebugIntensity = 150.0f;
+
+	Material material; //debug material
 
 	std::reference_wrapper<std::vector<shObject>>	m_objects;
 	std::reference_wrapper <dbb::CameraRay>				camRay;

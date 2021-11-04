@@ -12,7 +12,7 @@ public:
   ePBRRender(const std::string& vS, const std::string& fS);
 
   void Render(const Camera& camera,
-              const std::vector<Light>& light,
+              const Light& _light,
               std::vector<shObject>& objects);
 
 protected:

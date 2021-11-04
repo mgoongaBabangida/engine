@@ -31,8 +31,8 @@ struct Material
 	glm::vec3 specular;
 	float     shininess;
 
-	float     metallic;
-	float     roughness;
+	float     metallic = 0.0f;
+	float     roughness = 0.0f;
 	float     ao = 1.0f;
 };
 
