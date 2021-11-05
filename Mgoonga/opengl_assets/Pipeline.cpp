@@ -475,7 +475,7 @@ void ePipeline::PreparePBRDemo()
   shObject obj = std::make_shared<eObject>();
   obj->SetModel(new SphereTexturedModel(mesh));
   obj->SetTransform(new Transform);
-	obj->GetTransform()->setTranslation(glm::vec3((col - (nrColumns / 2)) * spacing, (row - (nrRows / 2)) * spacing, 0.0f));
+	//obj->GetTransform()->setTranslation(glm::vec3((col - (nrColumns / 2)) * spacing, (row - (nrRows / 2)) * spacing, 0.0f));
 	spheres.clear();
   spheres.push_back(obj);
 

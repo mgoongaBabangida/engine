@@ -379,6 +379,7 @@ void eMainContext::InitializeModels()
 	nanosuit->GetRigidBody()->SetObject(nanosuit.get());
 	nanosuit->GetCollider()->CalculateExtremDots(nanosuit->GetModel()->GetPositions());
 	nanosuit->GetTransform()->setTranslation(vec3(0.0f, 2.0f, 0.0f));
+  nanosuit->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
 	nanosuit->GetTransform()->setScale(vec3(0.12f, 0.12f, 0.12f));
 	m_objects.push_back(nanosuit);
 
@@ -438,6 +439,7 @@ void eMainContext::InitializeModels()
   zombie->GetRigidBody()->SetObject(zombie.get());
   zombie->GetCollider()->CalculateExtremDots(zombie->GetModel()->GetPositions());
   zombie->GetTransform()->setTranslation(vec3(1.0f, 2.0f, 0.0f));
+  zombie->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
   zombie->GetTransform()->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
   zombie->SetRigger(new Rigger((Model*)modelManager->Find("zombie").get()));
   m_objects.push_back(zombie);

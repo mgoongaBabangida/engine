@@ -1,6 +1,10 @@
 #include "PBRRender.h"
 
 #include <math/Camera.h>
+#include <glm\glm\gtc\matrix_transform.hpp>
+#include <glm\glm\gtx\transform.hpp>
+#include <glm\glm\gtc\quaternion.hpp>
+#include <glm\glm\gtx\quaternion.hpp>
 
 //-------------------------------------------------------------------
 ePBRRender::ePBRRender(const std::string& vS, const std::string& fS)
@@ -50,7 +54,11 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
 
   for (auto& object : objects)
   {
-    glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * object->GetTransform()->getModelMatrix();
+    glm::quat rot = object->GetTransform()->getRotation();
+    object->GetTransform()->setRotation(glm::quat(0.0f, 0.0f, 1.0f, 0.0f) * object->GetTransform()->getRotation());
+    glm::mat4 modelToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix() * object->GetTransform()->getModelMatrix();
+    object->GetTransform()->setRotation(rot);
+
     glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
     glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &object->GetTransform()->getModelMatrix()[0][0]);
   

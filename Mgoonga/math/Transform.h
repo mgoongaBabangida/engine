@@ -20,7 +20,7 @@ public:
 	Transform(): 
 		m_translation(0.0f, 0.0f, 0.0f)
 		, m_scale(1.0f, 1.0f, 1.0f)
-		, q_rotation(0.0f, 0.0f, 1.0f, 0.0f)
+		, q_rotation(1.0f, 0.0f, 0.0f, 0.0f)
 		, scaleIncrement(m_scale.x * 0.015f)
 		{ UpdateModelMatrix();}
 	
@@ -55,7 +55,7 @@ protected:
 
 	glm::vec3			m_translation;
 	glm::vec3			m_scale			= glm::vec3(1.0f, 1.0f, 1.0f);
-	glm::quat			q_rotation		= glm::quat(0.0f, 0.0f, 0.0f, 1.0f);
+	glm::quat			q_rotation;
 	glm::vec3			forward			= glm::vec3(0.0f, 0.0f, 1.0f);
 	glm::vec3			Up				= glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::mat4			totalTransform;
