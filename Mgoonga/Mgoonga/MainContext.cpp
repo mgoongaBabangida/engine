@@ -459,6 +459,21 @@ void eMainContext::InitializeModels()
 	/*shObject boat = shObject(new eObject(modelManager.Find("boat").get()));
 	boat->GetTransform()->setScale(vec3(0.0001f, 0.0001f, 0.0001f));
 	m_objects.push_back(boat);*/
+
+  std::vector<const Texture*> textures {texManager->Find("pbr1_basecolor"),
+                                  texManager->Find("pbr1_metallic"),
+                                  texManager->Find("pbr1_normal"),
+                                  texManager->Find("pbr1_roughness") };
+  Material material;
+  material.diffuse = glm::vec3(0.5f, 0.0f, 0.0f);
+  material.ao = 1.0f;
+  shObject obj = std::make_shared<eObject>();
+  SphereTexturedMesh* mesh = new SphereTexturedMesh();
+  mesh->SetMaterial(material);
+  obj->SetModel(new SphereTexturedModel(mesh, textures));
+  obj->SetTransform(new Transform);
+  obj->GetTransform()->setTranslation(glm::vec3(-2.0f,3.5f,1.5f));
+  m_pbr_objs.push_back(obj);
 }
 
 //-------------------------------------------------------------------------
@@ -496,5 +511,5 @@ void eMainContext::PaintGL()
     focused_output = m_focused ? std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{ m_focused })
                                : std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{});
 
-	pipeline.RenderFrame(m_camera, m_light, guis, *focused_output, flags); //better design impl new standard
+	pipeline.RenderFrame(m_camera, m_light, guis, *focused_output, flags, m_pbr_objs); //better design impl new standard
 }

@@ -156,12 +156,16 @@ std::optional<Material> SphereTexturedMesh::GetMaterial() const
 
 void SphereTexturedModel::Draw()
 {
-  if (m_texture)
+  if (m_textures.size() >= 4)
   {
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, m_texture->id);
+    glBindTexture(GL_TEXTURE_2D, m_textures[0]->id);
     glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, m_texture->id);
+    glBindTexture(GL_TEXTURE_2D, m_textures[1]->id);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, m_textures[2]->id);
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, m_textures[3]->id);
   }
   m_mesh->Draw();
 }

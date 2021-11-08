@@ -24,7 +24,7 @@ public:
 	ePipeline(std::vector<shObject>&, dbb::CameraRay&, uint32_t width, uint32_t height);
 	~ePipeline();
 
-	void			RenderFrame(Camera&, const Light&, std::vector<GUI>&, std::vector<shObject>, std::vector<eObject*>&); //gui should be const latter ?, and camera prob
+	void			RenderFrame(Camera&, const Light&, std::vector<GUI>&, std::vector<shObject>, std::vector<eObject*>&, std::vector<shObject> = std::vector<shObject>{}); //gui should be const latter ?, and camera prob
 	
 	void			Initialize();
 	void			InitializeBuffers(bool _needsShadowCubeMap = false);
@@ -50,6 +50,7 @@ public:
 
 	float& MaterialMetalness() { return material.metallic; }
 	float& MaterialRoughness() { return material.roughness; }
+	Material material; //debug
 
 	bool& GetDebugWhite() { return debug_white; }
 	bool& GetDebugTexCoords() { return debug_texcoords; }
@@ -79,10 +80,7 @@ protected:
 	void			RenderParticles(const Camera&);
 	void			RenderBlur(const Camera&);
 	void			RenderGui(std::vector<GUI>&, const Camera&);
-	void			RenderPBR(const Camera&, const Light& _light);
-
-	void      PreparePBRDemo();
-	std::vector<shObject> spheres;
+	void			RenderPBR(const Camera&, const Light& _light, std::vector<shObject> _objs);
 
 	bool			mousepress	= true; //to draw framed objects
 	bool			mts			= true;
@@ -104,8 +102,6 @@ protected:
 	float			farPlane	  = 0.0f;
 	float			waterHeight = 2.0f;
   float     blur_coef   = 0.7f;
-
-	Material material; //debug material
 
 	std::reference_wrapper<std::vector<shObject>>	m_objects;
 	std::reference_wrapper <dbb::CameraRay>				camRay;

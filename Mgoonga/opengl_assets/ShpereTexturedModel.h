@@ -32,7 +32,9 @@ protected:
 class DLL_OPENGL_ASSETS SphereTexturedModel : public IModel
   {
   public:
-    SphereTexturedModel(SphereTexturedMesh* _mesh, Texture* t = nullptr):m_mesh(_mesh), m_texture(t){}
+    SphereTexturedModel(SphereTexturedMesh* _mesh, std::vector<const Texture*> t = std::vector<const Texture*>{})
+      :m_mesh(_mesh), m_textures(t)
+      {}
 
     virtual void						          Draw() override;
     virtual std::vector<glm::vec3>		GetPositions() const override;
@@ -42,8 +44,10 @@ class DLL_OPENGL_ASSETS SphereTexturedModel : public IModel
     virtual std::vector<const IMesh*> GetMeshes() const override { return { m_mesh.get() }; }
     virtual size_t                    GetAnimationCount() const override { return 0; }
     virtual std::vector<const IAnimation*> GetAnimations() const override { return {}; }
-
+    virtual std::vector<const Texture*> GetTexturesModelLevel() const {
+      return m_textures;
+      }
   protected:
-    Texture* m_texture;
+    std::vector<const Texture*> m_textures;
     std::shared_ptr<SphereTexturedMesh> m_mesh;
   };

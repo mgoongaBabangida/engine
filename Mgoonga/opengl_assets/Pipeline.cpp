@@ -39,7 +39,10 @@ ePipeline::ePipeline(std::vector<shObject>& _objs,
   width(_width),
   height(_height),
   renderManager(new eRenderManager)
-{}
+{
+	material.roughness = 0.6f;
+	material.metallic = 0.3f;
+}
 
 ePipeline::~ePipeline()
 {
@@ -76,7 +79,6 @@ void ePipeline::InitializeBuffers(bool _needsShadowCubeMap)
 void ePipeline::InitializeRenders(eModelManager& modelManager, eTextureManager& texManager, const std::string& shadersFolderPath)
 {
 	renderManager->Initialize(modelManager, texManager, shadersFolderPath);
-	PreparePBRDemo(); //temp
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -88,7 +90,12 @@ Texture ePipeline::GetSkyNoiseTexture(const Camera& _camera)
 }
 
 //-----------------------------------------------------------------------------------------------
-void ePipeline::RenderFrame(Camera& _camera, const Light& _light ,std::vector<GUI>& guis, std::vector<shObject> _focused, std::vector<eObject*>& _flags)
+void ePipeline::RenderFrame(Camera& _camera,
+	const Light& _light,
+	std::vector<GUI>& guis,
+	std::vector<shObject> _focused,
+	std::vector<eObject*>& _flags,
+	std::vector<shObject> _pbr_objs)
 {
   /*std::sort(_focused.begin(), _focused.end(), [_camera](const shObject& obj1, const shObject& obj2)
     { return glm::length2(_camera.getPosition() - obj1->GetTransform()->getTranslation())
@@ -149,7 +156,7 @@ void ePipeline::RenderFrame(Camera& _camera, const Light& _light ,std::vector<GU
 
 	RenderMain(_camera, _light, not_outlined);
 
-	RenderPBR(_camera, _light);
+	RenderPBR(_camera, _light, _pbr_objs);
 
 	if (flags) { RenderFlags(_camera, _light, _flags); }
 
@@ -433,73 +440,13 @@ void ePipeline::RenderGui(std::vector<GUI>& guis, const Camera& _camera)
 #include "ShpereTexturedModel.h"
 
 //------------------------------------------------
-void ePipeline::RenderPBR(const Camera& _camera, const Light& _light)
+void ePipeline::RenderPBR(const Camera& _camera, const Light& _light, std::vector<shObject> _objs)
 {
-  //lights
-  /*float dist = lightPBRDebugDist;
-  float lghtIntensity = lghtPBRDebugIntensity;
-  std::vector<Light> lights;
-  Light light1, light2, light3, light4;
-  light1.light_position = glm::vec4(-dist, dist, dist, 1.0);
-  light2.light_position = glm::vec4(dist, dist, dist, 1.0f);
-  light3.light_position = glm::vec4(-dist, -dist, dist, 1.0f);
-  light4.light_position = glm::vec4(dist, -dist, dist, 1.0f);
-  light1.diffuse = glm::vec3(lghtIntensity, lghtIntensity, lghtIntensity);
-  light2.diffuse = glm::vec3(lghtIntensity, lghtIntensity, lghtIntensity);
-  light3.diffuse = glm::vec3(lghtIntensity, lghtIntensity, lghtIntensity);
-  light4.diffuse = glm::vec3(lghtIntensity, lghtIntensity, lghtIntensity);
-  lights.push_back(light1);
-  lights.push_back(light2);
-  lights.push_back(light3);
-  lights.push_back(light4);*/
+	material.ao = 0.8f;
+	material.diffuse = glm::vec3(0.5f, 0.0f, 0.0f);
+	material.shininess = 0.5f;
+	if (auto* mesh = _objs[0]->GetModel()->GetMeshes()[0]; mesh && mesh->HasMaterial())
+		const_cast<SphereTexturedMesh*>(dynamic_cast<const SphereTexturedMesh*>(mesh))->SetMaterial(material);
 
-	PreparePBRDemo(); //!
-	GetRenderManager().PBRRender()->Render(_camera, _light, spheres);
-}
-
-void ePipeline::PreparePBRDemo()
-{
-  int nrRows = 7;
-  int nrColumns = 7;
-  float spacing = 2.5;
-
-	int col = 4;
-	int row = 2;
-  material.diffuse = glm::vec3(0.5f, 0.0f, 0.0f);
-  material.ao = 1.0f;
-  //material.metallic = (float)4 / (float)nrRows;
-  //material.roughness = glm::clamp((float)4 / (float)nrColumns, 0.05f, 1.0f);
-  SphereTexturedMesh* mesh = new SphereTexturedMesh();
-  mesh->SetMaterial(material);
-
-  shObject obj = std::make_shared<eObject>();
-  obj->SetModel(new SphereTexturedModel(mesh));
-  obj->SetTransform(new Transform);
-	//obj->GetTransform()->setTranslation(glm::vec3((col - (nrColumns / 2)) * spacing, (row - (nrRows / 2)) * spacing, 0.0f));
-	spheres.clear();
-  spheres.push_back(obj);
-
-  // render rows * column number of spheres with varying metallic/roughness values scaled by rows and columns respectively
-  //for (int row = 0; row < nrRows; ++row)
-  //  {
-  //  Material material;
-  //  material.diffuse = glm::vec3(0.5f, 0.0f, 0.0f);
-  //  material.ao = 1.0f;
-  //  material.metallic = (float)row / (float)nrRows;
-
-  //  for (int col = 0; col < nrColumns; ++col)
-  //    {
-  //    // we clamp the roughness to 0.05 - 1.0 as perfectly smooth surfaces (roughness of 0.0) tend to look a bit off
-  //    // on direct lighting.
-  //    material.roughness = glm::clamp((float)col / (float)nrColumns, 0.05f, 1.0f);
-  //    SphereTexturedMesh* mesh = new SphereTexturedMesh();
-  //    mesh->SetMaterial(material);
-
-  //    shObject obj = std::make_shared<eObject>();
-  //    obj->SetModel(new SphereTexturedModel(mesh));
-  //    obj->SetTransform(new Transform);
-  //    obj->GetTransform()->setTranslation(glm::vec3((col - (nrColumns / 2)) * spacing, (row - (nrRows / 2)) * spacing, 0.0f));
-  //    spheres.push_back(obj);
-  //    }
-  //  }
+	GetRenderManager().PBRRender()->Render(_camera, _light, _objs);
 }

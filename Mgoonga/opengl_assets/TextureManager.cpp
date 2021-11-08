@@ -146,6 +146,16 @@ void eTextureManager::LoadAllTextures()
 	text.loadTextureFromFile(folderPath + "atlas2.png");
 	text.setNumRows(4);
 	m_Textures.insert(std::pair<std::string, Texture>("Tatlas2", text));
+
+	//pbr sphere
+  text.loadTextureFromFile(folderPath + "sphere_pbr1/rustediron2_basecolor.png");
+  m_Textures.insert(std::pair<std::string, Texture>("pbr1_basecolor", text));
+  text.loadTextureFromFile(folderPath + "sphere_pbr1/rustediron2_metallic.png");
+  m_Textures.insert(std::pair<std::string, Texture>("pbr1_metallic", text));
+  text.loadTextureFromFile(folderPath + "sphere_pbr1/rustediron2_normal.png");
+  m_Textures.insert(std::pair<std::string, Texture>("pbr1_normal", text));
+  text.loadTextureFromFile(folderPath + "sphere_pbr1/rustediron2_roughness.png");
+  m_Textures.insert(std::pair<std::string, Texture>("pbr1_roughness", text));
 }
 
 Texture* eTextureManager::Find(const std::string& texture_name)
@@ -164,3 +174,4 @@ void eTextureManager::AddTextureBox(const Texture& _texture, const std::string& 
 	text.makeCubemap(&(const_cast<Texture&>(_texture)));
 	m_Textures.insert(std::pair<std::string, Texture>(_name, text));
 }
+

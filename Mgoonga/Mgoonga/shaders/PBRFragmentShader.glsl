@@ -2,16 +2,21 @@
 
 out vec4 FragColor;
 
-in vec2 Texcoords;
+in vec2 Texcoord;
 in vec3 thePosition; //WorldPos
 in vec3 theNormal;//theNormal
-in vec3 Normal;
 
 // material parameters
 uniform vec3  albedo;
 uniform float metallic;
 uniform float roughness;
 uniform float ao;
+uniform bool textured = true;
+
+layout(binding=2) uniform sampler2D albedoMap;
+layout(binding=3) uniform sampler2D normalMap;
+layout(binding=4) uniform sampler2D metallicMap;
+layout(binding=5) uniform sampler2D roughnessMap;
 
 // lights
 uniform vec3 lightPositions[1];
@@ -27,12 +32,34 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 vec3 fresnelSchlick(float cosTheta, vec3 F0);
 
 void main()
-{		
-    vec3 N = normalize(theNormal);
-    vec3 V = normalize(camPos - thePosition);
+{	
+   vec3 albedo_f;
+   vec3 theNormal_f;
+   float metallic_f;
+   float roughness_f;
+   if(textured)	
+   {
+    albedo_f    = pow(texture(albedoMap, Texcoord).rgb, vec3(2.2));
+    //theNormal_f = texture(normalMap, Texcoord).rgb;
+	// Transform normal vector to range [-1,1]
+	//theNormal_f = normalize(theNormal_f * 2.0 - 1.0);
+	theNormal_f = theNormal;
+    metallic_f  = texture(metallicMap, Texcoord).r;
+    roughness_f = texture(roughnessMap, Texcoord).r;
+   }
+   else
+   {
+   albedo_f = albedo;
+   theNormal_f = theNormal;
+   metallic_f = metallic;
+   roughness_f = roughness;
+   }
+   
+    vec3 N = normalize(theNormal_f);
+    vec3 V = normalize(thePosition - camPos);
 
     vec3 F0 = vec3(0.04); 
-    F0 = mix(F0, albedo, metallic);
+    F0 = mix(F0, albedo_f, metallic_f);
 	           
     // reflectance equation
     vec3 Lo = vec3(0.0);
@@ -46,13 +73,13 @@ void main()
         vec3 radiance     = lightColors[i] * attenuation;        
         
         // cook-torrance brdf
-        float NDF = DistributionGGX(N, H, roughness);        
-        float G   = GeometrySmith(N, V, L, roughness);      
+        float NDF = DistributionGGX(N, H, roughness_f);        
+        float G   = GeometrySmith(N, V, L, roughness_f);      
         vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);       
         
         vec3 kS = F;
         vec3 kD = vec3(1.0) - kS;
-        kD *= 1.0 - metallic;	  
+        kD *= 1.0 - metallic_f;	  
         
         vec3 numerator    = NDF * G * F;
         float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
@@ -60,10 +87,10 @@ void main()
             
         // add to outgoing radiance Lo
         float NdotL = max(dot(N, L), 0.0);                
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL; 
+        Lo += (kD * albedo_f / PI + specular) * radiance * NdotL; 
     }   
   
-    vec3 ambient = vec3(0.03) * albedo * ao;
+    vec3 ambient = vec3(0.03) * albedo_f * ao;
     vec3 color = ambient + Lo;
 	
     color = color / (color + vec3(1.0));

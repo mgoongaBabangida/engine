@@ -51,6 +51,7 @@ protected:
 
   shObject							                 m_focused;
   std::vector<shObject>				           m_objects;
+  std::vector<shObject>                  m_pbr_objs;
   std::shared_ptr<std::vector<shObject>> m_framed;
   Light								                   m_light;
 
