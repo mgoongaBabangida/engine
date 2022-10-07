@@ -2,11 +2,10 @@
 
 #include <base/interfaces.h>
 
+#include <game_assets/BaseScript.h>
 #include <game_assets/ShipScript.h>
 #include <math/BoxCollider.h>
 #include <math/RigidBdy.h>
-
-#include "BaseScript.h"
 
 //-------------------------------------------------------------------------------------------
 class eShip : public eObject

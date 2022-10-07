@@ -1,5 +1,6 @@
 #ifndef SHIP_SCRIPT_H
 #define SHIP_SCRIPT_H
+#include "game_assets.h"
 
 #include <base/interfaces.h>
 
@@ -8,7 +9,6 @@
 
 #include <math/Camera.h>
 #include <math/CameraRay.h>
-#include "BaseScript.h"
 
 class eObject;
 struct Flag;
@@ -17,7 +17,7 @@ class RemSnd;
 class eRenderManager;
 
 //----------------------------------------------------------------------------------
-class eShipScript : public IScript
+class DLL_GAME_ASSETS eShipScript : public IScript
 {
 public:
 	eShipScript(Texture*		flag_texture,

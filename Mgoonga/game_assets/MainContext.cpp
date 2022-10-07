@@ -498,7 +498,8 @@ void eMainContext::PaintGL()
 		{
 			object->GetScript()->Update(m_objects);
 			eShipScript* script = dynamic_cast<eShipScript*>(object->GetScript());
-			if(script) flags.push_back(script->GetChildrenObjects()[0]);
+			if(script)
+        flags.push_back(script->GetChildrenObjects()[0]);
 		}
 	}
 

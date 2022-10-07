@@ -1,6 +1,8 @@
 #ifndef MAIN_CONTEXT_H
 #define MAIN_CONTEXT_H
 
+#include "game_assets.h"
+
 #include <base/base.h>
 
 #include <math/Camera.h>
@@ -15,7 +17,7 @@
 class IWindowImGui;
 
 //-------------------------------------------------------------------------------
-class eMainContext : public eMainContextBase
+class DLL_GAME_ASSETS eMainContext : public eMainContextBase
 {
 public:
 	eMainContext(eInputController*,
@@ -27,12 +29,12 @@ public:
 	virtual ~eMainContext() {}
 	
 	virtual void			InitializeGL()									override;
-	virtual void			PaintGL()										override;
+	virtual void			PaintGL()										    override;
 
-	virtual bool			OnMouseMove(uint32_t x, uint32_t y)				override;
-	virtual bool			OnKeyPress(uint32_t asci)						override;
+	virtual bool			OnMouseMove(uint32_t x, uint32_t y)				      override;
+	virtual bool			OnKeyPress(uint32_t asci)						            override;
 	virtual bool			OnMousePress(uint32_t x, uint32_t y, bool left) override;
-	virtual bool			OnMouseRelease()								override;
+	virtual bool			OnMouseRelease()								                override;
 
   void OnFocusedChanged();
 

@@ -1,6 +1,8 @@
 #ifndef BASE_SCRIPT_H
 #define BASE_SCRIPT_H
 
+#include "game_assets.h"
+
 #include <base/interfaces.h>
 #include <vector>
 #include <glm\glm\glm.hpp>
@@ -10,7 +12,7 @@ class eObject;
 struct Texture;
 
 //-------------------------------------------------------------------
-class eBaseScript : public IScript
+class DLL_GAME_ASSETS eBaseScript : public IScript
 {
 public:
 	eBaseScript(Texture* flag_texture);
