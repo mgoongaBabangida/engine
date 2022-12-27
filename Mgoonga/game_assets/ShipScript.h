@@ -35,7 +35,7 @@ public:
 	virtual bool	OnMousePress(uint32_t x, uint32_t y, bool left)		override;
 
 	virtual void	Update(std::vector<std::shared_ptr<eObject> > objs) override;
-	virtual std::vector<eObject*>			GetChildrenObjects() override;
+	virtual std::vector<shObject>			GetChildrenObjects() override;
 
 	void			SetDestination(glm::vec3 dst) { destination = dst; }
 	
@@ -51,7 +51,7 @@ protected:
 
   Texture* flag_tex;
   glm::vec3		  flag_scale = { 0.01f, 0.01f ,0.01f };
-  std::unique_ptr<eObject> flag;
+  std::shared_ptr<eObject> flag;
 
 	std::reference_wrapper<eRenderManager> render_manager;
 	std::reference_wrapper<Camera> camera;

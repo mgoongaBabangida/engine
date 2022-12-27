@@ -48,7 +48,7 @@ protected:
 	std::vector<std::shared_ptr<eShip>>	ships;
 	std::vector<std::shared_ptr<eBase>>	bases;
 	std::shared_ptr<eShip>				      focused;
-	std::vector<shObject>				        objects;
+	std::vector<shObject>				        m_objects;
 	std::unique_ptr<TerrainModel>		    terrainModel;
 	std::shared_ptr<eTerrain>			      terrain;
 	

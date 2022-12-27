@@ -30,12 +30,10 @@ void	ePipeline::AddHex(glm::vec3 _v) { renderManager->AddHex(_v); }
 void	ePipeline::SetHexRadius(float _r) { renderManager->SetHexRadius(_r); }
 
 //-------------------------------------------------------------------------------------------
-ePipeline::ePipeline(std::vector<shObject>& _objs,
-                     dbb::CameraRay& _cam_ray,
+ePipeline::ePipeline(dbb::CameraRay& _cam_ray,
                      uint32_t				_width,
                      uint32_t				_height)
-: m_objects(_objs),
-  camRay(_cam_ray),
+: camRay(_cam_ray),
   width(_width),
   height(_height),
   renderManager(new eRenderManager)
@@ -90,21 +88,24 @@ Texture ePipeline::GetSkyNoiseTexture(const Camera& _camera)
 }
 
 //-----------------------------------------------------------------------------------------------
-void ePipeline::RenderFrame(Camera& _camera,
+void ePipeline::RenderFrame(std::map<RenderType, std::vector<shObject>> _objects,
+	Camera& _camera,
 	const Light& _light,
-	std::vector<GUI>& guis,
-	std::vector<shObject> _focused,
-	std::vector<eObject*>& _flags,
-	std::vector<shObject> _pbr_objs)
+	std::vector<GUI>& guis)
 {
-  /*std::sort(_focused.begin(), _focused.end(), [_camera](const shObject& obj1, const shObject& obj2)
+  /*std::sort(focused.begin(), focused.end(), [_camera](const shObject& obj1, const shObject& obj2)
     { return glm::length2(_camera.getPosition() - obj1->GetTransform()->getTranslation())
     > glm::length2(_camera.getPosition() - obj2->GetTransform()->getTranslation()); });*/
 	  
+	std::vector<shObject> objects = _objects.find(RenderType::MAIN)->second;
+	std::vector<shObject> focused = _objects.find(RenderType::OUTLINED)->second;
+	std::vector<shObject> pbr_objs = _objects.find(RenderType::PBR)->second;
+	std::vector<shObject> flags = _objects.find(RenderType::FLAG)->second;
+
 	//1 Shadow Render Pass
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SHADOW);
 
-	if (shadows) { RenderShadows(_camera, _light, m_objects); }
+	if (shadows) { RenderShadows(_camera, _light, objects); }
 
 	if (_light.type == eLightType::DIRECTION)
 		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW, GL_TEXTURE1);
@@ -125,10 +126,10 @@ void ePipeline::RenderFrame(Camera& _camera,
 
 	if (water)
 	{
-		RenderReflection(_camera, _light, m_objects);
+		RenderReflection(_camera, _light, objects);
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_REFRACTION);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		RenderRefraction(_camera, _light, m_objects);
+		RenderRefraction(_camera, _light, objects);
 	}
   glDisable(GL_CLIP_DISTANCE0);
 
@@ -141,7 +142,7 @@ void ePipeline::RenderFrame(Camera& _camera,
 	//4. Rendering to main FBO with stencil
 	if (focuse)
 	{
-	  for (auto& obj : _focused)
+	  for (auto obj : focused)
 	  {
 	    RenderFocused(_camera, _light, std::vector<shObject>{ obj });
 	    RenderOutlineFocused(_camera, _light, std::vector<shObject>{ obj });
@@ -149,16 +150,16 @@ void ePipeline::RenderFrame(Camera& _camera,
 	}
 
 	std::vector<shObject> not_outlined;
-	std::set_difference(m_objects.get().begin(), m_objects.get().end(),
-		                  _focused.begin(), _focused.end(),
+	std::set_difference(objects.begin(), objects.end(),
+		                  focused.begin(), focused.end(),
 		                  std::back_inserter(not_outlined),
 		                  [](auto& a, auto& b) { return &a < &b; });
 
 	RenderMain(_camera, _light, not_outlined);
 
-	RenderPBR(_camera, _light, _pbr_objs);
+	RenderPBR(_camera, _light, pbr_objs);
 
-	if (flags) { RenderFlags(_camera, _light, _flags); }
+	if (flags_on) { RenderFlags(_camera, _light, flags); }
 
 	mts ? eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS)
 		: eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
@@ -186,7 +187,7 @@ void ePipeline::RenderFrame(Camera& _camera,
 	
 	if (draw_bounding_boxes)
 	{
-		for (auto object : m_objects.get())
+		for (auto object : objects)
 		{
 			std::vector<glm::vec3> extrems = object->GetCollider()->GetExtrems(*object->GetTransform());
 			std::vector<GLuint> indices{ 0,1,1,2,2,3,3,0,4,5,5,6,6,7,7,4,0,4,1,5,2,6,3,7 };
@@ -307,14 +308,14 @@ void ePipeline::RenderReflection(Camera& _camera, const Light& _light, std::vect
 	_camera.setPosition(glm::vec3(tem_cam.getPosition().x, 2 * (tem_cam.getPosition().y - waterHeight), tem_cam.getPosition().z));
 	_camera.setDirection(glm::reflect(_camera.getDirection(), glm::vec3(0, 1, 0)));  //water normal
 
-	renderManager->MainRender()->Render(_camera, _light, m_objects, false, false);
+	renderManager->MainRender()->Render(_camera, _light, _objects, false, false);
 	_camera = tem_cam;
 }
 
 void ePipeline::RenderRefraction(Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
 {
 	renderManager->MainRender()->SetClipPlane(waterHeight);
-	renderManager->MainRender()->Render(_camera, _light, m_objects, false, false);
+	renderManager->MainRender()->Render(_camera, _light, _objects, false, false);
 	renderManager->MainRender()->SetClipPlane(10);
 
 	//glDisable(GL_CLIP_DISTANCE0);
@@ -337,13 +338,13 @@ void ePipeline::StencilFuncDefault()
 	glStencilMask(0xFF);
 }
 
-void ePipeline::RenderFocused(const Camera& _camera, const Light& _light, std::vector<shObject>& _focused)
+void ePipeline::RenderFocused(const Camera& _camera, const Light& _light, std::vector<shObject>& focused)
 {
 	//4. Rendering to main FBO with stencil
 	StencilFuncDefault();
-	if(!_focused.empty())
+	if(!focused.empty())
 	{
-		renderManager->MainRender()->Render(_camera, _light, _focused, false, false);
+		renderManager->MainRender()->Render(_camera, _light, focused, false, false);
 	}
 }
 
@@ -354,22 +355,22 @@ void ePipeline::RenderMain(const Camera& _camera, const Light& _light, std::vect
 	glEnable(GL_STENCIL_TEST);
 }
 
-void ePipeline::RenderOutlineFocused(const Camera& _camera, const Light& _light, std::vector<shObject>& _focused)
+void ePipeline::RenderOutlineFocused(const Camera& _camera, const Light& _light, std::vector<shObject>& focused)
 {
 	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 	glStencilMask(0x00);
 	//5. Rendering Stencil Outlineing
-	if(!_focused.empty())
+	if(!focused.empty())
 	{
-		renderManager->OutlineRender()->Render(_camera, _light, std::vector<shObject> {_focused });
+		renderManager->OutlineRender()->Render(_camera, _light, std::vector<shObject> {focused });
 	}
 	StencilFuncDefault();
 	glClear(GL_STENCIL_BUFFER_BIT);
 }
 
-void ePipeline::RenderFlags(const Camera& _camera, const Light& _light, std::vector<eObject*>& _flags)
+void ePipeline::RenderFlags(const Camera& _camera, const Light& _light, std::vector<shObject> flags)
 {
-	renderManager->WaveRender()->Render(_camera, _light, _flags);
+	renderManager->WaveRender()->Render(_camera, _light, flags);
 }
 
 void ePipeline::RenderWater(const Camera& _camera, const Light& _light)
@@ -442,11 +443,14 @@ void ePipeline::RenderGui(std::vector<GUI>& guis, const Camera& _camera)
 //------------------------------------------------
 void ePipeline::RenderPBR(const Camera& _camera, const Light& _light, std::vector<shObject> _objs)
 {
-	material.ao = 0.8f;
-	material.diffuse = glm::vec3(0.5f, 0.0f, 0.0f);
-	material.shininess = 0.5f;
-	if (auto* mesh = _objs[0]->GetModel()->GetMeshes()[0]; mesh && mesh->HasMaterial())
-		const_cast<SphereTexturedMesh*>(dynamic_cast<const SphereTexturedMesh*>(mesh))->SetMaterial(material);
+	if (!_objs.empty())
+	{
+		material.ao = 0.8f;
+		material.diffuse = glm::vec3(0.5f, 0.0f, 0.0f);
+		material.shininess = 0.5f;
+		if (auto* mesh = _objs[0]->GetModel()->GetMeshes()[0]; mesh && mesh->HasMaterial())
+			const_cast<SphereTexturedMesh*>(dynamic_cast<const SphereTexturedMesh*>(mesh))->SetMaterial(material);
 
-	GetRenderManager().PBRRender()->Render(_camera, _light, _objs);
+		GetRenderManager().PBRRender()->Render(_camera, _light, _objs);
+	}
 }

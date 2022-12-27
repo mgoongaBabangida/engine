@@ -29,8 +29,11 @@ eShipScript::eShipScript(Texture*			_flagTexture,
 	move_speed = 1.0f / 240.0f;
 	flag_scale = { 0.03f, 0.03f ,0.03f };
 	flag->SetTransform(new Transform);
+	std::shared_ptr<MyMesh> mesh(new MyMesh());
+	flag->SetModel(new MyModel(mesh, flag_tex));
 }
 
+//------------------------------------------------------------------------------------
 bool eShipScript::OnKeyPress(uint32_t asci)
 {
 	if(asci == ASCII_G)
@@ -99,7 +102,8 @@ void eShipScript::Update(std::vector<std::shared_ptr<eObject> > objs)
 	}
 }
 
-std::vector<eObject*> eShipScript::GetChildrenObjects()
+//----------------------------------------------------------------------------------
+std::vector<shObject> eShipScript::GetChildrenObjects()
 {
   //getting top 4 corners of the model
   glm::vec4 top_corners[4];
@@ -117,9 +121,7 @@ std::vector<eObject*> eShipScript::GetChildrenObjects()
 
   flag->GetTransform()->setTranslation(position);
   flag->GetTransform()->setScale(flag_scale);
-	std::shared_ptr<MyMesh> mesh(new MyMesh());
-	flag->SetModel(new MyModel(mesh, flag_tex));
-  return { std::vector<eObject*> { flag.get()} };
+  return { flag };
 }
 
 //----------------------------------------------------------------------------------

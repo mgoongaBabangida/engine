@@ -59,7 +59,7 @@ eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model,
 //-------------------------------------------------------------------------------------------------
 void eWaveRender::Render(const Camera&		camera, 
 						 const Light&		light,
-						 std::vector<eObject*>	flags)
+						 std::vector<shObject>	flags)
 {
 	glUseProgram(wave_shader.ID);
 

@@ -10,6 +10,8 @@
 
 #include "Texture.h"
 
+#include <map>
+
 class Camera;
 class GUI;
 
@@ -21,10 +23,14 @@ class eTextureManager;
 class DLL_OPENGL_ASSETS ePipeline
 {
 public:
-	ePipeline(std::vector<shObject>&, dbb::CameraRay&, uint32_t width, uint32_t height);
+
+	enum class RenderType
+	{ MAIN, PBR, FLAG, OUTLINED};
+
+	ePipeline(dbb::CameraRay&, uint32_t width, uint32_t height);
 	~ePipeline();
 
-	void			RenderFrame(Camera&, const Light&, std::vector<GUI>&, std::vector<shObject>, std::vector<eObject*>&, std::vector<shObject> = std::vector<shObject>{}); //gui should be const latter ?, and camera prob
+	void			RenderFrame(std::map<RenderType, std::vector<shObject>>, Camera&, const Light&, std::vector<GUI>&); //gui should be const latter ?, and camera prob
 	
 	void			Initialize();
 	void			InitializeBuffers(bool _needsShadowCubeMap = false);
@@ -74,7 +80,7 @@ protected:
 	void			RenderFocused(const Camera&, const Light&, std::vector<shObject>&);
 	void			RenderMain(const Camera&, const Light&, std::vector<shObject>&);
 	void			RenderOutlineFocused(const Camera&, const Light&, std::vector<shObject>&);
-	void			RenderFlags(const Camera&, const Light&, std::vector<eObject*>&);
+	void			RenderFlags(const Camera&, const Light&, std::vector<shObject>);
 	void			RenderWater(const Camera&, const Light&);
 	void			RenderGeometry(const Camera&);	//hex latter other things
 	void			RenderParticles(const Camera&);
@@ -89,7 +95,7 @@ protected:
 	bool			water		= true;
 	bool			sky			= true;
 	bool			focuse		= true;
-	bool			flags		= true;
+	bool			flags_on		= true;
 	bool			geometry	= true;
 	bool			particles	= true;
 	bool			draw_bounding_boxes = false;
@@ -103,7 +109,6 @@ protected:
 	float			waterHeight = 2.0f;
   float     blur_coef   = 0.7f;
 
-	std::reference_wrapper<std::vector<shObject>>	m_objects;
 	std::reference_wrapper <dbb::CameraRay>				camRay;
 	std::unique_ptr<eRenderManager>								renderManager;
 };

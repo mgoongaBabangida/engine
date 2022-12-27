@@ -94,7 +94,7 @@ void eParticleRender::Render(const Camera& _camera)
 		systems.erase(toRemove);
 	}
 }
-   
+
 void eParticleRender::AddParticleSystem(IParticleSystem* sys)
 {
 	systems.push_back(std::shared_ptr<IParticleSystem>(sys));

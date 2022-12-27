@@ -110,7 +110,7 @@ eAmericanTreasureGame::eAmericanTreasureGame(eInputController* _input,
 											 const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
 , camRay(new dbb::CameraRay())
-, pipeline(new ePipeline(objects, *camRay, width, height))
+, pipeline(new ePipeline(*camRay, width, height))
 , camera(new Camera(width, height, nearPlane, farPlane))
 {
 	_externalGui[0]->Add(SLIDER_FLOAT, "Ydir", &light.light_position.y);
@@ -145,7 +145,7 @@ bool eAmericanTreasureGame::OnMousePress(uint32_t x, uint32_t y, bool left)
 
 	camRay->Update(*camera, static_cast<float>(x), static_cast<float>(y), static_cast<float>(width), static_cast<float>(height));
 	camRay->press(static_cast<float>(x), static_cast<float>(y));
-	auto clicked = camRay->calculateIntersaction(objects);
+	auto clicked = camRay->calculateIntersaction(m_objects);
 	
 	if (clicked != nullptr && clicked->Name() == "Terrain")
 		clicked = nullptr;
@@ -291,43 +291,43 @@ void eAmericanTreasureGame::InitializeModels()
 	std::shared_ptr<eBase> wallCube = std::shared_ptr<eBase>(new eBase(modelManager->Find("wall_cube").get(), new eBaseScript(texManager->Find("TPirate_flag0_s"))));
 	wallCube->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
 	wallCube->GetTransform()->setTranslation(vec3(1.3f, 2.2f, 0.7f));
-	objects.push_back(wallCube);
+	m_objects.push_back(wallCube);
 	bases.push_back(wallCube);
 
 	std::shared_ptr<eBase> wallCube2 = std::shared_ptr<eBase>(new eBase(modelManager->Find("wall_cube").get(), new eBaseScript(texManager->Find("TPirate_flag0_s"))));
 	wallCube2->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
 	wallCube2->GetTransform()->setTranslation(vec3(-0.5f, 2.2f, -0.5f));
-	objects.push_back(wallCube2);
+	m_objects.push_back(wallCube2);
 	bases.push_back(wallCube2);
 
 	std::shared_ptr<eBase> brickCube = std::shared_ptr<eBase>(new eBase(modelManager->Find("brick_cube").get(), new eBaseScript(texManager->Find("TSpanishFlag0_s"))));
 	brickCube->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
 	brickCube->GetTransform()->setTranslation(vec3(-1.3f, 2.2f, 3.5f));
-	objects.push_back(brickCube);
+	m_objects.push_back(brickCube);
 	bases.push_back(brickCube);
 
 	std::shared_ptr<eBase> brickCube2 = std::shared_ptr<eBase>(new eBase(modelManager->Find("brick_cube").get(), new eBaseScript(texManager->Find("TSpanishFlag0_s"))));
 	brickCube2->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
 	brickCube2->GetTransform()->setTranslation(vec3(1.5f, 2.2f, 3.5f));
-	objects.push_back(brickCube2);
+	m_objects.push_back(brickCube2);
 	bases.push_back(brickCube2);
 
 	std::shared_ptr<eBase> brickCube3 = std::shared_ptr<eBase>(new eBase(modelManager->Find("brick_cube").get(), new eBaseScript(texManager->Find("TSpanishFlag0_s"))));
 	brickCube3->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
 	brickCube3->GetTransform()->setTranslation(vec3(1.5f, 2.2f, -3.0f));
-	objects.push_back(brickCube3);
+	m_objects.push_back(brickCube3);
 	bases.push_back(brickCube3);
 
 	std::shared_ptr<eBase> brickCube4 = std::shared_ptr<eBase>(new eBase(modelManager->Find("brick_cube").get(), new eBaseScript(texManager->Find("TSpanishFlag0_s"))));
 	brickCube4->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
 	brickCube4->GetTransform()->setTranslation(vec3(-1.3f, 2.2f, -3.5f));
-	objects.push_back(brickCube4);
+	m_objects.push_back(brickCube4);
 	bases.push_back(brickCube4);
 
 	std::shared_ptr<eTerrain> terrain = std::shared_ptr<eTerrain>(new eTerrain(terrainModel.get(), "Terrain"));
 	terrain->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
 	terrain->GetTransform()->setTranslation(vec3(0.0f, 1.8f, 0.0f));
-	objects.push_back(terrain);
+	m_objects.push_back(terrain);
 
 	//SHIPS
 	//1
@@ -344,7 +344,7 @@ void eAmericanTreasureGame::InitializeModels()
 	nanosuit->GetTransform()->setTranslation(vec3(0.0f, 2.0f, 0.0f));
 	nanosuit->GetTransform()->setScale(vec3(0.03f, 0.03f, 0.03f));
 	ships.push_back(nanosuit);
-	objects.push_back(nanosuit);
+	m_objects.push_back(nanosuit);
 	
 	//2
 	//need to load listners for sounds somewhere, sounds should be copied
@@ -360,7 +360,7 @@ void eAmericanTreasureGame::InitializeModels()
 	nanosuit2->GetTransform()->setTranslation(vec3(1.0f, 2.0f, 1.0f));
 	nanosuit2->GetTransform()->setScale(vec3(0.03f, 0.03f, 0.03f));
 	ships.push_back(nanosuit2);
-	objects.push_back(nanosuit2);
+	m_objects.push_back(nanosuit2);
 
 	//3
 	//need to load listeners for sounds somewhere, sounds should be copied
@@ -376,7 +376,7 @@ void eAmericanTreasureGame::InitializeModels()
 	nanosuit3->GetTransform()->setTranslation(vec3(1.0f, 2.0f, -1.0f));
 	nanosuit3->GetTransform()->setScale(vec3(0.03f, 0.03f, 0.03f));
 	ships.push_back(nanosuit3);
-	objects.push_back(nanosuit3);
+	m_objects.push_back(nanosuit3);
 
 	//4
 	//need to load listners for sounds somewhere, sounds should be copied
@@ -392,7 +392,7 @@ void eAmericanTreasureGame::InitializeModels()
 	nanosuit4->GetTransform()->setTranslation(vec3(1.0f, 2.0f, 2.0f));
 	nanosuit4->GetTransform()->setScale(vec3(0.03f, 0.03f, 0.03f));
 	ships.push_back(nanosuit4);
-	objects.push_back(nanosuit4);
+	m_objects.push_back(nanosuit4);
 
 	//Camera Ray
 	camRay->init(static_cast<float>(width), static_cast<float>(height), nearPlane, farPlane);
@@ -447,19 +447,25 @@ void eAmericanTreasureGame::PaintGL()
 	turn_context->Update();
 	guis[0].SetTexture(turn_context->GetDiceTexture());
 
-	std::vector<eObject*> flags;
+	std::vector<shObject> flags;
 	for (auto &ship : ships)
 	{
 		if (ship->GetScript())
 		{
-			ship->GetScript()->Update(objects);
+			ship->GetScript()->Update(m_objects);
 			flags.push_back(ship->getShipScript()->GetChildrenObjects()[0]);
 		}
 	}
 
 	for(auto &base : bases)
 		flags.push_back(base->getBaseScript()->GetChildrenObjects()[0]);
-
-	pipeline->RenderFrame(*camera.get(), light, guis, focused ? std::vector<shObject>{ focused } 
-															  : std::vector<shObject>{},		flags); //better design
+	
+	std::map<ePipeline::RenderType, std::vector<shObject>> objects;
+	objects.insert({ ePipeline::RenderType::MAIN, m_objects });
+	if(focused)
+		objects.insert({ ePipeline::RenderType::OUTLINED, std::vector<shObject>{ focused } });
+	else
+		objects.insert({ ePipeline::RenderType::OUTLINED, std::vector<shObject>{} });
+	objects.insert({ ePipeline::RenderType::FLAG, flags });
+	pipeline->RenderFrame(objects, *camera.get(), light, guis);
 }

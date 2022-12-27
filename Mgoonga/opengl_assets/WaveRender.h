@@ -2,6 +2,7 @@
 
 #include "Shader.h"
 #include <base/base.h>
+#include <base/Object.h>
 #include <math/Clock.h>
 
 #include "Texture.h"
@@ -25,7 +26,7 @@ public:
 
 	void Render(const Camera&	  camera,
 				const Light&	  light,
-				std::vector<eObject*> flags);
+				std::vector<shObject> flags);
 
 private:
 	Shader							wave_shader;

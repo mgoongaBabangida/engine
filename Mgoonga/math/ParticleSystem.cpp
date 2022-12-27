@@ -31,7 +31,8 @@ ParticleSystem::ParticleSystem(float	 _pps,
   m_particles.resize(MAX_PARTICLES);
 	clock.start();
 
-	if(sound) sound->Play();
+	if(sound)
+		sound->Play();
 
 	timer.reset(new math::Timer([this]()->bool {this->Update(); return true; }));
 	timer->start(100);
@@ -104,6 +105,18 @@ std::vector<Particle>::iterator ParticleSystem::PrepareParticles(glm::vec3 _came
 	}
 	std::sort(m_particles.begin(), n_end, [](Particle& prt1, Particle& prt2) { return prt1.getDistance() > prt2.getDistance(); });
 	return n_end;
+}
+
+//---------------------------------------------------------------------------------------
+bool ParticleSystem::IsFinished()
+{
+	return clock.timeEllapsedMsc() > duration + m_lifeLength;
+}
+
+//--------------------------------------------------------------------------------------
+ParticleSystem::~ParticleSystem()
+{
+	timer->stop();
 }
 
 //-------------------------------------------------------------------------------------

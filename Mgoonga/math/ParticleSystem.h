@@ -29,25 +29,25 @@ public:
 	virtual void								              GenerateParticles();
 	virtual std::vector<Particle>::iterator		PrepareParticles(glm::vec3 cameraPosition);
 	virtual std::vector<Particle>&				    GetParticles()	{ return  m_particles; }
-	virtual bool								              IsFinished()	{ return clock.timeEllapsedMsc() > duration + m_lifeLength;}
+	virtual bool								              IsFinished();
 
-	virtual ~ParticleSystem()					{ timer->stop(); }
+	virtual ~ParticleSystem();
 
 protected:
 	virtual void								  Update();
 	void								          emitParticles();
 	virtual	glm::vec3							_calculateParticles();
 
-	glm::vec3					systemCenter;
-	int							m_pps; //particles per second
-	float						m_speed;
-	float						m_gravityComplient;
-	float						m_lifeLength;
-	std::vector<Particle>		m_particles;
-	math::eClock				clock;
+	glm::vec3										systemCenter;
+	int													m_pps; //particles per second
+	float												m_speed;
+	float												m_gravityComplient;
+	float												m_lifeLength;
+	std::vector<Particle>				m_particles;
+	math::eClock								clock;
 	std::unique_ptr<math::Timer>timer;
-	ISound*						sound;
-	float						duration;
-	uint32_t					cur_particles = 0;
-	size_t						num_rows_in_texture = 1;
+	ISound*											sound;
+	float												duration;
+	uint32_t										cur_particles = 0;
+	size_t											num_rows_in_texture = 1;
 };

@@ -68,7 +68,7 @@ public:
 	virtual ~IScript() = default;
 	virtual void	                    Update(std::vector<std::shared_ptr<eObject>> objs) = 0;
 	virtual void	                    CollisionCallback(const eCollision&)				{}
-  virtual std::vector<eObject*>			GetChildrenObjects() { return std::vector<eObject*>{}; }
+  virtual std::vector<std::shared_ptr<eObject>>			GetChildrenObjects() { return std::vector<std::shared_ptr<eObject>>{}; }
 	void			                        SetObject(eObject* obj) { object = obj; }
 };
 

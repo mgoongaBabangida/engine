@@ -27,7 +27,7 @@ eMainContext::eMainContext(eInputController*  _input,
 						   const std::string& _assetsPath, 
 						   const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
-, pipeline(m_objects, camRay, width, height)
+, pipeline(camRay, width, height)
 , m_camera(width, height, nearPlane, farPlane)
 {
 	//Light init!
@@ -473,7 +473,7 @@ void eMainContext::InitializeModels()
   obj->SetModel(new SphereTexturedModel(mesh, textures));
   obj->SetTransform(new Transform);
   obj->GetTransform()->setTranslation(glm::vec3(-2.0f,3.5f,1.5f));
-  m_pbr_objs.push_back(obj);
+  //m_pbr_objs.push_back(obj);
 }
 
 //-------------------------------------------------------------------------
@@ -491,7 +491,7 @@ void eMainContext::PaintGL()
 {
 	eMainContextBase::PaintGL();
 
-	std::vector<eObject*> flags;
+	std::vector<shObject> flags;
 	for (auto &object : m_objects)
 	{
 		if (object->GetScript())
@@ -512,5 +512,11 @@ void eMainContext::PaintGL()
     focused_output = m_focused ? std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{ m_focused })
                                : std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{});
 
-	pipeline.RenderFrame(m_camera, m_light, guis, *focused_output, flags, m_pbr_objs); //better design impl new standard
+  std::map<ePipeline::RenderType, std::vector<shObject>> objects;
+  objects.insert({ ePipeline::RenderType::MAIN, m_objects});
+  objects.insert({ ePipeline::RenderType::OUTLINED, *focused_output });
+  objects.insert({ ePipeline::RenderType::FLAG, flags });
+  objects.insert({ ePipeline::RenderType::PBR, m_pbr_objs });
+
+	pipeline.RenderFrame(objects, m_camera, m_light, guis);
 }
