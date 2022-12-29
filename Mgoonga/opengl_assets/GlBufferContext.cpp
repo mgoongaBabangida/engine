@@ -41,19 +41,19 @@ void eGlBufferContext::EnableReadingBuffer(eBuffer _buffer, GLenum _slot)
 {
 	switch (_buffer)
 	{
-		case eBuffer::BUFFER_DEFAULT:		/*?*/										break;
-		case eBuffer::BUFFER_SHADOW:		depthFBO.BindForReading(_slot);				break;
+		case eBuffer::BUFFER_DEFAULT:		/*?*/																					break;
+		case eBuffer::BUFFER_SHADOW:		depthFBO.BindForReading(_slot);								break;
 		case eBuffer::BUFFER_BRIGHT_FILTER: brightFilterFBO.BindForReading(_slot);		break;
-		case eBuffer::BUFFER_GAUSSIAN_ONE:	gausian1FBO.BindForReading(_slot);			break;
-		case eBuffer::BUFFER_GAUSSIAN_TWO:	gausian2FBO.BindForReading(_slot);			break;
-		case eBuffer::BUFFER_REFLECTION:	reflectionFBO.BindForReading(_slot);		break;
-		case eBuffer::BUFFER_REFRACTION:	refractionFBO.BindForReading(_slot);		break;
-		case eBuffer::BUFFER_SCREEN:		screenFBO.BindForReading(_slot);			break;
-		case eBuffer::BUFFER_MTS:			mtsFBO.BindForReading(_slot);				break;
-		case eBuffer::BUFFER_DEFFERED:		gFBO.BindForReading0(_slot);				break;
-		case eBuffer::BUFFER_DEFFERED1:		gFBO.BindForReading1(_slot);				break;
-		case eBuffer::BUFFER_DEFFERED2:		gFBO.BindForReading2(_slot);				break;
-		case eBuffer::BUFFER_SQUERE:		squereFBO.BindForReading(_slot);			break;
+		case eBuffer::BUFFER_GAUSSIAN_ONE:	gausian1FBO.BindForReading(_slot);				break;
+		case eBuffer::BUFFER_GAUSSIAN_TWO:	gausian2FBO.BindForReading(_slot);				break;
+		case eBuffer::BUFFER_REFLECTION:	reflectionFBO.BindForReading(_slot);				break;
+		case eBuffer::BUFFER_REFRACTION:	refractionFBO.BindForReading(_slot);				break;
+		case eBuffer::BUFFER_SCREEN:		screenFBO.BindForReading(_slot);							break;
+		case eBuffer::BUFFER_MTS:			mtsFBO.BindForReading(_slot);										break;
+		case eBuffer::BUFFER_DEFFERED:		gFBO.BindForReading0(_slot);								break;
+		case eBuffer::BUFFER_DEFFERED1:		gFBO.BindForReading1(_slot);								break;
+		case eBuffer::BUFFER_DEFFERED2:		gFBO.BindForReading2(_slot);								break;
+		case eBuffer::BUFFER_SQUERE:		squereFBO.BindForReading(_slot);							break;
 	}
 }
 

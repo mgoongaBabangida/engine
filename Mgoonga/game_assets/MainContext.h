@@ -17,16 +17,16 @@
 class IWindowImGui;
 
 //-------------------------------------------------------------------------------
-class DLL_GAME_ASSETS eMainContext : public eMainContextBase
+class DLL_GAME_ASSETS eMgoongaGameContext : public eMainContextBase
 {
 public:
-	eMainContext(eInputController*,
+	eMgoongaGameContext(eInputController*,
         std::vector<IWindowImGui*> _externalGui,
 				const std::string& modelsPath, 
 				const std::string& assetsPath, 
 				const std::string& shadersPath);
 
-	virtual ~eMainContext() {}
+  virtual ~eMgoongaGameContext();
 	
 	virtual void			InitializeGL()									override;
 	virtual void			PaintGL()										    override;
@@ -56,11 +56,8 @@ protected:
   std::vector<shObject>                  m_pbr_objs;
   std::shared_ptr<std::vector<shObject>> m_framed;
   Light								                   m_light;
-
-  shObject							          lightObject; //debuging
-
-	std::unique_ptr<TerrainModel>		m_TerrainModel;
-	std::vector<GUI>					      guis;
+  std::vector<GUI>					             guis;
+  shObject							                 lightObject; //debuging
 
   eThreeFloatCallback            transfer_data_position;
   eThreeFloatCallback            transfer_data_rotation;

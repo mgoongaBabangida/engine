@@ -53,11 +53,14 @@ std::string Model::RootBoneName()
 	return root_bone->Name();
 }
 
+//---------------------------------------------------------------------------
 Model::~Model()
 {
-
+	for (auto& mesh : meshes)
+		mesh.FreeTextures();
 }
 
+//---------------------------------------------------------------------------
 void Model::Draw()
 {
 	for (GLuint i = 0; i < this->meshes.size(); i++)
@@ -128,7 +131,7 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 	for (GLuint i = 0; i < node->mNumMeshes; i++)
 	{
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		this->meshes.push_back(this->processMesh(mesh, scene));
+		this->meshes.emplace_back(std::move(processMesh(mesh, scene)));
 	}
 	// Then do the same for each of its children
 	for (GLuint i = 0; i < node->mNumChildren; i++)
@@ -257,7 +260,7 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 		}
 
-	return AssimpMesh(vertices, indices, textures);
+		return { vertices, indices, textures };
 }
 
 vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName)
@@ -272,7 +275,7 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 		string filename = string(str.C_Str());
 		filename = directory + '/' + filename;
 		//std::cout << filename << std::endl;
-		texture.loadTextureFromFile(filename.c_str());		
+		texture.loadTextureFromFile(filename.c_str());
 		texture.type = typeName;
 		texture.path = str.C_Str();
 		//std::cout << typeName << std::endl;

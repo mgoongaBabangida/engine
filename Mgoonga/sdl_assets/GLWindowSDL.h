@@ -38,8 +38,9 @@ protected:
 	const GLint							WIDTH	= 1200;
 	const GLint							HEIGHT	= 600;
   bool                    running = true;
-  std::function<void()> on_close;
-	void								PaintGL();
+  std::function<void()>		on_close;
+
+	void										PaintGL();
 };
 
 #endif

@@ -32,6 +32,10 @@ void eModelManager::InitializePrimitives()
 eModelManager::eModelManager(): terrain(new TerrainModel)
 {}
 
+eModelManager::~eModelManager()
+{
+}
+
 std::shared_ptr<IModel> eModelManager::Find(const std::string& name)
 {
 	return  models.find(name)->second;
@@ -58,7 +62,7 @@ std::unique_ptr<MyModel> eModelManager::ClonePrimitive(const std::string& name)
 
 std::unique_ptr<TerrainModel> eModelManager::CloneTerrain(const std::string& name)
 {
-	return std::unique_ptr<TerrainModel>(new TerrainModel(*(terrain.get())));
+	return std::make_unique<TerrainModel>(*(terrain));
 }
 
 std::shared_ptr<MyMesh> eModelManager::FindMesh(const std::string& name)

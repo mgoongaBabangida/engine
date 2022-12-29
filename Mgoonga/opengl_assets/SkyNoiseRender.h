@@ -2,19 +2,23 @@
 #include <glm\glm\glm.hpp>
 #include <glm\glm\gtc\matrix_transform.hpp>
 #include <glm\glm\gtx\transform.hpp>
+
 #include "Shader.h"
 #include "Texture.h"
+#include "MyModel.h"
+
 #include <math/Camera.h>
 #include <memory>
 
 class eObject;
-class MyModel;
 
+//-------------------------------------------------------------------------------
 class eSkyNoiseRender
 {
 public:
 	eSkyNoiseRender(std::unique_ptr<MyModel> model, Texture* noise, const std::string&, const std::string&);
 	void Render(const Camera& camera);
+	~eSkyNoiseRender();
 
 private:
 	std::unique_ptr<MyModel> model;

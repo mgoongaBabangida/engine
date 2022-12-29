@@ -9,13 +9,13 @@
 #include <math/CameraRay.h>
 
 #include "Texture.h"
+#include "RenderManager.h"
 
 #include <map>
 
 class Camera;
 class GUI;
 
-class eRenderManager;
 class eModelManager;
 class eTextureManager;
 

@@ -45,15 +45,15 @@ eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model,
 	TimeFactorLoc	= glGetUniformLocation(wave_shader.ID, "Time");
 	clock.start();
 	
-	m_model.swap(model);
-	m_model->initialize(tex, tex);
-	object.reset(new eObject);
-	object->SetModel((IModel*)m_model.get());
-	object->SetTransform(new Transform);
+	model->initialize(tex, tex);
+	m_model = model.get();
+	m_object.reset(new eObject);
+	m_object->SetModel(model.release());
+	m_object->SetTransform(new Transform);
 	//move this outside
-	object->GetTransform()->setTranslation(glm::vec3(3.0f, 2.0f, 0.0f));
-	object->GetTransform()->setScale(glm::vec3(0.03f, 0.03f, 0.03f));
-	object->GetTransform()->setRotation(PI / 2, 0.0f, 0.0f);
+	m_object->GetTransform()->setTranslation(glm::vec3(3.0f, 2.0f, 0.0f));
+	m_object->GetTransform()->setScale(glm::vec3(0.03f, 0.03f, 0.03f));
+	m_object->GetTransform()->setRotation(PI / 2, 0.0f, 0.0f);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ void eWaveRender::Render(const Camera&		camera,
 	glUseProgram(wave_shader.ID);
 
 	glm::mat4 worldToProjectionMatrix	= camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
-	glm::mat4 modelViewMatrix			= camera.getWorldToViewMatrix() * object->GetTransform()->getModelMatrix();
+	glm::mat4 modelViewMatrix			= camera.getWorldToViewMatrix() * m_object->GetTransform()->getModelMatrix();
 
 	glUniform3f(lightAmbientLoc, light.ambient.x, light.ambient.y, light.ambient.z);  //!? diffuse
 	glUniform3f(lightDiffuseLoc, light.diffuse.x, light.diffuse.y, light.diffuse.z);
@@ -107,25 +107,25 @@ void eWaveRender::Render(const Camera&		camera,
 	for(auto& flag : flags)
 	{
 		//move this outside
-		object->GetTransform()->setTranslation(flag->GetTransform()->getTranslation());
-		object->GetTransform()->setScale(flag->GetTransform()->getScaleAsVector());
-		object->GetTransform()->billboard(-camera.getDirection());
+		m_object->GetTransform()->setTranslation(flag->GetTransform()->getTranslation());
+		m_object->GetTransform()->setScale(flag->GetTransform()->getScaleAsVector());
+		m_object->GetTransform()->billboard(-camera.getDirection());
 		
-		glm::quat cur = object->GetTransform()->getRotation();
+		glm::quat cur = m_object->GetTransform()->getRotation();
 		glm::quat plus = glm::toQuat(glm::rotate(UNIT_MATRIX, (float) PI / 2, XAXIS));
-		object->GetTransform()->setRotation(cur * plus);
+		m_object->GetTransform()->setRotation(cur * plus);
 
 		m_model->setDiffuse(const_cast<Texture*>(flag->GetModel()->GetMeshes()[0]->GetTextures()[0]));
 		m_model->setSpecular(const_cast<Texture*>(flag->GetModel()->GetMeshes()[0]->GetTextures()[0]));
 
-		glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * object->GetTransform()->getModelMatrix();
+		glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * m_object->GetTransform()->getModelMatrix();
 		glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
-		glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &object->GetTransform()->getModelMatrix()[0][0]);
+		glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &m_object->GetTransform()->getModelMatrix()[0][0]);
 		glUniformMatrix4fv(modelViewMatrixLocation, 1, GL_FALSE, &modelViewMatrix[0][0]);
 		/*glUniformMatrix4fv(normalMatrixLocation, 1, GL_FALSE,
 		&glm::mat3(glm::vec3(modelViewMatrix[0]), glm::vec3(modelViewMatrix[1]), glm::vec3(modelViewMatrix[2]))[0][0]);*/
 
-		object->GetModel()->Draw();
+		m_object->GetModel()->Draw();
 	}
 	glUniform1i(glGetUniformLocation(wave_shader.ID, "normalMapping"), GL_TRUE);
 	glEnable(GL_CULL_FACE); //todo transfer

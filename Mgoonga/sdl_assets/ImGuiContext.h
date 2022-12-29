@@ -72,10 +72,10 @@ public:
 
 protected:
 	std::vector<eItem>	lines;
-	std::string			name;
-  float window_pos_x;
-  float window_pos_y;
-  float window_size_x;
-  float window_size_y;
-	bool				visible = true;
+	std::string					name;
+  float								window_pos_x;
+  float								window_pos_y;
+  float								window_size_x;
+  float								window_size_y;
+	bool								visible = true;
 };

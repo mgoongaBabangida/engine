@@ -4,12 +4,15 @@
 #include <sstream>
 #include <iostream>
 
+using namespace std;
+
 AssimpMesh::AssimpMesh(vector<AssimpVertex> vertices, vector<GLuint> indices, vector<Texture> textures)
 {
 	this->vertices = vertices;
 	this->indices = indices;
 	this->textures = textures;
 	this->setupMesh();
+
   default_diffuse_mapping.loadTexture1x1(YELLOW);
   default_specular_mapping.loadTexture1x1(BLACK);
   default_normal_mapping.loadTexture1x1(BLUE);
@@ -20,6 +23,16 @@ AssimpMesh::~AssimpMesh()
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
   glGenBuffers(1, &EBO);
+}
+
+void AssimpMesh::FreeTextures()
+{
+  default_diffuse_mapping.freeTexture();
+  default_specular_mapping.freeTexture();
+  default_normal_mapping.freeTexture();
+
+  for (auto& t : textures)
+    t.freeTexture();
 }
 
 void AssimpMesh::Draw()

@@ -67,20 +67,4 @@ void eShadowRender::Render(const Camera&			camera,
 	{
 		assert(false, "");
 	}
-
-		//*********************
-		/*if (object->GetRigger() != nullptr)
-		{
-			matrices = object->GetRigger()->GetMatrices();
-		}
-		else
-		{
-			for (auto& m : matrices)
-			{
-				m = UNIT_MATRIX;
-			}
-		}
-		int loc = glGetUniformLocation(shaderDir.ID, "gBones");
-		glUniformMatrix4fv(loc, 100, GL_FALSE, &matrices[0][0][0]);*/
-		//*********************
 }

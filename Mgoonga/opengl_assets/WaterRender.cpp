@@ -3,7 +3,9 @@
 
 #include "WaterRender.h"
 #include "MyModel.h"
+#include "Texture.h"
 #include "GlBufferContext.h"
+
 #include <math/Transform.h>
 
 //--------------------------------------------------------------------------------------------------
@@ -12,6 +14,8 @@ eWaterRender::eWaterRender(std::unique_ptr<MyModel> model,
 							Texture*				DUDV, 
 							const std::string&		vertexShaderPath,
 							const std::string&		fragmentShaderPath)
+	: reflection(new Texture)
+	, refraction(new Texture)
 {
 	waterShader.installShaders(vertexShaderPath.c_str(), fragmentShaderPath.c_str());
 	
@@ -43,8 +47,11 @@ void eWaterRender::Render(const Camera& camera, const Light& light)
 	glUseProgram(waterShader.ID);
 
 	glm::mat4 worldToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
-	water->setTextureDiffuse(&eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFLECTION));
-	water->setTextureSpecular(&eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFRACTION));
+
+	*reflection = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFLECTION);
+	*refraction = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFRACTION);
+	water->setTextureDiffuse(reflection.get());
+	water->setTextureSpecular(refraction.get());
 	
 	//move factor (has to be improved)
 	glUniform1f(WaterFactorLoc, move_factor);
@@ -69,4 +76,8 @@ void eWaterRender::Render(const Camera& camera, const Light& light)
 void eWaterRender::Update(){}
 
 eWaterRender::~eWaterRender()
-{}
+{
+	water.release();
+	reflection->freeTexture();
+	refraction->freeTexture();
+}

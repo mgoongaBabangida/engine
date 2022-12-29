@@ -102,7 +102,7 @@ void ePipeline::RenderFrame(std::map<RenderType, std::vector<shObject>> _objects
 	std::vector<shObject> pbr_objs = _objects.find(RenderType::PBR)->second;
 	std::vector<shObject> flags = _objects.find(RenderType::FLAG)->second;
 
-	//1 Shadow Render Pass
+	//Shadow Render Pass
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SHADOW);
 
 	if (shadows) { RenderShadows(_camera, _light, objects); }
@@ -114,7 +114,7 @@ void ePipeline::RenderFrame(std::map<RenderType, std::vector<shObject>> _objects
 	else
 		assert("spot light is not yet supported");
 
-	//3 Rendering reflection and refraction to Textures
+	//Rendering reflection and refraction to Textures
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_REFLECTION);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -306,7 +306,7 @@ void ePipeline::RenderReflection(Camera& _camera, const Light& _light, std::vect
 
 	Camera tem_cam = _camera;
 	_camera.setPosition(glm::vec3(tem_cam.getPosition().x, 2 * (tem_cam.getPosition().y - waterHeight), tem_cam.getPosition().z));
-	_camera.setDirection(glm::reflect(_camera.getDirection(), glm::vec3(0, 1, 0)));  //water normal
+	_camera.setDirection(glm::reflect(_camera.getDirection(), glm::vec3(0, 1, 0)));//water normal
 
 	renderManager->MainRender()->Render(_camera, _light, _objects, false, false);
 	_camera = tem_cam;
@@ -421,9 +421,9 @@ void ePipeline::RenderGui(std::vector<GUI>& guis, const Camera& _camera)
 {
 	if (!guis.empty())
 	{
-		guis[0].SetTexture(&eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFLECTION));
+		guis[0].SetTexture(GetReflectionBufferTexture());
 		//8.2 Second quad
-		guis[1].SetTexture(&eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SHADOW));
+		guis[1].SetTexture(GetShadowBufferTexture());
 	}
 
 	for(auto& gui : guis)

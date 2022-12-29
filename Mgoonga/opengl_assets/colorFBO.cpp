@@ -65,7 +65,7 @@ void eColorFBO::CreateMultisampleColorAttachement(unsigned int WindowWidth, unsi
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
 	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA8, WindowWidth, WindowHeight);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rbo); 
-																																												  // Now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+	// Now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 }

@@ -35,6 +35,11 @@ eParticleRender::eParticleRender(std::shared_ptr<MyMesh> _mesh,
 	mesh.reset(new ParticleMesh(quad));
 	quad.cleanup();
 }
+//--------------------------------------------------------------------------------------
+eParticleRender::~eParticleRender()
+{
+	model.release();
+}
 
 //-------------------------------------------------------------------------------------------------------------
 void eParticleRender::Render(const Camera& _camera)

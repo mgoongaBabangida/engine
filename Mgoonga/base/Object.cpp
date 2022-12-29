@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "Object.h"
 
-void IModelDeleter::operator()(IModel * p){}
-
 //----------------------------------------------------------------------------
 eObject::~eObject() = default;
 
@@ -48,6 +46,12 @@ void eObject::SetCollider(ICollider* _c)
 void eObject::SetModel(IModel* _m)
 {
 	model.reset(_m);
+}
+
+//-----------------------------------------------------------------------------
+void eObject::SetModel(std::shared_ptr<IModel> _m)
+{
+	model = _m;
 }
 
 //-----------------------------------------------------------------------------

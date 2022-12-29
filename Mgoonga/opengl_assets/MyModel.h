@@ -14,6 +14,7 @@ struct Texture;
 class DLL_OPENGL_ASSETS MyModel: public IModel
 {
 public:
+	//todo make one constructor
 	MyModel();
   MyModel(std::shared_ptr<MyMesh> m, Texture* t);
   MyModel(std::shared_ptr<MyMesh> m, Texture* t, Texture* t2);

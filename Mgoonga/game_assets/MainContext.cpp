@@ -21,7 +21,7 @@
 #include "ShipScript.h"
 
 //---------------------------------------------------------------------------
-eMainContext::eMainContext(eInputController*  _input,
+eMgoongaGameContext::eMgoongaGameContext(eInputController*  _input,
   std::vector<IWindowImGui*> _externalGui,
 						   const std::string& _modelsPath,
 						   const std::string& _assetsPath, 
@@ -41,7 +41,10 @@ eMainContext::eMainContext(eInputController*  _input,
 }
 
 //--------------------------------------------------------------------------
-void eMainContext::InitializeExternalGui()
+eMgoongaGameContext::~eMgoongaGameContext() {}
+
+//--------------------------------------------------------------------------
+void eMgoongaGameContext::InitializeExternalGui()
 {
   externalGui[0]->Add(TEXT, "Light", nullptr);
   externalGui[0]->Add(SLIDER_FLOAT, "Y direction", &m_light.light_position.y);
@@ -148,7 +151,7 @@ void eMainContext::InitializeExternalGui()
 }
 
 //--------------------------------------------------------------------------
-bool eMainContext::OnMouseMove(uint32_t x, uint32_t y)
+bool eMgoongaGameContext::OnMouseMove(uint32_t x, uint32_t y)
 {
   if (camRay.IsPressed())
     {
@@ -159,7 +162,7 @@ bool eMainContext::OnMouseMove(uint32_t x, uint32_t y)
 }
 
 //--------------------------------------------------------------------------
-bool eMainContext::OnKeyPress(uint32_t asci)
+bool eMgoongaGameContext::OnKeyPress(uint32_t asci)
 {
 	switch (asci)
 	{
@@ -182,7 +185,7 @@ bool eMainContext::OnKeyPress(uint32_t asci)
 }
 
 //--------------------------------------------------------------------------
-bool eMainContext::OnMousePress(uint32_t x, uint32_t y, bool left)
+bool eMgoongaGameContext::OnMousePress(uint32_t x, uint32_t y, bool left)
 {
   if (m_framed)
     m_framed->clear();
@@ -206,14 +209,14 @@ bool eMainContext::OnMousePress(uint32_t x, uint32_t y, bool left)
 }
 
 //---------------------------------------------------------------------------------
-bool eMainContext::OnMouseRelease()
+bool eMgoongaGameContext::OnMouseRelease()
 {
 	camRay.release();
 	return true;
 }
 
 //------------------------------------------------------------------------------
-void eMainContext::OnFocusedChanged()
+void eMgoongaGameContext::OnFocusedChanged()
 {
   if (m_focused)
   {
@@ -257,7 +260,7 @@ void eMainContext::OnFocusedChanged()
 }
 
 //-------------------------------------------------------------------------------
-void eMainContext::InitializeGL()
+void eMgoongaGameContext::InitializeGL()
 {
 	eMainContextBase::InitializeGL();
 	
@@ -288,28 +291,28 @@ void eMainContext::InitializeGL()
 }
 
 //-------------------------------------------------------------------------------
-void eMainContext::InitializeSounds()
+void eMgoongaGameContext::InitializeSounds()
 {
 	//sound->loadListner(m_camera.getPosition().x, m_camera.getPosition().y, m_camera.getPosition().z); //!!!
 }
 
 //-------------------------------------------------------------------------------
-void eMainContext::InitializePipline()
+void eMgoongaGameContext::InitializePipline()
 {
 	pipeline.Initialize();
 	// call all the enable pipeline functions
 }
 
 //-----------------------------------------------------------------------------
-void eMainContext::InitializeBuffers()
+void eMgoongaGameContext::InitializeBuffers()
 {
 	pipeline.InitializeBuffers(m_light.type == eLightType::POINT);
 }
 
-#include <opengl_assets/ShpereTexturedModel.h>
+#include <opengl_assets/ShpereTexturedModel.h> // temp
 
 //-----------------------------------------------------------------------------
-void eMainContext::InitializeModels()
+void eMgoongaGameContext::InitializeModels()
 {
 	eMainContextBase::InitializeModels();
 
@@ -323,15 +326,15 @@ void eMainContext::InitializeModels()
   modelManager->Add("zombie", (GLchar*)std::string(modelFolderPath + "Thriller Part 3/Thriller Part 3.dae").c_str());
 
 	//TERRAIN
-	m_TerrainModel.swap(modelManager->CloneTerrain("simple"));
-	m_TerrainModel->initialize(texManager->Find("Tgrass0_d"),
+	std::unique_ptr<TerrainModel> terrainModel = modelManager->CloneTerrain("simple");
+  terrainModel->initialize(texManager->Find("Tgrass0_d"),
 							   texManager->Find("Tgrass0_d"),
 							   texManager->Find("Tblue"),
 							   texManager->Find("TOcean0_s"),
                  true);
 	//OBJECTS
 	shObject wallCube = shObject(new eObject);
-	wallCube->SetModel(modelManager->Find("wall_cube").get());
+	wallCube->SetModel(modelManager->Find("wall_cube"));
 	wallCube->SetTransform(new Transform);
 	wallCube->SetCollider(new BoxCollider);
 	wallCube->SetRigidBody(new eRigidBody);
@@ -341,7 +344,7 @@ void eMainContext::InitializeModels()
 	m_objects.push_back(wallCube);
 
 	shObject containerCube = shObject(new eObject);
-	containerCube->SetModel(modelManager->Find("container_cube").get());
+	containerCube->SetModel(modelManager->Find("container_cube"));
 	containerCube->SetTransform(new Transform);
 	containerCube->SetCollider(new BoxCollider);
 	containerCube->SetRigidBody(new eRigidBody);
@@ -351,7 +354,7 @@ void eMainContext::InitializeModels()
 	m_objects.push_back(containerCube);
 
 	shObject arrow = shObject(new eObject);
-	arrow->SetModel(modelManager->Find("arrow").get());
+	arrow->SetModel(modelManager->Find("arrow"));
 	arrow->SetName("arrow");
 	arrow->SetTransform(new Transform);
 	arrow->SetCollider(new BoxCollider);
@@ -362,7 +365,7 @@ void eMainContext::InitializeModels()
 	m_objects.push_back(arrow);
 
 	shObject grassPlane = shObject(new eObject);
-	grassPlane->SetModel(modelManager->Find("grass_plane").get());
+	grassPlane->SetModel(modelManager->Find("grass_plane"));
 	grassPlane->SetTransform(new Transform);
 	grassPlane->SetCollider(new BoxCollider);
 	grassPlane->SetRigidBody(new eRigidBody);
@@ -372,7 +375,7 @@ void eMainContext::InitializeModels()
 	m_objects.push_back(grassPlane);
 
 	shObject nanosuit = shObject(new eObject);
-	nanosuit->SetModel(modelManager->Find("nanosuit").get());
+	nanosuit->SetModel(modelManager->Find("nanosuit"));
 	nanosuit->SetTransform(new Transform);
 	nanosuit->SetCollider(new BoxCollider);
 	nanosuit->SetRigidBody(new eRigidBody);
@@ -384,7 +387,7 @@ void eMainContext::InitializeModels()
 	m_objects.push_back(nanosuit);
 
   shObject terrain = shObject(new eObject);
-  terrain->SetModel((IModel*)m_TerrainModel.get());
+  terrain->SetModel(terrainModel.release());
   terrain->SetTransform(new Transform);
   terrain->SetCollider(new BoxCollider);
   terrain->SetRigidBody(new eRigidBody);
@@ -396,7 +399,7 @@ void eMainContext::InitializeModels()
   m_objects.push_back(terrain);
 
 	shObject wolf = shObject(new eObject);
-	wolf->SetModel(modelManager->Find("wolf").get());
+	wolf->SetModel(modelManager->Find("wolf"));
 	wolf->SetTransform(new Transform);
 	wolf->SetCollider(new BoxCollider);
 	wolf->SetRigidBody(new eRigidBody);
@@ -404,12 +407,12 @@ void eMainContext::InitializeModels()
 	wolf->GetCollider()->CalculateExtremDots(wolf->GetModel()->GetPositions());
 	wolf->GetTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);
 	wolf->GetTransform()->setTranslation(vec3(4.0f, 3.0f, 0.0f));
-	wolf->SetRigger(new Rigger((Model*)modelManager->Find("wolf").get()));
-	wolf->GetRigger()->ChangeName(std::string(), "Running");
+	wolf->SetRigger(new Rigger((Model*)modelManager->Find("wolf").get())); //@todo improve
+	wolf->GetRigger()->ChangeName(std::string(), "Running");//@todo improve
 	m_objects.push_back(wolf);
 
 	shObject brickCube = shObject(new eObject);
-	brickCube->SetModel(modelManager->Find("brick_cube").get());
+	brickCube->SetModel(modelManager->Find("brick_cube"));
 	brickCube->SetTransform(new Transform);
 	brickCube->SetCollider(new BoxCollider);
 	brickCube->SetRigidBody(new eRigidBody);
@@ -419,7 +422,7 @@ void eMainContext::InitializeModels()
 	m_objects.push_back(brickCube);
 
   shObject guard = shObject(new eObject);
-  guard->SetModel(modelManager->Find("guard").get());
+  guard->SetModel(modelManager->Find("guard"));
   guard->SetTransform(new Transform);
   guard->SetCollider(new BoxCollider);
   guard->SetRigidBody(new eRigidBody);
@@ -428,11 +431,11 @@ void eMainContext::InitializeModels()
   guard->GetTransform()->setTranslation(vec3(2.0f, 2.0f, 0.0f));
   guard->GetTransform()->setRotation(glm::radians(-90.0f), glm::radians(-90.0f), 0.0f);
   guard->GetTransform()->setScale(glm::vec3(0.03f, 0.03f, 0.03f));
-  guard->SetRigger(new Rigger((Model*)modelManager->Find("guard").get()));
+  guard->SetRigger(new Rigger((Model*)modelManager->Find("guard").get()));//@todo improve
   m_objects.push_back(guard);
 
   shObject zombie = shObject(new eObject);
-  zombie->SetModel(modelManager->Find("zombie").get());
+  zombie->SetModel(modelManager->Find("zombie"));
   zombie->SetTransform(new Transform);
   zombie->SetCollider(new BoxCollider);
   zombie->SetRigidBody(new eRigidBody);
@@ -441,12 +444,12 @@ void eMainContext::InitializeModels()
   zombie->GetTransform()->setTranslation(vec3(1.0f, 2.0f, 0.0f));
   zombie->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
   zombie->GetTransform()->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
-  zombie->SetRigger(new Rigger((Model*)modelManager->Find("zombie").get()));
+  zombie->SetRigger(new Rigger((Model*)modelManager->Find("zombie").get()));//@todo improve
   m_objects.push_back(zombie);
 
 	//light_cube
 	lightObject = shObject(new eObject);
-	lightObject->SetModel(modelManager->Find("white_sphere").get());
+	lightObject->SetModel(modelManager->Find("white_sphere"));
 	lightObject->SetTransform(new Transform);
 	lightObject->SetCollider(new BoxCollider);
 	lightObject->SetRigidBody(new eRigidBody);
@@ -455,10 +458,6 @@ void eMainContext::InitializeModels()
 	lightObject->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
 	lightObject->GetTransform()->setTranslation(m_light.light_position);
 	m_objects.push_back(lightObject);
-
-	/*shObject boat = shObject(new eObject(modelManager.Find("boat").get()));
-	boat->GetTransform()->setScale(vec3(0.0001f, 0.0001f, 0.0001f));
-	m_objects.push_back(boat);*/
 
   std::vector<const Texture*> textures {texManager->Find("pbr1_basecolor"),
                                   texManager->Find("pbr1_metallic"),
@@ -473,11 +472,11 @@ void eMainContext::InitializeModels()
   obj->SetModel(new SphereTexturedModel(mesh, textures));
   obj->SetTransform(new Transform);
   obj->GetTransform()->setTranslation(glm::vec3(-2.0f,3.5f,1.5f));
-  //m_pbr_objs.push_back(obj);
+  m_pbr_objs.push_back(obj);
 }
 
 //-------------------------------------------------------------------------
-void eMainContext::InitializeRenders()
+void eMgoongaGameContext::InitializeRenders()
 {
 	pipeline.InitializeRenders(*modelManager.get(), *texManager.get(), shadersFolderPath);
 	pipeline.GetRenderManager().AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f),
@@ -487,7 +486,7 @@ void eMainContext::InitializeRenders()
 }
 
 //-------------------------------------------------------------------------------
-void eMainContext::PaintGL()
+void eMgoongaGameContext::PaintGL()
 {
 	eMainContextBase::PaintGL();
 

@@ -379,7 +379,7 @@ std::vector<glm::vec3> TerrainModel::GetPositions() const
 	std::vector<glm::vec3> ret;
 	for (auto& vert : mesh->vertices)
 		ret.push_back(vert.position);
-	return ret;
+	return ret; // @todo to improve
 }
 
 std::vector<GLuint> TerrainModel::GetIndeces() const

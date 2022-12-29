@@ -17,7 +17,7 @@ class TerrainModel;
 class eWaveRender
 {
 public:
-	eWaveRender(std::unique_ptr<TerrainModel> model, 
+	eWaveRender(std::unique_ptr<TerrainModel> model,
 				Texture*						tex, 
 				Texture*						normals, 
 				Texture*						Height,
@@ -29,9 +29,9 @@ public:
 				std::vector<shObject> flags);
 
 private:
-	Shader							wave_shader;
-	std::unique_ptr<eObject>		object;
-	std::unique_ptr<TerrainModel>	m_model;
+	Shader											wave_shader;
+	std::unique_ptr<eObject>		m_object;
+	TerrainModel*								m_model;
 	
 	math::eClock					clock;
 	float							time		= 0.0f;
@@ -39,13 +39,13 @@ private:
 	float							Velocity	= 2.5f;
 	float							Amp			= 0.6f;
 	//
-	GLuint fullTransformationUniformLocation;  
-	GLuint modelToWorldMatrixUniformLocation; 
-	GLuint modelViewMatrixLocation;  
-	GLuint normalMatrixLocation; 
-	GLuint normalMapingLocation; 
-	GLuint eyePositionWorldUniformLocation; //
-	GLuint shadowMatrixUniformLocation;  //
+	GLuint fullTransformationUniformLocation;
+	GLuint modelToWorldMatrixUniformLocation;
+	GLuint modelViewMatrixLocation;
+	GLuint normalMatrixLocation;
+	GLuint normalMapingLocation;
+	GLuint eyePositionWorldUniformLocation;
+	GLuint shadowMatrixUniformLocation;
 	GLuint matAmbientLoc;
 	GLuint matDiffuseLoc;
 	GLuint matSpecularLoc;

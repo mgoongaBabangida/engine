@@ -2,7 +2,6 @@
 
 #include "Shader.h"
 #include <base/base.h>
-#include "Texture.h"
 #include <math/Camera.h>
 #include <math/Timer.h>
 
@@ -10,6 +9,7 @@
 
 class MyModel;
 class eObject;
+struct Texture;
 
 //--------------------------------------------------------------------------
 class eWaterRender 
@@ -20,7 +20,7 @@ public:
 				Texture* DUDV,
 				const std::string& vertexShaderPath,
 				const std::string& fragmentShaderPath);
-	virtual ~eWaterRender();
+	~eWaterRender();
 
 	void						Render(const Camera&	camera, 
 									   const Light&		light);
@@ -40,9 +40,11 @@ protected:
 	GLuint						lightColorLoc;
 	GLuint						clipPlaneLoc;
 	
-	math::eClock				 clock;
+	math::eClock		clock;
 	float						 move_factor	= 0.0f;
 	float						 waterHeight = 2.0f;
 	bool						 incr		= true;
 	std::unique_ptr<math::Timer> timer;
+	std::unique_ptr<Texture> reflection;
+	std::unique_ptr<Texture> refraction;
 };

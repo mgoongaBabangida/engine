@@ -6,21 +6,23 @@
 #include "ModelManager.h"
 #include "TextureManager.h"
 
-class eWaterRender;
-class eSkyBoxRender;
-class eScreenRender;
-class eParticleRender;
-class eShadowRender;
-class eMainRender;
-class eOutlineRender;
-class eSkyNoiseRender;
-class eWaveRender;
-class eHexRender;
-class eGaussianBlurRender;
-class eBrightFilterRender;
-class eLinesRender;
-class eTextRender;
-class ePBRRender;
+#include "WaterRender.h"
+#include "SkyBoxRender.h"
+#include "ScreenRender.h"
+#include "ParticleRender.h"
+#include "MainRender.h"
+#include "OutlinRender.h"
+#include "SkyNoiseRender.h"
+#include "WaveRender.h"
+#include "HexRender.h"
+#include "GaussianBlurRender.h"
+#include "BrightFilterrender.h"
+#include "ShadowRender.h"
+#include "LinesRender.h"
+#include "TextRender.h"
+#include "PBRRender.h"
+
+#include <vector>
 
 //----------------------------------------------------------------------------------------------
 class DLL_OPENGL_ASSETS eRenderManager
@@ -31,6 +33,7 @@ public:
 	eRenderManager();
 	~eRenderManager();
 
+	//@todo transfer public functions from here and stop exporting this class
 	void				AddHex(glm::vec3 _v);
 	void				SetHexRadius(float _r);
 

@@ -20,7 +20,8 @@ class eParticleRender
 {
 public:
 	eParticleRender(std::shared_ptr<MyMesh>, Texture*, const std::string&, const std::string&);
-	
+	~eParticleRender();
+
 	void	Render(const Camera &camera);
 	void	AddParticleSystem(IParticleSystem* sys);
 

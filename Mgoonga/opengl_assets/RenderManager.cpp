@@ -1,21 +1,6 @@
 #include "stdafx.h"
 #include "RenderManager.h"
-
-#include "WaterRender.h"
-#include "SkyBoxRender.h"
-#include "ScreenRender.h"
-#include "ParticleRender.h"
-#include "MainRender.h"
-#include "OutlinRender.h"
-#include "SkyNoiseRender.h"
-#include "WaveRender.h"
-#include "HexRender.h"
-#include "GaussianBlurRender.h"
-#include "BrightFilterrender.h"
-#include "ShadowRender.h"
-#include "LinesRender.h"
-#include "TextRender.h"
-#include "PBRRender.h"
+#include "MyModel.h"
 
 eWaterRender*		 eRenderManager::WaterRender() { return m_waterRender.get(); }
 eSkyBoxRender*		 eRenderManager::SkyBoxRender() { return m_skyboxRender.get(); }

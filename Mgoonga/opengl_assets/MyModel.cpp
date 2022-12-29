@@ -59,6 +59,7 @@ MyModel::MyModel(const MyModel& _other) //shallow copy
 
 MyModel::~MyModel()
 {
+
 }
 
 std::vector<MyMesh*> MyModel::getMeshes() const 

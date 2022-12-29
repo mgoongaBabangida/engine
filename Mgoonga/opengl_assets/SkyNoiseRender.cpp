@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "SkyNoiseRender.h"
-#include "MyModel.h"
 #include <base/base.h>
 #include <base/Object.h>
 #include <math/Transform.h>
@@ -37,4 +36,10 @@ void eSkyNoiseRender::Render(const Camera& camera)
 	//moveFactor += 0.005f;
 	//glUniform1f(moveFactorLocation, moveFactor);
 	object->GetModel()->Draw();
+}
+
+//--------------------------------------------------------------------------------
+eSkyNoiseRender::~eSkyNoiseRender()
+{
+	model.release();
 }

@@ -14,6 +14,8 @@ class DLL_OPENGL_ASSETS eModelManager
 {
   public:
   	eModelManager();
+    ~eModelManager();
+
   	void							            InitializePrimitives();
   	std::shared_ptr<IModel>			  Find(const std::string& name);
   	void							            Add(const std::string& name, GLchar* path, bool invert_y_uv = false);

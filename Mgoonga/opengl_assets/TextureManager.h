@@ -1,6 +1,7 @@
 #pragma once
 
 #include <opengl_assets\opengl_assets.h>
+
 #include <map>
 #include <string>
 

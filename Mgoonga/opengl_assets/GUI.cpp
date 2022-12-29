@@ -46,14 +46,14 @@ void GUI::setCommand(std::shared_ptr<ICommand> com)
 	cmd = com;
 }
 
-void GUI::SetTexture(Texture * t)
+void GUI::SetTexture(const Texture& t)
 {
 	texture = t;
 }
 
 Texture * GUI::GetTexture()
 {
-	 return texture;
+	 return &texture;
 }
 
 void GUI::Perssed()

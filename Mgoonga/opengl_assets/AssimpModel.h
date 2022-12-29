@@ -30,11 +30,11 @@ public:
 
 	virtual void Draw() override;
 
-  virtual size_t                    GetVertexCount() const override;
-  virtual size_t                    GetMeshCount() const  override { return meshes.size();}
-  virtual std::vector<const IMesh*> GetMeshes() const override;
-  virtual size_t                    GetAnimationCount() const override { return m_animations.size(); }
-  virtual std::vector<const IAnimation*> GetAnimations() const override;
+  virtual size_t													GetVertexCount() const override;
+  virtual size_t													GetMeshCount() const  override { return meshes.size();}
+  virtual std::vector<const IMesh*>				GetMeshes() const override;
+  virtual size_t													GetAnimationCount() const override { return m_animations.size(); }
+  virtual std::vector<const IAnimation*>	GetAnimations() const override;
 
   public: //getters
 	std::string						          RootBoneName();
@@ -112,7 +112,7 @@ private:
 
 	std::vector<SceletalAnimation>	m_animations;
 	glm::mat4						            m_GlobalInverseTransform;
-  bool m_invert_y_uv = false;
+  bool														m_invert_y_uv = false;
 
 	void							loadNodesToBone(aiNode * node);
 	void							loadBoneChildren(aiNode* node);

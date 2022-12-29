@@ -4,16 +4,11 @@
 #include <vector>
 #include "interfaces.h"
 
-struct IModelDeleter
-{
-  void operator()(IModel *p);
-};
-
 //---------------------------------------------------------------------------------
 class DLL_BASE eObject
 {
 public:
-	explicit eObject() {}
+	explicit eObject() {} //@todo
 	virtual ~eObject();
 
 	bool operator==(const eObject&);
@@ -25,6 +20,7 @@ public:
 	void				SetTransform(ITransform*);
 	void				SetCollider(ICollider*);
 	void				SetModel(IModel*);
+	void				SetModel(std::shared_ptr<IModel>);
 	void				SetRigidBody(IRigidBody*);
 	void 				SetName(const std::string& _name) { name = _name; }
 
@@ -38,7 +34,7 @@ public:
 	const std::string&	Name()			const	{ return name;				}
 
 protected:
-	std::unique_ptr<IModel, IModelDeleter>			model;
+	std::shared_ptr<IModel>			model;
 	std::unique_ptr<IScript>		script;
 	std::unique_ptr<ITransform>		transform;
 	std::unique_ptr<ICollider>		collider;

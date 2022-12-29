@@ -3,10 +3,10 @@
 
 #include <base/interfaces.h>
 #include <base/Object.h>
+#include "Texture.h"
 
 #include "opengl_assets.h"
 
-struct Texture;
 
 class DLL_OPENGL_ASSETS GUI : public IInputObserver
 {
@@ -18,7 +18,7 @@ public:
 	virtual bool	OnMousePress(uint32_t x, uint32_t y, bool left) override;
 
 	void			  setCommand(std::shared_ptr<ICommand> com);
-	void			  SetTexture(Texture* t);
+	void			  SetTexture(const Texture& t);
 	Texture*		GetTexture();
 	
 	void			Perssed();
@@ -29,7 +29,7 @@ protected:
 	int32_t						screenWidth;
 	int32_t						screenHeight;
 
-	Texture*					texture;
+	Texture					texture;
 
 	int32_t						topleftX;
 	int32_t						topleftY;
