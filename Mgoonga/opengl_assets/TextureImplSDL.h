@@ -5,7 +5,7 @@
 #define SDL_IMAGE
 #ifdef SDL_IMAGE
 
-#include "SDL2-2.0.9/include/SDL.h"
+#include "SDL/include/SDL.h"
 #include "SDL2_image-2.0.4/SDL_image.h"
 
 class eTextureImplSDL

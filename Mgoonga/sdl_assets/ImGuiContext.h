@@ -5,9 +5,9 @@
 #include <tuple>
 #include <vector>
 
-#include <SDL2-2.0.9/include/SDL.h>
+#include <SDL/include/SDL.h>
 #include <glew-2.1.0/include/GL/glew.h>
-#include <SDL2-2.0.9/include/SDL_opengl.h>
+#include <SDL/include/SDL_opengl.h>
 
 #include <base/InputController.h>
 

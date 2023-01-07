@@ -3,6 +3,7 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
 #include "imgui/imgui_internal.h"
+//#include "imgui/imgui.h"
 
 #include <iostream>
 #include <functional>
@@ -286,7 +287,7 @@ namespace imgui_addons
                 {
                     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 0.01f));
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f,1.0f));
-                    ImGui::ArrowButtonEx("##Right", ImGuiDir_Right, ImVec2(frame_height, frame_height), ImGuiButtonFlags_Disabled);
+                    ImGui::ArrowButtonEx("##Right", ImGuiDir_Right, ImVec2(frame_height, frame_height), ImGuiButtonFlags_None);
                     ImGui::SameLine(0,0);
                     ImGui::PopStyleColor(2);
                 }
@@ -634,7 +635,7 @@ namespace imgui_addons
                 //ImGui::PushFocusScope(focus_scope_id);
                 for(auto& element : inputcb_filter_files)
                 {
-                    if(ImGui::Selectable(element.get().c_str(), false, ImGuiSelectableFlags_NoHoldingActiveID | ImGuiSelectableFlags_PressedOnClick))
+                    if(ImGui::Selectable(element.get().c_str(), false, ImGuiSelectableFlags_NoHoldingActiveID | ImGuiSelectableFlags_SelectOnClick))
                     {
                         if(element.get().size() > 256)
                         {

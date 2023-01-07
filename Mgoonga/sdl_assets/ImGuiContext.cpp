@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "ImGuiContext.h"
 
-#include <SDL2-2.0.9/include/SDL.h>
+#include <SDL/include/SDL.h>
 #include <glew-2.1.0/include/GL/glew.h>
-#include <SDL2-2.0.9/include/SDL_opengl.h>
+#include <SDL/include/SDL_opengl.h>
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
@@ -33,16 +33,28 @@ eImGuiContext& eImGuiContext::GetInstance(SDL_GLContext* context, SDL_Window* wi
 void eImGuiContext::Init()
 {
 	// GL 3.0 + GLSL 130
-	const char* glsl_version = "#version 130"; //330 ?
+	const char* glsl_version = "#version 330";
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiWindowFlags_AlwaysAutoResize;  // Enable Keyboard Controls
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+  io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+  //io.ConfigViewportsNoAutoMerge = true;
+  //io.ConfigViewportsNoTaskBarIcon = true;
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 	//ImGui::StyleColorsClassic();
+
+  /*ImGuiStyle& style = ImGui::GetStyle();
+  if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+  {
+    style.WindowRounding = 0.0f;
+    style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+  }*/
 
 	// Setup Platform/Renderer bindings
 	ImGui_ImplSDL2_InitForOpenGL(window, context);
@@ -52,13 +64,22 @@ void eImGuiContext::Init()
 void eImGuiContext::NewFrame()
 {
 	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplSDL2_NewFrame(window);
+	ImGui_ImplSDL2_NewFrame(); // pass window or not?
 	ImGui::NewFrame();
 }
 
 void eImGuiContext::Render()
 {
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+  ImGuiIO& io = ImGui::GetIO(); (void)io;
+  if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+  {
+    SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
+    SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
+    ImGui::UpdatePlatformWindows();
+    ImGui::RenderPlatformWindowsDefault();
+    SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
+  }
 }
 
 void eImGuiContext::PreRender()
@@ -242,7 +263,7 @@ void eWindowImGui::Render()
   window_size_x =size.x;
   window_size_y =size.y;
   ImGui::SetNextWindowPos(ImVec2{ window_pos_x , window_pos_y + window_size_y });
-  ImGui::SetNextWindowContentWidth(window_size_x);
+  ImGui::SetWindowSize({ 300, 300 });
 	ImGui::End();
 }
 

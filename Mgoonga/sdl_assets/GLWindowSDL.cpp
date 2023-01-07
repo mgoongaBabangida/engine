@@ -2,7 +2,8 @@
 #include "GLWindowSDL.h"
 
 #include "ImGuiContext.h"
-
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_sdl.h"
 #include <iostream>
 
 #include "MainContextBase.h"
@@ -47,12 +48,16 @@ dbGLWindowSDL::~dbGLWindowSDL()
 //---------------------------------------
 bool dbGLWindowSDL::InitializeGL()
 {
-	SDL_Init(SDL_INIT_EVERYTHING);
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
+	{
+		printf("Error: %s\n", SDL_GetError());
+		return -1;
+	}
 	
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -101,6 +106,10 @@ void dbGLWindowSDL::Run()
 	{
 		if(SDL_PollEvent(&windowEvent))
 		{
+			ImGuiIO& io = ImGui::GetIO();
+			ImGui_ImplSDL2_ProcessEvent(&windowEvent);
+			if (io.WantCaptureMouse)
+				continue;
       if (windowEvent.type == SDL_KEYDOWN && windowEvent.key.keysym.sym == SDLK_ESCAPE)
 			{
 				dTimer->stop();
@@ -152,21 +161,15 @@ void dbGLWindowSDL::PaintGL()
 	
 	eImGuiContext::GetInstance(&context, window).NewFrame();
 
-	//eWindowImGuiDemo demo;
-  //demo.Render();
+	/*eWindowImGuiDemo demo;
+  demo.Render();*/
 
   for(auto* gui : guiWnd)
     gui->Render();
 
-  for (auto* gui : guiWnd)
-	  if (gui)
-		  eImGuiContext::GetInstance(&context, window).PreRender();
-
+	eImGuiContext::GetInstance(&context, window).PreRender();
 	mainContext->PaintGL();
-	
-  for (auto* gui : guiWnd)
-    if (gui)
-		  eImGuiContext::GetInstance(&context, window).Render();
+	eImGuiContext::GetInstance(&context, window).Render();
 
 	SDL_GL_SwapWindow(window);
 }
