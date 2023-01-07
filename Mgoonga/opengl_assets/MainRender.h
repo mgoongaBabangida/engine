@@ -15,7 +15,7 @@ public:
 
 	void Render(const Camera&			camera,
 				      const Light&			light,
-				      std::vector<shObject>&	objects,
+				      const std::vector<shObject>&	objects,
 		          bool debug_white,
 		          bool debug_text_coords);
 

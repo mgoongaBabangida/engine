@@ -13,14 +13,14 @@
 //--------------------------------------------------------------------
 class DLL_MATH Bone
 {
-	size_t				index;
-	std::string			name;
-	std::vector<Bone*>	children;
-	glm::mat4			animatedTransform;
-	glm::mat4			localBindTransform;
-	glm::mat4			inverseBindTransform;
-	glm::mat4			mTransform = UNIT_MATRIX; //for empty nodes
-	bool				realBone = true;
+	size_t								index;
+	std::string						name;
+	std::vector<Bone*>		children;
+	glm::mat4							animatedTransform;
+	glm::mat4							localBindTransform;
+	glm::mat4							inverseBindTransform;
+	glm::mat4							mTransform = UNIT_MATRIX; //for empty nodes
+	bool									realBone = true;
 
 public:
 	Bone(int index, std::string name, glm::mat4 localBindTransform, bool real = true)
@@ -32,12 +32,12 @@ public:
 
 	Bone() {}
 	
-	void				addChild(Bone* bone)					            { children.push_back(bone); }
-	const glm::mat4&	getAnimatedTransform() const				{ return animatedTransform; }
-	void				setAnimatedTransform(glm::mat4 trans)	    { animatedTransform = trans; }
-	glm::mat4			getInverseBindTransform()const			    { return inverseBindTransform; }
-	int					ID()const								                  { return index; }
-	std::string			Name()const								            { return name; }
+	void							addChild(Bone* bone)													{ children.push_back(bone); }
+	const glm::mat4&	getAnimatedTransform() const									{ return animatedTransform; }
+	void							setAnimatedTransform(const glm::mat4& trans)	{ animatedTransform = trans; }
+	glm::mat4					getInverseBindTransform()const								{ return inverseBindTransform; }
+	int								ID()const																			{ return index; }
+	std::string				Name()const																		{ return name; }
 	
 	void calculateInverseBindTransform(const glm::mat4 &ParentBindTransform) 
 	{

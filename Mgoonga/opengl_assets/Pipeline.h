@@ -77,14 +77,15 @@ protected:
 	void			RenderRefraction(Camera&, const Light&, std::vector<shObject>&);
 	void			RenderSkyNoise(const Camera&);
 	void			StencilFuncDefault();
-	void			RenderFocused(const Camera&, const Light&, std::vector<shObject>&);
-	void			RenderMain(const Camera&, const Light&, std::vector<shObject>&);
-	void			RenderOutlineFocused(const Camera&, const Light&, std::vector<shObject>&);
+	void			RenderFocused(const Camera&, const Light&, const std::vector<shObject>&);
+	void			RenderMain(const Camera&, const Light&, const std::vector<shObject>&);
+	void			RenderOutlineFocused(const Camera&, const Light&, const std::vector<shObject>&);
 	void			RenderFlags(const Camera&, const Light&, std::vector<shObject>);
 	void			RenderWater(const Camera&, const Light&);
 	void			RenderGeometry(const Camera&);	//hex latter other things
 	void			RenderParticles(const Camera&);
 	void			RenderBlur(const Camera&);
+	void			RenderContrast(const Camera& _camera);
 	void			RenderGui(std::vector<GUI>&, const Camera&);
 	void			RenderPBR(const Camera&, const Light& _light, std::vector<shObject> _objs);
 

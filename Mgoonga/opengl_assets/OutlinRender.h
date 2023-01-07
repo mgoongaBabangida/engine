@@ -14,7 +14,7 @@ public:
 	eOutlineRender(const std::string& vS, const std::string& fS);
 	void Render(const Camera&			camera, 
 				      const Light&			light, 
-				      std::vector<shObject>&	objects);
+				      const std::vector<shObject>&	objects);
 
 private:
 	Shader		shader;

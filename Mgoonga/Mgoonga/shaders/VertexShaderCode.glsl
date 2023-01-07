@@ -35,7 +35,7 @@ void main()
 	
   vec4 v =  BoneTransform * vec4(position ,1.0); // BoneTransform *
  
-  gl_Position	= modelToProjectionMatrix * vec4(position ,1.0);
+  gl_Position	= modelToProjectionMatrix * v;
   LightSpacePos = shadowMatrix * modelToWorldMatrix * v;
 
   vec4 WorldPosV	    = modelToWorldMatrix * v;	  //water

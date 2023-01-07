@@ -51,7 +51,7 @@ eMainRender::eMainRender(const std::string& vS, const std::string& fS)
 //-----------------------------------------------------------------------------------------------------
 void eMainRender::Render(const Camera&			    camera,
 						             const Light&			      light,
-						             std::vector<shObject>&	objects,
+						             const std::vector<shObject>&	objects,
                          bool                   debug_white,
                          bool                   debug_text_coords)
 {
@@ -96,11 +96,15 @@ void eMainRender::Render(const Camera&			    camera,
 		glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 		glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &object->GetTransform()->getModelMatrix()[0][0]);
 
-		if(object->GetRigger() != nullptr)
+		if (object->GetRigger() != nullptr)
+		{
 			matrices = object->GetRigger()->GetMatrices();
+		}
 		else
+		{
 			for (auto& m : matrices)
 				m = UNIT_MATRIX;
+		}
 
 		int loc = glGetUniformLocation(mainShader.ID, "gBones");
 		glUniformMatrix4fv(loc, 100, GL_FALSE, &matrices[0][0][0]);

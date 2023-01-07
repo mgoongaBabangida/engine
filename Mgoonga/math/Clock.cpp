@@ -95,5 +95,9 @@ namespace math {
 			paused = false;
 		}
 	}
+	bool eClock::isPaused()
+	{
+		return paused;
+	}
 }
 

@@ -2,7 +2,7 @@
 #include "SceletalAnimation.h"
 #include <iostream>
 
-Frame SceletalAnimation::getCurrentFrame()
+const Frame& SceletalAnimation::getCurrentFrame()
 {
 	if(clock.timeEllapsedMsc() > duration) //need to improve
 		clock.restart();
@@ -17,8 +17,7 @@ Frame SceletalAnimation::getCurrentFrame()
 			break;
 	}
 	if(i == 0) 
-	{ return frames[0]; }
-
+		{ return frames[0]; }
 	return frames[i];
 
 	//float progression = (time - frames[i - 1].timeStamp) / (frames[i].timeStamp - frames[i - 1].timeStamp);	
@@ -37,8 +36,39 @@ Frame SceletalAnimation::getCurrentFrame()
 	//return Frame(time, newFrame);
 }
 
+void SceletalAnimation::Start()
+{
+	clock.start();
+}
+
+void SceletalAnimation::Stop()
+{
+	clock.pause();
+}
+
+void SceletalAnimation::Continue()
+{
+	clock.goOn();
+}
+
+bool SceletalAnimation::IsPaused()
+{
+	return clock.isPaused();
+}
+
+const std::string& SceletalAnimation::Name() const
+{
+	return name;
+}
+
+void SceletalAnimation::SetName(const std::string& n)
+{
+	name = n;
+}
+
 void SceletalAnimation::Debug()
 {
+	std::cout << "--------Time-----" << " " << std::endl;
 	for (auto &fr : frames)
 	{
 		for (auto& ps : fr.pose)
@@ -49,5 +79,5 @@ void SceletalAnimation::Debug()
 			std::cout << ps.second.getModelMatrix()[2][0] << " " << ps.second.getModelMatrix()[2][1] << " " << ps.second.getModelMatrix()[2][2] << " " << ps.second.getModelMatrix()[2][3] << std::endl;
 		}
 	}
-
 }
+

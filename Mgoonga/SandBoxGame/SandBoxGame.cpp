@@ -58,7 +58,8 @@ void eSandBoxGame::PaintGL()
 			object->GetScript()->Update(m_objects);
 	}
 	std::map<ePipeline::RenderType, std::vector<shObject>> objects;
-	pipeline.RenderFrame(objects, m_camera, m_light, std::vector<GUI> {});
+	std::vector<GUI> gui;
+	pipeline.RenderFrame(objects, m_camera, m_light, gui);
 }
 
 bool eSandBoxGame::OnMouseMove(uint32_t x, uint32_t y)

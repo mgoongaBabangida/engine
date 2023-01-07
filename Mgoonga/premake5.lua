@@ -9,6 +9,7 @@ project "base"
 	location "base"
 	kind "SharedLib"
 	language "C++"
+	cppdialect "C++17"
 	targetdir ("bin/" .. outputdir .. "/Mgoonga")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
@@ -33,6 +34,7 @@ project "math"
 	location "math"
 	kind "SharedLib"
 	language "C++"
+	cppdialect "C++17"
 	targetdir ("bin/" .. outputdir .. "/Mgoonga")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
@@ -61,6 +63,7 @@ project "opengl_assets"
 	location "opengl_assets"
 	kind "SharedLib"
 	language "C++"
+	cppdialect "C++17"
 	targetdir ("bin/" .. outputdir .. "/Mgoonga")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
@@ -118,6 +121,7 @@ project "sdl_assets"
 	location "sdl_assets"
 	kind "SharedLib"
 	language "C++"
+	cppdialect "C++17"
 	targetdir ("bin/" .. outputdir .. "/Mgoonga")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
@@ -176,6 +180,7 @@ project "game_assets"
 	location "game_assets"
 	kind "SharedLib"
 	language "C++"
+	cppdialect "C++17"
 	targetdir ("bin/" .. outputdir .. "/Mgoonga")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
@@ -230,6 +235,7 @@ project "Mgoonga"
 	location "Mgoonga"
 	kind "ConsoleApp"
 	language "C++"
+	cppdialect "C++17"
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
@@ -281,6 +287,7 @@ project "AmericanTreasureGame"
 	location "AmericanTreasureGame"
 	kind "ConsoleApp"
 	language "C++"
+	cppdialect "C++17"
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
@@ -332,6 +339,7 @@ project "SandBoxGame"
 	location "SandBoxGame"
 	kind "ConsoleApp"
 	language "C++"
+	cppdialect "C++17"
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	

@@ -23,8 +23,8 @@ MyModel::MyModel(std::shared_ptr<MyMesh> m, Texture* t)
   , m_bump(t)
   , m_fourth(t)
 {
-  m->setTextures({ m_diffuse , m_specular , m_bump , m_fourth });
 }
+
 //$todo make one constructor and not use textures in model AT ALL, only in meshes
 MyModel::MyModel(std::shared_ptr<MyMesh> m, Texture* t, Texture* t2)
   : mesh(m)

@@ -115,8 +115,8 @@ void eWaveRender::Render(const Camera&		camera,
 		glm::quat plus = glm::toQuat(glm::rotate(UNIT_MATRIX, (float) PI / 2, XAXIS));
 		m_object->GetTransform()->setRotation(cur * plus);
 
-		m_model->setDiffuse(const_cast<Texture*>(flag->GetModel()->GetMeshes()[0]->GetTextures()[0]));
-		m_model->setSpecular(const_cast<Texture*>(flag->GetModel()->GetMeshes()[0]->GetTextures()[0]));
+		m_model->setDiffuse(const_cast<Texture*>(flag->GetModel()->GetTexturesModelLevel()[0]));
+		m_model->setSpecular(const_cast<Texture*>(flag->GetModel()->GetTexturesModelLevel()[0]));
 
 		glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * m_object->GetTransform()->getModelMatrix();
 		glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);

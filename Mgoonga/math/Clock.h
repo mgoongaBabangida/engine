@@ -11,15 +11,15 @@ namespace math {
 	class DLL_MATH eClock
 	{
 	public:
-		void		start();
+		void			start();
 		int64_t		timeEllapsedMsc();
 		int64_t		newFrame();
 		int64_t		timeEllapsedLastFrameMsc();
-		void		restart();
-		bool		isActive();
-		void		pause();
-		void		goOn();
-		bool		isPaused() { return paused; }
+		void			restart();
+		bool			isActive();
+		void			pause();
+		void			goOn();
+		bool			isPaused();
 
 	protected:
 		std::chrono::system_clock::time_point  m_start;

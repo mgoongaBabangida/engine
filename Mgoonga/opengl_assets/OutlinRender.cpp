@@ -14,7 +14,7 @@ eOutlineRender::eOutlineRender(const std::string& vS, const std::string& fS)
 	eyePositionWorldUniformLocation		= glGetUniformLocation(shader.ID, "eyePositionWorld");
 }
 
-void eOutlineRender::Render(const Camera & camera, const Light & light, std::vector<shObject>& objects)
+void eOutlineRender::Render(const Camera & camera, const Light & light, const std::vector<shObject>& objects)
 {
 	glUseProgram(shader.ID);
 

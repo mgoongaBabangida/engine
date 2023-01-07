@@ -35,14 +35,14 @@ public:
 	
 	bool operator==(const SceletalAnimation& other) { return name == other.name && duration == other.duration; }
 	
-	Frame getCurrentFrame();
+	const Frame& getCurrentFrame();
 
-  virtual void Start() override { clock.start(); }
-  virtual void Stop() override  { clock.pause(); }
-  virtual void Continue() override { clock.goOn(); }
-  virtual bool IsPaused() override { return clock.isPaused(); }
-	virtual const std::string& Name() const		override { return name; }
-	void SetName(const std::string& n)	{ name = n; }
+	virtual void Start() override;
+	virtual void Stop() override;
+	virtual void Continue() override;
+	virtual bool IsPaused() override;
+	virtual const std::string& Name() const		override;
+	void SetName(const std::string& n);
 
 	void Debug();
 

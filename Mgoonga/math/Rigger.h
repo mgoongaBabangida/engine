@@ -18,7 +18,7 @@ class DLL_MATH Rigger : public IRigger
 {
 	friend struct eRaii;
 public:
-	explicit Rigger(eAnimatedModel* _model);
+	explicit									Rigger(eAnimatedModel* _model);
 	virtual bool							Apply(const std::string& _animation);
   virtual bool							Apply(size_t _animation_index);
 	virtual void							Stop();
@@ -28,14 +28,14 @@ public:
 protected:
 	void							UpdateAnimation(Bone &bone, const Frame &frame, const glm::mat4 &ParentTransform);
 
-	/*const*/ eAnimatedModel*		model;
+	/*const*/ eAnimatedModel*				model;
 	std::vector<SceletalAnimation>	animations;
-	SceletalAnimation*				currentAnim = nullptr;
-	std::vector<Bone>				bones;
-	std::string						nameRootBone;
-	std::vector<glm::mat4>			matrices;
-	std::unique_ptr<math::Timer>	timer;
-	std::atomic<bool>				matrix_flag = false;
+	SceletalAnimation*							currentAnim = nullptr;
+	std::vector<Bone>								bones;
+	std::string											nameRootBone;
+	std::vector<glm::mat4>					matrices;
+	std::unique_ptr<math::Timer>		timer;
+	std::atomic<bool>								matrix_flag = false;
 };
 
 struct eRaii

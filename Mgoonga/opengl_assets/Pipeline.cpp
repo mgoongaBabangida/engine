@@ -144,8 +144,8 @@ void ePipeline::RenderFrame(std::map<RenderType, std::vector<shObject>> _objects
 	{
 	  for (auto obj : focused)
 	  {
-	    RenderFocused(_camera, _light, std::vector<shObject>{ obj });
-	    RenderOutlineFocused(_camera, _light, std::vector<shObject>{ obj });
+	    RenderFocused(_camera, _light, { obj });
+	    RenderOutlineFocused(_camera, _light, { obj });
 	  }
 	}
 
@@ -183,7 +183,15 @@ void ePipeline::RenderFrame(std::map<RenderType, std::vector<shObject>> _objects
 
 	if (particles) { RenderParticles(_camera); }
 
-	if (mts) { RenderBlur(_camera); }
+	if (mts) 
+	{ 
+		RenderBlur(_camera);
+		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
+		glViewport(0, 0, width, height);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
+		RenderContrast(_camera);
+	}
 	
 	if (draw_bounding_boxes)
 	{
@@ -196,7 +204,7 @@ void ePipeline::RenderFrame(std::map<RenderType, std::vector<shObject>> _objects
 	}
 
 	//8.1 Texture visualization
-	glBindFramebuffer(GL_FRAMEBUFFER, 0); //default?
+	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT); //?
 	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
 
@@ -338,7 +346,7 @@ void ePipeline::StencilFuncDefault()
 	glStencilMask(0xFF);
 }
 
-void ePipeline::RenderFocused(const Camera& _camera, const Light& _light, std::vector<shObject>& focused)
+void ePipeline::RenderFocused(const Camera& _camera, const Light& _light, const std::vector<shObject>& focused)
 {
 	//4. Rendering to main FBO with stencil
 	StencilFuncDefault();
@@ -348,21 +356,21 @@ void ePipeline::RenderFocused(const Camera& _camera, const Light& _light, std::v
 	}
 }
 
-void ePipeline::RenderMain(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
+void ePipeline::RenderMain(const Camera& _camera, const Light& _light, const std::vector<shObject>& _objects)
 {
 	glDisable(GL_STENCIL_TEST);
 	renderManager->MainRender()->Render(_camera, _light, _objects, debug_white, debug_texcoords);
 	glEnable(GL_STENCIL_TEST);
 }
 
-void ePipeline::RenderOutlineFocused(const Camera& _camera, const Light& _light, std::vector<shObject>& focused)
+void ePipeline::RenderOutlineFocused(const Camera& _camera, const Light& _light, const std::vector<shObject>& focused)
 {
 	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 	glStencilMask(0x00);
 	//5. Rendering Stencil Outlineing
 	if(!focused.empty())
 	{
-		renderManager->OutlineRender()->Render(_camera, _light, std::vector<shObject> {focused });
+		renderManager->OutlineRender()->Render(_camera, _light, focused);
 	}
 	StencilFuncDefault();
 	glClear(GL_STENCIL_BUFFER_BIT);
@@ -408,10 +416,10 @@ void ePipeline::RenderBlur(const Camera& _camera)
 	renderManager->BrightFilterRender()->Render();
 	renderManager->GaussianBlurRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_BRIGHT_FILTER));
 	renderManager->GaussianBlurRender()->Render();
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); //default?
-	glViewport(0, 0, width, height);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	glDisable(GL_DEPTH_TEST);
+}
+
+void ePipeline::RenderContrast(const Camera& _camera)
+{
 	renderManager->ScreenRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));
 	renderManager->ScreenRender()->SetTextureContrast(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_GAUSSIAN_TWO));
 	renderManager->ScreenRender()->RenderContrast(_camera, blur_coef);
