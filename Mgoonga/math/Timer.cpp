@@ -26,10 +26,7 @@ namespace math {
 			return true;
 		};
 
-		std::packaged_task<bool()> tsk(func);
-		fut = tsk.get_future();
-		thrd = std::thread(std::move(tsk));
-
+		fut = std::async(func);
 		return true;
 	}
 
@@ -39,8 +36,6 @@ namespace math {
 		{
 			active = false;
 			fut.get();
-			if (thrd.joinable())
-				thrd.join();
 			return true;
 		}
 		return false;
@@ -50,5 +45,4 @@ namespace math {
 	{
 		this->stop();
 	}
-
 }

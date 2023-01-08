@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <iostream>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 
 //-------------------------------------------------------------------------------------------
 Rigger::Rigger(eAnimatedModel* _model):model(_model)
@@ -31,22 +33,36 @@ Rigger::Rigger(eAnimatedModel* _model):model(_model)
 		}
 		timer.reset(new math::Timer([this]()->bool
 									{
-										bool fls = false;
-										if(currentAnim != nullptr && !currentAnim->IsPaused() && matrix_flag.compare_exchange_weak(fls, true))
+										if (currentAnim != nullptr && !currentAnim->IsPaused())
 										{
-											auto root = std::find_if(bones.begin(), bones.end(), [this](const Bone& bone) { return nameRootBone == bone.Name(); });
-											UpdateAnimation(*(root), currentAnim->getCurrentFrame(), UNIT_MATRIX);
-											for(auto& bone : bones)
+											bool fls = false;
+											if (matrix_flag.compare_exchange_weak(fls, true))
 											{
-												matrices[bone.ID()] = bone.getAnimatedTransform();
+												auto root = std::find_if(bones.begin(), bones.end(), [this](const Bone& bone) { return nameRootBone == bone.Name(); });
+												UpdateAnimation(*(root), currentAnim->getCurrentFrame(), UNIT_MATRIX);
+												for (auto& bone : bones)
+												{
+													matrices[bone.ID()] = bone.getAnimatedTransform();
+												}
+												matrix_flag.store(false);
+												std::this_thread::yield();
 											}
-											matrix_flag.store(false);
-											std::this_thread::yield();
+										}
+										else if(is_active) // currentAnim == nullptr || currentAnim->IsPaused()
+										{
+											std::unique_lock lk(mutex);
+											cv.wait(lk);
 										}
 										return true;
 									}));
 		timer->start(100);
 	}
+}
+//-------------------------------------------------------------------------------------------
+Rigger::~Rigger()
+{
+	is_active = false; // no more sleep
+	cv.notify_one(); // wake up
 }
 
 //-------------------------------------------------------------------------------------------
@@ -79,13 +95,21 @@ bool Rigger::Apply(size_t _animation_index)
 {
   if (currentAnim != nullptr && currentAnim == &animations[_animation_index])
   {
-    currentAnim->Continue();
+		{
+			std::lock_guard lk(mutex);
+			currentAnim->Continue();
+		}
+		cv.notify_one();
     return true;
   }
   else if(_animation_index < animations.size())
   {
-    currentAnim = &animations[_animation_index];
-    currentAnim->Start();
+		{
+			std::lock_guard lk(mutex);
+			currentAnim = &animations[_animation_index];
+			currentAnim->Start();
+		}
+		cv.notify_one();
     return true;
   }
   else

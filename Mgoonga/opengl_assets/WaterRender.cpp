@@ -38,8 +38,6 @@ eWaterRender::eWaterRender(std::unique_ptr<MyModel> model,
 	object->GetTransform()->setScale(glm::vec3(1.18f, 1.8f, 1.0f)); // the size of the pixture
 
 	clock.start();
-	timer.reset(new math::Timer([this]()->bool {this->Update(); return true; }));
-	timer->start(100);
 }
 
 void eWaterRender::Render(const Camera& camera, const Light& light)
@@ -72,8 +70,6 @@ void eWaterRender::Render(const Camera& camera, const Light& light)
 	
 	object->GetModel()->Draw();
 }
-
-void eWaterRender::Update(){}
 
 eWaterRender::~eWaterRender()
 {

@@ -19,7 +19,6 @@ namespace math {
 		 eClock clock;
 		 bool active = false;
 		 std::function<bool()> callable;
-		 std::thread thrd;
 		 std::future<bool> fut;
 	};
 

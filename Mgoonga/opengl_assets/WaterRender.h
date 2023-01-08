@@ -26,9 +26,7 @@ public:
 									   const Light&		light);
 
 protected:
-	void						Update();
-
-	Shader						waterShader;
+	Shader										waterShader;
 	std::unique_ptr<MyModel>	water;
 	std::unique_ptr<eObject>	object;
 
@@ -44,7 +42,6 @@ protected:
 	float						 move_factor	= 0.0f;
 	float						 waterHeight = 2.0f;
 	bool						 incr		= true;
-	std::unique_ptr<math::Timer> timer;
 	std::unique_ptr<Texture> reflection;
 	std::unique_ptr<Texture> refraction;
 };

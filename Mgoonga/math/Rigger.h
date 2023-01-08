@@ -19,6 +19,7 @@ class DLL_MATH Rigger : public IRigger
 	friend struct eRaii;
 public:
 	explicit									Rigger(eAnimatedModel* _model);
+	virtual										~Rigger();
 	virtual bool							Apply(const std::string& _animation);
   virtual bool							Apply(size_t _animation_index);
 	virtual void							Stop();
@@ -36,6 +37,9 @@ protected:
 	std::vector<glm::mat4>					matrices;
 	std::unique_ptr<math::Timer>		timer;
 	std::atomic<bool>								matrix_flag = false;
+	std::mutex											mutex;
+	std::condition_variable					cv;
+	bool														is_active = true;
 };
 
 struct eRaii
