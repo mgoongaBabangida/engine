@@ -8,9 +8,6 @@
 #include "Texture.h"
 #include <math/Camera.h>
 
-#include <memory>
-#include <vector>
-
 class TerrainModel;
 
 //----------------------------------------------------------

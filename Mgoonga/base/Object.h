@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <vector>
 #include "interfaces.h"
 
 //---------------------------------------------------------------------------------
@@ -25,12 +23,12 @@ public:
 	void 				SetName(const std::string& _name) { name = _name; }
 
 	//Getters
-	IScript*			GetScript()		const;
-	ITransform*			GetTransform()	const;
-	ICollider*			GetCollider()	const;
-	IModel*				GetModel()		const;
-	IRigger*			GetRigger()		const;
-	IRigidBody*			GetRigidBody()	const	{ return movementApi.get(); }
+	IScript*						GetScript()		const;
+	ITransform*					GetTransform()	const;
+	ICollider*					GetCollider()	const;
+	IModel*							GetModel()		const;
+	IRigger*						GetRigger()		const;
+	IRigidBody*					GetRigidBody()	const	{ return movementApi.get(); }
 	const std::string&	Name()			const	{ return name;				}
 
 protected:

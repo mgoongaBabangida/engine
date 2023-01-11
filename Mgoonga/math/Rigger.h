@@ -7,7 +7,6 @@
 #include "Bone.h"
 #include "SceletalAnimation.h"
 
-#include <string>
 #include <atomic>
 
 class eAnimatedModel;

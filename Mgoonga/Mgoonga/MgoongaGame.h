@@ -1,14 +1,12 @@
 #ifndef MAIN_CONTEXT_H
 #define MAIN_CONTEXT_H
 
-#include "game_assets.h"
-
 #include <base/base.h>
 
 #include <math/Camera.h>
 #include <math/CameraRay.h>
 
-#include <opengl_assets/Pipeline.h>
+#include <opengl_assets/OpenGlRenderPipeline.h>
 #include <opengl_assets/GUI.h>
 #include <opengl_assets/TerrainModel.h>
 
@@ -17,7 +15,7 @@
 class IWindowImGui;
 
 //-------------------------------------------------------------------------------
-class DLL_GAME_ASSETS eMgoongaGameContext : public eMainContextBase
+class eMgoongaGameContext : public eMainContextBase
 {
 public:
 	eMgoongaGameContext(eInputController*,
@@ -49,7 +47,7 @@ protected:
 protected:
 	Camera								                 m_camera;
 	dbb::CameraRay				                 camRay;
-  ePipeline							                 pipeline;
+  eOpenGlRenderPipeline							     pipeline;
 
   shObject							                 m_focused;
   std::vector<shObject>				           m_objects;

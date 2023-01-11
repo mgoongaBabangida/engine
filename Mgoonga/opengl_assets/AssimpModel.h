@@ -1,18 +1,16 @@
 #pragma once
+
+#include "stdafx.h"
 #include <assimp-3.1.1/include/assimp/Importer.hpp>
 #include <assimp-3.1.1/include/assimp/scene.h>
 #include <assimp-3.1.1/include/assimp/postprocess.h>
-
-#include <vector>
-#include <string>
-#include <iostream>
 
 #include "AssimpMesh.h"
 #include "MyModel.h"
 #include <math/AnimatedModel.h>
 #include <math/Bone.h>
 
-using namespace std;
+#include <iostream> //temp @todo logging
 
 #define NUM_BONES_PER_VEREX 4 
 
@@ -47,14 +45,14 @@ public:
 
 private:
 	/*  Model Data  */
-	vector<AssimpMesh>	meshes;
-	string				      directory;
+	std::vector<AssimpMesh>	meshes;
+	std::string				      directory;
 
 	/*  Functions   */
-  void							              loadModel(string path);
+  void							              loadModel(std::string path);
   void							              processNode(aiNode* node, const aiScene* scene);
 	AssimpMesh						          processMesh(aiMesh* mesh, const aiScene* scene);
-	vector<Texture>					        loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);
+	std::vector<Texture>					        loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
 	
 	// VertexBoneData
 	struct VertexBoneData

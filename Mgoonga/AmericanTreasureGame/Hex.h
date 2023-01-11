@@ -1,8 +1,6 @@
 #pragma once
 
 #include <math/PlaneLine.h>
-#include <vector>
-#include <memory>
 #include <math.h>
 
 static const float	common_height = 2.01f;

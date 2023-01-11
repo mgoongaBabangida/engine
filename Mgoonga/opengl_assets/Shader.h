@@ -1,7 +1,7 @@
 #pragma once
 
+#include "stdafx.h"
 #include <glew-2.1.0\include\GL\glew.h>
-#include <string>
 
 struct Shader
 {

@@ -1,10 +1,7 @@
 #pragma once
 
+#include "stdafx.h"
 #include <opengl_assets\opengl_assets.h>
-
-#include <memory>
-#include <string>
-#include <vector>
 
 class SoundContext;
 class RemSnd;

@@ -5,7 +5,7 @@
 
 #include <sdl_assets/MainContextBase.h>
 
-class ePipeline;
+class eOpenGlRenderPipeline;
 class Camera;
 namespace dbb { class CameraRay; }
 class GUI;
@@ -54,7 +54,7 @@ protected:
 	
 	std::unique_ptr<Camera>				  camera;
 	std::unique_ptr<dbb::CameraRay>	camRay;
-	std::unique_ptr<ePipeline>			pipeline;
+	std::unique_ptr<eOpenGlRenderPipeline>			pipeline;
   std::vector<GUI>					      guis;
   std::vector<Hex>					      hexes;
   Light								            light;

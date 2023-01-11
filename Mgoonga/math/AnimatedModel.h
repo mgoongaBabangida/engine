@@ -1,6 +1,8 @@
 #pragma once
 
+#include "stdafx.h"
 #include <base/interfaces.h>
+
 #include "Bone.h"
 #include "SceletalAnimation.h"
 

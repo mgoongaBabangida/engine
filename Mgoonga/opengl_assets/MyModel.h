@@ -4,9 +4,6 @@
 
 #include "opengl_assets.h"
 
-#include <vector>
-#include <memory>
-
 #include "MyMesh.h"
 
 struct Texture;

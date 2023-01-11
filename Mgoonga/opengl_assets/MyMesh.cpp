@@ -112,7 +112,6 @@ void MyMesh::setupMesh()
 
 	glBindVertexArray(this->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-
 	glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(MyVertex),
 		&this->vertices[0], GL_STATIC_DRAW);
 

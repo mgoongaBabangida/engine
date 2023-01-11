@@ -1,6 +1,7 @@
 #pragma once
+
+#include "stdafx.h"
 #include <stdint.h>
-#include <string>
 
 #define DEVIL_IMAGE
 #ifdef DEVIL_IMAGE

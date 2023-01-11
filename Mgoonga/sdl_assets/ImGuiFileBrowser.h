@@ -1,10 +1,8 @@
 #ifndef IMGUIFILEBROWSER_H
 #define IMGUIFILEBROWSER_H
 
+#include "stdafx.h"
 #include "imgui/imgui.h"
-
-#include <string>
-#include <vector>
 
 namespace imgui_addons
 {

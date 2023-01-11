@@ -2,10 +2,6 @@
 #define  INTERFACES_H
 
 #include "base.h"
-
-#include <memory>
-#include <string>
-#include <vector>
 #include <optional>
 
 #include <glm\glm\glm.hpp>
@@ -66,10 +62,10 @@ protected:
 	eObject* object = nullptr;
 public:
 	virtual ~IScript() = default;
-	virtual void	                    Update(std::vector<std::shared_ptr<eObject>> objs) = 0;
-	virtual void	                    CollisionCallback(const eCollision&)				{}
+	virtual void																			Update(std::vector<std::shared_ptr<eObject>> objs) = 0;
+	virtual void																			CollisionCallback(const eCollision&)				{}
   virtual std::vector<std::shared_ptr<eObject>>			GetChildrenObjects() { return std::vector<std::shared_ptr<eObject>>{}; }
-	void			                        SetObject(eObject* obj) { object = obj; }
+	void																							SetObject(eObject* obj) { object = obj; }
 };
 
 //-----------------------------------------------------------------------------

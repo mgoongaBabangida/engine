@@ -7,7 +7,7 @@
 #include <math/Camera.h>
 #include <math/CameraRay.h>
 
-#include <opengl_assets\Pipeline.h>
+#include <opengl_assets\OpenGlRenderPipeline.h>
 #include <opengl_assets\GUI.h>
 #include <opengl_assets\Sound.h>
 #include <opengl_assets/TextureManager.h>
@@ -110,7 +110,7 @@ eAmericanTreasureGame::eAmericanTreasureGame(eInputController* _input,
 											 const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
 , camRay(new dbb::CameraRay())
-, pipeline(new ePipeline(*camRay, width, height))
+, pipeline(new eOpenGlRenderPipeline(*camRay, width, height))
 , camera(new Camera(width, height, nearPlane, farPlane))
 {
 	_externalGui[0]->Add(SLIDER_FLOAT, "Ydir", &light.light_position.y);
@@ -460,12 +460,12 @@ void eAmericanTreasureGame::PaintGL()
 	for(auto &base : bases)
 		flags.push_back(base->getBaseScript()->GetChildrenObjects()[0]);
 	
-	std::map<ePipeline::RenderType, std::vector<shObject>> objects;
-	objects.insert({ ePipeline::RenderType::MAIN, m_objects });
+	std::map<eOpenGlRenderPipeline::RenderType, std::vector<shObject>> objects;
+	objects.insert({ eOpenGlRenderPipeline::RenderType::MAIN, m_objects });
 	if(focused)
-		objects.insert({ ePipeline::RenderType::OUTLINED, std::vector<shObject>{ focused } });
+		objects.insert({ eOpenGlRenderPipeline::RenderType::OUTLINED, std::vector<shObject>{ focused } });
 	else
-		objects.insert({ ePipeline::RenderType::OUTLINED, std::vector<shObject>{} });
-	objects.insert({ ePipeline::RenderType::FLAG, flags });
+		objects.insert({ eOpenGlRenderPipeline::RenderType::OUTLINED, std::vector<shObject>{} });
+	objects.insert({ eOpenGlRenderPipeline::RenderType::FLAG, flags });
 	pipeline->RenderFrame(objects, *camera.get(), light, guis);
 }

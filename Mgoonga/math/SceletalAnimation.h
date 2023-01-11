@@ -1,14 +1,14 @@
 #ifndef SCELETAL_ANIMATION_H 
 #define SCELETAL_ANIMATION_H
 
+#include "stdafx.h"
 #include <base/interfaces.h>
 
 #include "Transform.h"
 #include "Clock.h"
 
-#include <string>
 #include <map>
-#include <vector>
+
 
 //-------------------------------------------------------------------
 struct Frame

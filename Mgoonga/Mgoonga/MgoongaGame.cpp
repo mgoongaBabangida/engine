@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "MainContext.h"
+#include "MgoongaGame.h"
 
 #include <base/InputController.h>
 
@@ -18,7 +18,8 @@
 
 #include <sdl_assets/ImGuiContext.h>
 
-#include "ShipScript.h"
+#include <game_assets/ShipScript.h>
+#include <game_assets/ObjectFactory.h>
 
 //---------------------------------------------------------------------------
 eMgoongaGameContext::eMgoongaGameContext(eInputController*  _input,
@@ -34,7 +35,8 @@ eMgoongaGameContext::eMgoongaGameContext(eInputController*  _input,
 	m_light.ambient			= vec3(0.05f, 0.05f, 0.05f);
 	m_light.diffuse			= vec3(0.75f, 0.75f, 0.75f);
 	m_light.specular		= vec3(0.5f, 0.5f, 0.5f);
-	m_light.light_position	= vec4(0.0f, 4.0f, -1.0f, -1.0f);
+	m_light.light_position	= vec4(0.0f, 4.0f, -1.0f, 1.0f); //-1?
+  m_light.light_direction = vec4(0.0f, 0.0f, 0.0f, 1.0f); // rather target
 	m_light.type			= eLightType::DIRECTION;
   m_camera.setPosition(glm::vec3(-1.0f, 4.0f, -2.5f));
   m_camera.setDirection(glm::vec3(0.6f, -0.10f, 0.8f));
@@ -145,6 +147,8 @@ void eMgoongaGameContext::InitializeExternalGui()
 
   externalGui[0]->Add(SLIDER_FLOAT, "PBR light dist", (void*)&pipeline.MaterialMetalness());
   externalGui[0]->Add(SLIDER_FLOAT, "PBR light intensity", (void*)&pipeline.MaterialRoughness());
+  externalGui[0]->Add(SLIDER_FLOAT, "PBR light shininess", (void*)&pipeline.MaterialShininess());
+  externalGui[0]->Add(SLIDER_FLOAT, "PBR light ao", (void*)&pipeline.MaterialAO());
 
   m_focused = m_objects[4];
   OnFocusedChanged();
@@ -154,10 +158,10 @@ void eMgoongaGameContext::InitializeExternalGui()
 bool eMgoongaGameContext::OnMouseMove(uint32_t x, uint32_t y)
 {
   if (camRay.IsPressed())
-    {
+  {
     m_framed.reset(new std::vector<shObject>(camRay.onMove(m_camera, m_objects, static_cast<float>(x), static_cast<float>(y)))); 	//to draw a frame
     return true;
-    }
+  }
 	return false;
 }
 
@@ -190,11 +194,13 @@ bool eMgoongaGameContext::OnMousePress(uint32_t x, uint32_t y, bool left)
   if (m_framed)
     m_framed->clear();
 
-	camRay.Update(m_camera, x, y, width, height);
+	camRay.Update(m_camera, static_cast<float>(x), static_cast<float>(y), width, height);
 	if(left)
 	{
 		camRay.press(x, y);
-		auto new_focused = camRay.calculateIntersaction(m_objects);
+    auto objects = m_objects;
+    objects.insert(objects.end(), m_pbr_objs.begin(), m_pbr_objs.end());
+		auto new_focused = camRay.calculateIntersaction(objects);
     if (new_focused != m_focused)
     {
       m_focused = new_focused;
@@ -267,7 +273,7 @@ void eMgoongaGameContext::InitializeGL()
 	//Camera Ray
 	camRay.init(width, height, nearPlane, farPlane);
 	
-	m_objects[4]->SetScript(new eShipScript(texManager->Find("TSpanishFlag0_s"),
+	m_objects[3]->SetScript(new eShipScript(texManager->Find("TSpanishFlag0_s"),
 											pipeline.GetRenderManager(),
                       m_camera,
 											texManager->Find("Tatlas2"),
@@ -309,8 +315,6 @@ void eMgoongaGameContext::InitializeBuffers()
 	pipeline.InitializeBuffers(m_light.type == eLightType::POINT);
 }
 
-#include <opengl_assets/ShpereTexturedModel.h> // temp
-
 //-----------------------------------------------------------------------------
 void eMgoongaGameContext::InitializeModels()
 {
@@ -319,11 +323,15 @@ void eMgoongaGameContext::InitializeModels()
 	//MODELS
 	modelManager->Add("nanosuit", (GLchar*)std::string(modelFolderPath + "nanosuit/nanosuit.obj").c_str());
 	modelManager->Add("boat", (GLchar*)std::string(modelFolderPath + "Medieval Boat/Medieval Boat.obj").c_str());
-	//modelManager.Add("spider", (GLchar*)std::string(ModelFolderPath + "ogldev-master/Content/spider.obj").c_str());
 	modelManager->Add("wolf", (GLchar*)std::string(modelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
 	modelManager->Add("guard", (GLchar*)std::string(modelFolderPath + "ogldev-master/Content/guard/boblampclean.md5mesh").c_str(), true);
-	//modelManager.Add("stairs", (GLchar*)std::string(modelFolderPath + "stairs.blend").c_str());
   modelManager->Add("zombie", (GLchar*)std::string(modelFolderPath + "Thriller Part 3/Thriller Part 3.dae").c_str());
+
+  std::vector<const Texture*> textures{ texManager->Find("pbr1_basecolor"),
+                                      texManager->Find("pbr1_normal"),
+                                      texManager->Find("pbr1_metallic"),
+                                      texManager->Find("pbr1_roughness") };
+  modelManager->Add("sphere_textured", std::vector<const Texture*>{}); // or textures
 
 	//TERRAIN
 	std::unique_ptr<TerrainModel> terrainModel = modelManager->CloneTerrain("simple");
@@ -333,114 +341,51 @@ void eMgoongaGameContext::InitializeModels()
 							   texManager->Find("TOcean0_s"),
                  true);
 	//OBJECTS
-	shObject wallCube = shObject(new eObject);
-	wallCube->SetModel(modelManager->Find("wall_cube"));
-	wallCube->SetTransform(new Transform);
-	wallCube->SetCollider(new BoxCollider);
-	wallCube->SetRigidBody(new eRigidBody);
-	wallCube->GetRigidBody()->SetObject(wallCube.get());
-	wallCube->GetCollider()->CalculateExtremDots(wallCube->GetModel()->GetPositions());
+  ObjectFactoryBase factory;
+  shObject wallCube = factory.CreateObject(modelManager->Find("wall_cube"));
 	wallCube->GetTransform()->setTranslation(vec3(3.0f, 3.0f, 3.0f));
 	m_objects.push_back(wallCube);
 
-	shObject containerCube = shObject(new eObject);
-	containerCube->SetModel(modelManager->Find("container_cube"));
-	containerCube->SetTransform(new Transform);
-	containerCube->SetCollider(new BoxCollider);
-	containerCube->SetRigidBody(new eRigidBody);
-	containerCube->GetRigidBody()->SetObject(containerCube.get());
-	containerCube->GetCollider()->CalculateExtremDots(containerCube->GetModel()->GetPositions());
+	shObject containerCube = factory.CreateObject(modelManager->Find("container_cube"));
 	containerCube->GetTransform()->setTranslation(vec3(-2.5f, 3.0f, 3.5f));
 	m_objects.push_back(containerCube);
 
-	shObject arrow = shObject(new eObject);
-	arrow->SetModel(modelManager->Find("arrow"));
-	arrow->SetName("arrow");
-	arrow->SetTransform(new Transform);
-	arrow->SetCollider(new BoxCollider);
-	arrow->SetRigidBody(new eRigidBody);
-	arrow->GetRigidBody()->SetObject(arrow.get());
-	arrow->GetCollider()->CalculateExtremDots(arrow->GetModel()->GetPositions());
-	arrow->GetTransform()->setTranslation(vec3(1.0f, 1.0f, -1.0f));
-	m_objects.push_back(arrow);
-
-	shObject grassPlane = shObject(new eObject);
-	grassPlane->SetModel(modelManager->Find("grass_plane"));
-	grassPlane->SetTransform(new Transform);
-	grassPlane->SetCollider(new BoxCollider);
-	grassPlane->SetRigidBody(new eRigidBody);
-	grassPlane->GetRigidBody()->SetObject(grassPlane.get());
-	grassPlane->GetCollider()->CalculateExtremDots(grassPlane->GetModel()->GetPositions());
-	grassPlane->GetTransform()->setTranslation(vec3(0.0f, -2.0f, 0.0f));
+  shObject grassPlane = factory.CreateObject(modelManager->Find("grass_plane"));
+	grassPlane->GetTransform()->setTranslation(vec3(0.0f, 1.0f, 0.0f));
 	m_objects.push_back(grassPlane);
 
-	shObject nanosuit = shObject(new eObject);
-	nanosuit->SetModel(modelManager->Find("nanosuit"));
-	nanosuit->SetTransform(new Transform);
-	nanosuit->SetCollider(new BoxCollider);
-	nanosuit->SetRigidBody(new eRigidBody);
-	nanosuit->GetRigidBody()->SetObject(nanosuit.get());
-	nanosuit->GetCollider()->CalculateExtremDots(nanosuit->GetModel()->GetPositions());
+	shObject nanosuit = factory.CreateObject(modelManager->Find("nanosuit"));
 	nanosuit->GetTransform()->setTranslation(vec3(0.0f, 2.0f, 0.0f));
   nanosuit->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
 	nanosuit->GetTransform()->setScale(vec3(0.12f, 0.12f, 0.12f));
 	m_objects.push_back(nanosuit);
 
-  shObject terrain = shObject(new eObject);
-  terrain->SetModel(terrainModel.release());
-  terrain->SetTransform(new Transform);
-  terrain->SetCollider(new BoxCollider);
-  terrain->SetRigidBody(new eRigidBody);
-  terrain->GetRigidBody()->SetObject(terrain.get());
-  terrain->GetCollider()->CalculateExtremDots(terrain->GetModel()->GetPositions());
+  shObject terrain = factory.CreateObject(std::shared_ptr<IModel>(terrainModel.release()));
   terrain->SetName("Terrain");
   terrain->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
   terrain->GetTransform()->setTranslation(vec3(0.0f, 1.8f, 0.0f));
   m_objects.push_back(terrain);
 
-	shObject wolf = shObject(new eObject);
-	wolf->SetModel(modelManager->Find("wolf"));
-	wolf->SetTransform(new Transform);
-	wolf->SetCollider(new BoxCollider);
-	wolf->SetRigidBody(new eRigidBody);
-	wolf->GetRigidBody()->SetObject(wolf.get());
-	wolf->GetCollider()->CalculateExtremDots(wolf->GetModel()->GetPositions());
+	shObject wolf = factory.CreateObject(modelManager->Find("wolf"));
 	wolf->GetTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);
 	wolf->GetTransform()->setTranslation(vec3(4.0f, 3.0f, 0.0f));
 	wolf->SetRigger(new Rigger((Model*)modelManager->Find("wolf").get())); //@todo improve
 	wolf->GetRigger()->ChangeName(std::string(), "Running");//@todo improve
 	m_objects.push_back(wolf);
 
-	shObject brickCube = shObject(new eObject);
+	shObject brickCube = factory.CreateObject(modelManager->Find("brick_cube"));
 	brickCube->SetModel(modelManager->Find("brick_cube"));
-	brickCube->SetTransform(new Transform);
-	brickCube->SetCollider(new BoxCollider);
-	brickCube->SetRigidBody(new eRigidBody);
-	brickCube->GetRigidBody()->SetObject(brickCube.get());
-	brickCube->GetCollider()->CalculateExtremDots(brickCube->GetModel()->GetPositions());
 	brickCube->GetTransform()->setTranslation(vec3(0.5f, 3.0f, 3.5f));
 	m_objects.push_back(brickCube);
 
-  shObject guard = shObject(new eObject);
-  guard->SetModel(modelManager->Find("guard"));
-  guard->SetTransform(new Transform);
-  guard->SetCollider(new BoxCollider);
-  guard->SetRigidBody(new eRigidBody);
-  guard->GetRigidBody()->SetObject(guard.get());
-  guard->GetCollider()->CalculateExtremDots(guard->GetModel()->GetPositions());
+  shObject guard = factory.CreateObject(modelManager->Find("guard"));
   guard->GetTransform()->setTranslation(vec3(2.0f, 2.0f, 0.0f));
   guard->GetTransform()->setRotation(glm::radians(-90.0f), glm::radians(-90.0f), 0.0f);
   guard->GetTransform()->setScale(glm::vec3(0.03f, 0.03f, 0.03f));
   guard->SetRigger(new Rigger((Model*)modelManager->Find("guard").get()));//@todo improve
   m_objects.push_back(guard);
 
-  shObject zombie = shObject(new eObject);
-  zombie->SetModel(modelManager->Find("zombie"));
-  zombie->SetTransform(new Transform);
-  zombie->SetCollider(new BoxCollider);
-  zombie->SetRigidBody(new eRigidBody);
-  zombie->GetRigidBody()->SetObject(zombie.get());
-  zombie->GetCollider()->CalculateExtremDots(zombie->GetModel()->GetPositions());
+  shObject zombie = factory.CreateObject(modelManager->Find("zombie"));
   zombie->GetTransform()->setTranslation(vec3(1.0f, 2.0f, 0.0f));
   zombie->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
   zombie->GetTransform()->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
@@ -448,29 +393,12 @@ void eMgoongaGameContext::InitializeModels()
   m_objects.push_back(zombie);
 
 	//light_cube
-	lightObject = shObject(new eObject);
-	lightObject->SetModel(modelManager->Find("white_sphere"));
-	lightObject->SetTransform(new Transform);
-	lightObject->SetCollider(new BoxCollider);
-	lightObject->SetRigidBody(new eRigidBody);
-	lightObject->GetRigidBody()->SetObject(lightObject.get());
-	lightObject->GetCollider()->CalculateExtremDots(lightObject->GetModel()->GetPositions());
+	lightObject = factory.CreateObject(modelManager->Find("white_sphere"));
 	lightObject->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
 	lightObject->GetTransform()->setTranslation(m_light.light_position);
 	m_objects.push_back(lightObject);
 
-  std::vector<const Texture*> textures {texManager->Find("pbr1_basecolor"),
-                                  texManager->Find("pbr1_metallic"),
-                                  texManager->Find("pbr1_normal"),
-                                  texManager->Find("pbr1_roughness") };
-  Material material;
-  material.diffuse = glm::vec3(0.5f, 0.0f, 0.0f);
-  material.ao = 1.0f;
-  shObject obj = std::make_shared<eObject>();
-  SphereTexturedMesh* mesh = new SphereTexturedMesh();
-  mesh->SetMaterial(material);
-  obj->SetModel(new SphereTexturedModel(mesh, textures));
-  obj->SetTransform(new Transform);
+  shObject obj = factory.CreateObject(modelManager->Find("sphere_textured"));
   obj->GetTransform()->setTranslation(glm::vec3(-2.0f,3.5f,1.5f));
   m_pbr_objs.push_back(obj);
 }
@@ -479,10 +407,10 @@ void eMgoongaGameContext::InitializeModels()
 void eMgoongaGameContext::InitializeRenders()
 {
 	pipeline.InitializeRenders(*modelManager.get(), *texManager.get(), shadersFolderPath);
-	pipeline.GetRenderManager().AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f),
+	/*pipeline.GetRenderManager().AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f),
                                                                    texManager->Find("Tatlas2"),
                                                                    soundManager->GetSound("shot_sound"),
-                                                                   texManager->Find("Tatlas2")->numberofRows));
+                                                                   texManager->Find("Tatlas2")->numberofRows));*/
 }
 
 //-------------------------------------------------------------------------------
@@ -511,11 +439,11 @@ void eMgoongaGameContext::PaintGL()
     focused_output = m_focused ? std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{ m_focused })
                                : std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{});
 
-  std::map<ePipeline::RenderType, std::vector<shObject>> objects;
-  objects.insert({ ePipeline::RenderType::MAIN, m_objects});
-  objects.insert({ ePipeline::RenderType::OUTLINED, *focused_output });
-  objects.insert({ ePipeline::RenderType::FLAG, flags });
-  objects.insert({ ePipeline::RenderType::PBR, m_pbr_objs });
+  std::map<eOpenGlRenderPipeline::RenderType, std::vector<shObject>> objects;
+  objects.insert({ eOpenGlRenderPipeline::RenderType::MAIN, m_objects});
+  objects.insert({ eOpenGlRenderPipeline::RenderType::OUTLINED, *focused_output });
+  objects.insert({ eOpenGlRenderPipeline::RenderType::FLAG, flags });
+  objects.insert({ eOpenGlRenderPipeline::RenderType::PBR, m_pbr_objs });
 
 	pipeline.RenderFrame(objects, m_camera, m_light, guis);
 }

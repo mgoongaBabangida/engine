@@ -3,10 +3,6 @@
 #include "game_assets.h"
 
 #include <base/interfaces.h>
-
-#include <vector>
-#include <memory>
-
 #include <math/Camera.h>
 #include <math/CameraRay.h>
 

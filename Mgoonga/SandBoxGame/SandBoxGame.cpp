@@ -57,7 +57,7 @@ void eSandBoxGame::PaintGL()
 		if (object->GetScript())
 			object->GetScript()->Update(m_objects);
 	}
-	std::map<ePipeline::RenderType, std::vector<shObject>> objects;
+	std::map<eOpenGlRenderPipeline::RenderType, std::vector<shObject>> objects;
 	std::vector<GUI> gui;
 	pipeline.RenderFrame(objects, m_camera, m_light, gui);
 }

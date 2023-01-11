@@ -120,7 +120,7 @@ namespace imgui_addons
         max_size.y = io.DisplaySize.y;
         ImGui::SetNextWindowSizeConstraints(min_size, max_size);
         ImGui::SetNextWindowPos(io.DisplaySize * 0.5f, ImGuiCond_Appearing, ImVec2(0.5f,0.5f));
-        ImGui::SetNextWindowSize(ImVec2(std::max(sz_xy.x, min_size.x), std::max(sz_xy.y, min_size.y)), ImGuiCond_Appearing);
+        ImGui::SetNextWindowSize(ImVec2(max(sz_xy.x, min_size.x), max(sz_xy.y, min_size.y)), ImGuiCond_Appearing);
 
         //Set Proper Filter Mode.
         if(mode == DialogMode::SELECT)
@@ -330,15 +330,15 @@ namespace imgui_addons
             return show_error;
 
         //Reinitialize the limit on number of selectables in one column based on height
-        col_items_limit = static_cast<int>(std::max(1.0f, window_content_height/list_item_height));
-        int num_cols = static_cast<int>(std::max(1.0f, std::ceil(static_cast<float>(filtered_dirs.size() + filtered_files.size()) / col_items_limit)));
+        col_items_limit = static_cast<int>(max(1.0f, window_content_height/list_item_height));
+        int num_cols = static_cast<int>(max(1.0f, std::ceil(static_cast<float>(filtered_dirs.size() + filtered_files.size()) / col_items_limit)));
 
         //Limitation by ImGUI in 1.75. If columns are greater than 64 readjust the limit on items per column and recalculate number of columns
         if(num_cols > 64)
         {
             int exceed_items_amount = (num_cols - 64) * col_items_limit;
             col_items_limit += static_cast<int>(std::ceil(exceed_items_amount/64.0));
-            num_cols = static_cast<int>(std::max(1.0f, std::ceil(static_cast<float>(filtered_dirs.size() + filtered_files.size()) / col_items_limit)));
+            num_cols = static_cast<int>(max(1.0f, std::ceil(static_cast<float>(filtered_dirs.size() + filtered_files.size()) / col_items_limit)));
         }
 
         float content_width = num_cols * col_width;
@@ -606,7 +606,7 @@ namespace imgui_addons
         ImGuiID focus_scope_id = ImGui::GetID("##InputBarComboBoxListScope");
         float frame_height = ImGui::GetFrameHeight();
 
-        input_combobox_sz.y = std::min((inputcb_filter_files.size() + 1) * frame_height + style.WindowPadding.y *  2.0f,
+        input_combobox_sz.y = min((inputcb_filter_files.size() + 1) * frame_height + style.WindowPadding.y *  2.0f,
                                         8 * ImGui::GetFrameHeight() + style.WindowPadding.y *  2.0f);
 
         if(show_inputbar_combobox && ( ImGui::GetFocusID() == focus_scope_id || ImGui::GetCurrentContext()->ActiveIdIsAlive == input_id  ))
@@ -1009,7 +1009,7 @@ namespace imgui_addons
 
         float frame_height = ImGui::GetFrameHeightWithSpacing();
         float cw_content_height = valid_exts.size() * frame_height;
-        float cw_height = std::min(4.0f * frame_height, cw_content_height);
+        float cw_height = min(4.0f * frame_height, cw_content_height);
         ImVec2 window_size(350, 0);
         ImGui::SetNextWindowSize(window_size);
 

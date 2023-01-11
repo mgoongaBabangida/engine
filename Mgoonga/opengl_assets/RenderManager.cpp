@@ -31,7 +31,7 @@ void				eRenderManager::SetHexRadius(float _r) { radius = _r; }
 void				eRenderManager::AddParticleSystem(IParticleSystem* system) { m_particleRender->AddParticleSystem(system); }
 
 //---------------------------------------------------------------------------------------------------------------
-void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& texManager, const string& _folderPath)
+void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& texManager, const std::string& _folderPath)
 {
 	folderPath = _folderPath;
 	//Water Renderer adjust
@@ -85,5 +85,5 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 	//Text
 	m_textRender.reset(new eTextRender(folderPath + "TextVertex.glsl", folderPath + "TextFragment.glsl"));
 	//PBR
-	m_pbrRender.reset(new ePBRRender(folderPath + "VertexShaderCode.glsl", folderPath + "PBRFragmentShader.glsl"));
+	m_pbrRender.reset(new ePBRRender(folderPath + "PBRVertexShaderCode.glsl", folderPath + "PBRFragmentShader.glsl"));
 }

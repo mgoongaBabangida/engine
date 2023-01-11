@@ -22,13 +22,11 @@
 #include "TextRender.h"
 #include "PBRRender.h"
 
-#include <vector>
-
 //----------------------------------------------------------------------------------------------
 class DLL_OPENGL_ASSETS eRenderManager
 {
 public:
-	friend class ePipeline;
+	friend class eOpenGlRenderPipeline;
 
 	eRenderManager();
 	~eRenderManager();
@@ -39,7 +37,7 @@ public:
 
 	void				Initialize(eModelManager&	modelManager,
 								         eTextureManager&  texManager,
-								         const string&	folderPath);
+								         const std::string&	folderPath);
 	void				AddParticleSystem(IParticleSystem* system);
 
 private:

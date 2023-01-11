@@ -40,10 +40,10 @@ void main()
    if(textured)	
    {
     albedo_f    = pow(texture(albedoMap, Texcoord).rgb, vec3(2.2));
-    //theNormal_f = texture(normalMap, Texcoord).rgb;
+    theNormal_f = texture(normalMap, Texcoord).rgb;
 	// Transform normal vector to range [-1,1]
 	//theNormal_f = normalize(theNormal_f * 2.0 - 1.0);
-	theNormal_f = theNormal;
+	//theNormal_f = theNormal;
     metallic_f  = texture(metallicMap, Texcoord).r;
     roughness_f = texture(roughnessMap, Texcoord).r;
    }
@@ -56,7 +56,7 @@ void main()
    }
    
     vec3 N = normalize(theNormal_f);
-    vec3 V = normalize(thePosition - camPos);
+    vec3 V = normalize(camPos - thePosition);
 
     vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo_f, metallic_f);

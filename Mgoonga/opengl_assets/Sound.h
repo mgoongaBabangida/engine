@@ -1,12 +1,12 @@
 #pragma once
 
+#include "stdafx.h"
 #include <AL\include\al.h>
 #include <AL\include\alc.h>
 
 #include <base/interfaces.h>
 
 #include <map>
-#include <string>
 
 //#pragma comment(lib, "OpenAL32.lib")
 

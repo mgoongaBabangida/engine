@@ -3,7 +3,6 @@
 #include <glm\glm\gtc\matrix_transform.hpp>
 #include <glm\glm\gtx\transform.hpp>
 #include "Shader.h"
-#include <vector>
 
 //----------------------------------------------------
 class eHexRender

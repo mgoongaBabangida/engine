@@ -19,6 +19,7 @@ public:
 
 protected:
   Material material;
+
   unsigned int sphereVAO = 0;
   unsigned int indexCount;
   unsigned int vbo;

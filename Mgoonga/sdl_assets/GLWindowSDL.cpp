@@ -156,6 +156,7 @@ void dbGLWindowSDL::PaintGL()
 	if(!flag)
 	{
 		SDL_GL_MakeCurrent(window, context);
+		//SDL_GL_SetSwapInterval(1);
 		flag = true;
 	}
 	

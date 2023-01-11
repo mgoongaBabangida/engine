@@ -11,6 +11,8 @@
 // Windows Header Files:
 #include <windows.h>
 
-
+#include <vector>
+#include <string>
+#include <memory>
 
 // TODO: reference additional headers your program requires here

@@ -6,8 +6,6 @@
 
 #include "opengl_assets.h"
 
-#include <string>
-#include <vector>
 #include <type_traits>
 #include <assert.h>
 

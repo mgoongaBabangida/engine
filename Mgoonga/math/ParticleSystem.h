@@ -4,8 +4,6 @@
 #include <math/Timer.h>
 #include <math/Particle.h>
 
-#include <vector>
-
 #include <glm\glm\glm.hpp>
 #include <glm\glm\gtc\matrix_transform.hpp>
 #include <glm\glm\gtx\transform.hpp>

@@ -3,7 +3,6 @@
 #include "sdl_assets.h"
 
 #include <tuple>
-#include <vector>
 
 #include <SDL/include/SDL.h>
 #include <glew-2.1.0/include/GL/glew.h>

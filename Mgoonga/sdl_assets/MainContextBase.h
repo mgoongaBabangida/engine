@@ -1,10 +1,7 @@
 #pragma once
-
+#include "stdafx.h"
 #include <base/interfaces.h>
 #include <sdl_assets/sdl_assets.h>
-
-#include <string>
-#include <memory>
 
 class eTextureManager;
 class eModelManager;

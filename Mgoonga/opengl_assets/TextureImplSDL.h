@@ -1,6 +1,7 @@
 #pragma once
+
+#include "stdafx.h"
 #include <stdint.h>
-#include <string>
 
 #define SDL_IMAGE
 #ifdef SDL_IMAGE

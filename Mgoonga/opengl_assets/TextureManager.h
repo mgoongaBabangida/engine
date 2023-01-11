@@ -1,9 +1,9 @@
 #pragma once
 
+#include "stdafx.h"
 #include <opengl_assets\opengl_assets.h>
 
 #include <map>
-#include <string>
 
 struct Texture;
 

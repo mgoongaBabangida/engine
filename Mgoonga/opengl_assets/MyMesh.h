@@ -5,8 +5,6 @@
 #include "Texture.h"
 #include "ShapeData.h"
 
-#include <vector>
-
 //----------------------------------------------------------------------------------------------
 class DLL_OPENGL_ASSETS MyMesh: public IMesh
 {

@@ -13,4 +13,8 @@
 
 #define DLLDIR_EX
 
+#include <vector>
+#include <string>
+#include <memory>
+
 // TODO: reference additional headers your program requires here

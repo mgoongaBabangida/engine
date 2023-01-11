@@ -7,9 +7,6 @@
 
 #include "math.h"
 
-#include <vector>
-#include <string>
-
 //--------------------------------------------------------------------
 class DLL_MATH Bone
 {

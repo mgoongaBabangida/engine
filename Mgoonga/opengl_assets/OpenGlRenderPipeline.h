@@ -20,15 +20,15 @@ class eModelManager;
 class eTextureManager;
 
 //------------------------------------------------------------------------------------------------------------
-class DLL_OPENGL_ASSETS ePipeline
+class DLL_OPENGL_ASSETS eOpenGlRenderPipeline
 {
 public:
 
 	enum class RenderType
 	{ MAIN, PBR, FLAG, OUTLINED};
 
-	ePipeline(dbb::CameraRay&, uint32_t width, uint32_t height);
-	~ePipeline();
+	eOpenGlRenderPipeline(dbb::CameraRay&, uint32_t width, uint32_t height);
+	~eOpenGlRenderPipeline();
 
 	void			RenderFrame(std::map<RenderType, std::vector<shObject>>, Camera&, const Light&, std::vector<GUI>&); //gui should be const latter ?, and camera prob
 	
@@ -54,9 +54,11 @@ public:
   bool& GetSkyBoxOnRef() { return skybox; }
   float& GetBlurCoefRef() { return blur_coef; }
 
+	Material material; //debug
 	float& MaterialMetalness() { return material.metallic; }
 	float& MaterialRoughness() { return material.roughness; }
-	Material material; //debug
+	float& MaterialShininess() { return material.shininess; }
+	float& MaterialAO()				 { return material.ao; }
 
 	bool& GetDebugWhite() { return debug_white; }
 	bool& GetDebugTexCoords() { return debug_texcoords; }
@@ -103,8 +105,8 @@ protected:
 	bool      debug_white = false;
 	bool      debug_texcoords = false;
 
-	uint32_t  width		  = 1200;
-	uint32_t  height		= 600;
+	const uint32_t  width		  = 1200;
+	const uint32_t  height		= 600;
 	float			nearPlane	  = 0.1f;
 	float			farPlane	  = 0.0f;
 	float			waterHeight = 2.0f;
@@ -112,6 +114,8 @@ protected:
 
 	std::reference_wrapper <dbb::CameraRay>				camRay;
 	std::unique_ptr<eRenderManager>								renderManager;
+
+	GLfloat* data; //(width height) // each pixel is 32bit int
 };
 
 #endif // PIPELINE_H
