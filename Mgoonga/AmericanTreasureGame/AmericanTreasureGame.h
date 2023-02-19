@@ -55,7 +55,7 @@ protected:
 	std::unique_ptr<Camera>				  camera;
 	std::unique_ptr<dbb::CameraRay>	camRay;
 	std::unique_ptr<eOpenGlRenderPipeline>			pipeline;
-  std::vector<GUI>					      guis;
+	std::vector<std::shared_ptr<GUI>>	guis;
   std::vector<Hex>					      hexes;
   Light								            light;
   float								            waterHeight = 2.0f;

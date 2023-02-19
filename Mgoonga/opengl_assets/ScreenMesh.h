@@ -16,6 +16,9 @@ public:
   virtual size_t GetVertexCount() const { return 4; }
   virtual std::vector<const Texture*> GetTextures() const;
 
+	void UpdateFrame(float top_x, float top_y, float botom_x, float botom_y, float viewport_width, float viewport_height);
+	void SetViewPortToDefault();
+
 	void SetTextureOne(Texture t) { textureOne = t; }
 	void SetTextureTwo(Texture t) { textureTwo = t; }
 
@@ -25,6 +28,8 @@ protected:
 
 	Texture textureOne;
 	Texture textureTwo;
+
+	std::array<GLfloat, 24> quadVertices;
 };
 
 //---------------------------------------------------------
@@ -42,6 +47,7 @@ public:
 protected:
 	GLuint	quadVAO_fr;
 	GLuint	quadVBO_fr;
+
 	std::array<GLfloat, 20> frameVertices;
 };
 

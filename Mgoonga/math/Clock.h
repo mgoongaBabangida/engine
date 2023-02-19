@@ -11,6 +11,7 @@ namespace math {
 	class DLL_MATH eClock
 	{
 	public:
+		void			reset();
 		void			start();
 		int64_t		timeEllapsedMsc();
 		int64_t		newFrame();

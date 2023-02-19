@@ -27,10 +27,10 @@ public:
 	enum class RenderType
 	{ MAIN, PBR, FLAG, OUTLINED};
 
-	eOpenGlRenderPipeline(dbb::CameraRay&, uint32_t width, uint32_t height);
+	eOpenGlRenderPipeline(uint32_t width, uint32_t height);
 	~eOpenGlRenderPipeline();
 
-	void			RenderFrame(std::map<RenderType, std::vector<shObject>>, Camera&, const Light&, std::vector<GUI>&); //gui should be const latter ?, and camera prob
+	void			RenderFrame(std::map<RenderType, std::vector<shObject>>, Camera&, const Light&, std::vector<std::shared_ptr<GUI>>&); //gui should be const latter ?, and camera prob
 	
 	void			Initialize();
 	void			InitializeBuffers(bool _needsShadowCubeMap = false);
@@ -88,7 +88,7 @@ protected:
 	void			RenderParticles(const Camera&);
 	void			RenderBlur(const Camera&);
 	void			RenderContrast(const Camera& _camera);
-	void			RenderGui(std::vector<GUI>&, const Camera&);
+	void			RenderGui(std::vector<std::shared_ptr<GUI>>&, const Camera&);
 	void			RenderPBR(const Camera&, const Light& _light, std::vector<shObject> _objs);
 
 	bool			mousepress	= true; //to draw framed objects
@@ -112,10 +112,7 @@ protected:
 	float			waterHeight = 2.0f;
   float     blur_coef   = 0.7f;
 
-	std::reference_wrapper <dbb::CameraRay>				camRay;
 	std::unique_ptr<eRenderManager>								renderManager;
-
-	GLfloat* data; //(width height) // each pixel is 32bit int
 };
 
 #endif // PIPELINE_H

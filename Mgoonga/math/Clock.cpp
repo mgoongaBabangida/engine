@@ -4,6 +4,13 @@
 namespace math {
 
 	//-------------------------------------------------------------
+	void eClock::reset()
+	{
+		m_start = last_frame = pause_time = std::chrono::system_clock::time_point();
+		paused = false;
+	}
+
+	//-------------------------------------------------------------
 	void eClock::start()
 	{
 		if (m_start == std::chrono::system_clock::time_point())

@@ -41,6 +41,7 @@ struct /*DLL_OPENGL_ASSETS*/ Texture
 	}
 
 	bool loadTextureFromFile(const std::string& path, GLenum format =GL_RGBA, GLenum wrap = GL_CLAMP_TO_EDGE);
+	uint8_t* getPixelBuffer();
 	bool saveToFile(const std::string &path);
 	void freeTexture();
 	bool loadTexture1x1(TColor color);

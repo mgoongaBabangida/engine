@@ -11,8 +11,8 @@ bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenu
 	path		= _path;
 	uint32_t ilId;
 	mChannels = eTextureImplDevIl::LoadTexture(path, ilId, mTextureWidth, mTextureHeight);
-	uint8_t* pixmap = nullptr;
-	eTextureImplDevIl::AssignPixels(pixmap, mTextureWidth, mTextureHeight);
+	uint8_t* data = nullptr;
+	eTextureImplDevIl::AssignPixels(data, mTextureWidth, mTextureHeight);
 
 	// Load textures
 	glGenTextures(1, &id);
@@ -25,7 +25,7 @@ bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenu
 				0, 
 				mChannels == 4 ? GL_RGBA : GL_RGB, 
 				GL_UNSIGNED_BYTE, 
-				(GLubyte*)pixmap);
+				(GLubyte*)data);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -35,17 +35,22 @@ bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenu
 	return true;
 }
 
-bool Texture::saveToFile(const std::string &path)
+uint8_t* Texture::getPixelBuffer()
 {
 	int sizeOfByte = sizeof(unsigned char);
 	int bytesToUsePerPixel = mChannels;
 	int theSize = mTextureWidth * mTextureHeight * sizeOfByte * bytesToUsePerPixel;
 	uint8_t* imData = (uint8_t*)malloc(theSize);
-	
+
 	glBindTexture(GL_TEXTURE_2D, this->id);
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA,GL_UNSIGNED_BYTE,(void*)imData); //generic
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)imData); //generic
 	glBindTexture(GL_TEXTURE_2D, 0);
-	
+	return imData;
+}
+
+bool Texture::saveToFile(const std::string &path)
+{
+	uint8_t* imData = getPixelBuffer();
 	eTextureImplDevIl::SaveToFile(imData, path, mTextureWidth, mTextureHeight, mChannels);
 	free(imData);
 	return true;

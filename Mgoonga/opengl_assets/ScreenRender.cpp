@@ -13,12 +13,14 @@ eScreenRender::eScreenRender(Texture tex, const std::string& vS, const std::stri
   blurCoefLoc = glGetUniformLocation(screenShader.ID, "blurCoef");
 }
 
-void eScreenRender::Render(const Camera& camera)
+void eScreenRender::Render(glm::vec2 _top_left, glm::vec2 _right_botom, float viewport_width, float viewport_height)
 {
 	glUseProgram(screenShader.ID);
 	glUniform1i(frameLoc, GL_FALSE);
   glUniform1i(blendLoc, GL_FALSE);
+	screenMesh->UpdateFrame(_top_left.x, _top_left.y, _right_botom.x, _right_botom.y, viewport_width, viewport_height);
 	screenMesh->Draw();
+	screenMesh->SetViewPortToDefault();
 }
 
 void eScreenRender::RenderContrast(const Camera& camera, float blur_coef)
@@ -27,6 +29,7 @@ void eScreenRender::RenderContrast(const Camera& camera, float blur_coef)
   glUniform1f(blurCoefLoc, blur_coef);
 	glUniform1i(frameLoc, GL_FALSE);
 	glUniform1i(blendLoc, GL_TRUE);
+	screenMesh->SetViewPortToDefault();
 	screenMesh->Draw();
 }
 

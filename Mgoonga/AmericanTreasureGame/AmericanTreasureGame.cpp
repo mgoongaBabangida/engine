@@ -110,7 +110,7 @@ eAmericanTreasureGame::eAmericanTreasureGame(eInputController* _input,
 											 const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
 , camRay(new dbb::CameraRay())
-, pipeline(new eOpenGlRenderPipeline(*camRay, width, height))
+, pipeline(new eOpenGlRenderPipeline(width, height))
 , camera(new Camera(width, height, nearPlane, farPlane))
 {
 	_externalGui[0]->Add(SLIDER_FLOAT, "Ydir", &light.light_position.y);
@@ -145,7 +145,7 @@ bool eAmericanTreasureGame::OnMousePress(uint32_t x, uint32_t y, bool left)
 
 	camRay->Update(*camera, static_cast<float>(x), static_cast<float>(y), static_cast<float>(width), static_cast<float>(height));
 	camRay->press(static_cast<float>(x), static_cast<float>(y));
-	auto clicked = camRay->calculateIntersaction(m_objects);
+	auto clicked = camRay->calculateIntersaction(m_objects).first;
 	
 	if (clicked != nullptr && clicked->Name() == "Terrain")
 		clicked = nullptr;
@@ -401,9 +401,9 @@ void eAmericanTreasureGame::InitializeModels()
 	inputController->AddObserver(camera.get(), WEAK);
 	inputController->AddObserver(camRay.get(), WEAK);
 
-	guis.emplace_back(width / 4 * 3, height / 4 * 3, width / 4, height / 4, width, height);
-	guis[0].setCommand(turn_context);
-	inputController->AddObserver(&guis[0], MONOPOLY);
+	guis.emplace_back(new GUI(width / 4 * 3, height / 4 * 3, width / 4, height / 4, width, height));
+	guis[0]->setCommand(turn_context);
+	inputController->AddObserver(guis[0].get(), MONOPOLY);
 }
 
 //-------------------------------------------------------------------------------------------
@@ -445,7 +445,7 @@ void eAmericanTreasureGame::PaintGL()
 	light.light_position = vec4(sin(angle) * 4.0f, cos(angle) * 4.0f, 0.0f, 1.0f);
 	
 	turn_context->Update();
-	guis[0].SetTexture(*turn_context->GetDiceTexture());
+	guis[0]->SetTexture(*turn_context->GetDiceTexture());
 
 	std::vector<shObject> flags;
 	for (auto &ship : ships)

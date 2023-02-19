@@ -45,16 +45,23 @@ protected:
   virtual void      InitializeExternalGui()           override;
 
 protected:
+  Light								                   m_light;
 	Camera								                 m_camera;
-	dbb::CameraRay				                 camRay;
+
   eOpenGlRenderPipeline							     pipeline;
 
   shObject							                 m_focused;
   std::vector<shObject>				           m_objects;
   std::vector<shObject>                  m_pbr_objs;
   std::shared_ptr<std::vector<shObject>> m_framed;
-  Light								                   m_light;
-  std::vector<GUI>					             guis;
+  std::vector<std::shared_ptr<GUI>>			 guis;
+
+  //should be inside script
+  std::optional<dbb::line>               m_grab_camera_line = std::nullopt;
+  glm::vec3                              m_intersaction;
+  glm::vec3                              m_grab_translation;
+  glm::vec3                              m_translation_vector = glm::vec3{ 0.f,0.f,0.0f };
+
   shObject							                 lightObject; //debuging
 
   eThreeFloatCallback            transfer_data_position;

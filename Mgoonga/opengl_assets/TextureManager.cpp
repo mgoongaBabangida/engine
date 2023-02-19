@@ -104,6 +104,10 @@ void eTextureManager::LoadAllTextures()
 	m_Textures.insert(std::pair<std::string, Texture>("TPirate_flag0_s", text));
 	text.loadTextureFromFile(folderPath + "ocean1.jpg");
 	m_Textures.insert(std::pair<std::string, Texture>("TOcean0_s", text));
+	text.loadTextureFromFile(folderPath + "red_button.png");
+	m_Textures.insert(std::pair<std::string, Texture>("TButton_red", text));
+	text.loadTextureFromFile(folderPath + "transparent-michelangelo.png");
+	m_Textures.insert(std::pair<std::string, Texture>("Michelangelo", text));
 
 	text.loadTextureFromFile(folderPath + "dice1.jpg");
 	m_Textures.insert(std::pair<std::string, Texture>("tex_dice1", text));

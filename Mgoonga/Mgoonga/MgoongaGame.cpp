@@ -28,7 +28,7 @@ eMgoongaGameContext::eMgoongaGameContext(eInputController*  _input,
 						   const std::string& _assetsPath, 
 						   const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
-, pipeline(camRay, width, height)
+, pipeline(width, height)
 , m_camera(width, height, nearPlane, farPlane)
 {
 	//Light init!
@@ -157,10 +157,24 @@ void eMgoongaGameContext::InitializeExternalGui()
 //--------------------------------------------------------------------------
 bool eMgoongaGameContext::OnMouseMove(uint32_t x, uint32_t y)
 {
-  if (camRay.IsPressed())
+  if (m_camera.getCameraRay().IsPressed())
   {
-    m_framed.reset(new std::vector<shObject>(camRay.onMove(m_camera, m_objects, static_cast<float>(x), static_cast<float>(y)))); 	//to draw a frame
-    return true;
+    if (m_grab_camera_line != std::nullopt) // right button is pressed @todo explicit right button
+    {
+      m_camera.getCameraRay().Update(m_camera, static_cast<float>(x), static_cast<float>(y), width, height);
+      m_camera.getCameraRay().press(x, y);
+
+      dbb::plane pl(m_intersaction,
+                    glm::vec3(0.0f, m_intersaction.y, 1.0f),
+                    glm::vec3(1.0f, m_intersaction.y, 0.0f)); // arbitrary triangle on xz plane
+      glm::vec3 new_intersaction = dbb::intersection(pl, m_camera.getCameraRay().getLine());
+      m_translation_vector = new_intersaction - m_intersaction;
+    }
+    else
+    {
+      m_framed.reset(new std::vector<shObject>(m_camera.getCameraRay().onMove(m_camera, m_objects, static_cast<float>(x), static_cast<float>(y)))); 	//to draw a frame
+      return true;
+    }
   }
 	return false;
 }
@@ -194,19 +208,32 @@ bool eMgoongaGameContext::OnMousePress(uint32_t x, uint32_t y, bool left)
   if (m_framed)
     m_framed->clear();
 
-	camRay.Update(m_camera, static_cast<float>(x), static_cast<float>(y), width, height);
+  m_camera.getCameraRay().Update(m_camera, static_cast<float>(x), static_cast<float>(y), width, height);
+  m_camera.getCameraRay().press(x, y);
+  auto objects = m_objects;
+  objects.insert(objects.end(), m_pbr_objs.begin(), m_pbr_objs.end());
+  auto [new_focused, intersaction] = m_camera.getCameraRay().calculateIntersaction(objects);
+
 	if(left)
 	{
-		camRay.press(x, y);
-    auto objects = m_objects;
-    objects.insert(objects.end(), m_pbr_objs.begin(), m_pbr_objs.end());
-		auto new_focused = camRay.calculateIntersaction(objects);
     if (new_focused != m_focused)
     {
       m_focused = new_focused;
       OnFocusedChanged();
     }
 	}
+  else // right click
+  {
+    if (new_focused) // right click on object
+    {
+      m_focused = new_focused;
+      OnFocusedChanged();
+      m_grab_translation = new_focused->GetTransform()->getTranslation();
+      m_intersaction = intersaction;
+      m_camera.MovementSpeedRef() = 0.f;
+      m_grab_camera_line = m_camera.getCameraRay().getLine();
+    }
+  }
 
 	if(m_focused && m_focused->GetScript())
 		m_focused->GetScript()->OnMousePress(x, y, left);
@@ -217,7 +244,10 @@ bool eMgoongaGameContext::OnMousePress(uint32_t x, uint32_t y, bool left)
 //---------------------------------------------------------------------------------
 bool eMgoongaGameContext::OnMouseRelease()
 {
-	camRay.release();
+  m_camera.getCameraRay().release();
+  m_grab_camera_line = std::nullopt;
+  m_translation_vector = vec3{ 0.0f, 0.0f, 0.0f };
+  m_camera.MovementSpeedRef() = 0.05f;
 	return true;
 }
 
@@ -271,26 +301,36 @@ void eMgoongaGameContext::InitializeGL()
 	eMainContextBase::InitializeGL();
 	
 	//Camera Ray
-	camRay.init(width, height, nearPlane, farPlane);
+  m_camera.getCameraRay().init(width, height, nearPlane, farPlane);
 	
 	m_objects[3]->SetScript(new eShipScript(texManager->Find("TSpanishFlag0_s"),
 											pipeline.GetRenderManager(),
                       m_camera,
 											texManager->Find("Tatlas2"),
 											soundManager->GetSound("shot_sound"),
-											&camRay,
+											&m_camera.getCameraRay(),
                       pipeline.GetWaterHeight()));
 
-	guis.emplace_back(GUI(0, 0, width / 4, height / 4, width, height));
-	//guis[0].setCommand(std::make_shared<AnimStart>(AnimStart(m_objects[6])));
-	guis.emplace_back(GUI(width / 4 * 3, height / 4 * 3, width / 4, height / 4, width, height));
+  Texture* tex = texManager->Find("TButton_red");
+	guis.emplace_back(new GUIWithAlpha(0, 0, tex->mTextureWidth/4, tex->mTextureHeight/4, width, height));
+  guis[0]->SetTexture(*tex);
+  guis[0]->SetChild(std::make_shared<GUIWithAlpha>(0, tex->mTextureHeight / 4, tex->mTextureWidth / 4, tex->mTextureHeight / 4, width, height));
+  guis[0]->GetChildren()[0]->SetTexture(*tex);
+  guis[0]->GetChildren()[0]->SetVisible(false);
+  guis[0]->setCommand(std::make_shared<MenuBehaviorLeanerMove>(guis[0]->GetChildren()[0].get(),
+    math::AnimationLeaner{ 
+      {glm::vec3(guis[0]->getTopLeft().x, guis[0]->getTopLeft().y, 0)},
+      {glm::vec3(guis[0]->GetChildren()[0]->getTopLeft().x, guis[0]->GetChildren()[0]->getTopLeft().y, 0)},
+      1000 }));
+
+	guis.emplace_back(new GUI(width / 4 * 3, height / 4 * 3, width / 4, height / 4, width, height));
 	//guis[1].setCommand(std::make_shared<AnimStop>(AnimStop(m_objects[6])));
 
-	inputController->AddObserver(this, MONOPOLY);
-  inputController->AddObserver(&camRay, WEAK);
+	inputController->AddObserver(this, WEAK);
+  inputController->AddObserver(&m_camera.getCameraRay(), WEAK);
   inputController->AddObserver(&m_camera, WEAK);
-  inputController->AddObserver(&guis[0], MONOPOLY);//monopoly takes only mouse
-  inputController->AddObserver(&guis[1], MONOPOLY);
+  inputController->AddObserver(guis[0].get(), MONOPOLY);//monopoly takes only mouse
+  inputController->AddObserver(guis[1].get(), MONOPOLY);
   inputController->AddObserver(externalGui[0], MONOPOLY);
   inputController->AddObserver(externalGui[1], MONOPOLY);
   inputController->AddObserver(externalGui[2], MONOPOLY);
@@ -429,6 +469,8 @@ void eMgoongaGameContext::PaintGL()
         flags.push_back(script->GetChildrenObjects()[0]);
 		}
 	}
+  if (m_grab_camera_line != std::nullopt && m_translation_vector != glm::vec3{0.f,0.f,0.0f})
+    m_focused->GetTransform()->setTranslation(m_grab_translation + m_translation_vector);
 
   lightObject->GetTransform()->setTranslation(m_light.light_position);
 	m_light.light_direction = { -m_light.light_position };

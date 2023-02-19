@@ -33,11 +33,8 @@ void	eOpenGlRenderPipeline::AddHex(glm::vec3 _v) { renderManager->AddHex(_v); }
 void	eOpenGlRenderPipeline::SetHexRadius(float _r) { renderManager->SetHexRadius(_r); }
 
 //-------------------------------------------------------------------------------------------
-eOpenGlRenderPipeline::eOpenGlRenderPipeline(dbb::CameraRay& _cam_ray,
-                     uint32_t				_width,
-                     uint32_t				_height)
-: camRay(_cam_ray),
-  width(_width),
+eOpenGlRenderPipeline::eOpenGlRenderPipeline(uint32_t				_width, uint32_t				_height)
+: width(_width),
   height(_height),
   renderManager(new eRenderManager)
 {
@@ -46,13 +43,10 @@ eOpenGlRenderPipeline::eOpenGlRenderPipeline(dbb::CameraRay& _cam_ray,
 	material.ao = 0.8f;
 	material.shininess = 0.2f;
 	material.diffuse = glm::vec3(1.0f, 0.0f, 0.0f);
-
-	data = new GLfloat[1200 * 600 * 4];
 }
 
 eOpenGlRenderPipeline::~eOpenGlRenderPipeline()
 {
-	delete[] data;
 }
 
 void eOpenGlRenderPipeline::Initialize()
@@ -98,9 +92,9 @@ Texture eOpenGlRenderPipeline::GetSkyNoiseTexture(const Camera& _camera)
 
 //-----------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObject>> _objects,
-	Camera& _camera,
-	const Light& _light,
-	std::vector<GUI>& guis)
+																			  Camera& _camera,
+																			  const Light& _light,
+																			  std::vector<std::shared_ptr<GUI>>& guis)
 {
   /*std::sort(focused.begin(), focused.end(), [_camera](const shObject& obj1, const shObject& obj2)
     { return glm::length2(_camera.getPosition() - obj1->GetTransform()->getTranslation())
@@ -199,7 +193,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 		RenderBlur(_camera);
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 		glViewport(0, 0, width, height);
-		glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT  | GL_STENCIL_BUFFER_BIT);
 		glDisable(GL_DEPTH_TEST);
 		RenderContrast(_camera);
 	}
@@ -219,9 +213,9 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
 
-	if(mousepress  && camRay.get().IsPressed())
+	if(mousepress  && _camera.getCameraRay().IsPressed())
 	{
-		renderManager->ScreenRender()->RenderFrame(camRay.get().GetFrame().first, camRay.get().GetFrame().second, width, height);
+		renderManager->ScreenRender()->RenderFrame(_camera.getCameraRay().GetFrame().first, _camera.getCameraRay().GetFrame().second, width, height);
 	}
 
 	RenderGui(guis, _camera);
@@ -436,8 +430,10 @@ void eOpenGlRenderPipeline::RenderContrast(const Camera& _camera)
 	renderManager->ScreenRender()->RenderContrast(_camera, blur_coef);
 }
 
-void eOpenGlRenderPipeline::RenderGui(std::vector<GUI>& guis, const Camera& _camera)
+void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, const Camera& _camera)
 {
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	if (!guis.empty())
 	{
 		/*Texture txt;
@@ -445,21 +441,29 @@ void eOpenGlRenderPipeline::RenderGui(std::vector<GUI>& guis, const Camera& _cam
 		glReadPixels(0, 0, width, height, GL_RGBA, GL_FLOAT, data);
 		txt.TextureFromBuffer<GLfloat>(data, width, height);*/
 
-		guis[0].SetTexture(GetReflectionBufferTexture());
-		//8.2 Second quad
-		guis[1].SetTexture(GetShadowBufferTexture());
-	}
+		//guis[0].SetTexture(GetReflectionBufferTexture());
+		guis[1]->SetTexture(GetShadowBufferTexture());
+	} 
 
 	for(auto& gui : guis)
 	{
-		if (gui.GetTexture())
+		if (gui->GetTexture() && gui->IsVisible())
 		{
-			glViewport(gui.getViewPort().x, gui.getViewPort().y, gui.getViewPort().z, gui.getViewPort().w);
-			renderManager->ScreenRender()->SetTexture(*(gui.GetTexture())); //copy texture
-			renderManager->ScreenRender()->Render(_camera);
+			renderManager->ScreenRender()->SetTexture(*(gui->GetTexture())); //copy texture
+			renderManager->ScreenRender()->Render(gui->getTopLeft(), gui->getBottomRight(), width, height);
+		}
+		gui->UpdateSync();
+		for (auto& child : gui->GetChildren())
+		{
+			if (child->GetTexture() && child->IsVisible())
+			{
+				renderManager->ScreenRender()->SetTexture(*(child->GetTexture())); //copy texture
+				renderManager->ScreenRender()->Render(child->getTopLeft(), child->getBottomRight(), width, height);
+			}
+			child->UpdateSync();
 		}
 	}
-	glViewport(0, 0, width, height);
+	glDisable(GL_BLEND);
 }
 
 //------------------------------------------------
@@ -470,7 +474,7 @@ void eOpenGlRenderPipeline::RenderPBR(const Camera& _camera, const Light& _light
 		//for debuginig
 		if (auto* mesh = _objs[0]->GetModel()->GetMeshes()[0]; mesh && mesh->HasMaterial())
 			const_cast<SphereTexturedMesh*>(dynamic_cast<const SphereTexturedMesh*>(mesh))->SetMaterial(material);
-		
+
 		GetRenderManager().PBRRender()->Render(_camera, _light, _objs);
 	}
 }

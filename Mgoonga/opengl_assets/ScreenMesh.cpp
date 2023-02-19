@@ -4,7 +4,7 @@
 
 eScreenMesh::eScreenMesh(Texture _textureOne, Texture _textureTwo): textureOne(_textureOne), textureTwo(_textureTwo)
 {
-	GLfloat quadVertices[] = {
+	quadVertices = {
 		// Positions   // TexCoords
 		-1.0f,  1.0f,  0.0f, 1.0f,
 		-1.0f, -1.0f,  0.0f, 0.0f,
@@ -51,6 +51,58 @@ std::vector<const Texture*> eScreenMesh::GetTextures() const
   ret.push_back(&textureOne);
   ret.push_back(&textureTwo);
   return ret;
+}
+
+//-----------------------------------------------------------------------------------
+void eScreenMesh::UpdateFrame(float top_x, float top_y, float botom_x, float botom_y, float viewport_width, float viewport_height)
+{
+	top_y = viewport_height - top_y; // invert y axis
+	botom_y = viewport_height - botom_y; // invert y axis
+
+	quadVertices[0] = (top_x / viewport_width) * 2 - 1.0f; // top left
+	quadVertices[1] = (top_y / viewport_height) * 2 - 1.0f;
+	
+	quadVertices[4] = (top_x / viewport_width) * 2 - 1.0f; // bottom left
+	quadVertices[5] = (botom_y / viewport_height) * 2 - 1.0f;
+	
+	quadVertices[8] = (botom_x / viewport_width) * 2 - 1.0f; // bottom right
+	quadVertices[9] = (botom_y / viewport_height) * 2 - 1.0f;
+	
+	quadVertices[12] = (top_x / viewport_width) * 2 - 1.0f;// top left
+	quadVertices[13] = (top_y / viewport_height) * 2 - 1.0f;
+
+	quadVertices[16] = (botom_x / viewport_width) * 2 - 1.0f;// bottom right
+	quadVertices[17] = (botom_y / viewport_height) * 2 - 1.0f;
+
+	quadVertices[20] = (botom_x / viewport_width) * 2 - 1.0f;// top right
+	quadVertices[21] = (top_y / viewport_height) * 2 - 1.0f;
+
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_DYNAMIC_DRAW);
+}
+
+void eScreenMesh::SetViewPortToDefault()
+{
+	quadVertices[0] = -1.0f;// top left
+	quadVertices[1] = 1.0f;
+										
+	quadVertices[4] = -1.0f;// bottom left
+	quadVertices[5] = -1.0f;
+										
+	quadVertices[8] = 1.0f; // bottom right
+	quadVertices[9] = -1.0f;
+										
+	quadVertices[12] = -1.0f;// top left
+	quadVertices[13] = 1.0f;
+										
+	quadVertices[16] = 1.0f;// bottom right
+	quadVertices[17] = -1.0f;
+										
+	quadVertices[20] = 1.0f;// top right
+	quadVertices[21] = 1.0f;
+
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_DYNAMIC_DRAW);
 }
 
 eFrameMesh::eFrameMesh()
@@ -106,6 +158,7 @@ void eFrameMesh::UpdateFrame(float top_x, float top_y, float botom_x, float boto
   frameVertices[13] = (botom_y / viewport_height) * 2 - 1.0f;
   frameVertices[16] = (top_x / viewport_width) * 2 - 1.0f;
   frameVertices[17] = (top_y / viewport_height) * 2 - 1.0f;
+
   glBindBuffer(GL_ARRAY_BUFFER, quadVBO_fr);
   glBufferData(GL_ARRAY_BUFFER, sizeof(frameVertices), &frameVertices, GL_DYNAMIC_DRAW);
 }

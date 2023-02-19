@@ -23,7 +23,7 @@ eSandBoxGame::eSandBoxGame(eInputController*  _input,
 						   const std::string& _assetsPath,
 						   const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
-, pipeline(camRay, width, height)
+, pipeline(width, height)
 , m_camera(width, height, nearPlane, farPlane)
 {
 	_externalGui[0]->Add(SLIDER_FLOAT, "Ydir", &m_light.light_position.y);
@@ -58,7 +58,7 @@ void eSandBoxGame::PaintGL()
 			object->GetScript()->Update(m_objects);
 	}
 	std::map<eOpenGlRenderPipeline::RenderType, std::vector<shObject>> objects;
-	std::vector<GUI> gui;
+	std::vector<std::shared_ptr<GUI>> gui;
 	pipeline.RenderFrame(objects, m_camera, m_light, gui);
 }
 
@@ -87,7 +87,7 @@ bool eSandBoxGame::OnMousePress(uint32_t x, uint32_t y, bool left)
 	if (left)
 	{
 		camRay.press(x, y);
-		m_focused = camRay.calculateIntersaction(m_objects);
+		m_focused = camRay.calculateIntersaction(m_objects).first;
 	}
 	if (m_focused && m_focused->GetScript())
 	{

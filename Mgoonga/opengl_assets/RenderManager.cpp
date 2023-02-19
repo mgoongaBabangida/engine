@@ -69,9 +69,17 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 										folderPath + "WaveVertexShader.glsl",
 										folderPath + "FragmentShaderCode.glsl"));
 
-	m_hexrender.reset(new eHexRender(folderPath + "VertexShades.glsl", folderPath + "StencilFragmentShader.glsl", folderPath + "HexGeometry.glsl", dots, radius));
-	m_gaussianRender.reset(new eGaussianBlurRender(1200, 600, folderPath + "GaussianVertexShader.glsl", folderPath + "GaussianFragmentShader.glsl")); // buffer width height!!!
-	m_brightRender.reset(new eBrightFilterRender(1200, 600, folderPath + "PostProcessingVertexShader.glsl", folderPath + "BrightFilterFragment.glsl"));  // buffer width height!!!
+	m_hexrender.reset(new eHexRender(folderPath + "VertexShades.glsl", 
+																	 folderPath + "StencilFragmentShader.glsl", 
+																	 folderPath + "HexGeometry.glsl", 
+																	 dots, 
+																	 radius));
+	m_gaussianRender.reset(new eGaussianBlurRender(1200, 600, 
+																								folderPath + "GaussianVertexShader.glsl", 
+																								folderPath + "GaussianFragmentShader.glsl")); // buffer width height!!!
+	m_brightRender.reset(new eBrightFilterRender(1200, 600, 
+																								folderPath + "PostProcessingVertexShader.glsl", 
+																								folderPath + "BrightFilterFragment.glsl"));  // buffer width height!!!
 
 	// Particle Renderer
 	m_particleRender.reset(new eParticleRender(modelManager.FindMesh("square"),

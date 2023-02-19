@@ -41,6 +41,11 @@ bool GUI::OnMousePress(uint32_t x, uint32_t y, bool left)
 	return false;
 }
 
+void GUI::UpdateSync()
+{
+
+}
+
 void GUI::setCommand(std::shared_ptr<ICommand> com)
 {
 	cmd = com;
@@ -59,17 +64,86 @@ Texture * GUI::GetTexture()
 void GUI::Perssed()
 {
   if(cmd)
-	cmd->Execute();
+		cmd->Execute();
 }
 
 bool GUI::isPressed(int x, int y)
 {
-	return x > topleftX && y > topleftY && x < (topleftX + Width) && y < (topleftY + Height); //test!
+	return x > topleftX && y > topleftY && x < (topleftX + Width) && y < (topleftY + Height);
 }
 
 glm::ivec4 GUI::getViewPort() const
 {
 	return glm::ivec4(topleftX, screenHeight - topleftY - Height, Width, Height);
+}
+
+glm::ivec2 GUI::getTopLeft() const
+{
+	return glm::ivec2(topleftX, topleftY);
+}
+
+glm::ivec2 GUI::getBottomRight() const
+{
+	return glm::ivec2(topleftX + Width, topleftY + Height);
+}
+
+std::pair<uint32_t, uint32_t> GUI::pointOnGUI(uint32_t x_window, uint32_t y_window)
+{
+	//works if it is inside
+	return std::pair<uint32_t, uint32_t>(x_window - topleftX, y_window- topleftY);
+}
+
+//---------------------------------------------------------------------------------
+GUIWithAlpha::GUIWithAlpha(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight)
+: GUI(topleftX, topleftY, Width, Height, scWidth, scHeight)
+{
+}
+
+//------------------------------------------------------
+bool GUIWithAlpha::isPressed(int _x, int _y)
+{
+	m_check_if_pressed = GUI::isPressed(_x, _y);
+	m_press_coords = { _x ,  _y };
+	return m_check_if_pressed;
+}
+
+//------------------------------------------------------
+void GUIWithAlpha::Perssed()
+{
+	if (!m_check_if_pressed)
+		GUI::Perssed();
+}
+
+//--------------------------------------------------
+void GUIWithAlpha::UpdateSync()
+{
+	GUI::UpdateSync();
+	if (m_check_if_pressed)
+	{
+		uint8_t* imData = texture.getPixelBuffer();
+		GLubyte r, g, b, a; // or GLubyte r, g, b, a;
+		
+		auto[x, y] = pointOnGUI(m_press_coords.first, m_press_coords.second);// line and column of the pixel
+		y = Height - y; // invert y to bottom left coord system
+		int32_t elmes_per_line = texture.mTextureWidth * 4; // elements per line = 256 * "RGBA"
+
+		y = y * (texture.mTextureHeight / Height);
+		x = x * (texture.mTextureWidth / Width);
+
+		int32_t row = y * elmes_per_line;
+		int32_t col = x * 4;
+
+		r = imData[row + col];
+		g = imData[row + col + 1];
+		b = imData[row + col + 2];
+		a = imData[row + col + 3];
+
+		m_check_if_pressed = false;
+		if (a > 0)
+			Perssed();
+
+		free(imData);
+	}
 }
 
 //--------------------------------------------------
@@ -103,6 +177,7 @@ void AnimStop::Execute()
 	m_obj->GetRigger()->Stop();
 }
 
+//--------------------------------------
 CommandTest::CommandTest()
 {
 }
@@ -111,3 +186,36 @@ void CommandTest::Execute()
 {
 }
 
+//--------------------------------------
+void MenuBehavior::Execute()
+{
+	gui->SetVisible(!gui->IsVisible());
+}
+
+//--------------------------------------
+void MenuBehaviorLeanerMove::Execute()
+{
+	if (!anim.IsOn())
+	{
+		anim.Start();
+		timer.reset(new math::Timer([this]()->bool
+			{
+				std::vector<glm::vec3> frame = anim.getCurrentFrame();
+				gui->Move({ frame[0].x, frame[0].y });
+				return true;
+			}));
+		timer->start(10);
+		gui->SetVisible(true);
+	}
+	else
+	{
+		gui->SetVisible(false);
+		anim.Reset();
+		timer->stop();
+	}
+}
+
+MenuBehaviorLeanerMove::~MenuBehaviorLeanerMove()
+{
+	timer->stop();
+}
