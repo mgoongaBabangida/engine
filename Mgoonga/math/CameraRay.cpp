@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "CameraRay.h"
 #include "BoxCollider.h"
+#include "Camera.h"
 
 #include <glm\glm\glm.hpp>
 #include <glm\glm\gtc\matrix_transform.hpp>
@@ -64,10 +65,10 @@ namespace dbb
 #endif // DEBUG
 	}
 
-	shObject CameraRay::calculateIntersaction(std::vector<shObject> objects)
+	std::pair<shObject, glm::vec3> CameraRay::calculateIntersaction(std::vector<shObject> objects)
 	{
 		std::multimap<shObject, glm::vec3> intersections;
-		int debug_counter = 0;
+
 		for (auto &obj : objects)
 		{
 			std::vector<glm::mat3> boundings = obj->GetCollider()->GetBoundingTriangles(*(obj->GetTransform()));
@@ -84,22 +85,22 @@ namespace dbb
 					intersections.insert(std::pair<shObject, glm::vec3>(obj, inters));
 				}
 			}
-			++debug_counter;
 		}
+
 		if (intersections.empty())
 		{
-			return nullptr;
+			return {};
 		}
 		else
 		{
-			float length = 1000.0f;  //should be in line with far plane!!!!!!!
-			shObject obj = nullptr;
+			float length = 1000.0f;  //@ todo should be in line with far plane
+			std::pair<shObject, glm::vec3> obj;
 			for (auto &inter : intersections)
 			{
 				if (glm::length(m_line.M - inter.second) < length)
 				{
 					length = glm::length(m_line.M - inter.second);
-					obj = inter.first;
+					obj = inter;
 				}
 			}
 			return obj;

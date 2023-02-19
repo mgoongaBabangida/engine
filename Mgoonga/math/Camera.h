@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math.h"
+#include "CameraRay.h"
 #include <base/interfaces.h>
 
 //---------------------------------------------------------------------
@@ -33,8 +34,10 @@ public:
 	const glm::mat4&	getProjectionOrthoMatrix() const { return projectionOrthoMatrix; };
 	uint32_t			getWidth() const { return width;  }
 	uint32_t			getHeight() const { return height; }
-	float				getNearPlane() const { return nearPlane; }
-	float				getFarPlane() const;
+	float				  getNearPlane() const { return nearPlane; }
+	float				  getFarPlane() const;
+
+	dbb::CameraRay& getCameraRay() { return camRay; }
 
 	void				moveForward();
 	void				moveBackword();
@@ -53,6 +56,8 @@ public:
 
 	glm::vec3&			PositionRef()		{ return position; }
 	glm::vec3&			ViewDirectionRef()  { return viewDirection; }
+	uint32_t&				StrafeThresholdRef() { return strafeThreshold; }
+	float&					MovementSpeedRef() { return MOVEMENT_SPEED; }
 
 protected:
 	glm::vec3			position;
@@ -61,7 +66,9 @@ protected:
 	glm::vec2			oldMousePosition;
 	glm::vec3			strafeDirection;
 	glm::mat3			rotationMatrix;
-	const float			MOVEMENT_SPEED = 0.05f;//@should be flexible and frame dependent
+	float					MOVEMENT_SPEED = 0.05f;
+
+	dbb::CameraRay camRay;
 
 	glm::mat4			projectionMatrix;
 	glm::mat4			projectionOrthoMatrix;
@@ -69,6 +76,7 @@ protected:
 	uint32_t			height;
 	float				nearPlane;
 	float				farPlane;
+	uint32_t		strafeThreshold = 5;
 };
 
 

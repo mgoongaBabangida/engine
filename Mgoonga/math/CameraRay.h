@@ -7,7 +7,8 @@
 
 #include "Transform.h"
 #include "PlaneLine.h"
-#include "Camera.h"
+
+class Camera;
 
 namespace dbb
 {
@@ -20,7 +21,7 @@ namespace dbb
 
 		void					                   init(float width, float height, float near, float far, float pers = 60.0f);
 		void					                   Update(Camera& camera, float click_x, float click_y, float w, float h);
-		shObject				                 calculateIntersaction(std::vector<shObject> objects);
+		std::pair<shObject, glm::vec3>   calculateIntersaction(std::vector<shObject> objects);
     bool									           IsPressed() const { return pressed; }
 		std::pair<glm::vec2, glm::vec2>  GetFrame() const { return std::pair<glm::vec2, glm::vec2>{ press_start, press_curr }; }
 		std::vector<shObject>            onMove(Camera& camera, std::vector<shObject> objects, float click_x, float click_y);
