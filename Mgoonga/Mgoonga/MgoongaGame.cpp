@@ -210,6 +210,7 @@ bool eMgoongaGameContext::OnMousePress(uint32_t x, uint32_t y, bool left)
 
   m_camera.getCameraRay().Update(m_camera, static_cast<float>(x), static_cast<float>(y), width, height);
   m_camera.getCameraRay().press(x, y);
+  m_camera.MovementSpeedRef() = 0.f;
   auto objects = m_objects;
   objects.insert(objects.end(), m_pbr_objs.begin(), m_pbr_objs.end());
   auto [new_focused, intersaction] = m_camera.getCameraRay().calculateIntersaction(objects);
@@ -230,7 +231,6 @@ bool eMgoongaGameContext::OnMousePress(uint32_t x, uint32_t y, bool left)
       OnFocusedChanged();
       m_grab_translation = new_focused->GetTransform()->getTranslation();
       m_intersaction = intersaction;
-      m_camera.MovementSpeedRef() = 0.f;
       m_grab_camera_line = m_camera.getCameraRay().getLine();
     }
   }
@@ -325,12 +325,18 @@ void eMgoongaGameContext::InitializeGL()
 
 	guis.emplace_back(new GUI(width / 4 * 3, height / 4 * 3, width / 4, height / 4, width, height));
 	//guis[1].setCommand(std::make_shared<AnimStop>(AnimStop(m_objects[6])));
+  guis.emplace_back(new Cursor(0, 0, 30, 30, width, height));
+  guis[2]->SetTexture(*(texManager->Find("TSpanishFlag0_s")));
+  guis.emplace_back(new Movable2D(400, 0, 60, 60, width, height));
+  guis[3]->SetTexture(*(texManager->Find("TSpanishFlag0_s")));
 
 	inputController->AddObserver(this, WEAK);
   inputController->AddObserver(&m_camera.getCameraRay(), WEAK);
   inputController->AddObserver(&m_camera, WEAK);
   inputController->AddObserver(guis[0].get(), MONOPOLY);//monopoly takes only mouse
   inputController->AddObserver(guis[1].get(), MONOPOLY);
+  inputController->AddObserver(guis[2].get(), WEAK);
+  inputController->AddObserver(guis[3].get(), STRONG);
   inputController->AddObserver(externalGui[0], MONOPOLY);
   inputController->AddObserver(externalGui[1], MONOPOLY);
   inputController->AddObserver(externalGui[2], MONOPOLY);

@@ -146,6 +146,44 @@ void GUIWithAlpha::UpdateSync()
 	}
 }
 
+//-------------------------------------------------------------
+bool Cursor::OnMouseMove(uint32_t x, uint32_t y)
+{
+	Move({ x,y });
+	return false;
+}
+
+//-------------------------------------------------------------
+bool Movable2D::OnMouseMove(uint32_t x, uint32_t y)
+{
+	if(is_pressed)
+		Move({ x - m_press_coords.first,y - m_press_coords.second });
+	return is_pressed;
+}
+
+//-------------------------------------------------------------
+bool Movable2D::OnMousePress(uint32_t x, uint32_t y, bool left)
+{
+	if (GUI::OnMousePress(x, y, left))
+	{
+		is_pressed = true;
+		m_press_coords = {x - topleftX , y - topleftY};
+		return true;
+	}
+	return false;
+}
+
+//-------------------------------------------------------------
+bool Movable2D::OnMouseRelease()
+{
+	if (is_pressed)
+	{
+		is_pressed = false;
+		return true;
+	}
+	return false;
+}
+
 //--------------------------------------------------
 AnimStart::AnimStart(shObject obj)
 	:m_obj(obj)
@@ -217,5 +255,10 @@ void MenuBehaviorLeanerMove::Execute()
 
 MenuBehaviorLeanerMove::~MenuBehaviorLeanerMove()
 {
-	timer->stop();
+	if (anim.IsOn())
+	{
+		gui->SetVisible(false);
+		anim.Reset();
+		timer->stop();
+	}
 }

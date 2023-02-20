@@ -31,6 +31,7 @@ public:
 
 	void					virtual Perssed();
 	bool					virtual isPressed(int x, int y);
+
 	bool					IsVisible() const { return isVisible; }
 	void					SetVisible(bool _isVisible) { isVisible = _isVisible; }
 
@@ -71,7 +72,32 @@ public:
 	virtual void UpdateSync() override;
 protected:
 	bool m_check_if_pressed = false;
-	std::pair<size_t, size_t> m_press_coords;
+	std::pair<size_t, size_t> m_press_coords; //move to base?
+};
+
+//----------------------------------------------
+class DLL_OPENGL_ASSETS Cursor : public GUI
+{
+public:
+	Cursor(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight)
+		:GUI(topleftX, topleftY, Width, Height, scWidth, scHeight) {}
+
+	virtual bool	OnMouseMove(uint32_t x, uint32_t y) override;
+};
+
+//----------------------------------------------
+class DLL_OPENGL_ASSETS Movable2D : public GUI
+{
+public:
+	Movable2D(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight)
+		:GUI(topleftX, topleftY, Width, Height, scWidth, scHeight) {}
+
+	virtual bool	OnMouseMove(uint32_t x, uint32_t y) override;
+	virtual bool	OnMousePress(uint32_t x, uint32_t y, bool left) override;
+	virtual bool	OnMouseRelease() override;
+protected:
+	bool is_pressed = false;
+	std::pair<size_t, size_t> m_press_coords; //move to base?
 };
 
 //----------------------------------------------
