@@ -442,7 +442,8 @@ void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, c
 		txt.TextureFromBuffer<GLfloat>(data, width, height);*/
 
 		//guis[0].SetTexture(GetReflectionBufferTexture());
-		guis[1]->SetTexture(GetShadowBufferTexture());
+		const Texture& t = GetShadowBufferTexture();
+		guis[1]->SetTexture(t, { 0,0 }, {t.mTextureWidth, t.mTextureHeight});
 	} 
 
 	for(auto& gui : guis)
@@ -450,7 +451,9 @@ void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, c
 		if (gui->GetTexture() && gui->IsVisible())
 		{
 			renderManager->ScreenRender()->SetTexture(*(gui->GetTexture())); //copy texture
-			renderManager->ScreenRender()->Render(gui->getTopLeft(), gui->getBottomRight(), width, height);
+			renderManager->ScreenRender()->Render(gui->getTopLeft(), gui->getBottomRight(),
+																						gui->getTopLeftTexture(), gui->getBottomRightTexture(), 
+																						width, height);
 		}
 		gui->UpdateSync();
 		for (auto& child : gui->GetChildren())
@@ -458,7 +461,9 @@ void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, c
 			if (child->GetTexture() && child->IsVisible())
 			{
 				renderManager->ScreenRender()->SetTexture(*(child->GetTexture())); //copy texture
-				renderManager->ScreenRender()->Render(child->getTopLeft(), child->getBottomRight(), width, height);
+				renderManager->ScreenRender()->Render(child->getTopLeft(), child->getBottomRight(), 
+																							child->getTopLeftTexture(), child->getBottomRightTexture(), 
+																							width, height);
 			}
 			child->UpdateSync();
 		}

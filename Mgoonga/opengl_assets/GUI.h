@@ -23,7 +23,9 @@ public:
 	virtual void UpdateSync();
 
 	void			  setCommand(std::shared_ptr<ICommand> com);
-	void			  SetTexture(const Texture& t);
+	void			  SetTexture(const Texture& t,
+												glm::ivec2 topLeft,
+												glm::ivec2 bottomRight);
 	Texture*		GetTexture();
 	
 	void SetChild(std::shared_ptr<GUI>_child) { children.push_back(_child); }
@@ -44,6 +46,9 @@ public:
 	glm::ivec2		getTopLeft() const;
 	glm::ivec2		getBottomRight() const;
 
+	glm::ivec2		getTopLeftTexture() const;
+	glm::ivec2		getBottomRightTexture() const;
+
 	std::pair<uint32_t, uint32_t> pointOnGUI(uint32_t x_window, uint32_t y_window);
 
 protected:
@@ -56,6 +61,11 @@ protected:
 	int32_t						topleftY;
 	int32_t						Width;
 	int32_t						Height;
+
+	int32_t						tex_topleftX;
+	int32_t						tex_topleftY;
+	int32_t						tex_Width;
+	int32_t						tex_Height;
 
 	std::vector<std::shared_ptr<GUI>> children;
 	std::shared_ptr<ICommand>	cmd;

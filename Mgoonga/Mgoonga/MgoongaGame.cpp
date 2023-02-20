@@ -312,10 +312,13 @@ void eMgoongaGameContext::InitializeGL()
                       pipeline.GetWaterHeight()));
 
   Texture* tex = texManager->Find("TButton_red");
-	guis.emplace_back(new GUIWithAlpha(0, 0, tex->mTextureWidth/4, tex->mTextureHeight/4, width, height));
-  guis[0]->SetTexture(*tex);
-  guis[0]->SetChild(std::make_shared<GUIWithAlpha>(0, tex->mTextureHeight / 4, tex->mTextureWidth / 4, tex->mTextureHeight / 4, width, height));
-  guis[0]->GetChildren()[0]->SetTexture(*tex);
+  Texture* flag = texManager->Find("TSpanishFlag0_s");
+  glm::ivec2 topLeft{ 160,450 };
+  glm::ivec2 bottomRight{ 1030, 725 };
+	guis.emplace_back(new GUIWithAlpha(0, 0, (bottomRight.x - topLeft.x)/4, (bottomRight.y - topLeft.y)/4, width, height));
+  guis[0]->SetTexture(*tex, topLeft, bottomRight);
+  guis[0]->SetChild(std::make_shared<GUIWithAlpha>(0, (bottomRight.y - topLeft.y)/4, (bottomRight.x - topLeft.x)/4, (bottomRight.y - topLeft.y)/4, width, height));
+  guis[0]->GetChildren()[0]->SetTexture(*tex, topLeft, bottomRight);
   guis[0]->GetChildren()[0]->SetVisible(false);
   guis[0]->setCommand(std::make_shared<MenuBehaviorLeanerMove>(guis[0]->GetChildren()[0].get(),
     math::AnimationLeaner{ 
@@ -326,9 +329,9 @@ void eMgoongaGameContext::InitializeGL()
 	guis.emplace_back(new GUI(width / 4 * 3, height / 4 * 3, width / 4, height / 4, width, height));
 	//guis[1].setCommand(std::make_shared<AnimStop>(AnimStop(m_objects[6])));
   guis.emplace_back(new Cursor(0, 0, 30, 30, width, height));
-  guis[2]->SetTexture(*(texManager->Find("TSpanishFlag0_s")));
+  guis[2]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight});
   guis.emplace_back(new Movable2D(400, 0, 60, 60, width, height));
-  guis[3]->SetTexture(*(texManager->Find("TSpanishFlag0_s")));
+  guis[3]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight });
 
 	inputController->AddObserver(this, WEAK);
   inputController->AddObserver(&m_camera.getCameraRay(), WEAK);

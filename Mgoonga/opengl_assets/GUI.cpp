@@ -51,9 +51,13 @@ void GUI::setCommand(std::shared_ptr<ICommand> com)
 	cmd = com;
 }
 
-void GUI::SetTexture(const Texture& t)
+void GUI::SetTexture(const Texture& t, glm::ivec2 topLeft, glm::ivec2 bottomRight)
 {
 	texture = t;
+	tex_topleftX = topLeft.x;
+	tex_topleftY = topLeft.y;
+	tex_Width = bottomRight.x - topLeft.x;
+	tex_Height = bottomRight.y - topLeft.y;
 }
 
 Texture * GUI::GetTexture()
@@ -85,6 +89,16 @@ glm::ivec2 GUI::getTopLeft() const
 glm::ivec2 GUI::getBottomRight() const
 {
 	return glm::ivec2(topleftX + Width, topleftY + Height);
+}
+
+glm::ivec2 GUI::getTopLeftTexture() const
+{
+	return glm::ivec2(tex_topleftX, tex_topleftY);
+}
+
+glm::ivec2 GUI::getBottomRightTexture() const
+{
+	return glm::ivec2(tex_topleftX + tex_Width, tex_topleftY + tex_Height);
 }
 
 std::pair<uint32_t, uint32_t> GUI::pointOnGUI(uint32_t x_window, uint32_t y_window)
@@ -127,11 +141,14 @@ void GUIWithAlpha::UpdateSync()
 		y = Height - y; // invert y to bottom left coord system
 		int32_t elmes_per_line = texture.mTextureWidth * 4; // elements per line = 256 * "RGBA"
 
-		y = y * (texture.mTextureHeight / Height);
-		x = x * (texture.mTextureWidth / Width);
+		float x_coef = static_cast<float>(x) / static_cast<float>(Width);
+		float y_coef = static_cast<float>(y) / static_cast<float>(Height);
 
-		int32_t row = y * elmes_per_line;
-		int32_t col = x * 4;
+		int32_t tex_x = tex_topleftX + (x_coef * tex_Width);
+		int32_t tex_y = tex_topleftY + (y_coef * tex_Height);
+
+		int32_t row = tex_y * elmes_per_line;
+		int32_t col = tex_x * 4;
 
 		r = imData[row + col];
 		g = imData[row + col + 1];
@@ -240,16 +257,16 @@ void MenuBehaviorLeanerMove::Execute()
 			{
 				std::vector<glm::vec3> frame = anim.getCurrentFrame();
 				gui->Move({ frame[0].x, frame[0].y });
+				gui->SetVisible(true);
 				return true;
 			}));
 		timer->start(10);
-		gui->SetVisible(true);
 	}
 	else
 	{
 		gui->SetVisible(false);
-		anim.Reset();
 		timer->stop();
+		anim.Reset();
 	}
 }
 

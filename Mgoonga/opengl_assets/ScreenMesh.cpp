@@ -54,7 +54,11 @@ std::vector<const Texture*> eScreenMesh::GetTextures() const
 }
 
 //-----------------------------------------------------------------------------------
-void eScreenMesh::UpdateFrame(float top_x, float top_y, float botom_x, float botom_y, float viewport_width, float viewport_height)
+void eScreenMesh::UpdateFrame(float top_x, float top_y,
+															float botom_x, float botom_y,
+															float tex_top_x, float tex_top_y,
+															float tex_botom_x, float tex_botom_y,
+															float viewport_width, float viewport_height)
 {
 	top_y = viewport_height - top_y; // invert y axis
 	botom_y = viewport_height - botom_y; // invert y axis
@@ -62,20 +66,38 @@ void eScreenMesh::UpdateFrame(float top_x, float top_y, float botom_x, float bot
 	quadVertices[0] = (top_x / viewport_width) * 2 - 1.0f; // top left
 	quadVertices[1] = (top_y / viewport_height) * 2 - 1.0f;
 	
+	quadVertices[2] = tex_top_x / static_cast<float>(textureOne.mTextureWidth);
+	quadVertices[3] = tex_botom_y / static_cast<float>(textureOne.mTextureHeight);
+
 	quadVertices[4] = (top_x / viewport_width) * 2 - 1.0f; // bottom left
 	quadVertices[5] = (botom_y / viewport_height) * 2 - 1.0f;
 	
+	quadVertices[6] = tex_top_x / static_cast<float>(textureOne.mTextureWidth);
+	quadVertices[7] = tex_top_y / static_cast<float>(textureOne.mTextureHeight);
+
 	quadVertices[8] = (botom_x / viewport_width) * 2 - 1.0f; // bottom right
 	quadVertices[9] = (botom_y / viewport_height) * 2 - 1.0f;
 	
+	quadVertices[10] = tex_botom_x / static_cast<float>(textureOne.mTextureWidth);
+	quadVertices[11] = tex_top_y / static_cast<float>(textureOne.mTextureHeight);
+
 	quadVertices[12] = (top_x / viewport_width) * 2 - 1.0f;// top left
 	quadVertices[13] = (top_y / viewport_height) * 2 - 1.0f;
+
+	quadVertices[14] = tex_top_x / static_cast<float>(textureOne.mTextureWidth);
+	quadVertices[15] = tex_botom_y / static_cast<float>(textureOne.mTextureHeight);
 
 	quadVertices[16] = (botom_x / viewport_width) * 2 - 1.0f;// bottom right
 	quadVertices[17] = (botom_y / viewport_height) * 2 - 1.0f;
 
+	quadVertices[18] = tex_botom_x / static_cast<float>(textureOne.mTextureWidth);
+	quadVertices[19] = tex_top_y / static_cast<float>(textureOne.mTextureHeight);
+
 	quadVertices[20] = (botom_x / viewport_width) * 2 - 1.0f;// top right
 	quadVertices[21] = (top_y / viewport_height) * 2 - 1.0f;
+
+	quadVertices[22] = tex_botom_x / static_cast<float>(textureOne.mTextureWidth);
+	quadVertices[23] = tex_botom_y / static_cast<float>(textureOne.mTextureHeight);
 
 	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_DYNAMIC_DRAW);
@@ -83,23 +105,16 @@ void eScreenMesh::UpdateFrame(float top_x, float top_y, float botom_x, float bot
 
 void eScreenMesh::SetViewPortToDefault()
 {
-	quadVertices[0] = -1.0f;// top left
-	quadVertices[1] = 1.0f;
-										
-	quadVertices[4] = -1.0f;// bottom left
-	quadVertices[5] = -1.0f;
-										
-	quadVertices[8] = 1.0f; // bottom right
-	quadVertices[9] = -1.0f;
-										
-	quadVertices[12] = -1.0f;// top left
-	quadVertices[13] = 1.0f;
-										
-	quadVertices[16] = 1.0f;// bottom right
-	quadVertices[17] = -1.0f;
-										
-	quadVertices[20] = 1.0f;// top right
-	quadVertices[21] = 1.0f;
+	quadVertices = {
+		// Positions   // TexCoords
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		1.0f, -1.0f,  1.0f, 0.0f,
+
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		1.0f, -1.0f,  1.0f, 0.0f,
+		1.0f,  1.0f,  1.0f, 1.0f
+	};
 
 	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_DYNAMIC_DRAW);

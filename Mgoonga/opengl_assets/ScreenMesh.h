@@ -16,7 +16,9 @@ public:
   virtual size_t GetVertexCount() const { return 4; }
   virtual std::vector<const Texture*> GetTextures() const;
 
-	void UpdateFrame(float top_x, float top_y, float botom_x, float botom_y, float viewport_width, float viewport_height);
+	void UpdateFrame(float top_x, float top_y, float botom_x, float botom_y,
+									 float tex_top_x, float tex_top_y, float tex_botom_x, float tex_botom_y,
+									 float viewport_width, float viewport_height);
 	void SetViewPortToDefault();
 
 	void SetTextureOne(Texture t) { textureOne = t; }

@@ -11,7 +11,9 @@ class eScreenRender
 public:
 	eScreenRender(Texture tex, const std::string& vS, const std::string& fS);
 
-	void Render(glm::vec2 _top_left, glm::vec2 _right_botom, float viewport_width, float viewport_height);
+	void Render(glm::vec2 _top_left, glm::vec2 _right_botom,
+							glm::vec2 _tex_top_left, glm::vec2 _tex_right_botom,
+							float viewport_width, float viewport_height);
 	void RenderContrast(const Camera& camera, float blur_coef);
 	void RenderFrame(glm::vec2 _top_left, glm::vec2 _right_botom, float viewport_width, float viewport_height);
 	
