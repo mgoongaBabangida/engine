@@ -302,19 +302,12 @@ void eMgoongaGameContext::InitializeGL()
 	
 	//Camera Ray
   m_camera.getCameraRay().init(width, height, nearPlane, farPlane);
-	
-	m_objects[3]->SetScript(new eShipScript(texManager->Find("TSpanishFlag0_s"),
-											pipeline.GetRenderManager(),
-                      m_camera,
-											texManager->Find("Tatlas2"),
-											soundManager->GetSound("shot_sound"),
-											&m_camera.getCameraRay(),
-                      pipeline.GetWaterHeight()));
 
   Texture* tex = texManager->Find("TButton_red");
   Texture* flag = texManager->Find("TSpanishFlag0_s");
   glm::ivec2 topLeft{ 160,450 };
   glm::ivec2 bottomRight{ 1030, 725 };
+
 	guis.emplace_back(new GUIWithAlpha(0, 0, (bottomRight.x - topLeft.x)/4, (bottomRight.y - topLeft.y)/4, width, height));
   guis[0]->SetTexture(*tex, topLeft, bottomRight);
   guis[0]->SetChild(std::make_shared<GUIWithAlpha>(0, (bottomRight.y - topLeft.y)/4, (bottomRight.x - topLeft.x)/4, (bottomRight.y - topLeft.y)/4, width, height));
@@ -326,20 +319,17 @@ void eMgoongaGameContext::InitializeGL()
       {glm::vec3(guis[0]->GetChildren()[0]->getTopLeft().x, guis[0]->GetChildren()[0]->getTopLeft().y, 0)},
       1000 }));
 
-	guis.emplace_back(new GUI(width / 4 * 3, height / 4 * 3, width / 4, height / 4, width, height));
-	//guis[1].setCommand(std::make_shared<AnimStop>(AnimStop(m_objects[6])));
   guis.emplace_back(new Cursor(0, 0, 30, 30, width, height));
-  guis[2]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight});
+  guis[1]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight});
   guis.emplace_back(new Movable2D(400, 0, 60, 60, width, height));
-  guis[3]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight });
+  guis[2]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight });
 
 	inputController->AddObserver(this, WEAK);
   inputController->AddObserver(&m_camera.getCameraRay(), WEAK);
   inputController->AddObserver(&m_camera, WEAK);
   inputController->AddObserver(guis[0].get(), MONOPOLY);//monopoly takes only mouse
-  inputController->AddObserver(guis[1].get(), MONOPOLY);
-  inputController->AddObserver(guis[2].get(), WEAK);
-  inputController->AddObserver(guis[3].get(), STRONG);
+  inputController->AddObserver(guis[1].get(), WEAK);
+  inputController->AddObserver(guis[2].get(), STRONG);
   inputController->AddObserver(externalGui[0], MONOPOLY);
   inputController->AddObserver(externalGui[1], MONOPOLY);
   inputController->AddObserver(externalGui[2], MONOPOLY);
@@ -400,7 +390,7 @@ void eMgoongaGameContext::InitializeModels()
 	m_objects.push_back(containerCube);
 
   shObject grassPlane = factory.CreateObject(modelManager->Find("grass_plane"));
-	grassPlane->GetTransform()->setTranslation(vec3(0.0f, 1.0f, 0.0f));
+	grassPlane->GetTransform()->setTranslation(vec3(0.0f, 1.5f, 0.0f));
 	m_objects.push_back(grassPlane);
 
 	shObject nanosuit = factory.CreateObject(modelManager->Find("nanosuit"));
@@ -408,6 +398,14 @@ void eMgoongaGameContext::InitializeModels()
   nanosuit->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
 	nanosuit->GetTransform()->setScale(vec3(0.12f, 0.12f, 0.12f));
 	m_objects.push_back(nanosuit);
+
+  nanosuit->SetScript(new eShipScript(texManager->Find("TSpanishFlag0_s"),
+                                      pipeline.GetRenderManager(),
+                                      m_camera,
+                                      texManager->Find("Tatlas2"),
+                                      soundManager->GetSound("shot_sound"),
+                                      &m_camera.getCameraRay(),
+                                      pipeline.GetWaterHeight()));
 
   shObject terrain = factory.CreateObject(std::shared_ptr<IModel>(terrainModel.release()));
   terrain->SetName("Terrain");
@@ -497,4 +495,10 @@ void eMgoongaGameContext::PaintGL()
   objects.insert({ eOpenGlRenderPipeline::RenderType::PBR, m_pbr_objs });
 
 	pipeline.RenderFrame(objects, m_camera, m_light, guis);
+}
+
+//-------------------------------------------------------------------------------
+uint32_t eMgoongaGameContext::GetFinalImageId()
+{
+  return pipeline.GetDefaultBufferTexture().id;
 }

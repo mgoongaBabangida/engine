@@ -445,7 +445,8 @@ void eAmericanTreasureGame::PaintGL()
 	light.light_position = vec4(sin(angle) * 4.0f, cos(angle) * 4.0f, 0.0f, 1.0f);
 	
 	turn_context->Update();
-	guis[0]->SetTexture(*turn_context->GetDiceTexture());
+	guis[0]->SetTexture(*turn_context->GetDiceTexture(), { 0,0 },
+		{ turn_context->GetDiceTexture()->mTextureWidth, turn_context->GetDiceTexture()->mTextureHeight });
 
 	std::vector<shObject> flags;
 	for (auto &ship : ships)

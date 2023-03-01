@@ -63,6 +63,12 @@ void eMainContextBase::PaintGL()
 }
 
 //--------------------------------------------------------------------------------
+uint32_t eMainContextBase::GetFinalImageId()
+{
+	return uint32_t();
+}
+
+//--------------------------------------------------------------------------------
 void eMainContextBase::InitializeModels()
 {
 	//PRIMITIVES

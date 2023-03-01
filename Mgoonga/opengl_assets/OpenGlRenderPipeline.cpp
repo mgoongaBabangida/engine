@@ -63,6 +63,7 @@ void eOpenGlRenderPipeline::Initialize()
 
 void eOpenGlRenderPipeline::InitializeBuffers(bool _needsShadowCubeMap)
 {
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFAULT, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SCREEN, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_MTS, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_REFLECTION, width, height);
@@ -231,6 +232,21 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	renderManager->TextRender()->RenderText(fps, 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f), width, height);
 	glDisable(GL_BLEND);
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	//render final texture to screen
+	/*Texture total_screen = GetDefaultBufferTexture();
+	renderManager->ScreenRender()->SetTexture(total_screen);
+	renderManager->ScreenRender()->Render({ 0,0 }, { width, height },
+																				{ 0,0 }, { width, height },
+																				width, height);*/
+}
+
+//-------------------------------------------------------
+Texture eOpenGlRenderPipeline::GetDefaultBufferTexture() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_DEFAULT);
 }
 
 //-------------------------------------------------------
@@ -434,18 +450,7 @@ void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, c
 {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	if (!guis.empty())
-	{
-		/*Texture txt;
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-		glReadPixels(0, 0, width, height, GL_RGBA, GL_FLOAT, data);
-		txt.TextureFromBuffer<GLfloat>(data, width, height);*/
-
-		//guis[0].SetTexture(GetReflectionBufferTexture());
-		const Texture& t = GetShadowBufferTexture();
-		guis[1]->SetTexture(t, { 0,0 }, {t.mTextureWidth, t.mTextureHeight});
-	} 
-
+	
 	for(auto& gui : guis)
 	{
 		if (gui->GetTexture() && gui->IsVisible())

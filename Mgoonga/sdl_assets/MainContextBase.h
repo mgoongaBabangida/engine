@@ -24,6 +24,7 @@ public:
 
 	virtual void		InitializeGL();
 	virtual void		PaintGL();
+	virtual uint32_t GetFinalImageId();
 
 	size_t			Width();
 	size_t			Height();

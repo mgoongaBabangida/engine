@@ -25,7 +25,8 @@ public:
 
 	bool		InitializeGL();
 	void		Run();
-  void    Close();
+  void		Close();
+	void		OnDockSpace();
 
 protected:
 	std::unique_ptr<math::Timer>		dTimer;

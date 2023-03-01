@@ -17,7 +17,6 @@ public:
 	void Init();
 	void NewFrame();
 	void Render();
-	void PreRender();
 	void CleanUp();
 
 	static eImGuiContext& GetInstance(SDL_GLContext* context, SDL_Window* window);
@@ -48,7 +47,8 @@ class IWindowImGui : public IInputObserver
 public:
 	virtual void Render()	{}
 	virtual void Add(TypeImGui, const std::string& name, void*)		{}
-
+	virtual void SetViewportOffset(float x_offset, float y_offset) {}
+	virtual void SetWindowOffset(float x_offset, float y_offset) {}
 };
 
 //--------------------------------------------------
@@ -64,6 +64,8 @@ class eWindowImGui : public IWindowImGui
 	using eItem = std::tuple<std::string, TypeImGui, void*>;
 public:
   eWindowImGui(const std::string& _name);
+	void SetViewportOffset(float x_offset, float y_offset);
+	void SetWindowOffset(float x_offset, float y_offset);
 	virtual void Render()										override;
 	virtual void Add(TypeImGui, const std::string& name, void*) override;
   virtual bool OnMousePress(uint32_t x, uint32_t y, bool left);
@@ -76,5 +78,14 @@ protected:
   float								window_pos_y;
   float								window_size_x;
   float								window_size_y;
+	float								viewport_offset_x;
+	float								viewport_offset_y;
+	float								window_offset_x;
+	float								window_offset_y;
 	bool								visible = true;
+};
+
+struct eDockSpaceImGui
+{
+
 };

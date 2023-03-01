@@ -42,6 +42,7 @@ public:
 	}
 
 private:
+	eColorFBO		  defaultFBO;
 	ShadowMapFBO	depthFBO;
   eColorFBO		  screenFBO;
   eColorFBO		  mtsFBO;

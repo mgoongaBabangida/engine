@@ -4,7 +4,6 @@
 #include "ImGuiContext.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
-#include <iostream>
 
 #include "MainContextBase.h"
 #include <opengl_assets/TextureManager.h>
@@ -12,6 +11,7 @@
 #include <opengl_assets/SoundManager.h>
 
 SDL_GLContext					context;
+ImVec2								viewport_offset;
 
 //***************************************
 //dbGLWindowSDL::~dbGLWindowSDL
@@ -66,8 +66,8 @@ bool dbGLWindowSDL::InitializeGL()
 	SDL_DisplayMode current;
 	SDL_GetCurrentDisplayMode(0, &current);
 	
-	window	= SDL_CreateWindow("OpenGl", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, 
-		SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+	window	= SDL_CreateWindow("OpenGl", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH+200, HEIGHT+250, //@todo
+		SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL /*| SDL_WINDOW_RESIZABLE*/ | SDL_WINDOW_ALLOW_HIGHDPI);
 	SDL_GL_SetSwapInterval(1); // Enable vsync
 	
 	if(window == nullptr)
@@ -108,8 +108,8 @@ void dbGLWindowSDL::Run()
 		{
 			ImGuiIO& io = ImGui::GetIO();
 			ImGui_ImplSDL2_ProcessEvent(&windowEvent);
-			if (io.WantCaptureMouse)
-				continue;
+			/*if (io.WantCaptureMouse)
+				continue;*/
       if (windowEvent.type == SDL_KEYDOWN && windowEvent.key.keysym.sym == SDLK_ESCAPE)
 			{
 				dTimer->stop();
@@ -123,9 +123,11 @@ void dbGLWindowSDL::Run()
 			}
 			else if(SDL_MOUSEBUTTONDOWN == windowEvent.type)
 			{
-				inputController.OnMousePress(windowEvent.button.x,
-											 windowEvent.button.y, 
-											 windowEvent.button.button == SDL_BUTTON_LEFT);
+				if(windowEvent.motion.x < viewport_offset.x || windowEvent.motion.y < viewport_offset.y)
+					continue;
+				inputController.OnMousePress(windowEvent.motion.x - viewport_offset.x,
+																		 windowEvent.motion.y - viewport_offset.y,
+																		 windowEvent.button.button == SDL_BUTTON_LEFT);
 			}
 			else if(SDL_MOUSEBUTTONUP == windowEvent.type)
 			{
@@ -133,7 +135,10 @@ void dbGLWindowSDL::Run()
 			}
 			else if(SDL_MOUSEMOTION == windowEvent.type)
 			{
-				inputController.OnMouseMove(windowEvent.motion.x, windowEvent.motion.y);
+				if (windowEvent.motion.x < viewport_offset.x || windowEvent.motion.y < viewport_offset.y)
+					continue;
+				inputController.OnMouseMove(windowEvent.motion.x - viewport_offset.x,
+																		windowEvent.motion.y - viewport_offset.y);
 			}
 		}
 	}
@@ -156,21 +161,126 @@ void dbGLWindowSDL::PaintGL()
 	if(!flag)
 	{
 		SDL_GL_MakeCurrent(window, context);
-		//SDL_GL_SetSwapInterval(1);
 		flag = true;
 	}
-	
+
 	eImGuiContext::GetInstance(&context, window).NewFrame();
+
+	//ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+	mainContext->PaintGL();
+	OnDockSpace();
 
 	/*eWindowImGuiDemo demo;
   demo.Render();*/
 
-  for(auto* gui : guiWnd)
-    gui->Render();
-
-	eImGuiContext::GetInstance(&context, window).PreRender();
-	mainContext->PaintGL();
+	for (auto* gui : guiWnd)
+	{
+		int window_x, window_y;
+		SDL_GetWindowPosition(window, &window_x, &window_y);
+		gui->SetWindowOffset(window_x, window_y);
+		gui->SetViewportOffset(viewport_offset.x, viewport_offset.y);
+		gui->Render();
+	}
 	eImGuiContext::GetInstance(&context, window).Render();
-
 	SDL_GL_SwapWindow(window);
+}
+
+//======================================
+//dbGLWindowSDL::OnDockSpace
+//---------------------------------------
+void dbGLWindowSDL::OnDockSpace()
+{
+	static bool dockspaceOpen = true;
+	static bool opt_fullscreen = true;
+	static bool opt_padding = false;
+	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+	// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+	// because it would be confusing to have two docking targets within each others.
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+	if (opt_fullscreen)
+	{
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+	}
+	else
+	{
+		dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
+	}
+
+	// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
+	// and handle the pass-thru hole, so we ask Begin() to not render a background.
+	if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+		window_flags |= ImGuiWindowFlags_NoBackground;
+
+	// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
+	// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
+	// all active windows docked into it will lose their parent and become undocked.
+	// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
+	// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
+	if (!opt_padding)
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	
+	ImGui::Begin("DockSpace", &dockspaceOpen, window_flags);
+	if (!opt_padding)
+		ImGui::PopStyleVar();
+
+	if (opt_fullscreen)
+		ImGui::PopStyleVar(2);
+
+	// Submit the DockSpace
+	ImGuiIO& io = ImGui::GetIO();
+	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+	{
+		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+	}
+
+	//if (ImGui::BeginMenuBar())
+	//{
+	//	if (ImGui::BeginMenu("Options"))
+	//	{
+	//		// Disabling fullscreen would allow the window to be moved to the front of other windows,
+	//		// which we can't undo at the moment without finer window depth/z control.
+	//		ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen);
+	//		ImGui::MenuItem("Padding", NULL, &opt_padding);
+	//		ImGui::Separator();
+
+	//		if (ImGui::MenuItem("Flag: NoSplit", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoSplit; }
+	//		if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoResize; }
+	//		if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode; }
+	//		if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar; }
+	//		if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }
+	//		ImGui::Separator();
+
+	//		if (ImGui::MenuItem("Close", NULL, false, dockspaceOpen != NULL))
+	//			dockspaceOpen = false;
+	//		ImGui::EndMenu();
+	//	}
+
+	//	ImGui::EndMenuBar();
+	//}
+
+		ImGui::Begin("Game");
+
+		ImVec2 viewport_pos = ImGui::GetWindowPos();
+		int window_x, window_y, border_x, border_y;
+		SDL_GetWindowPosition(window, &window_x, &window_y);
+		SDL_GetWindowBordersSize(window,
+			&border_y, &border_x,
+			nullptr, nullptr);
+		border_y -= 5;
+		viewport_offset = { viewport_pos.x - window_x + border_x,
+												viewport_pos.y - window_y + border_y };
+		ImGui::Image((void*)(intptr_t)(mainContext->GetFinalImageId()), ImVec2(WIDTH, HEIGHT), ImVec2(0, 1), ImVec2(1, 0));
+		
+		ImGui::End();
+
+	ImGui::End();
 }

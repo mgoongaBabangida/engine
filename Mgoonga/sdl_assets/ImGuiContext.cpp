@@ -70,6 +70,7 @@ void eImGuiContext::NewFrame()
 
 void eImGuiContext::Render()
 {
+  ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
   ImGuiIO& io = ImGui::GetIO(); (void)io;
   if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -80,11 +81,6 @@ void eImGuiContext::Render()
     ImGui::RenderPlatformWindowsDefault();
     SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
   }
-}
-
-void eImGuiContext::PreRender()
-{
-	ImGui::Render();
 }
 
 void eImGuiContext::CleanUp()
@@ -143,6 +139,18 @@ eWindowImGui::eWindowImGui(const std::string & _name)
 {
 }
 
+void eWindowImGui::SetViewportOffset(float x_offset, float y_offset)
+{
+  viewport_offset_x = x_offset;
+  viewport_offset_y = y_offset;
+}
+
+void eWindowImGui::SetWindowOffset(float x_offset, float y_offset)
+{
+  window_offset_x = x_offset;
+  window_offset_y = y_offset;
+}
+
 void eWindowImGui::Render()
 {
   ImGui::Begin(name.c_str(), &visible);
@@ -188,10 +196,10 @@ void eWindowImGui::Render()
      * Opening any other file will show error, return false and won't close the dialog.
      */
         if (file_dialog.showFileDialog("Open File", imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 310), ".rar,.zip,.7z,.obj"))
-          {
+        {
           std::cout << file_dialog.selected_fn << std::endl;      // The name of the selected file or directory in case of Select Directory dialog mode
           std::cout << file_dialog.selected_path << std::endl;    // The absolute path to the selected file
-          }
+        }
         if (file_dialog.showFileDialog("Save File", imgui_addons::ImGuiFileBrowser::DialogMode::SAVE, ImVec2(700, 310), ".png,.jpg,.bmp"))
           {
           std::cout << file_dialog.selected_fn << std::endl;      // The name of the selected file or directory in case of Select Directory dialog mode
@@ -262,7 +270,7 @@ void eWindowImGui::Render()
   ImVec2 size = ImGui::GetWindowSize();
   window_size_x =size.x;
   window_size_y =size.y;
-  ImGui::SetNextWindowPos(ImVec2{ window_pos_x , window_pos_y + window_size_y });
+  //ImGui::SetNextWindowPos(ImVec2{ window_pos_x , window_pos_y + window_size_y });
   ImGui::SetWindowSize({ 300, 300 });
 	ImGui::End();
 }
@@ -280,7 +288,14 @@ void eWindowImGui::Add(TypeImGui _type, const std::string & _name, void* _data)
 //---------------------------------------------------------------------
 bool eWindowImGui::OnMousePress(uint32_t x, uint32_t y, bool left)
 {
-  bool is_pressed = x > window_pos_x && y > window_pos_y && x < (window_pos_x + window_size_x) && y < (window_pos_y + window_size_y);
+  float global_pos_x = x + viewport_offset_x + window_offset_x;
+  float global_pos_y = y + viewport_offset_y + window_offset_y;
+
+  bool is_pressed = global_pos_x > window_pos_x &&
+                    global_pos_y > window_pos_y &&
+                    global_pos_x < (window_pos_x + window_size_x) &&
+                    global_pos_y < (window_pos_y + window_size_y);
+
   if (is_pressed)
     return true;
   else
@@ -290,7 +305,14 @@ bool eWindowImGui::OnMousePress(uint32_t x, uint32_t y, bool left)
 //---------------------------------------------------------------------
 bool eWindowImGui::OnMouseMove(uint32_t x, uint32_t y)
 {
-  bool is_pressed = x > window_pos_x && y > window_pos_y && x < (window_pos_x + window_size_x) && y < (window_pos_y + window_size_y);
+  float global_pos_x = x + viewport_offset_x + window_offset_x;
+  float global_pos_y = y + viewport_offset_y + window_offset_y;
+
+  bool is_pressed = global_pos_x > window_pos_x &&
+    global_pos_y > window_pos_y &&
+    global_pos_x < (window_pos_x + window_size_x) &&
+    global_pos_y < (window_pos_y + window_size_y);
+
   if (is_pressed)
     return true;
   else

@@ -31,6 +31,8 @@ public:
 	~eOpenGlRenderPipeline();
 
 	void			RenderFrame(std::map<RenderType, std::vector<shObject>>, Camera&, const Light&, std::vector<std::shared_ptr<GUI>>&); //gui should be const latter ?, and camera prob
+
+	Texture GetDefaultBufferTexture() const;
 	
 	void			Initialize();
 	void			InitializeBuffers(bool _needsShadowCubeMap = false);
