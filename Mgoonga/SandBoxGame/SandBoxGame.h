@@ -5,7 +5,7 @@
 #include <math/Camera.h>
 #include <math/CameraRay.h>
 #include <opengl_assets/OpenGlRenderPipeline.h>
-#include <sdl_assets/MainContextBase.h>
+#include <game_assets/MainContextBase.h>
 
 class IWindowImGui;
 

@@ -5,13 +5,15 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
 
-#include "MainContextBase.h"
+#include <base/interfaces.h>
+
 #include <opengl_assets/TextureManager.h>
 #include <opengl_assets/ModelManager.h>
 #include <opengl_assets/SoundManager.h>
 
 SDL_GLContext					context;
 ImVec2								viewport_offset;
+
 
 //***************************************
 //dbGLWindowSDL::~dbGLWindowSDL

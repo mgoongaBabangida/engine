@@ -10,7 +10,7 @@
 #include <base/InputController.h>
 #include <math/Timer.h>
 
-class eMainContextBase;
+class IGame;
 class IGameFactory;
 class IWindowImGui;
 
@@ -32,16 +32,25 @@ protected:
 	std::unique_ptr<math::Timer>		dTimer;
 	std::vector<IWindowImGui*>			guiWnd;
 	eInputController					       inputController;
-	std::unique_ptr<eMainContextBase>	mainContext; 
+	std::unique_ptr<IGame>	mainContext; 
 
 	SDL_Window*							window  = nullptr;
 
-	const GLint							WIDTH	= 1200;
+	const GLint							WIDTH	= 1200; //@todo
 	const GLint							HEIGHT	= 600;
+
   bool                    running = true;
   std::function<void()>		on_close;
 
-	void										PaintGL();
+	void										PaintGL(); //update? tick?
+};
+
+//----------------------------------------------------------------------
+class IGameFactory
+{
+public:
+	virtual IGame* CreateGame(eInputController*						_input,
+														std::vector<IWindowImGui*>	_imgui_windows) const = 0;
 };
 
 #endif

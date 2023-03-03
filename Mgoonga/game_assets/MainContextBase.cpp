@@ -3,12 +3,17 @@
 #include "MainContextBase.h"
 
 #include <base/InputController.h>
+#include <tcp_lib/Network.h>
+#include <tcp_lib/Server.h>
+#include <tcp_lib/Client.h>
 
 #include <opengl_assets/TextureManager.h>
 #include <opengl_assets/ModelManager.h>
 #include <opengl_assets/SoundManager.h>
 
 #include <math/Clock.h>
+
+#include <thread>
 
 //-----------------------------------------------------------------
 eMainContextBase::eMainContextBase(eInputController* _input,
@@ -29,7 +34,7 @@ eMainContextBase::eMainContextBase(eInputController* _input,
 //-------------------------------------------------------------------------
 eMainContextBase::~eMainContextBase()
 {
-
+	tcpTimer->stop();
 }
 
 //-------------------------------------------------------------------------
@@ -116,10 +121,75 @@ void eMainContextBase::InitializeModels()
 			texManager->Find("Twhite"))));
 }
 
+//--------------------------------------------------------------------------------
 void eMainContextBase::InitializeTextures()
 {
 	texManager->InitContext(assetsFolderPath);
 	texManager->LoadAllTextures();
 	//m_Textures.Find("Tbricks0_d")->second.saveToFile("MyTexture");  //Saving texture debug
+}
+
+//--------------------------------------------------------------------------------
+void eMainContextBase::InstallTcpServer()
+{
+	if (!tcpAgent)
+	{
+		if (dbb::NetWork::Initialize())
+		{
+			tcpAgent = std::make_unique<Server>();
+			if (tcpAgent->Initialize(dbb::IPEndPoint{ "0.0.0.0", 8080 }))//134.238.94.205 //208.67.222.222
+			{
+				tcpTimer.reset(new math::Timer([this]()->bool
+					{
+						if (tcpAgent->IsConnected())
+							tcpAgent->Frame();
+						return true;
+					}));
+				tcpTimer->start(15); //~70 fps
+
+				//this is test
+				std::string msg;
+				while (msg != "exit")
+				{
+					std::getline(std::cin, msg);
+					//std::cout << "Me: " << msg << std::endl;
+					tcpAgent->SendMsg(std::move(msg));
+				}
+			}
+			dbb::NetWork::Shutdown();
+		}
+	}
+}
+
+//--------------------------------------------------------------------------------
+void eMainContextBase::InstallTcpClient()
+{
+	if (!tcpAgent)
+	{
+		if (dbb::NetWork::Initialize())
+		{
+			tcpAgent = std::make_unique<Client>();
+			if (tcpAgent->Initialize(dbb::IPEndPoint{ "127.0.0.1", 8080 })) //"109.95.50.27 // "192.168.2.102 //134.238.94.205 /208.67.222.222
+			{
+				tcpTimer.reset(new math::Timer([this]()->bool
+					{
+						if (tcpAgent->IsConnected())
+							tcpAgent->Frame();
+						return true;
+					}));
+				tcpTimer->start(15); //~70 fps
+
+				//this is test
+				std::string msg;
+				while (msg != "exit")
+				{
+					std::getline(std::cin, msg);
+					//std::cout << "Me: " << msg << std::endl;
+					tcpAgent->SendMsg(std::move(msg));
+				}
+			}
+			dbb::NetWork::Shutdown();
+		}
+	}
 }
 

@@ -223,5 +223,17 @@ public:
 	virtual void Stop()		 = 0;
 };
 
+//-----------------------------------------------------------------------------
+class IGame
+{
+public:
+	virtual void		InitializeGL() = 0;
+	virtual void		PaintGL() = 0;
+	virtual uint32_t GetFinalImageId() = 0;
+
+	virtual size_t			Width() =0 ;
+	virtual size_t			Height() =0 ;
+};
+
 #endif
 

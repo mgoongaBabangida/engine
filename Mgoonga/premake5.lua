@@ -2,6 +2,7 @@
 workspace "Mgoonga"
 	architecture "x64"
 	configurations { "Debug", "Release" }
+    startproject "Mgoonga"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
@@ -59,6 +60,31 @@ project "math"
 	  --("{COPY} %{cfg.buidtarget.relpath} ../bin/" .. outputdir .. "/Mgoonga")
 	  --}
 
+project "tcp_lib"
+	location "tcp_lib"
+	kind "SharedLib"
+	language "C++"
+	cppdialect "C++17"
+	targetdir ("bin/" .. outputdir .. "/Mgoonga")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	
+   files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
+   
+   includedirs { "../../third_party" }
+	
+   filter "configurations:Debug"
+      defines { "DEBUG;_DEBUG;_WINDOWS;_USRDLL;BASE_EXPORTS" }
+      symbols "On"
+
+   filter "configurations:Release"
+      defines { "NDEBUG;_WINDOWS;_USRDLL;BASE_EXPORTS" }
+      optimize "On"
+	  
+	  --postbuildcommands
+	  --{
+	  --("{COPY} %{cfg.buidtarget.relpath} ../bin/" .. outputdir .. "/Mgoonga")
+	  --}
+	  
 project "opengl_assets"
 	location "opengl_assets"
 	kind "SharedLib"
@@ -210,6 +236,7 @@ project "game_assets"
    "math",
    "opengl_assets",
    "sdl_assets",
+   "tcp_lib",
    "assimpd", 
    "opengl32",
    "glew32",   

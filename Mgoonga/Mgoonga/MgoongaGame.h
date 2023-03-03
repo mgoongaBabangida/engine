@@ -10,7 +10,7 @@
 #include <opengl_assets/GUI.h>
 #include <opengl_assets/TerrainModel.h>
 
-#include <sdl_assets/MainContextBase.h>
+#include <game_assets/MainContextBase.h>
 
 class IWindowImGui;
 

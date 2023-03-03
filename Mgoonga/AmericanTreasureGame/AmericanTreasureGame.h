@@ -3,7 +3,7 @@
 
 #include <base/Object.h>
 
-#include <sdl_assets/MainContextBase.h>
+#include <game_assets/MainContextBase.h>
 
 class eOpenGlRenderPipeline;
 class Camera;
