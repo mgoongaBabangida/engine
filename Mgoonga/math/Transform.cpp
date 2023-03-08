@@ -19,6 +19,11 @@ glm::vec4 Transform::getRotationVector() const
 	return  glm::toMat4(q_rotation) * glm::vec4(forward, 1.0f);
 }
 
+glm::vec4 Transform::getRotationUpVector() const
+{
+	return  glm::toMat4(q_rotation) * glm::vec4(Up, 1.0f);
+}
+
 void Transform::UpdateModelMatrix()
 {
 	glm::mat4 rotatM0 = glm::toMat4(q_rotation);
@@ -116,11 +121,11 @@ bool Transform::turnTo(glm::vec3 dest, float speed) //$todo speed is not used
 	
 	glm::quat rot;
 	if (angle > 0.0f)
-	{ rot = glm::toQuat(glm::rotate(UNIT_MATRIX, glm::acos(angle), asix));}
+		{ rot = glm::toQuat(glm::rotate(UNIT_MATRIX, glm::acos(angle), asix));}
 	else if (angle < 0.0f)
-	{ rot = glm::toQuat(glm::rotate(UNIT_MATRIX, 2 * PI - (glm::acos(angle)), -asix));}
+		{ rot = glm::toQuat(glm::rotate(UNIT_MATRIX, 2 * PI - (glm::acos(angle)), -asix));}
 	else 
-	{ return false;} // angle inf(nan)
+		{ return false;} // angle inf(nan)
 
 	setRotation(rot * getRotation());
 	return true;

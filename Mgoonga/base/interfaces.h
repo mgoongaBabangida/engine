@@ -92,6 +92,7 @@ public:
 	virtual bool HasMaterial() const { return false; }
 	virtual void SetMaterial(const Material&) {}
 	virtual std::optional<Material> GetMaterial() const { return std::nullopt; }
+	virtual const std::string& Name() const = 0;
 };
 
 //----------------------------------------------------------------------------------------------
@@ -140,6 +141,9 @@ public:
 	virtual glm::vec3&	getTranslationRef() = 0;
 	virtual glm::quat	  getRotation()		const = 0;
 	virtual glm::vec4   getRotationVector() const = 0;
+	virtual glm::vec4		getRotationUpVector() const = 0;
+	virtual void				setForward(glm::vec3 _fwd) = 0;
+	virtual void				setUp(glm::vec3 _up) = 0;
 	virtual glm::vec3   getForward()		const = 0;
 	virtual glm::vec3   getUp()				const = 0;
 	virtual void		    incrementScale() = 0;

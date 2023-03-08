@@ -46,9 +46,6 @@ protected:
   virtual void      InitializeExternalGui()           override;
 
 protected:
-  Light								                   m_light;
-	Camera								                 m_camera;
-
   eOpenGlRenderPipeline							     pipeline;
 
   shObject							                 m_focused;
@@ -62,23 +59,9 @@ protected:
   glm::vec3                              m_intersaction;
   glm::vec3                              m_grab_translation;
   glm::vec3                              m_translation_vector = glm::vec3{ 0.f,0.f,0.0f };
-
-  shObject							                 lightObject; //debuging
-
-  eThreeFloatCallback            transfer_data_position;
-  eThreeFloatCallback            transfer_data_rotation;
-  eThreeFloatCallback            transfer_data_scale;
-  size_t                         transfer_num_vertices = 0;
-  size_t                         transfer_num_meshes = 0;
-  eVectorStringsCallback         transfer_meshes;
-  std::vector<const Texture*>    transfer_textures;
-  size_t                         transfer_num_animations = 0;
-  eVectorStringsCallback         transfer_animations;
-  size_t                         cur_animation = 0;
-  std::vector<const IAnimation*> current_animations;
-  std::function<void()>          play_callback;
-  std::function<void()>          stop_callback;
-  std::function<void()>          emit_partilces_callback;
+  
+  //debuging
+  shObject							                 lightObject;
 };
 
 #endif

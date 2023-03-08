@@ -259,8 +259,8 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
       vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
 			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 		}
-
-		return { vertices, indices, textures };
+		std::string n = mesh->mName.C_Str();
+		return { vertices, indices, textures, mesh->mName.C_Str() };
 }
 
 vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName)

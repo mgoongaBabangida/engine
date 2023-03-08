@@ -24,6 +24,7 @@ public:
 	virtual void setupMesh();
 	virtual void calculatedTangent();
 
+	virtual const std::string& Name() const { return name; }
 public:
 	/*  Mesh Data  */
 	std::vector<MyVertex>	vertices;
@@ -33,6 +34,7 @@ public:
 protected:
 	/*  Render data  */
 	GLuint VAO, VBO, EBO;
+	std::string name;
 };
 
 //----------------------------------------------------------------------------------------------
@@ -50,6 +52,7 @@ public:
 
 	virtual void		Draw() override;
   virtual size_t GetVertexCount() const override { return vertices.size(); }
+	virtual const std::string& Name() const override { return ""; }
   virtual std::vector<const Texture*> GetTextures() const;
 
   void				SetUpInstances(GLuint _instances) { instances = _instances; }

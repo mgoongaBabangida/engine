@@ -14,6 +14,7 @@ public:
 
 	virtual void Draw() override;
   virtual size_t GetVertexCount() const { return 4; }
+	virtual const std::string& Name() const override { return ""; }
   virtual std::vector<const Texture*> GetTextures() const;
 
 	void UpdateFrame(float top_x, float top_y, float botom_x, float botom_y,
@@ -43,6 +44,7 @@ public:
 
 	virtual void Draw() override;
   virtual size_t GetVertexCount() const { return 4; }
+	virtual const std::string& Name() const override { return ""; }
   virtual std::vector<const Texture*> GetTextures() const { assert("no textures in this private mesh"); return std::vector<const Texture*>(); }
 	void UpdateFrame(float top_x, float top_y, float botom_x , float botom_y, float viewport_width, float viewport_height);
 

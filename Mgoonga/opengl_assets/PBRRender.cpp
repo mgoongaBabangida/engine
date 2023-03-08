@@ -43,7 +43,7 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
   std::vector<glm::vec3> lcolors;
 
   lpositions.push_back(_light.light_position);
-  lcolors.push_back({ 1500,1500,1500 });
+  lcolors.push_back({ _light.intensity });
 
   std::string loc_p = "lightPositions";
   GLuint loc_pos = glGetUniformLocation(pbrShader.ID, loc_p.c_str());
@@ -73,7 +73,6 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
         glUniform1f(aoLoc, m.ao);
         glUniform1f(metallicLoc, m.metallic);
         glUniform1f(roughnessLoc, m.roughness);
-        //const_cast<IMesh*>(mesh)->Draw(); // draw should be const?
       }
     }
     object->GetModel()->Draw();

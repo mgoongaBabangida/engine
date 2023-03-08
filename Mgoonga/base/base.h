@@ -44,6 +44,7 @@ struct Light
 	glm::vec3  diffuse = { 1.0f, 1.0f, 1.0f };
 	glm::vec3  specular = { 1.0f, 1.0f, 1.0f };
 	eLightType type = eLightType::POINT;
+	glm::vec3  intensity = { 1500.0f, 1500.0f, 1500.0f };
 };
 
 const float PI = 3.14159265359f;
@@ -139,6 +140,13 @@ enum ASCII
 	ASCII_U = 117,//85,
 	ASCII_H = 104,//72,
 	ASCII_G = 103,//71,
+};
+
+//-------------------------------------------------------
+struct eThreeFloat
+{
+	std::array<float, 3> data = { 0.f, 0.f, 0.f };
+	float min, max;
 };
 
 //-------------------------------------------------------

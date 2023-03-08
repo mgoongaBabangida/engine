@@ -12,6 +12,7 @@ public:
 
   virtual void Draw();
   virtual size_t GetVertexCount() const { return vertices.size(); }
+  virtual const std::string& Name() const override { return "SphereTexturedMesh"; }
   virtual std::vector<const Texture*> GetTextures() const { return {}; }
   virtual void SetMaterial(const Material&) override;
   virtual std::optional<Material> GetMaterial() const override;

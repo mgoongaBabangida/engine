@@ -2,15 +2,15 @@
 #include "AssimpMesh.h"
 
 #include <sstream>
-#include <iostream>
 
 using namespace std;
 
-AssimpMesh::AssimpMesh(vector<AssimpVertex> vertices, vector<GLuint> indices, vector<Texture> textures)
+AssimpMesh::AssimpMesh(vector<AssimpVertex> vertices, vector<GLuint> indices, vector<Texture> textures, const std::string& _name)
 {
 	this->vertices = vertices;
 	this->indices = indices;
 	this->textures = textures;
+  this->name = _name.empty() ? "Default" : _name;
 	this->setupMesh();
 
   default_diffuse_mapping.loadTexture1x1(YELLOW);

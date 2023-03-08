@@ -21,12 +21,13 @@ ImVec2								viewport_offset;
 dbGLWindowSDL::dbGLWindowSDL(const IGameFactory& _factory)
 : inputController()
 {
-  guiWnd.push_back(new eWindowImGui("Gui"));
+  guiWnd.push_back(new eWindowImGui("Lights & Cameras"));
   guiWnd.push_back(new eWindowImGui("Debug"));
   guiWnd.push_back(new eWindowImGui("Object"));
+	guiWnd.push_back(new eMainImGuiWindow());
 
   on_close = std::function<void()>{ [this](){this->Close(); } };
-  guiWnd[0]->Add(MENU, "Close", reinterpret_cast<void*>(&on_close));
+  guiWnd[3]->Add(MENU, "Close", reinterpret_cast<void*>(&on_close));
 
 	mainContext.reset(_factory.CreateGame(&inputController, guiWnd));
 }
@@ -68,7 +69,7 @@ bool dbGLWindowSDL::InitializeGL()
 	SDL_DisplayMode current;
 	SDL_GetCurrentDisplayMode(0, &current);
 	
-	window	= SDL_CreateWindow("OpenGl", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH+200, HEIGHT+250, //@todo
+	window	= SDL_CreateWindow("OpenGl", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH+200, HEIGHT, //@todo
 		SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL /*| SDL_WINDOW_RESIZABLE*/ | SDL_WINDOW_ALLOW_HIGHDPI);
 	SDL_GL_SetSwapInterval(1); // Enable vsync
 	

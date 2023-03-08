@@ -45,6 +45,22 @@ size_t eMainContextBase::Height() { return height; }
 //--------------------------------------------------------------------------
 void eMainContextBase::InitializeGL()
 {
+	//init main light
+	m_lights.push_back({});
+	m_lights[0].ambient = vec3(0.05f, 0.05f, 0.05f);
+	m_lights[0].diffuse = vec3(0.75f, 0.75f, 0.75f);
+	m_lights[0].specular = vec3(0.5f, 0.5f, 0.5f);
+	m_lights[0].light_position = vec4(0.0f, 4.0f, -1.0f, 1.0f); //-1?
+	m_lights[0].light_direction = vec4(0.0f, 0.0f, 0.0f, 1.0f); // rather target
+	m_lights[0].type = eLightType::DIRECTION;
+
+	//init main camera
+	m_cameras.push_back(Camera(width, height, nearPlane, farPlane));
+	m_cameras[0].setPosition(glm::vec3(-1.0f, 4.0f, -2.5f));
+	m_cameras[0].setDirection(glm::vec3(0.6f, -0.10f, 0.8f));
+	//Camera Ray
+	GetMainCamera().getCameraRay().init(width, height, nearPlane, farPlane);
+
 	InitializeTextures();
 
 	InitializePipline();
@@ -127,6 +143,23 @@ void eMainContextBase::InitializeTextures()
 	texManager->InitContext(assetsFolderPath);
 	texManager->LoadAllTextures();
 	//m_Textures.Find("Tbricks0_d")->second.saveToFile("MyTexture");  //Saving texture debug
+}
+
+//------------------------------------------------------------
+Light& eMainContextBase::GetMainLight()
+{
+	if (m_lights.empty())
+		throw std::logic_error("main light was deleted!");
+
+	return m_lights[0];
+}
+//------------------------------------------------------------------
+Camera& eMainContextBase::GetMainCamera()
+{
+	if (m_cameras.empty())
+		throw std::logic_error("main camera was deleted!");
+
+	return m_cameras[0];
 }
 
 //--------------------------------------------------------------------------------

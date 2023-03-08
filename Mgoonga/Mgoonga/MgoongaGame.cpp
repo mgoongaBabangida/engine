@@ -23,23 +23,13 @@
 
 //---------------------------------------------------------------------------
 eMgoongaGameContext::eMgoongaGameContext(eInputController*  _input,
-  std::vector<IWindowImGui*> _externalGui,
-						   const std::string& _modelsPath,
-						   const std::string& _assetsPath, 
-						   const std::string& _shadersPath)
+                                         std::vector<IWindowImGui*> _externalGui,
+						                             const std::string& _modelsPath,
+						                             const std::string& _assetsPath, 
+						                             const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
 , pipeline(width, height)
-, m_camera(width, height, nearPlane, farPlane)
 {
-	//Light init!
-	m_light.ambient			= vec3(0.05f, 0.05f, 0.05f);
-	m_light.diffuse			= vec3(0.75f, 0.75f, 0.75f);
-	m_light.specular		= vec3(0.5f, 0.5f, 0.5f);
-	m_light.light_position	= vec4(0.0f, 4.0f, -1.0f, 1.0f); //-1?
-  m_light.light_direction = vec4(0.0f, 0.0f, 0.0f, 1.0f); // rather target
-	m_light.type			= eLightType::DIRECTION;
-  m_camera.setPosition(glm::vec3(-1.0f, 4.0f, -2.5f));
-  m_camera.setDirection(glm::vec3(0.6f, -0.10f, 0.8f));
 }
 
 //--------------------------------------------------------------------------
@@ -48,26 +38,33 @@ eMgoongaGameContext::~eMgoongaGameContext() {}
 //--------------------------------------------------------------------------
 void eMgoongaGameContext::InitializeExternalGui()
 {
+  // Lights & Cameras
   externalGui[0]->Add(TEXT, "Light", nullptr);
-  externalGui[0]->Add(SLIDER_FLOAT, "Y direction", &m_light.light_position.y);
-  externalGui[0]->Add(SLIDER_FLOAT, "Z direction", &m_light.light_position.z);
-  externalGui[0]->Add(SLIDER_FLOAT, "X direction", &m_light.light_position.x);
-  externalGui[0]->Add(CHECKBOX, "Show bounding boxes", &pipeline.GetBoundingBoxBoolRef());
-  externalGui[0]->Add(CHECKBOX, "Use Multi sampling", &pipeline.GetMultiSamplingBoolRef());
-  externalGui[0]->Add(CHECKBOX, "Sky box", &pipeline.GetSkyBoxOnRef());
-  externalGui[0]->Add(SLIDER_FLOAT, "Blur coefficients", &pipeline.GetBlurCoefRef());
-  externalGui[0]->Add(SLIDER_FLOAT_3_CALLBACK, "Camera pos.", &m_camera.PositionRef());
-  externalGui[0]->Add(SLIDER_FLOAT_3_CALLBACK, "Camera dir.", &m_camera.ViewDirectionRef());
-  emit_partilces_callback = [this]()
+  externalGui[0]->Add(SLIDER_FLOAT_3, "Light direction.", &GetMainLight().light_position);
+  externalGui[0]->Add(TEXT, "Camera", nullptr);
+  externalGui[0]->Add(SLIDER_FLOAT_3, "position", &GetMainCamera().PositionRef());
+  externalGui[0]->Add(SLIDER_FLOAT_3, "direction", &GetMainCamera().ViewDirectionRef());
+  
+  //Debug
+  externalGui[1]->Add(CHECKBOX, "Show bounding boxes", &pipeline.GetBoundingBoxBoolRef());
+  externalGui[1]->Add(CHECKBOX, "Use Multi sampling", &pipeline.GetMultiSamplingBoolRef());
+  externalGui[1]->Add(CHECKBOX, "Sky box", &pipeline.GetSkyBoxOnRef());
+  externalGui[1]->Add(SLIDER_FLOAT, "Blur coefficients", &pipeline.GetBlurCoefRef());
+  std::function<void()> emit_partilces_callback = [this]()
   {
     pipeline.GetRenderManager().AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f),
                                                   texManager->Find("Tatlas2"),
                                                   soundManager->GetSound("shot_sound"),
                                                   texManager->Find("Tatlas2")->numberofRows));
   };
-  externalGui[0]->Add(BUTTON, "Emit particle system", (void*)&emit_partilces_callback);
-  externalGui[0]->Add(CHECKBOX, "Debug white", &pipeline.GetDebugWhite());
-  externalGui[0]->Add(CHECKBOX, "Debug Tex Coords", &pipeline.GetDebugTexCoords());
+  externalGui[1]->Add(BUTTON, "Emit particle system", (void*)&emit_partilces_callback);
+  externalGui[1]->Add(CHECKBOX, "Debug white", &pipeline.GetDebugWhite());
+  externalGui[1]->Add(CHECKBOX, "Debug Tex Coords", &pipeline.GetDebugTexCoords());
+
+  externalGui[1]->Add(SLIDER_FLOAT, "PBR debug dist", (void*)&pipeline.MaterialMetalness());
+  externalGui[1]->Add(SLIDER_FLOAT, "PBR debug intensity", (void*)&pipeline.MaterialRoughness());
+  externalGui[1]->Add(SLIDER_FLOAT, "PBR debug shininess", (void*)&pipeline.MaterialShininess());
+  externalGui[1]->Add(SLIDER_FLOAT, "PBR debug ao", (void*)&pipeline.MaterialAO());
 
   externalGui[1]->Add(TEXTURE, "Reflection buffer", (void*)pipeline.GetReflectionBufferTexture().id);
   externalGui[1]->Add(TEXTURE, "Refraction buffer", (void*)pipeline.GetRefractionBufferTexture().id);
@@ -75,104 +72,32 @@ void eMgoongaGameContext::InitializeExternalGui()
   externalGui[1]->Add(TEXTURE, "Gaussian buffer", (void*)pipeline.GetGausian2BufferTexture().id);
   externalGui[1]->Add(TEXTURE, "Bright filter buffer", (void*)pipeline.GetBrightFilter().id);
 
-  transfer_data_position.callback = [this]()
-  {
-    if (m_focused)
-    {
-      m_focused->GetTransform()->setTranslation(glm::vec3{ transfer_data_position.data[0],
-                                                           transfer_data_position.data[1],
-                                                           transfer_data_position.data[2] });
-    }
-  };
-  transfer_data_position.min = -10.0f;
-  transfer_data_position.max = 10.0f;
-  transfer_data_rotation.callback = [this]()
-  {
-    if (m_focused)
-    {
-      m_focused->GetTransform()->setRotation(transfer_data_rotation.data[0] * PI * 2,
-                                             transfer_data_rotation.data[1] * PI * 2,
-                                             transfer_data_rotation.data[2] * PI * 2);
-    }
-  };
-  transfer_data_rotation.min = 0.0;
-  transfer_data_rotation.max = 1.0f;
-  transfer_data_scale.callback = [this]()
-  {
-    if (m_focused)
-    {
-      m_focused->GetTransform()->setScale(glm::vec3{ transfer_data_scale.data[0],
-                                                     transfer_data_scale.data[1],
-                                                     transfer_data_scale.data[2] });
-    }
-  };
-  transfer_data_scale.min = 0.0f;
-  transfer_data_scale.max = 5.0f;
-  transfer_meshes.callback = [this](size_t _current)
-  {
-    if (m_focused)
-    {
-      transfer_textures = m_focused->GetModel()->GetMeshes()[_current]->GetTextures();
-      if (transfer_textures.empty())
-        transfer_textures = m_focused->GetModel()->GetTexturesModelLevel();
-    }
-  };
+  //Objects
+  externalGui[2]->Add(OBJECT_REF, "Object", (void*)&m_focused);
 
-  transfer_animations.callback = [this](size_t _current)
-  {
-    cur_animation = _current - 1;
-  };
-
-  play_callback = [this]()
-  {
-    if(m_focused && m_focused->GetModel()->GetAnimationCount() != 0)
-      m_focused->GetRigger()->Apply(cur_animation);
-  };
-
-  stop_callback = [this]()
-  {
-    m_focused->GetRigger()->Stop();
-  };
-  externalGui[2]->Add(SLIDER_FLOAT_3_CALLBACK, "Position", (void*)&transfer_data_position);
-  externalGui[2]->Add(SLIDER_FLOAT_3_CALLBACK, "Rotation", (void*)&transfer_data_rotation);
-  externalGui[2]->Add(SLIDER_FLOAT_3_CALLBACK, "Scale", (void*)&transfer_data_scale);
-  externalGui[2]->Add(TEXT_INT, "Number of vertices ", (void*)&transfer_num_vertices);
-  externalGui[2]->Add(TEXT_INT, "Number of meshes ", (void*)&transfer_num_meshes);
-  externalGui[2]->Add(COMBO_BOX, "Current mesh ", (void*)&transfer_meshes);
-  externalGui[2]->Add(TEXTURE_ARRAY, "Textures ", (void*)&transfer_textures);
-  externalGui[2]->Add(TEXT_INT, "Number of animations ", (void*)&transfer_num_animations);
-  externalGui[2]->Add(COMBO_BOX, "Current animations ", (void*)&transfer_animations);
-  externalGui[2]->Add(BUTTON, "Play current animations ", (void*)&play_callback);
-  externalGui[2]->Add(BUTTON, "Stop current animations ", (void*)&stop_callback);
-
-  externalGui[0]->Add(SLIDER_FLOAT, "PBR light dist", (void*)&pipeline.MaterialMetalness());
-  externalGui[0]->Add(SLIDER_FLOAT, "PBR light intensity", (void*)&pipeline.MaterialRoughness());
-  externalGui[0]->Add(SLIDER_FLOAT, "PBR light shininess", (void*)&pipeline.MaterialShininess());
-  externalGui[0]->Add(SLIDER_FLOAT, "PBR light ao", (void*)&pipeline.MaterialAO());
-
-  m_focused = m_objects[4];
-  OnFocusedChanged();
+  m_focused = m_objects[0];
+  OnFocusedChanged(); // make event handler
 }
 
 //--------------------------------------------------------------------------
 bool eMgoongaGameContext::OnMouseMove(uint32_t x, uint32_t y)
 {
-  if (m_camera.getCameraRay().IsPressed())
+  if (GetMainCamera().getCameraRay().IsPressed())
   {
     if (m_grab_camera_line != std::nullopt) // right button is pressed @todo explicit right button
     {
-      m_camera.getCameraRay().Update(m_camera, static_cast<float>(x), static_cast<float>(y), width, height);
-      m_camera.getCameraRay().press(x, y);
+      GetMainCamera().getCameraRay().Update(GetMainCamera(), static_cast<float>(x), static_cast<float>(y), width, height);
+      GetMainCamera().getCameraRay().press(x, y);
 
       dbb::plane pl(m_intersaction,
                     glm::vec3(0.0f, m_intersaction.y, 1.0f),
                     glm::vec3(1.0f, m_intersaction.y, 0.0f)); // arbitrary triangle on xz plane
-      glm::vec3 new_intersaction = dbb::intersection(pl, m_camera.getCameraRay().getLine());
+      glm::vec3 new_intersaction = dbb::intersection(pl, GetMainCamera().getCameraRay().getLine());
       m_translation_vector = new_intersaction - m_intersaction;
     }
     else
     {
-      m_framed.reset(new std::vector<shObject>(m_camera.getCameraRay().onMove(m_camera, m_objects, static_cast<float>(x), static_cast<float>(y)))); 	//to draw a frame
+      m_framed.reset(new std::vector<shObject>(GetMainCamera().getCameraRay().onMove(GetMainCamera(), m_objects, static_cast<float>(x), static_cast<float>(y)))); 	//to draw a frame
       return true;
     }
   }
@@ -208,12 +133,12 @@ bool eMgoongaGameContext::OnMousePress(uint32_t x, uint32_t y, bool left)
   if (m_framed)
     m_framed->clear();
 
-  m_camera.getCameraRay().Update(m_camera, static_cast<float>(x), static_cast<float>(y), width, height);
-  m_camera.getCameraRay().press(x, y);
-  m_camera.MovementSpeedRef() = 0.f;
+  GetMainCamera().getCameraRay().Update(GetMainCamera(), static_cast<float>(x), static_cast<float>(y), width, height);
+  GetMainCamera().getCameraRay().press(x, y);
+  GetMainCamera().MovementSpeedRef() = 0.f;
   auto objects = m_objects;
   objects.insert(objects.end(), m_pbr_objs.begin(), m_pbr_objs.end());
-  auto [new_focused, intersaction] = m_camera.getCameraRay().calculateIntersaction(objects);
+  auto [new_focused, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(objects);
 
 	if(left)
 	{
@@ -231,7 +156,7 @@ bool eMgoongaGameContext::OnMousePress(uint32_t x, uint32_t y, bool left)
       OnFocusedChanged();
       m_grab_translation = new_focused->GetTransform()->getTranslation();
       m_intersaction = intersaction;
-      m_grab_camera_line = m_camera.getCameraRay().getLine();
+      m_grab_camera_line = GetMainCamera().getCameraRay().getLine();
     }
   }
 
@@ -244,10 +169,10 @@ bool eMgoongaGameContext::OnMousePress(uint32_t x, uint32_t y, bool left)
 //---------------------------------------------------------------------------------
 bool eMgoongaGameContext::OnMouseRelease()
 {
-  m_camera.getCameraRay().release();
+  GetMainCamera().getCameraRay().release();
   m_grab_camera_line = std::nullopt;
   m_translation_vector = vec3{ 0.0f, 0.0f, 0.0f };
-  m_camera.MovementSpeedRef() = 0.05f;
+  GetMainCamera().MovementSpeedRef() = 0.05f;
 	return true;
 }
 
@@ -256,42 +181,10 @@ void eMgoongaGameContext::OnFocusedChanged()
 {
   if (m_focused)
   {
-    transfer_data_position.data[0] = m_focused->GetTransform()->getTranslation().x;
-    transfer_data_position.data[1] = m_focused->GetTransform()->getTranslation().y;
-    transfer_data_position.data[2] = m_focused->GetTransform()->getTranslation().z;
-    glm::vec3 rot = glm::eulerAngles(m_focused->GetTransform()->getRotation());
-    transfer_data_rotation.data[0] = rot.x / (PI * 2);
-    transfer_data_rotation.data[1] = rot.y / (PI * 2);
-    transfer_data_rotation.data[2] = rot.z / (PI * 2);
-    transfer_data_scale.data[0] = m_focused->GetTransform()->getScaleAsVector().x;
-    transfer_data_scale.data[1] = m_focused->GetTransform()->getScaleAsVector().y;
-    transfer_data_scale.data[2] = m_focused->GetTransform()->getScaleAsVector().z;
-    transfer_num_vertices = m_focused->GetModel()->GetVertexCount();
-    transfer_num_meshes = m_focused->GetModel()->GetMeshCount();
-    transfer_meshes.data.clear();
-    for (int i = 0; i < transfer_num_meshes; ++i)
-      transfer_meshes.data.push_back(std::to_string(i+1));
 
-    transfer_num_animations = m_focused->GetModel()->GetAnimationCount();
-    transfer_animations.data.clear();
-    for (int i = 0; i < transfer_num_animations; ++i)
-      transfer_animations.data.push_back(std::to_string(i + 1));
-    transfer_textures = m_focused->GetModel()->GetMeshes()[0]->GetTextures();
-    if (transfer_textures.empty())
-      transfer_textures = m_focused->GetModel()->GetTexturesModelLevel();
-    current_animations = m_focused->GetModel()->GetAnimations();
   }
   else
   {
-    transfer_data_position.data[0] = 0.0f;
-    transfer_data_position.data[1] = 0.0f;
-    transfer_data_position.data[2] = 0.0f;
-    transfer_data_rotation.data[0] = 0.0f;
-    transfer_data_rotation.data[1] = 0.0f;
-    transfer_data_rotation.data[2] = 0.0f;
-    transfer_data_scale.data[0] = 0.0f;
-    transfer_data_scale.data[1] = 0.0f;
-    transfer_data_scale.data[2] = 0.0f;
   }
 }
 
@@ -300,9 +193,6 @@ void eMgoongaGameContext::InitializeGL()
 {
 	eMainContextBase::InitializeGL();
 	
-	//Camera Ray
-  m_camera.getCameraRay().init(width, height, nearPlane, farPlane);
-
   Texture* tex = texManager->Find("TButton_red");
   Texture* flag = texManager->Find("TSpanishFlag0_s");
   glm::ivec2 topLeft{ 160,450 };
@@ -325,8 +215,8 @@ void eMgoongaGameContext::InitializeGL()
   guis[2]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight });
 
 	inputController->AddObserver(this, WEAK);
-  inputController->AddObserver(&m_camera.getCameraRay(), WEAK);
-  inputController->AddObserver(&m_camera, WEAK);
+  inputController->AddObserver(&GetMainCamera().getCameraRay(), WEAK);
+  inputController->AddObserver(&GetMainCamera(), WEAK);
   inputController->AddObserver(guis[0].get(), MONOPOLY);//monopoly takes only mouse
   inputController->AddObserver(guis[1].get(), WEAK);
   inputController->AddObserver(guis[2].get(), STRONG);
@@ -338,7 +228,7 @@ void eMgoongaGameContext::InitializeGL()
 //-------------------------------------------------------------------------------
 void eMgoongaGameContext::InitializeSounds()
 {
-	//sound->loadListner(m_camera.getPosition().x, m_camera.getPosition().y, m_camera.getPosition().z); //!!!
+	//sound->loadListner(GetMainCamera().getPosition().x, GetMainCamera().getPosition().y, GetMainCamera().getPosition().z); //!!!
 }
 
 //-------------------------------------------------------------------------------
@@ -351,7 +241,7 @@ void eMgoongaGameContext::InitializePipline()
 //-----------------------------------------------------------------------------
 void eMgoongaGameContext::InitializeBuffers()
 {
-	pipeline.InitializeBuffers(m_light.type == eLightType::POINT);
+	pipeline.InitializeBuffers(GetMainLight().type == eLightType::POINT);
 }
 
 //-----------------------------------------------------------------------------
@@ -401,10 +291,10 @@ void eMgoongaGameContext::InitializeModels()
 
   nanosuit->SetScript(new eShipScript(texManager->Find("TSpanishFlag0_s"),
                                       pipeline.GetRenderManager(),
-                                      m_camera,
+                                      GetMainCamera(),
                                       texManager->Find("Tatlas2"),
                                       soundManager->GetSound("shot_sound"),
-                                      &m_camera.getCameraRay(),
+                                      &GetMainCamera().getCameraRay(),
                                       pipeline.GetWaterHeight()));
 
   shObject terrain = factory.CreateObject(std::shared_ptr<IModel>(terrainModel.release()));
@@ -429,6 +319,8 @@ void eMgoongaGameContext::InitializeModels()
   guard->GetTransform()->setTranslation(vec3(2.0f, 2.0f, 0.0f));
   guard->GetTransform()->setRotation(glm::radians(-90.0f), glm::radians(-90.0f), 0.0f);
   guard->GetTransform()->setScale(glm::vec3(0.03f, 0.03f, 0.03f));
+  guard->GetTransform()->setUp(glm::vec3(0.0f,0.0f,1.0f));
+  guard->GetTransform()->setForward(glm::vec3(0.0f, 1.0f, 0.0f));
   guard->SetRigger(new Rigger((Model*)modelManager->Find("guard").get()));//@todo improve
   m_objects.push_back(guard);
 
@@ -442,7 +334,7 @@ void eMgoongaGameContext::InitializeModels()
 	//light_cube
 	lightObject = factory.CreateObject(modelManager->Find("white_sphere"));
 	lightObject->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
-	lightObject->GetTransform()->setTranslation(m_light.light_position);
+	lightObject->GetTransform()->setTranslation(GetMainLight().light_position);
 	m_objects.push_back(lightObject);
 
   shObject obj = factory.CreateObject(modelManager->Find("sphere_textured"));
@@ -479,8 +371,8 @@ void eMgoongaGameContext::PaintGL()
   if (m_grab_camera_line != std::nullopt && m_translation_vector != glm::vec3{0.f,0.f,0.0f})
     m_focused->GetTransform()->setTranslation(m_grab_translation + m_translation_vector);
 
-  lightObject->GetTransform()->setTranslation(m_light.light_position);
-	m_light.light_direction = { -m_light.light_position };
+  lightObject->GetTransform()->setTranslation(GetMainLight().light_position);
+	GetMainLight().light_direction = { -GetMainLight().light_position };
   
   //need better design less copying
   std::shared_ptr<std::vector<shObject>> focused_output = m_framed;
@@ -494,7 +386,7 @@ void eMgoongaGameContext::PaintGL()
   objects.insert({ eOpenGlRenderPipeline::RenderType::FLAG, flags });
   objects.insert({ eOpenGlRenderPipeline::RenderType::PBR, m_pbr_objs });
 
-	pipeline.RenderFrame(objects, m_camera, m_light, guis);
+	pipeline.RenderFrame(objects, GetMainCamera(), GetMainLight(), guis);
 }
 
 //-------------------------------------------------------------------------------

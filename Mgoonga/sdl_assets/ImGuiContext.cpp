@@ -16,7 +16,10 @@
 #include <iostream>
 
 #include <base/base.h>
+#include <base/Object.h>
 #include <opengl_assets/Texture.h>
+
+#include <glm/glm/gtc/quaternion.hpp>
 
 imgui_addons::ImGuiFileBrowser file_dialog;
 
@@ -155,6 +158,15 @@ void eWindowImGui::Render()
 {
   ImGui::Begin(name.c_str(), &visible);
 
+  ImVec2 pos = ImGui::GetWindowPos();
+  window_pos_x = pos.x;
+  window_pos_y = pos.y;
+  ImVec2 size = ImGui::GetWindowSize();
+  window_size_x = size.x;
+  window_size_y = size.y;
+  //ImGui::SetNextWindowPos(ImVec2{ window_pos_x , window_pos_y + window_size_y });
+  ImGui::SetWindowSize({ 350, 300 });
+
   for (auto& item : lines)
   {
     switch (std::get<1>(item))
@@ -168,45 +180,12 @@ void eWindowImGui::Render()
         ImGui::Image((void*)(intptr_t)(std::get<2>(item)), ImVec2(240, 160), ImVec2(1, 1), ImVec2(0, 0));
       }
       break;
-      case MENU:
+      case SLIDER_FLOAT_3:
       {
-        bool open = false, save = false;
-        ImGui::BeginMainMenuBar();
-        if (ImGui::BeginMenu("File"))
-        {
-          if (ImGui::MenuItem("Open", NULL))
-            open = true;
-          if (ImGui::MenuItem("Save", NULL))
-            save = true;
-          if (ImGui::MenuItem(std::get<0>(item).c_str()))
-          {
-            auto callback = reinterpret_cast<std::function<void()>*>(std::get<2>(item));
-            (*callback)();
-          }
-          ImGui::EndMenu();
-        }
-        ImGui::EndMainMenuBar();
-
-        if (open)
-          ImGui::OpenPopup("Open File");
-        if (save)
-          ImGui::OpenPopup("Save File");
-
-        /* Optional third parameter. Support opening only compressed rar/zip files.
-     * Opening any other file will show error, return false and won't close the dialog.
-     */
-        if (file_dialog.showFileDialog("Open File", imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 310), ".rar,.zip,.7z,.obj"))
-        {
-          std::cout << file_dialog.selected_fn << std::endl;      // The name of the selected file or directory in case of Select Directory dialog mode
-          std::cout << file_dialog.selected_path << std::endl;    // The absolute path to the selected file
-        }
-        if (file_dialog.showFileDialog("Save File", imgui_addons::ImGuiFileBrowser::DialogMode::SAVE, ImVec2(700, 310), ".png,.jpg,.bmp"))
-          {
-          std::cout << file_dialog.selected_fn << std::endl;      // The name of the selected file or directory in case of Select Directory dialog mode
-          std::cout << file_dialog.selected_path << std::endl;    // The absolute path to the selected file
-          std::cout << file_dialog.ext << std::endl;              // Access ext separately (For SAVE mode)
-          //Do writing of files based on extension here
-          }
+        eThreeFloat* transfer_data = static_cast<eThreeFloat*>(std::get<2>(item));
+        ImGui::Text(std::get<0>(item).c_str());
+        ImGui::PushItemWidth(ImGui::GetWindowWidth());
+        ImGui::SliderFloat3(std::get<0>(item).c_str(), &transfer_data->data[0],-10, 10); //@todo
       }
       break;
       case SLIDER_FLOAT_3_CALLBACK:
@@ -256,27 +235,141 @@ void eWindowImGui::Render()
       {
         if (ImGui::Button(std::get<0>(item).c_str()))
         {
-          std::function<void()> callback = *static_cast<std::function<void()>*>(std::get<2>(item));
-          callback();
+          if(auto callback = callbacks.find(std::get<0>(item)); callback!= callbacks.end())
+            callback->second();
         }
       }
       break;
+      case OBJECT_REF:
+      {
+        shObject* p_object = static_cast<shObject*>(std::get<2>(item));
+        if (p_object && *p_object)
+        {
+          shObject obj = *p_object;
+          ImGui::Text(obj->Name().c_str());
+
+          static glm::vec3 g_translation, g_rotation, g_scale;
+          ImGui::Text("");
+          g_translation[0] = obj->GetTransform()->getTranslation()[0];
+          g_translation[1] = obj->GetTransform()->getTranslation()[1];
+          g_translation[2] = obj->GetTransform()->getTranslation()[2];
+          ImGui::PushItemWidth(ImGui::GetWindowWidth());
+          if (ImGui::SliderFloat3("Position", &g_translation[0], -10, 10))
+          {
+            obj->GetTransform()->setTranslation(g_translation);
+          }
+
+          ImGui::Text("Rotation");
+          
+         /* auto euler = glm::eulerAngles(obj->GetTransform()->getRotation());
+          std::cout << glm::abs(static_cast<float>(euler.z) - static_cast<float>(g_rotation.z)) << std::endl;
+          */
+          
+          glm::vec3 rot = g_rotation;
+          ImGui::PushItemWidth(ImGui::GetWindowWidth());
+          if (ImGui::SliderFloat3("", &g_rotation[0], -PI * 2, PI * 2, "%.2f"))
+          {
+            auto euler = glm::eulerAngles(obj->GetTransform()->getRotation());
+            //std::cout << "euler " << euler.x << " " << euler.y<< " " << euler.z << std::endl;
+            //auto xRotation = glm::cross(glm::vec3(obj->GetTransform()->getRotationUpVector()), glm::vec3(obj->GetTransform()->getRotationVector()));
+            auto xRotation = glm::vec3(1.0f, 0.0f, 0.0f);
+            float angleX = static_cast<float>(g_rotation[0]) - static_cast<float>(rot[0]);
+            glm::quat rotX = glm::angleAxis(angleX, xRotation);
+            
+            auto yRotation = glm::vec3(0.0f, 1.0f, 0.0f); //glm::vec3(obj->GetTransform()->getRotationUpVector())
+            float angleY = static_cast<float>(g_rotation[1]) - static_cast<float>(rot[1]);
+            glm::quat rotY = glm::angleAxis(angleY, yRotation);
+            
+            auto zRotation = glm::vec3(0.0f, 0.0f, 1.0f); //lm::vec3(obj->GetTransform()->getRotationVector())
+            float angleZ = static_cast<float>(g_rotation[2]) - static_cast<float>(rot[2]);
+            glm::quat rotZ = glm::angleAxis(angleZ, zRotation);
+
+            obj->GetTransform()->setRotation(rotX * rotY * rotZ* obj->GetTransform()->getRotation());
+          }
+
+          ImGui::Text("");
+          g_scale[0] = obj->GetTransform()->getScaleAsVector().x;
+          g_scale[1] = obj->GetTransform()->getScaleAsVector().y;
+          g_scale[2] = obj->GetTransform()->getScaleAsVector().z;
+          ImGui::PushItemWidth(ImGui::GetWindowWidth());
+          if (ImGui::SliderFloat3("Scale", &g_scale[0], 0.0f, 5.0f))
+          {
+            obj->GetTransform()->setScale(g_scale);
+          }
+          std::string text = std::string("Number of vertices ") + std::to_string(obj->GetModel()->GetVertexCount());
+          ImGui::Text(text.c_str());
+          
+          text = std::string("Number of meshes ") + std::to_string(obj->GetModel()->GetMeshCount());
+          ImGui::Text(text.c_str());
+
+          //Meshes transfer to rigger later
+          combo_list.clear();
+          for (size_t i = 0; i < obj->GetModel()->GetMeshCount(); ++i)
+          {
+            std::string name = obj->GetModel()->GetMeshes()[i]->Name();
+            for (int j = 0; j < name.size(); ++j)
+              combo_list.push_back(name[j]);
+            if(i != obj->GetModel()->GetMeshCount() -1)
+              combo_list.push_back('\0');
+          }
+          
+          static int mesh_current = 0;
+          if (!combo_list.empty())
+          {
+            if (ImGui::Combo("Object Meshes", &mesh_current, &combo_list[0]))
+            {
+            }
+          }
+
+          auto textures = obj->GetModel()->GetMeshes()[mesh_current]->GetTextures();
+          if (textures.empty())
+            textures = obj->GetModel()->GetTexturesModelLevel();
+          for (const Texture* t : textures)
+          {
+            ImGui::Image((void*)(intptr_t)(t->id), ImVec2(240, 160)/* ImVec2(t->mTextureWidth, t->mTextureHeight)*/, ImVec2(0, 1), ImVec2(1, 0));
+          }
+          //Animation -> transfer to rigger as well
+          text = std::string("Number of animations ") + std::to_string(obj->GetModel()->GetAnimationCount());
+          ImGui::Text(text.c_str());
+
+          static int anim_current = 0;
+          //cstrings.reserve(obj->GetModel()->GetAnimationCount());
+          //for (size_t i = 0; i < obj->GetModel()->GetAnimationCount(); ++i)
+          //  cstrings.push_back(const_cast<char*>(std::to_string(i).c_str())); //change ti names
+
+          //if (!cstrings.empty())
+          //{
+          //  if (ImGui::Combo("Current animations", &anim_current, &cstrings[0], obj->GetModel()->GetAnimationCount()))
+          //  {
+          //  }
+          //}
+
+          if (ImGui::Button("Play current animations "))
+          {
+            if (obj->GetModel()->GetAnimationCount() != 0)
+              obj->GetRigger()->Apply(anim_current);
+          }
+          if (ImGui::Button("Stop current animations "))
+          {
+            obj->GetRigger()->Stop();
+          }
+        }
+      }
     }
   }
 
-  ImVec2 pos = ImGui::GetWindowPos();
-  window_pos_x = pos.x;
-  window_pos_y = pos.y;
-  ImVec2 size = ImGui::GetWindowSize();
-  window_size_x =size.x;
-  window_size_y =size.y;
-  //ImGui::SetNextWindowPos(ImVec2{ window_pos_x , window_pos_y + window_size_y });
-  ImGui::SetWindowSize({ 300, 300 });
 	ImGui::End();
 }
 
+//-----------------------------------------------------------------------
 void eWindowImGui::Add(TypeImGui _type, const std::string & _name, void* _data)
 {
+  if (_type == BUTTON)
+  {
+    auto callback = reinterpret_cast<std::function<void()>*>(_data);
+    callbacks.insert({_name, *callback });
+  }
+
 	auto it = std::find_if(lines.begin(), lines.end(), [&_name](const eItem& _item)
 													   { return std::get<0>(_item) == _name; });
 	if (it == lines.end())
@@ -319,3 +412,65 @@ bool eWindowImGui::OnMouseMove(uint32_t x, uint32_t y)
     return false;
 }
 
+//-----------------------------------------------------------------
+void eMainImGuiWindow::Render()
+{
+  for (auto& item : lines)
+  {
+    switch (std::get<1>(item))
+    {
+      case MENU:
+      {
+        bool open = false, save = false;
+        ImGui::BeginMainMenuBar();
+        if (ImGui::BeginMenu("File"))
+        {
+          if (ImGui::MenuItem("Open", NULL))
+            open = true;
+          if (ImGui::MenuItem("Save", NULL))
+            save = true;
+          if (ImGui::MenuItem(std::get<0>(item).c_str()))
+          {
+            auto callback = reinterpret_cast<std::function<void()>*>(std::get<2>(item));
+            (*callback)();
+          }
+          ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    
+        if (open)
+          ImGui::OpenPopup("Open File");
+        if (save)
+          ImGui::OpenPopup("Save File");
+    
+        /* Optional third parameter. Support opening only compressed rar/zip files.
+        * Opening any other file will show error, return false and won't close the dialog.
+        */
+        if (file_dialog.showFileDialog("Open File", imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 310), ".rar,.zip,.7z,.obj"))
+        {
+          std::cout << file_dialog.selected_fn << std::endl;      // The name of the selected file or directory in case of Select Directory dialog mode
+          std::cout << file_dialog.selected_path << std::endl;    // The absolute path to the selected file
+        }
+        if (file_dialog.showFileDialog("Save File", imgui_addons::ImGuiFileBrowser::DialogMode::SAVE, ImVec2(700, 310), ".png,.jpg,.bmp"))
+        {
+          std::cout << file_dialog.selected_fn << std::endl;      // The name of the selected file or directory in case of Select Directory dialog mode
+          std::cout << file_dialog.selected_path << std::endl;    // The absolute path to the selected file
+          std::cout << file_dialog.ext << std::endl;              // Access ext separately (For SAVE mode)
+          //Do writing of files based on extension here
+        }
+      }
+      break;
+    }
+  }
+}
+
+//-------------------------------------------------------------------
+void eMainImGuiWindow::Add(TypeImGui _type, const std::string& _name, void* _data)
+{
+  auto it = std::find_if(lines.begin(), lines.end(), [&_name](const eItem& _item)
+    { return std::get<0>(_item) == _name; });
+  if (it == lines.end())
+    lines.push_back(eItem(_name, _type, _data));
+  else
+    std::get<2>(*it) = _data;
+}

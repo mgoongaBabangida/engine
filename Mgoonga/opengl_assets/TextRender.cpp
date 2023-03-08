@@ -19,11 +19,11 @@ eTextRender::eTextRender(const std::string& vS, const std::string& fS)
   textShader.installShaders(vS.c_str(), fS.c_str());
 
   if (FT_Init_FreeType(&ft))
-    {
+  {
     std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-    }
+   }
 
-  if (FT_New_Face(ft, "fonts/ARIALN.ttf", 0, &face))
+  if (FT_New_Face(ft, "../game_assets/fonts/ARIALN.ttf", 0, &face)) //@todo variable path
     {
     std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
     }

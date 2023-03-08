@@ -9,6 +9,7 @@
 #include <SDL/include/SDL_opengl.h>
 
 #include <base/InputController.h>
+#include <map>
 
 //---------------------------------------------------
 class DLL_SDL_ASSETS eImGuiContext
@@ -34,11 +35,13 @@ enum TypeImGui
   CHECKBOX,
   MENU,
   TEXTURE,
+	SLIDER_FLOAT_3,
   SLIDER_FLOAT_3_CALLBACK,
   TEXT_INT,
   COMBO_BOX,
   TEXTURE_ARRAY,
   BUTTON,
+	OBJECT_REF,
 };
 
 //--------------------------------------------------
@@ -58,6 +61,16 @@ public:
 	virtual void Render() override;
 };
 
+class eMainImGuiWindow : public IWindowImGui
+{
+	using eItem = std::tuple<std::string, TypeImGui, void*>;
+public:
+	virtual void Render()	override;
+	virtual void Add(TypeImGui, const std::string& name, void*) override;
+protected:
+	std::vector<eItem>	lines;
+};
+
 //---------------------------------------------
 class eWindowImGui : public IWindowImGui
 {
@@ -66,15 +79,21 @@ public:
   eWindowImGui(const std::string& _name);
 	void SetViewportOffset(float x_offset, float y_offset);
 	void SetWindowOffset(float x_offset, float y_offset);
-	virtual void Render()										override;
+	
+	virtual void Render()	override;
 	virtual void Add(TypeImGui, const std::string& name, void*) override;
-  virtual bool OnMousePress(uint32_t x, uint32_t y, bool left);
+  
+	virtual bool OnMousePress(uint32_t x, uint32_t y, bool left) override;
   virtual bool OnMouseMove(uint32_t x, uint32_t y) override;
 
 protected:
 	std::vector<eItem>	lines;
 	std::string					name;
-  float								window_pos_x;
+	bool								visible = true;
+	std::map<std::string, std::function<void()>> callbacks;
+	std::vector<char> combo_list;
+
+	float								window_pos_x;
   float								window_pos_y;
   float								window_size_x;
   float								window_size_y;
@@ -82,7 +101,6 @@ protected:
 	float								viewport_offset_y;
 	float								window_offset_x;
 	float								window_offset_y;
-	bool								visible = true;
 };
 
 struct eDockSpaceImGui

@@ -42,6 +42,10 @@ public:
 	glm::vec3&			     getTranslationRef()		  { return  m_translation; }
 	virtual glm::quat	   getRotation()		const { return  q_rotation; }
 	glm::vec4			       getRotationVector() const;
+	glm::vec4			       getRotationUpVector() const;
+
+	void								 setForward(glm::vec3 _fwd){forward = _fwd; }
+	void								 setUp(glm::vec3 _up) { Up = _up; }
 	glm::vec3			       getForward()		const { return forward; }
 	glm::vec3			       getUp()				const { return Up; }
 	
