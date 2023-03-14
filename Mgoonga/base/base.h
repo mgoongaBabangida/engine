@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <array>
+#include <variant>
 
 #pragma warning( disable : 4251) // vector & unique_ptr have to be exported or not used @todo
 
@@ -44,12 +45,34 @@ struct Light
 	glm::vec3  diffuse = { 1.0f, 1.0f, 1.0f };
 	glm::vec3  specular = { 1.0f, 1.0f, 1.0f };
 	eLightType type = eLightType::POINT;
-	glm::vec3  intensity = { 1500.0f, 1500.0f, 1500.0f };
+	glm::vec3  intensity = { 100, 100, 100 };
+};
+
+//-------------------------------------------------------
+using UniformData = std::variant<bool, float, int32_t, size_t,
+	glm::vec2, glm::vec3, glm::vec4,
+	glm::mat2, glm::mat3, glm::mat4>;
+
+//-------------------------------------------------------
+struct Uniform
+{
+	std::string name;
+	int32_t location;
+	int32_t type;
+	UniformData data;
+};
+
+//----------------------------------------------------------
+struct ShaderInfo
+{
+	std::string name;
+	int32_t id;
+	const std::vector<Uniform>& uniforms;
 };
 
 const float PI = 3.14159265359f;
 
-static const glm::vec3 NONE{ glm::vec3(-100.0f, -100.0f, -100.0f) };
+static const glm::vec3 NONE{ glm::vec3(-100.0f, -100.0f, -100.0f) }; //@todo
 
 const glm::vec3 XAXIS		= glm::vec3(1.0f, 0.0f, 0.0f);
 const glm::vec3 YAXIS		= glm::vec3(0.0f, 1.0f, 0.0f);

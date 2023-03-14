@@ -9,14 +9,14 @@ eOutlineRender::eOutlineRender(const std::string& vS, const std::string& fS)
 {
 	shader.installShaders(vS.c_str(), fS.c_str());
 
-	fullTransformationUniformLocation	= glGetUniformLocation(shader.ID, "modelToProjectionMatrix");
-	modelToWorldMatrixUniformLocation	= glGetUniformLocation(shader.ID, "modelToWorldMatrix");
-	eyePositionWorldUniformLocation		= glGetUniformLocation(shader.ID, "eyePositionWorld");
+	fullTransformationUniformLocation	= glGetUniformLocation(shader.ID(), "modelToProjectionMatrix");
+	modelToWorldMatrixUniformLocation	= glGetUniformLocation(shader.ID(), "modelToWorldMatrix");
+	eyePositionWorldUniformLocation		= glGetUniformLocation(shader.ID(), "eyePositionWorld");
 }
 
 void eOutlineRender::Render(const Camera & camera, const Light & light, const std::vector<shObject>& objects)
 {
-	glUseProgram(shader.ID);
+	glUseProgram(shader.ID());
 
 	glm::mat4 worldToProjectionMatrix	= camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
 
@@ -41,7 +41,7 @@ void eOutlineRender::Render(const Camera & camera, const Light & light, const st
 				m = UNIT_MATRIX;
 			}
 		}
-		int loc = glGetUniformLocation(shader.ID, "gBones");
+		int loc = glGetUniformLocation(shader.ID(), "gBones");
 		glUniformMatrix4fv(loc, 100, GL_FALSE, &matrices[0][0][0]);
 		//*********************
 		object->GetModel()->Draw();

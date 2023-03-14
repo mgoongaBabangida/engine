@@ -31,6 +31,9 @@ bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenu
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	if (type == "terrain")
+		glGenerateMipmap(id);
+
 	eTextureImplDevIl::DeleteImage(ilId);
 	return true;
 }

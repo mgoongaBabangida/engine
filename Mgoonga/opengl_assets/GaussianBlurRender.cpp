@@ -13,8 +13,8 @@ eGaussianBlurRender::eGaussianBlurRender(GLuint				_width,
   /*eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_ONE, width, height);
   eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_TWO, width, height);*/
 	
-	TexWidthLoc = glGetUniformLocation(shader.ID, "targetWidth");
-	textureLoc	= glGetUniformLocation(shader.ID, "screenTexture");
+	TexWidthLoc = glGetUniformLocation(shader.ID(), "targetWidth");
+	textureLoc	= glGetUniformLocation(shader.ID(), "screenTexture");
 
 	GLfloat quadVertices[] = {
 		// Positions   // TexCoords
@@ -48,7 +48,7 @@ eGaussianBlurRender::~eGaussianBlurRender()
 
 void eGaussianBlurRender::Render()
 {
-		glUseProgram(shader.ID);
+		glUseProgram(shader.ID());
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_GAUSSIAN_ONE);
 		glViewport(0, 0, width, height);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -57,7 +57,7 @@ void eGaussianBlurRender::Render()
 		glBindTexture(GL_TEXTURE_2D, texture.id);	// Use the color attachment texture as the texture of the quad plane
 		//glUniform1i(textureLoc, 1);
 		glUniform1f(TexWidthLoc, width);
-		GLuint BlurIndex = glGetSubroutineIndex(shader.ID, GL_VERTEX_SHADER, "HorizontalBlur");
+		GLuint BlurIndex = glGetSubroutineIndex(shader.ID(), GL_VERTEX_SHADER, "HorizontalBlur");
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &BlurIndex);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);
@@ -69,7 +69,7 @@ void eGaussianBlurRender::Render()
 		glBindVertexArray(quadVAO);
 		//glUniform1i(textureLoc, 1);
 		glUniform1f(TexWidthLoc, height);
-		BlurIndex = glGetSubroutineIndex(shader.ID, GL_VERTEX_SHADER, "VerticalBlur");
+		BlurIndex = glGetSubroutineIndex(shader.ID(), GL_VERTEX_SHADER, "VerticalBlur");
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &BlurIndex);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);

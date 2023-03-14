@@ -12,6 +12,7 @@ class eMainRender
 {
 public:
 	eMainRender(const std::string& vS, const std::string& fS);
+	~eMainRender();
 
 	void Render(const Camera&			camera,
 				      const Light&			light,
@@ -22,6 +23,7 @@ public:
 	void	SetClipPlane(float Height);
 	void	SetShadowMatrix(glm::mat4 shadow_matrix);
 
+	Shader& GetShader() { return mainShader; }
 protected:
 	Shader mainShader;
 	GLuint fullTransformationUniformLocation;

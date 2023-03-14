@@ -20,6 +20,7 @@ public:
 	void SetTexture(Texture t)			    { screenMesh->SetTextureOne(t); }
 	void SetTextureContrast(Texture t)	{ screenMesh->SetTextureTwo(t); }
 
+	Shader& GetShader() { return screenShader; }
 protected:
 	Shader							          screenShader;
 	std::unique_ptr<eFrameMesh>		frameMesh;

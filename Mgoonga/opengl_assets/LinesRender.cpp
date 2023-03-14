@@ -6,8 +6,8 @@ eLinesRender::eLinesRender(const std::string & vertexShaderPath, const std::stri
 {
 	linesShader.installShaders(vertexShaderPath.c_str(), fragmentShaderPath.c_str());
 
-	viewLoc		  = glGetUniformLocation(linesShader.ID, "view");
-	projectionLoc = glGetUniformLocation(linesShader.ID, "projection");
+	viewLoc		  = glGetUniformLocation(linesShader.ID(), "view");
+	projectionLoc = glGetUniformLocation(linesShader.ID(), "projection");
 
   // Setup VAO
   glGenVertexArrays(1, &VAO);
@@ -32,7 +32,7 @@ void eLinesRender::Render(const Camera& _camera, const std::vector<glm::vec3>& _
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(GLuint), &_indices[0], GL_DYNAMIC_DRAW);
 
-	glUseProgram(linesShader.ID);
+	glUseProgram(linesShader.ID());
 	glm::mat4 view = _camera.getWorldToViewMatrix();
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, &_camera.getProjectionMatrix()[0][0]);

@@ -25,6 +25,7 @@ public:
 				const Light&	  light,
 				std::vector<shObject> flags);
 
+	Shader& GetShader() { return wave_shader; }
 private:
 	Shader											wave_shader;
 	std::unique_ptr<eObject>		m_object;

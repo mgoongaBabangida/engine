@@ -13,9 +13,11 @@ public:
   ~eLinesRender();
 
 	void Render(const Camera& camera, const std::vector<glm::vec3>&, std::vector<GLuint>);
+	Shader& GetShader() { return linesShader; }
 
 protected:
 	Shader	linesShader;
+	
 	GLuint	viewLoc;
 	GLuint	projectionLoc;
 

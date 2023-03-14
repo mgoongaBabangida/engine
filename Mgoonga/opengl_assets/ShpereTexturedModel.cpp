@@ -28,7 +28,7 @@ SphereTexturedMesh::SphereTexturedMesh()
       MyVertex vert;
       vert.position = (glm::vec3(xPos, yPos, zPos));
       vert.TexCoords = (glm::vec2(xSegment, ySegment));
-      vert.Normal = (glm::vec3(xPos, yPos, zPos));
+      vert.Normal = glm::normalize((glm::vec3(xPos, yPos, zPos)));
       vertices.push_back(vert);
     }
   }
@@ -54,38 +54,79 @@ SphereTexturedMesh::SphereTexturedMesh()
     }
     oddRow = !oddRow;
   }
+
+  for (uint32_t i = 1; i < indices.size()-1; ++i)
+  {
+    glm::vec3 pos1 = vertices[indices[i - 1]].position;
+    glm::vec3 pos2 = vertices[indices[i]].position;
+    glm::vec3 pos3 = vertices[indices[i + 1]].position;
+    glm::vec2 uv1 = vertices[indices[i - 1]].TexCoords;
+    glm::vec2 uv2 = vertices[indices[i]].TexCoords;
+    glm::vec2 uv3 = vertices[indices[i + 1]].TexCoords;
+    // calculate tangent/bitangent vectors of both triangles
+    glm::vec3 tangent1, bitangent1;
+    // - triangle 1
+    glm::vec3 edge1 = pos2 - pos1;
+    glm::vec3 edge2 = pos3 - pos1;
+    glm::vec2 deltaUV1 = uv2 - uv1;
+    glm::vec2 deltaUV2 = uv3 - uv1;
+
+    GLfloat f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+    tangent1.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+    tangent1.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+    tangent1.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+    tangent1 = glm::normalize(tangent1);
+
+    bitangent1.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+    bitangent1.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+    bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+    bitangent1 = glm::normalize(bitangent1);
+
+    vertices[indices[i]].tangent = tangent1;
+    vertices[indices[i]].bitangent = bitangent1;
+  }
+
   indexCount = static_cast<unsigned int>(indices.size());
 
-  std::vector<float> data;
-  for (unsigned int i = 0; i < vertices.size(); ++i)
-  {
-    data.push_back(vertices[i].position.x);
-    data.push_back(vertices[i].position.y);
-    data.push_back(vertices[i].position.z);
-    if (vertices.size() > 0)
-    {
-      data.push_back(vertices[i].Normal.x);
-      data.push_back(vertices[i].Normal.y);
-      data.push_back(vertices[i].Normal.z);
-    }
-    if (vertices.size() > 0)
-    {
-      data.push_back(vertices[i].TexCoords.x);
-      data.push_back(vertices[i].TexCoords.y);
-    }
-  }
-  glBindVertexArray(sphereVAO);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), &data[0], GL_STATIC_DRAW);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
-  unsigned int stride = (3 + 2 + 3) * sizeof(float);
+  glBindVertexArray(this->sphereVAO);
+  glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
+  glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(MyVertex),
+    &this->vertices[0], GL_STATIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ebo);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(GLuint),
+    &this->indices[0], GL_STATIC_DRAW);
+
+  // Vertex Positions
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
+    (GLvoid*)0);
+  // Vertex Normals
   glEnableVertexAttribArray(2);
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
+    (GLvoid*)offsetof(MyVertex, Normal));
+  // Vertex Texture Coords
   glEnableVertexAttribArray(3);
-  glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
+  glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
+    (GLvoid*)offsetof(MyVertex, TexCoords));
+  // Vertex Tangent
+  glEnableVertexAttribArray(4);
+  glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
+    (GLvoid*)offsetof(MyVertex, tangent));
+  // Vertex Bitangent
+  glEnableVertexAttribArray(5);
+  glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
+    (GLvoid*)offsetof(MyVertex, bitangent));
+  //// Vertex BoneIDs
+  //glEnableVertexAttribArray(6);
+  //glVertexAttribIPointer(6, 4, GL_INT, sizeof(MyVertex),
+  //  (GLvoid*)offsetof(MyVertex, boneIDs));
+  //// Vertex Weights
+  //glEnableVertexAttribArray(7);
+  //glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
+  //  (GLvoid*)offsetof(MyVertex, weights));
+  glBindVertexArray(0);
 }
 
 SphereTexturedMesh::~SphereTexturedMesh()

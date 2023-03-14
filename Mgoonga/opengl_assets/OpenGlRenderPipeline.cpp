@@ -31,6 +31,7 @@
 void	eOpenGlRenderPipeline::SetSkyBoxTexture(Texture* _t)  { renderManager->SkyBoxRender()->SetSkyBoxTexture(_t); }
 void	eOpenGlRenderPipeline::AddHex(glm::vec3 _v) { renderManager->AddHex(_v); }
 void	eOpenGlRenderPipeline::SetHexRadius(float _r) { renderManager->SetHexRadius(_r); }
+const std::vector<ShaderInfo>& eOpenGlRenderPipeline::GetShaderInfos() const { return renderManager->GetShaderInfos(); }
 
 //-------------------------------------------------------------------------------------------
 eOpenGlRenderPipeline::eOpenGlRenderPipeline(uint32_t				_width, uint32_t				_height)

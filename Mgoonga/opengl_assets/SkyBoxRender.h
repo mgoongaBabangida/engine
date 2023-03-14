@@ -16,6 +16,8 @@ public:
 	void Render(const Camera& camera);	
 	void SetSkyBoxTexture(Texture*);
 
+	Shader& GetShader() { return skyboxShader; }
+
 protected:
 	Shader							          skyboxShader;
 	std::unique_ptr<eSkyBoxMesh>	skyBox;

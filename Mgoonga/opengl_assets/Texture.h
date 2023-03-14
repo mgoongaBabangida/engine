@@ -27,6 +27,7 @@ struct /*DLL_OPENGL_ASSETS*/ Texture
 	Texture(GLuint Width, GLuint Height) :Texture() { mTextureWidth = Width;  mTextureHeight = Height; }
 	Texture(GLuint ID, GLuint TextureWidth, GLuint TextureHeight, int32_t TextureChannels = 1)
     :id(ID), mTextureWidth(TextureWidth), mTextureHeight(TextureHeight), mChannels(TextureChannels) {}	
+	
 	Texture(const Texture& t) { this->operator=(t);}
 	Texture& operator=(const Texture& t) 
 	{ 

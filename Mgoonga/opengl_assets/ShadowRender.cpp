@@ -8,17 +8,17 @@ eShadowRender::eShadowRender(const std::string& vS, const std::string& fS, const
 	: matrices(100)
 {
 	shaderDir.installShaders(vS.c_str(), fS.c_str());
-	MVPUniformLocationDir				= glGetUniformLocation(shaderDir.ID, "MVP");
+	MVPUniformLocationDir				= glGetUniformLocation(shaderDir.ID(), "MVP");
 	
 	shaderPoint.installShaders(vS.c_str(), fSP.c_str(), gSP.c_str());
-	ModelUniformLocationPoint			= glGetUniformLocation(shaderPoint.ID, "MVP");
-	ProjectionTransformsUniformLocation = glGetUniformLocation(shaderPoint.ID, "shadowMatrices");
+	ModelUniformLocationPoint			= glGetUniformLocation(shaderPoint.ID(), "MVP");
+	ProjectionTransformsUniformLocation = glGetUniformLocation(shaderPoint.ID(), "shadowMatrices");
 }
 
 //-----------------------------------------------------------------------------
-void eShadowRender::Render(const Camera&			camera,
-						   const Light&				light, 
-						   std::vector<shObject>&	objects)
+void eShadowRender::Render(const Camera&					camera,
+													 const Light&						light,
+													 std::vector<shObject>&	objects)
 {
 	glm::mat4 ModelToWorldMatrix = glm::translate(glm::vec3(light.light_position));
 	
@@ -39,7 +39,7 @@ void eShadowRender::Render(const Camera&			camera,
 		shadowTransforms.push_back(shadowProj *
 			glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
 		
-		glUseProgram(shaderPoint.ID);
+		glUseProgram(shaderPoint.ID());
 		glUniformMatrix4fv(ProjectionTransformsUniformLocation, 6, GL_FALSE, &shadowTransforms[0][0][0]);
 		//RENDER DEPTH
 		for (auto &object : objects)
@@ -52,7 +52,7 @@ void eShadowRender::Render(const Camera&			camera,
 	}
 	else if (light.type == eLightType::DIRECTION)
 	{
-		glUseProgram(shaderDir.ID);
+		glUseProgram(shaderDir.ID());
 		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0f, 1.0f, 0.0f));
 		shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
 		//RENDER DEPTH

@@ -1,21 +1,36 @@
 #pragma once
-
 #include "stdafx.h"
 #include <glew-2.1.0\include\GL\glew.h>
+#include <base/base.h>
+#include <glm/glm/glm.hpp>
 
-struct Shader
+//------------------------------------------------------
+class Shader
 {
-	GLuint ID;
+public:
+	Shader() = default;
+	~Shader();
+
+	GLuint ID() { return id;}
+
+	void					GetUniformInfoFromShader();
+	void					GetUniformDataFromShader();
+	const std::vector<Uniform>& GetUniforms() const { return uniforms; }
+	
+	void					installShaders(const char* VertexShaderName, const char* FragmentShaderName);
+	void					installShaders(const char* VertexShaderName,
+															 const char* FragmentShaderName,
+															 const char* GeometryShaderName);//@todo make one function
+	std::string		readShaderCode(const char* filename);
+
+protected:
+	bool					checkShaderStatus(GLint shaderID);
+	bool					checkProgramStatus();
+
+	GLuint id;
 	GLuint vertexShaderID;
 	GLuint fragmentShaderID;
 	GLuint geometryShaderID;
-	Shader() = default;
-  ~Shader();
-
-	void installShaders(const char* VertexShaderName, const char* FragmentShaderName);
-	void installShaders(const char * VertexShaderName, const char * FragmentShaderName, const char * GeometryShaderName);
-	bool checkShaderStatus(GLint shaderID);
-	bool checkProgramStatus();
-	std::string readShaderCode(const char * filename);
+	std::vector<Uniform> uniforms;
 };
 

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ShipScript.h"
 #include <base/base.h>
-#include <opengl_assets\RenderManager.h>
+//#include <opengl_assets\RenderManager.h>
 #include <math/ShootingParticleSystem.h>
 #include <opengl_assets\Sound.h>
 #include <opengl_assets\MyModel.h>
@@ -31,6 +31,11 @@ eShipScript::eShipScript(Texture*			_flagTexture,
 	flag->SetTransform(new Transform);
 	std::shared_ptr<MyMesh> mesh(new MyMesh());
 	flag->SetModel(new MyModel(mesh, flag_tex));
+}
+
+//-------------------------------------------------------------------
+eShipScript::~eShipScript()
+{
 }
 
 //------------------------------------------------------------------------------------
@@ -134,6 +139,7 @@ void eShipScript::Shoot()
 														shoot_tex, 
 														shoot_snd,
 														10000);
-	render_manager.get().AddParticleSystem(system);
+	//@todo no connection to rendering. Add pt sys in different way
+	//render_manager.get().AddParticleSystem(system);
 	shoot_after_move = false;
 }

@@ -23,6 +23,60 @@
 
 imgui_addons::ImGuiFileBrowser file_dialog;
 
+//---------------------------------------------------------------------
+struct UniformDisplayVisitor
+{
+  void operator()(const int32_t& i) const {
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(i).c_str());
+  }
+
+  void operator()(const size_t& i) const {
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(i).c_str());
+  }
+
+  void operator()(const float& f) const {
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(f).c_str());
+  }
+
+  void operator()(const bool& b) const {
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(b).c_str());
+  }
+
+  void operator()(const glm::vec2& v) const {
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(v[0]).c_str());
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(v[1]).c_str());
+  }
+
+  void operator()(const glm::vec3& v) const {
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(v[0]).c_str());
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(v[1]).c_str());
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(v[2]).c_str());
+  }
+
+  void operator()(const glm::vec4& v) const {
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(v[0]).c_str());
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(v[1]).c_str());
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(v[2]).c_str());
+    ImGui::SameLine();
+    ImGui::Text(std::to_string(v[3]).c_str());
+  }
+  template<class T>
+  void operator()(const T&) const {
+  }
+};
+
 eImGuiContext::eImGuiContext(SDL_GLContext* _context, SDL_Window* _window)
 	:context(_context), window(_window)
 {}
@@ -242,6 +296,7 @@ void eWindowImGui::Render()
       break;
       case OBJECT_REF:
       {
+        //check if obj has changed and put current mesh to 0 (save last obj?)
         shObject* p_object = static_cast<shObject*>(std::get<2>(item));
         if (p_object && *p_object)
         {
@@ -355,6 +410,42 @@ void eWindowImGui::Render()
           }
         }
       }
+      break;
+      case SHADER:
+      {
+        const std::vector<ShaderInfo>* infos = static_cast<const std::vector<ShaderInfo>*>(std::get<2>(item));
+
+        combo_list.clear();
+        for (size_t i = 0; i < infos->size(); ++i)
+        {
+          std::string name = (*infos)[i].name;
+          for (int j = 0; j < name.size(); ++j)
+            combo_list.push_back(name[j]);
+          if (i != infos->size() - 1)
+            combo_list.push_back('\0');
+        }
+
+        static int shader_current = 0;
+        if (!combo_list.empty())
+        {
+          if (ImGui::Combo("Shaders", &shader_current, &combo_list[0]))
+          {
+          }
+          //if (ImGui::Button("Update shaders"))
+          //{
+          //  shader_current = 0;
+          //  if (auto callback = callbacks.find("Update shaders"); callback != callbacks.end())
+          //    callback->second();
+          //}
+          for (const auto& uniform : (*infos)[shader_current].uniforms)
+          {
+            ImGui::Text(uniform.name.c_str());
+            std::visit(UniformDisplayVisitor(), uniform.data);
+          }
+        }
+
+      }
+      break;
     }
   }
 

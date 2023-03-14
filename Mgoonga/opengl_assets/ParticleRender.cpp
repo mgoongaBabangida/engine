@@ -18,14 +18,14 @@ eParticleRender::eParticleRender(std::shared_ptr<MyMesh> _mesh,
 {
 	particleShader.installShaders(_vertexShaderPath.c_str(), _fragmentShaderPath.c_str());
 
-	modelToWorldMatrixUniformLocation		= glGetUniformLocation(particleShader.ID, "modelToWorldMatrix");
-	fullTransformationUniformLocation		= glGetUniformLocation(particleShader.ID, "modelToProjectionMatrix");
-	worldToProjectionMatrixUniformLocation	= glGetUniformLocation(particleShader.ID, "worldToProjectionMatrix");
-	ProjectionMatrixUniformLocation			= glGetUniformLocation(particleShader.ID, "ProjectionMatrix");
-	modelViewMatrixLocation					= glGetUniformLocation(particleShader.ID, "ModelViewMatrix");
-	texOffset1Location						= glGetUniformLocation(particleShader.ID, "texOffset1");
-	texOffset2Location						= glGetUniformLocation(particleShader.ID, "texOffset2");
-	texCoordInfoLocation					= glGetUniformLocation(particleShader.ID, "texCoordInfo");
+	modelToWorldMatrixUniformLocation		= glGetUniformLocation(particleShader.ID(), "modelToWorldMatrix");
+	fullTransformationUniformLocation		= glGetUniformLocation(particleShader.ID(), "modelToProjectionMatrix");
+	worldToProjectionMatrixUniformLocation	= glGetUniformLocation(particleShader.ID(), "worldToProjectionMatrix");
+	ProjectionMatrixUniformLocation			= glGetUniformLocation(particleShader.ID(), "ProjectionMatrix");
+	modelViewMatrixLocation					= glGetUniformLocation(particleShader.ID(), "ModelViewMatrix");
+	texOffset1Location						= glGetUniformLocation(particleShader.ID(), "texOffset1");
+	texOffset2Location						= glGetUniformLocation(particleShader.ID(), "texOffset2");
+	texCoordInfoLocation					= glGetUniformLocation(particleShader.ID(), "texCoordInfo");
 
 	model.reset(new MyModel(_mesh, _texture));
 	object.reset(new eObject); // @todo prob transform will do
@@ -44,7 +44,7 @@ eParticleRender::~eParticleRender()
 //-------------------------------------------------------------------------------------------------------------
 void eParticleRender::Render(const Camera& _camera)
 {
-	glUseProgram(particleShader.ID);
+	glUseProgram(particleShader.ID());
 	glUniformMatrix4fv(ProjectionMatrixUniformLocation, 1, GL_FALSE, &_camera.getProjectionMatrix()[0][0]);
 
 	int info = 0;
@@ -87,7 +87,7 @@ void eParticleRender::Render(const Camera& _camera)
 
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, system->GetTexture()->id);
-		glUniform1i(glGetUniformLocation(particleShader.ID, "texture_diffuse1"), 2);
+		glUniform1i(glGetUniformLocation(particleShader.ID(), "texture_diffuse1"), 2);
 		mesh->Draw();
 
 		++info;

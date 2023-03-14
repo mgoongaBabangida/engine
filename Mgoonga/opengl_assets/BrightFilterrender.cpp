@@ -2,6 +2,7 @@
 #include "BrightFilterrender.h"
 #include "GlBufferContext.h"
 
+//-------------------------------------------------------
 eBrightFilterRender::eBrightFilterRender(GLuint				width, 
 										GLuint				height, 
 										const std::string&	vS,
@@ -33,15 +34,17 @@ eBrightFilterRender::eBrightFilterRender(GLuint				width,
 	glBindVertexArray(0);
 }
 
+//-------------------------------------------------------
 eBrightFilterRender::~eBrightFilterRender()
 {
   glDeleteVertexArrays(1, &quadVAO);
   glDeleteBuffers(1, &quadVBO);
 }
 
+//-------------------------------------------------------
 void eBrightFilterRender::Render()
 {
-	glUseProgram(shader.ID);
+	glUseProgram(shader.ID());
 	glBindVertexArray(quadVAO);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, texture.id);

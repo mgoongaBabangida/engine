@@ -28,8 +28,11 @@ class DLL_OPENGL_ASSETS eRenderManager
 public:
 	friend class eOpenGlRenderPipeline;
 
-	eRenderManager();
-	~eRenderManager();
+	eRenderManager() = default;
+	~eRenderManager() = default;
+
+	const std::vector<ShaderInfo>& GetShaderInfos() const { return shaders;}
+	void UpdateShadersInfo();
 
 	//@todo transfer public functions from here and stop exporting this class
 	void				AddHex(glm::vec3 _v);
@@ -38,6 +41,7 @@ public:
 	void				Initialize(eModelManager&	modelManager,
 								         eTextureManager&  texManager,
 								         const std::string&	folderPath);
+
 	void				AddParticleSystem(IParticleSystem* system);
 
 private:
@@ -75,8 +79,8 @@ private:
 	std::unique_ptr<eTextRender>     m_textRender;
 	std::unique_ptr<ePBRRender>      m_pbrRender;
 
-	std::string							 folderPath;
-
+	std::string							folderPath;
+	std::vector<ShaderInfo>	shaders;
 	//should not be here
 	std::vector<glm::vec3>	 dots; //extra copy $change design
 	float								     radius;

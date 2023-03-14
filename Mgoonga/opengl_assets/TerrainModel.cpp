@@ -68,7 +68,11 @@ void TerrainModel::initialize(Texture* diffuse, Texture* specular, bool spreed_t
 }
 
 //----------------------------------------------------------------
-void TerrainModel::initialize(Texture* diffuse, Texture* specular, Texture* normal, Texture* heightMap, bool spreed_texture)
+void TerrainModel::initialize(Texture* diffuse,
+														  Texture* specular,
+														  Texture* normal,
+														  Texture* heightMap,
+														  bool spreed_texture)
 {
 	m_diffuse = diffuse;
 	m_specular=specular;
@@ -276,13 +280,13 @@ void TerrainModel::makePlaneVerts(unsigned int rows, unsigned int columns, bool 
 			thisVert.Normal = glm::vec3(0.0f, 1.0f, 0.0f);
       if (spreed_texture)
       {
-        thisVert.TexCoords.x = j / (float)rows;
-        thisVert.TexCoords.y = i / (float)columns;
+        thisVert.TexCoords.x = static_cast<float>(j) / static_cast<float>(rows);
+        thisVert.TexCoords.y = static_cast<float>(i) / static_cast<float>(columns);
       }
       else
       {
         thisVert.TexCoords.x = j % 2 ? 0.0f : 1.0f;
-        thisVert.TexCoords.y = i % 2 ? 0.0f : 1.0f;
+        thisVert.TexCoords.y = i % 2 ? 1.0f : 0.0f;
       }
 			if (thisVert.position.x < MinX)  //debug only
 				MinX = thisVert.position.x;

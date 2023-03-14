@@ -19,12 +19,12 @@ eWaterRender::eWaterRender(std::unique_ptr<MyModel> model,
 {
 	waterShader.installShaders(vertexShaderPath.c_str(), fragmentShaderPath.c_str());
 	
-	modelToWorldMatrixUniformLocation	= glGetUniformLocation(waterShader.ID, "modelToWorldMatrix");
-	fullTransformationUniformLocation	= glGetUniformLocation(waterShader.ID, "modelToProjectionMatrix");
-	WaterFactorLoc						= glGetUniformLocation(waterShader.ID, "moveFactor");
-	CameraPosLoc						= glGetUniformLocation(waterShader.ID, "cameraPosition");
-	lightPosLoc							= glGetUniformLocation(waterShader.ID, "lightPosition");
-	lightColorLoc						= glGetUniformLocation(waterShader.ID, "lightColor");
+	modelToWorldMatrixUniformLocation	= glGetUniformLocation(waterShader.ID(), "modelToWorldMatrix");
+	fullTransformationUniformLocation	= glGetUniformLocation(waterShader.ID(), "modelToProjectionMatrix");
+	WaterFactorLoc						= glGetUniformLocation(waterShader.ID(), "moveFactor");
+	CameraPosLoc						= glGetUniformLocation(waterShader.ID(), "cameraPosition");
+	lightPosLoc							= glGetUniformLocation(waterShader.ID(), "lightPosition");
+	lightColorLoc						= glGetUniformLocation(waterShader.ID(), "lightColor");
 
 	water.swap(model);
 	water->setTextureBump(waves);
@@ -42,7 +42,7 @@ eWaterRender::eWaterRender(std::unique_ptr<MyModel> model,
 
 void eWaterRender::Render(const Camera& camera, const Light& light)
 {
-	glUseProgram(waterShader.ID);
+	glUseProgram(waterShader.ID());
 
 	glm::mat4 worldToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
 

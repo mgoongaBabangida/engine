@@ -16,8 +16,10 @@ public:
 	void	Render(const Camera&		      camera,
 				       const Light&			      light,
 				       std::vector<shObject>& objects);
+
+	Shader& GetShader() { return shaderDir; }
 protected:
-	Shader			shaderDir;
+	Shader			shaderDir; //@todo two shaders in one render not good
 	Shader			shaderPoint;
 
 	GLuint			MVPUniformLocationDir;

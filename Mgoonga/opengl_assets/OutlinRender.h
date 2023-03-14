@@ -16,6 +16,7 @@ public:
 				      const Light&			light, 
 				      const std::vector<shObject>&	objects);
 
+	Shader& GetShader() { return shader; }
 private:
 	Shader		shader;
 	GLuint		fullTransformationUniformLocation;

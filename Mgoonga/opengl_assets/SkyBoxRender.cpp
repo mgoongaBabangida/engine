@@ -9,14 +9,14 @@ eSkyBoxRender::eSkyBoxRender(Texture*			_texture,
 	skyboxShader.installShaders(vertexShaderPath.c_str(), fragmentShaderPath.c_str());
 	skyBox.reset(new eSkyBoxMesh(_texture));
 
-	viewLoc			= glGetUniformLocation(skyboxShader.ID, "view");
-	projectionLoc	= glGetUniformLocation(skyboxShader.ID, "projection");
-	skyboxLoc		= glGetUniformLocation(skyboxShader.ID, "skybox");
+	viewLoc			= glGetUniformLocation(skyboxShader.ID(), "view");
+	projectionLoc	= glGetUniformLocation(skyboxShader.ID(), "projection");
+	skyboxLoc		= glGetUniformLocation(skyboxShader.ID(), "skybox");
 }
 
 void eSkyBoxRender::Render(const Camera& _camera)
 {
-	glUseProgram(skyboxShader.ID);
+	glUseProgram(skyboxShader.ID());
 	moveFactor += 0.001f;
 	glm::mat4 trans = glm::toMat4(glm::quat(glm::vec3(0, moveFactor, 0.0f)));
 	glm::mat4 view	= glm::mat4(glm::mat3(_camera.getWorldToViewMatrix())) * trans;	// Remove any translation component of the view matrix

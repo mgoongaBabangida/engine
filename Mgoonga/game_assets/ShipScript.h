@@ -24,6 +24,8 @@ public:
 			        dbb::CameraRay*,
 			        float			waterHeight);
 	
+	~eShipScript();
+
 	eShipScript(const eShipScript&)				= delete;
 	eShipScript& operator=(const eShipScript&)	= delete;
 
@@ -33,8 +35,8 @@ public:
 	virtual void	Update(std::vector<std::shared_ptr<eObject> > objs) override;
 	virtual std::vector<shObject>			GetChildrenObjects() override;
 
+	//
 	void			SetDestination(glm::vec3 dst) { destination = dst; }
-	
 	void			SetShootAfterMove(bool shoot) { shoot_after_move = shoot;}
 	void			Shoot();
 
@@ -42,7 +44,7 @@ protected:
 	float			  waterHeight;
 	float			  turn_speed;
 	float			  move_speed;
-	glm::vec3		  destination		= NONE;
+	glm::vec3		destination		= NONE;
 	bool			  shoot_after_move  = false;
 
   Texture* flag_tex;

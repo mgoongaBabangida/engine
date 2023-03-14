@@ -30,16 +30,16 @@ public:
 	eOpenGlRenderPipeline(uint32_t width, uint32_t height);
 	~eOpenGlRenderPipeline();
 
-	void			RenderFrame(std::map<RenderType, std::vector<shObject>>, Camera&, const Light&, std::vector<std::shared_ptr<GUI>>&); //gui should be const latter ?, and camera prob
-
-	Texture GetDefaultBufferTexture() const;
+	void			RenderFrame(std::map<RenderType, std::vector<shObject>>, Camera&, const Light&, std::vector<std::shared_ptr<GUI>>&);
+	//gui should be const latter ?, and camera prob
 	
 	void			Initialize();
 	void			InitializeBuffers(bool _needsShadowCubeMap = false);
 	void			InitializeRenders(eModelManager&, eTextureManager&, const std::string& shadersFolderPath);
 
-	eRenderManager& GetRenderManager()				{ return *renderManager.get(); } //to delete
+	eRenderManager& GetRenderManager()				{ return *renderManager.get(); } //@todo delete
 	
+	const std::vector<ShaderInfo>& GetShaderInfos() const;
 	void			SetSkyBoxTexture(Texture* _t);
 	
 	void			AddHex(glm::vec3 _v);
@@ -48,7 +48,6 @@ public:
 	void			SwitchSkyBox(bool on) { skybox = on; }
 	void			SwitchWater(bool on)  { water = on; }
 
-	Texture	  GetSkyNoiseTexture(const Camera& _camera);
 	float			GetWaterHeight() const { return waterHeight; }
 
   bool& GetBoundingBoxBoolRef() { return draw_bounding_boxes; }
@@ -65,6 +64,8 @@ public:
 	bool& GetDebugWhite() { return debug_white; }
 	bool& GetDebugTexCoords() { return debug_texcoords; }
 
+	Texture GetDefaultBufferTexture() const;
+	Texture GetSkyNoiseTexture(const Camera& _camera);
   Texture GetReflectionBufferTexture() const;
   Texture GetRefractionBufferTexture() const;
   Texture GetShadowBufferTexture() const;

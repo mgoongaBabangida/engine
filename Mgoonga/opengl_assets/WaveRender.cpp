@@ -17,32 +17,32 @@ eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model,
 {
 	wave_shader.installShaders(vS.c_str(), fS.c_str());
 
-	modelToWorldMatrixUniformLocation	= glGetUniformLocation(wave_shader.ID, "modelToWorldMatrix");
-	fullTransformationUniformLocation	= glGetUniformLocation(wave_shader.ID, "MVP");
-	modelViewMatrixLocation				= glGetUniformLocation(wave_shader.ID, "ModelViewMatrix");
-	normalMatrixLocation				= glGetUniformLocation(wave_shader.ID, "NormalMatrix");
-	shadowMatrixUniformLocation			= glGetUniformLocation(wave_shader.ID, "shadowMatrix");
-	eyePositionWorldUniformLocation		= glGetUniformLocation(wave_shader.ID, "eyePositionWorld");
+	modelToWorldMatrixUniformLocation	= glGetUniformLocation(wave_shader.ID(), "modelToWorldMatrix");
+	fullTransformationUniformLocation	= glGetUniformLocation(wave_shader.ID(), "MVP");
+	modelViewMatrixLocation				= glGetUniformLocation(wave_shader.ID(), "ModelViewMatrix");
+	normalMatrixLocation				= glGetUniformLocation(wave_shader.ID(), "NormalMatrix");
+	shadowMatrixUniformLocation			= glGetUniformLocation(wave_shader.ID(), "shadowMatrix");
+	eyePositionWorldUniformLocation		= glGetUniformLocation(wave_shader.ID(), "eyePositionWorld");
 	
-	glUseProgram(wave_shader.ID);
+	glUseProgram(wave_shader.ID());
 	//Light
-	lightAmbientLoc		= glGetUniformLocation(wave_shader.ID, "light.ambient");
-	lightDiffuseLoc		= glGetUniformLocation(wave_shader.ID, "light.diffuse");
-	lightSpecularLoc	= glGetUniformLocation(wave_shader.ID, "light.specular");
-	lightPosLoc			= glGetUniformLocation(wave_shader.ID, "light.position");
+	lightAmbientLoc		= glGetUniformLocation(wave_shader.ID(), "light.ambient");
+	lightDiffuseLoc		= glGetUniformLocation(wave_shader.ID(), "light.diffuse");
+	lightSpecularLoc	= glGetUniformLocation(wave_shader.ID(), "light.specular");
+	lightPosLoc			= glGetUniformLocation(wave_shader.ID(), "light.position");
 
 	//Material
-	matAmbientLoc	= glGetUniformLocation(wave_shader.ID, "material.ambient");
-	matDiffuseLoc	= glGetUniformLocation(wave_shader.ID, "material.texture_diffuse1");
-	matSpecularLoc	= glGetUniformLocation(wave_shader.ID, "material.texture_specular1");
-	matShineLoc		= glGetUniformLocation(wave_shader.ID, "material.shininess");
+	matAmbientLoc	= glGetUniformLocation(wave_shader.ID(), "material.ambient");
+	matDiffuseLoc	= glGetUniformLocation(wave_shader.ID(), "material.texture_diffuse1");
+	matSpecularLoc	= glGetUniformLocation(wave_shader.ID(), "material.texture_specular1");
+	matShineLoc		= glGetUniformLocation(wave_shader.ID(), "material.shininess");
 
 	glUniform3f(matAmbientLoc, 1.0f, 1.0f, 1.0f); // 1.0f, 0.5f, 0.31f
 	glUniform3f(matDiffuseLoc, 1.0f, 1.0f, 1.0f); // 1.0f, 0.5f, 0.31f
 	glUniform3f(matSpecularLoc, 1.0f, 1.0f, 1.0f); //0.5f, 0.5f, 0.5f
 	glUniform1f(matShineLoc, 32.0f); //32.0f
 
-	TimeFactorLoc	= glGetUniformLocation(wave_shader.ID, "Time");
+	TimeFactorLoc	= glGetUniformLocation(wave_shader.ID(), "Time");
 	clock.start();
 	
 	model->initialize(tex, tex);
@@ -61,7 +61,7 @@ void eWaveRender::Render(const Camera&		camera,
 						 const Light&		light,
 						 std::vector<shObject>	flags)
 {
-	glUseProgram(wave_shader.ID);
+	glUseProgram(wave_shader.ID());
 
 	glm::mat4 worldToProjectionMatrix	= camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
 	glm::mat4 modelViewMatrix			= camera.getWorldToViewMatrix() * m_object->GetTransform()->getModelMatrix();
@@ -71,9 +71,9 @@ void eWaveRender::Render(const Camera&		camera,
 	glUniform3f(lightSpecularLoc, light.specular.x, light.specular.y, light.specular.z);
 	glUniform4f(lightPosLoc, light.light_position.x, light.light_position.y, light.light_position.z, light.light_position.w);
 
-	glUniform1f(glGetUniformLocation(wave_shader.ID, "light.constant"), 1.0f); // transfer to light
-	glUniform1f(glGetUniformLocation(wave_shader.ID, "light.linear"),	0.09f);
-	glUniform1f(glGetUniformLocation(wave_shader.ID, "light.quadratic"), 0.032f);
+	glUniform1f(glGetUniformLocation(wave_shader.ID(), "light.constant"), 1.0f); // transfer to light
+	glUniform1f(glGetUniformLocation(wave_shader.ID(), "light.linear"),	0.09f);
+	glUniform1f(glGetUniformLocation(wave_shader.ID(), "light.quadratic"), 0.032f);
 	//light end
 
 	glm::vec3 eyePosition = camera.getPosition();
@@ -102,8 +102,8 @@ void eWaveRender::Render(const Camera&		camera,
 	float dur = (float)msc / 1000.0f;
 	time += dur;
 
-	glDisable(GL_CULL_FACE); //todo transfer
-	glUniform1i(glGetUniformLocation(wave_shader.ID, "normalMapping"), GL_FALSE);
+	glDisable(GL_CULL_FACE); //@todo transfer
+	glUniform1i(glGetUniformLocation(wave_shader.ID(), "normalMapping"), GL_FALSE);
 	for(auto& flag : flags)
 	{
 		//move this outside
@@ -127,7 +127,7 @@ void eWaveRender::Render(const Camera&		camera,
 
 		m_object->GetModel()->Draw();
 	}
-	glUniform1i(glGetUniformLocation(wave_shader.ID, "normalMapping"), GL_TRUE);
+	glUniform1i(glGetUniformLocation(wave_shader.ID(), "normalMapping"), GL_TRUE);
 	glEnable(GL_CULL_FACE); //todo transfer
 }
 

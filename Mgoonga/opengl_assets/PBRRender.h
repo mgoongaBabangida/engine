@@ -15,8 +15,10 @@ public:
               const Light& _light,
               std::vector<shObject>& objects);
 
+  Shader& GetShader() { return pbrShader; }
 protected:
   Shader pbrShader;
+
   std::vector<glm::mat4> matrices;
 
   GLuint albedoLoc;

@@ -52,9 +52,11 @@ void eTextureManager::LoadAllTextures()
 	text.loadTextureFromFile(folderPath + "container2.png");
 	m_Textures.insert(std::pair<std::string, Texture>("Tcontainer0_d", text));
 	
-	text.loadTextureFromFile(folderPath + "grass.png");
+	text.type = "terrain"; //@todo
+	text.loadTextureFromFile(folderPath + "grass.png", GL_RGBA, GL_REPEAT);
 	m_Textures.insert(std::pair<std::string, Texture>("Tgrass0_d", text));
 	
+	text.type = "";
 	text.loadTextureFromFile(folderPath + "container2_specular.png");
 	m_Textures.insert(std::pair<std::string, Texture>("Tcontainer0_s", text));
 	

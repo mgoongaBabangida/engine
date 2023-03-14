@@ -15,9 +15,10 @@ public:
 	void Render();
 	void SetTexture(Texture t) { texture = t; }
 
+	Shader& GetShader() { return shader; }
 private:
+	Shader shader;
   Texture texture;
-  Shader shader;
   GLuint quadVAO;
   GLuint quadVBO;
 };

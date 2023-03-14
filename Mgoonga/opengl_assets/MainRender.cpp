@@ -9,43 +9,48 @@ eMainRender::eMainRender(const std::string& vS, const std::string& fS)
 {
 	mainShader.installShaders(vS.c_str(), fS.c_str()); //main pass
 
-	glUseProgram(mainShader.ID);
+	glUseProgram(mainShader.ID());
 	
 	//Light
-	lightAmbientLoc		= glGetUniformLocation(mainShader.ID, "light.ambient");
-	lightDiffuseLoc		= glGetUniformLocation(mainShader.ID, "light.diffuse");
-	lightSpecularLoc	= glGetUniformLocation(mainShader.ID, "light.specular");
-	lightPosLoc			= glGetUniformLocation(mainShader.ID, "light.position");
-	lightDirLoc			= glGetUniformLocation(mainShader.ID, "light.direction");
-	lightTypeLoc		= glGetUniformLocation(mainShader.ID, "shadow_directional");
+	lightAmbientLoc		= glGetUniformLocation(mainShader.ID(), "light.ambient");
+	lightDiffuseLoc		= glGetUniformLocation(mainShader.ID(), "light.diffuse");
+	lightSpecularLoc	= glGetUniformLocation(mainShader.ID(), "light.specular");
+	lightPosLoc			= glGetUniformLocation(mainShader.ID(), "light.position");
+	lightDirLoc			= glGetUniformLocation(mainShader.ID(), "light.direction");
+	lightTypeLoc		= glGetUniformLocation(mainShader.ID(), "shadow_directional");
 
 	//Debug
-	DebugWhiteLoc = glGetUniformLocation(mainShader.ID, "debug_white_color");
-	DebugTexcoordsLoc = glGetUniformLocation(mainShader.ID, "debug_white_texcoords");
+	DebugWhiteLoc = glGetUniformLocation(mainShader.ID(), "debug_white_color");
+	DebugTexcoordsLoc = glGetUniformLocation(mainShader.ID(), "debug_white_texcoords");
 
 	//Material
-	matAmbientLoc		= glGetUniformLocation(mainShader.ID, "material.ambient");
-	matDiffuseLoc		= glGetUniformLocation(mainShader.ID, "material.texture_diffuse1");
-	matSpecularLoc		= glGetUniformLocation(mainShader.ID, "material.texture_specular1");
-	matShineLoc			= glGetUniformLocation(mainShader.ID, "material.shininess");
+	matAmbientLoc		= glGetUniformLocation(mainShader.ID(), "material.ambient");
+	matDiffuseLoc		= glGetUniformLocation(mainShader.ID(), "material.texture_diffuse1");
+	matSpecularLoc		= glGetUniformLocation(mainShader.ID(), "material.texture_specular1");
+	matShineLoc			= glGetUniformLocation(mainShader.ID(), "material.shininess");
 
 	glUniform3f(matAmbientLoc, 0.5f, 0.5f, 0.5f); // 1.0f, 0.5f, 0.31f
 	glUniform3f(matDiffuseLoc, 1.0f, 1.0f, 1.0f); // 1.0f, 0.5f, 0.31f
 	glUniform3f(matSpecularLoc, 1.0f, 1.0f, 1.0f); //0.5f, 0.5f, 0.5f
 	glUniform1f(matShineLoc, 32.0f); //32.0f
 
-	fullTransformationUniformLocation	= glGetUniformLocation(mainShader.ID, "modelToProjectionMatrix");
-	modelToWorldMatrixUniformLocation	= glGetUniformLocation(mainShader.ID, "modelToWorldMatrix");
-	shadowMatrixUniformLocation			= glGetUniformLocation(mainShader.ID, "shadowMatrix"); //shadow
-	eyePositionWorldUniformLocation		= glGetUniformLocation(mainShader.ID, "eyePositionWorld");
-	FarPlaneUniformLocation				= glGetUniformLocation(mainShader.ID, "far_plane");
+	fullTransformationUniformLocation	= glGetUniformLocation(mainShader.ID(), "modelToProjectionMatrix");
+	modelToWorldMatrixUniformLocation	= glGetUniformLocation(mainShader.ID(), "modelToWorldMatrix");
+	shadowMatrixUniformLocation			= glGetUniformLocation(mainShader.ID(), "shadowMatrix"); //shadow
+	eyePositionWorldUniformLocation		= glGetUniformLocation(mainShader.ID(), "eyePositionWorld");
+	FarPlaneUniformLocation				= glGetUniformLocation(mainShader.ID(), "far_plane");
 	
-	LightingIndexPoint		 = glGetSubroutineIndex(mainShader.ID, GL_FRAGMENT_SHADER, "calculatePhongPointSpecDif");
-	LightingIndexDirectional = glGetSubroutineIndex(mainShader.ID, GL_FRAGMENT_SHADER, "calculatePhongDirectionalSpecDif");
+	LightingIndexPoint		 = glGetSubroutineIndex(mainShader.ID(), GL_FRAGMENT_SHADER, "calculatePhongPointSpecDif");
+	LightingIndexDirectional = glGetSubroutineIndex(mainShader.ID(), GL_FRAGMENT_SHADER, "calculatePhongDirectionalSpecDif");
 
-	glUniform1f(glGetUniformLocation(mainShader.ID, "light.constant"), 1.0f); // transfer to light
-	glUniform1f(glGetUniformLocation(mainShader.ID, "light.linear"), 0.09f);
-	glUniform1f(glGetUniformLocation(mainShader.ID, "light.quadratic"), 0.032f);
+	glUniform1f(glGetUniformLocation(mainShader.ID(), "light.constant"), 1.0f); // transfer to light
+	glUniform1f(glGetUniformLocation(mainShader.ID(), "light.linear"), 0.09f);
+	glUniform1f(glGetUniformLocation(mainShader.ID(), "light.quadratic"), 0.032f);
+}
+
+//---------------------------------------------------------------------------------
+eMainRender::~eMainRender()
+{
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -55,7 +60,7 @@ void eMainRender::Render(const Camera&			    camera,
                          bool                   debug_white,
                          bool                   debug_text_coords)
 {
-	glUseProgram(mainShader.ID);
+	glUseProgram(mainShader.ID());
 
 	glUniform1i(DebugWhiteLoc, debug_white);
 	glUniform1i(DebugTexcoordsLoc, debug_text_coords);
@@ -106,7 +111,7 @@ void eMainRender::Render(const Camera&			    camera,
 				m = UNIT_MATRIX;
 		}
 
-		int loc = glGetUniformLocation(mainShader.ID, "gBones");
+		int loc = glGetUniformLocation(mainShader.ID(), "gBones");
 		glUniformMatrix4fv(loc, 100, GL_FALSE, &matrices[0][0][0]);
 
 		object->GetModel()->Draw();
@@ -116,15 +121,15 @@ void eMainRender::Render(const Camera&			    camera,
 //---------------------------------------------------------------------------
 void eMainRender::SetClipPlane(float Height)
 {
-	glUseProgram(mainShader.ID);
-	GLuint clipPlaneLoc = glGetUniformLocation(mainShader.ID, "clip_plane");
+	glUseProgram(mainShader.ID());
+	GLuint clipPlaneLoc = glGetUniformLocation(mainShader.ID(), "clip_plane");
 	glUniform4f(clipPlaneLoc, 0, 1, 0, Height);
 }
 
 //---------------------------------------------------------------------------
 void eMainRender::SetShadowMatrix(glm::mat4 shadow_matrix)
 {
-	glUseProgram(mainShader.ID);
+	glUseProgram(mainShader.ID());
 	glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE,
 		&shadow_matrix[0][0]);  //shadow
 }

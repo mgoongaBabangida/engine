@@ -79,15 +79,15 @@ eTextRender::eTextRender(const std::string& vS, const std::string& fS)
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
-  textColorLoc = glGetUniformLocation(textShader.ID, "textColor");
-  projectionMatrixLoc = glGetUniformLocation(textShader.ID, "projection");
+  textColorLoc = glGetUniformLocation(textShader.ID(), "textColor");
+  projectionMatrixLoc = glGetUniformLocation(textShader.ID(), "projection");
 }
 
 //-------------------------------------------------------
 void eTextRender::RenderText(std::string text, float x, float y, float scale, glm::vec3 color, float scr_width, float scr_height)
 {
   // activate corresponding render state	
-  glUseProgram(textShader.ID);
+  glUseProgram(textShader.ID());
   glUniform3f(textColorLoc, color.x, color.y, color.z);
   glm::mat4 projection = glm::ortho(0.0f, scr_width, 0.0f, scr_height);
   glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, glm::value_ptr(projection));

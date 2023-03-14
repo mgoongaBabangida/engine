@@ -13,6 +13,7 @@ public:
 
 	void Render(glm::mat4 mvp);
 
+	Shader& GetShader() { return hex_shader; }
 private:
 	Shader hex_shader;
 

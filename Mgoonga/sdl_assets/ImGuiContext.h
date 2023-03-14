@@ -42,6 +42,7 @@ enum TypeImGui
   TEXTURE_ARRAY,
   BUTTON,
 	OBJECT_REF,
+	SHADER
 };
 
 //--------------------------------------------------

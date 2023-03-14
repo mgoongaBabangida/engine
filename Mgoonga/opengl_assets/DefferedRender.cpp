@@ -10,13 +10,13 @@ eDefferedRender::eDefferedRender(const std::string & vS, const std::string & fS,
 	//$todo screenMesh
 	gShader.installShaders(vS.c_str(), fS.c_str());
 
-	fullTransformationUniformLocation = glGetUniformLocation(gShader.ID, "modelToProjectionMatrix");
-	modelToWorldMatrixUniformLocation = glGetUniformLocation(gShader.ID, "modelToWorldMatrix");
-	eyePositionWorldUniformLocation	  = glGetUniformLocation(gShader.ID, "eyePositionWorld");
+	fullTransformationUniformLocation = glGetUniformLocation(gShader.ID(), "modelToProjectionMatrix");
+	modelToWorldMatrixUniformLocation = glGetUniformLocation(gShader.ID(), "modelToWorldMatrix");
+	eyePositionWorldUniformLocation	  = glGetUniformLocation(gShader.ID(), "eyePositionWorld");
 
 	screenShader.installShaders(vSS.c_str(), fSS.c_str());
 
-	viewPosUniformLocation = glGetUniformLocation(screenShader.ID, "viewPos");
+	viewPosUniformLocation = glGetUniformLocation(screenShader.ID(), "viewPos");
 	
 	// lighting info
 	// -------------
@@ -39,7 +39,7 @@ eDefferedRender::eDefferedRender(const std::string & vS, const std::string & fS,
 
 void eDefferedRender::Render(const Camera& camera, std::vector<shObject>& objects)
 {
-	glUseProgram(gShader.ID);
+	glUseProgram(gShader.ID());
 
 	glm::mat4 worldToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
 	glm::vec3 eyePosition = camera.getPosition();
@@ -58,7 +58,7 @@ void eDefferedRender::Render(const Camera& camera, std::vector<shObject>& object
 		if (object->GetRigger() != nullptr)
 			matrices = object->GetRigger()->GetMatrices();
 
-		int loc = glGetUniformLocation(gShader.ID, "gBones");
+		int loc = glGetUniformLocation(gShader.ID(), "gBones");
 		glUniformMatrix4fv(loc, 100, GL_FALSE, &matrices[0][0][0]);
 
 		object->GetModel()->Draw();
@@ -67,7 +67,7 @@ void eDefferedRender::Render(const Camera& camera, std::vector<shObject>& object
 
 void eDefferedRender::RenderScreen(const Camera& camera)
 {
-	glUseProgram(screenShader.ID);
+	glUseProgram(screenShader.ID());
 
 	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_DEFFERED, GL_TEXTURE1);
 	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_DEFFERED1, GL_TEXTURE2);
@@ -76,18 +76,18 @@ void eDefferedRender::RenderScreen(const Camera& camera)
 	// send light relevant uniforms
 	for (unsigned int i = 0; i < lightPositions.size(); ++i)
 	{
-		glUniform3f(glGetUniformLocation(screenShader.ID, (const GLchar*)std::string("lights[" + std::to_string(i) + "].Position").c_str()), 1, GL_FALSE, lightPositions[i][0]);
-		glUniform3f(glGetUniformLocation(screenShader.ID, (const GLchar*)std::string("lights[" + std::to_string(i) + "].Color").c_str()), 1, GL_FALSE, lightColors[i][0]);
+		glUniform3f(glGetUniformLocation(screenShader.ID(), (const GLchar*)std::string("lights[" + std::to_string(i) + "].Position").c_str()), 1, GL_FALSE, lightPositions[i][0]);
+		glUniform3f(glGetUniformLocation(screenShader.ID(), (const GLchar*)std::string("lights[" + std::to_string(i) + "].Color").c_str()), 1, GL_FALSE, lightColors[i][0]);
 		// update attenuation parameters and calculate radius
 		const float constant = 1.0; // note that we don't send this to the shader, we assume it is always 1.0 (in our case)
 		const float linear = 0.7;
 		const float quadratic = 1.8;
-		glUniform1f(glGetUniformLocation(screenShader.ID, (const GLchar*)std::string("lights[" + std::to_string(i) + "].Linear").c_str()), linear);
-		glUniform1f(glGetUniformLocation(screenShader.ID, (const GLchar*)std::string("lights[" + std::to_string(i) + "].Quadratic").c_str()), quadratic);
+		glUniform1f(glGetUniformLocation(screenShader.ID(), (const GLchar*)std::string("lights[" + std::to_string(i) + "].Linear").c_str()), linear);
+		glUniform1f(glGetUniformLocation(screenShader.ID(), (const GLchar*)std::string("lights[" + std::to_string(i) + "].Quadratic").c_str()), quadratic);
 		// then calculate radius of light volume/sphere
 		const float maxBrightness = std::fmaxf(std::fmaxf(lightColors[i].r, lightColors[i].g), lightColors[i].b);
 		float radius = (-linear + std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0f / 5.0f) * maxBrightness))) / (2.0f * quadratic);
-		glUniform1f(glGetUniformLocation(screenShader.ID, (const GLchar*)std::string("lights[" + std::to_string(i) + "].Radius").c_str()), radius);
+		glUniform1f(glGetUniformLocation(screenShader.ID(), (const GLchar*)std::string("lights[" + std::to_string(i) + "].Radius").c_str()), radius);
 	}
 	glUniform3fv(viewPosUniformLocation, 1, &camera.getPosition()[0]);
 	// finally render quad

@@ -25,6 +25,8 @@ public:
 	void	Render(const Camera &camera);
 	void	AddParticleSystem(IParticleSystem* sys);
 
+	Shader& GetShader() { return particleShader; }
+
 protected:
   void	LoadOffsetsInfo(glm::vec2	offset1, glm::vec2	offset2, float numRows, float blend);
 

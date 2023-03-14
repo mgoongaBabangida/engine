@@ -57,6 +57,10 @@ void eMgoongaGameContext::InitializeExternalGui()
                                                   soundManager->GetSound("shot_sound"),
                                                   texManager->Find("Tatlas2")->numberofRows));
   };
+  std::function<void()> update_uniforms_callback = [this]()
+  {
+    pipeline.GetRenderManager().UpdateShadersInfo();
+  };
   externalGui[1]->Add(BUTTON, "Emit particle system", (void*)&emit_partilces_callback);
   externalGui[1]->Add(CHECKBOX, "Debug white", &pipeline.GetDebugWhite());
   externalGui[1]->Add(CHECKBOX, "Debug Tex Coords", &pipeline.GetDebugTexCoords());
@@ -74,9 +78,36 @@ void eMgoongaGameContext::InitializeExternalGui()
 
   //Objects
   externalGui[2]->Add(OBJECT_REF, "Object", (void*)&m_focused);
+  
+  //Shaders
+  externalGui[3]->Add(BUTTON, "Update shaders", (void*)&update_uniforms_callback);
+  externalGui[3]->Add(SHADER, "Shaders", (void*)&pipeline.GetShaderInfos());
 
   m_focused = m_objects[0];
   OnFocusedChanged(); // make event handler
+}
+
+//--------------------------------------------------------------------------
+bool eMgoongaGameContext::OnKeyPress(uint32_t asci)
+{
+  switch (asci)
+  {
+  case ASCII_J: { if (m_focused)	m_focused->GetRigidBody()->MoveLeft(m_objects); }				return true;
+  case ASCII_L: { if (m_focused)	m_focused->GetRigidBody()->MoveRight(m_objects); }				return true;
+  case ASCII_K: { if (m_focused)	m_focused->GetRigidBody()->MoveBack(m_objects); }				return true;
+  case ASCII_I: { if (m_focused)	m_focused->GetRigidBody()->MoveForward(m_objects); }				return true;
+  case ASCII_Z: { if (m_focused)	m_focused->GetRigidBody()->MoveUp(m_objects); }					return true;
+  case ASCII_X: { if (m_focused)	m_focused->GetRigidBody()->MoveDown(m_objects); }				return true;
+  case ASCII_C: { if (m_focused)	m_focused->GetRigidBody()->TurnRight(m_objects); }				return true;
+  case ASCII_V: { if (m_focused)	m_focused->GetRigidBody()->TurnLeft(m_objects); }				return true;
+  case ASCII_B: { if (m_focused)	m_focused->GetRigidBody()->LeanRight(m_objects); }				return true;
+  case ASCII_N: { if (m_focused)	m_focused->GetRigidBody()->LeanLeft(m_objects); }				return true;
+  case ASCII_U: { if (m_focused)	m_focused->GetRigidBody()->LeanForward(m_objects); }				return true;
+  case ASCII_H: { if (m_focused)	m_focused->GetRigidBody()->LeanBack(m_objects); }				return true;
+  case 27: {} return false; //ESC @todo
+  //case ASCII_G:	{ if (m_focused)	m_focused->GetScript()->OnKeyPress(ASCII_G);}	return true;
+  default: return false;
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -102,29 +133,6 @@ bool eMgoongaGameContext::OnMouseMove(uint32_t x, uint32_t y)
     }
   }
 	return false;
-}
-
-//--------------------------------------------------------------------------
-bool eMgoongaGameContext::OnKeyPress(uint32_t asci)
-{
-	switch (asci)
-	{
-	case ASCII_J:	{ if (m_focused)	m_focused->GetRigidBody()->MoveLeft(m_objects);}				return true;
-	case ASCII_L:	{ if (m_focused)	m_focused->GetRigidBody()->MoveRight(m_objects);}				return true;
-	case ASCII_K:	{ if (m_focused)	m_focused->GetRigidBody()->MoveBack(m_objects);}				return true;
-	case ASCII_I:	{ if (m_focused)	m_focused->GetRigidBody()->MoveForward(m_objects);}				return true;
-	case ASCII_Z:	{ if (m_focused)	m_focused->GetRigidBody()->MoveUp(m_objects);}					return true;
-	case ASCII_X:	{ if (m_focused)	m_focused->GetRigidBody()->MoveDown(m_objects);}				return true;
-	case ASCII_C:	{ if (m_focused)	m_focused->GetRigidBody()->TurnRight(m_objects);}				return true;
-	case ASCII_V:	{ if (m_focused)	m_focused->GetRigidBody()->TurnLeft(m_objects);}				return true;
-	case ASCII_B:	{ if (m_focused)	m_focused->GetRigidBody()->LeanRight(m_objects);}				return true;
-	case ASCII_N:	{ if (m_focused)	m_focused->GetRigidBody()->LeanLeft(m_objects);}				return true;
-	case ASCII_U:	{ if (m_focused)	m_focused->GetRigidBody()->LeanForward(m_objects);}				return true;
-	case ASCII_H:	{ if (m_focused)	m_focused->GetRigidBody()->LeanBack(m_objects);}				return true;
-	case 27: {} return false; //ESC @todo
-	//case ASCII_G:	{ if (m_focused)	m_focused->GetScript()->OnKeyPress(ASCII_G);}	return true;
-	default: return false;
-	}
 }
 
 //--------------------------------------------------------------------------
@@ -223,6 +231,7 @@ void eMgoongaGameContext::InitializeGL()
   inputController->AddObserver(externalGui[0], MONOPOLY);
   inputController->AddObserver(externalGui[1], MONOPOLY);
   inputController->AddObserver(externalGui[2], MONOPOLY);
+  inputController->AddObserver(externalGui[3], MONOPOLY);
 }
 
 //-------------------------------------------------------------------------------
@@ -241,7 +250,7 @@ void eMgoongaGameContext::InitializePipline()
 //-----------------------------------------------------------------------------
 void eMgoongaGameContext::InitializeBuffers()
 {
-	pipeline.InitializeBuffers(GetMainLight().type == eLightType::POINT);
+	pipeline.InitializeBuffers(true);
 }
 
 //-----------------------------------------------------------------------------
@@ -257,18 +266,18 @@ void eMgoongaGameContext::InitializeModels()
   modelManager->Add("zombie", (GLchar*)std::string(modelFolderPath + "Thriller Part 3/Thriller Part 3.dae").c_str());
 
   std::vector<const Texture*> textures{ texManager->Find("pbr1_basecolor"),
-                                      texManager->Find("pbr1_normal"),
-                                      texManager->Find("pbr1_metallic"),
-                                      texManager->Find("pbr1_roughness") };
-  modelManager->Add("sphere_textured", std::vector<const Texture*>{}); // or textures
+                                        texManager->Find("pbr1_normal"),
+                                        texManager->Find("pbr1_metallic"),
+                                        texManager->Find("pbr1_roughness") };
+  modelManager->Add("sphere_textured", textures /*std::vector<const Texture*>{}*/); // or textures
 
 	//TERRAIN
 	std::unique_ptr<TerrainModel> terrainModel = modelManager->CloneTerrain("simple");
   terrainModel->initialize(texManager->Find("Tgrass0_d"),
-							   texManager->Find("Tgrass0_d"),
-							   texManager->Find("Tblue"),
-							   texManager->Find("TOcean0_s"),
-                 true);
+							             texManager->Find("Tgrass0_d"),
+							             texManager->Find("Tblue"),
+							             texManager->Find("TOcean0_s"),
+                           false);
 	//OBJECTS
   ObjectFactoryBase factory;
   shObject wallCube = factory.CreateObject(modelManager->Find("wall_cube"));

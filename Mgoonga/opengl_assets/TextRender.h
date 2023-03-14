@@ -23,6 +23,7 @@ public:
 
   void RenderText(std::string text, float x, float y, float scale, glm::vec3 color, float scr_width, float scr_height);
 
+  Shader& GetShader() { return textShader; }
 protected:
   Shader							      textShader;
   unsigned int              VAO;

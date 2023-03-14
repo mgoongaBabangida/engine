@@ -24,6 +24,8 @@ public:
 
 	void						Render(const Camera&	camera, 
 									   const Light&		light);
+	
+	Shader& GetShader() { return waterShader; }
 
 protected:
 	Shader										waterShader;
