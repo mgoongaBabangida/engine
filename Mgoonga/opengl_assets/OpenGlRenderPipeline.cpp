@@ -8,6 +8,7 @@
 #include "RenderManager.h"
 #include "TextureManager.h"
 #include "ModelManager.h"
+#include "RenderManager.h"
 
 #include "WaterRender.h"
 #include "SkyBoxRender.h"
@@ -25,13 +26,25 @@
 #include "TextRender.h"
 #include "PBRRender.h"
 
-#include "ShpereTexturedModel.h" //temp
+#include "ShpereTexturedModel.h" //@todo temp
+
 #include <algorithm>
 
-void	eOpenGlRenderPipeline::SetSkyBoxTexture(Texture* _t)  { renderManager->SkyBoxRender()->SetSkyBoxTexture(_t); }
-void	eOpenGlRenderPipeline::AddHex(glm::vec3 _v) { renderManager->AddHex(_v); }
-void	eOpenGlRenderPipeline::SetHexRadius(float _r) { renderManager->SetHexRadius(_r); }
-const std::vector<ShaderInfo>& eOpenGlRenderPipeline::GetShaderInfos() const { return renderManager->GetShaderInfos(); }
+void	eOpenGlRenderPipeline::SetSkyBoxTexture(Texture* _t)
+{ renderManager->SkyBoxRender()->SetSkyBoxTexture(_t); }
+
+void eOpenGlRenderPipeline::AddParticleSystem(IParticleSystem* system)
+{
+	renderManager->AddParticleSystem(system);
+}
+
+const std::vector<ShaderInfo>& eOpenGlRenderPipeline::GetShaderInfos() const
+{ return renderManager->GetShaderInfos(); }
+
+void eOpenGlRenderPipeline::UpdateShadersInfo()
+{
+	renderManager->UpdateShadersInfo();
+}
 
 //-------------------------------------------------------------------------------------------
 eOpenGlRenderPipeline::eOpenGlRenderPipeline(uint32_t				_width, uint32_t				_height)
@@ -102,15 +115,16 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
     { return glm::length2(_camera.getPosition() - obj1->GetTransform()->getTranslation())
     > glm::length2(_camera.getPosition() - obj2->GetTransform()->getTranslation()); });*/
 	  
-	std::vector<shObject> objects = _objects.find(RenderType::MAIN)->second;
+	std::vector<shObject> main_objs = _objects.find(RenderType::MAIN)->second;
 	std::vector<shObject> focused = _objects.find(RenderType::OUTLINED)->second;
 	std::vector<shObject> pbr_objs = _objects.find(RenderType::PBR)->second;
 	std::vector<shObject> flags = _objects.find(RenderType::FLAG)->second;
+	std::vector<shObject> geometry_obj = _objects.find(RenderType::GEOMETRY)->second;
 
 	//Shadow Render Pass
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SHADOW);
 
-	auto shadow_objects = objects;
+	auto shadow_objects = main_objs;
 	shadow_objects.insert(shadow_objects.end(), pbr_objs.begin(), pbr_objs.end());
 	if (shadows) { RenderShadows(_camera, _light, shadow_objects); }
 
@@ -133,10 +147,10 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 
 	if (water)
 	{
-		RenderReflection(_camera, _light, objects);
+		RenderReflection(_camera, _light, main_objs);
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_REFRACTION);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		RenderRefraction(_camera, _light, objects);
+		RenderRefraction(_camera, _light, main_objs);
 	}
   glDisable(GL_CLIP_DISTANCE0);
 
@@ -149,22 +163,28 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 	//4. Rendering to main FBO with stencil
 	if (focuse)
 	{
-	  for (auto obj : focused)
+	  for (const auto& obj : focused)
 	  {
-	    RenderFocused(_camera, _light, { obj });
+			StencilFuncDefault();
+			if(std::find(main_objs.begin(), main_objs.end(), obj)!= main_objs.end())
+				RenderMain(_camera, _light, { obj });
+			else
+				RenderPBR(_camera, _light, { obj });
+
 	    RenderOutlineFocused(_camera, _light, { obj });
 	  }
 	}
 
 	std::vector<shObject> not_outlined;
-	std::set_difference(objects.begin(), objects.end(),
+	std::set_difference(main_objs.begin(), main_objs.end(),
 		                  focused.begin(), focused.end(),
 		                  std::back_inserter(not_outlined),
 		                  [](auto& a, auto& b) { return &a < &b; });
 
+	glDisable(GL_STENCIL_TEST);
 	RenderMain(_camera, _light, not_outlined);
-
 	RenderPBR(_camera, _light, pbr_objs);
+	glEnable(GL_STENCIL_TEST);
 
 	if (flags_on) { RenderFlags(_camera, _light, flags); }
 
@@ -175,7 +195,14 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 	if (water) { RenderWater(_camera, _light); }
 
 	// Hexes
-	if (geometry) { RenderGeometry(_camera); }	//$need to transfer dots every frame
+	if (geometry)
+	{
+		if (!geometry_obj.empty())
+		{
+			auto* mesh = dynamic_cast<const SimpleGeometryMesh*>(geometry_obj[0]->GetModel()->GetMeshes()[0]);
+			RenderGeometry(_camera, *mesh);
+		}
+	}
 
 	//  Draw skybox firs
 	if (skybox)
@@ -202,7 +229,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 	
 	if (draw_bounding_boxes)
 	{
-		for (auto object : objects)
+		for (auto object : main_objs)
 		{
 			std::vector<glm::vec3> extrems = object->GetCollider()->GetExtrems(*object->GetTransform());
 			std::vector<GLuint> indices{ 0,1,1,2,2,3,3,0,4,5,5,6,6,7,7,4,0,4,1,5,2,6,3,7 };
@@ -368,21 +395,9 @@ void eOpenGlRenderPipeline::StencilFuncDefault()
 	glStencilMask(0xFF);
 }
 
-void eOpenGlRenderPipeline::RenderFocused(const Camera& _camera, const Light& _light, const std::vector<shObject>& focused)
-{
-	//4. Rendering to main FBO with stencil
-	StencilFuncDefault();
-	if(!focused.empty())
-	{
-		renderManager->MainRender()->Render(_camera, _light, focused, false, false);
-	}
-}
-
 void eOpenGlRenderPipeline::RenderMain(const Camera& _camera, const Light& _light, const std::vector<shObject>& _objects)
 {
-	glDisable(GL_STENCIL_TEST);
 	renderManager->MainRender()->Render(_camera, _light, _objects, debug_white, debug_texcoords);
-	glEnable(GL_STENCIL_TEST);
 }
 
 void eOpenGlRenderPipeline::RenderOutlineFocused(const Camera& _camera, const Light& _light, const std::vector<shObject>& focused)
@@ -410,10 +425,10 @@ void eOpenGlRenderPipeline::RenderWater(const Camera& _camera, const Light& _lig
 	glEnable(GL_CULL_FACE);
 }
 
-void eOpenGlRenderPipeline::RenderGeometry(const Camera& _camera)
+void eOpenGlRenderPipeline::RenderGeometry(const Camera& _camera, const SimpleGeometryMesh& _mesh)
 {
 	glm::mat4 MVP = _camera.getProjectionMatrix() * _camera.getWorldToViewMatrix();
-	renderManager->HexRender()->Render(MVP);
+	renderManager->HexRender()->Render(MVP, const_cast<SimpleGeometryMesh&>(_mesh));//@ Draw is not const func unfortunately
 }
 
 void eOpenGlRenderPipeline::RenderParticles(const Camera& _camera)
@@ -482,10 +497,6 @@ void eOpenGlRenderPipeline::RenderPBR(const Camera& _camera, const Light& _light
 {
 	if (!_objs.empty())
 	{
-		//for debuginig
-		if (auto* mesh = _objs[0]->GetModel()->GetMeshes()[0]; mesh && mesh->HasMaterial())
-			const_cast<SphereTexturedMesh*>(dynamic_cast<const SphereTexturedMesh*>(mesh))->SetMaterial(material);
-
-		GetRenderManager().PBRRender()->Render(_camera, _light, _objs);
+		renderManager->PBRRender()->Render(_camera, _light, _objs);
 	}
 }

@@ -51,7 +51,8 @@ protected:
 	std::vector<shObject>				        m_objects;
 	std::unique_ptr<TerrainModel>		    terrainModel;
 	std::shared_ptr<eTerrain>			      terrain;
-	
+	shObject														hex_model;
+
 	std::unique_ptr<Camera>				  camera;
 	std::unique_ptr<dbb::CameraRay>	camRay;
 	std::unique_ptr<eOpenGlRenderPipeline>			pipeline;

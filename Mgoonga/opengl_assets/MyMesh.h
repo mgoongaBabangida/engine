@@ -72,3 +72,28 @@ protected:
 	/*  Functions    */
 	virtual void		setupMesh();
 };
+
+//------------------------------------------------------
+class DLL_OPENGL_ASSETS SimpleGeometryMesh : public IMesh
+{
+public:
+	SimpleGeometryMesh(const std::vector<glm::vec3>&, float);
+
+	~SimpleGeometryMesh();
+
+	float GetRadius() const { return m_radius; }
+	virtual void Draw();
+	virtual size_t GetVertexCount() const { return m_dots.size(); }
+	virtual std::vector<const Texture*> GetTextures() const { return {}; }
+	virtual bool HasMaterial() const { return false; }
+	virtual void SetMaterial(const Material&) {}
+	virtual std::optional<Material> GetMaterial() const { return std::nullopt; }
+	virtual const std::string& Name() const { return m_name; }
+protected:
+	std::string m_name = "SimpleGeometryMesh";
+	std::vector<glm::vec3> m_dots;
+	float m_radius; //@todo?
+
+	GLuint hexVAO;
+	GLuint hexVBO;
+};

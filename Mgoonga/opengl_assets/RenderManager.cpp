@@ -20,9 +20,11 @@ eLinesRender*		 eRenderManager::LinesRender() { return m_linesRender.get(); }
 eTextRender* eRenderManager::TextRender() { return m_textRender.get(); }
 ePBRRender* eRenderManager::PBRRender(){ return m_pbrRender.get(); }
 
-void				eRenderManager::AddHex(glm::vec3 _v) { dots.push_back(_v); }
-void				eRenderManager::SetHexRadius(float _r) { radius = _r; }
-void				eRenderManager::AddParticleSystem(IParticleSystem* system) { m_particleRender->AddParticleSystem(system); }
+//----------------------------------------------------------------------------------------------------------------
+void eRenderManager::AddParticleSystem(IParticleSystem* system) 
+{
+	m_particleRender->AddParticleSystem(system);
+}
 
 //---------------------------------------------------------------------------------------------------------------
 void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& texManager, const std::string& _folderPath)
@@ -83,9 +85,7 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 
 	m_hexrender.reset(new eHexRender(folderPath + "VertexShades.glsl", 
 																	 folderPath + "StencilFragmentShader.glsl", 
-																	 folderPath + "HexGeometry.glsl", 
-																	 dots, 
-																	 radius));
+																	 folderPath + "HexGeometry.glsl"));
 	shader_lambda(m_hexrender.get());
 
 	m_gaussianRender.reset(new eGaussianBlurRender(1200, 600, //@todo

@@ -1,8 +1,9 @@
 #pragma once
 
-#include <math/ShootingParticleSystem.h>
+#include <math/ShootingParticleSystem.h> //@todo separate particle system base
 
 #include "opengl_assets.h"
+
 #include "ModelManager.h"
 #include "TextureManager.h"
 
@@ -23,7 +24,7 @@
 #include "PBRRender.h"
 
 //----------------------------------------------------------------------------------------------
-class DLL_OPENGL_ASSETS eRenderManager
+class eRenderManager
 {
 public:
 	friend class eOpenGlRenderPipeline;
@@ -33,10 +34,6 @@ public:
 
 	const std::vector<ShaderInfo>& GetShaderInfos() const { return shaders;}
 	void UpdateShadersInfo();
-
-	//@todo transfer public functions from here and stop exporting this class
-	void				AddHex(glm::vec3 _v);
-	void				SetHexRadius(float _r);
 
 	void				Initialize(eModelManager&	modelManager,
 								         eTextureManager&  texManager,
@@ -81,8 +78,5 @@ private:
 
 	std::string							folderPath;
 	std::vector<ShaderInfo>	shaders;
-	//should not be here
-	std::vector<glm::vec3>	 dots; //extra copy $change design
-	float								     radius;
 };
 

@@ -16,33 +16,6 @@ MyModel::MyModel()
 {
 }
 
-MyModel::MyModel(std::shared_ptr<MyMesh> m, Texture* t) 
-  : mesh(m)
-  , m_diffuse(t)
-  , m_specular(t)
-  , m_bump(t)
-  , m_fourth(t)
-{
-}
-
-//$todo make one constructor and not use textures in model AT ALL, only in meshes
-MyModel::MyModel(std::shared_ptr<MyMesh> m, Texture* t, Texture* t2)
-  : mesh(m)
-  , m_diffuse(t)
-  , m_specular(t2)
-  , m_bump(t)
-  , m_fourth(t)
-{
-}
-
-MyModel::MyModel(std::shared_ptr<MyMesh> m, Texture* t, Texture* t2, Texture* t3)
-  : mesh(m)
-  , m_diffuse(t)
-  , m_specular(t2)
-  , m_bump(t3)
-  , m_fourth(t)
-{
-}
 MyModel::MyModel(std::shared_ptr<MyMesh> m, Texture* t, Texture* t2, Texture* t3, Texture* t4)
   : mesh(m)
   , m_diffuse(t)
@@ -50,6 +23,12 @@ MyModel::MyModel(std::shared_ptr<MyMesh> m, Texture* t, Texture* t2, Texture* t3
   , m_bump(t3)
   , m_fourth(t4)
 {
+  if (m_specular == nullptr)
+    m_specular = m_diffuse;
+  if (m_bump == nullptr)
+    m_bump = m_diffuse;
+  if (m_fourth == nullptr)
+    m_fourth = m_diffuse;
 }
 
 MyModel::MyModel(const MyModel& _other) //shallow copy
@@ -102,19 +81,16 @@ void MyModel::Draw()
 {
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_diffuse->id);
-	//glUniform1i(glGetUniformLocation(Program, "texture_diffuse1"), 2);
+	//glUniform1i(glGetUniformLocation(Program, "texture_diffuse1"), 2); other way to do it, may be useful
 
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, m_specular->id);
-	//glUniform1i(glGetUniformLocation(Program, "texture_specular1"), 3);
 
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, m_bump->id);
-	//glUniform1i(glGetUniformLocation(Program, "texture_normal1"), 4);
 
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, m_fourth->id);
-	//glUniform1i(glGetUniformLocation(Program, "texture_fourth1"), 5);
 
 	mesh->Draw();
 }

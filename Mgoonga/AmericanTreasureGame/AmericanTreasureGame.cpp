@@ -7,14 +7,16 @@
 #include <math/Camera.h>
 #include <math/CameraRay.h>
 
-#include <opengl_assets\OpenGlRenderPipeline.h>
-#include <opengl_assets\GUI.h>
-#include <opengl_assets\Sound.h>
+#include <opengl_assets/OpenGlRenderPipeline.h>
+#include <opengl_assets/GUI.h>
+#include <opengl_assets/Sound.h>
 #include <opengl_assets/TextureManager.h>
 #include <opengl_assets/ModelManager.h>
 #include <opengl_assets/SoundManager.h>
 
 #include <sdl_assets/ImGuiContext.h>
+
+#include <game_assets/ObjectFactory.h>
 
 #include "Hex.h"
 #include "ATGameClasses.h"
@@ -333,7 +335,7 @@ void eAmericanTreasureGame::InitializeModels()
 	//1
 	//need to load listeners for sounds somewhere, sounds should be copied
 	auto* shipScript = new eShipScript(texManager->Find("TSpanishFlag0_s"),
-										pipeline->GetRenderManager(),
+										*pipeline,
 		                *camera.get(),
 										texManager->Find("Tatlas2"),
 										soundManager->GetSound("shot_sound"),
@@ -349,7 +351,7 @@ void eAmericanTreasureGame::InitializeModels()
 	//2
 	//need to load listners for sounds somewhere, sounds should be copied
 	auto* shipScript2 = new eShipScript(texManager->Find("TPirate_flag0_s"),
-		pipeline->GetRenderManager(),
+		*pipeline,
 		*camera.get(),
 		texManager->Find("Tatlas2"),
 		soundManager->GetSound("shot_sound"),
@@ -365,7 +367,7 @@ void eAmericanTreasureGame::InitializeModels()
 	//3
 	//need to load listeners for sounds somewhere, sounds should be copied
 	auto* shipScript3 = new eShipScript(texManager->Find("TSpanishFlag0_s"),
-		pipeline->GetRenderManager(),
+		*pipeline,
 		*camera.get(),
 		texManager->Find("Tatlas2"),
 		soundManager->GetSound("shot_sound"),
@@ -381,7 +383,7 @@ void eAmericanTreasureGame::InitializeModels()
 	//4
 	//need to load listners for sounds somewhere, sounds should be copied
 	auto* shipScript4 = new eShipScript(texManager->Find("TPirate_flag0_s"),
-		pipeline->GetRenderManager(),
+		*pipeline,
 		*camera.get(),
 		texManager->Find("Tatlas2"),
 		soundManager->GetSound("shot_sound"),
@@ -426,14 +428,16 @@ void eAmericanTreasureGame::_InitializeHexes()
 			hexes.push_back(glm::vec2(glm::cos(glm::radians(0.0f)) * radius * i,					z_move * 2 * j));
 			hexes.push_back(glm::vec2(glm::cos(glm::radians(60.0f)) * radius * i * 2 + radius / 2,  z_move + z_move * 2 * j));
 		}
-
+	std::vector<glm::vec3> dots;
 	for (auto& hex : hexes)
 	{
 		hex.SetNeighbour(hexes);
-		pipeline->AddHex({ hex.x(), common_height,  hex.z() });
+		dots.emplace_back(glm::vec3{ hex.x(), common_height,  hex.z() });
 		//hex.Debug();
 	}
-	pipeline->SetHexRadius(radius);
+	auto* mesh = new SimpleGeometryMesh(dots, radius);//move
+	ObjectFactoryBase factory;
+	hex_model = factory.CreateObject(std::make_shared<SimpleModel>(mesh));
 }
 
 //-------------------------------------------------------------------------------------------
@@ -445,6 +449,7 @@ void eAmericanTreasureGame::PaintGL()
 	light.light_position = vec4(sin(angle) * 4.0f, cos(angle) * 4.0f, 0.0f, 1.0f);
 	
 	turn_context->Update();
+
 	guis[0]->SetTexture(*turn_context->GetDiceTexture(), { 0,0 },
 		{ turn_context->GetDiceTexture()->mTextureWidth, turn_context->GetDiceTexture()->mTextureHeight });
 
@@ -463,6 +468,7 @@ void eAmericanTreasureGame::PaintGL()
 	
 	std::map<eOpenGlRenderPipeline::RenderType, std::vector<shObject>> objects;
 	objects.insert({ eOpenGlRenderPipeline::RenderType::MAIN, m_objects });
+	objects.insert({ eOpenGlRenderPipeline::RenderType::GEOMETRY, {hex_model} });
 	if(focused)
 		objects.insert({ eOpenGlRenderPipeline::RenderType::OUTLINED, std::vector<shObject>{ focused } });
 	else

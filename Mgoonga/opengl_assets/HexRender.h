@@ -4,23 +4,21 @@
 #include <glm\glm\gtx\transform.hpp>
 #include "Shader.h"
 
+class SimpleGeometryMesh;
+
 //----------------------------------------------------
 class eHexRender
 {
 public:
-	eHexRender(const std::string& vS, const std::string& fS, const std::string&	gS, std::vector<glm::vec3>, float);
+	eHexRender(const std::string& vS, const std::string& fS, const std::string&	gS);
   ~eHexRender();
 
-	void Render(glm::mat4 mvp);
+	void Render(glm::mat4 mvp, SimpleGeometryMesh& _mesh);
 
 	Shader& GetShader() { return hex_shader; }
 private:
 	Shader hex_shader;
 
-	GLuint hexVAO;
-	GLuint hexVBO;
 	GLuint MVPLoc;
 	GLuint radiusLoc;
-	float radius;
-	std::vector<glm::vec3> dots;
 };

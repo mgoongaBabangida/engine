@@ -9,7 +9,6 @@
 #include <math/CameraRay.h>
 
 #include "Texture.h"
-#include "RenderManager.h"
 
 #include <map>
 
@@ -18,6 +17,8 @@ class GUI;
 
 class eModelManager;
 class eTextureManager;
+class eRenderManager;
+class SimpleGeometryMesh;
 
 //------------------------------------------------------------------------------------------------------------
 class DLL_OPENGL_ASSETS eOpenGlRenderPipeline
@@ -25,7 +26,7 @@ class DLL_OPENGL_ASSETS eOpenGlRenderPipeline
 public:
 
 	enum class RenderType
-	{ MAIN, PBR, FLAG, OUTLINED};
+	{ MAIN, PBR, FLAG, OUTLINED , GEOMETRY};
 
 	eOpenGlRenderPipeline(uint32_t width, uint32_t height);
 	~eOpenGlRenderPipeline();
@@ -36,14 +37,12 @@ public:
 	void			Initialize();
 	void			InitializeBuffers(bool _needsShadowCubeMap = false);
 	void			InitializeRenders(eModelManager&, eTextureManager&, const std::string& shadersFolderPath);
-
-	eRenderManager& GetRenderManager()				{ return *renderManager.get(); } //@todo delete
 	
 	const std::vector<ShaderInfo>& GetShaderInfos() const;
+	void UpdateShadersInfo();
 	void			SetSkyBoxTexture(Texture* _t);
 	
-	void			AddHex(glm::vec3 _v);
-	void			SetHexRadius(float _r);
+	void AddParticleSystem(IParticleSystem* system);
 	
 	void			SwitchSkyBox(bool on) { skybox = on; }
 	void			SwitchWater(bool on)  { water = on; }
@@ -53,6 +52,8 @@ public:
   bool& GetBoundingBoxBoolRef() { return draw_bounding_boxes; }
   bool& GetMultiSamplingBoolRef() { return mts; }
   bool& GetSkyBoxOnRef() { return skybox; }
+	bool& GetWaterOnRef() { return water; }
+	bool& GetGeometryOnRef() { return geometry; }
   float& GetBlurCoefRef() { return blur_coef; }
 
 	Material material; //debug
@@ -82,12 +83,11 @@ protected:
 	void			RenderRefraction(Camera&, const Light&, std::vector<shObject>&);
 	void			RenderSkyNoise(const Camera&);
 	void			StencilFuncDefault();
-	void			RenderFocused(const Camera&, const Light&, const std::vector<shObject>&);
 	void			RenderMain(const Camera&, const Light&, const std::vector<shObject>&);
 	void			RenderOutlineFocused(const Camera&, const Light&, const std::vector<shObject>&);
 	void			RenderFlags(const Camera&, const Light&, std::vector<shObject>);
 	void			RenderWater(const Camera&, const Light&);
-	void			RenderGeometry(const Camera&);	//hex latter other things
+	void			RenderGeometry(const Camera&, const SimpleGeometryMesh& _mesh);	//hex latter other things
 	void			RenderParticles(const Camera&);
 	void			RenderBlur(const Camera&);
 	void			RenderContrast(const Camera& _camera);
@@ -115,7 +115,7 @@ protected:
 	float			waterHeight = 2.0f;
   float     blur_coef   = 0.7f;
 
-	std::unique_ptr<eRenderManager>								renderManager;
+	std::unique_ptr<eRenderManager>	renderManager;
 };
 
 #endif // PIPELINE_H
