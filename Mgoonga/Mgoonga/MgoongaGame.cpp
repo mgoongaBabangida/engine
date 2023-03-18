@@ -40,26 +40,32 @@ void eMgoongaGameContext::InitializeExternalGui()
 {
   // Lights & Cameras
   externalGui[0]->Add(TEXT, "Light", nullptr);
-  externalGui[0]->Add(SLIDER_FLOAT_3, "Light direction.", &GetMainLight().light_position);
+  externalGui[0]->Add(SLIDER_FLOAT_3, "Light position.", &GetMainLight().light_position);
+  externalGui[0]->Add(SLIDER_FLOAT_3, "Light direction.", &GetMainLight().light_direction);
+  externalGui[0]->Add(SLIDER_FLOAT_3, "Light intensity.", &GetMainLight().intensity);
   externalGui[0]->Add(TEXT, "Camera", nullptr);
   externalGui[0]->Add(SLIDER_FLOAT_3, "position", &GetMainCamera().PositionRef());
   externalGui[0]->Add(SLIDER_FLOAT_3, "direction", &GetMainCamera().ViewDirectionRef());
   
-  //Debug
+  //Pipeline
   externalGui[1]->Add(CHECKBOX, "Show bounding boxes", &pipeline.GetBoundingBoxBoolRef());
   externalGui[1]->Add(CHECKBOX, "Use Multi sampling", &pipeline.GetMultiSamplingBoolRef());
   externalGui[1]->Add(CHECKBOX, "Sky box", &pipeline.GetSkyBoxOnRef());
   externalGui[1]->Add(SLIDER_FLOAT, "Blur coefficients", &pipeline.GetBlurCoefRef());
   std::function<void()> emit_partilces_callback = [this]()
   {
-    pipeline.GetRenderManager().AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f),
+    pipeline.AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f),
                                                   texManager->Find("Tatlas2"),
                                                   soundManager->GetSound("shot_sound"),
                                                   texManager->Find("Tatlas2")->numberofRows));
   };
   std::function<void()> update_uniforms_callback = [this]()
   {
-    pipeline.GetRenderManager().UpdateShadersInfo();
+    pipeline.UpdateShadersInfo();
+  };
+  static std::function<void(const std::string&)> add_model_callback = [this](const std::string& _path)
+  {
+    modelManager->Add("Name", (GLchar*)_path.c_str());
   };
   externalGui[1]->Add(BUTTON, "Emit particle system", (void*)&emit_partilces_callback);
   externalGui[1]->Add(CHECKBOX, "Debug white", &pipeline.GetDebugWhite());
@@ -82,6 +88,9 @@ void eMgoongaGameContext::InitializeExternalGui()
   //Shaders
   externalGui[3]->Add(BUTTON, "Update shaders", (void*)&update_uniforms_callback);
   externalGui[3]->Add(SHADER, "Shaders", (void*)&pipeline.GetShaderInfos());
+
+  //Main Menu 
+  externalGui[4]->Add(MENU_OPEN, "Add model", reinterpret_cast<void*>(&add_model_callback));
 
   m_focused = m_objects[0];
   OnFocusedChanged(); // make event handler
@@ -250,7 +259,7 @@ void eMgoongaGameContext::InitializePipline()
 //-----------------------------------------------------------------------------
 void eMgoongaGameContext::InitializeBuffers()
 {
-	pipeline.InitializeBuffers(true);
+	pipeline.InitializeBuffers(GetMainLight().type == eLightType::POINT);
 }
 
 //-----------------------------------------------------------------------------
@@ -266,8 +275,8 @@ void eMgoongaGameContext::InitializeModels()
   modelManager->Add("zombie", (GLchar*)std::string(modelFolderPath + "Thriller Part 3/Thriller Part 3.dae").c_str());
 
   std::vector<const Texture*> textures{ texManager->Find("pbr1_basecolor"),
-                                        texManager->Find("pbr1_normal"),
                                         texManager->Find("pbr1_metallic"),
+                                        texManager->Find("pbr1_normal"),
                                         texManager->Find("pbr1_roughness") };
   modelManager->Add("sphere_textured", textures /*std::vector<const Texture*>{}*/); // or textures
 
@@ -280,51 +289,51 @@ void eMgoongaGameContext::InitializeModels()
                            false);
 	//OBJECTS
   ObjectFactoryBase factory;
-  shObject wallCube = factory.CreateObject(modelManager->Find("wall_cube"));
+  shObject wallCube = factory.CreateObject(modelManager->Find("wall_cube"), "WallCube");
 	wallCube->GetTransform()->setTranslation(vec3(3.0f, 3.0f, 3.0f));
 	m_objects.push_back(wallCube);
 
-	shObject containerCube = factory.CreateObject(modelManager->Find("container_cube"));
+	shObject containerCube = factory.CreateObject(modelManager->Find("container_cube"), "ContainerCube");
 	containerCube->GetTransform()->setTranslation(vec3(-2.5f, 3.0f, 3.5f));
 	m_objects.push_back(containerCube);
 
-  shObject grassPlane = factory.CreateObject(modelManager->Find("grass_plane"));
-	grassPlane->GetTransform()->setTranslation(vec3(0.0f, 1.5f, 0.0f));
+  shObject grassPlane = factory.CreateObject(modelManager->Find("grass_plane"), "GrassPlane");
+	grassPlane->GetTransform()->setTranslation(vec3(0.0f, 1.2f, 0.0f));
 	m_objects.push_back(grassPlane);
 
-	shObject nanosuit = factory.CreateObject(modelManager->Find("nanosuit"));
+	shObject nanosuit = factory.CreateObject(modelManager->Find("nanosuit"), "Nanosuit");
 	nanosuit->GetTransform()->setTranslation(vec3(0.0f, 2.0f, 0.0f));
   nanosuit->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
 	nanosuit->GetTransform()->setScale(vec3(0.12f, 0.12f, 0.12f));
 	m_objects.push_back(nanosuit);
 
   nanosuit->SetScript(new eShipScript(texManager->Find("TSpanishFlag0_s"),
-                                      pipeline.GetRenderManager(),
+                                      pipeline,
                                       GetMainCamera(),
                                       texManager->Find("Tatlas2"),
                                       soundManager->GetSound("shot_sound"),
                                       &GetMainCamera().getCameraRay(),
                                       pipeline.GetWaterHeight()));
 
-  shObject terrain = factory.CreateObject(std::shared_ptr<IModel>(terrainModel.release()));
+  shObject terrain = factory.CreateObject(std::shared_ptr<IModel>(terrainModel.release()), "Terrain");
   terrain->SetName("Terrain");
   terrain->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
   terrain->GetTransform()->setTranslation(vec3(0.0f, 1.8f, 0.0f));
   m_objects.push_back(terrain);
 
-	shObject wolf = factory.CreateObject(modelManager->Find("wolf"));
+	shObject wolf = factory.CreateObject(modelManager->Find("wolf"), "Wolf");
 	wolf->GetTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);
 	wolf->GetTransform()->setTranslation(vec3(4.0f, 3.0f, 0.0f));
 	wolf->SetRigger(new Rigger((Model*)modelManager->Find("wolf").get())); //@todo improve
 	wolf->GetRigger()->ChangeName(std::string(), "Running");//@todo improve
 	m_objects.push_back(wolf);
 
-	shObject brickCube = factory.CreateObject(modelManager->Find("brick_cube"));
+	shObject brickCube = factory.CreateObject(modelManager->Find("brick_cube"), "BrickCube");
 	brickCube->SetModel(modelManager->Find("brick_cube"));
 	brickCube->GetTransform()->setTranslation(vec3(0.5f, 3.0f, 3.5f));
 	m_objects.push_back(brickCube);
 
-  shObject guard = factory.CreateObject(modelManager->Find("guard"));
+  shObject guard = factory.CreateObject(modelManager->Find("guard"), "Guard");
   guard->GetTransform()->setTranslation(vec3(2.0f, 2.0f, 0.0f));
   guard->GetTransform()->setRotation(glm::radians(-90.0f), glm::radians(-90.0f), 0.0f);
   guard->GetTransform()->setScale(glm::vec3(0.03f, 0.03f, 0.03f));
@@ -333,20 +342,24 @@ void eMgoongaGameContext::InitializeModels()
   guard->SetRigger(new Rigger((Model*)modelManager->Find("guard").get()));//@todo improve
   m_objects.push_back(guard);
 
-  shObject zombie = factory.CreateObject(modelManager->Find("zombie"));
+  shObject zombie = factory.CreateObject(modelManager->Find("zombie"), "Zombie");
   zombie->GetTransform()->setTranslation(vec3(1.0f, 2.0f, 0.0f));
   zombie->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
   zombie->GetTransform()->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
   zombie->SetRigger(new Rigger((Model*)modelManager->Find("zombie").get()));//@todo improve
   m_objects.push_back(zombie);
 
-	//light_cube
-	lightObject = factory.CreateObject(modelManager->Find("white_sphere"));
+	//light
+	lightObject = factory.CreateObject(modelManager->Find("white_sphere"), "WhiteSphere");
 	lightObject->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
 	lightObject->GetTransform()->setTranslation(GetMainLight().light_position);
 	m_objects.push_back(lightObject);
 
-  shObject obj = factory.CreateObject(modelManager->Find("sphere_textured"));
+  shObject pbrCube = factory.CreateObject(modelManager->Find("pbr_cube"), "CubePBR");
+  pbrCube->GetTransform()->setTranslation(vec3(-4.5f, 3.5f, 1.5f));
+  m_pbr_objs.push_back(pbrCube);
+
+  shObject obj = factory.CreateObject(modelManager->Find("sphere_textured"), "SpherePBR");
   obj->GetTransform()->setTranslation(glm::vec3(-2.0f,3.5f,1.5f));
   m_pbr_objs.push_back(obj);
 }
@@ -394,7 +407,7 @@ void eMgoongaGameContext::PaintGL()
   objects.insert({ eOpenGlRenderPipeline::RenderType::OUTLINED, *focused_output });
   objects.insert({ eOpenGlRenderPipeline::RenderType::FLAG, flags });
   objects.insert({ eOpenGlRenderPipeline::RenderType::PBR, m_pbr_objs });
-
+  objects.insert({ eOpenGlRenderPipeline::RenderType::GEOMETRY, {} });
 	pipeline.RenderFrame(objects, GetMainCamera(), GetMainLight(), guis);
 }
 

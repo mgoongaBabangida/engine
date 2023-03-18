@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ShipScript.h"
 #include <base/base.h>
-//#include <opengl_assets\RenderManager.h>
+#include <opengl_assets/openglrenderpipeline.h>
 #include <math/ShootingParticleSystem.h>
 #include <opengl_assets\Sound.h>
 #include <opengl_assets\MyModel.h>
@@ -10,13 +10,13 @@
 
 //----------------------------------------------------------------
 eShipScript::eShipScript(Texture*			_flagTexture,
-						 eRenderManager&	_render_manager, 
+						 eOpenGlRenderPipeline&	_pipeline,
 	           Camera& _camera,
 						 Texture*			_shoting_texture, 
 						 RemSnd*			_shooting_sound, 
 						 dbb::CameraRay*	_camRay, 
 						 float				_waterHeight)
-: render_manager(_render_manager)
+: pipeline(_pipeline)
 , camera(_camera)
 , shoot_tex(_shoting_texture)
 , shoot_snd(_shooting_sound)
@@ -120,8 +120,8 @@ std::vector<shObject> eShipScript::GetChildrenObjects()
   //Choosing the corner in relation to camera position
   for (int i = 0; i < 4; ++i)
   {
-  position = glm::length2(camera.get().getPosition() - glm::vec3(top_corners[i]))
-    < glm::length2(camera.get().getPosition() - glm::vec3(position)) ? top_corners[i] : position;
+		position = glm::length2(camera.get().getPosition() - glm::vec3(top_corners[i]))
+			< glm::length2(camera.get().getPosition() - glm::vec3(position)) ? top_corners[i] : position;
   }
 
   flag->GetTransform()->setTranslation(position);
@@ -134,12 +134,12 @@ void eShipScript::Shoot()
 {
 	glm::vec4 modelCenter	=	object->GetTransform()->getModelMatrix() 
 								* glm::vec4(object->GetCollider()->GetCenter(), 1.0f);
-	IParticleSystem* system = new ShootingParticleSystem(10, 0, 0, 10000, 
+	IParticleSystem* system = new ShootingParticleSystem(10, 0, 0, 10000,
 														modelCenter + object->GetTransform()->getRotationVector() * 0.2f, // ask hexes
 														shoot_tex, 
 														shoot_snd,
 														10000);
 	//@todo no connection to rendering. Add pt sys in different way
-	//render_manager.get().AddParticleSystem(system);
+	pipeline.get().AddParticleSystem(system);
 	shoot_after_move = false;
 }

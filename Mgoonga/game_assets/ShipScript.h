@@ -10,14 +10,14 @@ class eObject;
 struct Flag;
 struct Texture;
 class RemSnd;
-class eRenderManager;
+class eOpenGlRenderPipeline;
 
 //----------------------------------------------------------------------------------
 class DLL_GAME_ASSETS eShipScript : public IScript
 {
 public:
 	eShipScript(Texture*		flag_texture,
-			        eRenderManager&	render_manager,
+							eOpenGlRenderPipeline&	render_manager,
 		          Camera& camera,
 			        Texture*			shoting_texture,
 			        RemSnd*			shooting_sound,
@@ -51,7 +51,7 @@ protected:
   glm::vec3		  flag_scale = { 0.01f, 0.01f ,0.01f };
   std::shared_ptr<eObject> flag;
 
-	std::reference_wrapper<eRenderManager> render_manager;
+	std::reference_wrapper<eOpenGlRenderPipeline> pipeline;
 	std::reference_wrapper<Camera> camera;
 	Texture*							   shoot_tex;
 	RemSnd*								   shoot_snd;

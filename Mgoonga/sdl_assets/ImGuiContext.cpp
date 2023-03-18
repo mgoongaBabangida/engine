@@ -506,52 +506,70 @@ bool eWindowImGui::OnMouseMove(uint32_t x, uint32_t y)
 //-----------------------------------------------------------------
 void eMainImGuiWindow::Render()
 {
-  for (auto& item : lines)
+  bool open = false, save = false, open_file = false;
+  ImGui::BeginMainMenuBar();
+  if (ImGui::BeginMenu("File"))
   {
-    switch (std::get<1>(item))
+    if (ImGui::MenuItem("Open", NULL))
+      open = true;
+    if (ImGui::MenuItem("Save", NULL))
+      save = true;
+
+    for (auto& item : lines)
     {
+      switch (std::get<1>(item))
+      {
       case MENU:
       {
-        bool open = false, save = false;
-        ImGui::BeginMainMenuBar();
-        if (ImGui::BeginMenu("File"))
+        if (ImGui::MenuItem(std::get<0>(item).c_str()))
         {
-          if (ImGui::MenuItem("Open", NULL))
-            open = true;
-          if (ImGui::MenuItem("Save", NULL))
-            save = true;
-          if (ImGui::MenuItem(std::get<0>(item).c_str()))
-          {
-            auto callback = reinterpret_cast<std::function<void()>*>(std::get<2>(item));
-            (*callback)();
-          }
-          ImGui::EndMenu();
-        }
-        ImGui::EndMainMenuBar();
-    
-        if (open)
-          ImGui::OpenPopup("Open File");
-        if (save)
-          ImGui::OpenPopup("Save File");
-    
-        /* Optional third parameter. Support opening only compressed rar/zip files.
-        * Opening any other file will show error, return false and won't close the dialog.
-        */
-        if (file_dialog.showFileDialog("Open File", imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 310), ".rar,.zip,.7z,.obj"))
-        {
-          std::cout << file_dialog.selected_fn << std::endl;      // The name of the selected file or directory in case of Select Directory dialog mode
-          std::cout << file_dialog.selected_path << std::endl;    // The absolute path to the selected file
-        }
-        if (file_dialog.showFileDialog("Save File", imgui_addons::ImGuiFileBrowser::DialogMode::SAVE, ImVec2(700, 310), ".png,.jpg,.bmp"))
-        {
-          std::cout << file_dialog.selected_fn << std::endl;      // The name of the selected file or directory in case of Select Directory dialog mode
-          std::cout << file_dialog.selected_path << std::endl;    // The absolute path to the selected file
-          std::cout << file_dialog.ext << std::endl;              // Access ext separately (For SAVE mode)
-          //Do writing of files based on extension here
+          auto callback = reinterpret_cast<std::function<void()>*>(std::get<2>(item));
+          (*callback)();
         }
       }
       break;
+      case MENU_OPEN:
+      {
+        if (ImGui::MenuItem(std::get<0>(item).c_str(), NULL))
+        {
+          open_file = true;
+          open_file_menu_name = std::get<0>(item);
+          open_file_callback = *(reinterpret_cast<std::function<void(const std::string&)>*>(std::get<2>(item)));
+        }
+      }
+      break;
+      }
     }
+    ImGui::EndMenu();
+  }
+
+  ImGui::EndMainMenuBar();
+
+  if (open)
+    ImGui::OpenPopup("Open File");
+  if (save)
+    ImGui::OpenPopup("Save File");
+  if(open_file)
+    ImGui::OpenPopup(open_file_menu_name.c_str());
+
+  /* Optional third parameter. Support opening only compressed rar/zip files.
+  * Opening any other file will show error, return false and won't close the dialog.
+  */
+  if (file_dialog.showFileDialog("Open File", imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 310), ".rar,.zip,.7z,.obj"))
+  {
+    std::cout << file_dialog.selected_fn << std::endl;      // The name of the selected file or directory in case of Select Directory dialog mode
+    std::cout << file_dialog.selected_path << std::endl;    // The absolute path to the selected file
+  }
+  if (file_dialog.showFileDialog("Save File", imgui_addons::ImGuiFileBrowser::DialogMode::SAVE, ImVec2(700, 310), ".png,.jpg,.bmp"))
+  {
+    std::cout << file_dialog.selected_fn << std::endl;      // The name of the selected file or directory in case of Select Directory dialog mode
+    std::cout << file_dialog.selected_path << std::endl;    // The absolute path to the selected file
+    std::cout << file_dialog.ext << std::endl;              // Access ext separately (For SAVE mode)
+    //Do writing of files based on extension here
+  }
+  if (file_dialog.showFileDialog(open_file_menu_name.c_str(), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 310), ".obj"))
+  {
+    open_file_callback(file_dialog.selected_path);
   }
 }
 

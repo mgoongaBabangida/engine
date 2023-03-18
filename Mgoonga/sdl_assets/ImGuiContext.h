@@ -42,7 +42,8 @@ enum TypeImGui
   TEXTURE_ARRAY,
   BUTTON,
 	OBJECT_REF,
-	SHADER
+	SHADER,
+	MENU_OPEN
 };
 
 //--------------------------------------------------
@@ -70,6 +71,8 @@ public:
 	virtual void Add(TypeImGui, const std::string& name, void*) override;
 protected:
 	std::vector<eItem>	lines;
+	std::string open_file_menu_name;
+	std::function<void(const std::string&)> open_file_callback;
 };
 
 //---------------------------------------------

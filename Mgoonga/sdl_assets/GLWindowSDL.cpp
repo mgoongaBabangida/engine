@@ -22,7 +22,7 @@ dbGLWindowSDL::dbGLWindowSDL(const IGameFactory& _factory)
 : inputController()
 {
   guiWnd.push_back(new eWindowImGui("Lights & Cameras"));
-  guiWnd.push_back(new eWindowImGui("Debug"));
+  guiWnd.push_back(new eWindowImGui("Pipeline"));
   guiWnd.push_back(new eWindowImGui("Object"));
 	guiWnd.push_back(new eWindowImGui("Shader"));
 	guiWnd.push_back(new eMainImGuiWindow());

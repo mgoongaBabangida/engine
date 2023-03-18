@@ -57,9 +57,9 @@ void eModelManager::Add(const std::string& name, std::vector<const Texture*> _te
 		material.ao = 1.0f;
 		material.shininess = 0.5;
 		material.roughness = 0.5;
+		material.metallic = 0.5;
 		SphereTexturedMesh* mesh = new SphereTexturedMesh();
 		mesh->SetMaterial(material);
-		material.metallic = 0.5;
 		models.insert(std::pair<std::string, std::shared_ptr<IModel>>{ name, new SphereTexturedModel(mesh, _textures) });
 	}
 }

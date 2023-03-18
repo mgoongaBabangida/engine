@@ -45,7 +45,7 @@ struct Light
 	glm::vec3  diffuse = { 1.0f, 1.0f, 1.0f };
 	glm::vec3  specular = { 1.0f, 1.0f, 1.0f };
 	eLightType type = eLightType::POINT;
-	glm::vec3  intensity = { 100, 100, 100 };
+	glm::vec3  intensity = { 50, 50, 50 };
 };
 
 //-------------------------------------------------------

@@ -42,8 +42,6 @@ project "math"
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
    
    includedirs { "./"; "../../third_party" }
-	
-   libdirs { "../../Mgoonga/x64/Debug/" }
 
    links { "base" }
    
@@ -96,7 +94,7 @@ project "opengl_assets"
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
    
    includedirs 
-   {
+   { 
    "./"; "../../third_party",
    "./"; "../../third_party/freetype-2.11.0/include"
    }
@@ -104,9 +102,8 @@ project "opengl_assets"
    libdirs 
    { 
    "../../third_party/libs/Win64",
-   "../../Mgoonga/x64/Debug/",
    "../../third_party/glew-2.1.0/lib/Release/x64",
-   "../../third_party/SDL/VisualC/x64/Debug/",
+   "../../third_party/SDL/VisualC/x64/Release/",
    "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
@@ -153,18 +150,13 @@ project "sdl_assets"
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
    
-   includedirs 
-   { 
-   "./"; "../../third_party",
-   "./"; "../../third_party/freetype-2.11.0/include"
-   }
+   includedirs { "./"; "../../third_party" }
 	
    libdirs 
    { 
    "../../third_party/libs/Win64",
-   "../../Mgoonga/x64/Debug/",
    "../../third_party/glew-2.1.0/lib/Release/x64",
-   "../../third_party/SDL/VisualC/x64/Debug/",
+   "../../third_party/SDL/VisualC/x64/Release/",
    "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
@@ -212,18 +204,13 @@ project "game_assets"
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
    
-   includedirs 
-   { 
-   "./"; "../../third_party",
-   "./"; "../../third_party/freetype-2.11.0/include"
-   }
+   includedirs { "./"; "../../third_party" }
 	
    libdirs 
    { 
    "../../third_party/libs/Win64",
-   "../../Mgoonga/x64/Debug/",
    "../../third_party/glew-2.1.0/lib/Release/x64",
-   "../../third_party/SDL/VisualC/x64/Debug/",
+   "../../third_party/SDL/VisualC/x64/Release/",
    "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
@@ -273,9 +260,8 @@ project "Mgoonga"
    libdirs 
    { 
    "../../third_party/libs/Win64",
-   "../../Mgoonga/x64/Debug/",
    "../../third_party/glew-2.1.0/lib/Release/x64",
-   "../../third_party/SDL/VisualC/x64/Debug/",
+   "../../third_party/SDL/VisualC/x64/Release/",
    "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
@@ -325,9 +311,8 @@ project "AmericanTreasureGame"
    libdirs 
    { 
    "../../third_party/libs/Win64",
-   "../../Mgoonga/x64/Debug/",
    "../../third_party/glew-2.1.0/lib/Release/x64",
-   "../../third_party/SDL/VisualC/x64/Debug/",
+   "../../third_party/SDL/VisualC/x64/Release/",
    "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
@@ -377,9 +362,8 @@ project "SandBoxGame"
    libdirs 
    { 
    "../../third_party/libs/Win64",
-   "../../Mgoonga/x64/Debug/",
    "../../third_party/glew-2.1.0/lib/Release/x64",
-   "../../third_party/SDL/VisualC/x64/Debug/",
+   "../../third_party/SDL/VisualC/x64/Release/",
    "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",

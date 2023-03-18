@@ -7,12 +7,7 @@
 
 //----------------------------------------------------------------
 TerrainModel::TerrainModel()
-	:mesh(nullptr),
-  m_diffuse(nullptr),
-  m_specular(nullptr),
-  m_normal(nullptr),
-  m_fourth(nullptr),
-  m_height(nullptr)
+	: mesh(nullptr)
 {}
 
 //----------------------------------------------------------------
@@ -20,20 +15,20 @@ TerrainModel::TerrainModel(Texture* diffuse,
   Texture* specular,
   Texture* normal,
   Texture* heightMap)
-  :m_diffuse(diffuse),
-  m_specular(specular),
-  m_normal(normal),
-  m_fourth(diffuse)
+  :m_diffuse(*diffuse),
+  m_specular(*specular),
+  m_normal(*normal),
+  m_fourth(*diffuse),
+	m_height (*heightMap)
 {
 	mesh = new MyMesh();
 	m_size = heightMap->mTextureHeight;
 	m_rows = heightMap->mTextureWidth;
 	m_columns = heightMap->mTextureHeight;
-	m_height = heightMap;
 	
 	makePlaneVerts(heightMap->mTextureWidth,heightMap->mTextureHeight, false);
 	makePlaneIndices(heightMap->mTextureWidth, heightMap->mTextureHeight);
-	assignHeights(*m_height);
+	assignHeights(m_height);
 	generateNormals(heightMap->mTextureWidth, heightMap->mTextureHeight);
 	mesh->calculatedTangent();
 	mesh->setupMesh();
@@ -52,19 +47,18 @@ TerrainModel::TerrainModel(const TerrainModel& other)
 //----------------------------------------------------------------
 void TerrainModel::initialize(Texture* diffuse, Texture* specular, bool spreed_texture)
 {
-	m_diffuse = diffuse; 
-	m_specular = specular;
-	m_normal = nullptr;
-	m_fourth = diffuse;
+	m_diffuse = *diffuse; 
+	m_specular = *specular;
+	m_fourth = *diffuse;
 
   mesh = new MyMesh();
-	m_size = m_diffuse->mTextureHeight;
-	makePlaneVerts(m_diffuse->mTextureHeight, m_diffuse->mTextureHeight, spreed_texture);
-	makePlaneIndices(m_diffuse->mTextureHeight);
+	m_size = m_diffuse.mTextureHeight;
+	makePlaneVerts(m_diffuse.mTextureHeight, m_diffuse.mTextureHeight, spreed_texture);
+	makePlaneIndices(m_diffuse.mTextureHeight);
 	generateNormals(m_size);
 	mesh->calculatedTangent();
 	mesh->setupMesh();
-  mesh->setTextures({ m_diffuse , m_specular , m_normal , m_height });
+  mesh->setTextures({ &m_diffuse , &m_specular , &m_normal , &m_height });
 }
 
 //----------------------------------------------------------------
@@ -74,11 +68,11 @@ void TerrainModel::initialize(Texture* diffuse,
 														  Texture* heightMap,
 														  bool spreed_texture)
 {
-	m_diffuse = diffuse;
-	m_specular=specular;
-	m_normal=normal;
-	m_fourth=diffuse;
-	m_height = heightMap;
+	m_diffuse = *diffuse;
+	m_specular=	*specular;
+	m_normal=		*normal;
+	m_fourth=		*diffuse;
+	m_height =	*heightMap;
 	
 	if(mesh == nullptr)
 	 mesh = new MyMesh();
@@ -86,22 +80,21 @@ void TerrainModel::initialize(Texture* diffuse,
 	m_size = heightMap->mTextureHeight;
 	m_rows = heightMap->mTextureWidth;
 	m_columns = heightMap->mTextureHeight;
-	m_height = heightMap;
 
-	makePlaneVerts( heightMap->mTextureWidth, heightMap->mTextureHeight, spreed_texture);
+	makePlaneVerts(heightMap->mTextureWidth, heightMap->mTextureHeight, spreed_texture);
 	makePlaneIndices(heightMap->mTextureWidth, heightMap->mTextureHeight);
 	assignHeights(*heightMap);
 	generateNormals(heightMap->mTextureWidth, heightMap->mTextureHeight);
 	
 	mesh->calculatedTangent();
 	mesh->setupMesh();
-  mesh->setTextures({ m_diffuse , m_specular , m_normal , heightMap });
+  mesh->setTextures({ &m_diffuse , &m_specular , &m_normal , &m_height });
 }
 
 //------------------------------------------------------------
-TerrainModel::TerrainModel(Texture * color)
-  :m_diffuse(color)
-  , m_specular(color)
+TerrainModel::TerrainModel(Texture *color)
+  :m_diffuse(*color)
+  , m_specular(*color)
 {
 	mesh = new MyMesh();
 	m_size = 10;
@@ -120,11 +113,11 @@ std::vector<MyMesh*>	TerrainModel::getMeshes()				const
 
 //------------------------------------------------------------
 void					TerrainModel::setDiffuse(Texture* t)
-{ m_diffuse = t; }
+{ m_diffuse = *t; }
 
 //------------------------------------------------------------
 void					TerrainModel::setSpecular(Texture* t)
-{ m_specular = t; }
+{ m_specular = *t; }
 
 //----------------------------------------------------------------
  MyVertex TerrainModel::findVertex(float x, float z)
@@ -196,8 +189,8 @@ void TerrainModel::generateNormals(GLuint size)
 		buffer[i * 4 + 3] = 1.0f;
 	}
 
-  m_normal = new Texture(size, size);
-	m_normal->TextureFromBuffer(buffer, size, size);
+  m_normal = Texture(size, size);
+	m_normal.TextureFromBuffer(buffer, size, size);
 	delete[] buffer;
 }
 
@@ -230,8 +223,8 @@ void TerrainModel::generateNormals(GLuint rows, GLuint columns)
 		buffer[i * 4 + 3] = 1.0f;
 	}
 
-	m_normal = new Texture(rows, columns);
-	m_normal->TextureFromBuffer(buffer, rows, columns);
+	m_normal = Texture(rows, columns);
+	m_normal.TextureFromBuffer(buffer, rows, columns);
 	delete[] buffer;
 }
 
@@ -354,16 +347,16 @@ void TerrainModel::makePlaneIndices(unsigned int rows,unsigned int columns)
 void TerrainModel::Draw()
 {
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, m_diffuse->id);
+	glBindTexture(GL_TEXTURE_2D, m_diffuse.id);
 
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, m_specular->id);
+	glBindTexture(GL_TEXTURE_2D, m_specular.id);
 
 	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, m_normal->id);
+	glBindTexture(GL_TEXTURE_2D, m_normal.id);
 
 	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, m_fourth->id);
+	glBindTexture(GL_TEXTURE_2D, m_fourth.id);
 
 	mesh->Draw();
 }
@@ -395,10 +388,6 @@ TerrainModel::~TerrainModel()
 {
 	if (mesh != nullptr)
 		delete mesh;
-  if (m_normal != nullptr)
-  {
-    m_normal->freeTexture();
-    delete m_normal;
-  }
+    m_normal.freeTexture();
 }
 

@@ -46,15 +46,15 @@ private:
 	unsigned int	devisor = 10;
 	MyMesh*			mesh; // generate ourself inside constructor
 	
-	Texture*		m_diffuse;
-	Texture*		m_specular;
-	Texture*		m_normal;
-	Texture*		m_fourth;
-	Texture*		m_height;
+	Texture		m_diffuse;
+	Texture		m_specular;
+	Texture		m_normal;
+	Texture		m_fourth;
+	Texture		m_height;
 	
-	GLuint			m_size;
-	GLuint			m_rows;
-	GLuint			m_columns;
+	GLuint		m_size;
+	GLuint		m_rows;
+	GLuint		m_columns;
 
 	void			makePlaneVerts(unsigned int dimensions, bool spreed_texture = true);
 	void			makePlaneVerts(unsigned int rows, unsigned int columns, bool spreed_texture = true);
