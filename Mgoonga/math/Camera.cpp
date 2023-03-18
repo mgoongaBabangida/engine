@@ -27,25 +27,30 @@ Camera::Camera(float      _width,
 
 Camera::Camera(const Camera & other)
 {
-	Up				 = other.Up;
-	position		 = other.position;
-	viewDirection	 = other.viewDirection;
-	oldMousePosition = other.oldMousePosition;
-	strafeDirection	 = other.strafeDirection;
-	rotationMatrix	 = other.rotationMatrix;
-	projectionMatrix = other.projectionMatrix;
+	*this = other;
 }
 
 Camera& Camera::operator=(const Camera& other)
 {
 	if (&other != this) 
-	{  
-		position		 = other.position;
-		viewDirection	 = other.viewDirection;
+	{
+		position = other.position;
+		viewDirection = other.viewDirection;
+		Up = other.Up;
 		oldMousePosition = other.oldMousePosition;
-		strafeDirection	 = other.strafeDirection;
-		rotationMatrix	 = other.rotationMatrix;
+		strafeDirection = other.strafeDirection;
+		rotationMatrix = other.rotationMatrix;
+		MOVEMENT_SPEED = other.MOVEMENT_SPEED;
+
+		camRay = other.camRay;
+
 		projectionMatrix = other.projectionMatrix;
+		projectionOrthoMatrix = other.projectionOrthoMatrix;
+		width = other.width;
+		height = other.height;
+		nearPlane = other.nearPlane;
+		farPlane = other.farPlane;
+		strafeThreshold = other.strafeThreshold;
 	}
 	return *this;
 }
@@ -102,6 +107,11 @@ const glm::mat4& Camera::getProjectionMatrix() const
 		    glm::vec4(0.0f, 0.5f, 0.0f, 0.0f),
 		    glm::vec4(0.0f, 0.0f, 0.5f, 0.0f),
 		    glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)) * projectionMatrix;
+ }
+
+ const glm::mat4& Camera::getProjectionOrthoMatrix() const
+ {
+	 return projectionOrthoMatrix;
  }
 
 void Camera::mouseUpdate(const glm::vec2& newMousePosition)

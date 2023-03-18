@@ -8,13 +8,13 @@
 class DLL_MATH Camera : public IInputObserver
 {
 public:
-	explicit Camera(float _width ,
-		            float _height,
-		            float _nearPlane,
-		            float _farPlane,
-					float _perspective_ratio = 60.0f,
-					glm::vec3 _position		 = glm::vec3( -1.0f, 4.0f, -2.5f ),
-					glm::vec3 _viewDirection = glm::vec3(0.6f, -0.10f, 0.8f));
+	Camera(float _width ,
+				 float _height,
+				 float _nearPlane,
+				 float _farPlane,
+				 float _perspective_ratio = 60.0f,
+				 glm::vec3 _position		 = glm::vec3( -1.0f, 4.0f, -2.5f ),
+				 glm::vec3 _viewDirection = glm::vec3(0.6f, -0.10f, 0.8f));
 
 	Camera(const Camera& other);
 	Camera&				operator=(const Camera & other);
@@ -31,7 +31,7 @@ public:
 	glm::mat3			getRotationMatrix() const;
 	const glm::mat4& getProjectionMatrix() const;
 	glm::mat4			getProjectionBiasedMatrix() const;
-	const glm::mat4&	getProjectionOrthoMatrix() const { return projectionOrthoMatrix; };
+	const glm::mat4& getProjectionOrthoMatrix() const;
 	uint32_t			getWidth() const { return width;  }
 	uint32_t			getHeight() const { return height; }
 	float				  getNearPlane() const { return nearPlane; }

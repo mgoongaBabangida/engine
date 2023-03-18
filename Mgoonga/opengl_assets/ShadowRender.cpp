@@ -13,6 +13,7 @@ eShadowRender::eShadowRender(const std::string& vS, const std::string& fS, const
 	shaderPoint.installShaders(vS.c_str(), fSP.c_str(), gSP.c_str());
 	ModelUniformLocationPoint			= glGetUniformLocation(shaderPoint.ID(), "MVP");
 	ProjectionTransformsUniformLocation = glGetUniformLocation(shaderPoint.ID(), "shadowMatrices");
+	FarPlaneUniformLocation = glGetUniformLocation(shaderPoint.ID(), "far_plane");
 }
 
 //-----------------------------------------------------------------------------
@@ -41,6 +42,7 @@ void eShadowRender::Render(const Camera&					camera,
 		
 		glUseProgram(shaderPoint.ID());
 		glUniformMatrix4fv(ProjectionTransformsUniformLocation, 6, GL_FALSE, &shadowTransforms[0][0][0]);
+		glUniform1f(FarPlaneUniformLocation, camera.getFarPlane());
 		//RENDER DEPTH
 		for (auto &object : objects)
 		{
@@ -48,7 +50,6 @@ void eShadowRender::Render(const Camera&					camera,
 			glUniformMatrix4fv(ModelUniformLocationPoint, 1, GL_FALSE, &modelMatrix[0][0]);
 			object->GetModel()->Draw();
 		}
-		
 	}
 	else if (light.type == eLightType::DIRECTION)
 	{

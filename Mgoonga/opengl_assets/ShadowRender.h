@@ -23,6 +23,7 @@ protected:
 	Shader			shaderPoint;
 
 	GLuint			MVPUniformLocationDir;
+
 	GLuint			ModelUniformLocationPoint;
 	GLuint			ProjectionTransformsUniformLocation;
 	GLuint			FarPlaneUniformLocation;
