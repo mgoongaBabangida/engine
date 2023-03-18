@@ -38,6 +38,8 @@
 *.db-wal
 *.VC.db-scm
 *.obj.enc
+*.recipe
+*FileListAbsolute.txt
 Thumbs.db
 
 
@@ -59,24 +61,7 @@ BuildRW/*
 
 # [Deployment local builds artifacts] - Enlight/Mitral/MIS
 /Deployment/Mitral/Bootstrapper/obj/*
-/Deployment/Mitral/Bootstrapper/bin/*
-/Deployment/Mitral/BootstrapperApplication/obj/*
-/Deployment/Mitral/BootstrapperApplication/bin/*
-/Deployment/Mitral/MimicsStandalone/Setups/*
-/Deployment/Mitral/MitralDeployment/.vs/*
-/Deployment/Mitral/MitralDeployment/MitralWorkflow/x64/*
-/Deployment/Mitral/MitralDeployment/CMFWorkflow/x64/*
-/Deployment/Mitral/MitralDeployment/TendyneWorkflow/x64/*
-/Deployment/Mitral/Packages/*
-/Deployment/Mitral/MitralWorkflow/Setups/*
-/Deployment/Mitral/CMFWorkflow/Setups/*
-/Deployment/Mitral/TendyneWorkflow/Setups/*
-/Deployment/Enlight/Setups/*
-/Deployment/Enlight/vs/Logs/*
-/Deployment/Enlight/vs/x64/*
-/Deployment/MIS/SupportFiles/Mimics/x64/MimicsResearchModule.msm
-/Deployment/MIS/SupportFiles/Subfolders/Subfolders.msm
-/Deployment/MIS/SupportFiles/DemoFiles/Medical/
+
 
 
 # [Mimics build artifacts] - TODO: make more specific
