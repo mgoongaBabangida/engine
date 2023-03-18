@@ -5,7 +5,7 @@
 #include <math/RigidBdy.h>
 #include <math/BoxCollider.h>
 
-std::unique_ptr<eObject> ObjectFactoryBase::CreateObject(std::shared_ptr<IModel> _model)
+std::unique_ptr<eObject> ObjectFactoryBase::CreateObject(std::shared_ptr<IModel> _model, const std::string& _name)
 {
  auto obj = std::make_unique<eObject>();
   obj->SetModel(_model);
@@ -14,5 +14,6 @@ std::unique_ptr<eObject> ObjectFactoryBase::CreateObject(std::shared_ptr<IModel>
   obj->SetRigidBody(new eRigidBody);
   obj->GetRigidBody()->SetObject(obj.get());
   obj->GetCollider()->CalculateExtremDots(obj->GetModel()->GetPositions());
+  obj->SetName(_name);
   return obj;
 }

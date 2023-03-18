@@ -1,5 +1,7 @@
 #version 430
 
+out vec4 daColor;
+
 struct Material {
     vec3 ambient;
     vec3 diffuse;
@@ -23,8 +25,6 @@ struct Light
     float cutOff;
     float outerCutOff;
 };
-
-out vec4 daColor;
 
 in vec3 theColor;
 in vec3 theNormal;

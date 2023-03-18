@@ -4,7 +4,8 @@ out vec4 FragColor;
 
 in vec2 Texcoord;
 in vec3 thePosition; //WorldPos
-in vec3 theNormal;//theNormal
+in vec3 theNormal;   //theNormal
+in mat3 TBN;
 
 // material parameters
 uniform vec3  albedo;
@@ -14,8 +15,8 @@ uniform float ao;
 uniform bool textured = true;
 
 layout(binding=2) uniform sampler2D albedoMap;
-layout(binding=3) uniform sampler2D normalMap;
-layout(binding=4) uniform sampler2D metallicMap;
+layout(binding=3) uniform sampler2D metallicMap;
+layout(binding=4) uniform sampler2D normalMap;
 layout(binding=5) uniform sampler2D roughnessMap;
 
 // lights
@@ -42,17 +43,17 @@ void main()
     albedo_f    = pow(texture(albedoMap, Texcoord).rgb, vec3(2.2));
     theNormal_f = texture(normalMap, Texcoord).rgb;
 	// Transform normal vector to range [-1,1]
-	//theNormal_f = normalize(theNormal_f * 2.0 - 1.0);
-	//theNormal_f = theNormal;
+	theNormal_f = normalize(theNormal_f * 2.0 - 1.0);
+	theNormal_f = normalize(TBN * theNormal_f);
     metallic_f  = texture(metallicMap, Texcoord).r;
     roughness_f = texture(roughnessMap, Texcoord).r;
    }
    else
    {
-   albedo_f = albedo;
-   theNormal_f = theNormal;
-   metallic_f = metallic;
-   roughness_f = roughness;
+	albedo_f = albedo;
+	theNormal_f = theNormal;
+	metallic_f = metallic;
+	roughness_f = roughness;
    }
    
     vec3 N = normalize(theNormal_f);
@@ -63,7 +64,7 @@ void main()
 	           
     // reflectance equation
     vec3 Lo = vec3(0.0);
-    for(int i = 0; i < 4; ++i) 
+    for(int i = 0; i < 1; ++i) 
     {
         // calculate per-light radiance
         vec3 L = normalize(lightPositions[i] - thePosition);

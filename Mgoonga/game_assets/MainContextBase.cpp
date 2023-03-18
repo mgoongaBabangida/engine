@@ -132,6 +132,12 @@ void eMainContextBase::InitializeModels()
 			texManager->Find("Tbricks2_d"),
 			texManager->Find("Tbricks2_n"),
 			texManager->Find("Tbricks2_dp"))));
+	modelManager->AddPrimitive("pbr_cube",
+	std::shared_ptr<MyModel>(new MyModel(modelManager->FindMesh("cube"),
+			texManager->Find("pbr1_basecolor"),
+			texManager->Find("pbr1_metallic"),
+			texManager->Find("pbr1_normal"),
+			texManager->Find("pbr1_roughness"))));
 	modelManager->AddPrimitive("white_sphere",
 		std::shared_ptr<MyModel>(new MyModel(modelManager->FindMesh("sphere"),
 			texManager->Find("Twhite"))));
