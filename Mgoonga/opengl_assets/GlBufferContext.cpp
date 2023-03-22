@@ -5,7 +5,7 @@ void eGlBufferContext::BufferInit(eBuffer _buffer, unsigned int _width, unsigned
 {
 	switch (_buffer)
 	{
-		case eBuffer::BUFFER_DEFAULT:					defaultFBO.Init(_width, _height);				break;
+		case eBuffer::BUFFER_DEFAULT:				defaultFBO.Init(_width, _height);				break;
 		case eBuffer::BUFFER_SHADOW:				depthFBO.Init(_width, _height, _param);	break;
 		case eBuffer::BUFFER_BRIGHT_FILTER: brightFilterFBO.Init(_width, _height);	break;
 		case eBuffer::BUFFER_GAUSSIAN_ONE:	gausian1FBO.Init(_width, _height);		break;
@@ -78,10 +78,41 @@ Texture eGlBufferContext::GetTexture(eBuffer _buffer)
 	return Texture();/*?*/
 }
 
+//----------------------------------------------------------------
 void eGlBufferContext::BlitDepthFromTo(eBuffer from, eBuffer to) //$todo make generic otherwise may not work !!!
 {
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, gFBO.Id());
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, gFBO.ID());
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glBlitFramebuffer(0, 0, gFBO.Width(), gFBO.Height(), 0, 0, gFBO.Width(), gFBO.Height(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+//----------------------------------------------------------------
+void eGlBufferContext::BlitFromTo(eBuffer _from, eBuffer _to, GLenum bit)
+{
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, GetId(_from));
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, GetId(_to));
+	glBlitFramebuffer(0, 0, 1200, 600, 0, 0, 1200, 600, bit, GL_NEAREST); //@todo get width and height of buffers
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+//----------------------------------------------------------------
+GLuint eGlBufferContext::GetId(eBuffer _buffer)
+{
+	switch (_buffer)
+	{
+	case eBuffer::BUFFER_DEFAULT:		return defaultFBO.ID();
+	case eBuffer::BUFFER_SHADOW:		return depthFBO.ID();
+	case eBuffer::BUFFER_BRIGHT_FILTER: return brightFilterFBO.ID();
+	case eBuffer::BUFFER_GAUSSIAN_ONE:	return gausian1FBO.ID();
+	case eBuffer::BUFFER_GAUSSIAN_TWO:	return gausian2FBO.ID();
+	case eBuffer::BUFFER_REFLECTION:	return reflectionFBO.ID();
+	case eBuffer::BUFFER_REFRACTION:	return refractionFBO.ID();
+	case eBuffer::BUFFER_SCREEN:		return screenFBO.ID();
+	case eBuffer::BUFFER_MTS:			return mtsFBO.ID();
+	case eBuffer::BUFFER_DEFFERED:		return gFBO.ID();
+	case eBuffer::BUFFER_DEFFERED1:		return gFBO.ID();
+	case eBuffer::BUFFER_DEFFERED2:		return gFBO.ID();
+	case eBuffer::BUFFER_SQUERE:		return squereFBO.ID();
+	}
 }

@@ -26,8 +26,6 @@
 #include "TextRender.h"
 #include "PBRRender.h"
 
-#include "ShpereTexturedModel.h" //@todo temp
-
 #include <algorithm>
 
 void	eOpenGlRenderPipeline::SetSkyBoxTexture(Texture* _t)
@@ -52,11 +50,6 @@ eOpenGlRenderPipeline::eOpenGlRenderPipeline(uint32_t				_width, uint32_t				_he
   height(_height),
   renderManager(new eRenderManager)
 {
-	material.roughness = 0.2f;
-	material.metallic = 0.9f;
-	material.ao = 0.8f;
-	material.shininess = 0.2f;
-	material.diffuse = glm::vec3(1.0f, 0.0f, 0.0f);
 }
 
 eOpenGlRenderPipeline::~eOpenGlRenderPipeline()
@@ -73,7 +66,6 @@ void eOpenGlRenderPipeline::Initialize()
 	/*glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
 }
-
 
 void eOpenGlRenderPipeline::InitializeBuffers(bool _needsShadowCubeMap)
 {
@@ -131,7 +123,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 	if (_light.type == eLightType::DIRECTION)
 		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW, GL_TEXTURE1);
 	else if (_light.type == eLightType::POINT)
-		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW, GL_TEXTURE1); //0?
+		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW, GL_TEXTURE0);
 	else
 		assert("spot light is not yet supported");
 
@@ -143,7 +135,6 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 
 	glEnable(GL_CLIP_DISTANCE0); //?
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_STENCIL_TEST);
 
 	if (water)
 	{
@@ -160,31 +151,47 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 
 	if (sky) { RenderSkyNoise(_camera); }
 
+	glEnable(GL_STENCIL_TEST);
 	//4. Rendering to main FBO with stencil
 	if (focuse)
 	{
 	  for (const auto& obj : focused)
 	  {
-			StencilFuncDefault();
+			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+			glStencilFunc(GL_ALWAYS, 1, 0xFF);
+			glStencilMask(0xFF);
+
 			if(std::find(main_objs.begin(), main_objs.end(), obj)!= main_objs.end())
 				RenderMain(_camera, _light, { obj });
 			else
 				RenderPBR(_camera, _light, { obj });
 
+			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+			glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+			glStencilMask(0x00);
+
 	    RenderOutlineFocused(_camera, _light, { obj });
+
+			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+			glStencilFunc(GL_ALWAYS, 0, 0xFF);
+			glStencilMask(0xFF);
 	  }
 	}
-
+	//Render not outlined objects
 	std::vector<shObject> not_outlined;
 	std::set_difference(main_objs.begin(), main_objs.end(),
 		                  focused.begin(), focused.end(),
 		                  std::back_inserter(not_outlined),
 		                  [](auto& a, auto& b) { return &a < &b; });
 
-	glDisable(GL_STENCIL_TEST);
 	RenderMain(_camera, _light, not_outlined);
-	RenderPBR(_camera, _light, pbr_objs);
-	glEnable(GL_STENCIL_TEST);
+
+	not_outlined.clear();
+	std::set_difference(pbr_objs.begin(), pbr_objs.end(),
+		focused.begin(), focused.end(),
+		std::back_inserter(not_outlined),
+		[](auto& a, auto& b) { return &a < &b; });
+	RenderPBR(_camera, _light, not_outlined);
 
 	if (flags_on) { RenderFlags(_camera, _light, flags); }
 
@@ -217,16 +224,34 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 
 	if (particles) { RenderParticles(_camera); }
 
-	if (mts) 
-	{ 
+	if (mts) // resolving mts to default
+	{
+		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SCREEN);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		eGlBufferContext::GetInstance().ResolveMtsToScreen();
 		RenderBlur(_camera);
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 		glViewport(0, 0, width, height);
-		glClear(GL_DEPTH_BUFFER_BIT  | GL_STENCIL_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glDisable(GL_DEPTH_TEST);
 		RenderContrast(_camera);
 	}
 	
+	//Post-processing, need stencil
+	eGlBufferContext::GetInstance().BlitFromTo(eBuffer::BUFFER_SCREEN, eBuffer::BUFFER_DEFAULT, GL_STENCIL_BUFFER_BIT);
+	glEnable(GL_STENCIL_TEST);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	glStencilFunc(GL_EQUAL, 1, 0xFF);
+	glStencilMask(0xFF);
+	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
+	renderManager->ScreenRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));
+	renderManager->ScreenRender()->RenderKernel();
+	glClear(GL_STENCIL_BUFFER_BIT);
+	glDisable(GL_STENCIL_TEST);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	glStencilFunc(GL_ALWAYS, 1, 0xFF);
+	glStencilMask(0xFF);
+
 	if (draw_bounding_boxes)
 	{
 		for (auto object : main_objs)
@@ -238,7 +263,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 	}
 
 	//8.1 Texture visualization
-	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT); //?
+	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
 
@@ -269,60 +294,6 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 	renderManager->ScreenRender()->Render({ 0,0 }, { width, height },
 																				{ 0,0 }, { width, height },
 																				width, height);*/
-}
-
-//-------------------------------------------------------
-Texture eOpenGlRenderPipeline::GetDefaultBufferTexture() const
-{
-	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_DEFAULT);
-}
-
-//-------------------------------------------------------
-Texture eOpenGlRenderPipeline::GetReflectionBufferTexture() const
-{
-  return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFLECTION);
-}
-
-//-------------------------------------------------------
-Texture eOpenGlRenderPipeline::GetRefractionBufferTexture() const
-{
-  return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFRACTION);
-}
-
-//-------------------------------------------------------
-Texture eOpenGlRenderPipeline::GetShadowBufferTexture() const
-{
-  return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SHADOW);
-}
-
-//-------------------------------------------------------
-Texture eOpenGlRenderPipeline::GetGausian1BufferTexture() const
-{
-  return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_GAUSSIAN_ONE);
-}
-
-//-------------------------------------------------------
-Texture eOpenGlRenderPipeline::GetGausian2BufferTexture() const
-{
-  return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_GAUSSIAN_TWO);
-}
-
-//-------------------------------------------------------
-Texture eOpenGlRenderPipeline::GetMtsBufferTexture() const
-{
-  return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_MTS);
-}
-
-//-------------------------------------------------------
-Texture eOpenGlRenderPipeline::GetScreenBufferTexture() const
-{
-  return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN);
-}
-
-//----------------------------------------------------
-Texture eOpenGlRenderPipeline::GetBrightFilter() const
-{
-  return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_BRIGHT_FILTER);
 }
 
 void eOpenGlRenderPipeline::RenderShadows(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
@@ -388,13 +359,6 @@ void eOpenGlRenderPipeline::RenderSkyNoise(const Camera& _camera)
 	glEnable(GL_CULL_FACE);
 }
 
-void eOpenGlRenderPipeline::StencilFuncDefault()
-{
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-	glStencilFunc(GL_ALWAYS, 1, 0xFF);
-	glStencilMask(0xFF);
-}
-
 void eOpenGlRenderPipeline::RenderMain(const Camera& _camera, const Light& _light, const std::vector<shObject>& _objects)
 {
 	renderManager->MainRender()->Render(_camera, _light, _objects, debug_white, debug_texcoords);
@@ -402,15 +366,11 @@ void eOpenGlRenderPipeline::RenderMain(const Camera& _camera, const Light& _ligh
 
 void eOpenGlRenderPipeline::RenderOutlineFocused(const Camera& _camera, const Light& _light, const std::vector<shObject>& focused)
 {
-	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-	glStencilMask(0x00);
 	//5. Rendering Stencil Outlineing
 	if(!focused.empty())
 	{
 		renderManager->OutlineRender()->Render(_camera, _light, focused);
 	}
-	StencilFuncDefault();
-	glClear(GL_STENCIL_BUFFER_BIT);
 }
 
 void eOpenGlRenderPipeline::RenderFlags(const Camera& _camera, const Light& _light, std::vector<shObject> flags)
@@ -445,7 +405,6 @@ void eOpenGlRenderPipeline::RenderParticles(const Camera& _camera)
 
 void eOpenGlRenderPipeline::RenderBlur(const Camera& _camera)
 {
-	eGlBufferContext::GetInstance().ResolveMtsToScreen();
 	renderManager->BrightFilterRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_BRIGHT_FILTER);
 	glViewport(0, 0, width, height);
@@ -499,4 +458,58 @@ void eOpenGlRenderPipeline::RenderPBR(const Camera& _camera, const Light& _light
 	{
 		renderManager->PBRRender()->Render(_camera, _light, _objs);
 	}
+}
+
+//-------------------------------------------------------
+Texture eOpenGlRenderPipeline::GetDefaultBufferTexture() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_DEFAULT);
+}
+
+//-------------------------------------------------------
+Texture eOpenGlRenderPipeline::GetReflectionBufferTexture() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFLECTION);
+}
+
+//-------------------------------------------------------
+Texture eOpenGlRenderPipeline::GetRefractionBufferTexture() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFRACTION);
+}
+
+//-------------------------------------------------------
+Texture eOpenGlRenderPipeline::GetShadowBufferTexture() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SHADOW);
+}
+
+//-------------------------------------------------------
+Texture eOpenGlRenderPipeline::GetGausian1BufferTexture() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_GAUSSIAN_ONE);
+}
+
+//-------------------------------------------------------
+Texture eOpenGlRenderPipeline::GetGausian2BufferTexture() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_GAUSSIAN_TWO);
+}
+
+//-------------------------------------------------------
+Texture eOpenGlRenderPipeline::GetMtsBufferTexture() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_MTS);
+}
+
+//-------------------------------------------------------
+Texture eOpenGlRenderPipeline::GetScreenBufferTexture() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN);
+}
+
+//----------------------------------------------------
+Texture eOpenGlRenderPipeline::GetBrightFilter() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_BRIGHT_FILTER);
 }

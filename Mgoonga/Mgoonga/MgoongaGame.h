@@ -36,6 +36,7 @@ public:
 	virtual bool			OnMouseRelease()								                override;
 
   void OnFocusedChanged();
+  void _InitializeHexes();
 
 protected:
 	virtual void			InitializePipline()								override;
@@ -53,6 +54,7 @@ protected:
   std::vector<shObject>                  m_pbr_objs;
   std::shared_ptr<std::vector<shObject>> m_framed;
   std::vector<std::shared_ptr<GUI>>			 guis;
+  shObject														   hex_model;
 
   //should be inside script
   std::optional<dbb::line>               m_grab_camera_line = std::nullopt;

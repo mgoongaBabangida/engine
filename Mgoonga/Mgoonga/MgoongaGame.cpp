@@ -71,10 +71,10 @@ void eMgoongaGameContext::InitializeExternalGui()
   externalGui[1]->Add(CHECKBOX, "Debug white", &pipeline.GetDebugWhite());
   externalGui[1]->Add(CHECKBOX, "Debug Tex Coords", &pipeline.GetDebugTexCoords());
 
-  externalGui[1]->Add(SLIDER_FLOAT, "PBR debug dist", (void*)&pipeline.MaterialMetalness());
-  externalGui[1]->Add(SLIDER_FLOAT, "PBR debug intensity", (void*)&pipeline.MaterialRoughness());
-  externalGui[1]->Add(SLIDER_FLOAT, "PBR debug shininess", (void*)&pipeline.MaterialShininess());
-  externalGui[1]->Add(SLIDER_FLOAT, "PBR debug ao", (void*)&pipeline.MaterialAO());
+  externalGui[1]->Add(SLIDER_FLOAT, "PBR debug dist", (void*)&pipeline.debug_float[0]);
+  externalGui[1]->Add(SLIDER_FLOAT, "PBR debug intensity", (void*)&pipeline.debug_float[1]);
+  externalGui[1]->Add(SLIDER_FLOAT, "PBR debug shininess", (void*)&pipeline.debug_float[2]);
+  externalGui[1]->Add(SLIDER_FLOAT, "PBR debug ao", (void*)&pipeline.debug_float[3]);
 
   externalGui[1]->Add(TEXTURE, "Reflection buffer", (void*)pipeline.GetReflectionBufferTexture().id);
   externalGui[1]->Add(TEXTURE, "Refraction buffer", (void*)pipeline.GetRefractionBufferTexture().id);
@@ -362,6 +362,8 @@ void eMgoongaGameContext::InitializeModels()
   shObject obj = factory.CreateObject(modelManager->Find("sphere_textured"), "SpherePBR");
   obj->GetTransform()->setTranslation(glm::vec3(-2.0f,3.5f,1.5f));
   m_pbr_objs.push_back(obj);
+
+  _InitializeHexes();
 }
 
 //-------------------------------------------------------------------------
@@ -407,7 +409,7 @@ void eMgoongaGameContext::PaintGL()
   objects.insert({ eOpenGlRenderPipeline::RenderType::OUTLINED, *focused_output });
   objects.insert({ eOpenGlRenderPipeline::RenderType::FLAG, flags });
   objects.insert({ eOpenGlRenderPipeline::RenderType::PBR, m_pbr_objs });
-  objects.insert({ eOpenGlRenderPipeline::RenderType::GEOMETRY, {} });
+  objects.insert({ eOpenGlRenderPipeline::RenderType::GEOMETRY, {hex_model} });
 	pipeline.RenderFrame(objects, GetMainCamera(), GetMainLight(), guis);
 }
 
@@ -415,4 +417,25 @@ void eMgoongaGameContext::PaintGL()
 uint32_t eMgoongaGameContext::GetFinalImageId()
 {
   return pipeline.GetDefaultBufferTexture().id;
+}
+
+//-------------------------------------------------------------------------------------------
+void eMgoongaGameContext::_InitializeHexes()
+{
+  float common_height = 2.01f;
+  float radius = 0.5f;
+  std::vector<glm::vec3> dots;
+  float z_move = glm::sin(glm::radians(240.0f)) * radius;
+  for (int i = -6; i < 6; ++i)
+    for (int j = -5; j < 5; ++j)
+    {
+      dots.emplace_back(glm::vec3{ glm::cos(glm::radians(0.0f)) * radius * i,
+                                   common_height,
+                                   z_move * 2 * j });
+      dots.emplace_back(glm::vec3{ glm::cos(glm::radians(60.0f)) * radius * i * 2 + radius / 2,
+                                   common_height, 
+                                   z_move + z_move * 2 * j });
+    }
+  ObjectFactoryBase factory;
+  hex_model = factory.CreateObject(std::make_shared<SimpleModel>(new SimpleGeometryMesh(dots, radius)));
 }

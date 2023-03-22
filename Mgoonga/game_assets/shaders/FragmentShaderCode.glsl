@@ -170,6 +170,7 @@ void main()
 		bNormal = theNormal;
 
   //Ambient
+  vec3 dif_texture = vec3(texture(texture_diffuse1, Texcoord));
   vec3 ambientLight = light.ambient * vec3(texture(texture_diffuse1, Texcoord));// * material.ambient  
 
      float shadow; 
@@ -181,7 +182,7 @@ void main()
   vec3 difspec = LightingFunction(light, bNormal, thePosition, Texcoord);
 
   if(debug_white_color)
-   daColor = vec4(1.0,1.0,1.0,1.0); 
+   daColor = vec4(dif_texture.r * 2,dif_texture.g /2, dif_texture.b / 2,1.0); 
   else if(debug_white_texcoords)
    daColor = vec4(Texcoord.x, Texcoord.x, Texcoord.x, 1.0);
   else if(shadow < 0.9)

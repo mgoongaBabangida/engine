@@ -12,9 +12,9 @@
 	 void BindForWriting();
 	 void BindForReading(GLenum TextureUnit);
 	 Texture GetTexture();
+	 GLuint  ID() { return m_fbo; }
  private:
 	 GLuint m_fbo;
-	 //GLuint m_shadowMap;
 	 Texture m_shadowMap;
  };
 

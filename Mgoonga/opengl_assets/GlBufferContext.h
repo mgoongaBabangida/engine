@@ -34,7 +34,10 @@ public:
 	Texture GetTexture(eBuffer);
 	void ResolveMtsToScreen() { mtsFBO.ResolveToFBO(&screenFBO); }
 	void BlitDepthFromTo(eBuffer, eBuffer);
-	
+	void BlitFromTo(eBuffer, eBuffer, GLenum bit);
+
+	GLuint GetId(eBuffer);
+
 	static eGlBufferContext& GetInstance() 
 	{
 		static eGlBufferContext  instance;

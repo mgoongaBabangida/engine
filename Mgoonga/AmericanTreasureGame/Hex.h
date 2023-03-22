@@ -3,15 +3,15 @@
 #include <math/PlaneLine.h>
 #include <math.h>
 
-static const float	common_height = 2.01f;
-static const float	radius = 0.5f;
-
 class eTerrain;
 
 //---------------------------------------------------------------------
 class Hex
 {
 public:
+	static const float	common_height;
+	static const float	radius;
+
 	Hex(glm::vec2 c) : m_center( c ) {}
 	float x() const { return m_center.x; }
 	float z() const { return m_center.y; }

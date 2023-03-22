@@ -18,6 +18,7 @@ public:
 	void		BindForReading(GLenum TextureUnit);
 
 	Texture		GetTexture();
+	GLuint  ID()				{ return m_fbo; }
 	GLuint		Width()		{ return  m_width;	}
 	GLuint		Height()	{ return  m_height; }
 private:

@@ -21,7 +21,7 @@ public:
 	Texture		GetTexture1() { return Texture(gNormal, m_width, m_height);		}
 	Texture		GetTexture2() { return Texture(gAlbedoSpec, m_width, m_height); }
 
-	GLuint		Id()		  { return m_fbo; }
+	GLuint		ID()		  { return m_fbo; }
 
 private:
 	GLuint	m_fbo;

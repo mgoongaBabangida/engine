@@ -4,6 +4,9 @@
 #include <algorithm>
 #include <iostream>
 
+const float	Hex::common_height = 2.01f;
+const float	Hex::radius = 0.5f;
+
 //-------------------------------------------------------------------------------------
 bool Hex::IsOn(float x, float z)
 {

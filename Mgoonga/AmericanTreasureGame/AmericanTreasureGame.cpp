@@ -44,7 +44,7 @@ public:
   {
     //hex_distance multiplied by shooting distance
     {
-      if (glm::length(shooter->GetTransform()->getTranslation() - target->GetTransform()->getTranslation()) <= (radius))
+      if (glm::length(shooter->GetTransform()->getTranslation() - target->GetTransform()->getTranslation()) <= (Hex::radius))
       {
         //Calculate fight outcome
       }
@@ -421,23 +421,22 @@ void eAmericanTreasureGame::InitializeRenders()
 //-------------------------------------------------------------------------------------------
 void eAmericanTreasureGame::_InitializeHexes()
 {
-	float z_move = glm::sin(glm::radians(240.0f)) * radius;
+	float z_move = glm::sin(glm::radians(240.0f)) * Hex::radius;
 	for (int i = -6; i < 6; ++i)
 		for (int j = -5; j < 5; ++j)
 		{
-			hexes.push_back(glm::vec2(glm::cos(glm::radians(0.0f)) * radius * i,					z_move * 2 * j));
-			hexes.push_back(glm::vec2(glm::cos(glm::radians(60.0f)) * radius * i * 2 + radius / 2,  z_move + z_move * 2 * j));
+			hexes.push_back(glm::vec2(glm::cos(glm::radians(0.0f)) * Hex::radius * i,					z_move * 2 * j));
+			hexes.push_back(glm::vec2(glm::cos(glm::radians(60.0f)) * Hex::radius * i * 2 + Hex::radius / 2,  z_move + z_move * 2 * j));
 		}
 	std::vector<glm::vec3> dots;
 	for (auto& hex : hexes)
 	{
 		hex.SetNeighbour(hexes);
-		dots.emplace_back(glm::vec3{ hex.x(), common_height,  hex.z() });
+		dots.emplace_back(glm::vec3{ hex.x(), Hex::common_height,  hex.z() });
 		//hex.Debug();
 	}
-	auto* mesh = new SimpleGeometryMesh(dots, radius);//move
 	ObjectFactoryBase factory;
-	hex_model = factory.CreateObject(std::make_shared<SimpleModel>(mesh));
+	hex_model = factory.CreateObject(std::make_shared<SimpleModel>(new SimpleGeometryMesh(dots, Hex::radius)));
 }
 
 //-------------------------------------------------------------------------------------------

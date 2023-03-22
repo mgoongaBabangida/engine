@@ -56,11 +56,7 @@ public:
 	bool& GetGeometryOnRef() { return geometry; }
   float& GetBlurCoefRef() { return blur_coef; }
 
-	Material material; //debug
-	float& MaterialMetalness() { return material.metallic; }
-	float& MaterialRoughness() { return material.roughness; }
-	float& MaterialShininess() { return material.shininess; }
-	float& MaterialAO()				 { return material.ao; }
+	glm::vec4 debug_float = {0.0f,0.0f,0.0f,0.0f};
 
 	bool& GetDebugWhite() { return debug_white; }
 	bool& GetDebugTexCoords() { return debug_texcoords; }
@@ -82,7 +78,6 @@ protected:
 	void			RenderReflection(Camera&, const Light&, std::vector<shObject>&);
 	void			RenderRefraction(Camera&, const Light&, std::vector<shObject>&);
 	void			RenderSkyNoise(const Camera&);
-	void			StencilFuncDefault();
 	void			RenderMain(const Camera&, const Light&, const std::vector<shObject>&);
 	void			RenderOutlineFocused(const Camera&, const Light&, const std::vector<shObject>&);
 	void			RenderFlags(const Camera&, const Light&, std::vector<shObject>);
