@@ -153,7 +153,7 @@ void main()
 {   
 	// Paralax mapping
 	vec3 tangetnViewDir   = normalize(TBN * eyePositionWorld - TBN * thePosition);
-	vec2 fTexCoords = ParallaxMapping(Texcoord,  tangetnViewDir);
+	//vec2 fTexCoords = ParallaxMapping(Texcoord,  tangetnViewDir);
 	//if(fTexCoords.x > 1.0 || fTexCoords.y > 1.0 || fTexCoords.x < 0.0 || fTexCoords.y < 0.0)
 		//discard;
 	

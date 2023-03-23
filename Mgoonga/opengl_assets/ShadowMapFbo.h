@@ -3,6 +3,7 @@
 
 #include "Texture.h"
 
+//-------------------------------------------------------------------------------------
  class ShadowMapFBO
  {
  public:
@@ -12,7 +13,9 @@
 	 void BindForWriting();
 	 void BindForReading(GLenum TextureUnit);
 	 Texture GetTexture();
-	 GLuint  ID() { return m_fbo; }
+	 GLuint  ID()			 { return m_fbo; }
+	 glm::ivec2 Size() { return { m_shadowMap.mTextureWidth , m_shadowMap.mTextureHeight }; }
+ 
  private:
 	 GLuint m_fbo;
 	 Texture m_shadowMap;

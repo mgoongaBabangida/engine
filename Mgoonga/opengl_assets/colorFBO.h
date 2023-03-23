@@ -21,6 +21,8 @@ public:
 	GLuint  ID()				{ return m_fbo; }
 	GLuint		Width()		{ return  m_width;	}
 	GLuint		Height()	{ return  m_height; }
+	glm::ivec2 Size()		{ return { m_width , m_height }; }
+
 private:
 	void		CreateMultisampleColorAttachement(unsigned int WindowWidth, unsigned int WindowHeight);
 	GLuint		m_fbo;

@@ -79,20 +79,12 @@ Texture eGlBufferContext::GetTexture(eBuffer _buffer)
 }
 
 //----------------------------------------------------------------
-void eGlBufferContext::BlitDepthFromTo(eBuffer from, eBuffer to) //$todo make generic otherwise may not work !!!
-{
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, gFBO.ID());
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	glBlitFramebuffer(0, 0, gFBO.Width(), gFBO.Height(), 0, 0, gFBO.Width(), gFBO.Height(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-//----------------------------------------------------------------
 void eGlBufferContext::BlitFromTo(eBuffer _from, eBuffer _to, GLenum bit)
 {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, GetId(_from));
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, GetId(_to));
-	glBlitFramebuffer(0, 0, 1200, 600, 0, 0, 1200, 600, bit, GL_NEAREST); //@todo get width and height of buffers
+	glBlitFramebuffer(0, 0, GetSize(_from).x, GetSize(_from).y, 0, 0,
+													GetSize(_to).x, GetSize(_to).y, bit, GL_NEAREST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -101,18 +93,40 @@ GLuint eGlBufferContext::GetId(eBuffer _buffer)
 {
 	switch (_buffer)
 	{
-	case eBuffer::BUFFER_DEFAULT:		return defaultFBO.ID();
-	case eBuffer::BUFFER_SHADOW:		return depthFBO.ID();
+	case eBuffer::BUFFER_DEFAULT:				return defaultFBO.ID();
+	case eBuffer::BUFFER_SHADOW:				return depthFBO.ID();
 	case eBuffer::BUFFER_BRIGHT_FILTER: return brightFilterFBO.ID();
 	case eBuffer::BUFFER_GAUSSIAN_ONE:	return gausian1FBO.ID();
 	case eBuffer::BUFFER_GAUSSIAN_TWO:	return gausian2FBO.ID();
-	case eBuffer::BUFFER_REFLECTION:	return reflectionFBO.ID();
-	case eBuffer::BUFFER_REFRACTION:	return refractionFBO.ID();
-	case eBuffer::BUFFER_SCREEN:		return screenFBO.ID();
-	case eBuffer::BUFFER_MTS:			return mtsFBO.ID();
-	case eBuffer::BUFFER_DEFFERED:		return gFBO.ID();
-	case eBuffer::BUFFER_DEFFERED1:		return gFBO.ID();
-	case eBuffer::BUFFER_DEFFERED2:		return gFBO.ID();
-	case eBuffer::BUFFER_SQUERE:		return squereFBO.ID();
+	case eBuffer::BUFFER_REFLECTION:		return reflectionFBO.ID();
+	case eBuffer::BUFFER_REFRACTION:		return refractionFBO.ID();
+	case eBuffer::BUFFER_SCREEN:				return screenFBO.ID();
+	case eBuffer::BUFFER_MTS:						return mtsFBO.ID();
+	case eBuffer::BUFFER_DEFFERED:			return gFBO.ID();
+	case eBuffer::BUFFER_DEFFERED1:			return gFBO.ID();
+	case eBuffer::BUFFER_DEFFERED2:			return gFBO.ID();
+	case eBuffer::BUFFER_SQUERE:				return squereFBO.ID();
+	}
+}
+
+
+//----------------------------------------------------------------
+glm::ivec2 eGlBufferContext::GetSize(eBuffer _buffer)
+{
+	switch (_buffer)
+	{
+	case eBuffer::BUFFER_DEFAULT:				return defaultFBO.Size();
+	case eBuffer::BUFFER_SHADOW:				return depthFBO.Size();
+	case eBuffer::BUFFER_BRIGHT_FILTER: return brightFilterFBO.Size();
+	case eBuffer::BUFFER_GAUSSIAN_ONE:	return gausian1FBO.Size();
+	case eBuffer::BUFFER_GAUSSIAN_TWO:	return gausian2FBO.Size();
+	case eBuffer::BUFFER_REFLECTION:		return reflectionFBO.Size();
+	case eBuffer::BUFFER_REFRACTION:		return refractionFBO.Size();
+	case eBuffer::BUFFER_SCREEN:				return screenFBO.Size();
+	case eBuffer::BUFFER_MTS:						return mtsFBO.Size();
+	case eBuffer::BUFFER_DEFFERED:			return gFBO.Size();
+	case eBuffer::BUFFER_DEFFERED1:			return gFBO.Size();
+	case eBuffer::BUFFER_DEFFERED2:			return gFBO.Size();
+	case eBuffer::BUFFER_SQUERE:				return squereFBO.Size();
 	}
 }

@@ -51,6 +51,10 @@ void eMgoongaGameContext::InitializeExternalGui()
   externalGui[1]->Add(CHECKBOX, "Show bounding boxes", &pipeline.GetBoundingBoxBoolRef());
   externalGui[1]->Add(CHECKBOX, "Use Multi sampling", &pipeline.GetMultiSamplingBoolRef());
   externalGui[1]->Add(CHECKBOX, "Sky box", &pipeline.GetSkyBoxOnRef());
+  externalGui[1]->Add(CHECKBOX, "Water", &pipeline.GetWaterOnRef());
+  externalGui[1]->Add(CHECKBOX, "Hex", &pipeline.GetGeometryOnRef());
+  externalGui[1]->Add(CHECKBOX, "Kernel", &pipeline.GetKernelOnRef());
+  externalGui[1]->Add(CHECKBOX, "Sky noise", &pipeline.GetSkyNoiseOnRef());
   externalGui[1]->Add(SLIDER_FLOAT, "Blur coefficients", &pipeline.GetBlurCoefRef());
   std::function<void()> emit_partilces_callback = [this]()
   {
@@ -289,6 +293,7 @@ void eMgoongaGameContext::InitializeModels()
                            false);
 	//OBJECTS
   ObjectFactoryBase factory;
+
   shObject wallCube = factory.CreateObject(modelManager->Find("wall_cube"), "WallCube");
 	wallCube->GetTransform()->setTranslation(vec3(3.0f, 3.0f, 3.0f));
 	m_objects.push_back(wallCube);
@@ -300,6 +305,12 @@ void eMgoongaGameContext::InitializeModels()
   shObject grassPlane = factory.CreateObject(modelManager->Find("grass_plane"), "GrassPlane");
 	grassPlane->GetTransform()->setTranslation(vec3(0.0f, 1.2f, 0.0f));
 	m_objects.push_back(grassPlane);
+
+  shObject terrain = factory.CreateObject(std::shared_ptr<IModel>(terrainModel.release()), "Terrain");
+  terrain->SetName("Terrain");
+  terrain->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
+  terrain->GetTransform()->setTranslation(vec3(0.0f, 1.8f, 0.0f));
+  m_objects.push_back(terrain);
 
 	shObject nanosuit = factory.CreateObject(modelManager->Find("nanosuit"), "Nanosuit");
 	nanosuit->GetTransform()->setTranslation(vec3(0.0f, 2.0f, 0.0f));
@@ -314,12 +325,6 @@ void eMgoongaGameContext::InitializeModels()
                                       soundManager->GetSound("shot_sound"),
                                       &GetMainCamera().getCameraRay(),
                                       pipeline.GetWaterHeight()));
-
-  shObject terrain = factory.CreateObject(std::shared_ptr<IModel>(terrainModel.release()), "Terrain");
-  terrain->SetName("Terrain");
-  terrain->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
-  terrain->GetTransform()->setTranslation(vec3(0.0f, 1.8f, 0.0f));
-  m_objects.push_back(terrain);
 
 	shObject wolf = factory.CreateObject(modelManager->Find("wolf"), "Wolf");
 	wolf->GetTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);

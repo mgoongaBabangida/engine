@@ -3,6 +3,7 @@
 
 #include "Texture.h"
 
+//--------------------------------------------------------------------------
 class eGFBO
 {
 public:
@@ -14,6 +15,7 @@ public:
 	void		BindForReading0(GLenum TextureUnit);
 	void		BindForReading1(GLenum TextureUnit);
 	void		BindForReading2(GLenum TextureUnit);
+	
 	GLuint		Width()		  { return  m_width; }
 	GLuint		Height()	  { return  m_height; }
 
@@ -22,6 +24,7 @@ public:
 	Texture		GetTexture2() { return Texture(gAlbedoSpec, m_width, m_height); }
 
 	GLuint		ID()		  { return m_fbo; }
+	glm::ivec2 Size()		{ return { m_width , m_height }; }
 
 private:
 	GLuint	m_fbo;

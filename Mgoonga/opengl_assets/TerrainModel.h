@@ -11,9 +11,10 @@ class DLL_OPENGL_ASSETS TerrainModel : public ITerrainModel
 {
 public:
 	TerrainModel();
-	TerrainModel(Texture* heightMap);  //copy generation in private !!!
+	explicit TerrainModel(Texture* heightMap);  //copy generation in private !!!
 	TerrainModel(Texture * diffuse, Texture * specular, Texture * m_normal, Texture * heightMap);
 	TerrainModel(const TerrainModel& other);
+
 	virtual ~TerrainModel();
 
 	void initialize(Texture* diffuse, Texture* specular, bool spreed_texture = true);
@@ -21,11 +22,11 @@ public:
 	
 	virtual void			                Draw()							override;
 
-  virtual size_t                    GetVertexCount() const;
-  virtual size_t                    GetMeshCount() const { return 1; }
-  virtual std::vector<const IMesh*> GetMeshes() const;
-  virtual size_t                    GetAnimationCount() const { return 0; }
-  virtual std::vector<const IAnimation*> GetAnimations() const {
+  virtual size_t													GetVertexCount() const;
+  virtual size_t													GetMeshCount() const { return 1; }
+  virtual std::vector<const IMesh*>				GetMeshes() const;
+  virtual size_t													GetAnimationCount() const { return 0; }
+  virtual std::vector<const IAnimation*>	GetAnimations() const {
     return std::vector<const IAnimation*>();
   }
 

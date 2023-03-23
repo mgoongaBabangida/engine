@@ -149,11 +149,11 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 			: eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	if (sky) { RenderSkyNoise(_camera); }
+	if (sky_noise) { RenderSkyNoise(_camera); }
 
 	glEnable(GL_STENCIL_TEST);
 	//4. Rendering to main FBO with stencil
-	if (focuse)
+	if (focus)
 	{
 	  for (const auto& obj : focused)
 	  {
@@ -238,19 +238,22 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 	}
 	
 	//Post-processing, need stencil
-	eGlBufferContext::GetInstance().BlitFromTo(eBuffer::BUFFER_SCREEN, eBuffer::BUFFER_DEFAULT, GL_STENCIL_BUFFER_BIT);
-	glEnable(GL_STENCIL_TEST);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-	glStencilFunc(GL_EQUAL, 1, 0xFF);
-	glStencilMask(0xFF);
-	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
-	renderManager->ScreenRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));
-	renderManager->ScreenRender()->RenderKernel();
-	glClear(GL_STENCIL_BUFFER_BIT);
-	glDisable(GL_STENCIL_TEST);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-	glStencilFunc(GL_ALWAYS, 1, 0xFF);
-	glStencilMask(0xFF);
+	if (kernel)
+	{
+		eGlBufferContext::GetInstance().BlitFromTo(eBuffer::BUFFER_SCREEN, eBuffer::BUFFER_DEFAULT, GL_STENCIL_BUFFER_BIT);
+		glEnable(GL_STENCIL_TEST);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		glStencilFunc(GL_EQUAL, 1, 0xFF);
+		glStencilMask(0xFF);
+		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
+		renderManager->ScreenRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));
+		renderManager->ScreenRender()->RenderKernel();
+		glClear(GL_STENCIL_BUFFER_BIT);
+		glDisable(GL_STENCIL_TEST);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilMask(0xFF);
+	}
 
 	if (draw_bounding_boxes)
 	{

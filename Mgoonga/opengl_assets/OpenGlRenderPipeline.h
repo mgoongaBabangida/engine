@@ -55,6 +55,8 @@ public:
 	bool& GetWaterOnRef() { return water; }
 	bool& GetGeometryOnRef() { return geometry; }
   float& GetBlurCoefRef() { return blur_coef; }
+	bool& GetKernelOnRef() { return kernel; }
+	bool& GetSkyNoiseOnRef() { return sky_noise; }
 
 	glm::vec4 debug_float = {0.0f,0.0f,0.0f,0.0f};
 
@@ -94,19 +96,19 @@ protected:
 	bool			skybox		= true;
 	bool			shadows		= true;
 	bool			water		= true;
-	bool			sky			= true;
-	bool			focuse		= true;
+	bool			focus		= true;
 	bool			flags_on		= true;
 	bool			geometry	= true;
 	bool			particles	= true;
 	bool			draw_bounding_boxes = false;
 	bool      debug_white = false;
 	bool      debug_texcoords = false;
+	bool			kernel = true;
+	bool			sky_noise = true;
 
 	const uint32_t  width		  = 1200;
 	const uint32_t  height		= 600;
-	float			nearPlane	  = 0.1f;
-	float			farPlane	  = 0.0f;
+
 	float			waterHeight = 2.0f;
   float     blur_coef   = 0.7f;
 

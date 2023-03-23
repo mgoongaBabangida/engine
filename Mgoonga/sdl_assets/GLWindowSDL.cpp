@@ -70,7 +70,7 @@ bool dbGLWindowSDL::InitializeGL()
 	SDL_DisplayMode current;
 	SDL_GetCurrentDisplayMode(0, &current);
 	
-	window	= SDL_CreateWindow("OpenGl", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH+575, HEIGHT, //@todo
+	window	= SDL_CreateWindow("OpenGl", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH+575, HEIGHT+50, //@todo
 		SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL /*| SDL_WINDOW_RESIZABLE*/ | SDL_WINDOW_ALLOW_HIGHDPI);
 	SDL_GL_SetSwapInterval(1); // Enable vsync
 	

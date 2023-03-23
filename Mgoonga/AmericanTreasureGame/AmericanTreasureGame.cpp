@@ -21,7 +21,7 @@
 #include "Hex.h"
 #include "ATGameClasses.h"
 
-#include <math.h>
+//#include <math.h>
 #include <algorithm>
 
 //-------------------------------------------------------------------------------------------

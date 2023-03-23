@@ -21,6 +21,7 @@ enum class eBuffer
 	BUFFER_SQUERE,
 };
 
+//---------------------------------------------------------------------------
 class eGlBufferContext
 {
 public:
@@ -33,10 +34,10 @@ public:
 	void EnableReadingBuffer(eBuffer, GLenum slot);
 	Texture GetTexture(eBuffer);
 	void ResolveMtsToScreen() { mtsFBO.ResolveToFBO(&screenFBO); }
-	void BlitDepthFromTo(eBuffer, eBuffer);
 	void BlitFromTo(eBuffer, eBuffer, GLenum bit);
 
 	GLuint GetId(eBuffer);
+	glm::ivec2 eGlBufferContext::GetSize(eBuffer _buffer);
 
 	static eGlBufferContext& GetInstance() 
 	{
