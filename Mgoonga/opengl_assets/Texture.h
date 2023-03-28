@@ -20,7 +20,7 @@ struct /*DLL_OPENGL_ASSETS*/ Texture
 	//Texture dimensions
 	int32_t				mTextureWidth;
 	int32_t				mTextureHeight;
-	int32_t				mChannels			= 1;
+	int32_t				mChannels			=		1;
 	int32_t				numberofRows		= 1;
 	
 	Texture() { type = "default", path = "empty", id = (GLuint)glm::pow(2,8)- 1, mTextureWidth = 1, mTextureHeight = 1; loadTexture1x1(YELLOW); }

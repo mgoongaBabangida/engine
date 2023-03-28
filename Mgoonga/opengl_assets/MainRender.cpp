@@ -29,6 +29,7 @@ eMainRender::eMainRender(const std::string& vS, const std::string& fS)
 	matSpecularLoc		= glGetUniformLocation(mainShader.ID(), "material.texture_specular1");
 	matShineLoc			= glGetUniformLocation(mainShader.ID(), "material.shininess");
 
+	//@todo Need to delete this default and use it correctly
 	glUniform3f(matAmbientLoc, 0.5f, 0.5f, 0.5f); // 1.0f, 0.5f, 0.31f
 	glUniform3f(matDiffuseLoc, 1.0f, 1.0f, 1.0f); // 1.0f, 0.5f, 0.31f
 	glUniform3f(matSpecularLoc, 1.0f, 1.0f, 1.0f); //0.5f, 0.5f, 0.5f
@@ -39,7 +40,8 @@ eMainRender::eMainRender(const std::string& vS, const std::string& fS)
 	shadowMatrixUniformLocation			= glGetUniformLocation(mainShader.ID(), "shadowMatrix"); //shadow
 	eyePositionWorldUniformLocation		= glGetUniformLocation(mainShader.ID(), "eyePositionWorld");
 	FarPlaneUniformLocation				= glGetUniformLocation(mainShader.ID(), "far_plane");
-	
+	BonesMatLocation = glGetUniformLocation(mainShader.ID(), "gBones");
+
 	LightingIndexPoint		 = glGetSubroutineIndex(mainShader.ID(), GL_FRAGMENT_SHADER, "calculatePhongPointSpecDif");
 	LightingIndexDirectional = glGetSubroutineIndex(mainShader.ID(), GL_FRAGMENT_SHADER, "calculatePhongDirectionalSpecDif");
 
@@ -74,16 +76,16 @@ void eMainRender::Render(const Camera&			    camera,
 	if (light.type == eLightType::POINT)
 	{
     glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position + light.light_direction), glm::vec3(0.0f, 1.0f, 0.0f));
-		glUniform1i(lightTypeLoc, 0);
+		glUniform1i(lightTypeLoc, false);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexPoint);
 		shadowMatrix = camera.getProjectionBiasedMatrix() * worldToViewMatrix;
 	}
 	else if (light.type == eLightType::DIRECTION)
 	{
     glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0f, 1.0f, 0.0f));
-		glUniform1i(lightTypeLoc, 1);
+		glUniform1i(lightTypeLoc, true);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
-    shadowMatrix = camera.getProjectionBiasedMatrix() * worldToViewMatrix; //$todo should be ortho projection
+    shadowMatrix = camera.getProjectionBiasedMatrix() * worldToViewMatrix; //$todo should be ortho projection or not?
 	}
 	else // cut off
 	{
@@ -110,9 +112,7 @@ void eMainRender::Render(const Camera&			    camera,
 			for (auto& m : matrices)
 				m = UNIT_MATRIX;
 		}
-
-		int loc = glGetUniformLocation(mainShader.ID(), "gBones");
-		glUniformMatrix4fv(loc, 100, GL_FALSE, &matrices[0][0][0]);
+		glUniformMatrix4fv(BonesMatLocation, 100, GL_FALSE, &matrices[0][0][0]);
 
 		object->GetModel()->Draw();
 	}

@@ -145,7 +145,7 @@ void	Shader::GetUniformInfoFromShader()
 			GLint nameBufSize = results[0] + 1;
 			char* name = new char[nameBufSize];
 			glGetProgramResourceName(id, GL_UNIFORM, i, nameBufSize, NULL, name);
-			uniforms.push_back(Uniform{ std::string(name, nameBufSize),results[2],results[1],{} });
+			uniforms.push_back(Uniform{ std::string(name),results[2],results[1],{} });
 			delete[] name;
 			std::cout << uniforms.back().name << " " << uniforms.back().type << " " << uniforms.back().location << std::endl;
 		}

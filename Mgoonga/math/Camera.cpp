@@ -104,9 +104,9 @@ const glm::mat4& Camera::getProjectionMatrix() const
  glm::mat4 Camera::getProjectionBiasedMatrix() const
  {
 	 return glm::mat4(glm::vec4(0.5f, 0.0f, 0.0f, 0.0f),
-		    glm::vec4(0.0f, 0.5f, 0.0f, 0.0f),
-		    glm::vec4(0.0f, 0.0f, 0.5f, 0.0f),
-		    glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)) * projectionMatrix;
+										glm::vec4(0.0f, 0.5f, 0.0f, 0.0f),
+										glm::vec4(0.0f, 0.0f, 0.5f, 0.0f),
+										glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)) * projectionMatrix;
  }
 
  const glm::mat4& Camera::getProjectionOrthoMatrix() const

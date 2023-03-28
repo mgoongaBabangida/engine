@@ -39,7 +39,7 @@ void main()
   LightSpacePos = shadowMatrix * modelToWorldMatrix * v;
 
   vec4 WorldPosV	    = modelToWorldMatrix * v;	  //water
-  gl_ClipDistance[0]	= dot(WorldPosV,clip_plane); //water
+  gl_ClipDistance[0]	= dot(WorldPosV,clip_plane);  //water
 
   Texcoord = texcoord;
 

@@ -82,7 +82,10 @@ void eMgoongaGameContext::InitializeExternalGui()
 
   externalGui[1]->Add(TEXTURE, "Reflection buffer", (void*)pipeline.GetReflectionBufferTexture().id);
   externalGui[1]->Add(TEXTURE, "Refraction buffer", (void*)pipeline.GetRefractionBufferTexture().id);
-  externalGui[1]->Add(TEXTURE, "Shadow buffer", (void*)pipeline.GetShadowBufferTexture().id);
+  if(GetMainLight().type == eLightType::DIRECTION)
+    externalGui[1]->Add(TEXTURE, "Shadow buffer directional", (void*)pipeline.GetShadowBufferTexture().id);
+  else
+    externalGui[1]->Add(TEXTURE, "Shadow buffer point", (void*)pipeline.GetShadowBufferTexture().id);
   externalGui[1]->Add(TEXTURE, "Gaussian buffer", (void*)pipeline.GetGausian2BufferTexture().id);
   externalGui[1]->Add(TEXTURE, "Bright filter buffer", (void*)pipeline.GetBrightFilter().id);
 
@@ -263,6 +266,7 @@ void eMgoongaGameContext::InitializePipline()
 //-----------------------------------------------------------------------------
 void eMgoongaGameContext::InitializeBuffers()
 {
+  GetMainLight().type = eLightType::POINT;
 	pipeline.InitializeBuffers(GetMainLight().type == eLightType::POINT);
 }
 

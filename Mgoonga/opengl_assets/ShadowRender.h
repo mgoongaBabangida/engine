@@ -17,7 +17,7 @@ public:
 				       const Light&			      light,
 				       std::vector<shObject>& objects);
 
-	Shader& GetShader() { return shaderDir; }
+	Shader& GetShader() { return shaderPoint; }
 protected:
 	Shader			shaderDir; //@todo two shaders in one render not good
 	Shader			shaderPoint;
@@ -27,6 +27,7 @@ protected:
 	GLuint			ModelUniformLocationPoint;
 	GLuint			ProjectionTransformsUniformLocation;
 	GLuint			FarPlaneUniformLocation;
+	GLuint			LightPosUniformLocation;
 
 	std::vector<glm::mat4> matrices;
 	glm::mat4			         shadowMatrix;

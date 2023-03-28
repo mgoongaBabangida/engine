@@ -31,6 +31,7 @@ protected:
 	GLuint eyePositionWorldUniformLocation;
 	GLuint shadowMatrixUniformLocation;
 	GLuint FarPlaneUniformLocation;
+	GLuint BonesMatLocation;
 
 	GLuint matAmbientLoc;
 	GLuint matDiffuseLoc;
