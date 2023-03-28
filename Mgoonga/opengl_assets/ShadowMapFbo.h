@@ -19,6 +19,7 @@
  private:
 	 GLuint m_fbo;
 	 Texture m_shadowMap;
+	 bool m_cubemap = false;
  };
 
 

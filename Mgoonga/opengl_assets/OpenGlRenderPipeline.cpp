@@ -75,11 +75,11 @@ void eOpenGlRenderPipeline::InitializeBuffers(bool _needsShadowCubeMap)
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_REFLECTION, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_REFRACTION, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW, width * 2, height * 2, _needsShadowCubeMap);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFFERED, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SQUERE, height, height); //squere
   eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_BRIGHT_FILTER, width, height);
   eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_ONE, 600, 300); //@todo numbers
   eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_TWO, 600, 300);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFFERED, width, height);
   //eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFFERED2, width, height);
 }
 
@@ -301,8 +301,9 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 
 void eOpenGlRenderPipeline::RenderShadows(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
 {
-	// Bind the "depth only" FBO and set the viewport to the size of the depth texture 
-	glViewport(0, 0, width * 2, height * 2);
+	// Bind the "depth only" FBO and set the viewport to the size of the depth texture
+	glm::ivec2 size = eGlBufferContext::GetInstance().GetSize(eBuffer::BUFFER_SHADOW);
+	glViewport(0, 0, size.x, size.y);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 
@@ -310,7 +311,7 @@ void eOpenGlRenderPipeline::RenderShadows(const Camera& _camera, const Light& _l
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	//glClearDepth(1.0f);
-	glClear(GL_DEPTH_BUFFER_BIT);
+	// 
 	// Enable polygon offset to resolve depth-fighting isuses 
 	//glEnable(GL_POLYGON_OFFSET_FILL);
 	//glPolygonOffset(2.0f, -2000.0f);

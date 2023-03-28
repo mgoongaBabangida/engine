@@ -1,12 +1,11 @@
 #include "stdafx.h"
 #include "ShadowMapFbo.h"
 #include <stdio.h>
-#include <iostream>
 
 //-------------------------------------------------------------
  ShadowMapFBO::ShadowMapFBO()
  {
-	    m_fbo = 0;
+		m_fbo = 0;
  }
 
  //-------------------------------------------------------------
@@ -29,8 +28,12 @@
 
 	 if (needsCubeMap)
 	 {
+		 m_shadowMap.mTextureWidth = 1024; //!?
+		 m_shadowMap.mTextureHeight = 1024;//!?
+		 m_cubemap = needsCubeMap;
 		 m_shadowMap.makeDepthCubeMap();
 		 glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_shadowMap.id, 0);
+		 glReadBuffer(GL_NONE); //?
 	 }
 	 else
 	 {
@@ -38,9 +41,8 @@
 		 glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
 			 m_shadowMap.id, 0);
 	 }
-
 	 glDrawBuffer(GL_NONE);
-	 
+
 	 GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	  	  
 	   if (Status != GL_FRAMEBUFFER_COMPLETE) {
@@ -55,14 +57,18 @@
  //-------------------------------------------------------------
  void ShadowMapFBO::BindForWriting()
  {
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+		glClear(GL_DEPTH_BUFFER_BIT);
  }
 
  //-------------------------------------------------------------
  void ShadowMapFBO::BindForReading(GLenum TextureUnit)
 {
-	     glActiveTexture(TextureUnit);
-	     glBindTexture(GL_TEXTURE_2D, m_shadowMap.id);
+	 glActiveTexture(TextureUnit);
+	 if (m_cubemap)
+		 glBindTexture(GL_TEXTURE_CUBE_MAP, m_shadowMap.id);
+	 else
+		 glBindTexture(GL_TEXTURE_2D, m_shadowMap.id);
 }
 
  //-------------------------------------------------------------

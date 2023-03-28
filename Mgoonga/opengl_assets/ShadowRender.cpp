@@ -14,6 +14,7 @@ eShadowRender::eShadowRender(const std::string& vS, const std::string& fS, const
 	ModelUniformLocationPoint			= glGetUniformLocation(shaderPoint.ID(), "MVP");
 	ProjectionTransformsUniformLocation = glGetUniformLocation(shaderPoint.ID(), "shadowMatrices");
 	FarPlaneUniformLocation = glGetUniformLocation(shaderPoint.ID(), "far_plane");
+	LightPosUniformLocation = glGetUniformLocation(shaderPoint.ID(), "lightPosition");
 }
 
 //-----------------------------------------------------------------------------
@@ -21,28 +22,30 @@ void eShadowRender::Render(const Camera&					camera,
 													 const Light&						light,
 													 std::vector<shObject>&	objects)
 {
-	glm::mat4 ModelToWorldMatrix = glm::translate(glm::vec3(light.light_position));
-	
 	if (light.type == eLightType::POINT)
 	{
-		glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)camera.getWidth()/ camera.getHeight(), camera.getNearPlane(), camera.getFarPlane()); //should be 90
+		float aspect = 1.0f; // (float)SHADOW_WIDTH/(float)SHADOW_HEIGHT (depth buffer or viewport)
+		glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), aspect, camera.getNearPlane(), camera.getFarPlane()); //should be 90
+		glm::vec3 lightPos = light.light_position;
 		std::vector<glm::mat4> shadowTransforms;
+		shadowTransforms.push_back(shadowProj * 
+			glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
+			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
-		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
-		
+			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
+
 		glUseProgram(shaderPoint.ID());
 		glUniformMatrix4fv(ProjectionTransformsUniformLocation, 6, GL_FALSE, &shadowTransforms[0][0][0]);
 		glUniform1f(FarPlaneUniformLocation, camera.getFarPlane());
+		glUniform3fv(LightPosUniformLocation, 1, &light.light_position[0]);
+
 		//RENDER DEPTH
 		for (auto &object : objects)
 		{

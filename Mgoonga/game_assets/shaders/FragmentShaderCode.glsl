@@ -152,7 +152,7 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir);
 void main()
 {   
 	// Paralax mapping
-	vec3 tangetnViewDir   = normalize(TBN * eyePositionWorld - TBN * thePosition);
+	//vec3 tangetnViewDir   = normalize(TBN * eyePositionWorld - TBN * thePosition);
 	//vec2 fTexCoords = ParallaxMapping(Texcoord,  tangetnViewDir);
 	//if(fTexCoords.x > 1.0 || fTexCoords.y > 1.0 || fTexCoords.x < 0.0 || fTexCoords.y < 0.0)
 		//discard;
@@ -181,14 +181,14 @@ void main()
 
   vec3 difspec = LightingFunction(light, bNormal, thePosition, Texcoord);
 
-  if(debug_white_color)
+  if(debug_white_texcoords)
    daColor = vec4(dif_texture.r * 2,dif_texture.g /2, dif_texture.b / 2,1.0); 
-  else if(debug_white_texcoords)
-   daColor = vec4(Texcoord.x, Texcoord.x, Texcoord.x, 1.0);
+  else if(debug_white_color)
+   daColor = vec4(vec3(shadow / far_plane), 1.0);
   else if(shadow < 0.9)
 	daColor = vec4(ambientLight, 1.0);
   else
-    daColor= vec4(ambientLight +(difspec) * shadow, 1.0); //vec4(shadow,shadow,shadow,1.0);
+   daColor= vec4(ambientLight +(difspec) * shadow, 1.0); //vec4(shadow,shadow,shadow,1.0);
 };
 
 float ShadowCalculation(vec4 fragPosLightSpace )
@@ -224,7 +224,7 @@ float ShadowCalculationCubeMap(vec3 fragPos)
     float bias = 0.05; 
     float shadow = currentDepth -  bias > closestDepth ? 1.0 : 0.0;
 
-    return shadow;
+    return 1.0f - shadow;
 } 
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
