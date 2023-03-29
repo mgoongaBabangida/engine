@@ -3,9 +3,9 @@
 out vec4 daColor;
 
 struct Material {
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;    
+    vec3  ambient;
+    vec3  diffuse;
+    vec3  specular;    
     float shininess;
 }; 
 
@@ -41,7 +41,7 @@ subroutine vec3 LightingPtr(Light light, vec3 normal, vec3 thePosition, vec2 Tex
 subroutine uniform LightingPtr LightingFunction;
 
 layout(binding=0) uniform samplerCube 	   depth_cube_map;// Shadow point
-layout(binding=1) uniform sampler2DShadow  depth_texture; // Shadow dir
+layout(binding=1) uniform sampler2D		   depth_texture; // Shadow dir
 layout(binding=2) uniform sampler2D        texture_diffuse1;
 layout(binding=3) uniform sampler2D        texture_specular1;
 layout(binding=4) uniform sampler2D        texture_normal1;
@@ -51,6 +51,7 @@ uniform vec3 eyePositionWorld;
 uniform bool normalMapping = true;
 uniform bool shadow_directional = true;
 uniform float far_plane;
+uniform float shininess = 32.0f;
 
 uniform bool debug_white_color = false;
 uniform bool debug_white_texcoords = false;
@@ -60,8 +61,6 @@ float ShadowCalculationCubeMap(vec3 fragPos);
 
 subroutine(LightingPtr) vec3 calculatePhongPointSpecDif(Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
 {
-  float shininess = 32.0f;
-
   //Diffuse
   vec3 lightVector  = normalize(vec3(light.position)-thePosition);
   float Brightness  = clamp(dot(lightVector, normal), 0, 1);
@@ -86,31 +85,32 @@ subroutine(LightingPtr) vec3 calculatePhongPointSpecDif(Light light, vec3 normal
     return diffuseLight + specularLight;
 }
 
-vec3 calculatePhongDirectionalSpecDif(Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
+subroutine(LightingPtr) vec3 calculatePhongDirectionalSpecDif(Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
 {
-    float shininess =32.0f;
-    vec3 lightDir = normalize(vec3(-light.direction));
-    // diffuse shading
-    float diff = max(dot(normal, lightDir), 0.0);
-    
+    vec3 lightVector = -normalize(vec3(light.direction));
+    // diffuse shadingfloat 
+	float Brightness  = clamp(dot(lightVector, normal), 0, 1);
+    vec3 diffuseLight  = vec3(light.diffuse  * Brightness * vec3(texture(texture_diffuse1, TexCoords)));
+	
    // specular shading
-    vec3 reflectDir = reflect(-lightDir, normal);
-    vec3 eyeVector = normalize(eyePositionWorld - thePosition); 
-    float spec = pow(max(dot(eyeVector, reflectDir), 0.0), shininess);
-
-    // combine results
-    vec3 diffuse  = light.diffuse  * diff * vec3(texture(texture_diffuse1, TexCoords));
-    vec3 specular = light.specular * spec * vec3(texture(texture_specular1, TexCoords));
-    return (diffuse + specular);
+    vec3 Reflaction = reflect(-lightVector, normal);
+    vec3 eyeVector = normalize(eyePositionWorld - thePosition);
+	float spec      = clamp(dot(Reflaction,eyeVector), 0, 1);	
+    
+	spec = pow(spec, shininess);   
+	vec3 specularLight = light.specular * spec * vec3(texture(texture_specular1, TexCoords));
+	specularLight=clamp(specularLight,0,1);
+	
+    return diffuseLight + specularLight;
 }
 
-subroutine(LightingPtr) vec3 calculatePhongFlashSpecDif(	Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
+subroutine(LightingPtr) vec3 calculatePhongFlashSpecDif(Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
 {
 	vec3 lightDir= normalize(vec3(light.position)-thePosition);
 	float theta     = dot(lightDir, normalize(-light.direction));
 	float epsilon   = light.cutOff - light.outerCutOff;
 	float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
-    
+
 	if(theta > light.cutOff) 
 	{
 		vec3 ret = calculatePhongPointSpecDif(light, normal, thePosition, TexCoords);
@@ -120,10 +120,8 @@ subroutine(LightingPtr) vec3 calculatePhongFlashSpecDif(	Light light, vec3 norma
 	 return vec3(0.0f,0.0f,0.0f);
 }
 
-subroutine(LightingPtr) vec3 calculateBlindPhongPointSpecDif (Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
+subroutine(LightingPtr) vec3 calculateBlinnPhongPointSpecDif (Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
 {
-  float shininess = 32.0f;
-
   //Diffuse
   vec3 lightVector  = normalize(vec3(light.position)-thePosition);
   float Brightness  = clamp(dot(lightVector, normal),0,1);
@@ -145,6 +143,40 @@ subroutine(LightingPtr) vec3 calculateBlindPhongPointSpecDif (Light light, vec3 
     specularLight *= attenuation;
 
     return diffuseLight + specularLight;
+}
+
+subroutine(LightingPtr) vec3 calculateBlinnPhongDirectionalSpecDif(Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
+{
+    vec3 lightVector = -normalize(vec3(light.direction));
+    // diffuse shadingfloat 
+	float Brightness  = clamp(dot(lightVector, normal), 0, 1);
+    vec3 diffuseLight  = vec3(light.diffuse  * Brightness * vec3(texture(texture_diffuse1, TexCoords)));
+	
+   //Specular
+    vec3 eyeVector= normalize(eyePositionWorld-thePosition); 
+    vec3 halfvector = normalize(eyeVector+lightVector);
+    float spec = clamp(dot(normal, halfvector), 0, 1);
+    spec=pow(spec, shininess);
+    vec3 specularLight = vec3(light.specular * spec * vec3(texture(texture_specular1, TexCoords)));//* material.specular
+    specularLight=clamp(specularLight,0,1);	
+	
+    return diffuseLight + specularLight;
+}
+
+subroutine(LightingPtr) vec3 calculateBlinnPhongFlashSpecDif(Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
+{
+	vec3 lightDir= normalize(vec3(light.position)-thePosition);
+	float theta     = dot(lightDir, normalize(-light.direction));
+	float epsilon   = light.cutOff - light.outerCutOff;
+	float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+
+	if(theta > light.cutOff) 
+	{
+		vec3 ret = calculateBlinnPhongPointSpecDif(light, normal, thePosition, TexCoords);
+		return ret *= intensity;
+	}
+	else
+	 return vec3(0.0f,0.0f,0.0f);
 }
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir);
@@ -182,32 +214,40 @@ void main()
   vec3 difspec = LightingFunction(light, bNormal, thePosition, Texcoord);
 
   if(debug_white_texcoords)
-   daColor = vec4(dif_texture.r * 2,dif_texture.g /2, dif_texture.b / 2,1.0); 
+	daColor = vec4(dif_texture.r * 2,dif_texture.g /2, dif_texture.b / 2,1.0); 
   else if(debug_white_color)
-   daColor = vec4(vec3(shadow / far_plane), 1.0);
+	daColor = vec4(vec3(shadow / far_plane), 1.0);
   else if(shadow < 0.9)
 	daColor = vec4(ambientLight, 1.0);
   else
-   daColor= vec4(ambientLight +(difspec) * shadow, 1.0); //vec4(shadow,shadow,shadow,1.0);
+	daColor = vec4(ambientLight + difspec*shadow, 1.0); //vec4(shadow,shadow,shadow,1.0);
 };
 
 float ShadowCalculation(vec4 fragPosLightSpace )
 {
-  float sum=0.0;
+  //perform perspective divide
+  vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+  projCoords = projCoords * 0.5 + 0.5;
+  float closestDepth = texture(depth_texture, projCoords.xy).r;
+  float currentDepth = projCoords.z;
+  float bias = 0.05; //max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+  
+  float shadow = 0.0;
   vec2 texelSize = 1.0 / textureSize(depth_texture, 0);
   for(int x = -2; x <= 2; ++x)
-    {
-       for(int y = -2; y <= 2; ++y)
-        {
- 		sum += textureProjOffset(depth_texture, fragPosLightSpace, ivec2(0,0));        
-        }    
-    }    
-    sum = sum / 25.0;
-    float shadow = 0.2 + sum * sum;
-
- //if(LightSpacePos.z > 1.0) //far plane issue!
-       // shadow = 1.0;
-	return shadow;
+  {
+     for(int y = -2; y <= 2; ++y)
+     {
+         float pcfDepth = texture(depth_texture, projCoords.xy + vec2(x, y) * texelSize).r; 
+         shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
+     }    
+  }
+  shadow /= 25.0;
+  shadow = shadow * shadow;
+  
+  if(LightSpacePos.z > 1.0) //far plane issue!
+     shadow = 1.0;
+  return (1.0f - shadow);
 } 
 
 float ShadowCalculationCubeMap(vec3 fragPos)

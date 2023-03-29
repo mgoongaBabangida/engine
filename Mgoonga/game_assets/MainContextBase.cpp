@@ -47,11 +47,8 @@ void eMainContextBase::InitializeGL()
 {
 	//init main light
 	m_lights.push_back({});
-	m_lights[0].ambient = vec3(0.05f, 0.05f, 0.05f);
-	m_lights[0].diffuse = vec3(0.75f, 0.75f, 0.75f);
-	m_lights[0].specular = vec3(0.5f, 0.5f, 0.5f);
-	m_lights[0].light_position = vec4(0.0f, 4.0f, -1.0f, 1.0f); //-1?
-	m_lights[0].light_direction = vec4(0.0f, 0.0f, 0.0f, 1.0f); // rather target
+	m_lights[0].light_position = vec4(0.0f, 4.0f, -1.0f, 1.0f);
+	m_lights[0].light_direction = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	m_lights[0].type = eLightType::DIRECTION;
 
 	//init main camera

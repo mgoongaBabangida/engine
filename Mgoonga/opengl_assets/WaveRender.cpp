@@ -10,9 +10,9 @@
 //------------------------------------------------------------------------------------------
 eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model,
 						Texture* tex,
-						Texture* normals, 
-						Texture* Height, 
-						const std::string& vS, 
+						Texture* normals,
+						Texture* Height,
+						const std::string& vS,
 						const std::string& fS)
 {
 	wave_shader.installShaders(vS.c_str(), fS.c_str());
@@ -23,13 +23,16 @@ eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model,
 	normalMatrixLocation				= glGetUniformLocation(wave_shader.ID(), "NormalMatrix");
 	shadowMatrixUniformLocation			= glGetUniformLocation(wave_shader.ID(), "shadowMatrix");
 	eyePositionWorldUniformLocation		= glGetUniformLocation(wave_shader.ID(), "eyePositionWorld");
-	
+	FarPlaneUniformLocation = glGetUniformLocation(wave_shader.ID(), "far_plane");
+
 	glUseProgram(wave_shader.ID());
 	//Light
-	lightAmbientLoc		= glGetUniformLocation(wave_shader.ID(), "light.ambient");
-	lightDiffuseLoc		= glGetUniformLocation(wave_shader.ID(), "light.diffuse");
-	lightSpecularLoc	= glGetUniformLocation(wave_shader.ID(), "light.specular");
-	lightPosLoc			= glGetUniformLocation(wave_shader.ID(), "light.position");
+	lightAmbientLoc = glGetUniformLocation(wave_shader.ID(), "light.ambient");
+	lightDiffuseLoc = glGetUniformLocation(wave_shader.ID(), "light.diffuse");
+	lightSpecularLoc = glGetUniformLocation(wave_shader.ID(), "light.specular");
+	lightPosLoc = glGetUniformLocation(wave_shader.ID(), "light.position");
+	lightDirLoc = glGetUniformLocation(wave_shader.ID(), "light.direction");
+	lightTypeLoc = glGetUniformLocation(wave_shader.ID(), "shadow_directional");
 
 	//Material
 	matAmbientLoc	= glGetUniformLocation(wave_shader.ID(), "material.ambient");
@@ -41,6 +44,10 @@ eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model,
 	glUniform3f(matDiffuseLoc, 1.0f, 1.0f, 1.0f); // 1.0f, 0.5f, 0.31f
 	glUniform3f(matSpecularLoc, 1.0f, 1.0f, 1.0f); //0.5f, 0.5f, 0.5f
 	glUniform1f(matShineLoc, 32.0f); //32.0f
+
+	LightingIndexDirectional = glGetSubroutineIndex(wave_shader.ID(), GL_FRAGMENT_SHADER, "calculateBlinnPhongDirectionalSpecDif");
+	LightingIndexPoint = glGetSubroutineIndex(wave_shader.ID(), GL_FRAGMENT_SHADER, "calculateBlinnPhongPointSpecDif");
+	LightingIndexSpot = glGetSubroutineIndex(wave_shader.ID(), GL_FRAGMENT_SHADER, "calculateBlinnPhongFlashSpecDif");
 
 	TimeFactorLoc	= glGetUniformLocation(wave_shader.ID(), "Time");
 	clock.start();
@@ -61,6 +68,9 @@ void eWaveRender::Render(const Camera&		camera,
 						 const Light&		light,
 						 std::vector<shObject>	flags)
 {
+	if (!m_model)
+		return;
+
 	glUseProgram(wave_shader.ID());
 
 	glm::mat4 worldToProjectionMatrix	= camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
@@ -70,32 +80,47 @@ void eWaveRender::Render(const Camera&		camera,
 	glUniform3f(lightDiffuseLoc, light.diffuse.x, light.diffuse.y, light.diffuse.z);
 	glUniform3f(lightSpecularLoc, light.specular.x, light.specular.y, light.specular.z);
 	glUniform4f(lightPosLoc, light.light_position.x, light.light_position.y, light.light_position.z, light.light_position.w);
+	glUniform3f(lightDirLoc, light.light_direction.x, light.light_direction.y, light.light_direction.z);
 
-	glUniform1f(glGetUniformLocation(wave_shader.ID(), "light.constant"), 1.0f); // transfer to light
-	glUniform1f(glGetUniformLocation(wave_shader.ID(), "light.linear"),	0.09f);
-	glUniform1f(glGetUniformLocation(wave_shader.ID(), "light.quadratic"), 0.032f);
+	glUniform1f(glGetUniformLocation(wave_shader.ID(), "light.constant"), light.constant);
+	glUniform1f(glGetUniformLocation(wave_shader.ID(), "light.linear"), light.linear);
+	glUniform1f(glGetUniformLocation(wave_shader.ID(), "light.quadratic"), light.quadratic);
+	glUniform1f(glGetUniformLocation(wave_shader.ID(), "light.cutOff"), light.cutOff);
+	glUniform1f(glGetUniformLocation(wave_shader.ID(), "light.outerCutOff"), light.outerCutOff);
 	//light end
 
-	glm::vec3 eyePosition = camera.getPosition();
-	glUniform3fv(eyePositionWorldUniformLocation, 1, &eyePosition[0]);
-
 	glm::mat4 shadowMatrix;
-	glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position + light.light_direction), glm::vec3(0.0f, 1.0f, 0.0f));
-	if (light.type == eLightType::POINT)
+	if (light.type == eLightType::POINT || light.type == eLightType::SPOT)
 	{
+		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + light.light_direction,
+			glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniform1f(glGetUniformLocation(wave_shader.ID(), "shininess"), 32.0f);
+		if (light.type == eLightType::POINT)
+		{
+			glUniform1i(lightTypeLoc, false);
+			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexPoint);
+		}
+		else //spot
+		{
+			glUniform1i(lightTypeLoc, true);
+			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexSpot);
+		}
 		shadowMatrix = camera.getProjectionBiasedMatrix() * worldToViewMatrix;
 	}
 	else if (light.type == eLightType::DIRECTION)
 	{
-		shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
-	}
-	else // cut off
-	{
-		assert("");
+		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(0.0f, 0.0f, 0.0f), /*glm::vec3(light.light_position) + light.light_direction,*/
+			glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniform1i(lightTypeLoc, true);
+		glUniform1f(glGetUniformLocation(wave_shader.ID(), "shininess"), 8.0f);
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
+		shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix; //$todo should be ortho projection or not?
 	}
 
 	glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE,
 		&shadowMatrix[0][0]);  //shadow
+	glUniform1f(FarPlaneUniformLocation, camera.getFarPlane());
+	glUniform3fv(eyePositionWorldUniformLocation, 1, &camera.getPosition()[0]);
 
 	glUniform1f(TimeFactorLoc, time);
 	int32_t msc = clock.newFrame();

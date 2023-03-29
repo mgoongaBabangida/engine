@@ -110,7 +110,7 @@ protected:
 	const uint32_t  height		= 600;
 
 	float			waterHeight = 2.0f;
-  float     blur_coef   = 0.7f;
+  float     blur_coef   = 0.5f;
 
 	std::unique_ptr<eRenderManager>	renderManager;
 };

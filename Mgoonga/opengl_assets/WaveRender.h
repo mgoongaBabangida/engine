@@ -29,7 +29,7 @@ public:
 private:
 	Shader											wave_shader;
 	std::unique_ptr<eObject>		m_object;
-	TerrainModel*								m_model;
+	TerrainModel*								m_model = nullptr;
 	
 	math::eClock					clock;
 	float							time		= 0.0f;
@@ -52,6 +52,14 @@ private:
 	GLuint lightDiffuseLoc;
 	GLuint lightSpecularLoc;
 	GLuint lightPosLoc;
+	GLuint lightDirLoc;
+
+	GLuint LightingIndexDirectional;
+	GLuint LightingIndexPoint;
+	GLuint LightingIndexSpot;
+
+	GLuint lightTypeLoc;
+	GLuint FarPlaneUniformLocation;
 	GLuint TimeFactorLoc;
 };
 

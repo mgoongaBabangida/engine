@@ -37,6 +37,7 @@ public:
 
   void OnFocusedChanged();
   void _InitializeHexes();
+  void _InitMainTestSceane();
 
 protected:
 	virtual void			InitializePipline()								override;
@@ -63,7 +64,7 @@ protected:
   glm::vec3                              m_translation_vector = glm::vec3{ 0.f,0.f,0.0f };
   
   //debuging
-  shObject							                 lightObject;
+  shObject							                 m_lightObject;
 };
 
 #endif

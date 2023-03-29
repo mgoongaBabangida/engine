@@ -54,10 +54,16 @@ void eShadowRender::Render(const Camera&					camera,
 			object->GetModel()->Draw();
 		}
 	}
-	else if (light.type == eLightType::DIRECTION)
+	else if (light.type == eLightType::DIRECTION || light.type == eLightType::SPOT)
 	{
 		glUseProgram(shaderDir.ID());
-		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 worldToViewMatrix;
+		if(light.type == eLightType::DIRECTION)
+			worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(0.0f, 0.0f, 0.0f), /*glm::vec3(light.light_position) + light.light_direction,*/
+																							glm::vec3(0.0f, 1.0f, 0.0f));
+		else
+			worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(0.0f, -1.0f, 0.0f), /*glm::vec3(light.light_position) + light.light_direction,*/
+																			glm::vec3(0.0f, 1.0f, 0.0f));
 		shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
 		//RENDER DEPTH
 		for (auto &object : objects)
@@ -66,9 +72,5 @@ void eShadowRender::Render(const Camera&					camera,
 			glUniformMatrix4fv(MVPUniformLocationDir, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 			object->GetModel()->Draw();
 		}
-	}
-	else // cut off
-	{
-		assert(false, "");
 	}
 }

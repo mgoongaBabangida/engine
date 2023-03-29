@@ -192,8 +192,8 @@ bool Texture::makeDepthTexture()
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D, id);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, mTextureWidth, mTextureHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 	GLfloat borderColor[] = { 1.0,  1.0,  1.0,  1.0 };
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
@@ -263,7 +263,8 @@ bool Texture::generatePerlin(GLuint Width, GLuint Height, bool periodic)
 	glBindTexture(GL_TEXTURE_2D, id);
 	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, this->mTextureWidth, this->mTextureHeight);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mTextureWidth, this->mTextureHeight, GL_RGBA, GL_UNSIGNED_BYTE, (void*)data);
-
+	
+	delete[] data;
 	return true;
 }
 

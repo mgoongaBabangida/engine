@@ -44,8 +44,10 @@ protected:
 	GLuint lightPosLoc;
 	GLuint lightDirLoc;
 
-	GLuint LightingIndexPoint;
 	GLuint LightingIndexDirectional;
+	GLuint LightingIndexPoint;
+	GLuint LightingIndexSpot;
+	
 	GLuint lightTypeLoc;
 
 	GLuint DebugWhiteLoc;

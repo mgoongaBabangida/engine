@@ -231,7 +231,7 @@ void eWindowImGui::Render()
       case TEXTURE:
       {
         ImGui::Text(std::get<0>(item).c_str());
-        ImGui::Image((void*)(intptr_t)(std::get<2>(item)), ImVec2(240, 160), ImVec2(1, 1), ImVec2(0, 0));
+        ImGui::Image((void*)(intptr_t)(std::get<2>(item)), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
       }
       break;
       case SLIDER_FLOAT_3:
@@ -281,7 +281,7 @@ void eWindowImGui::Render()
         ImGui::Text(std::get<0>(item).c_str());
         for (const Texture* t : *transfer_data)
         {
-          ImGui::Image((void*)(intptr_t)(t->id), ImVec2(240, 160)/* ImVec2(t->mTextureWidth, t->mTextureHeight)*/, ImVec2(1, 1), ImVec2(0, 0));
+          ImGui::Image((void*)(intptr_t)(t->id), ImVec2(240, 160)/* ImVec2(t->mTextureWidth, t->mTextureHeight)*/, ImVec2(0, 1), ImVec2(1, 0));
         }
       }
       break;

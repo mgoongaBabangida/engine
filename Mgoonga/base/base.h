@@ -39,12 +39,19 @@ enum class eLightType { POINT, DIRECTION, SPOT};
 //-------------------------------------------------------
 struct Light
 {
-	glm::vec4  light_position;
-	glm::vec4  light_direction;
-	glm::vec3  ambient = { 1.0f, 1.0f, 1.0f };
-	glm::vec3  diffuse = { 1.0f, 1.0f, 1.0f };
-	glm::vec3  specular = { 1.0f, 1.0f, 1.0f };
 	eLightType type = eLightType::POINT;
+	glm::vec4  light_position;
+	glm::vec3  light_direction;
+	glm::vec3  ambient = { 0.1f, 0.1f, 0.1f };
+	glm::vec3  diffuse = { 0.4f, 0.4f, 0.4f };
+	glm::vec3  specular = { 0.45f, 0.45f, 0.45f };
+
+	float constant	= 1.0f;
+	float linear		= 0.09f;
+	float quadratic = 0.032f;
+	float cutOff		= 0.3f;
+	float outerCutOff = 0.0f;
+
 	glm::vec3  intensity = { 50, 50, 50 };
 };
 

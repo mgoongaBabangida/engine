@@ -11,10 +11,12 @@
 // Windows Header Files:
 #include <windows.h>
 
+
 #define DLLDIR_EX
 
 #include <vector>
 #include <string>
 #include <memory>
+#include <iostream>
 
 // TODO: reference additional headers your program requires here

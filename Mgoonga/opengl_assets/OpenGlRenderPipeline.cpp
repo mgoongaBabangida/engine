@@ -74,7 +74,7 @@ void eOpenGlRenderPipeline::InitializeBuffers(bool _needsShadowCubeMap)
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_MTS, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_REFLECTION, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_REFRACTION, width, height);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW, width * 2, height * 2, _needsShadowCubeMap);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW, width*2, height*2, _needsShadowCubeMap);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SQUERE, height, height); //squere
   eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_BRIGHT_FILTER, width, height);
   eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_ONE, 600, 300); //@todo numbers
@@ -106,7 +106,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
   /*std::sort(focused.begin(), focused.end(), [_camera](const shObject& obj1, const shObject& obj2)
     { return glm::length2(_camera.getPosition() - obj1->GetTransform()->getTranslation())
     > glm::length2(_camera.getPosition() - obj2->GetTransform()->getTranslation()); });*/
-	  
+	
 	std::vector<shObject> main_objs = _objects.find(RenderType::MAIN)->second;
 	std::vector<shObject> focused = _objects.find(RenderType::OUTLINED)->second;
 	std::vector<shObject> pbr_objs = _objects.find(RenderType::PBR)->second;
@@ -115,17 +115,14 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 
 	//Shadow Render Pass
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SHADOW);
-
 	auto shadow_objects = main_objs;
 	shadow_objects.insert(shadow_objects.end(), pbr_objs.begin(), pbr_objs.end());
 	if (shadows) { RenderShadows(_camera, _light, shadow_objects); }
 
-	if (_light.type == eLightType::DIRECTION)
+	if (_light.type == eLightType::DIRECTION || _light.type == eLightType::SPOT)
 		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW, GL_TEXTURE1);
 	else if (_light.type == eLightType::POINT)
 		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW, GL_TEXTURE0);
-	else
-		assert("spot light is not yet supported");
 
 	//Rendering reflection and refraction to Textures
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_REFLECTION);
@@ -304,18 +301,17 @@ void eOpenGlRenderPipeline::RenderShadows(const Camera& _camera, const Light& _l
 	// Bind the "depth only" FBO and set the viewport to the size of the depth texture
 	glm::ivec2 size = eGlBufferContext::GetInstance().GetSize(eBuffer::BUFFER_SHADOW);
 	glViewport(0, 0, size.x, size.y);
+	
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
-
 	// Clear
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+
 	//glClearDepth(1.0f);
-	// 
 	// Enable polygon offset to resolve depth-fighting isuses 
 	//glEnable(GL_POLYGON_OFFSET_FILL);
 	//glPolygonOffset(2.0f, -2000.0f);
-	// Draw from the light’s point of view DrawScene(true);
 
 	renderManager->ShadowRender()->Render(_camera, _light, _objects);
 
