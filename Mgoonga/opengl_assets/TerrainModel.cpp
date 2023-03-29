@@ -56,6 +56,7 @@ void TerrainModel::initialize(Texture* diffuse, Texture* specular, bool spreed_t
 	makePlaneVerts(m_diffuse.mTextureHeight, m_diffuse.mTextureHeight, spreed_texture);
 	makePlaneIndices(m_diffuse.mTextureHeight);
 	generateNormals(m_size);
+	
 	mesh->calculatedTangent();
 	mesh->setupMesh();
   mesh->setTextures({ &m_diffuse , &m_specular , &m_normal , &m_height });
@@ -75,7 +76,7 @@ void TerrainModel::initialize(Texture* diffuse,
 	m_height =	*heightMap;
 	
 	if(mesh == nullptr)
-	 mesh = new MyMesh();
+	  mesh = new MyMesh();
 
 	m_size = heightMap->mTextureHeight;
 	m_rows = heightMap->mTextureWidth;
@@ -101,8 +102,8 @@ TerrainModel::TerrainModel(Texture *color)
 	makePlaneVerts(10);
 	makePlaneIndices(10);
 	generateNormals(m_size);
-	mesh->calculatedTangent();
 	mesh->setupMesh();
+	mesh->calculatedTangent();
 }
 
 //----------------------------------------------------------------
@@ -181,17 +182,20 @@ void TerrainModel::generateNormals(GLuint size)
 	}
 
 	// Load to normal map
-	GLfloat* buffer = new GLfloat[mesh->vertices.size() * 4];
-	for (int i = 0; i< mesh->vertices.size(); ++i) {
-		buffer[i * 4] = mesh->vertices[i].Normal.x;//(mesh->vertices[i].Normal.x + 1.0f) / 2.0f;  // ( - 0.5) *2;//(GLubyte)128.f;
-		buffer[i * 4 + 1] = mesh->vertices[i].Normal.z; //(mesh->vertices[i].Normal.y+1.0f)/2.0f;128
-		buffer[i * 4 + 2] = mesh->vertices[i].Normal.y;// (mesh->vertices[i].Normal.z + 1.0f) / 2.0f; //(mesh->vertices[i].Normal.z+1.0f)/2.0f;255
-		buffer[i * 4 + 3] = 1.0f;
-	}
+	if (false)
+	{
+		GLfloat* buffer = new GLfloat[mesh->vertices.size() * 4];
+		for (int i = 0; i < mesh->vertices.size(); ++i) {
+			buffer[i * 4] = mesh->vertices[i].Normal.x;//(mesh->vertices[i].Normal.x + 1.0f) / 2.0f;  // ( - 0.5) *2;//(GLubyte)128.f;
+			buffer[i * 4 + 1] = mesh->vertices[i].Normal.z; //(mesh->vertices[i].Normal.y+1.0f)/2.0f;128
+			buffer[i * 4 + 2] = mesh->vertices[i].Normal.y;// (mesh->vertices[i].Normal.z + 1.0f) / 2.0f; //(mesh->vertices[i].Normal.z+1.0f)/2.0f;255
+			buffer[i * 4 + 3] = 1.0f;
+		}
 
-  m_normal = Texture(size, size);
-	m_normal.TextureFromBuffer(buffer, size, size);
-	delete[] buffer;
+		m_normal = Texture(size, size);
+		m_normal.TextureFromBuffer(buffer, size, size);
+		delete[] buffer;
+	}
 }
 
 void TerrainModel::generateNormals(GLuint rows, GLuint columns)
@@ -214,18 +218,21 @@ void TerrainModel::generateNormals(GLuint rows, GLuint columns)
 	{
 		mesh->vertices[i].Normal = glm::normalize(mesh->vertices[i].Normal);
 	}
-	// Load to normal map
-	GLfloat* buffer = new GLfloat[mesh->vertices.size() * 4];
-	for (int i = 0; i< mesh->vertices.size(); ++i) {
-		buffer[i * 4] = (mesh->vertices[i].Normal.x + 1.0f) / 2.0f;
-		buffer[i * 4 + 1] = (mesh->vertices[i].Normal.z + 1.0f) / 2.0f;
-		buffer[i * 4 + 2] = (mesh->vertices[i].Normal.y + 1.0f) / 2.0f;
-		buffer[i * 4 + 3] = 1.0f;
-	}
+	if (false)
+	{
+		// Load to normal map
+		GLfloat* buffer = new GLfloat[mesh->vertices.size() * 4];
+		for (int i = 0; i < mesh->vertices.size(); ++i) {
+			buffer[i * 4] = (mesh->vertices[i].Normal.x + 1.0f) / 2.0f;
+			buffer[i * 4 + 1] = (mesh->vertices[i].Normal.z + 1.0f) / 2.0f;
+			buffer[i * 4 + 2] = (mesh->vertices[i].Normal.y + 1.0f) / 2.0f;
+			buffer[i * 4 + 3] = 1.0f;
+		}
 
-	m_normal = Texture(rows, columns);
-	m_normal.TextureFromBuffer(buffer, rows, columns);
-	delete[] buffer;
+		m_normal = Texture(rows, columns);
+		m_normal.TextureFromBuffer(buffer, rows, columns);
+		delete[] buffer;
+	}
 }
 
 void TerrainModel::makePlaneVerts(unsigned int dimensions, bool spreed_texture)
@@ -267,8 +274,8 @@ void TerrainModel::makePlaneVerts(unsigned int rows, unsigned int columns, bool 
 		for (int j = 0; j < rows; j++)
 		{
 			MyVertex& thisVert = mesh->vertices[i * rows + j];
-			thisVert.position.x = (float)(j - half_r) / devisor;
-			thisVert.position.z = (float)(i - half_c) / devisor;
+			thisVert.position.x = static_cast<float>(j - half_r) / static_cast<float>(devisor);
+			thisVert.position.z = static_cast<float>(i - half_c) / static_cast<float>(devisor);
 			thisVert.position.y = 0;
 			thisVert.Normal = glm::vec3(0.0f, 1.0f, 0.0f);
       if (spreed_texture)
