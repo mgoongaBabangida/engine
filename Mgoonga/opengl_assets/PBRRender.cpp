@@ -69,7 +69,7 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
       if (mesh->HasMaterial())
       {
         Material m = mesh->GetMaterial().value();
-        glUniform3f(albedoLoc, m.diffuse[0], m.diffuse[1], m.diffuse[2]);
+        glUniform3f(albedoLoc, m.albedo[0], m.albedo[1], m.albedo[2]);
         glUniform1f(aoLoc, m.ao);
         glUniform1f(metallicLoc, m.metallic);
         glUniform1f(roughnessLoc, m.roughness);

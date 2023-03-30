@@ -53,9 +53,8 @@ void eModelManager::Add(const std::string& name, std::vector<const Texture*> _te
 	if (name == "sphere_textured")
 	{
 		Material material;
-		material.diffuse = glm::vec3(0.9f, 0.0f, 0.0f);
+		material.albedo = glm::vec3(0.9f, 0.0f, 0.0f);
 		material.ao = 1.0f;
-		material.shininess = 0.5;
 		material.roughness = 0.5;
 		material.metallic = 0.5;
 		SphereTexturedMesh* mesh = new SphereTexturedMesh();

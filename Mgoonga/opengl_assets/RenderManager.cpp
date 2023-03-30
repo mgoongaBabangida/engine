@@ -57,7 +57,7 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 										folderPath + "PostProcessingFragmentShader.glsl"));
 	shader_lambda(m_screenRender.get());
 	//MainRender
-	m_mainRender.reset(new eMainRender(folderPath + "VertexShaderCode.glsl", folderPath + "FragmentShaderCode.glsl"));
+	m_mainRender.reset(new eMainRender(folderPath + "PhongVertexShader.glsl", folderPath + "PhongFragmentShader.glsl"));
 	shader_lambda(m_mainRender.get());
 	//Shadow Render
 	m_shadowRender.reset(new eShadowRender(folderPath + "VertexShades.glsl", //@todo rendame
@@ -66,7 +66,7 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																				 folderPath + "FragmentPointShadowShader.glsl"));
 	shader_lambda(m_shadowRender.get());
 	//eOutlineRender
-	m_outlineRender.reset(new eOutlineRender(folderPath + "VertexShaderCode.glsl", folderPath + "StencilFragmentShader.glsl"));
+	m_outlineRender.reset(new eOutlineRender(folderPath + "PhongVertexShader.glsl", folderPath + "StencilFragmentShader.glsl"));
 	shader_lambda(m_outlineRender.get());
 	//eSkyNoiseRender
 	m_skynoiseRender.reset(new eSkyNoiseRender(modelManager.ClonePrimitive("brick_square"),
@@ -80,7 +80,7 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 										texManager.Find("Tblue"),
 										texManager.Find("Tblack"), 
 										folderPath + "WaveVertexShader.glsl",
-										folderPath + "FragmentShaderCode.glsl"));
+										folderPath + "PhongFragmentShader.glsl"));
 	shader_lambda(m_waverender.get());
 
 	m_hexrender.reset(new eHexRender(folderPath + "VertexShades.glsl", 

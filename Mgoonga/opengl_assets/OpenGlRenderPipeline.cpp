@@ -107,7 +107,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
     { return glm::length2(_camera.getPosition() - obj1->GetTransform()->getTranslation())
     > glm::length2(_camera.getPosition() - obj2->GetTransform()->getTranslation()); });*/
 	
-	std::vector<shObject> main_objs = _objects.find(RenderType::MAIN)->second;
+	std::vector<shObject> phong_objs = _objects.find(RenderType::PHONG)->second;
 	std::vector<shObject> focused = _objects.find(RenderType::OUTLINED)->second;
 	std::vector<shObject> pbr_objs = _objects.find(RenderType::PBR)->second;
 	std::vector<shObject> flags = _objects.find(RenderType::FLAG)->second;
@@ -115,7 +115,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 
 	//Shadow Render Pass
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SHADOW);
-	auto shadow_objects = main_objs;
+	auto shadow_objects = phong_objs;
 	shadow_objects.insert(shadow_objects.end(), pbr_objs.begin(), pbr_objs.end());
 	if (shadows) { RenderShadows(_camera, _light, shadow_objects); }
 
@@ -135,10 +135,10 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 
 	if (water)
 	{
-		RenderReflection(_camera, _light, main_objs);
+		RenderReflection(_camera, _light, phong_objs);
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_REFRACTION);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		RenderRefraction(_camera, _light, main_objs);
+		RenderRefraction(_camera, _light, phong_objs);
 	}
   glDisable(GL_CLIP_DISTANCE0);
 
@@ -158,7 +158,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 			glStencilFunc(GL_ALWAYS, 1, 0xFF);
 			glStencilMask(0xFF);
 
-			if(std::find(main_objs.begin(), main_objs.end(), obj)!= main_objs.end())
+			if(std::find(phong_objs.begin(), phong_objs.end(), obj)!= phong_objs.end())
 				RenderMain(_camera, _light, { obj });
 			else
 				RenderPBR(_camera, _light, { obj });
@@ -176,7 +176,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 	}
 	//Render not outlined objects
 	std::vector<shObject> not_outlined;
-	std::set_difference(main_objs.begin(), main_objs.end(),
+	std::set_difference(phong_objs.begin(), phong_objs.end(),
 		                  focused.begin(), focused.end(),
 		                  std::back_inserter(not_outlined),
 		                  [](auto& a, auto& b) { return &a < &b; });
@@ -254,7 +254,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 
 	if (draw_bounding_boxes)
 	{
-		for (auto object : main_objs)
+		for (auto object : phong_objs)
 		{
 			std::vector<glm::vec3> extrems = object->GetCollider()->GetExtrems(*object->GetTransform());
 			std::vector<GLuint> indices{ 0,1,1,2,2,3,3,0,4,5,5,6,6,7,7,4,0,4,1,5,2,6,3,7 };

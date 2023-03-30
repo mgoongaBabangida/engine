@@ -21,17 +21,22 @@ struct Texture;
 //-------------------------------------------------------
 struct Material
 {
-	Material() = default;
-	~Material() noexcept = default;
-
-	glm::vec3 ambient;
-	glm::vec3 diffuse; // or albedo
-	glm::vec3 specular;
-	float     shininess;
-
+	glm::vec3 albedo;
 	float     metallic = 0.0f;
 	float     roughness = 0.0f;
 	float     ao = 1.0f;
+
+	uint32_t albedo_texture_id = -1;
+	uint32_t metalic_texture_id = -1;
+	uint32_t normal_texture_id = -1;
+	uint32_t roughness_texture_id = -1;
+
+	bool use_albedo = false;
+	bool use_metalic = false;
+	bool use_normal = false;
+	bool use_roughness = false;
+
+	bool use_phong_shading = false;
 };
 
 enum class eLightType { POINT, DIRECTION, SPOT};
@@ -43,7 +48,7 @@ struct Light
 	glm::vec4  light_position;
 	glm::vec3  light_direction;
 	glm::vec3  ambient = { 0.1f, 0.1f, 0.1f };
-	glm::vec3  diffuse = { 0.4f, 0.4f, 0.4f };
+	glm::vec3  diffuse = { 0.45f, 0.45f, 0.45f };
 	glm::vec3  specular = { 0.45f, 0.45f, 0.45f };
 
 	float constant	= 1.0f;

@@ -466,7 +466,7 @@ void eAmericanTreasureGame::PaintGL()
 		flags.push_back(base->getBaseScript()->GetChildrenObjects()[0]);
 	
 	std::map<eOpenGlRenderPipeline::RenderType, std::vector<shObject>> objects;
-	objects.insert({ eOpenGlRenderPipeline::RenderType::MAIN, m_objects });
+	objects.insert({ eOpenGlRenderPipeline::RenderType::PHONG, m_objects });
 	objects.insert({ eOpenGlRenderPipeline::RenderType::GEOMETRY, {hex_model} });
 	if(focused)
 		objects.insert({ eOpenGlRenderPipeline::RenderType::OUTLINED, std::vector<shObject>{ focused } });

@@ -40,13 +40,13 @@ void main()
    float roughness_f;
    if(textured)	
    {
-    albedo_f    = pow(texture(albedoMap, Texcoord).rgb, vec3(2.2));
-    theNormal_f = texture(normalMap, Texcoord).rgb;
-	// Transform normal vector to range [-1,1]
-	theNormal_f = normalize(theNormal_f * 2.0 - 1.0);
-	theNormal_f = normalize(TBN * theNormal_f);
-    metallic_f  = texture(metallicMap, Texcoord).r;
-    roughness_f = texture(roughnessMap, Texcoord).r;
+     albedo_f    = pow(texture(albedoMap, Texcoord).rgb, vec3(2.2));
+     theNormal_f = texture(normalMap, Texcoord).rgb;
+	 // Transform normal vector to range [-1,1]
+	 theNormal_f = normalize(theNormal_f * 2.0 - 1.0);
+	 theNormal_f = normalize(TBN * theNormal_f);
+     metallic_f  = texture(metallicMap, Texcoord).r;
+     roughness_f = texture(roughnessMap, Texcoord).r;
    }
    else
    {

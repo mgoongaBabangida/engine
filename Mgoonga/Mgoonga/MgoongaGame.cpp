@@ -339,7 +339,7 @@ void eMgoongaGameContext::PaintGL()
                                : std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{});
 
   std::map<eOpenGlRenderPipeline::RenderType, std::vector<shObject>> objects;
-  objects.insert({ eOpenGlRenderPipeline::RenderType::MAIN, m_objects});
+  objects.insert({ eOpenGlRenderPipeline::RenderType::PHONG, m_objects});
   objects.insert({ eOpenGlRenderPipeline::RenderType::OUTLINED, *focused_output });
   objects.insert({ eOpenGlRenderPipeline::RenderType::FLAG, flags });
   objects.insert({ eOpenGlRenderPipeline::RenderType::PBR, m_pbr_objs });

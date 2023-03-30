@@ -1,12 +1,12 @@
 #version 430
 
-out vec4 daColor;
+out vec4 outColor;
 
 struct Material {
-    vec3  ambient;
-    vec3  diffuse;
-    vec3  specular;    
-    float shininess;
+    vec3  albedo;
+    float metallic;
+    float roughness;    
+    float ao;
 }; 
 
 struct Light 
@@ -214,13 +214,13 @@ void main()
   vec3 difspec = LightingFunction(light, bNormal, thePosition, Texcoord);
 
   if(debug_white_texcoords)
-	daColor = vec4(dif_texture.r * 2,dif_texture.g /2, dif_texture.b / 2,1.0); 
+	outColor = vec4(dif_texture.r * 2,dif_texture.g /2, dif_texture.b / 2,1.0); 
   else if(debug_white_color)
-	daColor = vec4(vec3(shadow / far_plane), 1.0);
+	outColor = vec4(vec3(shadow / far_plane), 1.0);
   else if(shadow < 0.9)
-	daColor = vec4(ambientLight, 1.0);
+	outColor = vec4(ambientLight, 1.0);
   else
-	daColor = vec4(ambientLight + difspec*shadow, 1.0); //vec4(shadow,shadow,shadow,1.0);
+	outColor = vec4(ambientLight + difspec*shadow, 1.0); //vec4(shadow,shadow,shadow,1.0);
 };
 
 float ShadowCalculation(vec4 fragPosLightSpace )

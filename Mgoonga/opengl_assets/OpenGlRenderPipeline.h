@@ -26,7 +26,7 @@ class DLL_OPENGL_ASSETS eOpenGlRenderPipeline
 public:
 
 	enum class RenderType
-	{ MAIN, PBR, FLAG, OUTLINED , GEOMETRY};
+	{ PHONG, PBR, FLAG, OUTLINED , GEOMETRY};
 
 	eOpenGlRenderPipeline(uint32_t width, uint32_t height);
 	~eOpenGlRenderPipeline();
