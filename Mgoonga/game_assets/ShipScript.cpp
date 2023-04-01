@@ -10,17 +10,15 @@
 
 //----------------------------------------------------------------
 eShipScript::eShipScript(Texture*			_flagTexture,
-						 eOpenGlRenderPipeline&	_pipeline,
-	           Camera& _camera,
-						 Texture*			_shoting_texture, 
-						 RemSnd*			_shooting_sound, 
-						 dbb::CameraRay*	_camRay, 
-						 float				_waterHeight)
+						 eOpenGlRenderPipeline&		_pipeline,
+	           Camera&									_camera,
+						 Texture*									_shoting_texture,
+						 RemSnd*									_shooting_sound,
+						 float										_waterHeight)
 : pipeline(_pipeline)
 , camera(_camera)
 , shoot_tex(_shoting_texture)
 , shoot_snd(_shooting_sound)
-, camRay(_camRay)
 , waterHeight(_waterHeight)
 , flag_tex(_flagTexture)
 , flag(new eObject{})

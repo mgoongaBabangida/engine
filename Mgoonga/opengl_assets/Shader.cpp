@@ -1,6 +1,6 @@
+#include "stdafx.h"
 #include "Shader.h"
 
-#include <iostream>
 #include <fstream>
 
 //------------------------------------------------------------------------------------
@@ -68,6 +68,53 @@ void Shader::installShaders(const char* VertexShaderName, const char* FragmentSh
 }
 
 //--------------------------------------------------------------------
+void	Shader::installShaders(const char* _vertexShaderName,
+														 const char* _fragmentShaderName,
+														 const char* _tessellation1ShaderName,
+														 const char* _tessellation2ShaderName)
+{
+	vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+	fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+	tessellation1ShaderID = glCreateShader(GL_TESS_CONTROL_SHADER);
+	tessellation2ShaderID = glCreateShader(GL_TESS_EVALUATION_SHADER);
+
+	const char* adapter[1];
+	std::string temp = readShaderCode(_vertexShaderName);
+	adapter[0] = temp.c_str();
+	glShaderSource(vertexShaderID, 1, adapter, NULL);
+	temp = readShaderCode(_fragmentShaderName);
+	adapter[0] = temp.c_str();
+	glShaderSource(fragmentShaderID, 1, adapter, NULL);
+	temp = readShaderCode(_tessellation1ShaderName);
+	adapter[0] = temp.c_str();
+	glShaderSource(tessellation1ShaderID, 1, adapter, NULL);
+	temp = readShaderCode(_tessellation2ShaderName);
+	adapter[0] = temp.c_str();
+	glShaderSource(tessellation2ShaderID, 1, adapter, NULL);
+
+	glCompileShader(vertexShaderID);
+	glCompileShader(tessellation1ShaderID);
+	glCompileShader(tessellation2ShaderID);
+	glCompileShader(fragmentShaderID);
+	id = glCreateProgram();
+
+	if (checkShaderStatus(vertexShaderID)
+		| checkShaderStatus(fragmentShaderID)
+		| checkShaderStatus(tessellation1ShaderID)
+		| checkShaderStatus(tessellation2ShaderID))
+	{
+		glAttachShader(id, vertexShaderID);
+		glAttachShader(id, tessellation1ShaderID);
+		glAttachShader(id, tessellation2ShaderID);
+		glAttachShader(id, fragmentShaderID);
+		glLinkProgram(id);
+	}
+
+	if (!checkProgramStatus())
+		return;
+}
+
+//--------------------------------------------------------------------
 bool Shader::checkShaderStatus(GLint shaderID)
 {
 	GLint compileStatus;
@@ -122,6 +169,9 @@ std::string Shader::readShaderCode(const char * filename)
 Shader::~Shader()
 {
 	glDeleteShader(vertexShaderID);
+	glDeleteShader(geometryShaderID);
+	glDeleteShader(tessellation1ShaderID);
+	glDeleteShader(tessellation2ShaderID);
 	glDeleteShader(fragmentShaderID);
 	glDeleteProgram(id);
 }

@@ -339,7 +339,6 @@ void eAmericanTreasureGame::InitializeModels()
 		                *camera.get(),
 										texManager->Find("Tatlas2"),
 										soundManager->GetSound("shot_sound"),
-										camRay.get(),
 										waterHeight);
 
 	std::shared_ptr<eShip> nanosuit = std::make_shared<eShip>(modelManager->Find("nanosuit").get(), shipScript, true, "spanish_1");
@@ -355,7 +354,6 @@ void eAmericanTreasureGame::InitializeModels()
 		*camera.get(),
 		texManager->Find("Tatlas2"),
 		soundManager->GetSound("shot_sound"),
-		camRay.get(),
 		waterHeight);
 
 	std::shared_ptr<eShip> nanosuit2 = std::make_shared<eShip>(modelManager->Find("nanosuit").get(), shipScript2, false, "pirat_1");
@@ -371,7 +369,6 @@ void eAmericanTreasureGame::InitializeModels()
 		*camera.get(),
 		texManager->Find("Tatlas2"),
 		soundManager->GetSound("shot_sound"),
-		camRay.get(),
 		waterHeight);
 
 	std::shared_ptr<eShip> nanosuit3 = std::make_shared<eShip>(modelManager->Find("nanosuit").get(), shipScript3, true, "spanish_2");
@@ -387,7 +384,6 @@ void eAmericanTreasureGame::InitializeModels()
 		*camera.get(),
 		texManager->Find("Tatlas2"),
 		soundManager->GetSound("shot_sound"),
-		camRay.get(),
 		waterHeight);
 
 	std::shared_ptr<eShip> nanosuit4 = std::make_shared<eShip>(modelManager->Find("nanosuit").get(), shipScript4, false, "pirat_2");

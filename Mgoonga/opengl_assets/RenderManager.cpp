@@ -19,6 +19,7 @@ eBrightFilterRender* eRenderManager::BrightFilterRender() { return m_brightRende
 eLinesRender*		 eRenderManager::LinesRender() { return m_linesRender.get(); }
 eTextRender* eRenderManager::TextRender() { return m_textRender.get(); }
 ePBRRender* eRenderManager::PBRRender(){ return m_pbrRender.get(); }
+eBezierRender* eRenderManager::BezierRender() { return m_bezierRender.get(); }
 
 //----------------------------------------------------------------------------------------------------------------
 void eRenderManager::AddParticleSystem(IParticleSystem* system) 
@@ -56,7 +57,7 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 										folderPath + "PostProcessingVertexShader.glsl",
 										folderPath + "PostProcessingFragmentShader.glsl"));
 	shader_lambda(m_screenRender.get());
-	//MainRender
+	//PhongRender
 	m_mainRender.reset(new eMainRender(folderPath + "PhongVertexShader.glsl", folderPath + "PhongFragmentShader.glsl"));
 	shader_lambda(m_mainRender.get());
 	//Shadow Render
@@ -104,7 +105,7 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 	shader_lambda(m_particleRender.get());
 	//Lines
 	m_linesRender.reset(new eLinesRender(folderPath + "SkyBoxVertexShader.glsl",
-										 folderPath + "StencilFragmentShader.glsl"));
+																			 folderPath + "StencilFragmentShader.glsl"));
 	shader_lambda(m_linesRender.get());
 	//Text
 	m_textRender.reset(new eTextRender(folderPath + "TextVertex.glsl", folderPath + "TextFragment.glsl"));
@@ -112,6 +113,12 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 	//PBR
 	m_pbrRender.reset(new ePBRRender(folderPath + "PBRVertexShaderCode.glsl", folderPath + "PBRFragmentShader.glsl"));
 	shader_lambda(m_pbrRender.get());
+	//Bezier
+	m_bezierRender.reset(new eBezierRender(folderPath + "SimpleVertexShader.glsl",
+																				 folderPath + "StencilFragmentShader.glsl",
+																				 folderPath + "BezierTessellation1Shader.glsl",
+																				 folderPath + "BezierTessellation2Shader.glsl"));
+	shader_lambda(m_bezierRender.get());
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -136,4 +143,5 @@ void eRenderManager::UpdateShadersInfo()
 	shader_lambda(m_linesRender.get());
 	shader_lambda(m_textRender.get());
 	shader_lambda(m_pbrRender.get());
+	shader_lambda(m_bezierRender.get());
 }

@@ -37,6 +37,7 @@ public:
 
   void OnFocusedChanged();
   void _InitializeHexes();
+  void _InitializeBezier();
   void _InitMainTestSceane();
 
 protected:
@@ -56,6 +57,7 @@ protected:
   std::shared_ptr<std::vector<shObject>> m_framed;
   std::vector<std::shared_ptr<GUI>>			 guis;
   shObject														   hex_model;
+  std::array<shObject, 5>								 bezier_model;
 
   //should be inside script
   std::optional<dbb::line>               m_grab_camera_line = std::nullopt;

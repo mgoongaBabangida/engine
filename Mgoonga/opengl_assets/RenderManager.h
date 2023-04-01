@@ -22,6 +22,7 @@
 #include "LinesRender.h"
 #include "TextRender.h"
 #include "PBRRender.h"
+#include "BezierRender.h"
 
 //----------------------------------------------------------------------------------------------
 class eRenderManager
@@ -58,6 +59,7 @@ private:
 	eLinesRender*		LinesRender();
 	eTextRender* TextRender();
 	ePBRRender* PBRRender();
+	eBezierRender* BezierRender();
 
 private:
 	std::unique_ptr<eWaterRender>		 m_waterRender;
@@ -75,6 +77,7 @@ private:
 	std::unique_ptr<eLinesRender>		 m_linesRender;
 	std::unique_ptr<eTextRender>     m_textRender;
 	std::unique_ptr<ePBRRender>      m_pbrRender;
+	std::unique_ptr<eBezierRender>   m_bezierRender;
 
 	std::string							folderPath;
 	std::vector<ShaderInfo>	shaders;

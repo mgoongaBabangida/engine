@@ -16,13 +16,12 @@ class eOpenGlRenderPipeline;
 class DLL_GAME_ASSETS eShipScript : public IScript
 {
 public:
-	eShipScript(Texture*		flag_texture,
+	eShipScript(Texture*								flag_texture,
 							eOpenGlRenderPipeline&	render_manager,
-		          Camera& camera,
-			        Texture*			shoting_texture,
-			        RemSnd*			shooting_sound,
-			        dbb::CameraRay*,
-			        float			waterHeight);
+		          Camera&									camera,
+			        Texture*								shoting_texture,
+			        RemSnd*									shooting_sound,
+			        float										waterHeight);
 	
 	~eShipScript();
 
@@ -35,7 +34,7 @@ public:
 	virtual void	Update(std::vector<std::shared_ptr<eObject> > objs) override;
 	virtual std::vector<shObject>			GetChildrenObjects() override;
 
-	//
+	//secific
 	void			SetDestination(glm::vec3 dst) { destination = dst; }
 	void			SetShootAfterMove(bool shoot) { shoot_after_move = shoot;}
 	void			Shoot();
@@ -47,16 +46,14 @@ protected:
 	glm::vec3		destination		= NONE;
 	bool			  shoot_after_move  = false;
 
-  Texture* flag_tex;
-  glm::vec3		  flag_scale = { 0.01f, 0.01f ,0.01f };
-  std::shared_ptr<eObject> flag;
+  Texture*									flag_tex;
+  glm::vec3									flag_scale = { 0.01f, 0.01f ,0.01f };
+  std::shared_ptr<eObject>	flag;
 
 	std::reference_wrapper<eOpenGlRenderPipeline> pipeline;
 	std::reference_wrapper<Camera> camera;
 	Texture*							   shoot_tex;
 	RemSnd*								   shoot_snd;
-
-	dbb::CameraRay*	  camRay;
 };
 
 #endif // SHIP_SCRIPT_H

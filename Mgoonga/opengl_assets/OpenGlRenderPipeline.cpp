@@ -112,6 +112,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 	std::vector<shObject> pbr_objs = _objects.find(RenderType::PBR)->second;
 	std::vector<shObject> flags = _objects.find(RenderType::FLAG)->second;
 	std::vector<shObject> geometry_obj = _objects.find(RenderType::GEOMETRY)->second;
+	std::vector<shObject> bezier_objs = _objects.find(RenderType::BEZIER_CURVE)->second;
 
 	//Shadow Render Pass
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SHADOW);
@@ -192,6 +193,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 
 	if (flags_on) { RenderFlags(_camera, _light, flags); }
 
+
 	mts ? eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS)
 		: eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 
@@ -205,6 +207,22 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 		{
 			auto* mesh = dynamic_cast<const SimpleGeometryMesh*>(geometry_obj[0]->GetModel()->GetMeshes()[0]);
 			RenderGeometry(_camera, *mesh);
+		}
+	}
+
+	//Bezier
+	if (bezier_curve)
+	{
+		if (!bezier_objs.empty())
+		{
+			std::vector<const BezierCurveMesh*> meshes;
+			for (auto& bezier : bezier_objs)
+			{
+				auto* mesh = dynamic_cast<const BezierCurveMesh*>(bezier->GetModel()->GetMeshes()[0]);
+				if (mesh)
+					meshes.push_back(mesh);
+			}
+			renderManager->BezierRender()->Render(_camera, meshes);
 		}
 	}
 

@@ -1,7 +1,8 @@
 // Vertex shader for shadow map generation
- #version 430 
+ #version 430 core
  
- uniform mat4 MVP; 
+ uniform mat4 MVP;
+ 
  in layout (location = 0) vec3 position;
  
  void main(void)

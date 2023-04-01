@@ -20,6 +20,7 @@
 
 #include <game_assets/ShipScript.h>
 #include <game_assets/ObjectFactory.h>
+#include <game_assets/BezierCurveUIController.h>
 
 //---------------------------------------------------------------------------
 eMgoongaGameContext::eMgoongaGameContext(eInputController*  _input,
@@ -104,7 +105,8 @@ void eMgoongaGameContext::InitializeExternalGui()
   //Main Menu 
   externalGui[4]->Add(MENU_OPEN, "Add model", reinterpret_cast<void*>(&add_model_callback));
 
-  m_focused = m_objects[0];
+  if(!m_objects.empty())
+    m_focused = m_objects[0];
   OnFocusedChanged(); // make event handler
 }
 
@@ -292,9 +294,11 @@ void eMgoongaGameContext::InitializeModels()
                                         texManager->Find("pbr1_normal"),
                                         texManager->Find("pbr1_roughness") };
   modelManager->Add("sphere_textured", textures /*std::vector<const Texture*>{}*/); // or textures
-
+  modelManager->Add("sphere_red");//@
+  
   _InitMainTestSceane();
   _InitializeHexes();
+  _InitializeBezier();
 }
 
 //-------------------------------------------------------------------------
@@ -312,8 +316,8 @@ void eMgoongaGameContext::PaintGL()
 {
 	eMainContextBase::PaintGL();
 
-	std::vector<shObject> flags;
-	for (auto &object : m_objects)
+	std::vector<shObject> flags; //@todo
+	for (auto &object : m_objects) //@todo
 	{
 		if (object->GetScript())
 		{
@@ -323,6 +327,8 @@ void eMgoongaGameContext::PaintGL()
         flags.push_back(script->GetChildrenObjects()[0]);
 		}
 	}
+  bezier_model[0]->GetScript()->Update(m_objects); //@todo
+
   if (m_grab_camera_line != std::nullopt && m_translation_vector != glm::vec3{0.f,0.f,0.0f})
     m_focused->GetTransform()->setTranslation(m_grab_translation + m_translation_vector);
 
@@ -344,6 +350,7 @@ void eMgoongaGameContext::PaintGL()
   objects.insert({ eOpenGlRenderPipeline::RenderType::FLAG, flags });
   objects.insert({ eOpenGlRenderPipeline::RenderType::PBR, m_pbr_objs });
   objects.insert({ eOpenGlRenderPipeline::RenderType::GEOMETRY, {hex_model} });
+  objects.insert({ eOpenGlRenderPipeline::RenderType::BEZIER_CURVE, {bezier_model[0]} });
 	pipeline.RenderFrame(objects, GetMainCamera(), GetMainLight(), guis);
 }
 
@@ -372,6 +379,24 @@ void eMgoongaGameContext::_InitializeHexes()
     }
   ObjectFactoryBase factory;
   hex_model = factory.CreateObject(std::make_shared<SimpleModel>(new SimpleGeometryMesh(dots, radius)));
+}
+
+//----------------------------------------------------
+void eMgoongaGameContext::_InitializeBezier()
+{
+  dbb::Bezier bezier;
+  bezier.p0 = { 1.0f, 3.0f, 0.0f };
+  bezier.p1 = { 3.0f, 3.0f, 3.0f };
+  bezier.p2 = { 6.0f, 3.0f, 3.0f };
+  bezier.p3 = { 8.0f, 3.0f, 1.0f };
+  ObjectFactoryBase factory;
+  bezier_model[0] = factory.CreateObject(std::make_shared<BezierCurveModel>(new BezierCurveMesh(bezier)));
+  for (int i = 1 ; i < bezier_model.size(); ++i)
+  {
+    bezier_model[i] = factory.CreateObject(modelManager->Find("sphere_red"), "SphereBezierPBR " + std::to_string(i));
+    m_pbr_objs.push_back(bezier_model[i]);
+  }
+  bezier_model[0]->SetScript(new BezierCurveUIController(bezier_model));
 }
 
 //----------------------------------------------------
@@ -413,12 +438,11 @@ void eMgoongaGameContext::_InitMainTestSceane()
   m_objects.push_back(nanosuit);
 
   nanosuit->SetScript(new eShipScript(texManager->Find("TSpanishFlag0_s"),
-    pipeline,
-    GetMainCamera(),
-    texManager->Find("Tatlas2"),
-    soundManager->GetSound("shot_sound"),
-    &GetMainCamera().getCameraRay(),
-    pipeline.GetWaterHeight()));
+                                      pipeline,
+                                      GetMainCamera(),
+                                      texManager->Find("Tatlas2"),
+                                      soundManager->GetSound("shot_sound"),
+                                      pipeline.GetWaterHeight()));
 
   shObject wolf = factory.CreateObject(modelManager->Find("wolf"), "Wolf");
   wolf->GetTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);

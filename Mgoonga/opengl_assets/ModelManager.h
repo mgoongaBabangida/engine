@@ -17,9 +17,13 @@ class DLL_OPENGL_ASSETS eModelManager
 
   	void							            InitializePrimitives();
   	std::shared_ptr<IModel>			  Find(const std::string& name);
+
   	void							            Add(const std::string& name, GLchar* path, bool invert_y_uv = false);
     void                          Add(const std::string& name, std::vector<const Texture*>);
+    void                          Add(const std::string& name);
+
     void							            AddPrimitive(const std::string&, std::shared_ptr<MyModel>);
+
   	std::unique_ptr<MyModel>		  ClonePrimitive(const std::string& name);
   	std::unique_ptr<TerrainModel>	CloneTerrain(const std::string& name);
   	std::shared_ptr<MyMesh>			  FindMesh(const std::string&);

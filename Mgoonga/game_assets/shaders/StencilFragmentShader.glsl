@@ -1,10 +1,10 @@
-#version  430 core
+#version  440 core
 
-out vec4 daColor;
+out vec4 outColor;
 
-uniform sampler2D screenTexture;
+uniform vec3 color = vec3(1.0, 1.0, 0.0);
 
 void main()
 {
-    daColor = vec4(1.0, 1.0, 0.0, 1.0);
+    outColor = vec4(color, 1.0);
 }

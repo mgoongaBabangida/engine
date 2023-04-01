@@ -47,6 +47,7 @@ protected:
 	Texture*				m_fourth;
 };
 
+//-------------------------------------------------------
 class DLL_OPENGL_ASSETS SimpleModel : public IModel
 {
 public:
@@ -66,5 +67,29 @@ public:
 	virtual void					Draw()					override { m_mesh->Draw(); }
 
 protected:
-	IMesh* m_mesh;
+	IMesh* m_mesh;//-> unique_ptr
+};
+
+
+//-------------------------------------------------------
+class DLL_OPENGL_ASSETS BezierCurveModel : public IModel
+{
+public:
+	BezierCurveModel(BezierCurveMesh* _m) :m_mesh(_m) {}
+
+	virtual ~BezierCurveModel() { delete m_mesh; }
+
+	virtual std::vector<glm::vec3>						GetPositions()	const	override { return std::vector<glm::vec3>{}; }
+	virtual std::vector<GLuint>								GetIndeces()	const	override { return std::vector<GLuint>{}; }
+	virtual size_t														GetVertexCount() const override { return 0; }
+	virtual size_t														GetMeshCount() const override { return 1; }
+	virtual std::vector<const IMesh*>					GetMeshes() const override { return std::vector<const IMesh*>{ m_mesh }; }
+	virtual size_t														GetAnimationCount() const { return 0; }
+	virtual std::vector<const IAnimation*>		GetAnimations() const { return std::vector<const IAnimation*>(); }
+	virtual std::vector<const Texture*>				GetTexturesModelLevel() const override { return std::vector<const Texture*>{}; }
+
+	virtual void					Draw()					override { m_mesh->Draw(); }
+
+protected:
+	BezierCurveMesh* m_mesh; //-> unique_ptr
 };

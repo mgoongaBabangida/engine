@@ -21,6 +21,10 @@ public:
 	void					installShaders(const char* VertexShaderName,
 															 const char* FragmentShaderName,
 															 const char* GeometryShaderName);//@todo make one function
+	void					installShaders(const char* VertexShaderName,
+															 const char* FragmentShaderName,
+															 const char* Tessalation1ShaderName,
+															 const char* Tessalation2ShaderName);//@todo make one function
 	std::string		readShaderCode(const char* filename);
 
 protected:
@@ -28,9 +32,13 @@ protected:
 	bool					checkProgramStatus();
 
 	GLuint id;
+
 	GLuint vertexShaderID;
 	GLuint fragmentShaderID;
 	GLuint geometryShaderID;
+	GLuint tessellation1ShaderID;
+	GLuint tessellation2ShaderID;
+
 	std::vector<Uniform> uniforms;
 };
 

@@ -26,7 +26,7 @@ class DLL_OPENGL_ASSETS eOpenGlRenderPipeline
 public:
 
 	enum class RenderType
-	{ PHONG, PBR, FLAG, OUTLINED , GEOMETRY};
+	{ PHONG, PBR, FLAG, OUTLINED , GEOMETRY, BEZIER_CURVE };
 
 	eOpenGlRenderPipeline(uint32_t width, uint32_t height);
 	~eOpenGlRenderPipeline();
@@ -105,6 +105,7 @@ protected:
 	bool      debug_texcoords = false;
 	bool			kernel = true;
 	bool			sky_noise = true;
+	bool			bezier_curve = true;
 
 	const uint32_t  width		  = 1200;
 	const uint32_t  height		= 600;

@@ -48,6 +48,7 @@ void eModelManager::Add(const std::string& name, GLchar* path, bool invert_y_uv)
 	models.insert(std::pair<std::string, std::shared_ptr<IModel> >(name, new Model(path, invert_y_uv)) );
 }
 
+//@todo needs to be changed
 void eModelManager::Add(const std::string& name, std::vector<const Texture*> _textures)
 {
 	if (name == "sphere_textured")
@@ -60,6 +61,22 @@ void eModelManager::Add(const std::string& name, std::vector<const Texture*> _te
 		SphereTexturedMesh* mesh = new SphereTexturedMesh();
 		mesh->SetMaterial(material);
 		models.insert(std::pair<std::string, std::shared_ptr<IModel>>{ name, new SphereTexturedModel(mesh, _textures) });
+	}
+}
+
+//@todo needs to be changed
+void eModelManager::Add(const std::string& name)
+{
+	if (name == "sphere_red")
+	{
+		Material material;
+		material.albedo = glm::vec3(0.9f, 0.0f, 0.0f);
+		material.ao = 1.0f;
+		material.roughness = 0.5;
+		material.metallic = 0.5;
+		SphereTexturedMesh* mesh = new SphereTexturedMesh();
+		mesh->SetMaterial(material);
+		models.insert(std::pair<std::string, std::shared_ptr<IModel>>{ name, new SphereTexturedModel(mesh, {}) });
 	}
 }
 
