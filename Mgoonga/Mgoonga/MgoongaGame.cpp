@@ -61,6 +61,7 @@ void eMgoongaGameContext::InitializeExternalGui()
   externalGui[1]->Add(CHECKBOX, "Hex", &pipeline.GetGeometryOnRef());
   externalGui[1]->Add(CHECKBOX, "Kernel", &pipeline.GetKernelOnRef());
   externalGui[1]->Add(CHECKBOX, "Sky noise", &pipeline.GetSkyNoiseOnRef());
+  externalGui[1]->Add(CHECKBOX, "Use gizmo", &m_use_guizmo);
   externalGui[1]->Add(SLIDER_FLOAT, "Blur coefficients", &pipeline.GetBlurCoefRef());
   std::function<void()> emit_partilces_callback = [this]()
   {

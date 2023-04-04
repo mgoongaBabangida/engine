@@ -86,6 +86,24 @@ uint32_t eMainContextBase::GetFinalImageId()
 	return uint32_t();
 }
 
+//---------------------------------------------------------------------------------
+std::shared_ptr<eObject> eMainContextBase::GetFocusedObject()
+{
+	return m_focused;
+}
+
+//--------------------------------------------------------------------------------
+glm::mat4 eMainContextBase::GetMainCameraViewMatrix()
+{
+	return m_cameras[0].getWorldToViewMatrix();
+}
+
+//--------------------------------------------------------------------------------
+glm::mat4 eMainContextBase::GetMainCameraProjectionMatrix()
+{
+	return m_cameras[0].getProjectionMatrix();
+}
+
 //--------------------------------------------------------------------------------
 void eMainContextBase::InitializeModels()
 {

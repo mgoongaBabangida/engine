@@ -170,9 +170,9 @@ void SphereTexturedModel::Draw()
 }
 
 std::vector<glm::vec3> SphereTexturedModel::GetPositions() const
-  {
+{
    std::vector<glm::vec3> ret;
    for (auto& vert : m_mesh->vertices)
     ret.push_back(vert.position);
    return ret;
-  }
+}

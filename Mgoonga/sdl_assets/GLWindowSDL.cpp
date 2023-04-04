@@ -6,10 +6,15 @@
 #include "imgui/imgui_impl_sdl.h"
 
 #include <base/interfaces.h>
+#include <base/Object.h>
 
 #include <opengl_assets/TextureManager.h>
 #include <opengl_assets/ModelManager.h>
 #include <opengl_assets/SoundManager.h>
+
+#include "ImGuizmo/ImGuizmo.h"
+
+#include <glm/glm/gtx/matrix_decompose.hpp>
 
 SDL_GLContext					context;
 ImVec2								viewport_offset;
@@ -167,11 +172,11 @@ void dbGLWindowSDL::PaintGL()
 		SDL_GL_MakeCurrent(window, context);
 		flag = true;
 	}
-
 	eImGuiContext::GetInstance(&context, window).NewFrame();
 
 	//ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 	mainContext->PaintGL();
+
 	OnDockSpace();
 
 	/*eWindowImGuiDemo demo;
@@ -276,14 +281,32 @@ void dbGLWindowSDL::OnDockSpace()
 		ImVec2 viewport_pos = ImGui::GetWindowPos();
 		int window_x, window_y, border_x, border_y;
 		SDL_GetWindowPosition(window, &window_x, &window_y);
-		SDL_GetWindowBordersSize(window,
-			&border_y, &border_x,
-			nullptr, nullptr);
+		SDL_GetWindowBordersSize(window, &border_y, &border_x, nullptr, nullptr);
 		border_y -= 5;
 		viewport_offset = { viewport_pos.x - window_x + border_x,
 												viewport_pos.y - window_y + border_y };
 		ImGui::Image((void*)(intptr_t)(mainContext->GetFinalImageId()), ImVec2(WIDTH, HEIGHT), ImVec2(0, 1), ImVec2(1, 0));
-		
+
+		//Guizmo!
+		if (auto& obj = mainContext->GetFocusedObject(); mainContext->UseGizmo() && obj)
+		{
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist();
+			ImGuizmo::SetRect(viewport_pos.x, viewport_pos.y, WIDTH, HEIGHT);
+
+			glm::mat4 view = mainContext->GetMainCameraViewMatrix();
+			glm::mat4 projection= mainContext->GetMainCameraProjectionMatrix();
+			glm::mat4 transform = obj->GetTransform()->getModelMatrix();
+			ImGuizmo::Manipulate(&view[0][0], &projection[0][0], (ImGuizmo::OPERATION)mainContext->CurGizmoType(), ImGuizmo::LOCAL, &transform[0][0]);
+
+			if (ImGuizmo::IsUsing())
+			{
+				glm::vec3 scale; glm::quat rotation; glm::vec3 translation; glm::vec3 sqew; glm::vec4 perspective;
+				glm::decompose(transform, scale, rotation, translation, sqew, perspective);
+				obj->GetTransform()->setTranslation(translation);
+			}
+		}
+		ImGuizmo::SetRect(viewport_pos.x - window_x + border_x, viewport_pos.y - window_y + border_y, WIDTH, HEIGHT);
 		ImGui::End();
 
 	ImGui::End();

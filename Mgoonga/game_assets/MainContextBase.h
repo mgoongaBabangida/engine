@@ -20,6 +20,13 @@ class ITcpAgent;
 class DLL_GAME_ASSETS eMainContextBase : public IGame, public IInputObserver
 {
 public:
+	enum class GizmoType // to be compatible with ImGuizmo
+	{
+		TRANSLATE = 7,
+		ROTATE = 120,
+		SCALE =896
+	};
+
 	eMainContextBase(eInputController* _input,
 									 std::vector<IWindowImGui*> _externalGui,
 									 const std::string& _modelsPath,
@@ -32,6 +39,11 @@ public:
 	virtual void			InitializeGL() override;
 	virtual void			PaintGL() override;
 	virtual uint32_t	GetFinalImageId() override;
+	virtual std::shared_ptr<eObject> GetFocusedObject() override;
+	virtual glm::mat4 GetMainCameraViewMatrix() override;
+	virtual glm::mat4 GetMainCameraProjectionMatrix() override;
+	virtual bool UseGizmo() override { return m_use_guizmo; }
+	virtual uint32_t CurGizmoType() override { return (uint32_t)m_gizmo_type; }
 
 	virtual size_t			Width() override;
 	virtual size_t			Height() override;
@@ -60,6 +72,9 @@ protected:
 
 	std::vector<Light>					m_lights;
 	std::vector<Camera>					m_cameras;
+	shObject										m_focused;
+	bool												m_use_guizmo = true;
+	GizmoType										m_gizmo_type = GizmoType::TRANSLATE;
 	//managers
 	std::unique_ptr<eTextureManager>	texManager;
 	std::unique_ptr<eModelManager>		modelManager;

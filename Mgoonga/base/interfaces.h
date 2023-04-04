@@ -233,6 +233,11 @@ public:
 	virtual void		InitializeGL() = 0;
 	virtual void		PaintGL() = 0;
 	virtual uint32_t GetFinalImageId() = 0;
+	virtual std::shared_ptr<eObject> GetFocusedObject() = 0; //const ref?
+	virtual glm::mat4 GetMainCameraViewMatrix() = 0;
+	virtual glm::mat4 GetMainCameraProjectionMatrix() = 0;
+	virtual bool UseGizmo() = 0;
+	virtual uint32_t CurGizmoType() = 0;
 
 	virtual size_t			Width() =0 ;
 	virtual size_t			Height() =0 ;
