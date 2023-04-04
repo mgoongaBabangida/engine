@@ -217,8 +217,6 @@ void main()
 	outColor = vec4(dif_texture.r * 2,dif_texture.g /2, dif_texture.b / 2,1.0); 
   else if(debug_white_color)
 	outColor = vec4(vec3(shadow / far_plane), 1.0);
-  else if(shadow < 0.9)
-	outColor = vec4(ambientLight, 1.0);
   else
 	outColor = vec4(ambientLight + difspec*shadow, 1.0); //vec4(shadow,shadow,shadow,1.0);
 };
@@ -239,15 +237,14 @@ float ShadowCalculation(vec4 fragPosLightSpace )
      for(int y = -2; y <= 2; ++y)
      {
          float pcfDepth = texture(depth_texture, projCoords.xy + vec2(x, y) * texelSize).r; 
-         shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
+         shadow += (currentDepth - bias) > pcfDepth ? 1.0 : 0.0;        
      }    
   }
   shadow /= 25.0;
-  shadow = shadow * shadow;
   
   if(LightSpacePos.z > 1.0) //far plane issue!
      shadow = 1.0;
-  return (1.0f - shadow);
+  return clamp((0.5f + (1.0f - shadow)), 0.0f, 1.0f);
 } 
 
 float ShadowCalculationCubeMap(vec3 fragPos)
