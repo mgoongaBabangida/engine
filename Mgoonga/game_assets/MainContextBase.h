@@ -75,6 +75,7 @@ protected:
 	shObject										m_focused;
 	bool												m_use_guizmo = true;
 	GizmoType										m_gizmo_type = GizmoType::TRANSLATE;
+	
 	//managers
 	std::unique_ptr<eTextureManager>	texManager;
 	std::unique_ptr<eModelManager>		modelManager;

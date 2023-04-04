@@ -65,7 +65,7 @@ void eMgoongaGameContext::InitializeExternalGui()
   externalGui[1]->Add(SLIDER_FLOAT, "Blur coefficients", &pipeline.GetBlurCoefRef());
   std::function<void()> emit_partilces_callback = [this]()
   {
-    pipeline.AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f),
+    pipeline.AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 3.0f, -2.5f),
                                                   texManager->Find("Tatlas2"),
                                                   soundManager->GetSound("shot_sound"),
                                                   texManager->Find("Tatlas2")->numberofRows));
