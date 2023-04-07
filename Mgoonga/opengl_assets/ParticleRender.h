@@ -28,8 +28,6 @@ public:
 	Shader& GetShader() { return particleShader; }
 
 protected:
-  void	LoadOffsetsInfo(glm::vec2	offset1, glm::vec2	offset2, float numRows, float blend);
-
 	Shader											        particleShader;
 	std::unique_ptr<MyModel>						model;
 	std::unique_ptr<ParticleMesh>				mesh;

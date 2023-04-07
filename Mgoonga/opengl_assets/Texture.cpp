@@ -4,7 +4,7 @@
 #include "TextureImplDevIl.h"
 #include "TextureImplSDL.h"
 
-#include <iostream>
+#include <math/Random.h>
 
 bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenum wrap)
 {
@@ -220,6 +220,28 @@ bool Texture::makeDepthCubeMap()
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	return true;
+}
+
+bool Texture::makeRandom1DTexture(unsigned int _size)
+{
+	glm::vec3* pRandomData = new glm::vec3[_size];
+
+	for (unsigned int i = 0; i < _size; i++) {
+		pRandomData[i].x = math::Random::RandomFloat(0.0f, 1.0f);
+		pRandomData[i].y = math::Random::RandomFloat(0.0f, 1.0f);
+		pRandomData[i].z = math::Random::RandomFloat(0.0f, 1.0f);
+	}
+
+	glGenTextures(1, &id);
+	glBindTexture(GL_TEXTURE_1D, id);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, _size, 0.0f, GL_RGB, GL_FLOAT, pRandomData);
+	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+
+	delete[] pRandomData;
 
 	return true;
 }

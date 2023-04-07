@@ -31,9 +31,14 @@
 void	eOpenGlRenderPipeline::SetSkyBoxTexture(Texture* _t)
 { renderManager->SkyBoxRender()->SetSkyBoxTexture(_t); }
 
-void eOpenGlRenderPipeline::AddParticleSystem(IParticleSystem* system)
+void eOpenGlRenderPipeline::AddParticleSystem(IParticleSystem* _system)
 {
-	renderManager->AddParticleSystem(system);
+	renderManager->AddParticleSystem(_system);
+}
+
+void eOpenGlRenderPipeline::AddParticleSystemGPU(glm::vec3 _startPos, Texture* _texture)
+{
+	renderManager->AddParticleSystemGPU(_startPos, _texture);
 }
 
 const std::vector<ShaderInfo>& eOpenGlRenderPipeline::GetShaderInfos() const
@@ -287,7 +292,9 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 
 	if(mousepress  && _camera.getCameraRay().IsPressed())
 	{
-		renderManager->ScreenRender()->RenderFrame(_camera.getCameraRay().GetFrame().first, _camera.getCameraRay().GetFrame().second, width, height);
+		renderManager->ScreenRender()->RenderFrame(_camera.getCameraRay().GetFrame().first, _camera.getCameraRay().GetFrame().second, 
+																							static_cast<float>(width), 
+																							static_cast<float>(height));
 	}
 
 	RenderGui(guis, _camera);
@@ -416,6 +423,7 @@ void eOpenGlRenderPipeline::RenderParticles(const Camera& _camera)
 	glDepthMask(GL_FALSE);
 	glCullFace(GL_TRUE);
 	renderManager->ParticleRender()->Render(_camera);
+	renderManager->ParticleRenderGPU()->Render(_camera);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_BLEND);
 	glDepthMask(GL_TRUE);

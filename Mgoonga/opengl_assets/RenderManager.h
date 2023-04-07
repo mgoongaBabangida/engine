@@ -23,6 +23,7 @@
 #include "TextRender.h"
 #include "PBRRender.h"
 #include "BezierRender.h"
+#include "ParticleSystemRenderGPUTransformfeedback.h"
 
 //----------------------------------------------------------------------------------------------
 class eRenderManager
@@ -41,6 +42,7 @@ public:
 								         const std::string&	folderPath);
 
 	void				AddParticleSystem(IParticleSystem* system);
+	void				AddParticleSystemGPU(glm::vec3 _startPos, Texture* _texture);
 
 private:
 
@@ -48,6 +50,7 @@ private:
 	eSkyBoxRender*		SkyBoxRender();
 	eScreenRender*		ScreenRender();
 	eParticleRender*	ParticleRender();
+	eParticleSystemRenderGPU_V2* ParticleRenderGPU();
 	eShadowRender*		ShadowRender();
 	eMainRender*		MainRender();
 	eOutlineRender*		OutlineRender();
@@ -66,6 +69,7 @@ private:
 	std::unique_ptr<eSkyBoxRender>		 m_skyboxRender;
 	std::unique_ptr<eScreenRender>		 m_screenRender;
 	std::unique_ptr<eParticleRender>	 m_particleRender;
+	std::unique_ptr <eParticleSystemRenderGPU_V2> m_particleRenderGPU;
 	std::unique_ptr<eShadowRender>		 m_shadowRender;
 	std::unique_ptr<eMainRender>		 m_mainRender;
 	std::unique_ptr<eOutlineRender>		 m_outlineRender;

@@ -8,15 +8,15 @@
 #include <random>
 
 //------------------------------------------------------------------------------------
-ParticleSystem::ParticleSystem(float	 _pps, 
-							   float	 _speed, 
-							   float	 _gravityComplient, 
-							   float	 _lifeLength,
-							   glm::vec3 _systemCenter,
-							   Texture*  _texture,
-							   ISound*	 _sound,
-							   size_t	 _num_rows_in_texture,
-							   float	 _duration)
+ParticleSystem::ParticleSystem(float	 _pps,
+															 float	 _speed,
+															 float	 _gravityComplient,
+															 float	 _lifeLength,
+															 glm::vec3 _systemCenter,
+															 Texture*  _texture,
+															 ISound*	 _sound,
+															 size_t	 _num_rows_in_texture,
+															 float	 _duration)
 : IParticleSystem(_texture, 0.05f)
 , duration(_duration)
 , m_pps(_pps)
@@ -123,11 +123,11 @@ ParticleSystem::~ParticleSystem()
 void ParticleSystem::Update()
 {
 	GenerateParticles();
-	for (auto& prt : m_particles) 
+	for (auto& prt : m_particles)
 	{
 		prt.Update();
 	}
-	std::sort(m_particles.begin(), m_particles.end(), 
-			  [](Particle& prt1, Particle& prt2) 
+	std::sort(m_particles.begin(), m_particles.end(),
+			  [](Particle& prt1, Particle& prt2)
 			{ return prt1.isAlive() > prt2.isAlive(); });
 }

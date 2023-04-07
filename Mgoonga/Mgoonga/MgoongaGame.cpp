@@ -65,10 +65,14 @@ void eMgoongaGameContext::InitializeExternalGui()
   externalGui[1]->Add(SLIDER_FLOAT, "Blur coefficients", &pipeline.GetBlurCoefRef());
   std::function<void()> emit_partilces_callback = [this]()
   {
-    pipeline.AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 3.0f, -2.5f),
+    pipeline.AddParticleSystem(new ParticleSystem(50, 0, 0, 10000, glm::vec3(0.0f, 3.0f, -2.5f),
                                                   texManager->Find("Tatlas2"),
                                                   soundManager->GetSound("shot_sound"),
                                                   texManager->Find("Tatlas2")->numberofRows));
+  };
+  std::function<void()> emit_partilces_gpu_callback = [this]()
+  {
+    pipeline.AddParticleSystemGPU(glm::vec3(0.5f, 3.0f, -2.5f), texManager->Find("Tatlas2"));
   };
   std::function<void()> update_uniforms_callback = [this]()
   {
@@ -79,6 +83,7 @@ void eMgoongaGameContext::InitializeExternalGui()
     modelManager->Add("Name", (GLchar*)_path.c_str());//@todo parse real name
   };
   externalGui[1]->Add(BUTTON, "Emit particle system", (void*)&emit_partilces_callback);
+  externalGui[1]->Add(BUTTON, "Emit particle system gpu", (void*)&emit_partilces_gpu_callback);
   externalGui[1]->Add(CHECKBOX, "Debug white", &pipeline.GetDebugWhite());
   externalGui[1]->Add(CHECKBOX, "Debug Tex Coords", &pipeline.GetDebugTexCoords());
 
@@ -103,7 +108,7 @@ void eMgoongaGameContext::InitializeExternalGui()
   externalGui[3]->Add(BUTTON, "Update shaders", (void*)&update_uniforms_callback);
   externalGui[3]->Add(SHADER, "Shaders", (void*)&pipeline.GetShaderInfos());
 
-  //Main Menu 
+  //Main Menu
   externalGui[4]->Add(MENU_OPEN, "Add model", reinterpret_cast<void*>(&add_model_callback));
 
   if(!m_objects.empty())

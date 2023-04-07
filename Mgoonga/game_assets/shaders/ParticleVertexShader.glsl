@@ -11,11 +11,6 @@ out vec2 textureCoords2;
 out float blend;
 
 uniform mat4 ProjectionMatrix;
-//uniform mat4 ModelViewMatrix;
-
-//uniform vec2 texOffset1;
-//uniform vec2 texOffset2;
-//uniform vec2 texCoordInfo;
 
 void main()
 {
@@ -27,6 +22,4 @@ void main()
 	blend = texCoordInfo.y;
 
 	gl_Position = ProjectionMatrix * ModelViewMatrix * vec4(position,1.0);
-
-
 }

@@ -8,6 +8,7 @@ eWaterRender*		 eRenderManager::WaterRender() { return m_waterRender.get(); }
 eSkyBoxRender*		 eRenderManager::SkyBoxRender() { return m_skyboxRender.get(); }
 eScreenRender*		 eRenderManager::ScreenRender() { return m_screenRender.get(); }
 eParticleRender*	 eRenderManager::ParticleRender() { return m_particleRender.get(); }
+eParticleSystemRenderGPU_V2* eRenderManager::ParticleRenderGPU(){ return m_particleRenderGPU.get();}
 eShadowRender*		 eRenderManager::ShadowRender() { return m_shadowRender.get(); }
 eMainRender*		 eRenderManager::MainRender() { return m_mainRender.get(); }
 eOutlineRender*		 eRenderManager::OutlineRender() { return m_outlineRender.get(); }
@@ -25,6 +26,12 @@ eBezierRender* eRenderManager::BezierRender() { return m_bezierRender.get(); }
 void eRenderManager::AddParticleSystem(IParticleSystem* system) 
 {
 	m_particleRender->AddParticleSystem(system);
+}
+
+//----------------------------------------------------------------------------------------------------------------
+void eRenderManager::AddParticleSystemGPU(glm::vec3 _startPos, Texture* _texture)
+{
+	m_particleRenderGPU->AddParticleSystem(_startPos, _texture);
 }
 
 //---------------------------------------------------------------------------------------------------------------
@@ -103,6 +110,17 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 											   folderPath + "ParticleVertexShader.glsl",
 											   folderPath + "ParticleFragmentShader.glsl"));
 	shader_lambda(m_particleRender.get());
+	// Particle Renderer GPU
+	/*m_particleRenderGPU.reset(new eParticleSystemRenderGPU(folderPath + "ParticleGPUUpdateVertexShader.glsl",
+																												 folderPath + "ParticleGPURenderFragmentShader.glsl",
+																												 folderPath + "ParticleGPUUpdateGeometryShader.glsl",
+																												 folderPath + "ParticleGPURenderVertexShader.glsl",
+																												 folderPath + "ParticleGPURenderGeometryShader.glsl"));*/
+	m_particleRenderGPU.reset(new eParticleSystemRenderGPU_V2(folderPath + "transfeedbackVS.glsl",
+																														folderPath + "transfeedbackFS.glsl",
+																														folderPath + "ParticleGPURenderGeometryShader.glsl"));
+
+	shader_lambda(m_particleRenderGPU.get());
 	//Lines
 	m_linesRender.reset(new eLinesRender(folderPath + "SkyBoxVertexShader.glsl",
 																			 folderPath + "StencilFragmentShader.glsl"));
@@ -140,6 +158,7 @@ void eRenderManager::UpdateShadersInfo()
 	shader_lambda(m_gaussianRender.get());
 	shader_lambda(m_brightRender.get());
 	shader_lambda(m_particleRender.get());
+	shader_lambda(m_particleRenderGPU.get());
 	shader_lambda(m_linesRender.get());
 	shader_lambda(m_textRender.get());
 	shader_lambda(m_pbrRender.get());

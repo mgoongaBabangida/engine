@@ -34,7 +34,8 @@ eMainContextBase::eMainContextBase(eInputController* _input,
 //-------------------------------------------------------------------------
 eMainContextBase::~eMainContextBase()
 {
-	tcpTimer->stop();
+	if(tcpTimer)
+		tcpTimer->stop();
 }
 
 //-------------------------------------------------------------------------

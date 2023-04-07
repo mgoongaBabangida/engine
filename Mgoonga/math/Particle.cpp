@@ -7,7 +7,7 @@ void Particle::updateTextureCoordInfo()
 	float lifeFactor		= m_elapsedTime / m_lifelength;
 	int stagecount			= numRowsInTexture * numRowsInTexture;
 	float atlasProgression	= lifeFactor * stagecount;
-	int index1				= glm::floor(atlasProgression); 
+	int index1				= glm::floor(atlasProgression);
 	int index2				= index1 == stagecount - 1 ? index1 : index1 + 1; // wiered
 	blend					= atlasProgression - index1;
 	setTextureOffset(texOffset1, index1);

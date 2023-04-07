@@ -14,12 +14,10 @@ void main()
 	vec4 color2 = texture(texture_diffuse1,textureCoords2);
 	vec4 final_color = mix(color1,color2,blend);
 	if(final_color.x<0.85 && final_color.y<0.85 && final_color.z<0.85 )
-	  discard ;
+	  discard;
 	else
-	  final_color.a=0.85f ;
-	out_Color = final_color; //color1 ;
-	
-
+	  final_color.a=0.85f;
+	out_Color = final_color; //color1;
 }
 
 

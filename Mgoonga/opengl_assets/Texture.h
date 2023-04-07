@@ -53,6 +53,7 @@ struct /*DLL_OPENGL_ASSETS*/ Texture
 	bool makeCubemap(Texture*);
 	bool makeDepthTexture();
 	bool makeDepthCubeMap();
+	bool makeRandom1DTexture(unsigned int _size);
 
 	template<class GLtype>
 	bool TextureFromBuffer(GLtype* buffer, GLuint Width, GLuint Height)

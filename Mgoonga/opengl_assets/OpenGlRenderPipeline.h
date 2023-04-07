@@ -39,11 +39,12 @@ public:
 	void			InitializeRenders(eModelManager&, eTextureManager&, const std::string& shadersFolderPath);
 	
 	const std::vector<ShaderInfo>& GetShaderInfos() const;
-	void UpdateShadersInfo();
+	void			UpdateShadersInfo();
 	void			SetSkyBoxTexture(Texture* _t);
 	
 	void AddParticleSystem(IParticleSystem* system);
-	
+	void AddParticleSystemGPU(glm::vec3 _startPos, Texture* _texture);
+
 	void			SwitchSkyBox(bool on) { skybox = on; }
 	void			SwitchWater(bool on)  { water = on; }
 

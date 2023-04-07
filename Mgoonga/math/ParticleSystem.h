@@ -12,15 +12,15 @@
 class DLL_MATH ParticleSystem: public IParticleSystem
 {
 public:
-	ParticleSystem(float	 _pps, 
-				   float	 _speed, 
-				   float	 _gravityComplient, 
-				   float	 _lifeLength, 
-				   glm::vec3 _systemCenter, 
-				   Texture*  _texture, 
-				   ISound*	 _sound,
-				   size_t	 _num_rows_in_texture,
-				   float	 _duration = 10000.0f);
+	ParticleSystem(float	 _pps,
+								 float	 _speed,
+								 float	 _gravityComplient,
+								 float	 _lifeLength,
+								 glm::vec3 _systemCenter,
+								 Texture*  _texture,
+								 ISound*	 _sound,
+								 size_t	 _num_rows_in_texture,
+								 float	 _duration = 10000.0f);
 	
 	static const int32_t MAX_PARTICLES = 1000;
 	

@@ -23,6 +23,7 @@ eParticleRender::eParticleRender(std::shared_ptr<MyMesh> _mesh,
 	worldToProjectionMatrixUniformLocation	= glGetUniformLocation(particleShader.ID(), "worldToProjectionMatrix");
 	ProjectionMatrixUniformLocation			= glGetUniformLocation(particleShader.ID(), "ProjectionMatrix");
 	modelViewMatrixLocation					= glGetUniformLocation(particleShader.ID(), "ModelViewMatrix");
+	
 	texOffset1Location						= glGetUniformLocation(particleShader.ID(), "texOffset1");
 	texOffset2Location						= glGetUniformLocation(particleShader.ID(), "texOffset2");
 	texCoordInfoLocation					= glGetUniformLocation(particleShader.ID(), "texCoordInfo");
@@ -31,6 +32,7 @@ eParticleRender::eParticleRender(std::shared_ptr<MyMesh> _mesh,
 	object.reset(new eObject); // @todo prob transform will do
 	object->SetModel(model.get());
 	object->SetTransform(new Transform);
+	
 	ShapeData quad	= ShapeGenerator::makeQuad();
 	mesh.reset(new ParticleMesh(quad));
 	quad.cleanup();
@@ -51,22 +53,20 @@ void eParticleRender::Render(const Camera& _camera)
 	for(auto& system : systems)
 	{
 		object->GetTransform()->billboard(_camera.getDirection());
-		object->GetTransform()->setScale(system->Scale());  
+		object->GetTransform()->setScale(system->Scale());
 
 		int counter		= 0;
 		int instances	= 0;
 		std::vector<Particle>::iterator n_end = system->PrepareParticles(_camera.getPosition());
 		std::vector<Particle>::iterator iter = system->GetParticles().begin();
-		if(iter != system->GetParticles().end() && n_end != system->GetParticles().begin()) 
+		if(iter != system->GetParticles().end() && n_end != system->GetParticles().begin())
 		{
-			while(iter != n_end) 
+			while(iter != n_end)
 			{
 				instances++;
 				object->GetTransform()->setTranslation(iter->getPosition());
 				glm::mat4 modelViewMatrix = _camera.getWorldToViewMatrix() * object->GetTransform()->getModelMatrix();
 				
-				LoadOffsetsInfo(iter->gettexOffset1(), iter->gettexOffset2(), iter->getNumRows(), iter->getBlend());
-
 				for (int i = 0; i < 4; ++i) {
 					for (int j = 0; j < 4; ++j) {
 						instancedBuffer[counter++] = modelViewMatrix[i][j];
@@ -103,11 +103,4 @@ void eParticleRender::Render(const Camera& _camera)
 void eParticleRender::AddParticleSystem(IParticleSystem* sys)
 {
 	systems.push_back(std::shared_ptr<IParticleSystem>(sys));
-}
-
-void eParticleRender::LoadOffsetsInfo(glm::vec2 offset1, glm::vec2 offset2, float numRows, float blend)
-{
-	glUniform2f(texOffset1Location, offset1[0], offset1[1]);
-	glUniform2f(texOffset2Location, offset2[0], offset2[1]);
-	glUniform2f(texCoordInfoLocation, numRows, blend);
 }

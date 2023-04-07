@@ -207,7 +207,7 @@ ParticleMesh::ParticleMesh(std::vector<MyVertex> vertices, std::vector<GLuint> i
   glDeleteBuffers(1, &VBOinstanced);
 }
 
-ParticleMesh::ParticleMesh(const ShapeData & data)
+ParticleMesh::ParticleMesh(const ShapeData& data)
 {
 	glm::vec2 tex[4];
 	tex[0] = glm::vec2(1.0f, 1.0f);
@@ -236,32 +236,6 @@ ParticleMesh::ParticleMesh(const ShapeData & data)
 		glm::vec2 uv1 = vertices[indices[i]].TexCoords;
 		glm::vec2 uv2 = vertices[indices[i + 1]].TexCoords;
 		glm::vec2 uv3 = vertices[indices[i + 2]].TexCoords;
-		// calculate tangent/bitangent vectors of both triangles
-		glm::vec3 tangent1, bitangent1;
-		// - triangle 1
-		glm::vec3 edge1 = pos2 - pos1;
-		glm::vec3 edge2 = pos3 - pos1;
-		glm::vec2 deltaUV1 = uv2 - uv1;
-		glm::vec2 deltaUV2 = uv3 - uv1;
-
-		GLfloat f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
-
-		tangent1.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
-		tangent1.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
-		tangent1.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
-		tangent1 = glm::normalize(tangent1);
-
-		bitangent1.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
-		bitangent1.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
-		bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
-		bitangent1 = glm::normalize(bitangent1);
-
-		vertices[indices[i]].tangent = tangent1;
-		vertices[indices[i + 1]].tangent = tangent1;
-		vertices[indices[i + 2]].tangent = tangent1;
-		vertices[indices[i]].bitangent = bitangent1;
-		vertices[indices[i + 1]].bitangent = bitangent1;
-		vertices[indices[i + 2]].bitangent = bitangent1;
 	}
 	this->setupMesh();
 }
@@ -301,22 +275,6 @@ void ParticleMesh::setupMesh()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
 		(GLvoid*)0);
-	// Vertex Normals
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
-		(GLvoid*)offsetof(MyVertex, Normal));
-	// Vertex Texture Coords
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
-		(GLvoid*)offsetof(MyVertex, TexCoords));
-	// Vertex Tangent
-	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
-		(GLvoid*)offsetof(MyVertex, tangent));
-	// Vertex Bitangent
-	glEnableVertexAttribArray(5);
-	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
-		(GLvoid*)offsetof(MyVertex, bitangent));
 
 	//Instancing
 	glGenBuffers(1, &this->VBOinstanced);
@@ -348,7 +306,6 @@ void ParticleMesh::setupMesh()
 	glVertexAttribDivisor(12, 1);
 
 	glBindVertexArray(0);
-
 }
 
 void ParticleMesh::updateInstancedData(std::vector<float>& buffer)

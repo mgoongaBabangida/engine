@@ -46,35 +46,43 @@ public:
 		alive			= true;
 	}
 
-	glm::vec3	   getPosition()			{ return m_position; }		 const
-	float		   getRotaion()				{ return m_rotation; }		 const
-	float		   getScale()				{ return m_scale; }			 const
-	glm::vec2	   gettexOffset1()			{ return this->texOffset1; } const
-	glm::vec2	   gettexOffset2()			{ return this->texOffset2; } const
-	int32_t		   getNumRows()				{ return numRowsInTexture; } const
-	float		   getBlend()				{ return blend; }			 const
-	bool		   isAlive()				{ return alive; }			 const
-	float		   getDistance()			{ return distance; }		 const
-	void		   setDistance(float dist)  { distance = dist; }
-	bool		   Update();
+	glm::vec3		getPosition()			{ return m_position; }		 const
+	float				getRotaion()				{ return m_rotation; }		 const
+	float				getScale()				{ return m_scale; }			 const
+	glm::vec2	  gettexOffset1()			{ return this->texOffset1; } const
+	glm::vec2	  gettexOffset2()			{ return this->texOffset2; } const
+	int32_t		  getNumRows()				{ return numRowsInTexture; } const
+	float				getBlend()				{ return blend; }			 const
+	bool				isAlive()				{ return alive; }			 const
+	float				getDistance()			{ return distance; }		 const
+	void				setDistance(float dist)  { distance = dist; }
+	bool				Update();
 
 private:
 	void			updateTextureCoordInfo();
 	void			setTextureOffset(glm::vec2& offset, int index);
 
-	bool			alive = true;
+	bool				alive = true; //m_elapsedTime >= m_lifelength
+	
 	glm::vec3		m_position;
 	glm::vec3		m_velocity;
-	float			m_gravityEffect;
-	float			m_lifelength;
-	float			m_rotation;
-	float			m_scale;
-	float			GRAVITY;// = 0.0f; ??? static  const??
-	float			m_elapsedTime = 0.0f;
+	float				m_elapsedTime = 0.0f;
+
+	float				m_lifelength; //outside?
+	
+	float				m_rotation;//?
+	float				m_scale;//?
+
+	//texturing
 	glm::vec2		texOffset1;
 	glm::vec2		texOffset2;
-	float			blend;
-	float			distance;
-	uint32_t		speed = 100; //msc
-	uint32_t		numRowsInTexture = 4;
+	float				blend;
+
+	float				distance;
+
+	uint32_t		speed = 100; //msc //outside?
+	uint32_t		numRowsInTexture = 4; //outside?
+
+	float				GRAVITY;// = 0.0f; ??? static  const??
+	float				m_gravityEffect;
 };

@@ -4,7 +4,7 @@
 #include <fstream>
 
 //------------------------------------------------------------------------------------
-void Shader::installShaders(const char* VertexShaderName, const char* FragmentShaderName)
+void Shader::installShaders(const char* VertexShaderName, const char* FragmentShaderName, bool _transformFeedback)
 {
 	vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 	fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -25,6 +25,16 @@ void Shader::installShaders(const char* VertexShaderName, const char* FragmentSh
 	{
 		glAttachShader(id, vertexShaderID);
 		glAttachShader(id, fragmentShaderID);
+
+		if (_transformFeedback)
+		{
+			const GLchar* Varyings[3];
+			Varyings[0] = "Position";
+			Varyings[1] = "Velocity";
+			Varyings[2] = "StartTime";
+			glTransformFeedbackVaryings(id, 3, Varyings, GL_SEPARATE_ATTRIBS);
+		}
+
 		glLinkProgram(id);
 	}
 
@@ -33,7 +43,7 @@ void Shader::installShaders(const char* VertexShaderName, const char* FragmentSh
 }
 
 //--------------------------------------------------------------------------------------
-void Shader::installShaders(const char* VertexShaderName, const char* FragmentShaderName, const char* GeometryShaderName)
+void Shader::installShaders(const char* VertexShaderName, const char* FragmentShaderName, const char* GeometryShaderName, bool _transformFeedback)
 {
 	vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 	fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -53,6 +63,7 @@ void Shader::installShaders(const char* VertexShaderName, const char* FragmentSh
 	glCompileShader(vertexShaderID);
 	glCompileShader(geometryShaderID);
 	glCompileShader(fragmentShaderID);
+
 	id = glCreateProgram();
 
 	if (checkShaderStatus(vertexShaderID) | checkShaderStatus(fragmentShaderID) | checkShaderStatus(geometryShaderID))
@@ -60,6 +71,15 @@ void Shader::installShaders(const char* VertexShaderName, const char* FragmentSh
 		glAttachShader(id, vertexShaderID);
 		glAttachShader(id, geometryShaderID);
 		glAttachShader(id, fragmentShaderID);
+
+		if (_transformFeedback)
+		{
+			const GLchar* Varyings[3];
+			Varyings[0] = "Position";
+			Varyings[1] = "Velocity";
+			Varyings[2] = "StartTime";
+			glTransformFeedbackVaryings(id, 3, Varyings, GL_SEPARATE_ATTRIBS);
+		}
 		glLinkProgram(id);
 	}
 

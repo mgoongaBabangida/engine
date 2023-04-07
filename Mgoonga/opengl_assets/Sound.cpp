@@ -11,6 +11,29 @@ bool SoundContext::endWithError(std::string str)
 	return false;
 }
 
+bool SoundContext::init()
+{
+	device = alcOpenDevice(NULL);
+	if (!device)
+		return endWithError("no sound device");
+	context = alcCreateContext(device, NULL);
+	alcMakeContextCurrent(context);
+	if (!context)
+		return endWithError("no sound context");
+	return true;
+}
+
+bool SoundContext::exit()
+{
+	/*for( auto& buf:buffers)
+		alDeleteBuffers(1, &buf.second);*/
+
+	alcMakeContextCurrent(NULL);
+	alcDestroyContext(context);
+	alcCloseDevice(device);
+	return true;
+}
+
 //-----------------------------------------------------------------------------
 RemSnd::RemSnd(const RemSnd& cSnd) 
 : mLooped(cSnd.mLooped), mSourceID(cSnd.mSourceID), mStreamed(cSnd.mStreamed) 
@@ -82,29 +105,6 @@ RemSnd::~RemSnd()
 	alSourceStop(mSourceID);
 	 if(alIsSource(mSourceID))
      alDeleteSources(1, &mSourceID);
-}
-
-bool SoundContext::init()
-{
-	device = alcOpenDevice(NULL);
-	if (!device) 
-		return endWithError("no sound device");
-	context = alcCreateContext(device, NULL);
-	alcMakeContextCurrent(context);
-	if (!context) 
-		return endWithError("no sound context");
-	return true;
-}
-
-bool SoundContext::exit()
-{
-	/*for( auto& buf:buffers)
-		alDeleteBuffers(1, &buf.second);*/
-
-	alcMakeContextCurrent(NULL);
-  alcDestroyContext(context);
-  alcCloseDevice(device);
-	return true;
 }
 
 void RemSnd::loadListner(float x, float y, float z)

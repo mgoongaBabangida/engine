@@ -33,12 +33,13 @@ public:
 
 	static const int MAX_PARTICLES = 1000;
 
-	virtual void							GenerateParticles()							= 0;
+	virtual void														GenerateParticles()			= 0;
 	virtual std::vector<Particle>::iterator PrepareParticles(glm::vec3 cameraPosition)	= 0;
-	virtual std::vector<Particle>&			GetParticles()								= 0;
-	virtual bool							IsFinished()								= 0;
+	virtual std::vector<Particle>&					GetParticles()	= 0;
+	virtual bool														IsFinished()		= 0;
+	
 	// to improve
-	glm::vec3								Scale()			{ return scale; }
+	glm::vec3								Scale()				{ return scale; }
 	Texture*								GetTexture()	{ return texture; }
 
 protected:
@@ -230,6 +231,7 @@ public:
 class IGame
 {
 public:
+	virtual ~IGame() = default;
 	virtual void		InitializeGL() = 0;
 	virtual void		PaintGL() = 0;
 	virtual uint32_t GetFinalImageId() = 0;

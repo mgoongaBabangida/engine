@@ -17,10 +17,13 @@ public:
 	void					GetUniformDataFromShader();
 	const std::vector<Uniform>& GetUniforms() const { return uniforms; }
 	
-	void					installShaders(const char* VertexShaderName, const char* FragmentShaderName);
 	void					installShaders(const char* VertexShaderName,
 															 const char* FragmentShaderName,
-															 const char* GeometryShaderName);//@todo make one function
+															 bool _transformFeedback = false);
+	void					installShaders(const char* VertexShaderName,
+															 const char* FragmentShaderName,
+															 const char* GeometryShaderName,
+															 bool _transformFeedback = false);//@todo make one function
 	void					installShaders(const char* VertexShaderName,
 															 const char* FragmentShaderName,
 															 const char* Tessalation1ShaderName,
