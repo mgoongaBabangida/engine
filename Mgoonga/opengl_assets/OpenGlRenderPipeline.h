@@ -58,6 +58,7 @@ public:
   float& GetBlurCoefRef() { return blur_coef; }
 	bool& GetKernelOnRef() { return kernel; }
 	bool& GetSkyNoiseOnRef() { return sky_noise; }
+	bool& GetGammaCorrectionRef() { return gamma_correction; }
 
 	glm::vec4 debug_float = {0.0f,0.0f,0.0f,0.0f};
 
@@ -107,6 +108,7 @@ protected:
 	bool			kernel = true;
 	bool			sky_noise = true;
 	bool			bezier_curve = true;
+	bool			gamma_correction = true;
 
 	const uint32_t  width		  = 1200;
 	const uint32_t  height		= 600;

@@ -15,10 +15,11 @@ public:
 	~eMainRender();
 
 	void Render(const Camera&			camera,
-				      const Light&			light,
-				      const std::vector<shObject>&	objects,
-		          bool debug_white,
-		          bool debug_text_coords);
+							const Light&			light,
+							const std::vector<shObject>&	objects,
+							bool debug_white,
+							bool debug_text_coords,
+							bool gamma_correction);
 
 	void	SetClipPlane(float Height);
 	void	SetShadowMatrix(glm::mat4 shadow_matrix);
@@ -52,6 +53,7 @@ protected:
 
 	GLuint DebugWhiteLoc;
 	GLuint DebugTexcoordsLoc;
+	GLuint GammaCorrectionLoc;
 
 	std::vector<glm::mat4> matrices;
 	glm::mat4			         worldToProjectionMatrix;

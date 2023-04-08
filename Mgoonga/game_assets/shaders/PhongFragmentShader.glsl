@@ -50,9 +50,11 @@ layout(binding=5) uniform sampler2D        texture_depth1;
 uniform vec3 eyePositionWorld;
 uniform bool normalMapping = true;
 uniform bool shadow_directional = true;
+
 uniform float far_plane;
 uniform float shininess = 32.0f;
 
+uniform bool gamma_correction = true;
 uniform bool debug_white_color = false;
 uniform bool debug_white_texcoords = false;
 
@@ -64,7 +66,11 @@ subroutine(LightingPtr) vec3 calculatePhongPointSpecDif(Light light, vec3 normal
   //Diffuse
   vec3 lightVector  = normalize(vec3(light.position)-thePosition);
   float Brightness  = clamp(dot(lightVector, normal), 0, 1);
-  vec3 diffuseLight = vec3(light.diffuse * Brightness * vec3(texture(texture_diffuse1, TexCoords))); //Brightness * material.diffuse
+  vec3 diffuseLight;
+  if(gamma_correction)
+	diffuseLight = vec3(light.diffuse * Brightness * pow(texture(texture_diffuse1, TexCoords).rgb, vec3(2.2f)));
+  else
+	diffuseLight = vec3(light.diffuse * Brightness * vec3(texture(texture_diffuse1, TexCoords))); //Brightness * material.diffuse
   
   //Specular
   vec3 Reflaction = reflect(-lightVector,normal);
@@ -90,7 +96,11 @@ subroutine(LightingPtr) vec3 calculatePhongDirectionalSpecDif(Light light, vec3 
     vec3 lightVector = -normalize(vec3(light.direction));
     // diffuse shadingfloat 
 	float Brightness  = clamp(dot(lightVector, normal), 0, 1);
-    vec3 diffuseLight  = vec3(light.diffuse  * Brightness * vec3(texture(texture_diffuse1, TexCoords)));
+	vec3 diffuseLight;
+	if(gamma_correction)
+		diffuseLight = vec3(light.diffuse * Brightness * pow(texture(texture_diffuse1, TexCoords).rgb, vec3(2.2f)));
+	else
+		diffuseLight  = vec3(light.diffuse  * Brightness * vec3(texture(texture_diffuse1, TexCoords)));
 	
    // specular shading
     vec3 Reflaction = reflect(-lightVector, normal);
@@ -125,7 +135,11 @@ subroutine(LightingPtr) vec3 calculateBlinnPhongPointSpecDif (Light light, vec3 
   //Diffuse
   vec3 lightVector  = normalize(vec3(light.position)-thePosition);
   float Brightness  = clamp(dot(lightVector, normal),0,1);
-  vec3 diffuseLight = vec3(light.diffuse * Brightness * vec3(texture(texture_diffuse1, TexCoords)));//Brightness*material.diffuse
+  vec3 diffuseLight;
+	if(gamma_correction)
+		diffuseLight = vec3(light.diffuse * Brightness * pow(texture(texture_diffuse1, TexCoords).rgb, vec3(2.2f)));
+	else
+		diffuseLight = vec3(light.diffuse * Brightness * vec3(texture(texture_diffuse1, TexCoords)));//Brightness*material.diffuse
   
   //Specular
   vec3 eyeVector= normalize(eyePositionWorld-thePosition); 
@@ -150,7 +164,11 @@ subroutine(LightingPtr) vec3 calculateBlinnPhongDirectionalSpecDif(Light light, 
     vec3 lightVector = -normalize(vec3(light.direction));
     // diffuse shadingfloat 
 	float Brightness  = clamp(dot(lightVector, normal), 0, 1);
-    vec3 diffuseLight  = vec3(light.diffuse  * Brightness * vec3(texture(texture_diffuse1, TexCoords)));
+	vec3 diffuseLight;
+	if(gamma_correction)
+		diffuseLight = vec3(light.diffuse * Brightness * pow(texture(texture_diffuse1, TexCoords).rgb, vec3(2.2f)));
+	else
+		diffuseLight  = vec3(light.diffuse  * Brightness * vec3(texture(texture_diffuse1, TexCoords)));
 	
    //Specular
     vec3 eyeVector= normalize(eyePositionWorld-thePosition); 
@@ -202,7 +220,11 @@ void main()
 		bNormal = theNormal;
 
   //Ambient
-  vec3 dif_texture = vec3(texture(texture_diffuse1, Texcoord));
+  vec3 dif_texture;
+	if(gamma_correction)
+		dif_texture = vec3(pow(texture(texture_diffuse1, Texcoord).rgb, vec3(2.2f)));
+	else
+		dif_texture = vec3(texture(texture_diffuse1, Texcoord));
   vec3 ambientLight = light.ambient * vec3(texture(texture_diffuse1, Texcoord));// * material.ambient  
 
      float shadow; 
@@ -214,11 +236,14 @@ void main()
   vec3 difspec = LightingFunction(light, bNormal, thePosition, Texcoord);
 
   if(debug_white_texcoords)
-	outColor = vec4(dif_texture.r * 2,dif_texture.g /2, dif_texture.b / 2,1.0); 
+	outColor = vec4(dif_texture.r * 2, dif_texture.g /2, dif_texture.b / 2, 1.0f); 
   else if(debug_white_color)
 	outColor = vec4(vec3(shadow / far_plane), 1.0);
   else
 	outColor = vec4(ambientLight + difspec*shadow, 1.0); //vec4(shadow,shadow,shadow,1.0);
+	
+   if(gamma_correction)
+	 outColor.rgb = pow(outColor.rgb, vec3(1.0/2.2f));
 };
 
 float ShadowCalculation(vec4 fragPosLightSpace )

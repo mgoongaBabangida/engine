@@ -22,6 +22,7 @@ eMainRender::eMainRender(const std::string& vS, const std::string& fS)
 	//Debug
 	DebugWhiteLoc = glGetUniformLocation(mainShader.ID(), "debug_white_color");
 	DebugTexcoordsLoc = glGetUniformLocation(mainShader.ID(), "debug_white_texcoords");
+	GammaCorrectionLoc = glGetUniformLocation(mainShader.ID(), "gamma_correction");
 
 	//Material
 	matAmbientLoc		= glGetUniformLocation(mainShader.ID(), "material.ambient");
@@ -58,12 +59,14 @@ void eMainRender::Render(const Camera&			    camera,
 						             const Light&			      light,
 						             const std::vector<shObject>&	objects,
                          bool                   debug_white,
-                         bool                   debug_text_coords)
+                         bool                   debug_text_coords,
+												 bool                   gamma_correction)
 {
 	glUseProgram(mainShader.ID());
 
 	glUniform1i(DebugWhiteLoc, debug_white);
 	glUniform1i(DebugTexcoordsLoc, debug_text_coords);
+	glUniform1i(GammaCorrectionLoc, gamma_correction);
 
 	glUniform3f(lightAmbientLoc,  light.ambient.x,		   light.ambient.y,	        light.ambient.z);
 	glUniform3f(lightDiffuseLoc,  light.diffuse.x,		   light.diffuse.y,	        light.diffuse.z);
@@ -98,7 +101,7 @@ void eMainRender::Render(const Camera&			    camera,
 	}
 	else if (light.type == eLightType::DIRECTION)
 	{
-		glUniform1f(glGetUniformLocation(mainShader.ID(), "shininess"), 16.0f);
+		glUniform1f(glGetUniformLocation(mainShader.ID(), "shininess"), 64.0f);
 		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(0.0f, 0.0f, 0.0f), /*glm::vec3(light.light_position) + light.light_direction,*/
 																							glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniform1i(lightTypeLoc, true);
