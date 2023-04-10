@@ -19,7 +19,9 @@ public:
 							const std::vector<shObject>&	objects,
 							bool debug_white,
 							bool debug_text_coords,
-							bool gamma_correction);
+							bool gamma_correction,
+							bool tone_mapping,
+							float exposure);
 
 	void	SetClipPlane(float Height);
 	void	SetShadowMatrix(glm::mat4 shadow_matrix);
@@ -54,6 +56,8 @@ protected:
 	GLuint DebugWhiteLoc;
 	GLuint DebugTexcoordsLoc;
 	GLuint GammaCorrectionLoc;
+	GLuint ToneMappingLoc;
+	GLuint HdrExposureLoc;
 
 	std::vector<glm::mat4> matrices;
 	glm::mat4			         worldToProjectionMatrix;

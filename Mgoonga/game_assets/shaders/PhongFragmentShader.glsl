@@ -58,6 +58,9 @@ uniform bool gamma_correction = true;
 uniform bool debug_white_color = false;
 uniform bool debug_white_texcoords = false;
 
+uniform bool tone_mapping = true;
+uniform float hdr_exposure = 1.0f;
+
 float ShadowCalculation(vec4 fragPosLightSpace);
 float ShadowCalculationCubeMap(vec3 fragPos);
 
@@ -225,7 +228,8 @@ void main()
 		dif_texture = vec3(pow(texture(texture_diffuse1, Texcoord).rgb, vec3(2.2f)));
 	else
 		dif_texture = vec3(texture(texture_diffuse1, Texcoord));
-  vec3 ambientLight = light.ambient * vec3(texture(texture_diffuse1, Texcoord));// * material.ambient  
+		
+  vec3 ambientLight = light.ambient * dif_texture; 
 
      float shadow; 
      if(shadow_directional)
@@ -240,10 +244,13 @@ void main()
   else if(debug_white_color)
 	outColor = vec4(vec3(shadow / far_plane), 1.0);
   else
-	outColor = vec4(ambientLight + difspec*shadow, 1.0); //vec4(shadow,shadow,shadow,1.0);
-	
-   if(gamma_correction)
-	 outColor.rgb = pow(outColor.rgb, vec3(1.0/2.2f));
+	outColor = vec4(ambientLight + difspec*shadow, 1.0);
+  
+  if(tone_mapping)
+	outColor.rgb = vec3(1.0) - exp(-outColor.rgb * hdr_exposure);
+	 
+  if(gamma_correction)
+	outColor.rgb = pow(outColor.rgb, vec3(1.0/2.2f));
 };
 
 float ShadowCalculation(vec4 fragPosLightSpace )

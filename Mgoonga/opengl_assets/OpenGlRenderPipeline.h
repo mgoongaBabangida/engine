@@ -59,6 +59,8 @@ public:
 	bool& GetKernelOnRef() { return kernel; }
 	bool& GetSkyNoiseOnRef() { return sky_noise; }
 	bool& GetGammaCorrectionRef() { return gamma_correction; }
+	bool& GetToneMappingRef() { return tone_mapping; }
+	float& GetExposureRef() { return exposure; }
 
 	glm::vec4 debug_float = {0.0f,0.0f,0.0f,0.0f};
 
@@ -109,6 +111,8 @@ protected:
 	bool			sky_noise = true;
 	bool			bezier_curve = true;
 	bool			gamma_correction = true;
+	bool			tone_mapping = true;
+	float			exposure = 1.0f;
 
 	const uint32_t  width		  = 1200;
 	const uint32_t  height		= 600;

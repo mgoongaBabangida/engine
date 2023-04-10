@@ -26,7 +26,7 @@ bool eColorFBO::Init(unsigned int WindowWidth, unsigned int WindowHeight, bool m
 		glBindTexture(GL_TEXTURE_2D, m_texture);
 		//glTexImage2D(GL_TEXTURE_2D, 0, attachment_type, Width(), Height(), 0, attachment_type, GL_UNSIGNED_BYTE, NULL);
 
-		glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, WindowWidth, WindowHeight);
+		glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA16F, WindowWidth, WindowHeight); //GL_RGBA16F for  hdr
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		// Create a color attachment texture
@@ -63,7 +63,7 @@ void eColorFBO::CreateMultisampleColorAttachement(unsigned int WindowWidth, unsi
 	GLuint rbo;
 	glGenRenderbuffers(1, &rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA8, WindowWidth, WindowHeight);
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA16F, WindowWidth, WindowHeight); //GL_RGBA16F for hdr
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rbo); 
 	// Now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)

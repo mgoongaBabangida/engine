@@ -58,6 +58,11 @@ void AssimpMesh::Draw()
       glActiveTexture(GL_TEXTURE4);
       normalNr++;
     }
+    else if (name == "texture_emission")
+    {
+      glActiveTexture(GL_TEXTURE6);
+      //emissionNr++;
+    }
 		glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
 	}
 

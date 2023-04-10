@@ -23,6 +23,8 @@ eMainRender::eMainRender(const std::string& vS, const std::string& fS)
 	DebugWhiteLoc = glGetUniformLocation(mainShader.ID(), "debug_white_color");
 	DebugTexcoordsLoc = glGetUniformLocation(mainShader.ID(), "debug_white_texcoords");
 	GammaCorrectionLoc = glGetUniformLocation(mainShader.ID(), "gamma_correction");
+	ToneMappingLoc = glGetUniformLocation(mainShader.ID(), "tone_mapping");
+	HdrExposureLoc = glGetUniformLocation(mainShader.ID(), "hdr_exposure");
 
 	//Material
 	matAmbientLoc		= glGetUniformLocation(mainShader.ID(), "material.ambient");
@@ -60,13 +62,17 @@ void eMainRender::Render(const Camera&			    camera,
 						             const std::vector<shObject>&	objects,
                          bool                   debug_white,
                          bool                   debug_text_coords,
-												 bool                   gamma_correction)
+												 bool                   gamma_correction,
+												 bool                   tone_mapping,
+												 float									exposure)
 {
 	glUseProgram(mainShader.ID());
 
 	glUniform1i(DebugWhiteLoc, debug_white);
 	glUniform1i(DebugTexcoordsLoc, debug_text_coords);
 	glUniform1i(GammaCorrectionLoc, gamma_correction);
+	glUniform1i(ToneMappingLoc, tone_mapping);
+	glUniform1f(HdrExposureLoc, exposure);
 
 	glUniform3f(lightAmbientLoc,  light.ambient.x,		   light.ambient.y,	        light.ambient.z);
 	glUniform3f(lightDiffuseLoc,  light.diffuse.x,		   light.diffuse.y,	        light.diffuse.z);

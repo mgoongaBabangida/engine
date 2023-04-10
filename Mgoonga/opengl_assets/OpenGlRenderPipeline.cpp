@@ -361,14 +361,14 @@ void eOpenGlRenderPipeline::RenderReflection(Camera& _camera, const Light& _ligh
 	_camera.setPosition(glm::vec3(tem_cam.getPosition().x, 2 * (tem_cam.getPosition().y - waterHeight), tem_cam.getPosition().z));
 	_camera.setDirection(glm::reflect(_camera.getDirection(), glm::vec3(0, 1, 0)));//water normal
 
-	renderManager->MainRender()->Render(_camera, _light, _objects, false, false, true);
+	renderManager->MainRender()->Render(_camera, _light, _objects, false, false, true, tone_mapping, exposure);
 	_camera = tem_cam;
 }
 
 void eOpenGlRenderPipeline::RenderRefraction(Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
 {
 	renderManager->MainRender()->SetClipPlane(waterHeight);
-	renderManager->MainRender()->Render(_camera, _light, _objects, false, false, true);
+	renderManager->MainRender()->Render(_camera, _light, _objects, false, false, true, tone_mapping, exposure);
 	renderManager->MainRender()->SetClipPlane(10);
 
 	//glDisable(GL_CLIP_DISTANCE0);
@@ -386,7 +386,7 @@ void eOpenGlRenderPipeline::RenderSkyNoise(const Camera& _camera)
 
 void eOpenGlRenderPipeline::RenderMain(const Camera& _camera, const Light& _light, const std::vector<shObject>& _objects)
 {
-	renderManager->MainRender()->Render(_camera, _light, _objects, debug_white, debug_texcoords, gamma_correction);
+	renderManager->MainRender()->Render(_camera, _light, _objects, debug_white, debug_texcoords, gamma_correction, tone_mapping, exposure);
 }
 
 void eOpenGlRenderPipeline::RenderOutlineFocused(const Camera& _camera, const Light& _light, const std::vector<shObject>& focused)

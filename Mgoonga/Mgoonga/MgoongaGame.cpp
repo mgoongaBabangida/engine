@@ -44,9 +44,9 @@ void eMgoongaGameContext::InitializeExternalGui()
   externalGui[0]->Add(SLIDER_FLOAT_3, "Light position.", &GetMainLight().light_position);
   externalGui[0]->Add(SLIDER_FLOAT_3, "Light direction.", &GetMainLight().light_direction);
   externalGui[0]->Add(SLIDER_FLOAT_3, "Light intensity.", &GetMainLight().intensity);
-  externalGui[0]->Add(SLIDER_FLOAT_3, "Light ambient.", &GetMainLight().intensity);
-  externalGui[0]->Add(SLIDER_FLOAT_3, "Light diffuse.", &GetMainLight().intensity);
-  externalGui[0]->Add(SLIDER_FLOAT_3, "Light specular.", &GetMainLight().intensity);
+  externalGui[0]->Add(SLIDER_FLOAT_3, "Light ambient.", &GetMainLight().ambient);
+  externalGui[0]->Add(SLIDER_FLOAT_3, "Light diffuse.", &GetMainLight().diffuse);
+  externalGui[0]->Add(SLIDER_FLOAT_3, "Light specular.", &GetMainLight().specular);
   externalGui[0]->Add(SLIDER_FLOAT, "Light constant", &GetMainLight().constant);
   externalGui[0]->Add(SLIDER_FLOAT, "Light linear", &GetMainLight().linear);
   externalGui[0]->Add(SLIDER_FLOAT, "Light quadratic", &GetMainLight().quadratic);
@@ -66,6 +66,8 @@ void eMgoongaGameContext::InitializeExternalGui()
   externalGui[1]->Add(CHECKBOX, "Sky noise", &pipeline.GetSkyNoiseOnRef());
   externalGui[1]->Add(CHECKBOX, "Use gizmo", &m_use_guizmo);
   externalGui[1]->Add(CHECKBOX, "Gamma Correction", &pipeline.GetGammaCorrectionRef());
+  externalGui[1]->Add(CHECKBOX, "Gamma Tone Mapping", &pipeline.GetToneMappingRef());
+  externalGui[1]->Add(SLIDER_FLOAT, "Gamma Exposure", &pipeline.GetExposureRef());
   externalGui[1]->Add(SLIDER_FLOAT, "Blur coefficients", &pipeline.GetBlurCoefRef());
   std::function<void()> emit_partilces_callback = [this]()
   {
