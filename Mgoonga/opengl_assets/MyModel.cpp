@@ -10,11 +10,13 @@
 #include <glm\glm/gtx/quaternion.hpp>
 #include <glm\glm/gtx/norm.hpp>
 
-#include <iostream>
+Texture MyModel::default_diffuse_mapping = {};
+Texture MyModel::default_specular_mapping = {};
+Texture MyModel::default_normal_mapping = {};
+Texture MyModel::default_emission_mapping = {};
 
 MyModel::MyModel()
-{
-}
+{}
 
 MyModel::MyModel(std::shared_ptr<MyMesh> m, Texture* t, Texture* t2, Texture* t3, Texture* t4)
   : mesh(m)
@@ -23,12 +25,21 @@ MyModel::MyModel(std::shared_ptr<MyMesh> m, Texture* t, Texture* t2, Texture* t3
   , m_bump(t3)
   , m_fourth(t4)
 {
+  if (default_diffuse_mapping.id == DEFAULT_TEXTURE_ID)
+    default_diffuse_mapping.loadTexture1x1(YELLOW);
+  if (default_specular_mapping.id == DEFAULT_TEXTURE_ID)
+    default_specular_mapping.loadTexture1x1(BLACK);
+  if (default_normal_mapping.id == DEFAULT_TEXTURE_ID)
+    default_normal_mapping.loadTexture1x1(BLUE);
+  if (default_emission_mapping.id == DEFAULT_TEXTURE_ID)
+    default_emission_mapping.loadTexture1x1(BLACK);
+
   if (m_specular == nullptr)
-    m_specular = m_diffuse;
+    m_specular = &default_specular_mapping;
   if (m_bump == nullptr)
-    m_bump = m_diffuse;
+    m_bump = &default_normal_mapping;
   if (m_fourth == nullptr)
-    m_fourth = m_diffuse;
+    m_fourth = &default_specular_mapping;
 }
 
 MyModel::MyModel(const MyModel& _other) //shallow copy
@@ -37,9 +48,7 @@ MyModel::MyModel(const MyModel& _other) //shallow copy
 }
 
 MyModel::~MyModel()
-{
-
-}
+{}
 
 std::vector<MyMesh*> MyModel::getMeshes() const 
 {
@@ -92,13 +101,14 @@ void MyModel::Draw()
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, m_fourth->id);
 
+  glActiveTexture(GL_TEXTURE6);
+  glBindTexture(GL_TEXTURE_2D, default_emission_mapping.id);
+
 	mesh->Draw();
 }
 
 void MyModel::Debug()
-{
-
-}
+{}
 
 std::vector<glm::vec3> MyModel::GetPositions() const
 {

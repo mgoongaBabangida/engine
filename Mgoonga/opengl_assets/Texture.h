@@ -11,6 +11,8 @@
 
 enum TColor { WHITE, BLACK, BLUE, PINK, YELLOW };
 
+static const GLuint DEFAULT_TEXTURE_ID = (GLuint)glm::pow(2, 8) - 1;
+
 struct /*DLL_OPENGL_ASSETS*/ Texture
 {
 	GLuint				  id;
@@ -23,17 +25,16 @@ struct /*DLL_OPENGL_ASSETS*/ Texture
 	int32_t				mChannels			=		1;
 	int32_t				numberofRows		= 1;
 	
-	Texture() { type = "default", path = "empty", id = (GLuint)glm::pow(2,8)- 1, mTextureWidth = 1, mTextureHeight = 1; loadTexture1x1(YELLOW); }
-	Texture(GLuint Width, GLuint Height) :Texture() { mTextureWidth = Width;  mTextureHeight = Height; }
-	Texture(GLuint ID, GLuint TextureWidth, GLuint TextureHeight, int32_t TextureChannels = 1)
-    :id(ID), mTextureWidth(TextureWidth), mTextureHeight(TextureHeight), mChannels(TextureChannels) {}	
+	Texture();
+	Texture(GLuint Width, GLuint Height);
+	Texture(GLuint ID, GLuint TextureWidth, GLuint TextureHeight, int32_t TextureChannels = 1);
 	
 	Texture(const Texture& t) { this->operator=(t);}
 	Texture& operator=(const Texture& t) 
 	{ 
-		id				= t.id, 
-		mTextureWidth	= t.mTextureWidth, 
-		mTextureHeight	= t.mTextureHeight, 
+		id				= t.id,
+		mTextureWidth	= t.mTextureWidth,
+		mTextureHeight	= t.mTextureHeight,
 		type			= t.type,
 		path			= t.path;
 		mChannels		= t.mChannels;
@@ -41,14 +42,16 @@ struct /*DLL_OPENGL_ASSETS*/ Texture
 		return *this; 
 	}
 
-	bool loadTextureFromFile(const std::string& path, GLenum format =GL_RGBA, GLenum wrap = GL_CLAMP_TO_EDGE);
+	void setNumRows(GLuint nrows) { numberofRows = nrows; }
+	void freeTexture();
+
 	uint8_t* getPixelBuffer();
 	bool saveToFile(const std::string &path);
-	void freeTexture();
+
+	bool loadTextureFromFile(const std::string& path, GLenum format = GL_RGBA, GLenum wrap = GL_CLAMP_TO_EDGE);
 	bool loadTexture1x1(TColor color);
 	bool loadCubemap(std::vector<std::string> faces);
 	bool generatePerlin(GLuint Width, GLuint Height, bool periodic);
-	void setNumRows(GLuint nrows) { numberofRows = nrows; }
 
 	bool makeCubemap(Texture*);
 	bool makeDepthTexture();

@@ -45,6 +45,11 @@ protected:
 	Texture*				m_specular;
 	Texture*				m_bump;
 	Texture*				m_fourth;
+
+	static Texture default_diffuse_mapping;
+	static Texture default_specular_mapping;
+	static Texture default_normal_mapping;
+	static Texture default_emission_mapping;
 };
 
 //-------------------------------------------------------

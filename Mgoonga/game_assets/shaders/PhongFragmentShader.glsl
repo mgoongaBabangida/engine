@@ -46,6 +46,7 @@ layout(binding=2) uniform sampler2D        texture_diffuse1;
 layout(binding=3) uniform sampler2D        texture_specular1;
 layout(binding=4) uniform sampler2D        texture_normal1;
 layout(binding=5) uniform sampler2D        texture_depth1;
+layout(binding=6) uniform sampler2D        texture_emissionl;
 
 uniform vec3 eyePositionWorld;
 uniform bool normalMapping = true;
@@ -244,7 +245,15 @@ void main()
   else if(debug_white_color)
 	outColor = vec4(vec3(shadow / far_plane), 1.0);
   else
-	outColor = vec4(ambientLight + difspec*shadow, 1.0);
+	outColor = vec4(ambientLight + difspec * shadow, 1.0);
+  
+  vec3 emissive_color;
+	if(gamma_correction)
+		emissive_color = vec3(pow(texture(texture_emissionl, Texcoord).rgb, vec3(2.2f)));
+	else
+		emissive_color = vec3(texture(texture_emissionl, Texcoord));
+
+  outColor.rgb += emissive_color;
   
   if(tone_mapping)
 	outColor.rgb = vec3(1.0) - exp(-outColor.rgb * hdr_exposure);

@@ -6,6 +6,26 @@
 
 #include <math/Random.h>
 
+Texture::Texture()
+{
+	type = "default";
+	path = "empty";
+	id = DEFAULT_TEXTURE_ID;
+	mTextureWidth = 1, mTextureHeight = 1;
+	loadTexture1x1(YELLOW);
+}
+
+Texture::Texture(GLuint Width, GLuint Height)
+	:Texture()
+{
+	mTextureWidth = Width;
+	mTextureHeight = Height;
+}
+
+Texture::Texture(GLuint ID, GLuint TextureWidth, GLuint TextureHeight, int32_t TextureChannels)
+	:id(ID), mTextureWidth(TextureWidth), mTextureHeight(TextureHeight), mChannels(TextureChannels)
+{}
+
 bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenum wrap)
 {
 	path		= _path;

@@ -7,7 +7,8 @@
 class AssimpMesh : public IMesh
 {
 public:
-	/*  Functions  */
+  friend class Model;
+
 	AssimpMesh(std::vector<AssimpVertex> vertices, std::vector<GLuint> indices, std::vector<Texture> textures ,const std::string& name = "Default");
   virtual ~AssimpMesh();
 
@@ -19,20 +20,22 @@ public:
   virtual size_t GetVertexCount() const override { return vertices.size();}
   virtual std::vector<const Texture*> GetTextures() const override;
   virtual const std::string& Name() const override { return name;}
+
+protected:
   /*  Mesh Data  */
   std::vector<AssimpVertex>	vertices;
   std::vector<GLuint>			  indices;
   std::vector<Texture>			textures;
   std::string               name;
 
-private:
 	/*  Render data  */
 	GLuint VAO, VBO, EBO;
+
 	/*  Functions    */
 	void setupMesh();
 
-  //@todo make static
-  Texture default_diffuse_mapping;
-  Texture default_specular_mapping;
-  Texture default_normal_mapping;
+  static Texture default_diffuse_mapping;
+  static Texture default_specular_mapping;
+  static Texture default_normal_mapping;
+  static Texture default_emission_mapping;
 };

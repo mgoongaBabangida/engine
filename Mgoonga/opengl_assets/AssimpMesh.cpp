@@ -5,17 +5,27 @@
 
 using namespace std;
 
-AssimpMesh::AssimpMesh(vector<AssimpVertex> vertices, vector<GLuint> indices, vector<Texture> textures, const std::string& _name)
+Texture AssimpMesh::default_diffuse_mapping = {};
+Texture AssimpMesh::default_specular_mapping = {};
+Texture AssimpMesh::default_normal_mapping = {};
+Texture AssimpMesh::default_emission_mapping = {};
+
+AssimpMesh::AssimpMesh(vector<AssimpVertex> _vertices, vector<GLuint> _indices, vector<Texture> _textures, const std::string& _name)
 {
-	this->vertices = vertices;
-	this->indices = indices;
-	this->textures = textures;
+	this->vertices = _vertices;
+	this->indices = _indices;
+	this->textures = _textures;
   this->name = _name.empty() ? "Default" : _name;
 	this->setupMesh();
 
-  default_diffuse_mapping.loadTexture1x1(YELLOW);
-  default_specular_mapping.loadTexture1x1(BLACK);
-  default_normal_mapping.loadTexture1x1(BLUE);
+  if(default_diffuse_mapping.id == DEFAULT_TEXTURE_ID)
+    default_diffuse_mapping.loadTexture1x1(YELLOW);
+  if (default_specular_mapping.id == DEFAULT_TEXTURE_ID)
+    default_specular_mapping.loadTexture1x1(BLACK);
+  if (default_normal_mapping.id == DEFAULT_TEXTURE_ID)
+    default_normal_mapping.loadTexture1x1(BLUE);
+  if (default_emission_mapping.id == DEFAULT_TEXTURE_ID)
+    default_emission_mapping.loadTexture1x1(BLACK);
 }
 
 AssimpMesh::~AssimpMesh()
@@ -30,6 +40,7 @@ void AssimpMesh::FreeTextures()
   default_diffuse_mapping.freeTexture();
   default_specular_mapping.freeTexture();
   default_normal_mapping.freeTexture();
+  default_emission_mapping.freeTexture();
 
   for (auto& t : textures)
     t.freeTexture();
@@ -40,6 +51,7 @@ void AssimpMesh::Draw()
 	GLuint diffuseNr = 0;
 	GLuint specularNr = 0;
 	GLuint normalNr = 0;
+  GLuint emissionNr = 0;
 	for (GLuint i = 0; i < this->textures.size(); i++)
 	{
     string name = textures[i].type;
@@ -61,7 +73,7 @@ void AssimpMesh::Draw()
     else if (name == "texture_emission")
     {
       glActiveTexture(GL_TEXTURE6);
-      //emissionNr++;
+      emissionNr++;
     }
 		glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
 	}
@@ -92,8 +104,13 @@ void AssimpMesh::Draw()
     glBindTexture(GL_TEXTURE_2D, default_normal_mapping.id);
     normalNr++;
   }
-
-  if (!diffuseNr || !specularNr || !normalNr)
+  if (emissionNr == 0)
+  {
+    glActiveTexture(GL_TEXTURE6);
+    glBindTexture(GL_TEXTURE_2D, default_emission_mapping.id);
+    emissionNr++;
+  }
+  if (!diffuseNr || !specularNr || !normalNr || !emissionNr)
   {
     assert(false, "some texture is not assigned!");
   }

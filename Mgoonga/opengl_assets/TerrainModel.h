@@ -11,7 +11,7 @@ class DLL_OPENGL_ASSETS TerrainModel : public ITerrainModel
 {
 public:
 	TerrainModel();
-	explicit TerrainModel(Texture* heightMap);  //copy generation in private !!!
+	explicit TerrainModel(Texture* heightMap); //@todo copy generation in private !!!
 	TerrainModel(Texture * diffuse, Texture * specular, Texture * m_normal, Texture * heightMap);
 	TerrainModel(const TerrainModel& other);
 
@@ -20,7 +20,7 @@ public:
 	void initialize(Texture* diffuse, Texture* specular, bool spreed_texture = true);
 	void initialize(Texture* diffuse, Texture* specular, Texture* normal, Texture* heightMap, bool spreed_texture = true);
 	
-	virtual void			                Draw()							override;
+	virtual void														Draw()							override;
 
   virtual size_t													GetVertexCount() const;
   virtual size_t													GetMeshCount() const { return 1; }
@@ -30,10 +30,10 @@ public:
     return std::vector<const IAnimation*>();
   }
 
-	float					   GetHeight(float x , float z)	override;
-	glm::vec3				 GetNormal(float x, float z)		override;
+	float							GetHeight(float x , float z)	override;
+	glm::vec3					GetNormal(float x, float z)		override;
 
-	void					makePlaneIndices(unsigned int rows, unsigned int columns);
+	void							makePlaneIndices(unsigned int rows, unsigned int columns);
 	
 	std::vector<glm::vec3>	GetPositions()			const;
 	std::vector<GLuint>		  GetIndeces()			const;
