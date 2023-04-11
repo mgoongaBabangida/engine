@@ -31,6 +31,7 @@ Rigger::Rigger(eAnimatedModel* _model):model(_model)
 				bone.addChild(&(*iter));	//$todo remove old children
 			}
 		}
+
 		timer.reset(new math::Timer([this]()->bool
 									{
 										if (currentAnim != nullptr && !currentAnim->IsPaused())

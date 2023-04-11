@@ -44,7 +44,7 @@ std::string Model::RootBoneName()
 {
 	if (!root_bone)
 	{
-		auto scene = m_scene;
+		auto scene = m_scene.get();
 		std::vector<Bone>::iterator root = std::find_if(m_bones.begin(), m_bones.end(), [scene](const Bone& bone) { return scene->mRootNode->mName.C_Str() == bone.Name(); });
 		if (root == m_bones.end())
 			return "";
@@ -54,10 +54,20 @@ std::string Model::RootBoneName()
 }
 
 //---------------------------------------------------------------------------
+Model::Model(GLchar* path, bool _m_invert_y_uv)
+	: m_invert_y_uv(_m_invert_y_uv)
+{
+	loadModel(path);
+}
+
+//---------------------------------------------------------------------------
 Model::~Model()
 {
 	for (auto& mesh : meshes)
 		mesh.FreeTextures();
+	
+	//need to read Assimp doc, looks like we do not won it
+	m_scene.reset();
 }
 
 //---------------------------------------------------------------------------
@@ -98,18 +108,24 @@ std::vector<const IAnimation*> Model::GetAnimations() const
 void Model::loadModel(string path)
 {
 	//Assimp::Importer import;
-	m_import = new Assimp::Importer(); // delete
+	m_import.reset(new Assimp::Importer());
 	m_import->SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, 4);
-	const aiScene* scene = m_import->ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights); //get sm normals
-	m_scene = (aiScene*)scene;
-	if (!m_scene || m_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !m_scene->mRootNode)
+	const aiScene* scene = m_import->ReadFile(path,
+																						aiProcess_Triangulate |
+																						aiProcess_GenSmoothNormals |
+																						aiProcess_FlipUVs |
+																						aiProcess_CalcTangentSpace |
+																						aiProcess_LimitBoneWeights);//get sm normals
+
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
 		cout << "ERROR::ASSIMP::" << m_import->GetErrorString() << endl;
 		return;
 	}
+	m_scene.reset((aiScene*)scene);
 	this->directory = path.substr(0, path.find_last_of('/'));
 
-	this->processNode(m_scene->mRootNode, m_scene);
+	this->processNode(m_scene->mRootNode, m_scene.get());
 	
 	this->m_GlobalInverseTransform = glm::inverse(toMat4(m_scene->mRootNode->mTransformation));
 	
@@ -141,6 +157,7 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 
 }
 
+//----------------------------------------------------------------------
 AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 {
 	vector< AssimpVertex> vertices;
@@ -190,38 +207,50 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 
 		vertices.push_back(vertex);
 	}
-	////////Bones Set Up ///////////////////////////
-	boneData.resize(vertices.size());
-	for (uint32_t i = 0; i < mesh->mNumBones; i++) 
-	{
-		int BoneIndex = 0;
-		string BoneName(mesh->mBones[i]->mName.C_Str());
-		if (m_BoneMapping.find(BoneName) == m_BoneMapping.end()) {
-			BoneIndex = m_NumBones;
-			m_NumBones++;
-			m_bones.push_back(Bone(BoneIndex, BoneName, toMat4(mesh->mBones[i]->mOffsetMatrix)));
-			m_BoneMapping[BoneName] = BoneIndex;
-		}
-		else {
-			BoneIndex = m_BoneMapping[BoneName];
-		}
 
-		for (uint32_t j = 0; j < mesh->mBones[i]->mNumWeights; j++) {
-			int VertexID = mesh->mBones[i]->mWeights[j].mVertexId;
-			float Weight = mesh->mBones[i]->mWeights[j].mWeight;
-			boneData[VertexID].AddBoneData(BoneIndex, Weight);
+	//-----------------------------Bones Set Up-----------------------------
+	if (mesh->HasBones())
+	{
+		boneData.resize(vertices.size());
+		for (uint32_t i = 0; i < mesh->mNumBones; ++i)
+		{
+			int BoneIndex = 0;
+			string BoneName(mesh->mBones[i]->mName.C_Str());
+			if (m_BoneMapping.find(BoneName) == m_BoneMapping.end())
+			{
+				BoneIndex = m_NumBones;
+				m_NumBones++;
+				m_bones.push_back(Bone(BoneIndex, BoneName, toMat4(mesh->mBones[i]->mOffsetMatrix)));
+				m_BoneMapping[BoneName] = BoneIndex;
+			}
+			else
+			{
+				BoneIndex = m_BoneMapping[BoneName];
+			}
+
+			for (uint32_t j = 0; j < mesh->mBones[i]->mNumWeights; j++) {
+				int VertexID = mesh->mBones[i]->mWeights[j].mVertexId;
+				float Weight = mesh->mBones[i]->mWeights[j].mWeight;
+				boneData[VertexID].AddBoneData(BoneIndex, Weight);
+			}
 		}
 	}
 
-	if (mesh->mNumBones > 0)
-	  for (int i = 0; i < boneData.size(); ++i) {
-		vertices[i].boneIDs = glm::vec4(boneData[i].IDs[0], boneData[i].IDs[1], boneData[i].IDs[2], boneData[i].IDs[3]);
-		vertices[i].weights = glm::vec4(boneData[i].Weights[0], boneData[i].Weights[1], boneData[i].Weights[2], boneData[i].Weights[3]);
-	  }
-	else
-		for (int i = 0; i < vertices.size(); ++i) {
-			vertices[i].boneIDs = glm::vec4(0, 0, 0, 0);
-			vertices[i].weights = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
+		if (mesh->HasBones())
+		{
+			for (int i = 0; i < boneData.size(); ++i)
+			{
+				vertices[i].boneIDs = glm::vec4(boneData[i].IDs[0], boneData[i].IDs[1], boneData[i].IDs[2], boneData[i].IDs[3]);
+				vertices[i].weights = glm::vec4(boneData[i].Weights[0], boneData[i].Weights[1], boneData[i].Weights[2], boneData[i].Weights[3]);
+			}
+		}
+		else
+		{
+			for (int i = 0; i < vertices.size(); ++i)
+			{
+				vertices[i].boneIDs = glm::vec4(0, 0, 0, 0);
+				vertices[i].weights = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
+			}
 		}
 
 #ifdef DEBUG_VERTICES
@@ -237,7 +266,6 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		}
 	}
 #endif // DEBUG_VERTICES
-	///////////////////////////////////////////////////
 
 	// Process indices
 	for (GLuint i = 0; i < mesh->mNumFaces; i++)
@@ -271,18 +299,14 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 	vector<Texture> textures;
 	for (GLuint i = 0; i < mat->GetTextureCount(type); i++)
 	{
-		//std::cout << "--------------" << std::endl;
 		aiString str;
 		mat->GetTexture(type, i, &str);
 		Texture texture;
 		string filename = string(str.C_Str());
 		filename = directory + '/' + filename;
-		//std::cout << filename << std::endl;
 		texture.loadTextureFromFile(filename.c_str());
 		texture.type = typeName;
 		texture.path = str.C_Str();
-		//std::cout << typeName << std::endl;
-		//std::cout << str.C_Str() << std::endl;
 		textures.push_back(texture);
 	}
 	return textures;
@@ -309,6 +333,7 @@ std::vector<GLuint> Model::GetIndeces() const
 	return inds;
 }
 
+//------------------------------------------------------------------------------------------------
 void Model::loadNodesToBone(aiNode * node) //all nodes have names
 {
 	for (uint32_t i = 0; i< node->mNumChildren; ++i)
@@ -318,15 +343,15 @@ void Model::loadNodesToBone(aiNode * node) //all nodes have names
 	{ return bone.Name() == node->mName.C_Str(); });
 	if (CurBoneIter == m_bones.end()) //not a bone
 	{
-		m_bones.push_back(Bone(m_NumBones, node->mName.C_Str(), UNIT_MATRIX,false));
+		m_bones.push_back(Bone(m_NumBones, node->mName.C_Str(), UNIT_MATRIX, false));
 		CurBoneIter = --m_bones.end();
 		CurBoneIter->setMTransform(toMat4(node->mTransformation));
 		m_BoneMapping[node->mName.C_Str()] = m_NumBones;
 		m_NumBones++;
-		//std::cout << "inside add node" << std::endl;
 	}
 }
 
+//-------------------------------------------------------------------------------------
 void Model::loadBoneChildren(aiNode * node)
 {
 	for (uint32_t i = 0; i< node->mNumChildren; ++i)
@@ -341,23 +366,19 @@ void Model::loadBoneChildren(aiNode * node)
 	}
 }
 
+//-------------------------------------------------------------------------------------
 SceletalAnimation Model::ProccessAnimations(const aiAnimation* anim)
 {
 	int durationMsc = (int)(anim->mDuration / anim->mTicksPerSecond * 1000);//mTicksPerSecond can be 0 ?
 	int qNodes = anim->mNumChannels; //quantity of nodes(bones) in anim 45
 	int qframes = anim->mChannels[0]->mNumPositionKeys; //check if it is the same for all 41
-	//const aiNodeAnim* pNodeAnim = anim->mChannels[0];
-	std::vector<Frame> frames(qframes);
-	//std::cout << "Frames" << qframes << std::endl;
-	//DumpAiAnimation(anim);
 
+	std::vector<Frame> frames(qframes);
 	for (int i = 0; i<qframes; ++i)
 		frames[i].addTimeStemp((durationMsc / qframes) * i);
 	
 	for (int i = 0; i<qNodes; ++i)
 	{
-		/*auto iterBone = std::find_if(m_bones.begin(), m_bones.end(), [anim, i](const Bone& bone)
-		{ return bone.Name() == anim->mChannels[i]->mNodeName.C_Str(); });*/
 		for (int j = 0; j <qframes; ++j) // numTransforms ? frames?
 		{
 			frames[j].addTrnasform(anim->mChannels[i]->mNodeName.C_Str(),
@@ -370,6 +391,7 @@ SceletalAnimation Model::ProccessAnimations(const aiAnimation* anim)
 	return m_animations.back();
 }
 
+//----------------------------------------------------------------------------------------
 void Model::updateAnimation(Bone &bone, const Frame& frame, const glm::mat4 &ParentTransform)
 {
 	glm::mat4 currentLocalTransform;
@@ -387,6 +409,7 @@ void Model::updateAnimation(Bone &bone, const Frame& frame, const glm::mat4 &Par
 		updateAnimation(*(bone.getChildren()[i]), frame, globalTransform);
 }
 
+//-----------------------------------------------------------------------
 void Model::VertexBoneData::AddBoneData(int BoneID, float Weight)
  {
 		++numTries;
@@ -399,7 +422,6 @@ void Model::VertexBoneData::AddBoneData(int BoneID, float Weight)
 		        }
 		
 	}
-	
 		    // should never get here - more bones than we have space for 
 		  //  assert(0);
 }

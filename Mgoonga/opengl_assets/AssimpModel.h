@@ -1,16 +1,15 @@
 #pragma once
 
 #include "stdafx.h"
-#include <assimp-3.1.1/include/assimp/Importer.hpp>
-#include <assimp-3.1.1/include/assimp/scene.h>
-#include <assimp-3.1.1/include/assimp/postprocess.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 #include "AssimpMesh.h"
 #include "MyModel.h"
+
 #include <math/AnimatedModel.h>
 #include <math/Bone.h>
-
-#include <iostream> //temp @todo logging
 
 #define NUM_BONES_PER_VEREX 4 
 
@@ -18,12 +17,7 @@
 class Model: public eAnimatedModel
 {
 public:
-	
-  Model(GLchar* path, bool _m_invert_y_uv = false)
-    : m_invert_y_uv(_m_invert_y_uv)
-	{
-		this->loadModel(path);
-	}
+	Model(GLchar* path, bool _m_invert_y_uv = false);
   virtual ~Model();
 
 	virtual void Draw() override;
@@ -34,7 +28,7 @@ public:
   virtual size_t													GetAnimationCount() const override { return m_animations.size(); }
   virtual std::vector<const IAnimation*>	GetAnimations() const override;
 
-  public: //getters
+public:
 	std::string						          RootBoneName();
 	std::vector<Bone>				        Bones()				const { return m_bones; }
 	std::vector<SceletalAnimation>	Animations()		const { return m_animations; }
@@ -52,7 +46,7 @@ private:
   void							              loadModel(std::string path);
   void							              processNode(aiNode* node, const aiScene* scene);
 	AssimpMesh						          processMesh(aiMesh* mesh, const aiScene* scene);
-	std::vector<Texture>					        loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
+	std::vector<Texture>					  loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
 	
 	// VertexBoneData
 	struct VertexBoneData
@@ -100,8 +94,8 @@ private:
 	};
 
 private:
-	Assimp::Importer*				m_import; //?
-	aiScene*						    m_scene; //?
+	std::unique_ptr<Assimp::Importer>				m_import;
+	std::unique_ptr <aiScene>								m_scene; //?
 	
 	std::vector<Bone>				      m_bones;
 	Bone*							            root_bone	= nullptr;
