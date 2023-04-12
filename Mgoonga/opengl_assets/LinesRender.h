@@ -18,8 +18,7 @@ public:
 protected:
 	Shader	linesShader;
 	
-	GLuint	viewLoc;
-	GLuint	projectionLoc;
+	GLuint	MVPLoc;
 
   GLuint	 VAO;
   GLuint	 VBO;

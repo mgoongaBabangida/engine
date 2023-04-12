@@ -122,7 +122,7 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 
 	shader_lambda(m_particleRenderGPU.get());
 	//Lines
-	m_linesRender.reset(new eLinesRender(folderPath + "SkyBoxVertexShader.glsl",
+	m_linesRender.reset(new eLinesRender(folderPath + "VertexShades.glsl",
 																			 folderPath + "StencilFragmentShader.glsl"));
 	shader_lambda(m_linesRender.get());
 	//Text

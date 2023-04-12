@@ -67,7 +67,7 @@ Model::~Model()
 		mesh.FreeTextures();
 	
 	//need to read Assimp doc, looks like we do not won it
-	m_scene.reset();
+	m_scene.release();
 }
 
 //---------------------------------------------------------------------------

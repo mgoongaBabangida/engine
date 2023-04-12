@@ -231,6 +231,18 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 		}
 	}
 
+	// Bounding boxes
+	//@todo performance is rediculos, need to save buffers and/or instancing to decrease draw calls
+	if (draw_bounding_boxes)
+	{
+		for (auto object : phong_objs)
+		{
+			std::vector<glm::vec3> extrems = object->GetCollider()->GetExtrems(*object->GetTransform());
+			std::vector<GLuint> indices{ 0,1,1,2,2,3,3,0,4,5,5,6,6,7,7,4,0,4,1,5,2,6,3,7 };
+			renderManager->LinesRender()->Render(_camera, extrems, indices);
+		}
+	}
+
 	//  Draw skybox firs
 	if (skybox)
 	{
@@ -273,16 +285,6 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glStencilMask(0xFF);
-	}
-
-	if (draw_bounding_boxes)
-	{
-		for (auto object : phong_objs)
-		{
-			std::vector<glm::vec3> extrems = object->GetCollider()->GetExtrems(*object->GetTransform());
-			std::vector<GLuint> indices{ 0,1,1,2,2,3,3,0,4,5,5,6,6,7,7,4,0,4,1,5,2,6,3,7 };
-			renderManager->LinesRender()->Render(_camera, extrems, indices);
-		}
 	}
 
 	//8.1 Texture visualization

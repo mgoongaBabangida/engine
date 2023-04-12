@@ -107,7 +107,7 @@ protected:
 	bool			draw_bounding_boxes = false;
 	bool      debug_white = false;
 	bool      debug_texcoords = false;
-	bool			kernel = true;
+	bool			kernel = false;
 	bool			sky_noise = true;
 	bool			bezier_curve = true;
 	bool			gamma_correction = true;

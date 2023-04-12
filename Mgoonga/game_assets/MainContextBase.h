@@ -42,8 +42,8 @@ public:
 	virtual std::shared_ptr<eObject> GetFocusedObject() override;
 	virtual glm::mat4 GetMainCameraViewMatrix() override;
 	virtual glm::mat4 GetMainCameraProjectionMatrix() override;
-	virtual bool UseGizmo() override { return m_use_guizmo; }
-	virtual uint32_t CurGizmoType() override { return (uint32_t)m_gizmo_type; }
+	virtual bool			UseGizmo() override { return m_use_guizmo; }
+	virtual uint32_t	CurGizmoType() override { return (uint32_t)m_gizmo_type; }
 
 	virtual size_t			Width() override;
 	virtual size_t			Height() override;

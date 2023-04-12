@@ -300,6 +300,7 @@ void eMgoongaGameContext::InitializeModels()
 	modelManager->Add("wolf", (GLchar*)std::string(modelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
 	modelManager->Add("guard", (GLchar*)std::string(modelFolderPath + "ogldev-master/Content/guard/boblampclean.md5mesh").c_str(), true);
   modelManager->Add("zombie", (GLchar*)std::string(modelFolderPath + "Thriller Part 3/Thriller Part 3.dae").c_str());
+  modelManager->Add("vampire", (GLchar*)std::string(modelFolderPath + "vampire/dancing_vampire.dae").c_str());
 
   std::vector<const Texture*> textures{ texManager->Find("pbr1_basecolor"),
                                         texManager->Find("pbr1_metallic"),
@@ -399,7 +400,7 @@ void eMgoongaGameContext::_InitializeBezier()
   dbb::Bezier bezier;
   bezier.p0 = { 1.0f, 3.0f, 0.0f };
   bezier.p1 = { 3.0f, 3.0f, 3.0f };
-  bezier.p2 = { 6.0f, 3.0f, 3.0f };
+  bezier.p2 = { 4.2f, 3.0f, -2.5f };
   bezier.p3 = { 8.0f, 3.0f, 1.0f };
   ObjectFactoryBase factory;
   bezier_model[0] = factory.CreateObject(std::make_shared<BezierCurveModel>(new BezierCurveMesh(bezier)));
@@ -477,12 +478,12 @@ void eMgoongaGameContext::_InitMainTestSceane()
   guard->SetRigger(new Rigger((Model*)modelManager->Find("guard").get()));//@todo improve
   m_objects.push_back(guard);
 
-  shObject zombie = factory.CreateObject(modelManager->Find("zombie"), "Zombie");
-  zombie->GetTransform()->setTranslation(vec3(1.0f, 2.0f, 0.0f));
-  zombie->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
-  zombie->GetTransform()->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
-  zombie->SetRigger(new Rigger((Model*)modelManager->Find("zombie").get()));//@todo improve
-  m_objects.push_back(zombie);
+  shObject vampire = factory.CreateObject(modelManager->Find("vampire"), "Vampire");
+  vampire->GetTransform()->setTranslation(vec3(1.0f, 2.0f, 0.0f));
+  vampire->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
+  vampire->GetTransform()->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
+  vampire->SetRigger(new Rigger((Model*)modelManager->Find("vampire").get()));//@todo improve
+  m_objects.push_back(vampire);
 
   //light
   m_lightObject = factory.CreateObject(modelManager->Find("white_sphere"), "WhiteSphere");
