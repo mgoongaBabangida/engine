@@ -29,6 +29,7 @@ eMainContextBase::eMainContextBase(eInputController* _input,
 , modelManager(new eModelManager)
 , soundManager(new eSoundManager(_assetsPath))
 , externalGui(_externalGui)
+, pipeline(width, height)
 {}
 
 //-------------------------------------------------------------------------
@@ -67,13 +68,17 @@ void eMainContextBase::InitializeGL()
 
 	InitializeSounds();
 
-	modelManager->InitializePrimitives();
-
-	InitializeModels();
+	_PreInitModelManager();
 
 	InitializeRenders();
 
+	m_gameState = GameState::LOADING;
+
+	InitializeModels();
+
   InitializeExternalGui();
+
+	m_gameState = GameState::LOADED;
 }
 
 //-------------------------------------------------------------------------------
@@ -108,6 +113,20 @@ glm::mat4 eMainContextBase::GetMainCameraProjectionMatrix()
 //--------------------------------------------------------------------------------
 void eMainContextBase::InitializeModels()
 {
+}
+
+//--------------------------------------------------------------------------------
+void eMainContextBase::InitializeTextures()
+{
+	texManager->InitContext(assetsFolderPath);
+	texManager->LoadAllTextures();
+	//m_Textures.Find("Tbricks0_d")->second.saveToFile("MyTexture");  //Saving texture debug
+}
+
+//------------------------------------------------------------
+void eMainContextBase::_PreInitModelManager()
+{
+	modelManager->InitializePrimitives();
 	//PRIMITIVES
 	modelManager->AddPrimitive("wall_cube",
 		std::shared_ptr<MyModel>(new MyModel(modelManager->FindMesh("cube"),
@@ -149,7 +168,7 @@ void eMainContextBase::InitializeModels()
 			texManager->Find("Tbricks2_n"),
 			texManager->Find("Tbricks2_dp"))));
 	modelManager->AddPrimitive("pbr_cube",
-	std::shared_ptr<MyModel>(new MyModel(modelManager->FindMesh("cube"),
+		std::shared_ptr<MyModel>(new MyModel(modelManager->FindMesh("cube"),
 			texManager->Find("pbr1_basecolor"),
 			texManager->Find("pbr1_metallic"),
 			texManager->Find("pbr1_normal"),
@@ -157,14 +176,6 @@ void eMainContextBase::InitializeModels()
 	modelManager->AddPrimitive("white_sphere",
 		std::shared_ptr<MyModel>(new MyModel(modelManager->FindMesh("sphere"),
 			texManager->Find("Twhite"))));
-}
-
-//--------------------------------------------------------------------------------
-void eMainContextBase::InitializeTextures()
-{
-	texManager->InitContext(assetsFolderPath);
-	texManager->LoadAllTextures();
-	//m_Textures.Find("Tbricks0_d")->second.saveToFile("MyTexture");  //Saving texture debug
 }
 
 //------------------------------------------------------------

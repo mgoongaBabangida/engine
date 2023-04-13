@@ -37,17 +37,6 @@ eSandBoxGame::eSandBoxGame(eInputController*  _input,
 	m_light.light_position = vec4(1.0f, 4.0f, 1.0f, 1.0f);
 }
 
-void eSandBoxGame::InitializeGL()
-{
-	eMainContextBase::InitializeGL();
-
-	camRay.init(static_cast<float>(width), static_cast<float>(height), nearPlane, farPlane);
-
-	inputController->AddObserver(this, STRONG);
-	inputController->AddObserver(&m_camera, WEAK);
-	inputController->AddObserver(&camRay, WEAK);
-}
-
 void eSandBoxGame::PaintGL()
 {
 	eMainContextBase::PaintGL();
@@ -156,6 +145,12 @@ void eSandBoxGame::InitializeModels()
 	wolf->SetRigger(new Rigger((Model*)modelManager->Find("wolf").get()));
 	wolf->GetRigger()->ChangeName(std::string(), "Running");
 	m_objects.push_back(wolf);
+
+	camRay.init(static_cast<float>(width), static_cast<float>(height), nearPlane, farPlane);
+
+	inputController->AddObserver(this, STRONG);
+	inputController->AddObserver(&m_camera, WEAK);
+	inputController->AddObserver(&camRay, WEAK);
 }
 
 void eSandBoxGame::InitializeRenders()

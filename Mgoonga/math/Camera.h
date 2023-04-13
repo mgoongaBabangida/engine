@@ -25,19 +25,19 @@ public:
 	
 	void				mouseUpdate(const glm::vec2& newMousePosition);
 
-	glm::mat4			getWorldToViewMatrix() const;
-	glm::vec3			getPosition() const;
-	glm::vec3			getDirection() const;
-	glm::mat3			getRotationMatrix() const;
-	const glm::mat4& getProjectionMatrix() const;
-	glm::mat4			getProjectionBiasedMatrix() const;
-	const glm::mat4& getProjectionOrthoMatrix() const;
-	uint32_t			getWidth() const { return width;  }
-	uint32_t			getHeight() const { return height; }
-	float				  getNearPlane() const { return nearPlane; }
-	float				  getFarPlane() const;
+	glm::mat4					getWorldToViewMatrix() const;
+	glm::vec3					getPosition() const;
+	glm::vec3					getDirection() const;
+	glm::mat3					getRotationMatrix() const;
+	const glm::mat4&	getProjectionMatrix() const;
+	glm::mat4					getProjectionBiasedMatrix() const;
+	const glm::mat4&	getProjectionOrthoMatrix() const;
+	uint32_t					getWidth() const { return width;  }
+	uint32_t					getHeight() const { return height; }
+	float							getNearPlane() const { return nearPlane; }
+	float							getFarPlane() const;
 
-	dbb::CameraRay& getCameraRay() { return camRay; }
+	dbb::CameraRay&		getCameraRay() { return camRay; }
 
 	void				moveForward();
 	void				moveBackword();

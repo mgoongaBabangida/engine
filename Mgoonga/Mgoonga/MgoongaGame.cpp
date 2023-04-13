@@ -29,7 +29,6 @@ eMgoongaGameContext::eMgoongaGameContext(eInputController*  _input,
 						                             const std::string& _assetsPath, 
 						                             const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
-, pipeline(width, height)
 {
 }
 
@@ -117,9 +116,12 @@ void eMgoongaGameContext::InitializeExternalGui()
   //Main Menu
   externalGui[4]->Add(MENU_OPEN, "Add model", reinterpret_cast<void*>(&add_model_callback));
 
-  if(!m_objects.empty())
+  FocuseChanged.Subscribe([this](shObject _prev, shObject _new)->void { this->OnFocusedChanged(); });
+  if (!m_objects.empty())
+  {
     m_focused = m_objects[0];
-  OnFocusedChanged(); // make event handler
+    FocuseChanged.Occur(shObject{}, m_focused);
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -127,21 +129,21 @@ bool eMgoongaGameContext::OnKeyPress(uint32_t asci)
 {
   switch (asci)
   {
-  case ASCII_J: { if (m_focused)	m_focused->GetRigidBody()->MoveLeft(m_objects); }				return true;
-  case ASCII_L: { if (m_focused)	m_focused->GetRigidBody()->MoveRight(m_objects); }				return true;
-  case ASCII_K: { if (m_focused)	m_focused->GetRigidBody()->MoveBack(m_objects); }				return true;
-  case ASCII_I: { if (m_focused)	m_focused->GetRigidBody()->MoveForward(m_objects); }				return true;
-  case ASCII_Z: { if (m_focused)	m_focused->GetRigidBody()->MoveUp(m_objects); }					return true;
-  case ASCII_X: { if (m_focused)	m_focused->GetRigidBody()->MoveDown(m_objects); }				return true;
-  case ASCII_C: { if (m_focused)	m_focused->GetRigidBody()->TurnRight(m_objects); }				return true;
-  case ASCII_V: { if (m_focused)	m_focused->GetRigidBody()->TurnLeft(m_objects); }				return true;
-  case ASCII_B: { if (m_focused)	m_focused->GetRigidBody()->LeanRight(m_objects); }				return true;
-  case ASCII_N: { if (m_focused)	m_focused->GetRigidBody()->LeanLeft(m_objects); }				return true;
-  case ASCII_U: { if (m_focused)	m_focused->GetRigidBody()->LeanForward(m_objects); }				return true;
-  case ASCII_H: { if (m_focused)	m_focused->GetRigidBody()->LeanBack(m_objects); }				return true;
-  case 27: {} return false; //ESC @todo
-  //case ASCII_G:	{ if (m_focused)	m_focused->GetScript()->OnKeyPress(ASCII_G);}	return true;
-  default: return false;
+     case ASCII_J: { if (m_focused)	m_focused->GetRigidBody()->MoveLeft(m_objects); }				return true;
+     case ASCII_L: { if (m_focused)	m_focused->GetRigidBody()->MoveRight(m_objects); }				return true;
+     case ASCII_K: { if (m_focused)	m_focused->GetRigidBody()->MoveBack(m_objects); }				return true;
+     case ASCII_I: { if (m_focused)	m_focused->GetRigidBody()->MoveForward(m_objects); }				return true;
+     case ASCII_Z: { if (m_focused)	m_focused->GetRigidBody()->MoveUp(m_objects); }					return true;
+     case ASCII_X: { if (m_focused)	m_focused->GetRigidBody()->MoveDown(m_objects); }				return true;
+     case ASCII_C: { if (m_focused)	m_focused->GetRigidBody()->TurnRight(m_objects); }				return true;
+     case ASCII_V: { if (m_focused)	m_focused->GetRigidBody()->TurnLeft(m_objects); }				return true;
+     case ASCII_B: { if (m_focused)	m_focused->GetRigidBody()->LeanRight(m_objects); }				return true;
+     case ASCII_N: { if (m_focused)	m_focused->GetRigidBody()->LeanLeft(m_objects); }				return true;
+     case ASCII_U: { if (m_focused)	m_focused->GetRigidBody()->LeanForward(m_objects); }				return true;
+     case ASCII_H: { if (m_focused)	m_focused->GetRigidBody()->LeanBack(m_objects); }				return true;
+     case 27: {} return false; //ESC @todo
+     //case ASCII_G:	{ if (m_focused)	m_focused->GetScript()->OnKeyPress(ASCII_G);}	return true;
+     default: return false;
   }
 }
 
@@ -150,18 +152,7 @@ bool eMgoongaGameContext::OnMouseMove(uint32_t x, uint32_t y)
 {
   if (GetMainCamera().getCameraRay().IsPressed())
   {
-    if (m_grab_camera_line != std::nullopt) // right button is pressed @todo explicit right button
-    {
-      GetMainCamera().getCameraRay().Update(GetMainCamera(), static_cast<float>(x), static_cast<float>(y), width, height);
-      GetMainCamera().getCameraRay().press(x, y);
-
-      dbb::plane pl(m_intersaction,
-                    glm::vec3(0.0f, m_intersaction.y, 1.0f),
-                    glm::vec3(1.0f, m_intersaction.y, 0.0f)); // arbitrary triangle on xz plane
-      glm::vec3 new_intersaction = dbb::intersection(pl, GetMainCamera().getCameraRay().getLine());
-      m_translation_vector = new_intersaction - m_intersaction;
-    }
-    else
+    if(!m_inputStrategy->OnMouseMove(x,y))
     {
       m_framed.reset(new std::vector<shObject>(GetMainCamera().getCameraRay().onMove(GetMainCamera(), m_objects, static_cast<float>(x), static_cast<float>(y)))); 	//to draw a frame
       return true;
@@ -179,30 +170,25 @@ bool eMgoongaGameContext::OnMousePress(uint32_t x, uint32_t y, bool left)
   GetMainCamera().getCameraRay().Update(GetMainCamera(), static_cast<float>(x), static_cast<float>(y), width, height);
   GetMainCamera().getCameraRay().press(x, y);
   GetMainCamera().MovementSpeedRef() = 0.f;
+
   auto objects = m_objects;
   objects.insert(objects.end(), m_pbr_objs.begin(), m_pbr_objs.end());
   auto [new_focused, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(objects);
 
+  if (new_focused != m_focused)
+  {
+    m_focused = new_focused;
+    OnFocusedChanged();
+  }
 	if(left)
-	{
-    if (new_focused != m_focused)
-    {
-      m_focused = new_focused;
-      OnFocusedChanged();
-    }
-	}
+	{}
   else // right click
   {
     if (new_focused) // right click on object
     {
-      m_focused = new_focused;
-      OnFocusedChanged();
-      m_grab_translation = new_focused->GetTransform()->getTranslation();
-      m_intersaction = intersaction;
-      m_grab_camera_line = GetMainCamera().getCameraRay().getLine();
+      m_inputStrategy->OnMousePress(x,y,left);
     }
   }
-
 	if(m_focused && m_focused->GetScript())
 		m_focused->GetScript()->OnMousePress(x, y, left);
 
@@ -213,8 +199,7 @@ bool eMgoongaGameContext::OnMousePress(uint32_t x, uint32_t y, bool left)
 bool eMgoongaGameContext::OnMouseRelease()
 {
   GetMainCamera().getCameraRay().release();
-  m_grab_camera_line = std::nullopt;
-  m_translation_vector = vec3{ 0.0f, 0.0f, 0.0f };
+  m_inputStrategy->OnMouseRelease();
   GetMainCamera().MovementSpeedRef() = 0.05f;
 	return true;
 }
@@ -229,44 +214,6 @@ void eMgoongaGameContext::OnFocusedChanged()
   else
   {
   }
-}
-
-//-------------------------------------------------------------------------------
-void eMgoongaGameContext::InitializeGL()
-{
-	eMainContextBase::InitializeGL();
-	
-  Texture* tex = texManager->Find("TButton_red");
-  Texture* flag = texManager->Find("TSpanishFlag0_s");
-  glm::ivec2 topLeft{ 160,450 };
-  glm::ivec2 bottomRight{ 1030, 725 };
-
-	guis.emplace_back(new GUIWithAlpha(0, 0, (bottomRight.x - topLeft.x)/4, (bottomRight.y - topLeft.y)/4, width, height));
-  guis[0]->SetTexture(*tex, topLeft, bottomRight);
-  guis[0]->SetChild(std::make_shared<GUIWithAlpha>(0, (bottomRight.y - topLeft.y)/4, (bottomRight.x - topLeft.x)/4, (bottomRight.y - topLeft.y)/4, width, height));
-  guis[0]->GetChildren()[0]->SetTexture(*tex, topLeft, bottomRight);
-  guis[0]->GetChildren()[0]->SetVisible(false);
-  guis[0]->setCommand(std::make_shared<MenuBehaviorLeanerMove>(guis[0]->GetChildren()[0].get(),
-    math::AnimationLeaner{ 
-      {glm::vec3(guis[0]->getTopLeft().x, guis[0]->getTopLeft().y, 0)},
-      {glm::vec3(guis[0]->GetChildren()[0]->getTopLeft().x, guis[0]->GetChildren()[0]->getTopLeft().y, 0)},
-      1000 }));
-
-  guis.emplace_back(new Cursor(0, 0, 30, 30, width, height));
-  guis[1]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight});
-  guis.emplace_back(new Movable2D(400, 0, 60, 60, width, height));
-  guis[2]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight });
-
-	inputController->AddObserver(this, WEAK);
-  inputController->AddObserver(&GetMainCamera().getCameraRay(), WEAK);
-  inputController->AddObserver(&GetMainCamera(), WEAK);
-  inputController->AddObserver(guis[0].get(), MONOPOLY);//monopoly takes only mouse
-  inputController->AddObserver(guis[1].get(), WEAK);
-  inputController->AddObserver(guis[2].get(), STRONG);
-  inputController->AddObserver(externalGui[0], MONOPOLY);
-  inputController->AddObserver(externalGui[1], MONOPOLY);
-  inputController->AddObserver(externalGui[2], MONOPOLY);
-  inputController->AddObserver(externalGui[3], MONOPOLY);
 }
 
 //-------------------------------------------------------------------------------
@@ -309,9 +256,44 @@ void eMgoongaGameContext::InitializeModels()
   modelManager->Add("sphere_textured", textures /*std::vector<const Texture*>{}*/); // or textures
   modelManager->Add("sphere_red");//@
   
+  //@todo separate init scene member func
   _InitMainTestSceane();
   _InitializeHexes();
   _InitializeBezier();
+
+  m_inputStrategy.reset(new InputStrategyMoveAlongXZPlane(GetMainCamera(), m_objects));
+
+  Texture* tex = texManager->Find("TButton_red");
+  Texture* flag = texManager->Find("TSpanishFlag0_s");
+  glm::ivec2 topLeft{ 160, 450 };
+  glm::ivec2 bottomRight{ 1030, 725 };
+
+  guis.emplace_back(new GUIWithAlpha(0, 0, (bottomRight.x - topLeft.x) / 4, (bottomRight.y - topLeft.y) / 4, width, height));
+  guis[0]->SetTexture(*tex, topLeft, bottomRight);
+  guis[0]->SetChild(std::make_shared<GUIWithAlpha>(0, (bottomRight.y - topLeft.y) / 4, (bottomRight.x - topLeft.x) / 4, (bottomRight.y - topLeft.y) / 4, width, height));
+  guis[0]->GetChildren()[0]->SetTexture(*tex, topLeft, bottomRight);
+  guis[0]->GetChildren()[0]->SetVisible(false);
+  guis[0]->setCommand(std::make_shared<MenuBehaviorLeanerMove>(guis[0]->GetChildren()[0].get(),
+    math::AnimationLeaner{
+      {glm::vec3(guis[0]->getTopLeft().x, guis[0]->getTopLeft().y, 0)},
+      {glm::vec3(guis[0]->GetChildren()[0]->getTopLeft().x, guis[0]->GetChildren()[0]->getTopLeft().y, 0)},
+      1000 }));
+
+  guis.emplace_back(new Cursor(0, 0, 30, 30, width, height));
+  guis[1]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight });
+  guis.emplace_back(new Movable2D(400, 0, 60, 60, width, height));
+  guis[2]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight });
+
+  inputController->AddObserver(this, WEAK);
+  inputController->AddObserver(&GetMainCamera().getCameraRay(), WEAK);
+  inputController->AddObserver(&GetMainCamera(), WEAK);
+  inputController->AddObserver(guis[0].get(), MONOPOLY);//monopoly takes only mouse
+  inputController->AddObserver(guis[1].get(), WEAK);
+  inputController->AddObserver(guis[2].get(), STRONG);
+  inputController->AddObserver(externalGui[0], MONOPOLY);
+  inputController->AddObserver(externalGui[1], MONOPOLY);
+  inputController->AddObserver(externalGui[2], MONOPOLY);
+  inputController->AddObserver(externalGui[3], MONOPOLY);
 }
 
 //-------------------------------------------------------------------------
@@ -329,42 +311,48 @@ void eMgoongaGameContext::PaintGL()
 {
 	eMainContextBase::PaintGL();
 
-	std::vector<shObject> flags; //@todo
-	for (auto &object : m_objects) //@todo
-	{
-		if (object->GetScript())
-		{
-			object->GetScript()->Update(m_objects);
-			eShipScript* script = dynamic_cast<eShipScript*>(object->GetScript());
-			if(script)
-        flags.push_back(script->GetChildrenObjects()[0]);
-		}
-	}
-  bezier_model[0]->GetScript()->Update(m_objects); //@todo
-
-  if (m_grab_camera_line != std::nullopt && m_translation_vector != glm::vec3{0.f,0.f,0.0f})
-    m_focused->GetTransform()->setTranslation(m_grab_translation + m_translation_vector);
-
-  if (m_lightObject)
+  if (m_gameState == GameState::LOADED)
   {
-    m_lightObject->GetTransform()->setTranslation(GetMainLight().light_position);
-    GetMainLight().light_direction = -GetMainLight().light_position;
-  }
-  
-  //need better design less copying
-  std::shared_ptr<std::vector<shObject>> focused_output = m_framed;
-  if (!focused_output || !(focused_output->size() > 1))
-    focused_output = m_focused ? std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{ m_focused })
-                               : std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{});
+    std::vector<shObject> flags; //@todo
+    for (auto& object : m_objects) //@todo
+    {
+      if (object->GetScript())
+      {
+        object->GetScript()->Update(m_objects);
+        eShipScript* script = dynamic_cast<eShipScript*>(object->GetScript());
+        if (script)
+          flags.push_back(script->GetChildrenObjects()[0]);
+      }
+    }
+    bezier_model[0]->GetScript()->Update(m_objects); //@todo
 
-  std::map<eOpenGlRenderPipeline::RenderType, std::vector<shObject>> objects;
-  objects.insert({ eOpenGlRenderPipeline::RenderType::PHONG, m_objects});
-  objects.insert({ eOpenGlRenderPipeline::RenderType::OUTLINED, *focused_output });
-  objects.insert({ eOpenGlRenderPipeline::RenderType::FLAG, flags });
-  objects.insert({ eOpenGlRenderPipeline::RenderType::PBR, m_pbr_objs });
-  objects.insert({ eOpenGlRenderPipeline::RenderType::GEOMETRY, {hex_model} });
-  objects.insert({ eOpenGlRenderPipeline::RenderType::BEZIER_CURVE, {bezier_model[0]} });
-	pipeline.RenderFrame(objects, GetMainCamera(), GetMainLight(), guis);
+    m_inputStrategy->UpdateInRenderThread();
+
+    if (m_lightObject)
+    {
+      m_lightObject->GetTransform()->setTranslation(GetMainLight().light_position);
+      GetMainLight().light_direction = -GetMainLight().light_position;
+    }
+
+    //need better design less copying
+    std::shared_ptr<std::vector<shObject>> focused_output = m_framed;
+    if (!focused_output || !(focused_output->size() > 1))
+      focused_output = m_focused ? std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{ m_focused })
+      : std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{});
+
+    std::map<eOpenGlRenderPipeline::RenderType, std::vector<shObject>> objects;
+    objects.insert({ eOpenGlRenderPipeline::RenderType::PHONG, m_objects });
+    objects.insert({ eOpenGlRenderPipeline::RenderType::OUTLINED, *focused_output });
+    objects.insert({ eOpenGlRenderPipeline::RenderType::FLAG, flags });
+    objects.insert({ eOpenGlRenderPipeline::RenderType::PBR, m_pbr_objs });
+    objects.insert({ eOpenGlRenderPipeline::RenderType::GEOMETRY, {hex_model} });
+    objects.insert({ eOpenGlRenderPipeline::RenderType::BEZIER_CURVE, {bezier_model[0]} });
+    pipeline.RenderFrame(objects, GetMainCamera(), GetMainLight(), guis);
+  }
+  else if (m_gameState == GameState::LOADING)
+  {
+    //welcome texture(s)
+  }
 }
 
 //-------------------------------------------------------------------------------

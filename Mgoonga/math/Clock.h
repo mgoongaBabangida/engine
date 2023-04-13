@@ -14,6 +14,7 @@ namespace math {
 		void			reset();
 		void			start();
 		int64_t		timeEllapsedMsc();
+		//returns time since last frame
 		int64_t		newFrame();
 		int64_t		timeEllapsedLastFrameMsc();
 		void			restart();

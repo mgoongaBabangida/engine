@@ -6,11 +6,11 @@
 #include <math/Camera.h>
 #include <math/CameraRay.h>
 
-#include <opengl_assets/OpenGlRenderPipeline.h>
 #include <opengl_assets/GUI.h>
 #include <opengl_assets/TerrainModel.h>
 
 #include <game_assets/MainContextBase.h>
+#include <game_assets/InputStrategy.h>
 
 class IWindowImGui;
 
@@ -25,8 +25,7 @@ public:
 				const std::string& shadersPath);
 
   virtual ~eMgoongaGameContext();
-	
-	virtual void			InitializeGL()									override;
+
 	virtual void			PaintGL()										    override;
   virtual uint32_t  GetFinalImageId()               override;
 
@@ -49,21 +48,13 @@ protected:
   virtual void      InitializeExternalGui()           override;
 
 protected:
-  eOpenGlRenderPipeline							     pipeline;
-
   std::vector<shObject>				           m_objects;
   std::vector<shObject>                  m_pbr_objs;
   std::shared_ptr<std::vector<shObject>> m_framed;
   std::vector<std::shared_ptr<GUI>>			 guis;
   shObject														   hex_model;
   std::array<shObject, 5>								 bezier_model;
-
-  //should be inside script
-  std::optional<dbb::line>               m_grab_camera_line = std::nullopt;
-  glm::vec3                              m_intersaction;
-  glm::vec3                              m_grab_translation;
-  glm::vec3                              m_translation_vector = glm::vec3{ 0.f,0.f,0.0f };
-  
+  std::unique_ptr<InputStrategy>         m_inputStrategy;
   //debuging
   shObject							                 m_lightObject;
 };

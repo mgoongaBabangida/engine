@@ -3,10 +3,14 @@
 #include "game_assets.h"
 
 #include <base/interfaces.h>
+#include <base/Event.h>
+
 #include <math/timer.h>
 #include <math/Camera.h>
 
 #include <sdl_assets/sdl_assets.h>
+
+#include <opengl_assets/OpenGlRenderPipeline.h>
 
 class eTextureManager;
 class eModelManager;
@@ -27,6 +31,13 @@ public:
 		SCALE =896
 	};
 
+	enum class GameState
+	{
+		UNINITIALIZED,
+		LOADING,
+		LOADED
+	};
+
 	eMainContextBase(eInputController* _input,
 									 std::vector<IWindowImGui*> _externalGui,
 									 const std::string& _modelsPath,
@@ -35,8 +46,14 @@ public:
 
 	virtual ~eMainContextBase();
 
+	Event<std::function<void(shObject, shObject)>> FocuseChanged;
+	Event<std::function<void(shObject)>> ObjectBeingAddedToScene;
+	Event<std::function<void(shObject)>> ObjectBeingDeletedFromScene;
+
 	//IGame
-	virtual void			InitializeGL() override;
+	void			InitializeGL() final;
+
+	//IGame
 	virtual void			PaintGL() override;
 	virtual uint32_t	GetFinalImageId() override;
 	virtual std::shared_ptr<eObject> GetFocusedObject() override;
@@ -61,10 +78,13 @@ protected:
   virtual void    InitializeExternalGui() {}
 	virtual void		Pipeline()			{}
 
+	void						_PreInitModelManager();
 	Light&					GetMainLight();
 	Camera&					GetMainCamera();
 
-	eInputController*	inputController;
+	GameState								m_gameState = GameState::UNINITIALIZED;
+	/*eOpenGlRenderPipeline		pipeline;*/
+	eInputController*				inputController;
 	
 	std::string			modelFolderPath;
 	std::string			assetsFolderPath;
@@ -73,6 +93,7 @@ protected:
 	std::vector<Light>					m_lights;
 	std::vector<Camera>					m_cameras;
 	shObject										m_focused;
+
 	bool												m_use_guizmo = true;
 	GizmoType										m_gizmo_type = GizmoType::TRANSLATE;
 	
@@ -91,4 +112,6 @@ protected:
 	size_t		height		= 600;
 	float			nearPlane	= 0.1f;
 	float			farPlane	= 20.0f;
+
+	eOpenGlRenderPipeline							pipeline;
 };
