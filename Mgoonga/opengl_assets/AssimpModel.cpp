@@ -4,7 +4,6 @@
 #include <math/Transform.h>
 
 #include <algorithm>
-#include <iostream>
 #include <assert.h>
 
 using namespace std;

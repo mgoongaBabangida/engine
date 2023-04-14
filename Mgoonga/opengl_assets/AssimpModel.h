@@ -1,10 +1,12 @@
 #pragma once
 
 #include "stdafx.h"
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
+//#include <assimp/Importer.hpp>
+//#include <assimp/scene.h>
+//#include <assimp/postprocess.h>
+#include <assimp-3.1.1/include/assimp/Importer.hpp>
+#include <assimp-3.1.1/include/assimp/scene.h>
+#include <assimp-3.1.1/include/assimp/postprocess.h>
 #include "AssimpMesh.h"
 #include "MyModel.h"
 

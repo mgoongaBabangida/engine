@@ -247,7 +247,9 @@ void eMgoongaGameContext::InitializeModels()
 	modelManager->Add("wolf", (GLchar*)std::string(modelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
 	modelManager->Add("guard", (GLchar*)std::string(modelFolderPath + "ogldev-master/Content/guard/boblampclean.md5mesh").c_str(), true);
   modelManager->Add("zombie", (GLchar*)std::string(modelFolderPath + "Thriller Part 3/Thriller Part 3.dae").c_str());
-  modelManager->Add("vampire", (GLchar*)std::string(modelFolderPath + "vampire/dancing_vampire.dae").c_str());
+  //modelManager->Add("vampire", (GLchar*)std::string(modelFolderPath + "vampire/dancing_vampire.dae").c_str());
+
+  modelManager->Add("Dying", (GLchar*)std::string(modelFolderPath + "Dying Soldier/Dying.dae").c_str());
 
   std::vector<const Texture*> textures{ texManager->Find("pbr1_basecolor"),
                                         texManager->Find("pbr1_metallic"),
@@ -466,12 +468,12 @@ void eMgoongaGameContext::_InitMainTestSceane()
   guard->SetRigger(new Rigger((Model*)modelManager->Find("guard").get()));//@todo improve
   m_objects.push_back(guard);
 
-  shObject vampire = factory.CreateObject(modelManager->Find("vampire"), "Vampire");
-  vampire->GetTransform()->setTranslation(vec3(1.0f, 2.0f, 0.0f));
-  vampire->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
-  vampire->GetTransform()->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
-  vampire->SetRigger(new Rigger((Model*)modelManager->Find("vampire").get()));//@todo improve
-  m_objects.push_back(vampire);
+  //shObject vampire = factory.CreateObject(modelManager->Find("vampire"), "Vampire");
+  //vampire->GetTransform()->setTranslation(vec3(1.0f, 2.0f, 0.0f));
+  //vampire->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
+  //vampire->GetTransform()->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
+  //vampire->SetRigger(new Rigger((Model*)modelManager->Find("vampire").get()));//@todo improve
+  //m_objects.push_back(vampire);
 
   //light
   m_lightObject = factory.CreateObject(modelManager->Find("white_sphere"), "WhiteSphere");
@@ -486,4 +488,11 @@ void eMgoongaGameContext::_InitMainTestSceane()
   shObject obj = factory.CreateObject(modelManager->Find("sphere_textured"), "SpherePBR");
   obj->GetTransform()->setTranslation(glm::vec3(-2.0f, 3.5f, 1.5f));
   m_pbr_objs.push_back(obj);
+
+  shObject dying = factory.CreateObject(modelManager->Find("Dying"), "Dying");
+  dying->GetTransform()->setTranslation(vec3(1.0f, 2.0f, -2.0f));
+  dying->GetTransform()->setScale(vec3(0.01f, 0.01f, 0.01f));
+  dying->SetRigger(new Rigger((Model*)modelManager->Find("Dying").get())); //@todo improve
+  dying->GetRigger()->ChangeName(std::string(), "Dying");//@todo improve
+  m_objects.push_back(dying);
 }

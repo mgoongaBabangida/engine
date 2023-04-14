@@ -11,7 +11,7 @@
 
 enum TColor { WHITE, BLACK, BLUE, PINK, YELLOW };
 
-static const GLuint DEFAULT_TEXTURE_ID = (GLuint)glm::pow(2, 8) - 1;
+static const GLuint DEFAULT_TEXTURE_ID = (GLuint)glm::pow(2, 32) - 1;
 
 struct /*DLL_OPENGL_ASSETS*/ Texture
 {
