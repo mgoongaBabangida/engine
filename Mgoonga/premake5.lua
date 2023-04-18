@@ -104,7 +104,7 @@ project "opengl_assets"
    "../../third_party/libs/Win64",
    "../../third_party/glew-2.1.0/lib/Release/x64",
    "../../third_party/SDL/VisualC/x64/Release/",
-   "../../third_party/assimp/",
+   "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
    "../../third_party/freetype-2.11.0/objs"
@@ -114,7 +114,7 @@ project "opengl_assets"
    {  
    "base", 
    "math",
-   "assimp-vc142-mt", 
+   "assimpd", 
    "opengl32",
    "glew32",   
    "DevIL", 
@@ -150,18 +150,14 @@ project "sdl_assets"
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
    
-   includedirs 
-   {
-   "./"; "../../third_party",
-   "imgui/"
-   }
+   includedirs { "./"; "../../third_party" }
 	
    libdirs 
    { 
    "../../third_party/libs/Win64",
    "../../third_party/glew-2.1.0/lib/Release/x64",
    "../../third_party/SDL/VisualC/x64/Release/",
-   "../../third_party/assimp/",
+   "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
    "../../third_party/freetype-2.11.0/objs"
@@ -172,7 +168,7 @@ project "sdl_assets"
    "base", 
    "math",
    "opengl_assets",
-   "assimp-vc142-mt", 
+   "assimpd", 
    "opengl32",
    "glew32",   
    "DevIL", 
@@ -215,7 +211,7 @@ project "game_assets"
    "../../third_party/libs/Win64",
    "../../third_party/glew-2.1.0/lib/Release/x64",
    "../../third_party/SDL/VisualC/x64/Release/",
-   "../../third_party/assimp/",
+   "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
    "../../third_party/freetype-2.11.0/objs"
@@ -228,7 +224,7 @@ project "game_assets"
    "opengl_assets",
    "sdl_assets",
    "tcp_lib",
-   "assimp-vc142-mt", 
+   "assimpd", 
    "opengl32",
    "glew32",   
    "DevIL", 
@@ -266,7 +262,7 @@ project "Mgoonga"
    "../../third_party/libs/Win64",
    "../../third_party/glew-2.1.0/lib/Release/x64",
    "../../third_party/SDL/VisualC/x64/Release/",
-   "../../third_party/assimp/",
+   "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
    "../../third_party/freetype-2.11.0/objs"
@@ -279,7 +275,7 @@ project "Mgoonga"
    "opengl_assets",
    "sdl_assets",
    "game_assets",
-   "assimp-vc142-mt", 
+   "assimpd", 
    "opengl32",
    "glew32",   
    "DevIL", 
@@ -317,7 +313,7 @@ project "AmericanTreasureGame"
    "../../third_party/libs/Win64",
    "../../third_party/glew-2.1.0/lib/Release/x64",
    "../../third_party/SDL/VisualC/x64/Release/",
-   "../../third_party/assimp/",
+   "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
    "../../third_party/freetype-2.11.0/objs"
@@ -330,7 +326,7 @@ project "AmericanTreasureGame"
    "opengl_assets",
    "sdl_assets",
    "game_assets",
-   "assimp-vc142-mt", 
+   "assimpd", 
    "opengl32",
    "glew32",   
    "DevIL", 
@@ -368,7 +364,7 @@ project "SandBoxGame"
    "../../third_party/libs/Win64",
    "../../third_party/glew-2.1.0/lib/Release/x64",
    "../../third_party/SDL/VisualC/x64/Release/",
-   "../../third_party/assimp/",
+   "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
    "../../third_party/freetype-2.11.0/objs"
@@ -381,7 +377,7 @@ project "SandBoxGame"
    "opengl_assets",
    "sdl_assets",
    "game_assets",
-   "assimp-vc142-mt", 
+   "assimpd", 
    "opengl32",
    "glew32",   
    "DevIL", 

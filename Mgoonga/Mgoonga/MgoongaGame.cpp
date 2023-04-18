@@ -357,12 +357,6 @@ void eMgoongaGameContext::PaintGL()
   }
 }
 
-//-------------------------------------------------------------------------------
-uint32_t eMgoongaGameContext::GetFinalImageId()
-{
-  return pipeline.GetDefaultBufferTexture().id;
-}
-
 //-------------------------------------------------------------------------------------------
 void eMgoongaGameContext::_InitializeHexes()
 {

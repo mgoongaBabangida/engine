@@ -8,7 +8,7 @@
 
 //-------------------------------------------------------------------
 ePBRRender::ePBRRender(const std::string& vS, const std::string& fS)
-: matrices(100)
+: matrices(300)
 {
   pbrShader.installShaders(vS.c_str(), fS.c_str());
   glUseProgram(pbrShader.ID());

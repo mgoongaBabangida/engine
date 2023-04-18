@@ -5,7 +5,7 @@
 
 //---------------------------------------------------------------------------------
 eMainRender::eMainRender(const std::string& vS, const std::string& fS)
-: matrices(100)
+: matrices(300)
 {
 	mainShader.installShaders(vS.c_str(), fS.c_str()); //main pass
 
@@ -135,7 +135,7 @@ void eMainRender::Render(const Camera&			    camera,
 			for (auto& m : matrices)
 				m = UNIT_MATRIX;
 		}
-		glUniformMatrix4fv(BonesMatLocation, 100, GL_FALSE, &matrices[0][0][0]);
+		glUniformMatrix4fv(BonesMatLocation, 300, GL_FALSE, &matrices[0][0][0]);
 		object->GetModel()->Draw();
 	}
 }

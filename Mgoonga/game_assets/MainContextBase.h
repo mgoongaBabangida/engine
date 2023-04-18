@@ -83,7 +83,7 @@ protected:
 	Camera&					GetMainCamera();
 
 	GameState								m_gameState = GameState::UNINITIALIZED;
-	/*eOpenGlRenderPipeline		pipeline;*/
+
 	eInputController*				inputController;
 	
 	std::string			modelFolderPath;

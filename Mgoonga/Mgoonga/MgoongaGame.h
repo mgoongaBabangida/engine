@@ -27,7 +27,6 @@ public:
   virtual ~eMgoongaGameContext();
 
 	virtual void			PaintGL()										    override;
-  virtual uint32_t  GetFinalImageId()               override;
 
 	virtual bool			OnMouseMove(uint32_t x, uint32_t y)				      override;
 	virtual bool			OnKeyPress(uint32_t asci)						            override;
