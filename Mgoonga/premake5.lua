@@ -11,7 +11,7 @@ project "base"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
-	targetdir ("bin/" .. outputdir .. "/Mgoonga")
+	targetdir ("bin/" .. outputdir .. "/")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
@@ -36,7 +36,7 @@ project "math"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
-	targetdir ("bin/" .. outputdir .. "/Mgoonga")
+	targetdir ("bin/" .. outputdir .. "/")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
@@ -63,7 +63,7 @@ project "tcp_lib"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
-	targetdir ("bin/" .. outputdir .. "/Mgoonga")
+	targetdir ("bin/" .. outputdir .. "/")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
@@ -88,7 +88,7 @@ project "opengl_assets"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
-	targetdir ("bin/" .. outputdir .. "/Mgoonga")
+	targetdir ("bin/" .. outputdir .. "/")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
@@ -145,7 +145,7 @@ project "sdl_assets"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
-	targetdir ("bin/" .. outputdir .. "/Mgoonga")
+	targetdir ("bin/" .. outputdir .. "/")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
@@ -199,7 +199,7 @@ project "game_assets"
 	kind "SharedLib"
 	language "C++"
 	cppdialect "C++17"
-	targetdir ("bin/" .. outputdir .. "/Mgoonga")
+	targetdir ("bin/" .. outputdir .. "/")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
@@ -250,7 +250,7 @@ project "Mgoonga"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	targetdir ("bin/" .. outputdir .. "/")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
@@ -301,7 +301,7 @@ project "AmericanTreasureGame"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	targetdir ("bin/" .. outputdir .. "/")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
@@ -352,7 +352,7 @@ project "SandBoxGame"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	targetdir ("bin/" .. outputdir .. "/")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}

@@ -12,7 +12,7 @@
 #include <opengl_assets/ModelManager.h>
 #include <opengl_assets/SoundManager.h>
 
-#include "ImGuizmo/ImGuizmo.h"
+#include "ImGuizmo.h"
 
 #include <glm/glm/gtx/matrix_decompose.hpp>
 
