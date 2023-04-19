@@ -4,22 +4,28 @@
 
 const Frame& SceletalAnimation::getCurrentFrame()
 {
-	if(clock.timeEllapsedMsc() > duration) //need to improve
-		clock.restart();
+	if (freeze_frame != -1)
+		return frames[freeze_frame];
+
+	if (clock.timeEllapsedMsc() > duration)
+	{
+		if (play_once)
+			clock.pause();
+		else
+			clock.restart();
+	}
 
 	float time = clock.timeEllapsedMsc();
-	//std::cout << "time " << time << std::endl;
-	int i = 0;
+	size_t i = 0;
 
 	for (; i < frames.size() - 1; ++i)
 	{
 		if(frames[i].timeStamp > time) //should be sorted
 			break;
 	}
-	if(i == 0) 
-		{ return frames[0]; }
 	return frames[i];
 
+	//interpolation
 	//float progression = (time - frames[i - 1].timeStamp) / (frames[i].timeStamp - frames[i - 1].timeStamp);	
 	/*std::cout << "Debug progression " << progression <<" "<< i << std::endl;
 	std::cout << "i " << i << std::endl;*/
@@ -38,6 +44,7 @@ const Frame& SceletalAnimation::getCurrentFrame()
 
 void SceletalAnimation::Start()
 {
+	play_once = false;
 	clock.start();
 }
 
@@ -54,6 +61,17 @@ void SceletalAnimation::Continue()
 bool SceletalAnimation::IsPaused()
 {
 	return clock.isPaused();
+}
+
+void SceletalAnimation::PlayOnce()
+{
+	play_once = true;
+	clock.restart();
+}
+
+void SceletalAnimation::FreezeFrame(size_t _frame)
+{
+	freeze_frame = _frame;
 }
 
 const std::string& SceletalAnimation::Name() const

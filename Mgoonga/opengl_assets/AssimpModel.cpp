@@ -374,7 +374,7 @@ SceletalAnimation Model::ProccessAnimations(const aiAnimation* anim)
 
 	std::vector<Frame> frames(qframes);
 	for (int i = 0; i<qframes; ++i)
-		frames[i].addTimeStemp((durationMsc / qframes) * i);
+		frames[i].addTimeStamp((durationMsc / qframes) * i);
 	
 	for (int i = 0; i<qNodes; ++i)
 	{

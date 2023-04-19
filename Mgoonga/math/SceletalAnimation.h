@@ -13,15 +13,16 @@
 //-------------------------------------------------------------------
 struct Frame
 {
-	int									 timeStamp; //can be const?
-	std::map<std::string, Transform>	 pose; //45
+	size_t															timeStamp; //can be const?
+	std::map<std::string, Transform>		pose;
 	
 	Frame(int timeStamp, std::map<std::string, Transform> pose) 
-    : timeStamp(timeStamp), pose(pose) 
+    : timeStamp(timeStamp), pose(pose)
   {}
+
 	Frame(){} //improve
 	
-	void addTimeStemp(int stamp)						            { timeStamp = stamp; }
+	void addTimeStamp(int stamp)						            { timeStamp = stamp; }
 	void addTrnasform(std::string name, Transform trs)  { pose.insert(std::pair<std::string, Transform>(name, trs)); }
 	bool exists(const std::string& name) const			    { return pose.find(name) != pose.end(); }
 };
@@ -36,21 +37,29 @@ public:
 	bool operator==(const SceletalAnimation& other) { return name == other.name && duration == other.duration; }
 	
 	const Frame& getCurrentFrame();
+	size_t GetNumFrames() const { return frames.size(); }
 
 	virtual void Start() override;
 	virtual void Stop() override;
 	virtual void Continue() override;
 	virtual bool IsPaused() override;
+
+	void PlayOnce();
+	void FreezeFrame(size_t);
+
 	virtual const std::string& Name() const		override;
 	void SetName(const std::string& n);
 
 	void Debug();
 
 protected:
-  math::eClock		clock;
-  std::vector<Frame>  frames;
-  int					duration; // msc
-  std::string			name;
+  math::eClock					clock;
+  std::vector<Frame>		frames;
+  size_t								duration; // msc
+  std::string						name;
+
+	bool									play_once = false;
+	size_t								freeze_frame = -1;
 };
 
 #endif 

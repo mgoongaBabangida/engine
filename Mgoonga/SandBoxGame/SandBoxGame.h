@@ -32,6 +32,8 @@ protected:
 	std::vector<shObject>								m_objects;
 	std::vector<shObject>								m_framed;
 	std::vector<std::shared_ptr<GUI>>		guis;
+	//debuging
+	shObject							              m_lightObject;
 
 	virtual void		InitializePipline()			override;
 	virtual void		InitializeBuffers()			override;

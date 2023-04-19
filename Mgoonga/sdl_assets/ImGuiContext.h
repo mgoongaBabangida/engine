@@ -63,6 +63,7 @@ public:
 	virtual void Render() override;
 };
 
+//---------------------------------------------
 class eMainImGuiWindow : public IWindowImGui
 {
 	using eItem = std::tuple<std::string, TypeImGui, void*>;

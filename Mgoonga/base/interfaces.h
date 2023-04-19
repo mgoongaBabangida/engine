@@ -181,11 +181,13 @@ class IRigger
 {
 public:
 	virtual ~IRigger() = default;
-	virtual bool							Apply(const std::string& _animation)								 = 0;
-  virtual bool							Apply(size_t _animation_index) = 0;
-	virtual void							Stop()																 = 0;
-	virtual bool							ChangeName(const std::string& _oldName, const std::string& _newName) = 0;
-	virtual const std::vector<glm::mat4>&	GetMatrices()														 = 0;
+	virtual bool							Apply(const std::string& _animation, bool _play_once)			= 0;
+  virtual bool							Apply(size_t _animation_index, bool _play_once)						= 0;
+	virtual void							Stop()																										= 0;
+	virtual bool							ChangeName(const std::string& _oldName, const std::string& _newName)	= 0;
+	virtual const std::vector<glm::mat4>&	GetMatrices()																							= 0;
+	virtual size_t						GetAnimationCount() const																							= 0;
+	virtual size_t						GetBoneCount() const																									= 0;
 };
 
 //-----------------------------------------------------------------------------------------------

@@ -17,6 +17,7 @@
 
 #include <base/base.h>
 #include <base/Object.h>
+#include <math/Rigger.h>
 #include <opengl_assets/Texture.h>
 
 #include <glm/glm/gtc/quaternion.hpp>
@@ -383,30 +384,147 @@ void eWindowImGui::Render()
           {
             ImGui::Image((void*)(intptr_t)(t->id), ImVec2(240, 160)/* ImVec2(t->mTextureWidth, t->mTextureHeight)*/, ImVec2(0, 1), ImVec2(1, 0));
           }
-          //Animation -> transfer to rigger as well
-          text = std::string("Number of animations ") + std::to_string(obj->GetModel()->GetAnimationCount());
-          ImGui::Text(text.c_str());
+          combo_list.clear();
 
-          static int anim_current = 0;
-          //cstrings.reserve(obj->GetModel()->GetAnimationCount());
-          //for (size_t i = 0; i < obj->GetModel()->GetAnimationCount(); ++i)
-          //  cstrings.push_back(const_cast<char*>(std::to_string(i).c_str())); //change ti names
-
-          //if (!cstrings.empty())
-          //{
-          //  if (ImGui::Combo("Current animations", &anim_current, &cstrings[0], obj->GetModel()->GetAnimationCount()))
-          //  {
-          //  }
-          //}
-
-          if (ImGui::Button("Play current animations "))
+          if (obj->GetRigger())
           {
-            if (obj->GetModel()->GetAnimationCount() != 0)
-              obj->GetRigger()->Apply(anim_current);
-          }
-          if (ImGui::Button("Stop current animations "))
-          {
-            obj->GetRigger()->Stop();
+            //Animation -> transfer to rigger as well
+            text = std::string("Number of animations ") + std::to_string(obj->GetRigger()->GetAnimationCount());
+            ImGui::Text(text.c_str());
+
+            //Animations
+            Rigger* rigger = dynamic_cast<Rigger*>(obj->GetRigger());
+            std::vector<std::string> names = rigger->GetAnimationNames();
+            for (size_t i = 0; i < obj->GetRigger()->GetAnimationCount(); ++i)
+            {
+              for (int j = 0; j < names[i].size(); ++j)
+                combo_list.push_back(names[i][j]);
+              if (i != names[i].size() - 1)
+                combo_list.push_back('\0');
+            }
+
+            static int anim_current = 0;
+            if (!combo_list.empty())
+            {
+              if (ImGui::Combo("Object Animations", &anim_current, &combo_list[0]))
+              {
+              }
+            }
+            combo_list.clear();
+
+            //Frames
+            if (auto* cur_anim = rigger->GetCurrentAnimation(); cur_anim != nullptr)
+            {
+              text = std::string("Number of frames ") + std::to_string(rigger->GetCurrentAnimation()->GetNumFrames());
+              ImGui::Text(text.c_str());
+
+              for (size_t i = 0; i < cur_anim->GetNumFrames(); ++i)
+              {
+                std::string number = std::to_string(i);
+                for (int j = 0; j < number.size(); ++j)
+                  combo_list.push_back(number[j]);
+                if (i != cur_anim->GetNumFrames() - 1)
+                  combo_list.push_back('\0');
+              }
+
+              static int frame_current = 0;
+              if (!combo_list.empty())
+              {
+                if (ImGui::Combo("Object Frames", &frame_current, &combo_list[0]))
+                {
+                }
+              }
+
+              static bool is_frame_freez = false;
+              ImGui::Checkbox("FreezeFrame frame", &is_frame_freez);
+              if (is_frame_freez)
+                rigger->GetCurrentAnimation()->FreezeFrame(frame_current);
+              else
+                rigger->GetCurrentAnimation()->FreezeFrame(-1);
+            }
+
+            combo_list.clear();
+            //Bones
+            text = std::string("Number of bones ") + std::to_string(obj->GetRigger()->GetBoneCount());
+            ImGui::Text(text.c_str());
+            std::vector<std::string> bone_names = rigger->GetBoneNames();
+            for (size_t i = 0; i < obj->GetRigger()->GetBoneCount(); ++i)
+            {
+              for (int j = 0; j < bone_names[i].size(); ++j)
+                combo_list.push_back(bone_names[i][j]);
+              if (i != bone_names[i].size() - 1)
+                combo_list.push_back('\0');
+            }
+            static int bone_current = 0;
+            static glm::mat4 boneMatrix;
+            if (!combo_list.empty())
+            {
+              if (ImGui::Combo("Object Bones", &bone_current, &combo_list[0]))
+              {
+                boneMatrix = rigger->GetCurrentMatrixForBone(bone_current);
+              }
+            }
+            combo_list.clear();
+
+            ImGui::Text("Bone animated transform Matrix");
+            ImGui::Text(std::to_string(boneMatrix[0][0]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(boneMatrix[0][1]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(boneMatrix[0][2]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(boneMatrix[0][3]).c_str());
+
+            ImGui::Text(std::to_string(boneMatrix[1][0]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(boneMatrix[1][1]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(boneMatrix[1][2]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(boneMatrix[1][3]).c_str());
+
+            ImGui::Text(std::to_string(boneMatrix[2][0]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(boneMatrix[2][1]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(boneMatrix[2][2]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(boneMatrix[2][3]).c_str());
+
+            ImGui::Text(std::to_string(boneMatrix[3][0]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(boneMatrix[3][1]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(boneMatrix[3][2]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(boneMatrix[3][3]).c_str());
+
+            static glm::mat4 bindMatrix = rigger->GetBindMatrixForBone(bone_current);
+
+            ImGui::Text("Bone bind transform Matrix");
+            ImGui::Text(std::to_string(bindMatrix[0][0]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(bindMatrix[0][1]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(bindMatrix[0][2]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(bindMatrix[0][3]).c_str());
+
+            ImGui::Text(std::to_string(bindMatrix[1][0]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(bindMatrix[1][1]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(bindMatrix[1][2]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(bindMatrix[1][3]).c_str());
+
+            ImGui::Text(std::to_string(bindMatrix[2][0]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(bindMatrix[2][1]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(bindMatrix[2][2]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(bindMatrix[2][3]).c_str());
+
+            ImGui::Text(std::to_string(bindMatrix[3][0]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(bindMatrix[3][1]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(bindMatrix[3][2]).c_str()); ImGui::SameLine();
+            ImGui::Text(std::to_string(bindMatrix[3][3]).c_str());
+
+            //Play animation
+            if (ImGui::Button("Play current animations "))
+            {
+              if (obj->GetModel()->GetAnimationCount() != 0)
+                obj->GetRigger()->Apply(anim_current, false);
+            }
+            if (ImGui::Button("Play once current animations "))
+            {
+              if (obj->GetModel()->GetAnimationCount() != 0)
+                obj->GetRigger()->Apply(anim_current, true);
+            }
+            if (ImGui::Button("Stop current animations "))
+            {
+              obj->GetRigger()->Stop();
+            }
           }
         }
       }

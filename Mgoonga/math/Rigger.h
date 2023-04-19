@@ -19,11 +19,23 @@ class DLL_MATH Rigger : public IRigger
 public:
 	explicit									Rigger(eAnimatedModel* _model);
 	virtual										~Rigger();
-	virtual bool							Apply(const std::string& _animation);
-  virtual bool							Apply(size_t _animation_index);
+	virtual bool							Apply(const std::string& _animation, bool _play_once = false);
+  virtual bool							Apply(size_t _animation_index, bool _play_once = false);
 	virtual void							Stop();
 	virtual bool							ChangeName(const std::string& _oldName, const std::string& _newName);
 	virtual const std::vector<glm::mat4>&	GetMatrices();
+	virtual size_t						GetAnimationCount() const;
+	virtual size_t						GetBoneCount() const;
+
+	void AddAnimations(std::vector<SceletalAnimation>);
+	std::vector<std::string> GetAnimationNames() const;
+	SceletalAnimation* GetCurrentAnimation() const { return currentAnim; }
+
+	std::vector<std::string> GetBoneNames() const;
+	glm::mat4 GetBindMatrixForBone(const std::string& _boneName) const;
+	glm::mat4 GetBindMatrixForBone(size_t _boneID) const;
+	glm::mat4 GetCurrentMatrixForBone(const std::string& _boneName) const;
+	glm::mat4 GetCurrentMatrixForBone(size_t _boneID) const;
 
 protected:
 	void							UpdateAnimation(Bone &bone, const Frame &frame, const glm::mat4 &ParentTransform);

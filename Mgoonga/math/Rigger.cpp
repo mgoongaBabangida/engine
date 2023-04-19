@@ -7,6 +7,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <iterator>
 
 //-------------------------------------------------------------------------------------------
 Rigger::Rigger(eAnimatedModel* _model):model(_model)
@@ -67,7 +68,7 @@ Rigger::~Rigger()
 }
 
 //-------------------------------------------------------------------------------------------
-bool Rigger::Apply(const std::string & _animation)
+bool Rigger::Apply(const std::string & _animation, bool _play_once)
 {
 	if(currentAnim != nullptr && currentAnim->Name() == _animation )
 	{
@@ -81,7 +82,10 @@ bool Rigger::Apply(const std::string & _animation)
 		if(anim != animations.end())
 		{
 			currentAnim = &(*anim);
-			currentAnim->Start();
+			if (_play_once)
+				currentAnim->PlayOnce();
+			else
+				currentAnim->Start();
 			return true;
 		}
 		else
@@ -92,13 +96,16 @@ bool Rigger::Apply(const std::string & _animation)
 }
 
 //-------------------------------------------------------------------------------------------
-bool Rigger::Apply(size_t _animation_index)
+bool Rigger::Apply(size_t _animation_index, bool _play_once)
 {
   if (currentAnim != nullptr && currentAnim == &animations[_animation_index])
   {
 		{
 			std::lock_guard lk(mutex);
-			currentAnim->Continue();
+			if (_play_once)
+				currentAnim->PlayOnce();
+			else
+				currentAnim->Continue();
 		}
 		cv.notify_one();
     return true;
@@ -108,7 +115,10 @@ bool Rigger::Apply(size_t _animation_index)
 		{
 			std::lock_guard lk(mutex);
 			currentAnim = &animations[_animation_index];
-			currentAnim->Start();
+			if (_play_once)
+				currentAnim->PlayOnce();
+			else
+				currentAnim->Start();
 		}
 		cv.notify_one();
     return true;
@@ -143,6 +153,78 @@ const std::vector<glm::mat4>& Rigger::GetMatrices()
 	bool fls = false;
 	while(!matrix_flag.compare_exchange_weak(fls, true)) {}
 	return matrices;
+}
+
+//------------------------------------------------------------------
+size_t Rigger::GetAnimationCount() const
+{
+	return animations.size();
+}
+
+//-------------------------------------------------------------------------------------------
+size_t Rigger::GetBoneCount() const
+{
+	return bones.size();
+}
+
+//-------------------------------------------------------------------------------------------
+void Rigger::AddAnimations(std::vector<SceletalAnimation> _animations)
+{
+	animations.insert(animations.end(),
+										std::make_move_iterator(_animations.begin()),
+										std::make_move_iterator(_animations.end()));
+}
+
+//-------------------------------------------------------------------------------------------
+std::vector<std::string> Rigger::GetAnimationNames() const
+{
+	std::vector<std::string> names;
+	for (auto& anim : animations)
+		names.push_back(anim.Name());
+	return names;
+}
+
+//-------------------------------------------------------------------------------------------
+std::vector<std::string> Rigger::GetBoneNames() const
+{
+	std::vector<std::string> names;
+	for (auto& bone : bones)
+		names.push_back(bone.Name());
+	return names;
+}
+
+//-------------------------------------------------------------------------------------------
+glm::mat4 Rigger::GetBindMatrixForBone(const std::string& _boneName) const
+{
+	auto it = std::find_if(bones.begin(), bones.end(), [_boneName](const Bone& bone) {return bone.Name() == _boneName; });
+	if (it != bones.end())
+		return it->getBindTransform();
+	return glm::mat4();
+}
+
+//-------------------------------------------------------------------------------------------
+glm::mat4 Rigger::GetBindMatrixForBone(size_t _boneID) const
+{
+	if (_boneID < bones.size())
+		return GetBindMatrixForBone(bones[_boneID].Name());
+	return glm::mat4();
+}
+
+//-------------------------------------------------------------------------------------------
+glm::mat4 Rigger::GetCurrentMatrixForBone(const std::string& _boneName) const
+{
+	auto it = std::find_if(bones.begin(), bones.end(), [_boneName](const Bone& bone) {return bone.Name() == _boneName; });
+	if (it != bones.end())
+		return it->getAnimatedTransform();
+	return glm::mat4();
+}
+
+//-------------------------------------------------------------------------------------------
+glm::mat4 Rigger::GetCurrentMatrixForBone(size_t _boneID) const
+{
+	if (_boneID < bones.size())
+		return GetCurrentMatrixForBone(bones[_boneID].Name());
+	return glm::mat4();
 }
 
 //-------------------------------------------------------------------------------------------

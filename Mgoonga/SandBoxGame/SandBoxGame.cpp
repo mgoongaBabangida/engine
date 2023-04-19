@@ -39,6 +39,13 @@ void eSandBoxGame::PaintGL()
 		if (object->GetScript())
 			object->GetScript()->Update(m_objects);
 	}
+
+	if (m_lightObject)
+	{
+		m_lightObject->GetTransform()->setTranslation(GetMainLight().light_position);
+		GetMainLight().light_direction = -GetMainLight().light_position;
+	}
+
 	std::map<eOpenGlRenderPipeline::RenderType, std::vector<shObject>> objects;
 	objects.insert({ eOpenGlRenderPipeline::RenderType::PHONG, m_objects });
 	objects.insert({ eOpenGlRenderPipeline::RenderType::OUTLINED, {} });
@@ -116,9 +123,9 @@ void eSandBoxGame::InitializeModels()
 	//MODELS
 	modelManager->Add("wolf", (GLchar*)std::string(modelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
 	
-	//modelManager->Add("Firing", (GLchar*)std::string(modelFolderPath + "Firing Rifle Soldier/Firing Rifle.dae").c_str());
-	modelManager->Add("Dying", (GLchar*)std::string(modelFolderPath + "Dying.fbx").c_str());
-	//modelManager->Add("Walking", (GLchar*)std::string(modelFolderPath + "Walking Soldier/Walking.dae").c_str());
+	modelManager->Add("Firing", (GLchar*)std::string(modelFolderPath + "Firing Rifle Soldier/Firing Rifle.dae").c_str());
+	modelManager->Add("Dying", (GLchar*)std::string(modelFolderPath + "Dying Soldier/Dying.dae").c_str());
+	modelManager->Add("Walking", (GLchar*)std::string(modelFolderPath + "Walking Soldier/Walking.dae").c_str());
 
 	//OBJECTS
 	ObjectFactoryBase factory;
@@ -148,16 +155,21 @@ void eSandBoxGame::InitializeModels()
 
 	shObject dying = factory.CreateObject(modelManager->Find("Dying"), "Dying");
 	dying->GetTransform()->setTranslation(vec3(1.0f, -2.0f, 0.0f));
-	dying->GetTransform()->setScale(vec3(0.03f, 0.03f, 0.03f));
-	dying->SetRigger(new Rigger((Model*)modelManager->Find("Dying").get())); //@todo improve
-	dying->GetRigger()->ChangeName(std::string(), "Dying");//@todo improve
+	dying->GetTransform()->setScale(vec3(0.01f, 0.01f, 0.01f));
+	Rigger* rigger = new Rigger((Model*)modelManager->Find("Dying").get());
+	rigger->ChangeName(std::string(), "Dying");//@todo improve
+	rigger->AddAnimations(dynamic_cast<eAnimatedModel*>(modelManager->Find("Firing").get())->Animations());
+	rigger->ChangeName(std::string(), "Firing");
+	rigger->AddAnimations(dynamic_cast<eAnimatedModel*>(modelManager->Find("Walking").get())->Animations());
+	rigger->ChangeName(std::string(), "Walking");
+	dying->SetRigger(rigger); //@todo improve
 	m_objects.push_back(dying);
 
-	//shObject walking = factory.CreateObject(modelManager->Find("Walking"), "Walking");
-	//walking->GetTransform()->setTranslation(vec3(0.0f, -2.0f, 0.0f));
-	//walking->SetRigger(new Rigger((Model*)modelManager->Find("Walking").get())); //@todo improve
-	//walking->GetRigger()->ChangeName(std::string(), "Walking");//@todo improve
-	//m_objects.push_back(walking);
+		//light
+	m_lightObject = factory.CreateObject(modelManager->Find("white_sphere"), "WhiteSphere");
+	m_lightObject->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
+	m_lightObject->GetTransform()->setTranslation(GetMainLight().light_position);
+	m_objects.push_back(m_lightObject);
 
 	Texture* flag = texManager->Find("TSpanishFlag0_s");
 	guis.emplace_back(new Cursor(0, 0, 30, 30, width, height));

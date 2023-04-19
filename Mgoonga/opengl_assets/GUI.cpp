@@ -214,7 +214,7 @@ AnimStart::AnimStart(const AnimStart& _other)
 
 void AnimStart::Execute()
 {
-	m_obj->GetRigger()->Apply("Running");
+	m_obj->GetRigger()->Apply("Running", false);
 }
 
 AnimStop::AnimStop(shObject obj)
