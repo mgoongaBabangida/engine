@@ -39,6 +39,7 @@ Transform createTransform(const aiVectorKey& PositionKey,const aiQuatKey& Rotati
 	return trans;
 }
 
+//---------------------------------------------------------------------------
 std::string Model::RootBoneName()
 {
 	if (!root_bone)
@@ -94,6 +95,7 @@ std::vector<const IMesh*> Model::GetMeshes() const
   return ret;
 }
 
+//----------------------------------------------------------------------------
 std::vector<const IAnimation*> Model::GetAnimations() const
 {
   std::vector<const IAnimation*> ret;
@@ -104,6 +106,7 @@ std::vector<const IAnimation*> Model::GetAnimations() const
   return ret;
 }
 
+//----------------------------------------------------------------------------
 void Model::loadModel(string path)
 {
 	//Assimp::Importer import;
@@ -140,6 +143,7 @@ void Model::loadModel(string path)
 		ProccessAnimations(m_scene->mAnimations[i]);
 }
 
+//----------------------------------------------------------------------------
 void Model::processNode(aiNode* node, const aiScene* scene)
 {
 	// Process all the node's meshes (if any)
@@ -159,7 +163,7 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 //----------------------------------------------------------------------
 AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 {
-	vector< AssimpVertex> vertices;
+	vector<AssimpVertex> vertices;
 	vector<GLuint> indices;
 	vector<Texture> textures;
 	vector<VertexBoneData> boneData;
@@ -227,7 +231,8 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 				BoneIndex = m_BoneMapping[BoneName];
 			}
 
-			for (uint32_t j = 0; j < mesh->mBones[i]->mNumWeights; j++) {
+			for (uint32_t j = 0; j < mesh->mBones[i]->mNumWeights; j++)
+			{
 				int VertexID = mesh->mBones[i]->mWeights[j].mVertexId;
 				float Weight = mesh->mBones[i]->mWeights[j].mWeight;
 				boneData[VertexID].AddBoneData(BoneIndex, Weight);
@@ -235,22 +240,22 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		}
 	}
 
-		if (mesh->HasBones())
+	if (mesh->HasBones())
+	{
+		for (int i = 0; i < boneData.size(); ++i)
 		{
-			for (int i = 0; i < boneData.size(); ++i)
-			{
-				vertices[i].boneIDs = glm::vec4(boneData[i].IDs[0], boneData[i].IDs[1], boneData[i].IDs[2], boneData[i].IDs[3]);
-				vertices[i].weights = glm::vec4(boneData[i].Weights[0], boneData[i].Weights[1], boneData[i].Weights[2], boneData[i].Weights[3]);
-			}
+			vertices[i].boneIDs = glm::vec4(boneData[i].IDs[0], boneData[i].IDs[1], boneData[i].IDs[2], boneData[i].IDs[3]);
+			vertices[i].weights = glm::vec4(boneData[i].Weights[0], boneData[i].Weights[1], boneData[i].Weights[2], boneData[i].Weights[3]);
 		}
-		else
+	}
+	else
+	{
+		for (int i = 0; i < vertices.size(); ++i)
 		{
-			for (int i = 0; i < vertices.size(); ++i)
-			{
-				vertices[i].boneIDs = glm::vec4(0, 0, 0, 0);
-				vertices[i].weights = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
-			}
+			vertices[i].boneIDs = glm::vec4(0, 0, 0, 0);
+			vertices[i].weights = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
 		}
+	}
 
 #ifdef DEBUG_VERTICES
 	if (mesh->mNumBones > 0)
@@ -266,33 +271,59 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 	}
 #endif // DEBUG_VERTICES
 
-	// Process indices
+	//-----------------------------Process indices------------------------------------------------
 	for (GLuint i = 0; i < mesh->mNumFaces; i++)
 	{
 		aiFace face = mesh->mFaces[i];
 		for (GLuint j = 0; j < face.mNumIndices; j++)
 			indices.push_back(face.mIndices[j]);
 	}
-		// Process material
-		if (mesh->mMaterialIndex >= 0)
+	//-----------------------------Process material-------------------------------------------------
+	Material mat;
+	if (mesh->mMaterialIndex >= 0)
+	{
+		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+		vector<Texture> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		if (!diffuseMaps.empty())
 		{
-			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-			vector<Texture> diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-			
-			vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-			
-			vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-
-			vector<Texture> emissionMaps = loadMaterialTextures(material, aiTextureType_EMISSIVE, "texture_emission");
-			textures.insert(textures.end(), emissionMaps.begin(), emissionMaps.end());
+			mat.albedo_texture_id = diffuseMaps[0].id;
 		}
-		std::string n = mesh->mName.C_Str();
-		return { vertices, indices, textures, mesh->mName.C_Str() };
+		else
+			mat.albedo_texture_id = GetDefaultTextureId();
+		
+		vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		if (!specularMaps.empty())
+		{
+			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+			mat.metalic_texture_id = specularMaps[0].id; // should be dif?
+		}
+		else
+			mat.metalic_texture_id = GetDefaultTextureId();
+		
+		vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		if (!normalMaps.empty())
+		{
+			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+			mat.normal_texture_id = normalMaps[0].id;
+		}
+		else
+			mat.normal_texture_id = GetDefaultTextureId();
+
+		vector<Texture> emissionMaps = loadMaterialTextures(material, aiTextureType_EMISSIVE, "texture_emission");
+		if (!emissionMaps.empty())
+		{
+			textures.insert(textures.end(), emissionMaps.begin(), emissionMaps.end());
+			mat.emissive_texture_id = emissionMaps[0].id;
+		}
+		else
+			mat.emissive_texture_id = GetDefaultTextureId();
+	}
+	std::string n = mesh->mName.C_Str();
+	return AssimpMesh { vertices, indices, textures, mat, mesh->mName.C_Str() };
 }
 
+//-------------------------------------------------------------------------------------------
 vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName)
 {
 	vector<Texture> textures;
@@ -311,6 +342,7 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 	return textures;
 }
 
+//-------------------------------------------------------------------------------------------
 std::vector<glm::vec3> Model::GetPositions() const 
 {
 	std::vector<glm::vec3> ret;
@@ -321,12 +353,13 @@ std::vector<glm::vec3> Model::GetPositions() const
 	return ret;
 }
 
+//-------------------------------------------------------------------------------------------
 std::vector<GLuint> Model::GetIndeces() const
 {
 	std::vector<GLuint> inds;
-	for (auto& mesh : meshes) 
+	for (auto& mesh : meshes)
 	{
-		for(int i = 0; i < mesh.indices.size(); ++i)  // algortithm! concat 
+		for(int i = 0; i < mesh.indices.size(); ++i)  //@todo algortithm! concat 
 		 inds.push_back(mesh.indices[i]);
 	}
 	return inds;
@@ -338,7 +371,7 @@ void Model::loadNodesToBone(aiNode * node) //all nodes have names
 	for (uint32_t i = 0; i< node->mNumChildren; ++i)
 		loadNodesToBone(node->mChildren[i]);
 
-	std::vector<Bone>::iterator CurBoneIter = std::find_if(m_bones.begin(), m_bones.end(), [node](const Bone& bone) 
+	std::vector<Bone>::iterator CurBoneIter = std::find_if(m_bones.begin(), m_bones.end(), [node](const Bone& bone)
 	{ return bone.Name() == node->mName.C_Str(); });
 	if (CurBoneIter == m_bones.end()) //not a bone
 	{
@@ -412,17 +445,18 @@ void Model::updateAnimation(Bone &bone, const Frame& frame, const glm::mat4 &Par
 void Model::VertexBoneData::AddBoneData(int BoneID, float Weight)
  {
 		++numTries;
-	     for (int i = 0; i < NUM_BONES_PER_VEREX; i++) { //ARRAY_SIZE_IN_ELEMENTS(IDs)
-		        if (Weights[i] == 0.0)
-            {
-              IDs[i] = BoneID;
-              Weights[i] = Weight;
-              return;
-		        }
-		
-	}
-		    // should never get here - more bones than we have space for 
-		  //  assert(0);
+		for (int i = 0; i < NUM_BONES_PER_VEREX; i++)
+		{
+			//ARRAY_SIZE_IN_ELEMENTS(IDs)
+			if (Weights[i] == 0.0)
+			{
+				IDs[i] = BoneID;
+				Weights[i] = Weight;
+				return;
+			}
+		}
+		// should never get here - more bones than we have space for 
+		//  assert(0);
 }
 
 //-----------------------------------------------------------------------

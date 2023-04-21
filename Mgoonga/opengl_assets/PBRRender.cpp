@@ -59,20 +59,41 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
     glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
     glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &object->GetTransform()->getModelMatrix()[0][0]);
   
-    for (const IMesh* mesh : object->GetModel()->GetMeshes())
+    if (object->GetModel()->HasMaterial())
     {
-      if (object->GetModel()->GetTexturesModelLevel().size() >= 4)
+      Material material = object->GetModel()->GetMaterial().value();
+      if (material.use_albedo)
         glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 1);
       else
+      {
         glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 0);
 
-      if (mesh->HasMaterial())
+        glUniform3f(albedoLoc, material.albedo[0], material.albedo[1], material.albedo[2]);
+        glUniform1f(aoLoc, material.ao);
+        glUniform1f(metallicLoc, material.metallic);
+        glUniform1f(roughnessLoc, material.roughness);
+      }
+      // draw object and return
+    }
+    else
+    {
+      for (const IMesh* mesh : object->GetModel()->GetMeshes())
       {
-        Material m = mesh->GetMaterial().value();
-        glUniform3f(albedoLoc, m.albedo[0], m.albedo[1], m.albedo[2]);
-        glUniform1f(aoLoc, m.ao);
-        glUniform1f(metallicLoc, m.metallic);
-        glUniform1f(roughnessLoc, m.roughness);
+        if (mesh->HasMaterial())
+        {
+          Material material = mesh->GetMaterial().value();
+          if (material.use_albedo)
+            glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 1);
+          else
+          {
+            glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 0);
+            glUniform3f(albedoLoc, material.albedo[0], material.albedo[1], material.albedo[2]);
+            glUniform1f(aoLoc, material.ao);
+            glUniform1f(metallicLoc, material.metallic);
+            glUniform1f(roughnessLoc, material.roughness);
+          }
+        }
+        // draw mesh ? //set matterial and draw for each mesh
       }
     }
     object->GetModel()->Draw();

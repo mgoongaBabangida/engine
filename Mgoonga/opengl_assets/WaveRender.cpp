@@ -64,9 +64,9 @@ eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model,
 }
 
 //-------------------------------------------------------------------------------------------------
-void eWaveRender::Render(const Camera&		camera, 
-						 const Light&		light,
-						 std::vector<shObject>	flags)
+void eWaveRender::Render(const Camera&					camera,
+												 const Light&						light,
+												 std::vector<shObject>	flags)
 {
 	if (!m_model)
 		return;
@@ -140,8 +140,9 @@ void eWaveRender::Render(const Camera&		camera,
 		glm::quat plus = glm::toQuat(glm::rotate(UNIT_MATRIX, (float) PI / 2, XAXIS));
 		m_object->GetTransform()->setRotation(cur * plus);
 
-		m_model->setDiffuse(const_cast<Texture*>(flag->GetModel()->GetTexturesModelLevel()[0]));
-		m_model->setSpecular(const_cast<Texture*>(flag->GetModel()->GetTexturesModelLevel()[0]));
+		// set with texture id
+		m_model->setDiffuse(flag->GetModel()->GetMaterial()->albedo_texture_id);
+		m_model->setSpecular(flag->GetModel()->GetMaterial()->metalic_texture_id);
 
 		glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * m_object->GetTransform()->getModelMatrix();
 		glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);

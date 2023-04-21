@@ -377,13 +377,42 @@ void eWindowImGui::Render()
             }
           }
 
-          auto textures = obj->GetModel()->GetMeshes()[mesh_current]->GetTextures();
-          if (textures.empty())
-            textures = obj->GetModel()->GetTexturesModelLevel();
-          for (const Texture* t : textures)
-          {
-            ImGui::Image((void*)(intptr_t)(t->id), ImVec2(240, 160)/* ImVec2(t->mTextureWidth, t->mTextureHeight)*/, ImVec2(0, 1), ImVec2(1, 0));
-          }
+          // Material
+          Material material;
+          if (obj->GetModel()->GetMeshes()[mesh_current]->HasMaterial())
+            material = *(obj->GetModel()->GetMeshes()[mesh_current]->GetMaterial());
+          else if (obj->GetModel()->HasMaterial())
+            material = *(obj->GetModel()->GetMaterial());
+          else
+            assert(false && "Neither mesh nor model have material!");
+
+          ImGui::Text("Albedo texture(Diffuse)");
+          ImGui::Image((void*)(intptr_t)(material.albedo_texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
+          ImGui::Text(std::to_string(material.albedo[0]).c_str()); ImGui::SameLine();
+          ImGui::Text(std::to_string(material.albedo[1]).c_str()); ImGui::SameLine();
+          ImGui::Text(std::to_string(material.albedo[2]).c_str()); ImGui::SameLine();
+          ImGui::Text(std::to_string(material.use_albedo).c_str());
+
+          ImGui::Text("Metalic texture");
+          ImGui::Image((void*)(intptr_t)(material.metalic_texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
+          ImGui::Text(std::to_string(material.metallic).c_str());
+          ImGui::Text(std::to_string(material.use_metalic).c_str());
+
+          ImGui::Text("AO"); ImGui::SameLine();
+          ImGui::Text(std::to_string(material.ao).c_str());
+
+          ImGui::Text("Normal texture(Bump)");
+          ImGui::Image((void*)(intptr_t)(material.normal_texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
+          ImGui::Text(std::to_string(material.use_normal).c_str());
+
+          ImGui::Text("Roughness texture");
+          ImGui::Image((void*)(intptr_t)(material.roughness_texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
+          ImGui::Text(std::to_string(material.roughness).c_str());
+          ImGui::Text(std::to_string(material.use_roughness).c_str());
+
+          ImGui::Text("Emissive texture");
+          ImGui::Image((void*)(intptr_t)(material.emissive_texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
+
           combo_list.clear();
 
           if (obj->GetRigger())

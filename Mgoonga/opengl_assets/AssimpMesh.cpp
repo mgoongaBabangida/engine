@@ -10,22 +10,36 @@ Texture AssimpMesh::default_specular_mapping = {};
 Texture AssimpMesh::default_normal_mapping = {};
 Texture AssimpMesh::default_emission_mapping = {};
 
-AssimpMesh::AssimpMesh(vector<AssimpVertex> _vertices, vector<GLuint> _indices, vector<Texture> _textures, const std::string& _name)
+AssimpMesh::AssimpMesh(vector<AssimpVertex> _vertices,
+                       vector<GLuint> _indices,
+                       vector<Texture> _textures,
+                       const Material _material,
+                       const std::string& _name)
 {
 	this->vertices = _vertices;
 	this->indices = _indices;
 	this->textures = _textures;
+  this->material = _material;
   this->name = _name.empty() ? "Default" : _name;
 	this->setupMesh();
 
-  if(default_diffuse_mapping.id == DEFAULT_TEXTURE_ID)
-    default_diffuse_mapping.loadTexture1x1(YELLOW);
-  if (default_specular_mapping.id == DEFAULT_TEXTURE_ID)
+  if(default_diffuse_mapping.id == GetDefaultTextureId())
+    default_diffuse_mapping.loadTexture1x1(GREY);
+  if (default_specular_mapping.id == GetDefaultTextureId())
     default_specular_mapping.loadTexture1x1(BLACK);
-  if (default_normal_mapping.id == DEFAULT_TEXTURE_ID)
+  if (default_normal_mapping.id == GetDefaultTextureId())
     default_normal_mapping.loadTexture1x1(BLUE);
-  if (default_emission_mapping.id == DEFAULT_TEXTURE_ID)
+  if (default_emission_mapping.id == GetDefaultTextureId())
     default_emission_mapping.loadTexture1x1(BLACK);
+
+  if (material.albedo_texture_id == GetDefaultTextureId())
+    material.albedo_texture_id = default_diffuse_mapping.id;
+  if (material.metalic_texture_id == GetDefaultTextureId())
+    material.metalic_texture_id = default_specular_mapping.id;
+  if (material.normal_texture_id == GetDefaultTextureId())
+    material.normal_texture_id = default_normal_mapping.id;
+  if (material.emissive_texture_id == GetDefaultTextureId())
+    material.emissive_texture_id = default_emission_mapping.id;
 }
 
 AssimpMesh::~AssimpMesh()
@@ -48,6 +62,8 @@ void AssimpMesh::FreeTextures()
 
 void AssimpMesh::Draw()
 {
+  //@todo switch to rendering material instead of textures
+
 	GLuint diffuseNr = 0;
 	GLuint specularNr = 0;
 	GLuint normalNr = 0;
@@ -80,6 +96,7 @@ void AssimpMesh::Draw()
 
   if (diffuseNr == 0)
   {
+    glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, default_diffuse_mapping.id);
     diffuseNr++;
   }
@@ -112,7 +129,7 @@ void AssimpMesh::Draw()
   }
   if (!diffuseNr || !specularNr || !normalNr || !emissionNr)
   {
-    assert(false, "some texture is not assigned!");
+    assert(false && "some texture is not assigned!");
   }
 
   glActiveTexture(GL_TEXTURE0);
@@ -123,12 +140,9 @@ void AssimpMesh::Draw()
 	glBindVertexArray(0);
 }
 
-std::vector<const Texture*> AssimpMesh::GetTextures() const
+void AssimpMesh::SetMaterial(const Material&)
 {
-  std::vector<const Texture*> ret;
-  for (const Texture& t : textures)
-    ret.push_back(&t);
-  return ret;
+  assert(false && "trying to set material to assimp mesh externaly!");
 }
 
 void AssimpMesh::setupMesh()

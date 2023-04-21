@@ -54,13 +54,25 @@ void eModelManager::Add(const std::string& name, std::vector<const Texture*> _te
 	if (name == "sphere_textured")
 	{
 		Material material;
+		if(_textures.size() > 0)
+			material.albedo_texture_id = _textures[0]->id;
+		if (_textures.size() > 1)
+			material.metalic_texture_id = _textures[1]->id;
+		if (_textures.size() > 2)
+			material.normal_texture_id = _textures[2]->id;
+		if (_textures.size() > 3)
+			material.roughness_texture_id = _textures[3]->id;
+		if (_textures.size() > 4)
+			material.emissive_texture_id = _textures[4]->id;
+
 		material.albedo = glm::vec3(0.9f, 0.0f, 0.0f);
 		material.ao = 1.0f;
 		material.roughness = 0.5;
 		material.metallic = 0.5;
+		material.use_albedo = material.use_metalic = material.use_normal = material.use_roughness = true;
 		SphereTexturedMesh* mesh = new SphereTexturedMesh();
 		mesh->SetMaterial(material);
-		models.insert(std::pair<std::string, std::shared_ptr<IModel>>{ name, new SphereTexturedModel(mesh, _textures) });
+		models.insert(std::pair<std::string, std::shared_ptr<IModel>>{ name, new SphereTexturedModel(mesh) });
 	}
 }
 
@@ -76,7 +88,7 @@ void eModelManager::Add(const std::string& name)
 		material.metallic = 0.5;
 		SphereTexturedMesh* mesh = new SphereTexturedMesh();
 		mesh->SetMaterial(material);
-		models.insert(std::pair<std::string, std::shared_ptr<IModel>>{ name, new SphereTexturedModel(mesh, {}) });
+		models.insert(std::pair<std::string, std::shared_ptr<IModel>>{ name, new SphereTexturedModel(mesh) });
 	}
 }
 

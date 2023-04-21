@@ -138,6 +138,21 @@ SphereTexturedMesh::~SphereTexturedMesh()
 
 void SphereTexturedMesh::Draw()
 {
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(GL_TEXTURE_2D, m_material.albedo_texture_id);
+
+  glActiveTexture(GL_TEXTURE3);
+  glBindTexture(GL_TEXTURE_2D, m_material.metalic_texture_id);
+
+  glActiveTexture(GL_TEXTURE4);
+  glBindTexture(GL_TEXTURE_2D, m_material.normal_texture_id);
+
+  glActiveTexture(GL_TEXTURE5);
+  glBindTexture(GL_TEXTURE_2D, m_material.roughness_texture_id);
+
+  glActiveTexture(GL_TEXTURE6);
+  glBindTexture(GL_TEXTURE_2D, m_material.emissive_texture_id);
+
   glBindVertexArray(sphereVAO);
   glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
@@ -145,27 +160,17 @@ void SphereTexturedMesh::Draw()
 
 void SphereTexturedMesh::SetMaterial(const Material& _m)
 {
-  material = _m;
+  m_material = _m;
 }
 
 std::optional<Material> SphereTexturedMesh::GetMaterial() const
 {
-  return  material;
+  return  m_material;
 }
 
+//-------------------------------------------------------------------
 void SphereTexturedModel::Draw()
 {
-  if (m_textures.size() >= 4)
-  {
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, m_textures[0]->id);
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, m_textures[1]->id);
-    glActiveTexture(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_2D, m_textures[2]->id);
-    glActiveTexture(GL_TEXTURE5);
-    glBindTexture(GL_TEXTURE_2D, m_textures[3]->id);
-  }
   m_mesh->Draw();
 }
 

@@ -10,7 +10,7 @@ Texture::Texture()
 {
 	type = "default";
 	path = "empty";
-	id = DEFAULT_TEXTURE_ID;
+	id = GetDefaultTextureId();
 	mTextureWidth = 1, mTextureHeight = 1;
 	loadTexture1x1(YELLOW);
 }
@@ -109,6 +109,9 @@ bool Texture::loadTexture1x1(TColor color)
 		break;
 	case YELLOW:
 		tex[0] = 255, tex[1] = 255, tex[2] = 0, tex[3] = 255;
+		break;
+	case GREY:
+		tex[0] = 122, tex[1] = 122, tex[2] = 122, tex[3] = 255;
 		break;
 	}
 	// Load textures
@@ -310,3 +313,8 @@ bool Texture::generatePerlin(GLuint Width, GLuint Height, bool periodic)
 	return true;
 }
 
+GLuint GetDefaultTextureId()
+{
+	static const GLuint DEFAULT_TEXTURE_ID = (GLuint)glm::pow(2, 32) - 1;
+	return DEFAULT_TEXTURE_ID;
+}

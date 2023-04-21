@@ -10,7 +10,10 @@
 TerrainModel::TerrainModel()
 	: mesh(nullptr)
 {
-	m_fourth.loadTexture1x1(BLACK);
+	Texture t;
+	t.loadTexture1x1(BLACK);
+	m_material.roughness_texture_id = t.id; //free teyxture, make static Texture function
+	m_material.emissive_texture_id = t.id;
 }
 
 //----------------------------------------------------------------
@@ -18,13 +21,20 @@ TerrainModel::TerrainModel(Texture* diffuse,
 													 Texture* specular,
 													 Texture* normal,
 													 Texture* heightMap)
-  :m_diffuse(*diffuse),
-  m_specular(*specular),
-  m_normal(*normal),
-  m_fourth(*diffuse),
-	m_height (*heightMap)
 {
-	m_fourth.loadTexture1x1(BLACK);
+	if (diffuse != nullptr)
+		m_material.albedo_texture_id = diffuse->id;
+
+	if (specular != nullptr)
+		m_material.metalic_texture_id = specular->id;
+
+	if (normal != nullptr)
+		m_material.normal_texture_id = normal->id;
+
+	Texture t;
+	t.loadTexture1x1(BLACK);
+	m_material.roughness_texture_id = t.id;
+	m_material.emissive_texture_id = t.id;
 
 	mesh = new MyMesh();
 	m_size = heightMap->mTextureHeight;
@@ -41,10 +51,18 @@ TerrainModel::TerrainModel(Texture* diffuse,
 
 //------------------------------------------------------------
 TerrainModel::TerrainModel(Texture* color)
-	:m_diffuse(*color)
-	, m_specular(*color)
 {
-	m_fourth.loadTexture1x1(BLACK);
+	if (color != nullptr)
+		m_material.albedo_texture_id = color->id;
+
+	if (color != nullptr)
+		m_material.metalic_texture_id = color->id;
+
+	Texture t;
+	t.loadTexture1x1(BLACK);
+	m_material.roughness_texture_id = t.id;
+	m_material.emissive_texture_id = t.id;
+
 	mesh = new MyMesh();
 	m_size = 10;
 	makePlaneVerts(10);
@@ -55,30 +73,30 @@ TerrainModel::TerrainModel(Texture* color)
 }
 
 //----------------------------------------------------------------
-TerrainModel::TerrainModel(const TerrainModel& other)
-  : mesh(other.mesh)
-  , m_diffuse(other.m_diffuse)
-  , m_specular(other.m_specular)
-  , m_normal(other.m_normal)
-  , m_fourth(other.m_fourth)
-  , m_height(other.m_height)
+TerrainModel::TerrainModel(const TerrainModel& _other)
+  : mesh(_other.mesh)
+  , m_material(_other.m_material)
 {}
 
 //----------------------------------------------------------------
 void TerrainModel::initialize(Texture* diffuse, Texture* specular, bool spreed_texture)
 {
-	m_diffuse = *diffuse; 
-	m_specular = *specular;
+	if (diffuse != nullptr)
+		m_material.albedo_texture_id = diffuse->id;
+
+	if (specular != nullptr)
+		m_material.metalic_texture_id = specular->id;
 
   mesh = new MyMesh();
-	m_size = m_diffuse.mTextureHeight;
-	makePlaneVerts(m_diffuse.mTextureHeight, m_diffuse.mTextureHeight, spreed_texture);
-	makePlaneIndices(m_diffuse.mTextureHeight);
+	m_size = diffuse->mTextureHeight;
+	makePlaneVerts(diffuse->mTextureHeight, diffuse->mTextureHeight, spreed_texture);
+	makePlaneIndices(diffuse->mTextureHeight);
 	generateNormals(m_size);
 	
 	mesh->calculatedTangent();
 	mesh->setupMesh();
-  mesh->setTextures({ &m_diffuse , &m_specular , &m_normal , &m_height });
+	//does my mesh need textures ?
+  //mesh->setTextures({ diffuse , specular , &m_normal , &m_height });
 }
 
 //----------------------------------------------------------------
@@ -88,9 +106,15 @@ void TerrainModel::initialize(Texture* diffuse,
 														  Texture* heightMap,
 														  bool spreed_texture)
 {
-	m_diffuse = *diffuse;
-	m_specular=	*specular;
-	m_normal=		*normal;
+	if (diffuse != nullptr)
+		m_material.albedo_texture_id = diffuse->id;
+
+	if (specular != nullptr)
+		m_material.metalic_texture_id = specular->id;
+
+	if (normal != nullptr)
+		m_material.normal_texture_id = normal->id;
+
 	m_height =	*heightMap;
 	
 	if(mesh == nullptr)
@@ -107,7 +131,8 @@ void TerrainModel::initialize(Texture* diffuse,
 	
 	mesh->calculatedTangent();
 	mesh->setupMesh();
-  mesh->setTextures({ &m_diffuse , &m_specular , &m_normal , &m_height });
+	//does my mesh need textures ?
+  //mesh->setTextures({ &diffuse , &specular , &normal , &m_height });
 }
 
 //----------------------------------------------------------------
@@ -117,12 +142,16 @@ std::vector<MyMesh*>	TerrainModel::getMeshes()				const
 }
 
 //------------------------------------------------------------
-void					TerrainModel::setDiffuse(Texture* t)
-{ m_diffuse = *t; }
+void	TerrainModel::setDiffuse(uint32_t _id)
+{
+	m_material.albedo_texture_id = _id;
+}
 
 //------------------------------------------------------------
-void					TerrainModel::setSpecular(Texture* t)
-{ m_specular = *t; }
+void	TerrainModel::setSpecular(uint32_t _id)
+{
+	m_material.metallic = _id;
+}
 
 //----------------------------------------------------------------
  MyVertex TerrainModel::findVertex(float x, float z)
@@ -196,8 +225,9 @@ void TerrainModel::generateNormals(GLuint size)
 			buffer[i * 4 + 3] = 1.0f;
 		}
 
-		m_normal = Texture(size, size);
-		m_normal.TextureFromBuffer(buffer, size, size);
+		Texture normal = Texture(size, size); // free texture !!!
+		normal.TextureFromBuffer(buffer, size, size);
+		m_material.normal_texture_id = normal.id;
 		delete[] buffer;
 	}
 }
@@ -233,8 +263,9 @@ void TerrainModel::generateNormals(GLuint rows, GLuint columns)
 			buffer[i * 4 + 3] = 1.0f;
 		}
 
-		m_normal = Texture(rows, columns);
-		m_normal.TextureFromBuffer(buffer, rows, columns);
+		Texture normal = Texture(rows, columns);// free texture !!!
+		normal.TextureFromBuffer(buffer, rows, columns);
+		m_material.normal_texture_id = normal.id;
 		delete[] buffer;
 	}
 }
@@ -358,19 +389,19 @@ void TerrainModel::makePlaneIndices(unsigned int rows,unsigned int columns)
 void TerrainModel::Draw()
 {
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, m_diffuse.id);
+	glBindTexture(GL_TEXTURE_2D, m_material.albedo_texture_id);
 
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, m_specular.id);
+	glBindTexture(GL_TEXTURE_2D, m_material.metalic_texture_id);
 
 	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, m_normal.id);
+	glBindTexture(GL_TEXTURE_2D, m_material.normal_texture_id);
 
 	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, m_fourth.id);
+	glBindTexture(GL_TEXTURE_2D, m_material.roughness_texture_id);
 
 	glActiveTexture(GL_TEXTURE6);
-	glBindTexture(GL_TEXTURE_2D, m_fourth.id);
+	glBindTexture(GL_TEXTURE_2D, m_material.emissive_texture_id); //should be black
 
 	mesh->Draw();
 }
@@ -402,7 +433,7 @@ TerrainModel::~TerrainModel()
 {
 	if (mesh != nullptr)
 		delete mesh;
-  m_normal.freeTexture();
-	m_fourth.freeTexture();
+	//custom normals
+ /* normal.freeTexture(); !!!*/
 }
 

@@ -39,18 +39,16 @@ public:
 	std::vector<GLuint>		  GetIndeces()			const;
 
 	std::vector<MyMesh*>	  getMeshes()				const;
-	
-	void					setDiffuse(Texture* t);
-	void					setSpecular(Texture* t);
+
+	void setDiffuse(uint32_t _id);
+
+	void setSpecular(uint32_t _id);
 
 private:
 	unsigned int	devisor = 10;
 	MyMesh*			mesh; // generate ourself inside constructor
-	
-	Texture		m_diffuse;
-	Texture		m_specular;
-	Texture		m_normal;
-	Texture		m_fourth;
+	Material								m_material;
+
 	Texture		m_height;
 	
 	GLuint		m_size;

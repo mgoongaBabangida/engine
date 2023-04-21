@@ -12,7 +12,7 @@ struct Texture;
 class DLL_OPENGL_ASSETS MyModel: public IModel
 {
 public:
-	//todo make one constructor
+	//@todo make one constructor
 	MyModel();
 	MyModel(std::shared_ptr<MyMesh> m, Texture* t, Texture* t2 = nullptr, Texture* t3 = nullptr, Texture* t4 = nullptr);
 	MyModel(const MyModel& _other);
@@ -26,9 +26,13 @@ public:
   virtual size_t														GetVertexCount() const override;
   virtual size_t														GetMeshCount() const override { return 1; }
   virtual std::vector<const IMesh*>					GetMeshes() const override;
-  virtual size_t														GetAnimationCount() const { return 0; }
+  
+	virtual size_t														GetAnimationCount() const { return 0; }
   virtual std::vector<const IAnimation*>		GetAnimations() const { return std::vector<const IAnimation*>();}
-  virtual std::vector<const Texture*>				GetTexturesModelLevel() const override;
+
+	virtual bool											HasMaterial() const { return true; }
+	virtual void											SetMaterial(const Material& _material) { m_material = _material; }
+	virtual std::optional<Material>		GetMaterial() const { return m_material; }
 
 	virtual void					Draw()					override;
 	void							    Debug();
@@ -41,10 +45,7 @@ public:
 
 protected:
 	std::shared_ptr<MyMesh> mesh;
-	Texture*				m_diffuse;
-	Texture*				m_specular;
-	Texture*				m_bump;
-	Texture*				m_fourth;
+	Material								m_material;
 
 	static Texture default_diffuse_mapping;
 	static Texture default_specular_mapping;
@@ -67,14 +68,12 @@ public:
 	virtual std::vector<const IMesh*>					GetMeshes() const override { return std::vector<const IMesh*>{ m_mesh }; }
 	virtual size_t														GetAnimationCount() const { return 0; }
 	virtual std::vector<const IAnimation*>		GetAnimations() const { return std::vector<const IAnimation*>(); }
-	virtual std::vector<const Texture*>				GetTexturesModelLevel() const override { return std::vector<const Texture*>{}; }
 
 	virtual void					Draw()					override { m_mesh->Draw(); }
 
 protected:
 	IMesh* m_mesh;//-> unique_ptr
 };
-
 
 //-------------------------------------------------------
 class DLL_OPENGL_ASSETS BezierCurveModel : public IModel
@@ -91,7 +90,6 @@ public:
 	virtual std::vector<const IMesh*>					GetMeshes() const override { return std::vector<const IMesh*>{ m_mesh }; }
 	virtual size_t														GetAnimationCount() const { return 0; }
 	virtual std::vector<const IAnimation*>		GetAnimations() const { return std::vector<const IAnimation*>(); }
-	virtual std::vector<const Texture*>				GetTexturesModelLevel() const override { return std::vector<const Texture*>{}; }
 
 	virtual void					Draw()					override { m_mesh->Draw(); }
 

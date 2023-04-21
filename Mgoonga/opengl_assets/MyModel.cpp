@@ -20,30 +20,54 @@ MyModel::MyModel()
 
 MyModel::MyModel(std::shared_ptr<MyMesh> m, Texture* t, Texture* t2, Texture* t3, Texture* t4)
   : mesh(m)
-  , m_diffuse(t)
-  , m_specular(t2)
-  , m_bump(t3)
-  , m_fourth(t4)
 {
-  if (default_diffuse_mapping.id == DEFAULT_TEXTURE_ID)
-    default_diffuse_mapping.loadTexture1x1(YELLOW);
-  if (default_specular_mapping.id == DEFAULT_TEXTURE_ID)
+  if (default_diffuse_mapping.id == GetDefaultTextureId())
+    default_diffuse_mapping.loadTexture1x1(GREY);
+  if (default_specular_mapping.id == GetDefaultTextureId())
     default_specular_mapping.loadTexture1x1(BLACK);
-  if (default_normal_mapping.id == DEFAULT_TEXTURE_ID)
+  if (default_normal_mapping.id == GetDefaultTextureId())
     default_normal_mapping.loadTexture1x1(BLUE);
-  if (default_emission_mapping.id == DEFAULT_TEXTURE_ID)
+  if (default_emission_mapping.id == GetDefaultTextureId())
     default_emission_mapping.loadTexture1x1(BLACK);
 
-  if (m_specular == nullptr)
-    m_specular = &default_specular_mapping;
-  if (m_bump == nullptr)
-    m_bump = &default_normal_mapping;
-  if (m_fourth == nullptr)
-    m_fourth = &default_specular_mapping;
+  if (t != nullptr)
+  {
+    m_material.albedo_texture_id = t->id;
+    m_material.use_albedo = true;
+  }
+  else
+    m_material.albedo_texture_id = default_diffuse_mapping.id;
+  
+  if (t2 != nullptr)
+  {
+    m_material.metalic_texture_id = t2->id;
+    m_material.use_metalic = true;
+  }
+  else
+    m_material.metalic_texture_id = default_specular_mapping.id;
+
+  if (t3 != nullptr)
+  {
+    m_material.normal_texture_id = t3->id;
+    m_material.use_normal = true;
+  }
+  else
+    m_material.normal_texture_id = default_normal_mapping.id;
+
+  if (t4 != nullptr)
+  {
+    m_material.roughness_texture_id = t4->id;
+    m_material.use_roughness = true;
+  }
+  else
+    m_material.roughness_texture_id = default_emission_mapping.id; //!!! add default emissive
+
+  m_material.emissive_texture_id = default_emission_mapping.id;
 }
 
 MyModel::MyModel(const MyModel& _other) //shallow copy
-	: mesh(_other.mesh), m_diffuse(_other.m_diffuse), m_specular(_other.m_specular), m_bump(_other.m_bump), m_fourth(_other.m_fourth)
+	: mesh(_other.mesh)
+  , m_material(_other.m_material)
 {
 }
 
@@ -59,50 +83,45 @@ std::vector<MyMesh*> MyModel::getMeshes() const
 
 void MyModel::SetTexture(Texture* t) 
 { 
-  m_diffuse = t; 
-  m_specular = t; 
-  m_bump = t;
+  m_material.albedo_texture_id = t->id;
+  m_material.metalic_texture_id = t->id;
+  m_material.normal_texture_id = t->id;
 }
 
 void MyModel::setTextureDiffuse(Texture* t)
 { 
-  m_diffuse = t;
+  m_material.albedo_texture_id = t->id;
 }
-void MyModel::setTextureSpecular(Texture* t) 
+void MyModel::setTextureSpecular(Texture* t)
 { 
-  m_specular = t;
+  m_material.metalic_texture_id = t->id;
 }
-void MyModel::setTextureBump(Texture* t) 
+void MyModel::setTextureBump(Texture* t)
 { 
-  m_bump = t;
+  m_material.normal_texture_id = t->id;
 }
-void MyModel::setTextureFourth(Texture* t) 
+void MyModel::setTextureFourth(Texture* t)
 { 
-  m_fourth = t;
-}
-
-std::vector<const Texture*> MyModel::GetTexturesModelLevel() const
-{
-  return std::vector<const Texture*> { m_diffuse , m_specular , m_bump , m_fourth };
+  m_material.roughness_texture_id = t->id;
 }
 
 void MyModel::Draw()
 {
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, m_diffuse->id);
+	glBindTexture(GL_TEXTURE_2D, m_material.albedo_texture_id);
 	//glUniform1i(glGetUniformLocation(Program, "texture_diffuse1"), 2); other way to do it, may be useful
 
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, m_specular->id);
+	glBindTexture(GL_TEXTURE_2D, m_material.metalic_texture_id);
 
 	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, m_bump->id);
+	glBindTexture(GL_TEXTURE_2D, m_material.normal_texture_id);
 
 	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, m_fourth->id);
+	glBindTexture(GL_TEXTURE_2D, m_material.roughness_texture_id);
 
   glActiveTexture(GL_TEXTURE6);
-  glBindTexture(GL_TEXTURE_2D, default_emission_mapping.id);
+  glBindTexture(GL_TEXTURE_2D, m_material.emissive_texture_id);
 
 	mesh->Draw();
 }

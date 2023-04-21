@@ -256,7 +256,7 @@ void eMgoongaGameContext::InitializeModels()
                                         texManager->Find("pbr1_normal"),
                                         texManager->Find("pbr1_roughness") };
   modelManager->Add("sphere_textured", textures /*std::vector<const Texture*>{}*/); // or textures
-  modelManager->Add("sphere_red");//@
+  modelManager->Add("sphere_red");//@todo
   
   //@todo separate init scene member func
   _InitMainTestSceane();

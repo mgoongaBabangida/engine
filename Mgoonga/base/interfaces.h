@@ -38,7 +38,7 @@ public:
 	virtual std::vector<Particle>&					GetParticles()	= 0;
 	virtual bool														IsFinished()		= 0;
 	
-	// to improve
+	//@todo improve
 	glm::vec3								Scale()				{ return scale; }
 	Texture*								GetTexture()	{ return texture; }
 
@@ -86,13 +86,13 @@ class IMesh
 {
 public:
 	virtual ~IMesh() = default;
-	virtual void Draw() = 0;
-  virtual size_t GetVertexCount() const = 0;
-  virtual std::vector<const Texture*> GetTextures() const = 0;
-	virtual bool HasMaterial() const { return false; }
-	virtual void SetMaterial(const Material&) {}
-	virtual std::optional<Material> GetMaterial() const { return std::nullopt; }
-	virtual const std::string& Name() const = 0;
+	virtual void											Draw() = 0;
+	virtual const std::string&				Name() const = 0;
+  virtual size_t										GetVertexCount() const = 0;
+
+	virtual bool											HasMaterial() const	{ return false; }
+	virtual void											SetMaterial(const Material&) {}
+	virtual std::optional<Material>		GetMaterial() const { return std::nullopt; }
 };
 
 //----------------------------------------------------------------------------------------------
@@ -101,17 +101,18 @@ class IModel
 public:
 	virtual ~IModel() = default;
 
-	virtual void						          Draw()					= 0;
-	virtual std::vector<glm::vec3>		GetPositions()	const	= 0;
-	virtual std::vector<unsigned int>	GetIndeces()	const	= 0;
-  virtual size_t                    GetVertexCount() const = 0;
-  virtual size_t                    GetMeshCount() const = 0;
-  virtual std::vector<const IMesh*> GetMeshes() const = 0;
-  virtual size_t                    GetAnimationCount() const = 0;
-  virtual std::vector<const IAnimation*> GetAnimations() const = 0;
-  virtual std::vector<const Texture*> GetTexturesModelLevel() const {
-    return std::vector<const Texture*>();
-  } //$todo delete later
+	virtual void														Draw()					= 0;
+	virtual std::vector<glm::vec3>					GetPositions()	const	= 0; //@todo const ref!
+	virtual std::vector<unsigned int>				GetIndeces()	const	= 0;//@todo const ref!
+  virtual size_t													GetVertexCount() const = 0;
+  virtual size_t													GetMeshCount() const = 0;
+  virtual std::vector<const IMesh*>				GetMeshes() const = 0;
+  virtual size_t													GetAnimationCount() const = 0;
+  virtual std::vector<const IAnimation*>	GetAnimations() const = 0;
+
+	virtual bool											HasMaterial() const { return false; }
+	virtual void											SetMaterial(const Material&) {}
+	virtual std::optional<Material>		GetMaterial() const { return std::nullopt; }
 };
 
 //----------------------------------------------------------------------------------------------
@@ -171,7 +172,7 @@ public:
 	virtual float getMinY()const = 0;
 	virtual float getMinZ()const = 0;
 
-	virtual glm::vec3				GetCenter() const = 0;
+	virtual glm::vec3								GetCenter() const = 0;
 	virtual std::vector<glm::mat3>	GetBoundingTriangles(const ITransform& trans)const = 0;
 	virtual std::vector<glm::vec3>	GetExtrems(const ITransform& trans) const = 0;
 };
@@ -215,8 +216,8 @@ public:
 	virtual void Move(std::vector<std::shared_ptr<eObject> > objects) = 0;
 	virtual void Turn(glm::vec3 direction, std::vector<std::shared_ptr<eObject>> objects) = 0;
 
-	virtual void		 SetCurrentVelocity(glm::vec3 _vel) = 0;
-	virtual glm::vec3	 Velocity()	const = 0;
+	virtual void				SetCurrentVelocity(glm::vec3 _vel) = 0;
+	virtual glm::vec3		Velocity()	const = 0;
 };
 
 //---------------------------------------------------------------------------

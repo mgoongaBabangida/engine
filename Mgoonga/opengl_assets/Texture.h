@@ -9,9 +9,9 @@
 #include <type_traits>
 #include <assert.h>
 
-enum TColor { WHITE, BLACK, BLUE, PINK, YELLOW };
+enum TColor { WHITE, BLACK, BLUE, PINK, YELLOW, GREY };
 
-static const GLuint DEFAULT_TEXTURE_ID = (GLuint)glm::pow(2, 32) - 1;
+GLuint GetDefaultTextureId();
 
 struct /*DLL_OPENGL_ASSETS*/ Texture
 {

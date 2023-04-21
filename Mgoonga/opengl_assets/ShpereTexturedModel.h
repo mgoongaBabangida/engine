@@ -7,21 +7,22 @@ class DLL_OPENGL_ASSETS SphereTexturedMesh : public IMesh
 {
 public:
   friend class SphereTexturedModel;
+  
   SphereTexturedMesh();
   virtual ~SphereTexturedMesh();
 
   virtual const std::string& Name() const override { return name; }
   virtual void Draw();
+
   virtual size_t GetVertexCount() const { return vertices.size(); }
-  virtual std::vector<const Texture*> GetTextures() const { return {}; }
-  
+
   virtual void SetMaterial(const Material&) override;
   virtual std::optional<Material> GetMaterial() const override;
   virtual bool HasMaterial() const override { return true; }
 
 protected:
   std::string name = "SphereTexturedMesh";
-  Material material;
+  Material m_material;
 
   unsigned int sphereVAO = 0;
   unsigned int indexCount;
@@ -36,8 +37,8 @@ protected:
 class DLL_OPENGL_ASSETS SphereTexturedModel : public IModel
   {
   public:
-    SphereTexturedModel(SphereTexturedMesh* _mesh, std::vector<const Texture*> t = std::vector<const Texture*>{})
-      :m_mesh(_mesh), m_textures(t)
+    SphereTexturedModel(SphereTexturedMesh* _mesh)
+      :m_mesh(_mesh)
       {}
 
     virtual void						          Draw() override;
@@ -46,12 +47,10 @@ class DLL_OPENGL_ASSETS SphereTexturedModel : public IModel
     virtual size_t                    GetVertexCount() const override { return m_mesh->GetVertexCount();}
     virtual size_t                    GetMeshCount() const override { return 1; }
     virtual std::vector<const IMesh*> GetMeshes() const override { return { m_mesh.get() }; }
-    virtual size_t                    GetAnimationCount() const override { return 0; }
-    virtual std::vector<const IAnimation*> GetAnimations() const override { return {}; }
-    virtual std::vector<const Texture*> GetTexturesModelLevel() const {
-      return m_textures;
-      }
+
+    virtual size_t                          GetAnimationCount() const override { return 0; }
+    virtual std::vector<const IAnimation*>  GetAnimations() const override { return {}; }
+
   protected:
-    std::vector<const Texture*> m_textures;
     std::shared_ptr<SphereTexturedMesh> m_mesh;
   };

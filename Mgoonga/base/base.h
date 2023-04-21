@@ -30,6 +30,7 @@ struct Material
 	uint32_t metalic_texture_id = -1;
 	uint32_t normal_texture_id = -1;
 	uint32_t roughness_texture_id = -1;
+	uint32_t emissive_texture_id = -1;
 
 	bool use_albedo = false;
 	bool use_metalic = false;
