@@ -140,9 +140,9 @@ void AssimpMesh::Draw()
 	glBindVertexArray(0);
 }
 
-void AssimpMesh::SetMaterial(const Material&)
+void AssimpMesh::SetMaterial(const Material& _material)
 {
-  assert(false && "trying to set material to assimp mesh externaly!");
+  material = _material;
 }
 
 void AssimpMesh::setupMesh()

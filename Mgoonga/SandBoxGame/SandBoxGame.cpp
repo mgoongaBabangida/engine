@@ -157,12 +157,22 @@ void eSandBoxGame::InitializeModels()
 	dying->GetTransform()->setTranslation(vec3(1.0f, -2.0f, 0.0f));
 	dying->GetTransform()->setScale(vec3(0.01f, 0.01f, 0.01f));
 	Rigger* rigger = new Rigger((Model*)modelManager->Find("Dying").get());
+	//Set animations manually
 	rigger->ChangeName(std::string(), "Dying");//@todo improve
 	rigger->AddAnimations(dynamic_cast<eAnimatedModel*>(modelManager->Find("Firing").get())->Animations());
 	rigger->ChangeName(std::string(), "Firing");
 	rigger->AddAnimations(dynamic_cast<eAnimatedModel*>(modelManager->Find("Walking").get())->Animations());
 	rigger->ChangeName(std::string(), "Walking");
 	dying->SetRigger(rigger); //@todo improve
+	//Set textures manually
+	auto material1 = dying->GetModel()->GetMeshes()[0]->GetMaterial();
+	material1->normal_texture_id = texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1001_Normal.png", "soldier_normal1");
+	const_cast<IMesh*>(dying->GetModel()->GetMeshes()[0])->SetMaterial(*material1);
+	
+	auto material2 = dying->GetModel()->GetMeshes()[1]->GetMaterial();
+	material2->normal_texture_id = texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1002_Normal.png", "soldier_normal2");
+	const_cast<IMesh*>(dying->GetModel()->GetMeshes()[1])->SetMaterial(*material2);
+
 	m_objects.push_back(dying);
 
 		//light

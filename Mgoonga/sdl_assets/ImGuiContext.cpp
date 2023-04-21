@@ -401,17 +401,19 @@ void eWindowImGui::Render()
           ImGui::Text("AO"); ImGui::SameLine();
           ImGui::Text(std::to_string(material.ao).c_str());
 
-          ImGui::Text("Normal texture(Bump)");
+          ImGui::Text("Normal texture");
           ImGui::Image((void*)(intptr_t)(material.normal_texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
           ImGui::Text(std::to_string(material.use_normal).c_str());
 
-          ImGui::Text("Roughness texture");
+          ImGui::Text("Roughness texture");//contra glossiness
           ImGui::Image((void*)(intptr_t)(material.roughness_texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
           ImGui::Text(std::to_string(material.roughness).c_str());
           ImGui::Text(std::to_string(material.use_roughness).c_str());
 
           ImGui::Text("Emissive texture");
           ImGui::Image((void*)(intptr_t)(material.emissive_texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
+
+          //@todo add displacement/ bump as separate slot
 
           combo_list.clear();
 

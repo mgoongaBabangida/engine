@@ -181,3 +181,12 @@ void eTextureManager::AddTextureBox(const Texture& _texture, const std::string& 
 	m_Textures.insert(std::pair<std::string, Texture>(_name, text));
 }
 
+//-----------------------------------------------------
+uint64_t eTextureManager::LoadTexture(const std::string& _path, const std::string& _name)
+{
+	Texture text;
+	text.loadTextureFromFile(_path);
+	m_Textures.insert(std::pair<std::string, Texture>(_name, text));
+	return text.id;
+}
+

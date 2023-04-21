@@ -13,12 +13,13 @@ public:
 	eTextureManager() = default;
 	~eTextureManager();
 
-	void		  InitContext(const std::string& folderPath);
-	void		  LoadAllTextures();
+	void			InitContext(const std::string& folderPath);
+	void			LoadAllTextures(); //rename
 	Texture*	Find(const std::string&);
-	void		  AddTextureBox(const Texture&, const std::string&);
+	void			AddTextureBox(const Texture&, const std::string&);
+	uint64_t	LoadTexture(const std::string& _path, const std::string& _name);
 
 private:
 	std::map<std::string, Texture>	m_Textures;
-	std::string						folderPath;
+	std::string											folderPath;
 };

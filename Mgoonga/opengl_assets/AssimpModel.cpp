@@ -301,7 +301,7 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		else
 			mat.metalic_texture_id = GetDefaultTextureId();
 		
-		vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
 		if (!normalMaps.empty())
 		{
 			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
@@ -309,6 +309,16 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		}
 		else
 			mat.normal_texture_id = GetDefaultTextureId();
+
+		//@!? height
+		/*vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		if (!normalMaps.empty())
+		{
+			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+			mat.normal_texture_id = normalMaps[0].id;
+		}
+		else
+			mat.normal_texture_id = GetDefaultTextureId();*/
 
 		vector<Texture> emissionMaps = loadMaterialTextures(material, aiTextureType_EMISSIVE, "texture_emission");
 		if (!emissionMaps.empty())
@@ -318,6 +328,23 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		}
 		else
 			mat.emissive_texture_id = GetDefaultTextureId();
+
+		//glossiness is oposite to roughness @todo needs to be inverted!!!
+		vector<Texture> roughnessMaps = loadMaterialTextures(material, aiTextureType_SHININESS, "texture_roughness");
+		if (!roughnessMaps.empty())
+		{
+			textures.insert(textures.end(), roughnessMaps.begin(), roughnessMaps.end());
+			mat.roughness_texture_id = roughnessMaps[0].id;
+		}
+		else
+			mat.roughness_texture_id = GetDefaultTextureId();
+
+		vector<Texture> displacementMaps = loadMaterialTextures(material, aiTextureType_DISPLACEMENT, "texture_displacement");
+		if (!displacementMaps.empty())
+		{
+			textures.insert(textures.end(), displacementMaps.begin(), displacementMaps.end());
+			//mat. = displacementMaps[0].id;
+		}
 	}
 	std::string n = mesh->mName.C_Str();
 	return AssimpMesh { vertices, indices, textures, mat, mesh->mName.C_Str() };
