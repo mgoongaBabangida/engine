@@ -15,8 +15,10 @@ public:
 
 	void					GetUniformInfoFromShader();
 	void					GetUniformDataFromShader();
-	const std::vector<Uniform>& GetUniforms() const { return uniforms; }
+	const std::vector<Uniform>& GetUniforms() const { return m_uniforms; }
 	
+	bool SetUniformData(const std::string& _name, const UniformData& _data);
+
 	void					installShaders(const char* VertexShaderName,
 															 const char* FragmentShaderName,
 															 bool _transformFeedback = false);
@@ -31,6 +33,8 @@ public:
 	std::string		readShaderCode(const char* filename);
 
 protected:
+	void _SetUniform(const Uniform& _data);
+
 	bool					checkShaderStatus(GLint shaderID);
 	bool					checkProgramStatus();
 
@@ -42,6 +46,6 @@ protected:
 	GLuint tessellation1ShaderID;
 	GLuint tessellation2ShaderID;
 
-	std::vector<Uniform> uniforms;
+	std::vector<Uniform> m_uniforms;
 };
 

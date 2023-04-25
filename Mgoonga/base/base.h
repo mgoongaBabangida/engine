@@ -63,8 +63,8 @@ struct Light
 
 //-------------------------------------------------------
 using UniformData = std::variant<bool, float, int32_t, size_t,
-	glm::vec2, glm::vec3, glm::vec4,
-	glm::mat2, glm::mat3, glm::mat4>;
+																 glm::vec2, glm::vec3, glm::vec4,
+																 glm::mat2, glm::mat3, glm::mat4>;
 
 //-------------------------------------------------------
 struct Uniform
@@ -97,7 +97,7 @@ const glm::mat4 UNIT_MATRIX = glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
                                         0.0f, 0.0f, 0.0f, 1.0f);
 
 //-------------------------------------------------------
-struct MyVertex
+struct MyVertex //@todo remove
 {
 	glm::vec3	position;	  //0
 	glm::vec3	color;		  //1

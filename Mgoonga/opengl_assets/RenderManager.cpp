@@ -142,7 +142,8 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 //----------------------------------------------------------------------------------------------------
 void eRenderManager::UpdateShadersInfo()
 {
-	auto shader_lambda = [this](const auto& _render) {
+	auto shader_lambda = [this](const auto& _render)
+	{
 		_render->GetShader().GetUniformDataFromShader();
 	};
 
@@ -163,4 +164,54 @@ void eRenderManager::UpdateShadersInfo()
 	shader_lambda(m_textRender.get());
 	shader_lambda(m_pbrRender.get());
 	shader_lambda(m_bezierRender.get());
+}
+
+//----------------------------------------------------------------------------------------------------
+bool eRenderManager::SetUniformData(const std::string& _renderName, const std::string& _uniformName, const UniformData& _data)
+{
+	auto shader_lambda = [this, _renderName, _uniformName, _data](const auto& _render)
+	{
+		if (typeid(*_render).name() == _renderName)
+			return _render->GetShader().SetUniformData(_uniformName, _data);
+		else
+			return false;
+	};
+
+	if (shader_lambda(m_waterRender.get()))
+		return true;
+	if (shader_lambda(m_skyboxRender.get()))
+		return true;
+	if (shader_lambda(m_screenRender.get()))
+		return true;
+	if (shader_lambda(m_mainRender.get()))
+		return true;
+	if (shader_lambda(m_shadowRender.get()))
+		return true;
+	if (shader_lambda(m_outlineRender.get()))
+		return true;
+	if (shader_lambda(m_skynoiseRender.get()))
+		return true;
+	if (shader_lambda(m_waverender.get()))
+		return true;
+	if (shader_lambda(m_hexrender.get()))
+		return true;
+	if (shader_lambda(m_gaussianRender.get()))
+		return true;
+	if (shader_lambda(m_brightRender.get()))
+		return true;
+	if (shader_lambda(m_particleRender.get()))
+		return true;
+	if (shader_lambda(m_particleRenderGPU.get()))
+		return true;
+	if (shader_lambda(m_linesRender.get()))
+		return true;
+	if (shader_lambda(m_textRender.get()))
+		return true;
+	return true;
+	if (shader_lambda(m_pbrRender.get()))
+		return true;
+	if (shader_lambda(m_bezierRender.get()))
+		return true;
+
+	return false;
 }

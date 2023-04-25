@@ -34,8 +34,11 @@ public:
 	eRenderManager() = default;
 	~eRenderManager() = default;
 
-	const std::vector<ShaderInfo>& GetShaderInfos() const { return shaders;}
-	void UpdateShadersInfo();
+	const std::vector<ShaderInfo>&	GetShaderInfos() const { return shaders;}
+	void														UpdateShadersInfo();
+	bool														SetUniformData(const std::string& _renderName,
+																								 const std::string& _uniformName,
+																								 const UniformData& _data);
 
 	void				Initialize(eModelManager&	modelManager,
 								         eTextureManager&  texManager,

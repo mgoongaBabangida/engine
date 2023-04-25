@@ -232,15 +232,40 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 	}
 
 	// Bounding boxes
-	//@todo performance is rediculos, need to save buffers and/or instancing to decrease draw calls
 	if (draw_bounding_boxes)
 	{
-		for (auto object : phong_objs)
+		std::vector<glm::vec3> extrems_total;
+		std::vector<GLuint> indices_total;
+		for (GLuint i = 0; i < phong_objs.size(); i++)
 		{
-			std::vector<glm::vec3> extrems = object->GetCollider()->GetExtrems(*object->GetTransform());
-			std::vector<GLuint> indices{ 0,1,1,2,2,3,3,0,4,5,5,6,6,7,7,4,0,4,1,5,2,6,3,7 };
-			renderManager->LinesRender()->Render(_camera, extrems, indices);
+			std::vector<glm::vec3> extrems = phong_objs[i]->GetCollider()->GetExtrems(*phong_objs[i]->GetTransform());
+			extrems_total.insert(extrems_total.end(), extrems.begin(), extrems.end());
+			indices_total.push_back(0 + i * 8);
+			indices_total.push_back(1 + i * 8);
+			indices_total.push_back(1 + i * 8);
+			indices_total.push_back(2 + i * 8);
+			indices_total.push_back(2 + i * 8);
+			indices_total.push_back(3 + i * 8);
+			indices_total.push_back(3 + i * 8);
+			indices_total.push_back(0 + i * 8);
+			indices_total.push_back(4 + i * 8);
+			indices_total.push_back(5 + i * 8);
+			indices_total.push_back(5 + i * 8);
+			indices_total.push_back(6 + i * 8);
+			indices_total.push_back(6 + i * 8);
+			indices_total.push_back(7 + i * 8);
+			indices_total.push_back(7 + i * 8);
+			indices_total.push_back(4 + i * 8);
+			indices_total.push_back(0 + i * 8);
+			indices_total.push_back(4 + i * 8);
+			indices_total.push_back(1 + i * 8);
+			indices_total.push_back(5 + i * 8);
+			indices_total.push_back(2 + i * 8);
+			indices_total.push_back(6 + i * 8);
+			indices_total.push_back(3 + i * 8);
+			indices_total.push_back(7 + i * 8);
 		}
+		renderManager->LinesRender()->Render(_camera, extrems_total, indices_total);
 	}
 
 	//  Draw skybox firs

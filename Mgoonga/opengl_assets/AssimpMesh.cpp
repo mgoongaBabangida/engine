@@ -8,6 +8,7 @@ using namespace std;
 Texture AssimpMesh::default_diffuse_mapping = {};
 Texture AssimpMesh::default_specular_mapping = {};
 Texture AssimpMesh::default_normal_mapping = {};
+Texture AssimpMesh::default_roughness_mapping = {};
 Texture AssimpMesh::default_emission_mapping = {};
 
 AssimpMesh::AssimpMesh(vector<AssimpVertex> _vertices,
@@ -19,7 +20,7 @@ AssimpMesh::AssimpMesh(vector<AssimpVertex> _vertices,
 	this->vertices = _vertices;
 	this->indices = _indices;
 	this->textures = _textures;
-  this->material = _material;
+  this->m_material = _material;
   this->name = _name.empty() ? "Default" : _name;
 	this->setupMesh();
 
@@ -29,17 +30,21 @@ AssimpMesh::AssimpMesh(vector<AssimpVertex> _vertices,
     default_specular_mapping.loadTexture1x1(BLACK);
   if (default_normal_mapping.id == GetDefaultTextureId())
     default_normal_mapping.loadTexture1x1(BLUE);
+  if(default_roughness_mapping.id == GetDefaultTextureId())
+    default_roughness_mapping.loadTexture1x1(WHITE);
   if (default_emission_mapping.id == GetDefaultTextureId())
     default_emission_mapping.loadTexture1x1(BLACK);
 
-  if (material.albedo_texture_id == GetDefaultTextureId())
-    material.albedo_texture_id = default_diffuse_mapping.id;
-  if (material.metalic_texture_id == GetDefaultTextureId())
-    material.metalic_texture_id = default_specular_mapping.id;
-  if (material.normal_texture_id == GetDefaultTextureId())
-    material.normal_texture_id = default_normal_mapping.id;
-  if (material.emissive_texture_id == GetDefaultTextureId())
-    material.emissive_texture_id = default_emission_mapping.id;
+  if (m_material.albedo_texture_id == GetDefaultTextureId())
+    m_material.albedo_texture_id = default_diffuse_mapping.id;
+  if (m_material.metalic_texture_id == GetDefaultTextureId())
+    m_material.metalic_texture_id = default_specular_mapping.id;
+  if (m_material.normal_texture_id == GetDefaultTextureId())
+    m_material.normal_texture_id = default_normal_mapping.id;
+  if (m_material.roughness_texture_id == GetDefaultTextureId())
+    m_material.roughness_texture_id = default_roughness_mapping.id;
+  if (m_material.emissive_texture_id == GetDefaultTextureId())
+    m_material.emissive_texture_id = default_emission_mapping.id;
 }
 
 AssimpMesh::~AssimpMesh()
@@ -54,6 +59,7 @@ void AssimpMesh::FreeTextures()
   default_diffuse_mapping.freeTexture();
   default_specular_mapping.freeTexture();
   default_normal_mapping.freeTexture();
+  default_roughness_mapping.freeTexture();
   default_emission_mapping.freeTexture();
 
   for (auto& t : textures)
@@ -62,14 +68,27 @@ void AssimpMesh::FreeTextures()
 
 void AssimpMesh::Draw()
 {
-  //@todo switch to rendering material instead of textures
+  _BindMaterialTextures(); // _BindRawTextures();
+	// Draw mesh
+	glBindVertexArray(this->VAO);
+	glDrawElements(GL_TRIANGLES, (GLsizei)this->indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
 
-	GLuint diffuseNr = 0;
-	GLuint specularNr = 0;
-	GLuint normalNr = 0;
+void AssimpMesh::SetMaterial(const Material& _material)
+{
+  m_material = _material;
+}
+
+void AssimpMesh::_BindRawTextures()
+{
+  GLuint diffuseNr = 0;
+  GLuint specularNr = 0;
+  GLuint normalNr = 0;
   GLuint emissionNr = 0;
-	for (GLuint i = 0; i < this->textures.size(); i++)
-	{
+  GLuint roughnesslNr = 0;
+  for (GLuint i = 0; i < this->textures.size(); i++)
+  {
     string name = textures[i].type;
     if (name == "texture_diffuse")
     {
@@ -86,13 +105,18 @@ void AssimpMesh::Draw()
       glActiveTexture(GL_TEXTURE4);
       normalNr++;
     }
+    else if (name == "texture_roughness")
+    {
+      glActiveTexture(GL_TEXTURE5);
+      roughnesslNr++;
+    }
     else if (name == "texture_emission")
     {
       glActiveTexture(GL_TEXTURE6);
       emissionNr++;
     }
-		glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
-	}
+    glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
+  }
 
   if (diffuseNr == 0)
   {
@@ -121,6 +145,12 @@ void AssimpMesh::Draw()
     glBindTexture(GL_TEXTURE_2D, default_normal_mapping.id);
     normalNr++;
   }
+  if (roughnesslNr == 0)
+  {
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, default_normal_mapping.id);
+    roughnesslNr++;
+  }
   if (emissionNr == 0)
   {
     glActiveTexture(GL_TEXTURE6);
@@ -133,16 +163,24 @@ void AssimpMesh::Draw()
   }
 
   glActiveTexture(GL_TEXTURE0);
-
-	// Draw mesh
-	glBindVertexArray(this->VAO);
-	glDrawElements(GL_TRIANGLES, (GLsizei)this->indices.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
 }
 
-void AssimpMesh::SetMaterial(const Material& _material)
+void AssimpMesh::_BindMaterialTextures()
 {
-  material = _material;
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(GL_TEXTURE_2D, m_material.albedo_texture_id);
+
+  glActiveTexture(GL_TEXTURE3);
+  glBindTexture(GL_TEXTURE_2D, m_material.metalic_texture_id);
+
+  glActiveTexture(GL_TEXTURE4);
+  glBindTexture(GL_TEXTURE_2D, m_material.normal_texture_id);
+
+  glActiveTexture(GL_TEXTURE5);
+  glBindTexture(GL_TEXTURE_2D, m_material.roughness_texture_id);
+
+  glActiveTexture(GL_TEXTURE6);
+  glBindTexture(GL_TEXTURE_2D, m_material.emissive_texture_id);
 }
 
 void AssimpMesh::setupMesh()

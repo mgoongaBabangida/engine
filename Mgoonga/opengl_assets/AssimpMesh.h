@@ -26,15 +26,18 @@ public:
 
   virtual bool											HasMaterial() const override { return true; }
   virtual void											SetMaterial(const Material&) override;
-  virtual std::optional<Material>		GetMaterial() const override { return material; }
+  virtual std::optional<Material>		GetMaterial() const override { return m_material; }
 
 protected:
+  void _BindRawTextures();
+  void _BindMaterialTextures();
+
   /*  Mesh Data  */
   std::vector<AssimpVertex>	vertices;
   std::vector<GLuint>			  indices;
   std::vector<Texture>			textures;
   std::string               name;
-  Material                  material;
+  Material                  m_material;
 
 	/*  Render data  */
 	GLuint VAO, VBO, EBO;
@@ -45,5 +48,6 @@ protected:
   static Texture default_diffuse_mapping;
   static Texture default_specular_mapping;
   static Texture default_normal_mapping;
+  static Texture default_roughness_mapping; //anti-glossiness
   static Texture default_emission_mapping;
 };

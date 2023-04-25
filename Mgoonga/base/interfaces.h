@@ -172,9 +172,12 @@ public:
 	virtual float getMinY()const = 0;
 	virtual float getMinZ()const = 0;
 
-	virtual glm::vec3								GetCenter() const = 0;
+	virtual glm::vec3								GetCenter() = 0;
 	virtual std::vector<glm::mat3>	GetBoundingTriangles(const ITransform& trans)const = 0;
 	virtual std::vector<glm::vec3>	GetExtrems(const ITransform& trans) const = 0;
+
+	virtual std::vector<glm::mat3>	GetBoundingTrianglesLocalSpace()const = 0;
+	virtual std::vector<glm::vec3>	GetExtremsLocalSpace() const = 0;
 };
 
 //----------------------------------------------------------------------------------------------

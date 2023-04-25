@@ -199,14 +199,14 @@ Shader::~Shader()
 //---------------------------------------------------
 void	Shader::GetUniformInfoFromShader()
 {
-	if (uniforms.empty())
+	if (m_uniforms.empty())
 	{
-		GLint numUniforms = 0;
-		glGetProgramInterfaceiv(id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numUniforms);
+		GLint numuniforms = 0;
+		glGetProgramInterfaceiv(id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numuniforms);
 
 		std::cout << "Active uniforms " << id << std::endl;
 		GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION, GL_BLOCK_INDEX };
-		for (int i = 0; i < numUniforms; ++i)
+		for (int i = 0; i < numuniforms; ++i)
 		{
 			GLint results[4];
 			glGetProgramResourceiv(id, GL_UNIFORM, i, 4, properties, 4, NULL, results);
@@ -215,9 +215,9 @@ void	Shader::GetUniformInfoFromShader()
 			GLint nameBufSize = results[0] + 1;
 			char* name = new char[nameBufSize];
 			glGetProgramResourceName(id, GL_UNIFORM, i, nameBufSize, NULL, name);
-			uniforms.push_back(Uniform{ std::string(name),results[2],results[1],{} });
+			m_uniforms.push_back(Uniform{ std::string(name),results[2],results[1],{} });
 			delete[] name;
-			std::cout << uniforms.back().name << " " << uniforms.back().type << " " << uniforms.back().location << std::endl;
+			std::cout << m_uniforms.back().name << " " << m_uniforms.back().type << " " << m_uniforms.back().location << std::endl;
 		}
 	}
 }
@@ -225,7 +225,7 @@ void	Shader::GetUniformInfoFromShader()
 //---------------------------------------------------
 void	Shader::GetUniformDataFromShader()
 {
-	for (auto& uniform : uniforms)
+	for (auto& uniform : m_uniforms)
 	{
 		switch (uniform.type)
 		{
@@ -321,3 +321,105 @@ void	Shader::GetUniformDataFromShader()
 		}
 	}
 }
+
+//---------------------------------------------------
+bool Shader::SetUniformData(const std::string& _name, const UniformData& _data)
+{
+	auto it = std::find_if(m_uniforms.begin(), m_uniforms.end(), [_name](const Uniform& u) {return u.name == _name; });
+	if (it != m_uniforms.end())
+	{
+		it->data = _data;
+		_SetUniform(*it);
+		return true;
+	}
+	return false;
+}
+
+//---------------------------------------------------
+void Shader::_SetUniform(const Uniform& _uniform)
+{
+	switch (_uniform.type)
+	{
+		case GL_BOOL:
+		{
+			bool data = std::get<bool>(_uniform.data);
+			glUniform1i(_uniform.location, data);
+		}
+		break;
+		case GL_INT:
+		{
+			int32_t data = std::get<int32_t>(_uniform.data);
+			glUniform1i(_uniform.location, data);
+		}
+		break;
+		case GL_UNSIGNED_INT:
+		{
+			size_t data = std::get<size_t>(_uniform.data);
+			glUniform1i(_uniform.location, data);
+		}
+		break;
+		case GL_FLOAT:
+		{
+			float data = std::get<float>(_uniform.data);
+			glUniform1f(_uniform.location, data);
+		}
+		break;
+		case GL_FLOAT_VEC2:
+		{
+			glm::vec2 data = std::get<glm::vec2>(_uniform.data);
+			glUniform2f(_uniform.location, data[0], data[1]);
+		}
+		break;
+		case GL_FLOAT_VEC3:
+		{
+			glm::vec3 data = std::get<glm::vec3>(_uniform.data);
+			/*glUniform3f(_uniform.location,  data[0], data[1], data[2]);*/
+			glUniform3fv(_uniform.location, 1, &data[0]);
+		}
+		break;
+		case GL_FLOAT_VEC4:
+		{
+			glm::vec4 data = std::get<glm::vec4>(_uniform.data);
+			//glUniform4f(_uniform.location, data[0], data[1], data[2], data[3]);
+			glUniform4fv(_uniform.location, 1, &data[0]);
+		}
+		break;
+		case GL_FLOAT_MAT2:
+		{
+			glm::mat2 data = std::get<glm::mat2>(_uniform.data);
+			glUniformMatrix2fv(_uniform.location, 1, GL_FALSE, &data[0][0]);
+		}
+		break;
+		case GL_FLOAT_MAT3:
+		{
+			glm::mat3 data = std::get<glm::mat3>(_uniform.data);
+			glUniformMatrix3fv(_uniform.location, 1, GL_FALSE, &data[0][0]);
+		}
+		break;
+		case GL_FLOAT_MAT4:
+		{
+			glm::mat4 data = std::get<glm::mat4>(_uniform.data);
+			glUniformMatrix4fv(_uniform.location, 1, GL_FALSE, &data[0][0]);
+		}
+		break;
+		case GL_SAMPLER_2D:
+		{
+
+		}
+		break;
+		case GL_SAMPLER_CUBE:
+		{
+
+		}
+		break;
+		case GL_SAMPLER_2D_SHADOW:
+		{
+
+		}
+		break;
+		default:
+		{
+			std::cout << "there is not uniform handler for type " << _uniform.type << std::endl;
+		}
+	}
+}		

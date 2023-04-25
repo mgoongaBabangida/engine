@@ -297,6 +297,7 @@ void eWindowImGui::Render()
       break;
       case OBJECT_REF:
       {
+        //@todo !!!
         //check if obj has changed and put current mesh to 0 (save last obj?)
         shObject* p_object = static_cast<shObject*>(std::get<2>(item));
         if (p_object && *p_object)

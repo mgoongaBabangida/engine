@@ -122,7 +122,6 @@ void eSandBoxGame::InitializeModels()
 	
 	//MODELS
 	modelManager->Add("wolf", (GLchar*)std::string(modelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
-	
 	modelManager->Add("Firing", (GLchar*)std::string(modelFolderPath + "Firing Rifle Soldier/Firing Rifle.dae").c_str());
 	modelManager->Add("Dying", (GLchar*)std::string(modelFolderPath + "Dying Soldier/Dying.dae").c_str());
 	modelManager->Add("Walking", (GLchar*)std::string(modelFolderPath + "Walking Soldier/Walking.dae").c_str());
@@ -147,12 +146,6 @@ void eSandBoxGame::InitializeModels()
 	wolf->GetRigger()->ChangeName(std::string(), "Running");//@todo improve
 	m_objects.push_back(wolf);
 
-	//shObject firing = factory.CreateObject(modelManager->Find("Firing"), "Firing");
-	//firing->GetTransform()->setTranslation(vec3(2.0f, -2.0f, 0.0f));
-	//firing->SetRigger(new Rigger((Model*)modelManager->Find("Firing").get())); //@todo improve
-	//firing->GetRigger()->ChangeName(std::string(), "Firing");//@todo improve
-	//m_objects.push_back(firing);
-
 	shObject dying = factory.CreateObject(modelManager->Find("Dying"), "Dying");
 	dying->GetTransform()->setTranslation(vec3(1.0f, -2.0f, 0.0f));
 	dying->GetTransform()->setScale(vec3(0.01f, 0.01f, 0.01f));
@@ -168,7 +161,6 @@ void eSandBoxGame::InitializeModels()
 	auto material1 = dying->GetModel()->GetMeshes()[0]->GetMaterial();
 	material1->normal_texture_id = texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1001_Normal.png", "soldier_normal1");
 	const_cast<IMesh*>(dying->GetModel()->GetMeshes()[0])->SetMaterial(*material1);
-	
 	auto material2 = dying->GetModel()->GetMeshes()[1]->GetMaterial();
 	material2->normal_texture_id = texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1002_Normal.png", "soldier_normal2");
 	const_cast<IMesh*>(dying->GetModel()->GetMeshes()[1])->SetMaterial(*material2);
@@ -285,4 +277,13 @@ void eSandBoxGame::InitializeExternalGui()
 
 	//Main Menu
 	externalGui[4]->Add(MENU_OPEN, "Add model", reinterpret_cast<void*>(&add_model_callback));
+
+	//Create
+	std::function<void()> create_cube_callbaack = [this]()
+	{
+		ObjectFactoryBase factory;
+		shObject cube = factory.CreateObject(std::make_shared<MyModel>(modelManager->FindMesh("cube")), "DefaultCube");
+		m_objects.push_back(cube);
+	};
+	externalGui[5]->Add(BUTTON, "Cube", (void*)&create_cube_callbaack);
 }

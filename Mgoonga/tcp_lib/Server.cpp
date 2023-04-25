@@ -123,11 +123,11 @@ void Server::CloseConnection(int connectionIndex, std::string reason)
 //------------------------------------------
 void Server::SendMsgToAll(std::string&& msg)
 {
-    for (int i = use_fd.size() - 1; i >= 1; i--)
+    for (size_t i = use_fd.size() - 1; i >= 1; i--)
     {
-        int connectionIndex = i - 1;
-        dbb::TCPConnection& connection = connections[connectionIndex];
-        connection.AddSent(std::move(msg));
+      size_t connectionIndex = i - 1;
+      dbb::TCPConnection& connection = connections[connectionIndex];
+      connection.AddSent(std::move(msg));
     }
 }
 

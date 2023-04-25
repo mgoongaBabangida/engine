@@ -13,6 +13,7 @@
 Texture MyModel::default_diffuse_mapping = {};
 Texture MyModel::default_specular_mapping = {};
 Texture MyModel::default_normal_mapping = {};
+Texture MyModel::default_roughness_mapping = {};
 Texture MyModel::default_emission_mapping = {};
 
 MyModel::MyModel()
@@ -27,6 +28,8 @@ MyModel::MyModel(std::shared_ptr<MyMesh> m, Texture* t, Texture* t2, Texture* t3
     default_specular_mapping.loadTexture1x1(BLACK);
   if (default_normal_mapping.id == GetDefaultTextureId())
     default_normal_mapping.loadTexture1x1(BLUE);
+  if (default_roughness_mapping.id == GetDefaultTextureId())
+    default_roughness_mapping.loadTexture1x1(WHITE);
   if (default_emission_mapping.id == GetDefaultTextureId())
     default_emission_mapping.loadTexture1x1(BLACK);
 

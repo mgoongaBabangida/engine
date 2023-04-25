@@ -14,7 +14,11 @@ class DLL_OPENGL_ASSETS MyModel: public IModel
 public:
 	//@todo make one constructor
 	MyModel();
-	MyModel(std::shared_ptr<MyMesh> m, Texture* t, Texture* t2 = nullptr, Texture* t3 = nullptr, Texture* t4 = nullptr);
+	MyModel(std::shared_ptr<MyMesh> m,
+					Texture* t = nullptr,
+					Texture* t2 = nullptr,
+					Texture* t3 = nullptr,
+					Texture* t4 = nullptr);
 	MyModel(const MyModel& _other);
 
 	virtual ~MyModel();
@@ -50,6 +54,7 @@ protected:
 	static Texture default_diffuse_mapping;
 	static Texture default_specular_mapping;
 	static Texture default_normal_mapping;
+	static Texture default_roughness_mapping;
 	static Texture default_emission_mapping;
 };
 
