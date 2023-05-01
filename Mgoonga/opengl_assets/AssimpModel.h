@@ -27,6 +27,7 @@ public:
   virtual size_t													GetVertexCount() const override;
   virtual size_t													GetMeshCount() const  override { return meshes.size();}
   virtual std::vector<const IMesh*>				GetMeshes() const override;
+
   virtual size_t													GetAnimationCount() const override { return m_animations.size(); }
   virtual std::vector<const IAnimation*>	GetAnimations() const override;
 
@@ -35,9 +36,6 @@ public:
 	std::vector<Bone>				        Bones()				const { return m_bones; }
 	std::vector<SceletalAnimation>	Animations()		const { return m_animations; }
 	glm::mat4						            GlobalTransform()	const { return m_GlobalInverseTransform; }
-
-  virtual std::vector<glm::vec3>	GetPositions()	const override;
-  virtual std::vector<GLuint>		  GetIndeces()	const override;
 
 private:
 	/*  Model Data  */

@@ -146,10 +146,11 @@ void eSandBoxGame::InitializeModels()
 	wolf->GetRigger()->ChangeName(std::string(), "Running");//@todo improve
 	m_objects.push_back(wolf);
 
-	shObject dying = factory.CreateObject(modelManager->Find("Dying"), "Dying");
+	shObject dying = factory.CreateObject(modelManager->Find("Dying"), "Dying", true); // dynamic collider
 	dying->GetTransform()->setTranslation(vec3(1.0f, -2.0f, 0.0f));
 	dying->GetTransform()->setScale(vec3(0.01f, 0.01f, 0.01f));
 	Rigger* rigger = new Rigger((Model*)modelManager->Find("Dying").get());
+
 	//Set animations manually
 	rigger->ChangeName(std::string(), "Dying");//@todo improve
 	rigger->AddAnimations(dynamic_cast<eAnimatedModel*>(modelManager->Find("Firing").get())->Animations());
@@ -157,6 +158,8 @@ void eSandBoxGame::InitializeModels()
 	rigger->AddAnimations(dynamic_cast<eAnimatedModel*>(modelManager->Find("Walking").get())->Animations());
 	rigger->ChangeName(std::string(), "Walking");
 	dying->SetRigger(rigger); //@todo improve
+	dying->GetCollider()->CalculateExtremDots(dying.get()); //recalculate
+
 	//Set textures manually
 	auto material1 = dying->GetModel()->GetMeshes()[0]->GetMaterial();
 	material1->normal_texture_id = texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1001_Normal.png", "soldier_normal1");
@@ -173,6 +176,7 @@ void eSandBoxGame::InitializeModels()
 	m_lightObject->GetTransform()->setTranslation(GetMainLight().light_position);
 	m_objects.push_back(m_lightObject);
 
+	//gui
 	Texture* flag = texManager->Find("TSpanishFlag0_s");
 	guis.emplace_back(new Cursor(0, 0, 30, 30, width, height));
 	guis[0]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight });

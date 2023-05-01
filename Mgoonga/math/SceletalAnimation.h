@@ -36,8 +36,10 @@ public:
 	
 	bool operator==(const SceletalAnimation& other) { return name == other.name && duration == other.duration; }
 	
-	const Frame& getCurrentFrame();
-	size_t GetNumFrames() const { return frames.size(); }
+	const Frame&	getCurrentFrame();
+	const Frame&	GetFrameByNumber(size_t _num);
+	size_t				GetCurFrameIndex() const;
+	size_t				GetNumFrames() const { return frames.size(); }
 
 	virtual void Start() override;
 	virtual void Stop() override;
@@ -55,11 +57,12 @@ public:
 protected:
   math::eClock					clock;
   std::vector<Frame>		frames;
-  size_t								duration; // msc
+	int64_t								duration; // msc
   std::string						name;
 
 	bool									play_once = false;
 	size_t								freeze_frame = -1;
+	size_t								cur_frame_index = -1;
 };
 
 #endif 

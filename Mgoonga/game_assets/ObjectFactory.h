@@ -8,6 +8,6 @@ class IModel;
 class DLL_GAME_ASSETS ObjectFactoryBase
 {
 public:
-  std::unique_ptr<eObject> CreateObject(std::shared_ptr<IModel>, const std::string& _name = std::string(""));
+  std::unique_ptr<eObject> CreateObject(std::shared_ptr<IModel>, const std::string& _name = std::string("default"), bool _dynamic_collider = false);
 };
 

@@ -23,7 +23,7 @@ bool Hex::IsOn(float x, float z)
 	glm::vec3(glm::cos(glm::radians(30.0f)) * radius,	common_height, glm::sin(glm::radians(30.0f)) * radius)
 	};*/
 
-	std::vector<glm::vec3> dots{
+	std::vector<glm::vec3> m_dots{
 		glm::vec3(0.866, 0.0, 0.5)  * radius * 0.57f,
 		glm::vec3(0.0, 0.0, 1.0)    * radius * 0.57f,
 		glm::vec3(-0.866, 0.0, 0.5) * radius * 0.57f,
@@ -35,7 +35,7 @@ bool Hex::IsOn(float x, float z)
 
 	for (int i = 0; i < 6; ++i)
 	{
-		glm::mat3  triangle(center, center + dots[i], center + dots[i + 1]);
+		glm::mat3  triangle(center, center + m_dots[i], center + m_dots[i + 1]);
 		if (dbb::IsInside(triangle, glm::vec3(x, common_height, z)))
 			return true;
 	}

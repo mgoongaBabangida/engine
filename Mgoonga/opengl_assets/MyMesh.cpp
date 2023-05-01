@@ -17,7 +17,7 @@ MyMesh::~MyMesh()
 	glDeleteBuffers(1, &EBO);
 }
 
-MyMesh::MyMesh(std::vector<MyVertex> vertices, std::vector<GLuint> indices, std::vector<Texture*> textures)
+MyMesh::MyMesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture*> textures)
 {
 	this->vertices = vertices;
 	this->indices = indices;
@@ -36,9 +36,9 @@ MyMesh::MyMesh(const ShapeData & data)
 	
 	for (uint32_t i = 0; i < data.numVertices; ++i)
 	{
-		MyVertex vert;
+		Vertex vert;
 		vert.Normal = data.vertices[i].normal;
-		vert.position = data.vertices[i].position;
+		vert.Position = data.vertices[i].position;
 		vert.TexCoords = tex[i % 4];
 		vertices.push_back(vert);
 	}
@@ -48,9 +48,9 @@ MyMesh::MyMesh(const ShapeData & data)
 
 	for (uint32_t i = 0; i < indices.size(); i += 3)
 	{
-		glm::vec3 pos1 = vertices[indices[i]].position;
-		glm::vec3 pos2 = vertices[indices[i+1]].position;
-		glm::vec3 pos3 = vertices[indices[i+2]].position;
+		glm::vec3 pos1 = vertices[indices[i]].Position;
+		glm::vec3 pos2 = vertices[indices[i+1]].Position;
+		glm::vec3 pos3 = vertices[indices[i+2]].Position;
 		glm::vec2 uv1 = vertices[indices[i]].TexCoords;
 		glm::vec2 uv2 = vertices[indices[i + 1]].TexCoords;
 		glm::vec2 uv3 = vertices[indices[i + 2]].TexCoords;
@@ -112,7 +112,7 @@ void MyMesh::setupMesh()
 
 	glBindVertexArray(this->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-	glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(MyVertex),
+	glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex),
 		&this->vertices[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
@@ -121,32 +121,32 @@ void MyMesh::setupMesh()
 
 	// Vertex Positions
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 		(GLvoid*)0);
 	// Vertex Normals
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
-		(GLvoid*)offsetof(MyVertex, Normal));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+		(GLvoid*)offsetof(Vertex, Normal));
 	// Vertex Texture Coords
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
-		(GLvoid*)offsetof(MyVertex, TexCoords));
+	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+		(GLvoid*)offsetof(Vertex, TexCoords));
 	// Vertex Tangent
 	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
-		(GLvoid*)offsetof(MyVertex, tangent));
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+		(GLvoid*)offsetof(Vertex, tangent));
 	// Vertex Bitangent
 	glEnableVertexAttribArray(5);
-	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
-		(GLvoid*)offsetof(MyVertex, bitangent));
+	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+		(GLvoid*)offsetof(Vertex, bitangent));
 	// Vertex BoneIDs
 	glEnableVertexAttribArray(6);
-	glVertexAttribIPointer(6, 4, GL_INT,  sizeof(MyVertex),
-		(GLvoid*)offsetof(MyVertex, boneIDs));
+	glVertexAttribIPointer(6, 4, GL_INT,  sizeof(Vertex),
+		(GLvoid*)offsetof(Vertex, boneIDs));
 	// Vertex Weights
 	glEnableVertexAttribArray(7);
-	glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
-		(GLvoid*)offsetof(MyVertex, weights));
+	glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+		(GLvoid*)offsetof(Vertex, weights));
 	glBindVertexArray(0);
 }
 
@@ -154,9 +154,9 @@ void MyMesh::calculatedTangent()
 {
 	for (int i = 0; i < indices.size(); i += 3)
 	{
-		glm::vec3 pos1 = vertices[indices[i]].position;
-		glm::vec3 pos2 = vertices[indices[i + 1]].position;
-		glm::vec3 pos3 = vertices[indices[i + 2]].position;
+		glm::vec3 pos1 = vertices[indices[i]].Position;
+		glm::vec3 pos2 = vertices[indices[i + 1]].Position;
+		glm::vec3 pos3 = vertices[indices[i + 2]].Position;
 		glm::vec2 uv1 = vertices[indices[i]].TexCoords;
 		glm::vec2 uv2 = vertices[indices[i + 1]].TexCoords;
 		glm::vec2 uv3 = vertices[indices[i + 2]].TexCoords;
@@ -190,7 +190,7 @@ void MyMesh::calculatedTangent()
 }
 
 //--------------------------------------------------------------------------------------------------------------
-ParticleMesh::ParticleMesh(std::vector<MyVertex> vertices, std::vector<GLuint> indices, std::vector<Texture> textures)
+ParticleMesh::ParticleMesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture> textures)
 {
 	this->vertices = vertices;
 	this->indices = indices;
@@ -218,9 +218,9 @@ ParticleMesh::ParticleMesh(const ShapeData& data)
 
 	for (int i = 0; i < data.numVertices; ++i)
 	{
-		MyVertex vert;
+		Vertex vert;
 		vert.Normal = data.vertices[i].normal;
-		vert.position = data.vertices[i].position;
+		vert.Position = data.vertices[i].position;
 		vert.TexCoords = tex[i % 4];
 		vertices.push_back(vert);
 	}
@@ -230,9 +230,9 @@ ParticleMesh::ParticleMesh(const ShapeData& data)
 
 	for (int i = 0; i < indices.size(); i += 3)
 	{
-		glm::vec3 pos1 = vertices[indices[i]].position;
-		glm::vec3 pos2 = vertices[indices[i + 1]].position;
-		glm::vec3 pos3 = vertices[indices[i + 2]].position;
+		glm::vec3 pos1 = vertices[indices[i]].Position;
+		glm::vec3 pos2 = vertices[indices[i + 1]].Position;
+		glm::vec3 pos3 = vertices[indices[i + 2]].Position;
 		glm::vec2 uv1 = vertices[indices[i]].TexCoords;
 		glm::vec2 uv2 = vertices[indices[i + 1]].TexCoords;
 		glm::vec2 uv3 = vertices[indices[i + 2]].TexCoords;
@@ -264,7 +264,7 @@ void ParticleMesh::setupMesh()
 	glBindVertexArray(this->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
 
-	glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(MyVertex),
+	glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex),
 		&this->vertices[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
@@ -273,7 +273,7 @@ void ParticleMesh::setupMesh()
 
 	// Vertex Positions
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 		(GLvoid*)0);
 
 	//Instancing

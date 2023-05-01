@@ -11,10 +11,10 @@ bool eRigidBody::CollidesWith(eObject* _other, Side _side)
 	collision.collider = object;
 	collision.collidee = _other;
 	return object->GetCollider()->CollidesWith(*(object->GetTransform()),
-		*(_other->GetTransform()),
-		*(_other->GetCollider()),
-		_side,
-		collision);
+																						 *(_other->GetTransform()),
+																						 *(_other->GetCollider()),
+																						 _side,
+																						 collision);
 }
 
 void eRigidBody::ReactCollision(const eCollision& _col)
@@ -128,14 +128,12 @@ void eRigidBody::MoveDown(std::vector<std::shared_ptr<eObject> > objects)
 void eRigidBody::Move(std::vector<std::shared_ptr<eObject>> objects)
 {
 	object->GetTransform()->setTranslation(object->GetTransform()->getTranslation() += velocity);
-	for (auto& obj : objects)
+	eCollision collision;
+	collision.collider = object;
+	std::array<Side, 6> sides{ FORWARD , UP, DOWN, LEFT, RIGHT, BACK };
+	for (auto side : sides)
 	{
-		if (*object != *obj && (CollidesWith(obj.get(), RIGHT) //$todo optimize
-			|| CollidesWith(obj.get(), LEFT)
-			|| CollidesWith(obj.get(), UP)
-			|| CollidesWith(obj.get(), DOWN)
-			|| CollidesWith(obj.get(), FORWARD)
-			|| CollidesWith(obj.get(), BACK)))
+		if (object->GetCollider()->CollidesWith(*(object->GetTransform()), objects, side, collision))
 		{
 			object->GetTransform()->setTranslation(object->GetTransform()->getTranslation() -= velocity);
 			ReactCollision(collision);

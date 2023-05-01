@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <chrono>
-#include <iostream>
 #include <random>
 
 //------------------------------------------------------------------------------------
@@ -19,7 +18,7 @@ ParticleSystem::ParticleSystem(float	 _pps,
 															 float	 _duration)
 : IParticleSystem(_texture, 0.05f)
 , duration(_duration)
-, m_pps(_pps)
+, m_pps(static_cast<uint32_t>(_pps))
 , m_speed(_speed)
 , m_gravityComplient(_gravityComplient)
 , m_lifeLength(_lifeLength)
@@ -44,7 +43,7 @@ void ParticleSystem::GenerateParticles()
 {
 	if(clock.timeEllapsedMsc() < duration)
 	{
-		int msc = clock.newFrame();
+		int64_t msc = clock.newFrame();
 		float new_particles = (float)msc / 1000.0f * (float)m_pps;
 		for (int i = 0; i < new_particles; ++i)
 			emitParticles();
@@ -65,14 +64,14 @@ void ParticleSystem::emitParticles()
 
 	if (cur_particles < MAX_PARTICLES)
 	{
-		m_particles[cur_particles].reset(systemCenter, dir, 0, m_lifeLength, 0, 0, num_rows_in_texture);
+		m_particles[cur_particles].reset(systemCenter, dir, 0, m_lifeLength, 0, 0, static_cast<uint32_t>(num_rows_in_texture));
 		++cur_particles;
 	}
 	else 
 	{
 		auto prt = std::find_if(m_particles.begin(), m_particles.end(), [](Particle& pt) {return !pt.isAlive(); });
 		if (prt != m_particles.end())
-			prt->reset(systemCenter, dir, 0, m_lifeLength, 0, 0, num_rows_in_texture);
+			prt->reset(systemCenter, dir, 0, m_lifeLength, 0, 0, static_cast<uint32_t>(num_rows_in_texture));
 	}
 }
 

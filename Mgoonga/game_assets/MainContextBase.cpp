@@ -49,16 +49,17 @@ void eMainContextBase::InitializeGL()
 {
 	//init main light
 	m_lights.push_back({});
+	//m_lights[0].light_position = vec4(0.0f, 4.0f, -1.0f, 1.0f);
 	m_lights[0].light_position = vec4(0.5f, 2.0f, -4.0f, 1.0f);
 	m_lights[0].light_direction = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	m_lights[0].type = eLightType::DIRECTION;
 
 	//init main camera
 	m_cameras.push_back(Camera(width, height, nearPlane, farPlane));
+	m_cameras[0].setDirection(glm::vec3(0.6f, -0.10f, 0.8f));
 	m_cameras[0].setPosition(glm::vec3(0.0f, 4.0f, -4.0f));
-	m_cameras[0].setDirection(glm::vec3(0.0f, -0.10f, 0.9f));
 	//Camera Ray
-	GetMainCamera().getCameraRay().init(width, height, nearPlane, farPlane);
+	GetMainCamera().getCameraRay().init(width, height, nearPlane, farPlane); //@todo direction of camera normalization
 
 	InitializeTextures();
 

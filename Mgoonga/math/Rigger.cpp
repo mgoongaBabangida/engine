@@ -155,6 +155,26 @@ const std::vector<glm::mat4>& Rigger::GetMatrices()
 	return matrices;
 }
 
+//-------------------------------------------------------------------------------------------
+std::vector<glm::mat4> Rigger::GetMatrices(const std::string& _animationName, size_t _frame)
+{
+	auto anim = std::find_if(animations.begin(), animations.end(),
+		[_animationName](SceletalAnimation anim) { return anim.Name() == _animationName; });
+	if(anim == animations.end() || anim->GetNumFrames() < _frame)
+		return {};
+	else
+	{
+		std::vector<glm::mat4> ret(bones.size());
+		auto root = std::find_if(bones.begin(), bones.end(), [this](const Bone& bone) { return nameRootBone == bone.Name(); });
+		UpdateAnimation(*(root), anim->GetFrameByNumber(_frame), UNIT_MATRIX); //@ potentialy not thread safe
+		for (auto& bone : bones)
+		{
+			ret[bone.ID()] = bone.getAnimatedTransform();
+		}
+		return ret;
+	}
+}
+
 //------------------------------------------------------------------
 size_t Rigger::GetAnimationCount() const
 {
@@ -165,6 +185,24 @@ size_t Rigger::GetAnimationCount() const
 size_t Rigger::GetBoneCount() const
 {
 	return bones.size();
+}
+
+//-------------------------------------------------------------
+const std::string& Rigger::GetCurrentAnimationName() const
+{
+	if (currentAnim != nullptr)
+		return currentAnim->Name();
+	else
+		throw("logic error");
+}
+
+//-------------------------------------------------------------------------------------------
+size_t Rigger::GetCurrentAnimationFrameIndex() const
+{
+	if (currentAnim != nullptr)
+		return currentAnim->GetCurFrameIndex();
+	else
+		return -1;
 }
 
 //-------------------------------------------------------------------------------------------

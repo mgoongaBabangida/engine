@@ -78,11 +78,11 @@ dbb::plane::plane(glm::vec3 dot1, glm::vec3 dot2, glm::vec3 dot3)
 
 }
 
-dbb::plane::plane(glm::mat3 dots)
+dbb::plane::plane(glm::mat3 m_dots)
 {
-	vec3 v1(dots[0][0] - dots[1][0], dots[0][1] - dots[1][1], dots[0][2] - dots[1][2]);
-	vec3 v2(dots[2][0] - dots[1][0], dots[2][1] - dots[1][1], dots[2][2] - dots[1][2]);
-	vec3 dot(dots[1][0], dots[1][1], dots[1][2]);
+	vec3 v1(m_dots[0][0] - m_dots[1][0], m_dots[0][1] - m_dots[1][1], m_dots[0][2] - m_dots[1][2]);
+	vec3 v2(m_dots[2][0] - m_dots[1][0], m_dots[2][1] - m_dots[1][1], m_dots[2][2] - m_dots[1][2]);
+	vec3 dot(m_dots[1][0], m_dots[1][1], m_dots[1][2]);
 	vec3 normal = glm::cross(v1, v2);
 	A = normal.x; B = normal.y; C = normal.z;
 	D = -(A*dot.x + B*dot.y + C*dot.z);

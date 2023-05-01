@@ -132,19 +132,6 @@ void MyModel::Draw()
 void MyModel::Debug()
 {}
 
-std::vector<glm::vec3> MyModel::GetPositions() const
-{
-	std::vector<glm::vec3> ret;
-	for (auto& vert : mesh->vertices)
-		ret.push_back(vert.position);
-	return ret;
-}
-
-std::vector<GLuint> MyModel::GetIndeces() const
-{
-	return mesh->indices;
-}
-
 size_t MyModel::GetVertexCount() const
 {
   return mesh->GetVertexCount();

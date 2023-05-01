@@ -362,20 +362,20 @@ void eMgoongaGameContext::_InitializeHexes()
 {
   float common_height = 2.01f;
   float radius = 0.5f;
-  std::vector<glm::vec3> dots;
+  std::vector<glm::vec3> m_dots;
   float z_move = glm::sin(glm::radians(240.0f)) * radius;
   for (int i = -6; i < 6; ++i)
     for (int j = -5; j < 5; ++j)
     {
-      dots.emplace_back(glm::vec3{ glm::cos(glm::radians(0.0f)) * radius * i,
+      m_dots.emplace_back(glm::vec3{ glm::cos(glm::radians(0.0f)) * radius * i,
                                    common_height,
                                    z_move * 2 * j });
-      dots.emplace_back(glm::vec3{ glm::cos(glm::radians(60.0f)) * radius * i * 2 + radius / 2,
+      m_dots.emplace_back(glm::vec3{ glm::cos(glm::radians(60.0f)) * radius * i * 2 + radius / 2,
                                    common_height, 
                                    z_move + z_move * 2 * j });
     }
   ObjectFactoryBase factory;
-  hex_model = factory.CreateObject(std::make_shared<SimpleModel>(new SimpleGeometryMesh(dots, radius)));
+  hex_model = factory.CreateObject(std::make_shared<SimpleModel>(new SimpleGeometryMesh(m_dots, radius)));
 }
 
 //----------------------------------------------------

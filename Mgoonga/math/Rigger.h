@@ -24,8 +24,11 @@ public:
 	virtual void							Stop();
 	virtual bool							ChangeName(const std::string& _oldName, const std::string& _newName);
 	virtual const std::vector<glm::mat4>&	GetMatrices();
+	virtual std::vector<glm::mat4> GetMatrices(const std::string& _animationName, size_t _frame);
 	virtual size_t						GetAnimationCount() const;
 	virtual size_t						GetBoneCount() const;
+	const std::string&				GetCurrentAnimationName() const;
+	virtual size_t						GetCurrentAnimationFrameIndex() const;
 
 	void AddAnimations(std::vector<SceletalAnimation>);
 	std::vector<std::string> GetAnimationNames() const;

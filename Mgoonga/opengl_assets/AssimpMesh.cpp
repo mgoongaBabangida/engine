@@ -11,7 +11,7 @@ Texture AssimpMesh::default_normal_mapping = {};
 Texture AssimpMesh::default_roughness_mapping = {};
 Texture AssimpMesh::default_emission_mapping = {};
 
-AssimpMesh::AssimpMesh(vector<AssimpVertex> _vertices,
+AssimpMesh::AssimpMesh(vector<Vertex> _vertices,
                        vector<GLuint> _indices,
                        vector<Texture> _textures,
                        const Material _material,
@@ -192,7 +192,7 @@ void AssimpMesh::setupMesh()
 	glBindVertexArray(this->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
 
-	glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(AssimpVertex),
+	glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex),
 		&this->vertices[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
@@ -201,32 +201,32 @@ void AssimpMesh::setupMesh()
 
 	// Vertex Positions
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(AssimpVertex),
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 		(GLvoid*)0);
 	// Vertex Normals
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(AssimpVertex),
-		(GLvoid*)offsetof(AssimpVertex, Normal));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+		(GLvoid*)offsetof(Vertex, Normal));
 	// Vertex Texture Coords
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(AssimpVertex),
-		(GLvoid*)offsetof(AssimpVertex, TexCoords));
+	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+		(GLvoid*)offsetof(Vertex, TexCoords));
 	// Vertex Tangent
 	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(AssimpVertex),
-		(GLvoid*)offsetof(AssimpVertex, tangent));
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+		(GLvoid*)offsetof(Vertex, tangent));
 	// Vertex Bitangent
 	glEnableVertexAttribArray(5);
-	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(AssimpVertex),
-		(GLvoid*)offsetof(AssimpVertex, bitangent));
+	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+		(GLvoid*)offsetof(Vertex, bitangent));
 	// Vertex BoneIDs
 	glEnableVertexAttribArray(6);
-	glVertexAttribIPointer(6, 4, GL_INT, sizeof(AssimpVertex),
-		(GLvoid*)offsetof(AssimpVertex, boneIDs));
+	glVertexAttribIPointer(6, 4, GL_INT, sizeof(Vertex),
+		(GLvoid*)offsetof(Vertex, boneIDs));
 	// Vertex Weights
 	glEnableVertexAttribArray(7);
-	glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(AssimpVertex),
-		(GLvoid*)offsetof(AssimpVertex, weights));
+	glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+		(GLvoid*)offsetof(Vertex, weights));
 
 	glBindVertexArray(0);
 }

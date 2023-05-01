@@ -9,7 +9,7 @@ in layout(location=5) vec3 bitangent;
 in layout(location=6) ivec4 boneIDs;
 in layout(location=7) vec4 weights;
 
-const int MAX_BONES = 300;
+const int MAX_BONES = 100;
 
 uniform mat4 modelToProjectionMatrix;
 uniform mat4 modelToWorldMatrix;

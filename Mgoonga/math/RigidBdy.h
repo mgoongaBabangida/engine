@@ -34,7 +34,7 @@ protected:
 
 	eObject*	object = nullptr;
 	float		turnSpeed = PI / 12.0f;
-	float		speed = 0.1f;
+	float		speed = 0.01f;
 	glm::vec3	velocity = NONE;
 	eCollision	collision;
 };

@@ -5,6 +5,8 @@
 #include "Texture.h"
 #include "ShapeData.h"
 
+#include <math/Bezier.h>
+
 //----------------------------------------------------------------------------------------------
 class DLL_OPENGL_ASSETS MyMesh: public IMesh
 {
@@ -13,21 +15,24 @@ public:
 	MyMesh(const MyMesh&) = default;
 	virtual ~MyMesh();
 
-	MyMesh(std::vector<MyVertex> vertices, std::vector<GLuint> indices, std::vector<Texture*> textures);
+	MyMesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture*> textures);
 	explicit MyMesh(const ShapeData& data);
 	
-	virtual void Draw()			override;
-  virtual size_t GetVertexCount() const override { return vertices.size(); }
+	virtual void								Draw()			override;
+	virtual const std::string&	Name() const { return name; }
+  virtual size_t							GetVertexCount() const override { return vertices.size(); }
+
+	virtual const std::vector<Vertex>& GetVertexs() const override { return vertices; }
+	virtual const std::vector<unsigned int>& GetIndices() const override { return indices; }
+
   virtual std::vector<const Texture*> GetTextures() const;
+  virtual void												setTextures(std::vector<Texture*>);
+	virtual void												setupMesh();
+	virtual void												calculatedTangent();
 
-  virtual void setTextures(std::vector<Texture*>);
-	virtual void setupMesh();
-	virtual void calculatedTangent();
-
-	virtual const std::string& Name() const { return name; }
 public:
 	/*  Mesh Data  */
-	std::vector<MyVertex>	vertices;
+	std::vector<Vertex>	vertices;
 	std::vector<GLuint>		indices;
 	std::vector<Texture*>	textures;
 
@@ -44,26 +49,30 @@ public:
 	static const int		MAXPARTICLES	= 1000;
 	static const GLsizei	SIZEOF = sizeof(glm::mat4) + sizeof(glm::vec2) * 3;
 	
-	ParticleMesh(std::vector< MyVertex> vertices, std::vector<GLuint> indices, std::vector<Texture> textures);
+	ParticleMesh(std::vector< Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture> textures);
 	ParticleMesh(const ShapeData & data);
 	ParticleMesh(const ParticleMesh&) = delete;
 
   virtual ~ParticleMesh();
 
-	virtual void		Draw() override;
-  virtual size_t GetVertexCount() const override { return vertices.size(); }
-	virtual const std::string& Name() const override { return ""; }
-  virtual std::vector<const Texture*> GetTextures() const;
+	virtual void								Draw() override;
+	virtual const std::string&	Name() const override { return ""; }
+
+  virtual size_t														GetVertexCount() const override { return vertices.size(); }
+	virtual const std::vector<Vertex>&				GetVertexs() const override { return vertices; }
+	virtual const std::vector<unsigned int>&	GetIndices() const override { return indices; }
+  
+	virtual std::vector<const Texture*> GetTextures() const;
 
   void				SetUpInstances(GLuint _instances) { instances = _instances; }
 	void				updateInstancedData(std::vector<float>& buffer);
 
 public:
   /*  Mesh Data  */
-  std::vector<MyVertex>	vertices;
+  std::vector<Vertex>		vertices;
   std::vector<GLuint>		indices;
   std::vector<Texture>	textures;
-  GLuint					instances;
+  GLuint								instances;
 
 protected:
 	/*  Render data  */
@@ -83,13 +92,19 @@ public:
 
 	float GetRadius() const { return m_radius; }
 
-	virtual void Draw();
-	virtual size_t GetVertexCount() const { return m_dots.size(); }
-	virtual std::vector<const Texture*> GetTextures() const { return {}; }
+	virtual void								Draw();
+	virtual const std::string&	Name() const { return m_name; }
+	virtual size_t							GetVertexCount() const { return m_dots.size(); }
+
+	virtual const std::vector<Vertex>&				GetVertexs() const override { throw("logic error"); } //@?
+	virtual const std::vector<unsigned int>&	GetIndices() const override { throw("logic error"); }
+
+	virtual std::vector<const Texture*>				GetTextures() const { return {}; }
+	
 	virtual bool HasMaterial() const { return false; }
 	virtual void SetMaterial(const Material&) {}
 	virtual std::optional<Material> GetMaterial() const { return std::nullopt; }
-	virtual const std::string& Name() const { return m_name; }
+
 protected:
 	std::string m_name = "SimpleGeometryMesh";
 	std::vector<glm::vec3> m_dots;
@@ -99,7 +114,6 @@ protected:
 	GLuint hexVBO;
 };
 
-#include <math/Bezier.h>
 //------------------------------------------------------
 class DLL_OPENGL_ASSETS BezierCurveMesh : public IMesh
 {
@@ -110,13 +124,19 @@ public:
 	dbb::Bezier& GetBezier() { return m_bezier; };
 	void Update();
 
-	virtual void Draw();
-	virtual size_t GetVertexCount() const { return 4; }
+	virtual void								Draw();
+	virtual const std::string&	Name() const { return m_name; }
+	virtual size_t							GetVertexCount() const { return 4; }
+
+	virtual const std::vector<Vertex>& GetVertexs() const override { throw("logic error"); } //@?
+	virtual const std::vector<unsigned int>& GetIndices() const override { throw("logic error"); }
+
 	virtual std::vector<const Texture*> GetTextures() const { return {}; }
+	
 	virtual bool HasMaterial() const { return false; }
 	virtual void SetMaterial(const Material&) {}
 	virtual std::optional<Material> GetMaterial() const { return std::nullopt; }
-	virtual const std::string& Name() const { return m_name; }
+
 protected:
 	std::string m_name = "BezierCurveMesh";
 	dbb::Bezier m_bezier;

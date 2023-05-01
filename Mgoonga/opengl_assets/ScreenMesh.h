@@ -12,9 +12,13 @@ public:
 	eScreenMesh(Texture textureOne, Texture textureTwo);
   ~eScreenMesh();
 
-	virtual void Draw() override;
-  virtual size_t GetVertexCount() const { return 4; }
-	virtual const std::string& Name() const override { return ""; }
+	virtual void								Draw() override;
+  virtual size_t							GetVertexCount() const { return 4; }
+	virtual const std::string&	Name() const override { return ""; }
+
+	virtual const std::vector<Vertex>& GetVertexs() const override { return {}; } //@?
+	virtual const std::vector<unsigned int>& GetIndices() const override { return {}; }
+
   virtual std::vector<const Texture*> GetTextures() const;
 
 	void UpdateFrame(float top_x, float top_y, float botom_x, float botom_y,
@@ -46,6 +50,10 @@ public:
   virtual size_t GetVertexCount() const { return 4; }
 	virtual const std::string& Name() const override { return ""; }
   virtual std::vector<const Texture*> GetTextures() const { assert("no textures in this private mesh"); return std::vector<const Texture*>(); }
+	
+	virtual const std::vector<Vertex>& GetVertexs() const override { return {}; } //@?
+	virtual const std::vector<unsigned int>& GetIndices() const override { return {}; }
+	
 	void UpdateFrame(float top_x, float top_y, float botom_x , float botom_y, float viewport_width, float viewport_height);
 
 protected:

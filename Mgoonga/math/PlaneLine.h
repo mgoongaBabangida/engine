@@ -25,7 +25,7 @@ namespace dbb
 
 		plane(float a, float b, float c, float d);
 		plane(glm::vec3 dot1, glm::vec3 dot2, glm::vec3 dot3);
-		plane(glm::mat3 dots);
+		plane(glm::mat3 m_dots);
 		
 		bool isOn(glm::vec3 dot);
 		bool isSame(plane other);

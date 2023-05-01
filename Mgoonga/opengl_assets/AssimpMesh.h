@@ -9,7 +9,7 @@ class AssimpMesh : public IMesh
 public:
   friend class Model;
 
-	AssimpMesh(std::vector<AssimpVertex> vertices,
+	AssimpMesh(std::vector<Vertex> vertices,
              std::vector<GLuint> indices,
              std::vector<Texture> textures,
              const Material material,
@@ -20,9 +20,14 @@ public:
   AssimpMesh(AssimpMesh&&) = default;
 
   void FreeTextures();
+
 	void Draw();
+
   virtual size_t GetVertexCount() const override { return vertices.size();}
   virtual const std::string& Name() const override { return name;}
+
+  virtual const std::vector<Vertex>& GetVertexs() const override { return vertices; }
+  virtual const std::vector<unsigned int>& GetIndices() const override { return indices; }
 
   virtual bool											HasMaterial() const override { return true; }
   virtual void											SetMaterial(const Material&) override;
@@ -33,7 +38,7 @@ protected:
   void _BindMaterialTextures();
 
   /*  Mesh Data  */
-  std::vector<AssimpVertex>	vertices;
+  std::vector<Vertex>	vertices;
   std::vector<GLuint>			  indices;
   std::vector<Texture>			textures;
   std::string               name;

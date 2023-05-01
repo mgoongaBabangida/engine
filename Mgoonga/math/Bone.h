@@ -33,7 +33,7 @@ public:
 	const glm::mat4&	getAnimatedTransform() const									{ return animatedTransform; }
 	void							setAnimatedTransform(const glm::mat4& trans)	{ animatedTransform = trans; }
 	glm::mat4					getInverseBindTransform()const								{ return inverseBindTransform; }
-	int								ID()const																			{ return index; }
+	size_t						ID()const																			{ return index; }
 	std::string				Name()const																		{ return name; }
 	
 	void calculateInverseBindTransform(const glm::mat4 &ParentBindTransform) 

@@ -16,8 +16,8 @@ Camera::Camera(float      _width,
 	, Up(0.0f, 1.0f, 0.0f)
 	, strafeDirection(1.0f, 0.0f, 0.0f)
 	, projectionOrthoMatrix(glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, _nearPlane, _farPlane))
-	, width(_width)
-	, height(_height)
+	, width(static_cast<uint32_t>(_width))
+	, height(static_cast<uint32_t>(_height))
 	, nearPlane(_nearPlane)
 	, farPlane(_farPlane)
 {

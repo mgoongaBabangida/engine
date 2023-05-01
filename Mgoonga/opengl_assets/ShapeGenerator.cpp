@@ -9,7 +9,6 @@
 #include <glm\glm\gtc\matrix_transform.hpp>
 
 #include <assert.h>
-#include <iostream>
 
 using glm::vec3;
 using glm::mat4;
@@ -29,7 +28,7 @@ glm::vec3 randomColor()
 ShapeData ShapeGenerator::makeTriangle()
 {
 	ShapeData ret;
-	Vertex myTri[] =
+	ShapeData::Vertex myTri[] =
 	{
 		glm::vec3(0.0f, +1.0f, 0.0f),//0
 		glm::vec3(+1.0f, +0.0f,+0.0f),//color
@@ -41,7 +40,7 @@ ShapeData ShapeGenerator::makeTriangle()
 		glm::vec3(+0.0f, +0.0f,+1.0f),//color
 	};
 	ret.numVertices = NUM_ARRAY_ELEMENTS(myTri);
-	ret.vertices = new Vertex[ret.numVertices];
+	ret.vertices = new ShapeData::Vertex[ret.numVertices];
 	memcpy(ret.vertices, myTri, sizeof(myTri));
 
 	GLushort indices[] = { 0,1,2 };
@@ -54,7 +53,7 @@ ShapeData ShapeGenerator::makeTriangle()
 
 ShapeData ShapeGenerator::makeCube() {
 	ShapeData ret;
-	Vertex stackVerts[] =
+	ShapeData::Vertex stackVerts[] =
 	{
 		vec3(-1.0f, +1.0f, +1.0f),  // 0
 		vec3(+1.0f, +0.0f, +0.0f),	// Color
@@ -136,7 +135,7 @@ ShapeData ShapeGenerator::makeCube() {
 	};
 
 	ret.numVertices = NUM_ARRAY_ELEMENTS(stackVerts);
-	ret.vertices = new Vertex[ret.numVertices];
+	ret.vertices = new ShapeData::Vertex[ret.numVertices];
 	memcpy(ret.vertices, stackVerts, sizeof(stackVerts));
 
 	unsigned short stackIndices[] = {
@@ -158,7 +157,7 @@ ShapeData ShapeGenerator::makeCube() {
 ShapeData ShapeGenerator::makeArrow()
 {
 	ShapeData ret;
-	Vertex stackVerts[] =
+	ShapeData::Vertex stackVerts[] =
 	{
 		// Top side of arrow head
 		vec3(+0.00f, +0.25f, -0.25f),         // 0
@@ -316,7 +315,7 @@ ShapeData ShapeGenerator::makeArrow()
 	};
 
 	ret.numVertices = NUM_ARRAY_ELEMENTS(stackVerts);
-	ret.vertices = new Vertex[ret.numVertices];
+	ret.vertices = new ShapeData::Vertex[ret.numVertices];
 	memcpy(ret.vertices, stackVerts, sizeof(stackVerts));  //need clean up
 
 	ret.numIndices = NUM_ARRAY_ELEMENTS(stackIndices);
@@ -332,12 +331,12 @@ ShapeData ShapeGenerator::makePlaneVerts(uint dimensions)
 	ShapeData ret;
 	ret.numVertices = dimensions * dimensions;
 	int half = dimensions / 2;
-	ret.vertices = new Vertex[ret.numVertices];
+	ret.vertices = new ShapeData::Vertex[ret.numVertices];
 	for (int i = 0; i < dimensions; i++)
 	{
 		for (int j = 0; j < dimensions; j++)
 		{
-			Vertex& thisVert = ret.vertices[i * dimensions + j];
+			ShapeData::Vertex& thisVert = ret.vertices[i * dimensions + j];
 			thisVert.position.x = j - half;
 			thisVert.position.z = i - half;
 			thisVert.position.y = 0;
@@ -451,10 +450,10 @@ ShapeData ShapeGenerator::makeTeapot(uint tesselation, const glm::mat4& lidTrans
 	moveLid(tesselation, vertices, lidTransform);
 
 	// Adapt/convert their data format to mine
-	ret.vertices = new Vertex[ret.numVertices];
+	ret.vertices = new ShapeData::Vertex[ret.numVertices];
 	for (uint i = 0; i < ret.numVertices; i++)
 	{
-		Vertex& v = ret.vertices[i];
+		ShapeData::Vertex& v = ret.vertices[i];
 		v.position.x = vertices[i * 3 + 0];
 		v.position.y = vertices[i * 3 + 1];
 		v.position.z = vertices[i * 3 + 2];
@@ -684,7 +683,7 @@ ShapeData ShapeGenerator::makeTorus(uint tesselation)
 	ShapeData ret;
 	uint dimensions = tesselation * tesselation;
 	ret.numVertices = dimensions;
-	ret.vertices = new Vertex[ret.numVertices];
+	ret.vertices = new ShapeData::Vertex[ret.numVertices];
 	float sliceAngle = 360 / tesselation;
 	const float torusRadius = 1.0f;
 	const float pipeRadius = 0.5f;
@@ -698,7 +697,7 @@ ShapeData ShapeGenerator::makeTorus(uint tesselation)
 		glm::mat3 normalTransform = (glm::mat3)transform;
 		for (uint round2 = 0; round2 < tesselation; round2++)
 		{
-			Vertex& v = ret.vertices[round1 * tesselation + round2];
+			ShapeData::Vertex& v = ret.vertices[round1 * tesselation + round2];
 			glm::vec4 glmVert(
 				pipeRadius * cos(glm::radians(sliceAngle * round2)),
 				pipeRadius * sin(glm::radians(sliceAngle * round2)),
@@ -735,7 +734,7 @@ ShapeData ShapeGenerator::makeSphere(uint tesselation)
 		{
 			double theta = -(SLICE_ANGLE / 2.0) * row;
 			size_t vertIndex = col * dimensions + row;
-			Vertex& v = ret.vertices[vertIndex];
+			ShapeData::Vertex& v = ret.vertices[vertIndex];
 			v.position.x = RADIUS * cos(phi) * sin(theta);
 			v.position.y = RADIUS * sin(phi) * sin(theta);
 			v.position.z = RADIUS * cos(theta);
@@ -749,14 +748,14 @@ ShapeData ShapeGenerator::generateNormals(const ShapeData& data)
 {
 	ShapeData ret;
 	ret.numVertices = data.numVertices * 2;
-	ret.vertices = new Vertex[ret.numVertices];
+	ret.vertices = new ShapeData::Vertex[ret.numVertices];
 	glm::vec3 white(1.0f, 1.0f, 1.0f);
 	for (int i = 0; i < data.numVertices; i++)
 	{
 		uint vertIndex = i * 2;
-		Vertex& v1 = ret.vertices[vertIndex];
-		Vertex& v2 = ret.vertices[vertIndex + 1];
-		const Vertex& sourceVertex = data.vertices[i];
+		ShapeData::Vertex& v1 = ret.vertices[vertIndex];
+		ShapeData::Vertex& v2 = ret.vertices[vertIndex + 1];
+		const ShapeData::Vertex& sourceVertex = data.vertices[i];
 		v1.position = sourceVertex.position;
 		v2.position = sourceVertex.position + sourceVertex.normal;
 		v1.color = v2.color = white;
@@ -775,7 +774,7 @@ ShapeData ShapeGenerator::makeMyPlane(float Width, float Height) {
 	float widthF = 2 * tan(glm::radians(60.0f)) * 10;//real is 20
 	float heightN = widthN* (Height / Width);
 	float heightF = widthF* (Height / Width);
-	Vertex stackVerts[] = {		              //color                      //normals
+	ShapeData::Vertex stackVerts[] = {		              //color                      //normals
 		glm::vec3(-widthN / 2, heightN / 2, 0),  glm::vec3(0,0, 1),   glm::vec3(0, 0, 1),
 		glm::vec3(widthN / 2, heightN / 2,  0),  glm::vec3(0, 0, 1),  glm::vec3(0, 0, 1),
 		glm::vec3(-widthN / 2,-heightN / 2, 0),  glm::vec3(0, 0, 1),  glm::vec3(0, 0, 1),
@@ -792,7 +791,7 @@ ShapeData ShapeGenerator::makeMyPlane(float Width, float Height) {
 
 	ShapeData ret;
 	ret.numVertices = NUM_ARRAY_ELEMENTS(stackVerts);
-	ret.vertices = new Vertex[ret.numVertices];
+	ret.vertices = new ShapeData::Vertex[ret.numVertices];
 	memcpy(ret.vertices, stackVerts, sizeof(stackVerts));  //need clean up
 
 	unsigned short stackIndices[] = {
@@ -812,7 +811,7 @@ ShapeData ShapeGenerator::makeMyPlane(float Width, float Height) {
 
 ShapeData ShapeGenerator::makeQuad() {
 	
-	Vertex stackVerts[] = {
+	ShapeData::Vertex stackVerts[] = {
 		glm::vec3(-1.0f,  1.0f, 0.0f),//position
 		glm::vec3(1.0f,  1.0f, 1.0f),//color
 		glm::vec3(0.0f,  0.0f, 1.0f),//normal
@@ -835,7 +834,7 @@ ShapeData ShapeGenerator::makeQuad() {
 
 	ShapeData ret;
 	ret.numVertices = NUM_ARRAY_ELEMENTS(stackVerts);
-	ret.vertices = new Vertex[ret.numVertices];
+	ret.vertices = new ShapeData::Vertex[ret.numVertices];
 	memcpy(ret.vertices, stackVerts, sizeof(stackVerts));  //need clean up
 
 	unsigned short stackIndices[] = {
@@ -854,7 +853,7 @@ ShapeData ShapeGenerator::makeQuad() {
 
 ShapeData ShapeGenerator::makeSquare(float Width, float Height) {
 
-	Vertex stackVerts[] = {		              //color                      //normals
+	ShapeData::Vertex stackVerts[] = {		              //color                      //normals
 		/*glm::vec3(-Width / 2,Height / 2, 0),  glm::vec3(0, 0, 1),  glm::vec3(0, 0, 1), 
 		glm::vec3(Width / 2, Height / 2, 0),  glm::vec3(0,0, 1),   glm::vec3(0, 0, 1), 
 		glm::vec3(Width / 2, -Height / 2,  0),  glm::vec3(0, 0, 1),  glm::vec3(0, 0, 1),
@@ -871,7 +870,7 @@ ShapeData ShapeGenerator::makeSquare(float Width, float Height) {
 
 	ShapeData ret;
 	ret.numVertices = NUM_ARRAY_ELEMENTS(stackVerts);
-	ret.vertices = new Vertex[ret.numVertices];
+	ret.vertices = new ShapeData::Vertex[ret.numVertices];
 	memcpy(ret.vertices, stackVerts, sizeof(stackVerts));  //need clean up
 
 	unsigned short stackIndices[] = {

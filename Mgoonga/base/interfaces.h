@@ -86,9 +86,11 @@ class IMesh
 {
 public:
 	virtual ~IMesh() = default;
-	virtual void											Draw() = 0;
-	virtual const std::string&				Name() const = 0;
-  virtual size_t										GetVertexCount() const = 0;
+	virtual void															Draw() = 0;
+	virtual const std::string&								Name() const = 0;
+  virtual size_t														GetVertexCount() const = 0;
+	virtual const std::vector<Vertex>&				GetVertexs() const = 0;
+	virtual const std::vector<unsigned int>&	GetIndices() const = 0;
 
 	virtual bool											HasMaterial() const	{ return false; }
 	virtual void											SetMaterial(const Material&) {}
@@ -102,11 +104,10 @@ public:
 	virtual ~IModel() = default;
 
 	virtual void														Draw()					= 0;
-	virtual std::vector<glm::vec3>					GetPositions()	const	= 0; //@todo const ref!
-	virtual std::vector<unsigned int>				GetIndeces()	const	= 0;//@todo const ref!
   virtual size_t													GetVertexCount() const = 0;
   virtual size_t													GetMeshCount() const = 0;
   virtual std::vector<const IMesh*>				GetMeshes() const = 0;
+
   virtual size_t													GetAnimationCount() const = 0;
   virtual std::vector<const IAnimation*>	GetAnimations() const = 0;
 
@@ -158,26 +159,25 @@ class ICollider
 {
 public:
 	virtual ~ICollider() = default;
-	virtual void CalculateExtremDots(const std::vector<glm::vec3>& positions) = 0;
+	virtual void CalculateExtremDots(const eObject* _object) = 0;
 	virtual bool CollidesWith(const ITransform& trans1,
 							  const ITransform& trans2,
 							  const ICollider& other,
 							  Side moveDirection,
 							  eCollision& collision) = 0;
-
-	virtual float getMaxX()const = 0;
-	virtual float getMaxY()const = 0;
-	virtual float getMaxZ()const = 0;
-	virtual float getMinX()const = 0;
-	virtual float getMinY()const = 0;
-	virtual float getMinZ()const = 0;
+	virtual bool CollidesWith(const ITransform& _trans,
+														std::vector<std::shared_ptr<eObject>> _objects,
+														Side _moveDirection,
+														eCollision& _collision) = 0;
 
 	virtual glm::vec3								GetCenter() = 0;
+
 	virtual std::vector<glm::mat3>	GetBoundingTriangles(const ITransform& trans)const = 0;
 	virtual std::vector<glm::vec3>	GetExtrems(const ITransform& trans) const = 0;
 
 	virtual std::vector<glm::mat3>	GetBoundingTrianglesLocalSpace()const = 0;
 	virtual std::vector<glm::vec3>	GetExtremsLocalSpace() const = 0;
+	virtual extremDots							GetExtremDotsLocalSpace() const = 0;
 };
 
 //----------------------------------------------------------------------------------------------
@@ -185,13 +185,17 @@ class IRigger
 {
 public:
 	virtual ~IRigger() = default;
-	virtual bool							Apply(const std::string& _animation, bool _play_once)			= 0;
-  virtual bool							Apply(size_t _animation_index, bool _play_once)						= 0;
-	virtual void							Stop()																										= 0;
-	virtual bool							ChangeName(const std::string& _oldName, const std::string& _newName)	= 0;
-	virtual const std::vector<glm::mat4>&	GetMatrices()																							= 0;
-	virtual size_t						GetAnimationCount() const																							= 0;
-	virtual size_t						GetBoneCount() const																									= 0;
+	virtual bool													Apply(const std::string& _animation, bool _play_once)									= 0;
+  virtual bool													Apply(size_t _animation_index, bool _play_once)												= 0;
+	virtual void													Stop()																																= 0;
+	virtual bool													ChangeName(const std::string& _oldName, const std::string& _newName)	= 0;
+	virtual const std::vector<glm::mat4>&	GetMatrices()																													= 0;
+	virtual size_t												GetAnimationCount() const																							= 0;
+	virtual std::vector<std::string>			GetAnimationNames() const																							= 0;
+	virtual const std::string&						GetCurrentAnimationName() const																				= 0;
+	virtual size_t												GetCurrentAnimationFrameIndex() const																	= 0;
+	virtual size_t												GetBoneCount() const																									= 0;
+	virtual std::vector<glm::mat4>				GetMatrices(const std::string& _animationName, size_t _frame)					= 0;
 };
 
 //-----------------------------------------------------------------------------------------------

@@ -109,11 +109,11 @@ void eShipScript::Update(std::vector<std::shared_ptr<eObject> > objs)
 std::vector<shObject> eShipScript::GetChildrenObjects()
 {
   //getting top 4 corners of the model
-  glm::vec4 top_corners[4];
-  top_corners[0] = object->GetTransform()->getModelMatrix() * glm::vec4(object->GetCollider()->getMaxX(), object->GetCollider()->getMaxY(), object->GetCollider()->getMaxZ(), 1.0f);
-  top_corners[1] = object->GetTransform()->getModelMatrix() * glm::vec4(object->GetCollider()->getMaxX(), object->GetCollider()->getMaxY(), object->GetCollider()->getMinZ(), 1.0f);
-  top_corners[2] = object->GetTransform()->getModelMatrix() * glm::vec4(object->GetCollider()->getMinX(), object->GetCollider()->getMaxY(), object->GetCollider()->getMaxZ(), 1.0f);
-  top_corners[3] = object->GetTransform()->getModelMatrix() * glm::vec4(object->GetCollider()->getMinX(), object->GetCollider()->getMaxY(), object->GetCollider()->getMinZ(), 1.0f);
+  glm::vec4 top_corners[4]; //@todo improve
+  top_corners[0] = object->GetTransform()->getModelMatrix() * glm::vec4(object->GetCollider()->GetExtremDotsLocalSpace().MaxX, object->GetCollider()->GetExtremDotsLocalSpace().MaxY, object->GetCollider()->GetExtremDotsLocalSpace().MaxZ, 1.0f);
+	top_corners[1] = object->GetTransform()->getModelMatrix() * glm::vec4(object->GetCollider()->GetExtremDotsLocalSpace().MaxX, object->GetCollider()->GetExtremDotsLocalSpace().MaxY, object->GetCollider()->GetExtremDotsLocalSpace().MaxZ, 1.0f);
+	top_corners[2] = object->GetTransform()->getModelMatrix() * glm::vec4(object->GetCollider()->GetExtremDotsLocalSpace().MinX, object->GetCollider()->GetExtremDotsLocalSpace().MinY, object->GetCollider()->GetExtremDotsLocalSpace().MinZ, 1.0f);
+	top_corners[3] = object->GetTransform()->getModelMatrix() * glm::vec4(object->GetCollider()->GetExtremDotsLocalSpace().MinX, object->GetCollider()->GetExtremDotsLocalSpace().MinY, object->GetCollider()->GetExtremDotsLocalSpace().MinZ, 1.0f);
   glm::vec4 position = top_corners[0];
   //Choosing the corner in relation to camera position
   for (int i = 0; i < 4; ++i)

@@ -25,8 +25,8 @@ SphereTexturedMesh::SphereTexturedMesh()
       float yPos = std::cos(ySegment * PI);
       float zPos = std::sin(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
 
-      MyVertex vert;
-      vert.position = (glm::vec3(xPos, yPos, zPos));
+      Vertex vert;
+      vert.Position = (glm::vec3(xPos, yPos, zPos));
       vert.TexCoords = (glm::vec2(xSegment, ySegment));
       vert.Normal = glm::normalize((glm::vec3(xPos, yPos, zPos)));
       vertices.push_back(vert);
@@ -57,9 +57,9 @@ SphereTexturedMesh::SphereTexturedMesh()
 
   for (uint32_t i = 1; i < indices.size()-1; ++i)
   {
-    glm::vec3 pos1 = vertices[indices[i - 1]].position;
-    glm::vec3 pos2 = vertices[indices[i]].position;
-    glm::vec3 pos3 = vertices[indices[i + 1]].position;
+    glm::vec3 pos1 = vertices[indices[i - 1]].Position;
+    glm::vec3 pos2 = vertices[indices[i]].Position;
+    glm::vec3 pos3 = vertices[indices[i + 1]].Position;
     glm::vec2 uv1 = vertices[indices[i - 1]].TexCoords;
     glm::vec2 uv2 = vertices[indices[i]].TexCoords;
     glm::vec2 uv3 = vertices[indices[i + 1]].TexCoords;
@@ -91,7 +91,7 @@ SphereTexturedMesh::SphereTexturedMesh()
 
   glBindVertexArray(this->sphereVAO);
   glBindBuffer(GL_ARRAY_BUFFER, this->vbo);
-  glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(MyVertex),
+  glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex),
     &this->vertices[0], GL_STATIC_DRAW);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->ebo);
@@ -100,32 +100,32 @@ SphereTexturedMesh::SphereTexturedMesh()
 
   // Vertex Positions
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
     (GLvoid*)0);
   // Vertex Normals
   glEnableVertexAttribArray(2);
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
-    (GLvoid*)offsetof(MyVertex, Normal));
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+    (GLvoid*)offsetof(Vertex, Normal));
   // Vertex Texture Coords
   glEnableVertexAttribArray(3);
-  glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
-    (GLvoid*)offsetof(MyVertex, TexCoords));
+  glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+    (GLvoid*)offsetof(Vertex, TexCoords));
   // Vertex Tangent
   glEnableVertexAttribArray(4);
-  glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
-    (GLvoid*)offsetof(MyVertex, tangent));
+  glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+    (GLvoid*)offsetof(Vertex, tangent));
   // Vertex Bitangent
   glEnableVertexAttribArray(5);
-  glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
-    (GLvoid*)offsetof(MyVertex, bitangent));
+  glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+    (GLvoid*)offsetof(Vertex, bitangent));
   //// Vertex BoneIDs
   //glEnableVertexAttribArray(6);
-  //glVertexAttribIPointer(6, 4, GL_INT, sizeof(MyVertex),
-  //  (GLvoid*)offsetof(MyVertex, boneIDs));
+  //glVertexAttribIPointer(6, 4, GL_INT, sizeof(Vertex),
+  //  (GLvoid*)offsetof(Vertex, boneIDs));
   //// Vertex Weights
   //glEnableVertexAttribArray(7);
-  //glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(MyVertex),
-  //  (GLvoid*)offsetof(MyVertex, weights));
+  //glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+  //  (GLvoid*)offsetof(Vertex, weights));
   glBindVertexArray(0);
 }
 
@@ -172,12 +172,4 @@ std::optional<Material> SphereTexturedMesh::GetMaterial() const
 void SphereTexturedModel::Draw()
 {
   m_mesh->Draw();
-}
-
-std::vector<glm::vec3> SphereTexturedModel::GetPositions() const
-{
-   std::vector<glm::vec3> ret;
-   for (auto& vert : m_mesh->vertices)
-    ret.push_back(vert.position);
-   return ret;
 }

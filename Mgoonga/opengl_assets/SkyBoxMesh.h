@@ -15,6 +15,9 @@ public:
 	virtual const std::string& Name() const override {return name;}
   virtual std::vector<const Texture*> GetTextures() const;
 
+	virtual const std::vector<Vertex>& GetVertexs() const override { return {}; } //@?
+	virtual const std::vector<unsigned int>& GetIndices() const override { return {}; }
+
 	void SetTexture(Texture* _t);
 
 protected:

@@ -15,7 +15,7 @@ const Frame& SceletalAnimation::getCurrentFrame()
 			clock.restart();
 	}
 
-	float time = clock.timeEllapsedMsc();
+	int64_t time = clock.timeEllapsedMsc();
 	size_t i = 0;
 
 	for (; i < frames.size() - 1; ++i)
@@ -23,6 +23,7 @@ const Frame& SceletalAnimation::getCurrentFrame()
 		if(frames[i].timeStamp > time) //should be sorted
 			break;
 	}
+	cur_frame_index = i;
 	return frames[i];
 
 	//interpolation
@@ -40,6 +41,19 @@ const Frame& SceletalAnimation::getCurrentFrame()
 	//}
 
 	//return Frame(time, newFrame);
+}
+
+const Frame& SceletalAnimation::GetFrameByNumber(size_t _num)
+{
+	if (_num < frames.size())
+		return frames[_num];
+	else
+		return frames[frames.size() - 1];
+}
+
+size_t SceletalAnimation::GetCurFrameIndex() const
+{
+	return freeze_frame != -1 ? freeze_frame : cur_frame_index;
 }
 
 void SceletalAnimation::Start()

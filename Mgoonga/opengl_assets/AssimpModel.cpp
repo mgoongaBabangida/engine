@@ -163,14 +163,14 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 //----------------------------------------------------------------------
 AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 {
-	vector<AssimpVertex> vertices;
+	vector<Vertex> vertices;
 	vector<GLuint> indices;
 	vector<Texture> textures;
 	vector<VertexBoneData> boneData;
 
 	for (GLuint i = 0; i < mesh->mNumVertices; i++)
 	{
-		AssimpVertex vertex;
+		Vertex vertex;
 		// Process vertex positions, normals and texture coordinates
 		glm::vec3 vector;
 		vector.x = mesh->mVertices[i].x;
@@ -367,29 +367,6 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 		textures.push_back(texture);
 	}
 	return textures;
-}
-
-//-------------------------------------------------------------------------------------------
-std::vector<glm::vec3> Model::GetPositions() const 
-{
-	std::vector<glm::vec3> ret;
-	for (auto& mesh: meshes) {
-		for (auto& vert : mesh.vertices)
-			ret.push_back(vert.Position);
-	}
-	return ret;
-}
-
-//-------------------------------------------------------------------------------------------
-std::vector<GLuint> Model::GetIndeces() const
-{
-	std::vector<GLuint> inds;
-	for (auto& mesh : meshes)
-	{
-		for(int i = 0; i < mesh.indices.size(); ++i)  //@todo algortithm! concat 
-		 inds.push_back(mesh.indices[i]);
-	}
-	return inds;
 }
 
 //------------------------------------------------------------------------------------------------

@@ -61,7 +61,7 @@ private:
 	void			assignHeights(Texture heightMap);
 	void			generateNormals(GLuint size);
 	void			generateNormals(GLuint rows, GLuint columns);
-	MyVertex	findVertex(float x, float z);
+	Vertex	findVertex(float x, float z);
 };
 
 

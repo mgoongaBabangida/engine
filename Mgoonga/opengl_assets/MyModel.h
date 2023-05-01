@@ -25,8 +25,6 @@ public:
 
 	std::vector<MyMesh*>											getMeshes()		const;
 
-	virtual std::vector<glm::vec3>						GetPositions()	const	override;
-	virtual std::vector<GLuint>								GetIndeces()	const	override;
   virtual size_t														GetVertexCount() const override;
   virtual size_t														GetMeshCount() const override { return 1; }
   virtual std::vector<const IMesh*>					GetMeshes() const override;
@@ -66,8 +64,6 @@ public:
 
 	virtual ~SimpleModel() { delete m_mesh; }
 
-	virtual std::vector<glm::vec3>						GetPositions()	const	override { return std::vector<glm::vec3>{}; }
-	virtual std::vector<GLuint>								GetIndeces()	const	override { return std::vector<GLuint>{}; }
 	virtual size_t														GetVertexCount() const override { return 0; }
 	virtual size_t														GetMeshCount() const override { return 1; }
 	virtual std::vector<const IMesh*>					GetMeshes() const override { return std::vector<const IMesh*>{ m_mesh }; }
@@ -88,8 +84,6 @@ public:
 
 	virtual ~BezierCurveModel() { delete m_mesh; }
 
-	virtual std::vector<glm::vec3>						GetPositions()	const	override { return std::vector<glm::vec3>{}; }
-	virtual std::vector<GLuint>								GetIndeces()	const	override { return std::vector<GLuint>{}; }
 	virtual size_t														GetVertexCount() const override { return 0; }
 	virtual size_t														GetMeshCount() const override { return 1; }
 	virtual std::vector<const IMesh*>					GetMeshes() const override { return std::vector<const IMesh*>{ m_mesh }; }

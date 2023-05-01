@@ -154,30 +154,30 @@ void	TerrainModel::setSpecular(uint32_t _id)
 }
 
 //----------------------------------------------------------------
- MyVertex TerrainModel::findVertex(float x, float z)
+ Vertex TerrainModel::findVertex(float x, float z)
 {
 	float newX = glm::floor(x);
 	newX = newX + (glm::round((x - newX) * devisor)) / devisor;
 	float newZ = glm::floor(z);
 	newZ = newZ + (glm::round((z - newZ) * devisor)) / devisor;
 
-	auto vert = std::find_if(mesh->vertices.begin(), mesh->vertices.end(), [newX, newZ](const MyVertex& v)
-																		   {return v.position.x == newX && v.position.z == newZ; });
+	auto vert = std::find_if(mesh->vertices.begin(), mesh->vertices.end(), [newX, newZ](const Vertex& v)
+																		   {return v.Position.x == newX && v.Position.z == newZ; });
 	if (vert != mesh->vertices.end())
 		return *vert;
 	else
-		return MyVertex();// std::optional
+		return Vertex();// std::optional
 }
 
 float TerrainModel::GetHeight(float x, float z)
 {
-	MyVertex vert = findVertex(x, z);
-		return vert.position.y;
+	Vertex vert = findVertex(x, z);
+		return vert.Position.y;
 }
 
 glm::vec3 TerrainModel::GetNormal(float x, float z)
 {
-	MyVertex vert = findVertex(x, z);
+	Vertex vert = findVertex(x, z);
 	return vert.Normal;
 }
 
@@ -191,7 +191,7 @@ void TerrainModel::assignHeights(Texture heightMap)
 	int counter = 0;
 	for (int i = 0; i < heightMap.mTextureHeight * heightMap.mTextureWidth * 4; i += 4) 
 	{
-		mesh->vertices[i / 4].position.y = (float)buffer[i];
+		mesh->vertices[i / 4].Position.y = (float)buffer[i];
 		counter++;
 	}
 	delete[] buffer;
@@ -201,9 +201,9 @@ void TerrainModel::generateNormals(GLuint size)
 {
 	for (unsigned int i = 0; i < mesh->indices.size(); i += 3) 
 	{
-		glm::vec3& pos1 = mesh->vertices[mesh->indices[i]].position;
-		glm::vec3& pos2 = mesh->vertices[mesh->indices[i + 1]].position;
-		glm::vec3& pos3 = mesh->vertices[mesh->indices[i + 2]].position;
+		glm::vec3& pos1 = mesh->vertices[mesh->indices[i]].Position;
+		glm::vec3& pos2 = mesh->vertices[mesh->indices[i + 1]].Position;
+		glm::vec3& pos3 = mesh->vertices[mesh->indices[i + 2]].Position;
 		glm::vec3 normal = glm::normalize(glm::cross(glm::vec3(pos3 - pos1), glm::vec3(pos2 - pos1)));  //side ?
 		mesh->vertices[mesh->indices[i]].Normal += normal;
 		mesh->vertices[mesh->indices[i + 1]].Normal += normal;
@@ -236,9 +236,9 @@ void TerrainModel::generateNormals(GLuint rows, GLuint columns)
 {
 	for (unsigned int i = 0; i < mesh->indices.size(); i += 3) 
 	{
-		glm::vec3& pos1 = mesh->vertices[mesh->indices[i]].position;
-		glm::vec3& pos2 = mesh->vertices[mesh->indices[i + 1]].position;
-		glm::vec3& pos3 = mesh->vertices[mesh->indices[i + 2]].position;
+		glm::vec3& pos1 = mesh->vertices[mesh->indices[i]].Position;
+		glm::vec3& pos2 = mesh->vertices[mesh->indices[i + 1]].Position;
+		glm::vec3& pos3 = mesh->vertices[mesh->indices[i + 2]].Position;
 		glm::vec3 normal = glm::normalize(glm::cross(glm::vec3(pos3 - pos1), glm::vec3(pos2 - pos1)));  //side ?
 		
 		if (normal.y < 0)
@@ -278,10 +278,10 @@ void TerrainModel::makePlaneVerts(unsigned int dimensions, bool spreed_texture)
 	{
 		for (int j = 0; j < dimensions; j++)
 		{
-			MyVertex& thisVert = mesh->vertices[i * dimensions + j];
-			thisVert.position.x =(float) (j - half) / devisor;
-			thisVert.position.z = (float)(i - half) / devisor;
-			thisVert.position.y = 0;
+			Vertex& thisVert = mesh->vertices[i * dimensions + j];
+			thisVert.Position.x =(float) (j - half) / devisor;
+			thisVert.Position.z = (float)(i - half) / devisor;
+			thisVert.Position.y = 0;
 			thisVert.Normal = glm::vec3(0.0f, 1.0f, 0.0f);
       if (spreed_texture)
       {
@@ -308,10 +308,10 @@ void TerrainModel::makePlaneVerts(unsigned int rows, unsigned int columns, bool 
 	{
 		for (int j = 0; j < rows; j++)
 		{
-			MyVertex& thisVert = mesh->vertices[i * rows + j];
-			thisVert.position.x = static_cast<float>(j - half_r) / static_cast<float>(devisor);
-			thisVert.position.z = static_cast<float>(i - half_c) / static_cast<float>(devisor);
-			thisVert.position.y = 0;
+			Vertex& thisVert = mesh->vertices[i * rows + j];
+			thisVert.Position.x = static_cast<float>(j - half_r) / static_cast<float>(devisor);
+			thisVert.Position.z = static_cast<float>(i - half_c) / static_cast<float>(devisor);
+			thisVert.Position.y = 0;
 			thisVert.Normal = glm::vec3(0.0f, 1.0f, 0.0f);
       if (spreed_texture)
       {
@@ -323,14 +323,14 @@ void TerrainModel::makePlaneVerts(unsigned int rows, unsigned int columns, bool 
         thisVert.TexCoords.x = j % 2 ? 0.0f : 1.0f;
         thisVert.TexCoords.y = i % 2 ? 1.0f : 0.0f;
       }
-			if (thisVert.position.x < MinX)  //debug only
-				MinX = thisVert.position.x;
-			if (thisVert.position.x > MaxX)
-				MaxX = thisVert.position.x;
-			if (thisVert.position.z < MinZ)
-				MinZ = thisVert.position.z;
-			if (thisVert.position.z > MaxZ)
-				MaxZ = thisVert.position.z;
+			if (thisVert.Position.x < MinX)  //debug only
+				MinX = thisVert.Position.x;
+			if (thisVert.Position.x > MaxX)
+				MaxX = thisVert.Position.x;
+			if (thisVert.Position.z < MinZ)
+				MinZ = thisVert.Position.z;
+			if (thisVert.Position.z > MaxZ)
+				MaxZ = thisVert.Position.z;
 			counter++;
 		}
 	}
@@ -373,14 +373,14 @@ void TerrainModel::makePlaneIndices(unsigned int rows,unsigned int columns)
 			mesh->indices[runner++] = col * rows + row + 1;
 			
 			for (int i = 0; i < 6 && runner < mesh->indices.size(); i++) {
-				if (mesh->vertices[mesh->indices[runner - i]].position.x < MinX)
-					MinX = mesh->vertices[mesh->indices[runner - i]].position.x;
-				if (mesh->vertices[mesh->indices[runner - i]].position.x > MaxX)
-					MaxX = mesh->vertices[mesh->indices[runner - i]].position.x;
-				if (mesh->vertices[mesh->indices[runner - i]].position.z < MinZ)
-					MinZ = mesh->vertices[mesh->indices[runner - i]].position.z;
-				if (mesh->vertices[mesh->indices[runner - i]].position.z > MaxZ)
-					MaxZ = mesh->vertices[mesh->indices[runner - i]].position.z;
+				if (mesh->vertices[mesh->indices[runner - i]].Position.x < MinX)
+					MinX = mesh->vertices[mesh->indices[runner - i]].Position.x;
+				if (mesh->vertices[mesh->indices[runner - i]].Position.x > MaxX)
+					MaxX = mesh->vertices[mesh->indices[runner - i]].Position.x;
+				if (mesh->vertices[mesh->indices[runner - i]].Position.z < MinZ)
+					MinZ = mesh->vertices[mesh->indices[runner - i]].Position.z;
+				if (mesh->vertices[mesh->indices[runner - i]].Position.z > MaxZ)
+					MaxZ = mesh->vertices[mesh->indices[runner - i]].Position.z;
 			}
 		}
 	}
@@ -420,7 +420,7 @@ std::vector<glm::vec3> TerrainModel::GetPositions() const
 {
 	std::vector<glm::vec3> ret;
 	for (auto& vert : mesh->vertices)
-		ret.push_back(vert.position);
+		ret.push_back(vert.Position);
 	return ret; // @todo to improve
 }
 

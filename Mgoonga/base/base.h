@@ -5,6 +5,8 @@
 #include <variant>
 
 #pragma warning( disable : 4251) // vector & unique_ptr have to be exported or not used @todo
+#pragma warning( disable : 4275) // non-dll class I- used as base for dll-interface
+#pragma warning( disable : 4273) // inconsistent dll-linkage
 
 #ifdef DLLDIR_EX
 #define DLL_BASE __declspec(dllexport)
@@ -97,28 +99,15 @@ const glm::mat4 UNIT_MATRIX = glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
                                         0.0f, 0.0f, 0.0f, 1.0f);
 
 //-------------------------------------------------------
-struct MyVertex //@todo remove
+struct Vertex
 {
-	glm::vec3	position;	  //0
-	glm::vec3	color;		  //1
-	glm::vec3	Normal;		  //2
-	glm::vec2	TexCoords;	//3
-	glm::vec3	tangent;	  //4
-	glm::vec3	bitangent;	//5
-	glm::ivec4	boneIDs{ 0, 0 ,0 ,0};		//6
-	glm::vec4	weights{ 0.0f, 0.0f ,0.0f ,1.0f};	//7
-};
-
-//-------------------------------------------------------
-struct AssimpVertex
-{
-	glm::vec3	Position;	//0
-	glm::vec3	Normal;		//1
-	glm::vec2	TexCoords;	//2
-	glm::vec3	tangent;	//3
-	glm::vec3	bitangent;	//4
-	glm::ivec4	boneIDs;	//5 !?
-	glm::vec4	weights{ 0.0f, 0.0f ,0.0f ,1.0f };	//6	!?
+	glm::vec3		Position;	//0
+	glm::vec3		Normal;		//2
+	glm::vec2		TexCoords;	//3
+	glm::vec3		tangent;	//4
+	glm::vec3		bitangent;	//5
+	glm::ivec4	boneIDs{ 0, 0 ,0 ,0 };	//6
+	glm::vec4		weights{ 0.0f, 0.0f ,0.0f ,1.0f };	//7
 };
 
 //-------------------------------------------------------
@@ -144,12 +133,12 @@ enum Side
 //--------------------------------------------------------
 struct extremDots
 {
-	float MaxX;
-	float MinX;
-	float MaxY;
-	float MinY;
-	float MaxZ;
-	float MinZ;
+	float MaxX = -1000;//@todo max min float ?
+	float MinX = 1000;
+	float MaxY = -1000;
+	float MinY = 1000;
+	float MaxZ = -1000;
+	float MinZ = 1000;
 };
 
 //-------------------------------------------------------

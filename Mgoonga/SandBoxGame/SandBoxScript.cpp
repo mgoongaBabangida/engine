@@ -1,7 +1,5 @@
 #include "stdafx.h"
 
-#include <iostream>
-
 #include <base/Object.h>
 #include "SandBoxScript.h"
 

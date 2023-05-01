@@ -15,6 +15,8 @@ public:
   virtual void Draw();
 
   virtual size_t GetVertexCount() const { return vertices.size(); }
+  virtual const std::vector<Vertex>& GetVertexs() const override { return vertices; }
+  virtual const std::vector<unsigned int>& GetIndices() const override { return indices; }
 
   virtual void SetMaterial(const Material&) override;
   virtual std::optional<Material> GetMaterial() const override;
@@ -29,7 +31,7 @@ protected:
   unsigned int vbo;
   unsigned int ebo;
 
-  std::vector<MyVertex> vertices;
+  std::vector<Vertex> vertices;
   std::vector<unsigned int> indices;
 };
 
@@ -42,8 +44,7 @@ class DLL_OPENGL_ASSETS SphereTexturedModel : public IModel
       {}
 
     virtual void						          Draw() override;
-    virtual std::vector<glm::vec3>		GetPositions() const override;
-    virtual std::vector<unsigned int>	GetIndeces() const override { return m_mesh->indices; }
+
     virtual size_t                    GetVertexCount() const override { return m_mesh->GetVertexCount();}
     virtual size_t                    GetMeshCount() const override { return 1; }
     virtual std::vector<const IMesh*> GetMeshes() const override { return { m_mesh.get() }; }

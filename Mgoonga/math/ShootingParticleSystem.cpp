@@ -13,7 +13,7 @@ ShootingParticleSystem::ShootingParticleSystem(float	  _pps,
 												Texture*  _texture,
 												ISound*	  _sound,
 												float	  _duration)
-: ParticleSystem(_pps,_speed, _gravityComplient, _lifeLength,_systemCenter,_texture,_sound, _duration)
+: ParticleSystem(_pps,_speed, _gravityComplient, _lifeLength,_systemCenter,_texture,_sound, static_cast<int64_t>(_duration))
 {}
 
 ShootingParticleSystem::~ShootingParticleSystem()
