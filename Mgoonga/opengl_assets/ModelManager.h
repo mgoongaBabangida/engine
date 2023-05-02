@@ -30,7 +30,7 @@ class DLL_OPENGL_ASSETS eModelManager
   
   private:
   	std::map<std::string, std::shared_ptr<MyMesh> >		myMeshes;
-  	std::map<std::string, std::shared_ptr<IModel> >		models;
+  	std::map<std::string, std::shared_ptr<IModel> >   models;
   	std::map<std::string, std::shared_ptr<MyModel> >	primitves;
   	std::unique_ptr<TerrainModel>						          terrain;
 };

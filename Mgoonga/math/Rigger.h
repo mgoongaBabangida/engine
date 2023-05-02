@@ -29,10 +29,13 @@ public:
 	virtual size_t						GetBoneCount() const;
 	const std::string&				GetCurrentAnimationName() const;
 	virtual size_t						GetCurrentAnimationFrameIndex() const;
+	SceletalAnimation*				GetCurrentAnimation() const { return currentAnim; }
 
 	void AddAnimations(std::vector<SceletalAnimation>);
 	std::vector<std::string> GetAnimationNames() const;
-	SceletalAnimation* GetCurrentAnimation() const { return currentAnim; }
+
+	void SetActiveBoneIndex(int32_t _index) { active_bone_index = _index; }
+	int32_t GetActiveBoneIndex() { return active_bone_index; }
 
 	std::vector<std::string> GetBoneNames() const;
 	glm::mat4 GetBindMatrixForBone(const std::string& _boneName) const;
@@ -48,8 +51,10 @@ protected:
 	SceletalAnimation*							currentAnim = nullptr;
 	std::vector<Bone>								bones;
 	std::string											nameRootBone;
+	int32_t													active_bone_index = MAX_BONES;
 	std::vector<glm::mat4>					matrices;
 	std::unique_ptr<math::Timer>		timer;
+
 	std::atomic<bool>								matrix_flag = false;
 	std::mutex											mutex;
 	std::condition_variable					cv;

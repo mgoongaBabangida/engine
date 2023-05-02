@@ -60,7 +60,6 @@ protected:
 	GLuint HdrExposureLoc;
 
 	std::vector<glm::mat4> matrices;
-	glm::mat4			         worldToProjectionMatrix;
 	glm::mat4			         shadowMatrix;
 };
 

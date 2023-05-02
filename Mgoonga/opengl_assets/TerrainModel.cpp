@@ -416,6 +416,11 @@ std::vector<const IMesh*> TerrainModel::GetMeshes() const
   return std::vector<const IMesh*>{mesh};
 }
 
+std::vector<const I3DMesh*> TerrainModel::Get3DMeshes() const
+{
+	return std::vector<const I3DMesh*>{mesh};
+}
+
 std::vector<glm::vec3> TerrainModel::GetPositions() const
 {
 	std::vector<glm::vec3> ret;

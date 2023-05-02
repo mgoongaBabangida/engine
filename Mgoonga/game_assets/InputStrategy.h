@@ -23,7 +23,7 @@ class InputStrategyMoveAlongXZPlane : public InputStrategy
 public:
 	InputStrategyMoveAlongXZPlane(Camera& _camera, std::vector<shObject> _objs)
 		:m_camera(_camera)
-		,m_objects(_objs) // need to subscribe on update objects
+		,m_objects(_objs) // @todo need to subscribe on update objects !!!
 	{
 
 	}

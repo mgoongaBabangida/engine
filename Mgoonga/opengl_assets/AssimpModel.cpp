@@ -87,6 +87,15 @@ size_t Model::GetVertexCount() const
 }
 
 //----------------------------------------------------------------------------
+std::vector<const I3DMesh*> Model::Get3DMeshes() const
+{
+	std::vector<const I3DMesh*> ret;
+	for (const AssimpMesh& mesh : meshes)
+		ret.push_back(&mesh);
+	return ret;
+}
+
+//----------------------------------------------------------------------------
 std::vector<const IMesh*> Model::GetMeshes() const
 {
   std::vector<const IMesh*> ret;

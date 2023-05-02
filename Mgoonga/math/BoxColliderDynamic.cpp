@@ -21,7 +21,7 @@ void BoxColliderDynamic::CalculateExtremDots(const eObject* _object)
 				extremDots dts;
 				for (int k = 0; k < _object->GetModel()->GetMeshCount(); ++k)
 				{
-					auto vertices = _object->GetModel()->GetMeshes()[k]->GetVertexs();
+					auto vertices = _object->GetModel()->Get3DMeshes()[k]->GetVertexs();
 					for (int i = 0; i < vertices.size(); ++i)
 					{
 						glm::mat4 BoneTransform = gBones[vertices[i].boneIDs[0]] * vertices[i].weights[0];
@@ -58,7 +58,7 @@ void BoxColliderDynamic::CalculateExtremDots(const eObject* _object)
 //------------------------------------------------------------------
 std::vector<glm::mat3> BoxColliderDynamic::GetBoundingTriangles(const ITransform& _trans) const
 {
-	if (!m_rigger || m_rigger->GetCurrentAnimationName() == std::string{})
+	if (!m_rigger || !m_rigger->GetCurrentAnimation())
 		return BoxCollider::GetBoundingTriangles(_trans);
 	else
 	{
@@ -131,7 +131,7 @@ std::vector<glm::mat3> BoxColliderDynamic::GetBoundingTriangles(const ITransform
 //------------------------------------------------------------------
 std::vector<glm::vec3> BoxColliderDynamic::GetExtrems(const ITransform& _trans) const
 {
-	if (!m_rigger || m_rigger->GetCurrentAnimationName() == std::string{})
+	if (!m_rigger || !m_rigger->GetCurrentAnimation())
 		return BoxCollider::GetExtrems(_trans);
 	else
 	{

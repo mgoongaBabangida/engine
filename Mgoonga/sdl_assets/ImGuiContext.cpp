@@ -479,6 +479,8 @@ void eWindowImGui::Render()
             //Bones
             text = std::string("Number of bones ") + std::to_string(obj->GetRigger()->GetBoneCount());
             ImGui::Text(text.c_str());
+            static bool is_show_active_bone = false;
+            ImGui::Checkbox("Show active bone", &is_show_active_bone);
             std::vector<std::string> bone_names = rigger->GetBoneNames();
             for (size_t i = 0; i < obj->GetRigger()->GetBoneCount(); ++i)
             {
@@ -493,9 +495,14 @@ void eWindowImGui::Render()
             {
               if (ImGui::Combo("Object Bones", &bone_current, &combo_list[0]))
               {
-                boneMatrix = rigger->GetCurrentMatrixForBone(bone_current);
               }
             }
+            boneMatrix = rigger->GetCurrentMatrixForBone(bone_current);
+            if (is_show_active_bone)
+              rigger->SetActiveBoneIndex(bone_current);
+            else
+              rigger->SetActiveBoneIndex(MAX_BONES);
+
             combo_list.clear();
 
             ImGui::Text("Bone animated transform Matrix");

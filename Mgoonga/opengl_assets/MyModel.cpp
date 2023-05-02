@@ -137,6 +137,11 @@ size_t MyModel::GetVertexCount() const
   return mesh->GetVertexCount();
 }
 
+std::vector<const I3DMesh*> MyModel::Get3DMeshes() const
+{
+  return std::vector<const I3DMesh*> { mesh.get() };
+}
+
 std::vector<const IMesh*> MyModel::GetMeshes() const
 {
   return std::vector<const IMesh*> { mesh.get() };

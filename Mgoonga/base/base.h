@@ -98,6 +98,8 @@ const glm::mat4 UNIT_MATRIX = glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
                                         0.0f, 0.0f, 1.0f, 0.0f,
                                         0.0f, 0.0f, 0.0f, 1.0f);
 
+const int32_t MAX_BONES = 100;
+
 //-------------------------------------------------------
 struct Vertex
 {

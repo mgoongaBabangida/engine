@@ -10,13 +10,16 @@ std::unique_ptr<eObject> ObjectFactoryBase::CreateObject(std::shared_ptr<IModel>
   auto obj = std::make_unique<eObject>();
   obj->SetModel(_model);
   obj->SetTransform(new Transform);
-  if(_dynamic_collider)
-    obj->SetCollider(new BoxColliderDynamic);
-  else
-    obj->SetCollider(new BoxCollider);
-  obj->SetRigidBody(new eRigidBody);
-  obj->GetRigidBody()->SetObject(obj.get());
-  obj->GetCollider()->CalculateExtremDots(obj.get());
+  if (!_model->Get3DMeshes().empty())
+  {
+    if (_dynamic_collider)
+      obj->SetCollider(new BoxColliderDynamic);
+    else
+      obj->SetCollider(new BoxCollider);
+    obj->SetRigidBody(new eRigidBody);
+    obj->GetRigidBody()->SetObject(obj.get());
+    obj->GetCollider()->CalculateExtremDots(obj.get());
+  }
   obj->SetName(_name);
   return obj;
 }

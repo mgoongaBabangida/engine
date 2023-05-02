@@ -25,6 +25,7 @@
 #include "LinesRender.h"
 #include "TextRender.h"
 #include "PBRRender.h"
+#include "MeshLineRender.h"
 
 #include <algorithm>
 
@@ -196,8 +197,11 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 		[](auto& a, auto& b) { return &a < &b; });
 	RenderPBR(_camera, _light, not_outlined);
 
-	if (flags_on) { RenderFlags(_camera, _light, flags); }
+	//Mesh Line
+	renderManager->MeshLineRender()->Render(_camera, _light, phong_objs);
 
+	//Flags
+	if (flags_on) { RenderFlags(_camera, _light, flags); }
 
 	mts ? eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS)
 		: eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);

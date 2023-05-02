@@ -25,6 +25,8 @@ public:
   virtual size_t													GetVertexCount() const;
   virtual size_t													GetMeshCount() const { return 1; }
   virtual std::vector<const IMesh*>				GetMeshes() const;
+	virtual std::vector<const I3DMesh*>			Get3DMeshes() const;
+
   virtual size_t													GetAnimationCount() const { return 0; }
   virtual std::vector<const IAnimation*>	GetAnimations() const {
     return std::vector<const IAnimation*>();
@@ -41,13 +43,11 @@ public:
 	std::vector<MyMesh*>	  getMeshes()				const;
 
 	void setDiffuse(uint32_t _id);
-
 	void setSpecular(uint32_t _id);
 
 private:
-	unsigned int	devisor = 10;
-	MyMesh*			mesh; // generate ourself inside constructor
-	Material								m_material;
+	MyMesh*		mesh; // generate ourself inside constructor
+	Material	m_material;
 
 	Texture		m_height;
 	
@@ -55,13 +55,15 @@ private:
 	GLuint		m_rows;
 	GLuint		m_columns;
 
+	unsigned int	devisor = 10;
+
 	void			makePlaneVerts(unsigned int dimensions, bool spreed_texture = true);
 	void			makePlaneVerts(unsigned int rows, unsigned int columns, bool spreed_texture = true);
 	void			makePlaneIndices(unsigned int dimensions);
 	void			assignHeights(Texture heightMap);
 	void			generateNormals(GLuint size);
 	void			generateNormals(GLuint rows, GLuint columns);
-	Vertex	findVertex(float x, float z);
+	Vertex		findVertex(float x, float z);
 };
 
 

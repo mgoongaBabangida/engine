@@ -8,7 +8,7 @@
 
 //-------------------------------------------------------------------
 ePBRRender::ePBRRender(const std::string& vS, const std::string& fS)
-: matrices(300)
+: matrices(MAX_BONES)
 {
   pbrShader.installShaders(vS.c_str(), fS.c_str());
   glUseProgram(pbrShader.ID());

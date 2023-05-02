@@ -146,7 +146,7 @@ void eSandBoxGame::InitializeModels()
 	wolf->GetRigger()->ChangeName(std::string(), "Running");//@todo improve
 	m_objects.push_back(wolf);
 
-	shObject dying = factory.CreateObject(modelManager->Find("Dying"), "Dying", true); // dynamic collider
+	shObject dying = factory.CreateObject(modelManager->Find("Dying"), "Dying", false); // dynamic collider
 	dying->GetTransform()->setTranslation(vec3(1.0f, -2.0f, 0.0f));
 	dying->GetTransform()->setScale(vec3(0.01f, 0.01f, 0.01f));
 	Rigger* rigger = new Rigger((Model*)modelManager->Find("Dying").get());

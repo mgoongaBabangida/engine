@@ -3,7 +3,7 @@
 #include <base/interfaces.h>
 
 //---------------------------------------
-class DLL_OPENGL_ASSETS SphereTexturedMesh : public IMesh
+class DLL_OPENGL_ASSETS SphereTexturedMesh : public I3DMesh
 {
 public:
   friend class SphereTexturedModel;
@@ -14,9 +14,11 @@ public:
   virtual const std::string& Name() const override { return name; }
   virtual void Draw();
 
-  virtual size_t GetVertexCount() const { return vertices.size(); }
-  virtual const std::vector<Vertex>& GetVertexs() const override { return vertices; }
-  virtual const std::vector<unsigned int>& GetIndices() const override { return indices; }
+  virtual size_t                            GetVertexCount() const { return vertices.size(); }
+  virtual const std::vector<Vertex>&        GetVertexs() const override { return vertices; }
+  virtual const std::vector<unsigned int>&  GetIndices() const override { return indices; }
+  virtual void                              BindVAO() const override;
+  virtual void                              UnbindVAO() const override;
 
   virtual void SetMaterial(const Material&) override;
   virtual std::optional<Material> GetMaterial() const override;
@@ -45,9 +47,10 @@ class DLL_OPENGL_ASSETS SphereTexturedModel : public IModel
 
     virtual void						          Draw() override;
 
-    virtual size_t                    GetVertexCount() const override { return m_mesh->GetVertexCount();}
-    virtual size_t                    GetMeshCount() const override { return 1; }
-    virtual std::vector<const IMesh*> GetMeshes() const override { return { m_mesh.get() }; }
+    virtual size_t                      GetVertexCount() const override { return m_mesh->GetVertexCount();}
+    virtual size_t                      GetMeshCount() const override { return 1; }
+    virtual std::vector<const IMesh*>   GetMeshes() const override { return { m_mesh.get() }; }
+    virtual std::vector<const I3DMesh*> Get3DMeshes() const override { return { m_mesh.get() }; }
 
     virtual size_t                          GetAnimationCount() const override { return 0; }
     virtual std::vector<const IAnimation*>  GetAnimations() const override { return {}; }

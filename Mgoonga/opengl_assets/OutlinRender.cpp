@@ -5,7 +5,7 @@
 
 //--------------------------------------------------------------------------------------------
 eOutlineRender::eOutlineRender(const std::string& vS, const std::string& fS)
-	: matrices(300)
+	: matrices(MAX_BONES)
 {
 	shader.installShaders(vS.c_str(), fS.c_str());
 
@@ -42,7 +42,7 @@ void eOutlineRender::Render(const Camera & camera, const Light & light, const st
 			}
 		}
 		int loc = glGetUniformLocation(shader.ID(), "gBones");
-		glUniformMatrix4fv(loc, 300, GL_FALSE, &matrices[0][0][0]);
+		glUniformMatrix4fv(loc, MAX_BONES, GL_FALSE, &matrices[0][0][0]);
 		//*********************
 		object->GetModel()->Draw();
 		object->GetTransform()->decrementScale();

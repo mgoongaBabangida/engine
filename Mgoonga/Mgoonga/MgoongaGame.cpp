@@ -263,7 +263,7 @@ void eMgoongaGameContext::InitializeModels()
   _InitializeHexes();
   _InitializeBezier();
 
-  m_inputStrategy.reset(new InputStrategyMoveAlongXZPlane(GetMainCamera(), m_objects));
+  m_inputStrategy.reset(new InputStrategyMoveAlongXZPlane(GetMainCamera(), m_objects)); //@todo mobjects and pbr objects in one container
 
   Texture* tex = texManager->Find("TButton_red");
   Texture* flag = texManager->Find("TSpanishFlag0_s");

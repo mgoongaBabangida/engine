@@ -8,7 +8,7 @@
 #include <math/Bezier.h>
 
 //----------------------------------------------------------------------------------------------
-class DLL_OPENGL_ASSETS MyMesh: public IMesh
+class DLL_OPENGL_ASSETS MyMesh: public I3DMesh
 {
 public:
 	MyMesh();
@@ -20,10 +20,12 @@ public:
 	
 	virtual void								Draw()			override;
 	virtual const std::string&	Name() const { return name; }
-  virtual size_t							GetVertexCount() const override { return vertices.size(); }
 
-	virtual const std::vector<Vertex>& GetVertexs() const override { return vertices; }
-	virtual const std::vector<unsigned int>& GetIndices() const override { return indices; }
+  virtual size_t														GetVertexCount() const override { return vertices.size(); }
+	virtual const std::vector<Vertex>&				GetVertexs() const override { return vertices; }
+	virtual const std::vector<unsigned int>&	GetIndices() const override { return indices; }
+	virtual void                              BindVAO() const override { glBindVertexArray(this->VAO); }
+	virtual void                              UnbindVAO() const override { glBindVertexArray(0); }
 
   virtual std::vector<const Texture*> GetTextures() const;
   virtual void												setTextures(std::vector<Texture*>);
@@ -43,7 +45,7 @@ protected:
 };
 
 //----------------------------------------------------------------------------------------------
-class ParticleMesh : public IMesh
+class ParticleMesh : public I3DMesh
 {
 public:
 	static const int		MAXPARTICLES	= 1000;
@@ -56,12 +58,14 @@ public:
   virtual ~ParticleMesh();
 
 	virtual void								Draw() override;
-	virtual const std::string&	Name() const override { return ""; }
+	virtual const std::string&	Name() const override { return name; }
 
   virtual size_t														GetVertexCount() const override { return vertices.size(); }
 	virtual const std::vector<Vertex>&				GetVertexs() const override { return vertices; }
 	virtual const std::vector<unsigned int>&	GetIndices() const override { return indices; }
-  
+	virtual void                              BindVAO() const override { glBindVertexArray(this->VAO); }
+	virtual void                              UnbindVAO() const override { glBindVertexArray(0); }
+
 	virtual std::vector<const Texture*> GetTextures() const;
 
   void				SetUpInstances(GLuint _instances) { instances = _instances; }
@@ -78,6 +82,7 @@ protected:
 	/*  Render data  */
 	GLuint VAO, VBO, EBO;
 	GLuint VBOinstanced;
+	std::string name= "ParticleMesh";
 	/*  Functions    */
 	virtual void		setupMesh();
 };
@@ -95,9 +100,6 @@ public:
 	virtual void								Draw();
 	virtual const std::string&	Name() const { return m_name; }
 	virtual size_t							GetVertexCount() const { return m_dots.size(); }
-
-	virtual const std::vector<Vertex>&				GetVertexs() const override { throw("logic error"); } //@?
-	virtual const std::vector<unsigned int>&	GetIndices() const override { throw("logic error"); }
 
 	virtual std::vector<const Texture*>				GetTextures() const { return {}; }
 	
@@ -127,9 +129,6 @@ public:
 	virtual void								Draw();
 	virtual const std::string&	Name() const { return m_name; }
 	virtual size_t							GetVertexCount() const { return 4; }
-
-	virtual const std::vector<Vertex>& GetVertexs() const override { throw("logic error"); } //@?
-	virtual const std::vector<unsigned int>& GetIndices() const override { throw("logic error"); }
 
 	virtual std::vector<const Texture*> GetTextures() const { return {}; }
 	

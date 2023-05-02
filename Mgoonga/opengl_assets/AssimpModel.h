@@ -26,7 +26,8 @@ public:
 
   virtual size_t													GetVertexCount() const override;
   virtual size_t													GetMeshCount() const  override { return meshes.size();}
-  virtual std::vector<const IMesh*>				GetMeshes() const override;
+	virtual std::vector<const I3DMesh*>			Get3DMeshes() const override;
+	virtual std::vector<const IMesh*>				GetMeshes() const override;
 
   virtual size_t													GetAnimationCount() const override { return m_animations.size(); }
   virtual std::vector<const IAnimation*>	GetAnimations() const override;

@@ -27,8 +27,9 @@ public:
 
   virtual size_t														GetVertexCount() const override;
   virtual size_t														GetMeshCount() const override { return 1; }
-  virtual std::vector<const IMesh*>					GetMeshes() const override;
-  
+  virtual std::vector<const I3DMesh*>				Get3DMeshes() const override;
+	virtual std::vector<const IMesh*>					GetMeshes() const override;
+
 	virtual size_t														GetAnimationCount() const { return 0; }
   virtual std::vector<const IAnimation*>		GetAnimations() const { return std::vector<const IAnimation*>();}
 
@@ -57,7 +58,7 @@ protected:
 };
 
 //-------------------------------------------------------
-class DLL_OPENGL_ASSETS SimpleModel : public IModel
+class DLL_OPENGL_ASSETS SimpleModel : public IModel //@todo need to improve
 {
 public:
 	SimpleModel(IMesh* _m) :m_mesh(_m) {}
@@ -67,6 +68,7 @@ public:
 	virtual size_t														GetVertexCount() const override { return 0; }
 	virtual size_t														GetMeshCount() const override { return 1; }
 	virtual std::vector<const IMesh*>					GetMeshes() const override { return std::vector<const IMesh*>{ m_mesh }; }
+	virtual std::vector<const I3DMesh*>				Get3DMeshes() const override { return std::vector<const I3DMesh*>{}; }
 	virtual size_t														GetAnimationCount() const { return 0; }
 	virtual std::vector<const IAnimation*>		GetAnimations() const { return std::vector<const IAnimation*>(); }
 
@@ -77,7 +79,7 @@ protected:
 };
 
 //-------------------------------------------------------
-class DLL_OPENGL_ASSETS BezierCurveModel : public IModel
+class DLL_OPENGL_ASSETS BezierCurveModel : public IModel //@todo need to improve
 {
 public:
 	BezierCurveModel(BezierCurveMesh* _m) :m_mesh(_m) {}
@@ -87,6 +89,7 @@ public:
 	virtual size_t														GetVertexCount() const override { return 0; }
 	virtual size_t														GetMeshCount() const override { return 1; }
 	virtual std::vector<const IMesh*>					GetMeshes() const override { return std::vector<const IMesh*>{ m_mesh }; }
+	virtual std::vector<const I3DMesh*>				Get3DMeshes() const override { return std::vector<const I3DMesh*>{}; }
 	virtual size_t														GetAnimationCount() const { return 0; }
 	virtual std::vector<const IAnimation*>		GetAnimations() const { return std::vector<const IAnimation*>(); }
 

@@ -5,7 +5,7 @@
 
 //---------------------------------------------------------------------------------
 eMainRender::eMainRender(const std::string& vS, const std::string& fS)
-: matrices(300)
+: matrices(MAX_BONES)
 {
 	mainShader.installShaders(vS.c_str(), fS.c_str()); //main pass
 
@@ -108,7 +108,8 @@ void eMainRender::Render(const Camera&			    camera,
 	else if (light.type == eLightType::DIRECTION)
 	{
 		glUniform1f(glGetUniformLocation(mainShader.ID(), "shininess"), 64.0f);
-		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(0.0f, 0.0f, 0.0f), /*glm::vec3(light.light_position) + light.light_direction,*/
+		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position),
+																							glm::vec3(0.0f, 0.0f, 0.0f), /*glm::vec3(light.light_position) + light.light_direction,*/
 																							glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniform1i(lightTypeLoc, true);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
@@ -119,7 +120,7 @@ void eMainRender::Render(const Camera&			    camera,
 	glUniform1f(FarPlaneUniformLocation, camera.getFarPlane());
 	glUniform3fv(eyePositionWorldUniformLocation, 1, &camera.getPosition()[0]);
 
-	worldToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
+	glm ::mat4 worldToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
 	for (auto &object : objects)
 	{
 		glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * object->GetTransform()->getModelMatrix();

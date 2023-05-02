@@ -17,22 +17,31 @@ uniform mat4 shadowMatrix;
 uniform vec4 clip_plane;
 uniform mat4 gBones[MAX_BONES];
 
+uniform bool outline = false;
+uniform int outline_bone = MAX_BONES;
+
 out vec3 thePosition;
 out vec3 theNormal;
 out vec2 Texcoord;
 out vec4 LightSpacePos;
 out mat3 TBN;
 out vec4 debug;
+out vec2 toDiscard;
 
 void main()
 {
-    mat4 matrix = mat4(vec4(1,0,0,0),vec4(0,1,0,0),vec4(0,0,1,0),vec4(0,0,0,1));
+if(outline && boneIDs[0] != outline_bone && boneIDs[1] != outline_bone && boneIDs[2] != outline_bone && boneIDs[3] != outline_bone)
+	toDiscard = vec2(1.0f, 1.0f);
+else
+	toDiscard = vec2(0.0f, 0.0f);
 	
-    mat4 BoneTransform      = gBones[boneIDs[0]] * weights[0];
-         BoneTransform     += gBones[boneIDs[1]] * weights[1];
-         BoneTransform     += gBones[boneIDs[2]] * weights[2];
-         BoneTransform     += gBones[boneIDs[3]] * weights[3];
-	
+  mat4 matrix = mat4(vec4(1,0,0,0),vec4(0,1,0,0),vec4(0,0,1,0),vec4(0,0,0,1));
+
+  mat4 BoneTransform      = gBones[boneIDs[0]] * weights[0];
+       BoneTransform     += gBones[boneIDs[1]] * weights[1];
+       BoneTransform     += gBones[boneIDs[2]] * weights[2];
+       BoneTransform     += gBones[boneIDs[3]] * weights[3];
+
   vec4 v =  BoneTransform * vec4(position ,1.0); // BoneTransform *
  
   gl_Position	= modelToProjectionMatrix * v;

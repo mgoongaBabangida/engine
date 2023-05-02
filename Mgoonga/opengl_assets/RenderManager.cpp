@@ -21,6 +21,7 @@ eLinesRender*		 eRenderManager::LinesRender() { return m_linesRender.get(); }
 eTextRender* eRenderManager::TextRender() { return m_textRender.get(); }
 ePBRRender* eRenderManager::PBRRender(){ return m_pbrRender.get(); }
 eBezierRender* eRenderManager::BezierRender() { return m_bezierRender.get(); }
+eMeshLineRender* eRenderManager::MeshLineRender(){ return m_meshlineRender.get(); }
 
 //----------------------------------------------------------------------------------------------------------------
 void eRenderManager::AddParticleSystem(IParticleSystem* system) 
@@ -137,6 +138,9 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																				 folderPath + "BezierTessellation1Shader.glsl",
 																				 folderPath + "BezierTessellation2Shader.glsl"));
 	shader_lambda(m_bezierRender.get());
+	// Mesh line 
+	m_meshlineRender.reset(new eMeshLineRender(folderPath + "PhongVertexShader.glsl", folderPath + "StencilFragmentShader.glsl"));
+	shader_lambda(m_meshlineRender.get());
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -164,6 +168,7 @@ void eRenderManager::UpdateShadersInfo()
 	shader_lambda(m_textRender.get());
 	shader_lambda(m_pbrRender.get());
 	shader_lambda(m_bezierRender.get());
+	shader_lambda(m_meshlineRender.get());
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -211,6 +216,8 @@ bool eRenderManager::SetUniformData(const std::string& _renderName, const std::s
 	if (shader_lambda(m_pbrRender.get()))
 		return true;
 	if (shader_lambda(m_bezierRender.get()))
+		return true;
+	if(shader_lambda(m_meshlineRender.get()))
 		return true;
 
 	return false;

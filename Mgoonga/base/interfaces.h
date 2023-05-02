@@ -88,13 +88,22 @@ public:
 	virtual ~IMesh() = default;
 	virtual void															Draw() = 0;
 	virtual const std::string&								Name() const = 0;
-  virtual size_t														GetVertexCount() const = 0;
-	virtual const std::vector<Vertex>&				GetVertexs() const = 0;
-	virtual const std::vector<unsigned int>&	GetIndices() const = 0;
 
 	virtual bool											HasMaterial() const	{ return false; }
 	virtual void											SetMaterial(const Material&) {}
 	virtual std::optional<Material>		GetMaterial() const { return std::nullopt; }
+};
+
+//----------------------------------------------------------------------------------------------
+class I3DMesh : public IMesh
+{
+public:
+	virtual ~I3DMesh() = default;
+	virtual size_t														GetVertexCount() const = 0;
+	virtual const std::vector<Vertex>&				GetVertexs() const = 0;
+	virtual const std::vector<unsigned int>&	GetIndices() const = 0;
+	virtual void BindVAO()	const																	= 0;
+	virtual void UnbindVAO() const																= 0;
 };
 
 //----------------------------------------------------------------------------------------------
@@ -107,6 +116,7 @@ public:
   virtual size_t													GetVertexCount() const = 0;
   virtual size_t													GetMeshCount() const = 0;
   virtual std::vector<const IMesh*>				GetMeshes() const = 0;
+	virtual std::vector<const I3DMesh*>			Get3DMeshes() const = 0;
 
   virtual size_t													GetAnimationCount() const = 0;
   virtual std::vector<const IAnimation*>	GetAnimations() const = 0;
@@ -191,6 +201,7 @@ public:
 	virtual bool													ChangeName(const std::string& _oldName, const std::string& _newName)	= 0;
 	virtual const std::vector<glm::mat4>&	GetMatrices()																													= 0;
 	virtual size_t												GetAnimationCount() const																							= 0;
+	virtual IAnimation*										GetCurrentAnimation() const																						= 0;
 	virtual std::vector<std::string>			GetAnimationNames() const																							= 0;
 	virtual const std::string&						GetCurrentAnimationName() const																				= 0;
 	virtual size_t												GetCurrentAnimationFrameIndex() const																	= 0;

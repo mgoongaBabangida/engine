@@ -66,6 +66,9 @@ namespace dbb
 
 		for (auto &obj : objects)
 		{
+			if (!obj->GetCollider())
+				continue;
+
 			std::vector<glm::mat3> boundings = obj->GetCollider()->GetBoundingTriangles(*(obj->GetTransform()));
 			line line;
 			line.p = glm::vec4(m_line.p, 1.0f);

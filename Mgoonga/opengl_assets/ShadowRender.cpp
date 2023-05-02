@@ -5,7 +5,7 @@
 
 //-----------------------------------------------------------------------------
 eShadowRender::eShadowRender(const std::string& vS, const std::string& fS, const std::string& gSP, const std::string& fSP)
-	: matrices(300)
+	: matrices(MAX_BONES)
 {
 	shaderDir.installShaders(vS.c_str(), fS.c_str());
 	MVPUniformLocationDir				= glGetUniformLocation(shaderDir.ID(), "MVP");

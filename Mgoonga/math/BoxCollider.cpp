@@ -8,7 +8,7 @@ void BoxCollider::CalculateExtremDots(const eObject* _object)
 {
 	for (int k = 0; k < _object->GetModel()->GetMeshCount(); ++k)
 	{
-		auto vertices = _object->GetModel()->GetMeshes()[k]->GetVertexs();
+		auto vertices = _object->GetModel()->Get3DMeshes()[k]->GetVertexs();
 		for (int i = 0; i < vertices.size(); ++i)
 		{
 			if (vertices[i].Position.x > m_dots.MaxX)
@@ -328,6 +328,9 @@ bool BoxCollider::CollidesWith(const ITransform& _trans, std::vector<shObject> _
 
 	for (auto& obj :_objects)
 	{
+		if (obj->GetCollider() == this)
+			continue;
+
 		std::vector<glm::mat3> boundings = obj->GetCollider()->GetBoundingTriangles(*obj->GetTransform());
 		for (int i = 0; i < rays.size(); ++i)
 		{

@@ -25,14 +25,14 @@ eDefferedRender::eDefferedRender(const std::string & vS, const std::string & fS,
 	for (unsigned int i = 0; i < NR_LIGHTS; i++)
 	{
 		// calculate slightly random offsets
-		float xPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
-		float yPos = ((rand() % 100) / 100.0) * 6.0 - 4.0;
-		float zPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
+		double xPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
+		double yPos = ((rand() % 100) / 100.0) * 6.0 - 4.0;
+		double zPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
 		lightPositions.push_back(glm::vec3(xPos, yPos, zPos));
 		// also calculate random color
-		float rColor = ((rand() % 100) / 200.0f) + 0.5; // between 0.5 and 1.0
-		float gColor = ((rand() % 100) / 200.0f) + 0.5; // between 0.5 and 1.0
-		float bColor = ((rand() % 100) / 200.0f) + 0.5; // between 0.5 and 1.0
+		double rColor = ((rand() % 100) / 200.0f) + 0.5; // between 0.5 and 1.0
+		double gColor = ((rand() % 100) / 200.0f) + 0.5; // between 0.5 and 1.0
+		double bColor = ((rand() % 100) / 200.0f) + 0.5; // between 0.5 and 1.0
 		lightColors.push_back(glm::vec3(rColor, gColor, bColor));
 	}
 }
@@ -51,7 +51,7 @@ void eDefferedRender::Render(const Camera& camera, std::vector<shObject>& object
 		glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 		glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &object->GetTransform()->getModelMatrix()[0][0]);
 
-		std::vector<glm::mat4> matrices(100);
+		std::vector<glm::mat4> matrices(MAX_BONES);
 		for (auto&m : matrices)
 			m = UNIT_MATRIX;
 

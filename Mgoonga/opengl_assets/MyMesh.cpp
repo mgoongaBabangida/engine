@@ -216,7 +216,7 @@ ParticleMesh::ParticleMesh(const ShapeData& data)
 	tex[3] = glm::vec2(1.0f, 0.0f);
 
 
-	for (int i = 0; i < data.numVertices; ++i)
+	for (unsigned int i = 0; i < data.numVertices; ++i)
 	{
 		Vertex vert;
 		vert.Normal = data.vertices[i].normal;
@@ -225,10 +225,10 @@ ParticleMesh::ParticleMesh(const ShapeData& data)
 		vertices.push_back(vert);
 	}
 
-	for (int i = 0; i < data.numIndices; ++i)
+	for (unsigned int i = 0; i < data.numIndices; ++i)
 		indices.push_back(data.indices[i]);
 
-	for (int i = 0; i < indices.size(); i += 3)
+	for (unsigned int i = 0; i < indices.size(); i += 3)
 	{
 		glm::vec3 pos1 = vertices[indices[i]].Position;
 		glm::vec3 pos2 = vertices[indices[i + 1]].Position;

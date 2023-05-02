@@ -4,7 +4,7 @@
 #include <base/interfaces.h>
 
 //-----------------------------------------------------------------
-class AssimpMesh : public IMesh
+class AssimpMesh : public I3DMesh
 {
 public:
   friend class Model;
@@ -22,12 +22,13 @@ public:
   void FreeTextures();
 
 	void Draw();
-
-  virtual size_t GetVertexCount() const override { return vertices.size();}
   virtual const std::string& Name() const override { return name;}
 
-  virtual const std::vector<Vertex>& GetVertexs() const override { return vertices; }
-  virtual const std::vector<unsigned int>& GetIndices() const override { return indices; }
+  virtual size_t                            GetVertexCount() const override { return vertices.size(); }
+  virtual const std::vector<Vertex>&        GetVertexs() const override { return vertices; }
+  virtual const std::vector<unsigned int>&  GetIndices() const override { return indices; }
+  virtual void                              BindVAO() const override { glBindVertexArray(this->VAO); }
+  virtual void                              UnbindVAO() const override { glBindVertexArray(0); }
 
   virtual bool											HasMaterial() const override { return true; }
   virtual void											SetMaterial(const Material&) override;

@@ -158,6 +158,16 @@ void SphereTexturedMesh::Draw()
   glBindVertexArray(0);
 }
 
+void SphereTexturedMesh::BindVAO() const
+{
+  glBindVertexArray(this->sphereVAO);
+}
+
+void SphereTexturedMesh::UnbindVAO() const
+{
+   glBindVertexArray(0);
+}
+
 void SphereTexturedMesh::SetMaterial(const Material& _m)
 {
   m_material = _m;
