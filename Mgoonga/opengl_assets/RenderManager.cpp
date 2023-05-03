@@ -92,8 +92,8 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 										folderPath + "PhongFragmentShader.glsl"));
 	shader_lambda(m_waverender.get());
 
-	m_hexrender.reset(new eHexRender(folderPath + "VertexShades.glsl", 
-																	 folderPath + "StencilFragmentShader.glsl", 
+	m_hexrender.reset(new eHexRender(folderPath + "Vertex3DSimple.glsl",
+																	 folderPath + "StencilFragmentShader.glsl",
 																	 folderPath + "HexGeometry.glsl"));
 	shader_lambda(m_hexrender.get());
 
@@ -123,7 +123,7 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 
 	shader_lambda(m_particleRenderGPU.get());
 	//Lines
-	m_linesRender.reset(new eLinesRender(folderPath + "VertexShades.glsl",
+	m_linesRender.reset(new eLinesRender(folderPath + "Vertex3DSimple.glsl",
 																			 folderPath + "StencilFragmentShader.glsl"));
 	shader_lambda(m_linesRender.get());
 	//Text

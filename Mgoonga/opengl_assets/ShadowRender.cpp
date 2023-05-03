@@ -8,13 +8,15 @@ eShadowRender::eShadowRender(const std::string& vS, const std::string& fS, const
 	: matrices(MAX_BONES)
 {
 	shaderDir.installShaders(vS.c_str(), fS.c_str());
-	MVPUniformLocationDir				= glGetUniformLocation(shaderDir.ID(), "MVP");
-	
+	MVPUniformLocationDir = glGetUniformLocation(shaderDir.ID(), "MVP");
+	BonesMatLocationDir = glGetUniformLocation(shaderDir.ID(), "gBones");
+
 	shaderPoint.installShaders(vS.c_str(), fSP.c_str(), gSP.c_str());
-	ModelUniformLocationPoint			= glGetUniformLocation(shaderPoint.ID(), "MVP");
+	ModelUniformLocationPoint = glGetUniformLocation(shaderPoint.ID(), "MVP");
 	ProjectionTransformsUniformLocation = glGetUniformLocation(shaderPoint.ID(), "shadowMatrices");
 	FarPlaneUniformLocation = glGetUniformLocation(shaderPoint.ID(), "far_plane");
 	LightPosUniformLocation = glGetUniformLocation(shaderPoint.ID(), "lightPosition");
+	BonesMatLocationPoint = glGetUniformLocation(shaderPoint.ID(), "gBones");
 }
 
 //-----------------------------------------------------------------------------
@@ -51,6 +53,18 @@ void eShadowRender::Render(const Camera&					camera,
 		{
 			glm::mat4 modelMatrix = object->GetTransform()->getModelMatrix();
 			glUniformMatrix4fv(ModelUniformLocationPoint, 1, GL_FALSE, &modelMatrix[0][0]);
+
+			if (object->GetRigger() != nullptr)
+			{
+				matrices = object->GetRigger()->GetMatrices();
+			}
+			else
+			{
+				for (auto& m : matrices)
+					m = UNIT_MATRIX;
+			}
+			glUniformMatrix4fv(BonesMatLocationPoint, MAX_BONES, GL_FALSE, &matrices[0][0][0]);
+
 			object->GetModel()->Draw();
 		}
 	}
@@ -70,6 +84,18 @@ void eShadowRender::Render(const Camera&					camera,
 		{
 			glm::mat4 modelToProjectionMatrix = shadowMatrix * object->GetTransform()->getModelMatrix();
 			glUniformMatrix4fv(MVPUniformLocationDir, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
+
+			if (object->GetRigger() != nullptr)
+			{
+				matrices = object->GetRigger()->GetMatrices();
+			}
+			else
+			{
+				for (auto& m : matrices)
+					m = UNIT_MATRIX;
+			}
+			glUniformMatrix4fv(BonesMatLocationDir, MAX_BONES, GL_FALSE, &matrices[0][0][0]);
+
 			object->GetModel()->Draw();
 		}
 	}

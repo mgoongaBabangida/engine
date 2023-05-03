@@ -28,6 +28,8 @@ protected:
 	GLuint			ProjectionTransformsUniformLocation;
 	GLuint			FarPlaneUniformLocation;
 	GLuint			LightPosUniformLocation;
+	GLuint			BonesMatLocationDir;
+	GLuint			BonesMatLocationPoint;
 
 	std::vector<glm::mat4> matrices;
 	glm::mat4			         shadowMatrix;

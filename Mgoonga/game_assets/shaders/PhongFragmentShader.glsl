@@ -62,8 +62,9 @@ uniform bool debug_white_texcoords = false;
 uniform bool tone_mapping = true;
 uniform float hdr_exposure = 1.0f;
 
-float ShadowCalculation(vec4 fragPosLightSpace);
+float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal);
 float ShadowCalculationCubeMap(vec3 fragPos);
+vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir);
 
 subroutine(LightingPtr) vec3 calculatePhongPointSpecDif(Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
 {
@@ -201,8 +202,6 @@ subroutine(LightingPtr) vec3 calculateBlinnPhongFlashSpecDif(Light light, vec3 n
 	 return vec3(0.0f,0.0f,0.0f);
 }
 
-vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir);
-
 void main()
 {   
 	// Paralax mapping
@@ -232,9 +231,10 @@ void main()
 		
   vec3 ambientLight = light.ambient * dif_texture; 
 
-     float shadow; 
+     float shadow;
+	 vec3 lightVector = -normalize(vec3(light.direction));	 
      if(shadow_directional)
-		shadow =  ShadowCalculation(LightSpacePos);
+		shadow =  ShadowCalculation(LightSpacePos, lightVector, bNormal);
      else
 		shadow =  ShadowCalculationCubeMap(thePosition);
 
@@ -262,14 +262,14 @@ void main()
 	outColor.rgb = pow(outColor.rgb, vec3(1.0/2.2f));
 };
 
-float ShadowCalculation(vec4 fragPosLightSpace )
+float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal )
 {
   //perform perspective divide
   vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
   projCoords = projCoords * 0.5 + 0.5;
   float closestDepth = texture(depth_texture, projCoords.xy).r;
   float currentDepth = projCoords.z;
-  float bias = 0.05; //max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+  float bias = max(0.01 * (1.0 - dot(normal, lightDir)), 0.001);
   
   float shadow = 0.0;
   vec2 texelSize = 1.0 / textureSize(depth_texture, 0);
