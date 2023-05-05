@@ -331,7 +331,7 @@ void eAmericanTreasureGame::InitializeModels()
 	terrain->GetTransform()->setTranslation(vec3(0.0f, 1.8f, 0.0f));
 	m_objects.push_back(terrain);
 
-	//SHIPS
+	//SHIPS @todo shuold be created in factory !
 	//1
 	//need to load listeners for sounds somewhere, sounds should be copied
 	auto* shipScript = new eShipScript(texManager->Find("TSpanishFlag0_s"),
@@ -348,7 +348,7 @@ void eAmericanTreasureGame::InitializeModels()
 	m_objects.push_back(nanosuit);
 	
 	//2
-	//need to load listners for sounds somewhere, sounds should be copied
+	//@todo need to load listners for sounds somewhere, sounds should be copied !!!
 	auto* shipScript2 = new eShipScript(texManager->Find("TPirate_flag0_s"),
 		*pipeline,
 		*camera.get(),
@@ -432,7 +432,7 @@ void eAmericanTreasureGame::_InitializeHexes()
 		//hex.Debug();
 	}
 	ObjectFactoryBase factory;
-	hex_model = factory.CreateObject(std::make_shared<SimpleModel>(new SimpleGeometryMesh(dots, Hex::radius)));
+	hex_model = factory.CreateObject(std::make_shared<SimpleModel>(new SimpleGeometryMesh(dots, Hex::radius)), eObject::RenderType::GEOMETRY);
 }
 
 //-------------------------------------------------------------------------------------------
@@ -454,20 +454,20 @@ void eAmericanTreasureGame::PaintGL()
 		if (ship->GetScript())
 		{
 			ship->GetScript()->Update(m_objects);
-			flags.push_back(ship->getShipScript()->GetChildrenObjects()[0]);
+			flags.push_back(ship->GetChildrenObjects()[0]);
 		}
 	}
 
 	for(auto &base : bases)
-		flags.push_back(base->getBaseScript()->GetChildrenObjects()[0]);
+		flags.push_back(base->GetChildrenObjects()[0]);
 	
-	std::map<eOpenGlRenderPipeline::RenderType, std::vector<shObject>> objects;
-	objects.insert({ eOpenGlRenderPipeline::RenderType::PHONG, m_objects });
-	objects.insert({ eOpenGlRenderPipeline::RenderType::GEOMETRY, {hex_model} });
+	std::map<eObject::RenderType, std::vector<shObject>> objects;
+	objects.insert({ eObject::RenderType::PHONG, m_objects });
+	objects.insert({ eObject::RenderType::GEOMETRY, {hex_model} });
 	if(focused)
-		objects.insert({ eOpenGlRenderPipeline::RenderType::OUTLINED, std::vector<shObject>{ focused } });
+		objects.insert({ eObject::RenderType::OUTLINED, std::vector<shObject>{ focused } });
 	else
-		objects.insert({ eOpenGlRenderPipeline::RenderType::OUTLINED, std::vector<shObject>{} });
-	objects.insert({ eOpenGlRenderPipeline::RenderType::FLAG, flags });
+		objects.insert({ eObject::RenderType::OUTLINED, std::vector<shObject>{} });
+	objects.insert({ eObject::RenderType::FLAG, flags });
 	pipeline->RenderFrame(objects, *camera.get(), light, guis);
 }

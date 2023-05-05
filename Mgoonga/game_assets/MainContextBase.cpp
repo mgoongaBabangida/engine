@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "MainContextBase.h"
+#include "ObjectFactory.h"
 
 #include <base/InputController.h>
 #include <tcp_lib/Network.h>
@@ -10,8 +11,12 @@
 #include <opengl_assets/TextureManager.h>
 #include <opengl_assets/ModelManager.h>
 #include <opengl_assets/SoundManager.h>
+#include <opengl_assets/Sound.h>
+
+#include <sdl_assets/ImGuiContext.h>
 
 #include <math/Clock.h>
+#include <math/ParticleSystem.h>
 
 #include <thread>
 
@@ -30,7 +35,9 @@ eMainContextBase::eMainContextBase(eInputController* _input,
 , soundManager(new eSoundManager(_assetsPath))
 , externalGui(_externalGui)
 , pipeline(width, height)
-{}
+{
+
+}
 
 //-------------------------------------------------------------------------
 eMainContextBase::~eMainContextBase()
@@ -43,6 +50,25 @@ eMainContextBase::~eMainContextBase()
 size_t eMainContextBase::Width() { return width; }
 //-------------------------------------------------------------------------
 size_t eMainContextBase::Height() { return height; }
+
+//--------------------------------------------------------------------------
+bool eMainContextBase::OnKeyPress(uint32_t _asci)
+{
+	switch (_asci)
+	{
+		case ASCII_Q:
+		{
+			if (m_gizmo_type == GizmoType::TRANSLATE)
+				m_gizmo_type = GizmoType::ROTATE;
+			else if (m_gizmo_type == GizmoType::ROTATE)
+				m_gizmo_type = GizmoType::SCALE;
+			else if (m_gizmo_type == GizmoType::SCALE)
+				m_gizmo_type = GizmoType::TRANSLATE;
+		}
+	return true;
+	default: return false;
+	}
+}
 
 //--------------------------------------------------------------------------
 void eMainContextBase::InitializeGL()
@@ -60,6 +86,9 @@ void eMainContextBase::InitializeGL()
 	m_cameras[0].setPosition(glm::vec3(0.0f, 4.0f, -4.0f));
 	//Camera Ray
 	GetMainCamera().getCameraRay().init(width, height, nearPlane, farPlane); //@todo direction of camera normalization
+
+	for (auto& gui : externalGui)
+		inputController->AddObserver(gui, MONOPOLY);
 
 	InitializeTextures();
 
@@ -85,6 +114,67 @@ void eMainContextBase::InitializeGL()
 //-------------------------------------------------------------------------------
 void eMainContextBase::PaintGL()
 {
+	if (m_gameState == GameState::LOADED)
+	{
+		std::map<eObject::RenderType, std::vector<shObject>> objects;
+		std::vector<shObject> phong, pbr, flags, bezier, geometry;
+
+		for (auto& object : m_objects)
+		{
+			if (object->GetScript())
+				object->GetScript()->Update(m_objects);
+
+			for (auto& child : object->GetChildrenObjects())
+			{
+				if (child->GetRenderType() == eObject::RenderType::PBR)
+					pbr.push_back(child);
+				else if (child->GetRenderType() == eObject::RenderType::PHONG)
+					phong.push_back(child);
+				else if (child->GetRenderType() == eObject::RenderType::FLAG)
+					flags.push_back(child);
+			}
+
+			if (object->GetRenderType() == eObject::RenderType::BEZIER_CURVE)
+				bezier.push_back(object);
+			else if (object->GetRenderType() == eObject::RenderType::GEOMETRY)
+				geometry.push_back(object);
+			else if (object->GetRenderType() == eObject::RenderType::PBR)
+				pbr.push_back(object);
+			else if (object->GetRenderType() == eObject::RenderType::PHONG)
+				phong.push_back(object);
+			else if (object->GetRenderType() == eObject::RenderType::FLAG)
+				flags.push_back(object);
+		}
+
+		if(m_input_strategy)
+			m_input_strategy->UpdateInRenderThread();
+
+		if (m_light_object)
+		{
+			m_light_object->GetTransform()->setTranslation(GetMainLight().light_position);
+			GetMainLight().light_direction = -GetMainLight().light_position;
+			phong.push_back(m_light_object);
+		}
+
+		//need better design less copying
+		std::shared_ptr<std::vector<shObject>> focused_output = m_framed;
+		if (!focused_output || !(focused_output->size() > 1))
+			focused_output = m_focused ? std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{ m_focused })
+			: std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{});
+
+		objects.insert({ eObject::RenderType::PHONG, phong });
+		objects.insert({ eObject::RenderType::OUTLINED, *focused_output });
+		objects.insert({ eObject::RenderType::FLAG, flags });
+		objects.insert({ eObject::RenderType::PBR, pbr });
+		objects.insert({ eObject::RenderType::BEZIER_CURVE, bezier });
+		objects.insert({ eObject::RenderType::GEOMETRY, geometry });
+
+		pipeline.RenderFrame(objects, GetMainCamera(), GetMainLight(), m_guis);
+	}
+	else if (m_gameState == GameState::LOADING)
+	{
+		//welcome texture(s)
+	}
 }
 
 //--------------------------------------------------------------------------------
@@ -122,6 +212,121 @@ void eMainContextBase::InitializeTextures()
 	texManager->InitContext(assetsFolderPath);
 	texManager->LoadAllTextures();
 	//m_Textures.Find("Tbricks0_d")->second.saveToFile("MyTexture");  //Saving texture debug
+}
+
+//--------------------------------------------------------------------------------
+void eMainContextBase::InitializeExternalGui()
+{
+	// Lights & Cameras
+	externalGui[0]->Add(TEXT, "Light", nullptr);
+	externalGui[0]->Add(SLIDER_FLOAT_3, "Light position.", &GetMainLight().light_position);
+	externalGui[0]->Add(SLIDER_FLOAT_3, "Light direction.", &GetMainLight().light_direction);
+	externalGui[0]->Add(SLIDER_FLOAT_3, "Light intensity.", &GetMainLight().intensity);
+	externalGui[0]->Add(SLIDER_FLOAT_3, "Light ambient.", &GetMainLight().ambient);
+	externalGui[0]->Add(SLIDER_FLOAT_3, "Light diffuse.", &GetMainLight().diffuse);
+	externalGui[0]->Add(SLIDER_FLOAT_3, "Light specular.", &GetMainLight().specular);
+	externalGui[0]->Add(SLIDER_FLOAT, "Light constant", &GetMainLight().constant);
+	externalGui[0]->Add(SLIDER_FLOAT, "Light linear", &GetMainLight().linear);
+	externalGui[0]->Add(SLIDER_FLOAT, "Light quadratic", &GetMainLight().quadratic);
+	externalGui[0]->Add(SLIDER_FLOAT, "Light cut off", &GetMainLight().cutOff);
+	externalGui[0]->Add(SLIDER_FLOAT, "Light outer cut off", &GetMainLight().outerCutOff);
+	externalGui[0]->Add(TEXT, "Camera", nullptr);
+	externalGui[0]->Add(SLIDER_FLOAT_3, "position", &GetMainCamera().PositionRef());
+	externalGui[0]->Add(SLIDER_FLOAT_3, "direction", &GetMainCamera().ViewDirectionRef());
+
+	//Pipeline
+	externalGui[1]->Add(CHECKBOX, "Show bounding boxes", &pipeline.GetBoundingBoxBoolRef());
+	externalGui[1]->Add(CHECKBOX, "Use Multi sampling", &pipeline.GetMultiSamplingBoolRef());
+	externalGui[1]->Add(CHECKBOX, "Sky box", &pipeline.GetSkyBoxOnRef());
+	externalGui[1]->Add(CHECKBOX, "Water", &pipeline.GetWaterOnRef());
+	externalGui[1]->Add(CHECKBOX, "Hex", &pipeline.GetGeometryOnRef());
+	externalGui[1]->Add(CHECKBOX, "Kernel", &pipeline.GetKernelOnRef());
+	externalGui[1]->Add(CHECKBOX, "Sky noise", &pipeline.GetSkyNoiseOnRef());
+	externalGui[1]->Add(CHECKBOX, "Use gizmo", &m_use_guizmo);
+	externalGui[1]->Add(CHECKBOX, "Gamma Correction", &pipeline.GetGammaCorrectionRef());
+	externalGui[1]->Add(CHECKBOX, "Gamma Tone Mapping", &pipeline.GetToneMappingRef());
+	externalGui[1]->Add(SLIDER_FLOAT, "Gamma Exposure", &pipeline.GetExposureRef());
+	externalGui[1]->Add(SLIDER_FLOAT, "Blur coefficients", &pipeline.GetBlurCoefRef());
+	std::function<void()> emit_partilces_callback = [this]()
+	{
+		pipeline.AddParticleSystem(new ParticleSystem(50, 0, 0, 10000, glm::vec3(0.0f, 3.0f, -2.5f),
+			texManager->Find("Tatlas2"),
+			soundManager->GetSound("shot_sound"),
+			texManager->Find("Tatlas2")->numberofRows));
+	};
+	std::function<void()> emit_partilces_gpu_callback = [this]()
+	{
+		pipeline.AddParticleSystemGPU(glm::vec3(0.5f, 3.0f, -2.5f), texManager->Find("Tatlas2"));
+	};
+	std::function<void()> update_uniforms_callback = [this]()
+	{
+		pipeline.UpdateShadersInfo();
+	};
+	static std::function<void(const std::string&)> add_model_callback = [this](const std::string& _path)
+	{
+		modelManager->Add("Name", (GLchar*)_path.c_str());//@todo parse real name
+	};
+
+	externalGui[1]->Add(BUTTON, "Emit particle system", (void*)&emit_partilces_callback);
+	externalGui[1]->Add(BUTTON, "Emit particle system gpu", (void*)&emit_partilces_gpu_callback);
+	externalGui[1]->Add(CHECKBOX, "Debug white", &pipeline.GetDebugWhite());
+	externalGui[1]->Add(CHECKBOX, "Debug Tex Coords", &pipeline.GetDebugTexCoords());
+
+	externalGui[1]->Add(SLIDER_FLOAT, "PBR debug dist", (void*)&pipeline.debug_float[0]);
+	externalGui[1]->Add(SLIDER_FLOAT, "PBR debug intensity", (void*)&pipeline.debug_float[1]);
+	externalGui[1]->Add(SLIDER_FLOAT, "PBR debug shininess", (void*)&pipeline.debug_float[2]);
+	externalGui[1]->Add(SLIDER_FLOAT, "PBR debug ao", (void*)&pipeline.debug_float[3]);
+
+	externalGui[1]->Add(TEXTURE, "Reflection buffer", (void*)pipeline.GetReflectionBufferTexture().id);
+	externalGui[1]->Add(TEXTURE, "Refraction buffer", (void*)pipeline.GetRefractionBufferTexture().id);
+	if (GetMainLight().type == eLightType::DIRECTION)
+		externalGui[1]->Add(TEXTURE, "Shadow buffer directional", (void*)pipeline.GetShadowBufferTexture().id);
+	else
+		externalGui[1]->Add(TEXTURE, "Shadow buffer point", (void*)pipeline.GetShadowBufferTexture().id);
+	externalGui[1]->Add(TEXTURE, "Gaussian buffer", (void*)pipeline.GetGausian2BufferTexture().id);
+	externalGui[1]->Add(TEXTURE, "Bright filter buffer", (void*)pipeline.GetBrightFilter().id);
+
+	//Objects transform
+	externalGui[2]->Add(OBJECT_REF_TRANSFORM, "Transform", (void*)&m_focused);
+
+	//Shaders
+	externalGui[3]->Add(BUTTON, "Update shaders", (void*)&update_uniforms_callback);
+	externalGui[3]->Add(SHADER, "Shaders", (void*)&pipeline.GetShaderInfos());
+
+	//Main Menu
+	externalGui[4]->Add(MENU_OPEN, "Add model", reinterpret_cast<void*>(&add_model_callback));
+
+	//Create
+	std::function<void()> create_cube_callbaack = [this]()
+	{
+		ObjectFactoryBase factory;
+		shObject cube = factory.CreateObject(std::make_shared<MyModel>(modelManager->FindMesh("cube")), eObject::RenderType::PHONG, "DefaultCube");
+		m_objects.push_back(cube);
+	};
+	externalGui[5]->Add(BUTTON, "Cube", (void*)&create_cube_callbaack);
+
+	std::function<void()> create_sphere_callbaack = [this]()
+	{
+		ObjectFactoryBase factory;
+		shObject sphere = factory.CreateObject(std::make_shared<MyModel>(modelManager->FindMesh("sphere")), eObject::RenderType::PHONG, "DefaultSphere");
+		m_objects.push_back(sphere);
+	};
+	externalGui[5]->Add(BUTTON, "Sphere", (void*)&create_sphere_callbaack);
+
+	std::function<void()> create_plane_callbaack = [this]()
+	{
+		ObjectFactoryBase factory;
+		shObject plane = factory.CreateObject(std::make_shared<MyModel>(modelManager->FindMesh("plane")), eObject::RenderType::PHONG, "DefaultSphere");
+		m_objects.push_back(plane);
+	};
+	externalGui[5]->Add(BUTTON, "Plane", (void*)&create_plane_callbaack);
+
+	externalGui[6]->Add(OBJECT_LIST, "Objects List", (void*)this);
+
+	//Objects material
+	externalGui[7]->Add(OBJECT_REF_MATERIAL, "Material", (void*)&m_focused);
+	//Objects rigger
+	externalGui[8]->Add(OBJECT_REF_RIGGER, "Rigger", (void*)&m_focused);
 }
 
 //------------------------------------------------------------

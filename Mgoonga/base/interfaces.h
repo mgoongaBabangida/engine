@@ -64,7 +64,6 @@ public:
 	virtual ~IScript() = default;
 	virtual void																			Update(std::vector<std::shared_ptr<eObject>> objs) = 0;
 	virtual void																			CollisionCallback(const eCollision&)				{}
-  virtual std::vector<std::shared_ptr<eObject>>			GetChildrenObjects() { return std::vector<std::shared_ptr<eObject>>{}; }
 	void																							SetObject(eObject* obj) { object = obj; }
 };
 
@@ -257,8 +256,10 @@ public:
 	virtual void		PaintGL() = 0;
 	virtual uint32_t GetFinalImageId() = 0;
 	virtual std::shared_ptr<eObject> GetFocusedObject() = 0; //const ref?
+	virtual std::vector<std::shared_ptr<eObject>> GetObjects() = 0;
 	virtual glm::mat4 GetMainCameraViewMatrix() = 0;
 	virtual glm::mat4 GetMainCameraProjectionMatrix() = 0;
+
 	virtual bool UseGizmo() = 0;
 	virtual uint32_t CurGizmoType() = 0;
 

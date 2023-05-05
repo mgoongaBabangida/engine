@@ -24,14 +24,10 @@ class SimpleGeometryMesh;
 class DLL_OPENGL_ASSETS eOpenGlRenderPipeline
 {
 public:
-
-	enum class RenderType
-	{ PHONG, PBR, FLAG, OUTLINED , GEOMETRY, BEZIER_CURVE };
-
 	eOpenGlRenderPipeline(uint32_t width, uint32_t height);
 	~eOpenGlRenderPipeline();
 
-	void			RenderFrame(std::map<RenderType, std::vector<shObject>>, Camera&, const Light&, std::vector<std::shared_ptr<GUI>>&);
+	void			RenderFrame(std::map<eObject::RenderType, std::vector<shObject>>, Camera&, const Light&, std::vector<std::shared_ptr<GUI>>&);
 	//gui should be const latter ?, and camera prob
 	
 	void			Initialize();

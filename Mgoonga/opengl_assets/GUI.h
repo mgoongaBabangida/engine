@@ -86,11 +86,11 @@ protected:
 };
 
 //----------------------------------------------
-class DLL_OPENGL_ASSETS Cursor : public GUI
+class DLL_OPENGL_ASSETS Cursor : public GUIWithAlpha
 {
 public:
 	Cursor(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight)
-		:GUI(topleftX, topleftY, Width, Height, scWidth, scHeight) {}
+		: GUIWithAlpha(topleftX, topleftY, Width, Height, scWidth, scHeight) {}
 
 	virtual bool	OnMouseMove(uint32_t x, uint32_t y) override;
 };

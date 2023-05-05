@@ -24,8 +24,8 @@ void eScreenRender::Render(glm::vec2 _top_left, glm::vec2 _right_botom,
 	glUseProgram(screenShader.ID());
 	glUniform1i(frameLoc, GL_FALSE);
   glUniform1i(blendLoc, GL_FALSE);
-	screenMesh->UpdateFrame(_top_left.x, _top_left.y, _right_botom.x, _right_botom.y,
-													_tex_top_left.x, _tex_top_left.y, _tex_right_botom.x, _tex_right_botom.y, 
+	screenMesh->UpdateFrame(_top_left.x,			_top_left.y,				_right_botom.x,			_right_botom.y,
+													_tex_top_left.x, _tex_right_botom.y,	_tex_right_botom.x,	_tex_top_left.y,
 													viewport_width, viewport_height);
 	screenMesh->Draw();
 	screenMesh->SetViewPortToDefault();

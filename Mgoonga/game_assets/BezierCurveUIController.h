@@ -12,12 +12,12 @@ class BezierCurveMesh;
 class DLL_GAME_ASSETS BezierCurveUIController : public IScript
 {
 public:
-  explicit BezierCurveUIController(const std::array<shObject, 5>& _bezier_objects);
+  explicit BezierCurveUIController(shObject _bezier_object);
   virtual ~BezierCurveUIController();
 
   virtual void	Update(std::vector<std::shared_ptr<eObject> > objs) override;
 protected:
-  std::array<shObject, 5> m_bezier_objects;
+  shObject m_bezier_object;
   dbb::Bezier* m_bezier;
   const BezierCurveMesh* m_bezier_mesh;
 };

@@ -1,14 +1,17 @@
 #include "stdafx.h"
 #include "ObjectFactory.h"
-#include <base/Object.h>
 #include <math/Rigger.h>
 #include <math/RigidBdy.h>
 #include <math/BoxColliderDynamic.h>
 
-std::unique_ptr<eObject> ObjectFactoryBase::CreateObject(std::shared_ptr<IModel> _model, const std::string& _name, bool _dynamic_collider)
+std::unique_ptr<eObject> ObjectFactoryBase::CreateObject(std::shared_ptr<IModel> _model,
+                                                         eObject::RenderType _render_type,
+                                                         const std::string& _name,
+                                                         bool _dynamic_collider)
 {
   auto obj = std::make_unique<eObject>();
   obj->SetModel(_model);
+  obj->SetRenderType(_render_type);
   obj->SetTransform(new Transform);
   if (!_model->Get3DMeshes().empty())
   {

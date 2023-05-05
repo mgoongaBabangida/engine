@@ -47,15 +47,7 @@ protected:
   virtual void      InitializeExternalGui()           override;
 
 protected:
-  std::vector<shObject>				           m_objects;
-  std::vector<shObject>                  m_pbr_objs;
-  std::shared_ptr<std::vector<shObject>> m_framed;
-  std::vector<std::shared_ptr<GUI>>			 guis;
-  shObject														   hex_model;
-  std::array<shObject, 5>								 bezier_model;
-  std::unique_ptr<InputStrategy>         m_inputStrategy;
-  //debuging
-  shObject							                 m_lightObject;
+
 };
 
 #endif

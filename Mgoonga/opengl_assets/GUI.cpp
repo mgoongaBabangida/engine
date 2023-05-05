@@ -3,7 +3,6 @@
 #include <math/Rigger.h>
 
 #include <memory>
-#include <iostream>
 
 GUI::GUI()
 {
@@ -11,11 +10,11 @@ GUI::GUI()
 
 GUI::GUI(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight)
 	: topleftX(topleftX),
-	topleftY(topleftY),
-	Width(Width),
-	Height(Height),
-	screenWidth(scWidth),
-	screenHeight(scHeight)
+		topleftY(topleftY),
+		Width(Width),
+		Height(Height),
+		screenWidth(scWidth),
+		screenHeight(scHeight)
 	{}
 
 GUI::GUI(const GUI& _other)

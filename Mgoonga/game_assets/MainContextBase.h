@@ -11,6 +11,7 @@
 #include <sdl_assets/sdl_assets.h>
 
 #include <opengl_assets/OpenGlRenderPipeline.h>
+#include "InputStrategy.h"
 
 class eTextureManager;
 class eModelManager;
@@ -50,15 +51,20 @@ public:
 	Event<std::function<void(shObject)>> ObjectBeingAddedToScene;
 	Event<std::function<void(shObject)>> ObjectBeingDeletedFromScene;
 
+	//IInputObserver
+	virtual bool			OnKeyPress(uint32_t asci)		override;
+	
 	//IGame
 	void			InitializeGL() final;
 
-	//IGame
 	virtual void			PaintGL() override;
 	virtual uint32_t	GetFinalImageId() override;
 	virtual std::shared_ptr<eObject> GetFocusedObject() override;
+	virtual std::vector<std::shared_ptr<eObject>> GetObjects() override { return m_objects; }
+	
 	virtual glm::mat4 GetMainCameraViewMatrix() override;
 	virtual glm::mat4 GetMainCameraProjectionMatrix() override;
+	
 	virtual bool			UseGizmo() override { return m_use_guizmo; }
 	virtual uint32_t	CurGizmoType() override { return (uint32_t)m_gizmo_type; }
 
@@ -75,7 +81,7 @@ protected:
 	virtual void		InitializeRenders() {}
 	virtual void		InitializeTextures();
 	virtual void		InitializeSounds()  {}
-  virtual void    InitializeExternalGui() {}
+	virtual void    InitializeExternalGui();
 	virtual void		Pipeline()			{}
 
 	void						_PreInitModelManager();
@@ -92,7 +98,15 @@ protected:
 
 	std::vector<Light>					m_lights;
 	std::vector<Camera>					m_cameras;
-	shObject										m_focused;
+
+	shObject																m_focused;
+	std::vector<shObject>										m_objects;
+	std::shared_ptr<std::vector<shObject>>	m_framed;
+	std::vector<std::shared_ptr<GUI>>				m_guis;
+
+	std::unique_ptr<InputStrategy>					m_input_strategy;
+	//debuging
+	shObject																m_light_object;
 
 	bool												m_use_guizmo = true;
 	GizmoType										m_gizmo_type = GizmoType::TRANSLATE;

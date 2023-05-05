@@ -104,7 +104,7 @@ Texture eOpenGlRenderPipeline::GetSkyNoiseTexture(const Camera& _camera)
 }
 
 //-----------------------------------------------------------------------------------------------
-void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObject>> _objects,
+void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vector<shObject>> _objects,
 																			  Camera& _camera,
 																			  const Light& _light,
 																			  std::vector<std::shared_ptr<GUI>>& guis)
@@ -113,12 +113,12 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
     { return glm::length2(_camera.getPosition() - obj1->GetTransform()->getTranslation())
     > glm::length2(_camera.getPosition() - obj2->GetTransform()->getTranslation()); });*/
 	
-	std::vector<shObject> phong_objs = _objects.find(RenderType::PHONG)->second;
-	std::vector<shObject> focused = _objects.find(RenderType::OUTLINED)->second;
-	std::vector<shObject> pbr_objs = _objects.find(RenderType::PBR)->second;
-	std::vector<shObject> flags = _objects.find(RenderType::FLAG)->second;
-	std::vector<shObject> geometry_obj = _objects.find(RenderType::GEOMETRY)->second;
-	std::vector<shObject> bezier_objs = _objects.find(RenderType::BEZIER_CURVE)->second;
+	std::vector<shObject> phong_objs = _objects.find(eObject::RenderType::PHONG)->second;
+	std::vector<shObject> focused = _objects.find(eObject::RenderType::OUTLINED)->second;
+	std::vector<shObject> pbr_objs = _objects.find(eObject::RenderType::PBR)->second;
+	std::vector<shObject> flags = _objects.find(eObject::RenderType::FLAG)->second;
+	std::vector<shObject> geometry_obj = _objects.find(eObject::RenderType::GEOMETRY)->second;
+	std::vector<shObject> bezier_objs = _objects.find(eObject::RenderType::BEZIER_CURVE)->second;
 
 	//Shadow Render Pass
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SHADOW);
@@ -323,9 +323,10 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<RenderType, std::vector<shObjec
 
 	if(mousepress  && _camera.getCameraRay().IsPressed())
 	{
-		renderManager->ScreenRender()->RenderFrame(_camera.getCameraRay().GetFrame().first, _camera.getCameraRay().GetFrame().second, 
-																							static_cast<float>(width), 
-																							static_cast<float>(height));
+		renderManager->ScreenRender()->RenderFrame(_camera.getCameraRay().GetFrame().first,
+																							 _camera.getCameraRay().GetFrame().second, 
+																							 static_cast<float>(width), 
+																							 static_cast<float>(height));
 	}
 
 	RenderGui(guis, _camera);

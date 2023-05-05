@@ -123,6 +123,9 @@ namespace dbb
 
 			for (auto &obj : objects)
 			{
+				if (!obj->GetCollider())
+					continue;
+
 				std::vector<glm::vec3> extrems = obj->GetCollider()->GetExtrems(*(obj->GetTransform()));
 				for (auto &extrem : extrems)
 				{

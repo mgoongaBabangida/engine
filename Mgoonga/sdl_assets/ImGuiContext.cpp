@@ -295,7 +295,7 @@ void eWindowImGui::Render()
         }
       }
       break;
-      case OBJECT_REF:
+      case OBJECT_REF_TRANSFORM:
       {
         //@todo !!!
         //check if obj has changed and put current mesh to 0 (save last obj?)
@@ -358,6 +358,16 @@ void eWindowImGui::Render()
           
           text = std::string("Number of meshes ") + std::to_string(obj->GetModel()->GetMeshCount());
           ImGui::Text(text.c_str());
+        }
+      }
+      break;
+      case OBJECT_REF_MATERIAL:
+      {
+        shObject* p_object = static_cast<shObject*>(std::get<2>(item));
+        if (p_object && *p_object)
+        {
+          shObject obj = *p_object;
+          ImGui::Text(obj->Name().c_str());
 
           //Meshes transfer to rigger later
           combo_list.clear();
@@ -366,10 +376,10 @@ void eWindowImGui::Render()
             std::string name = obj->GetModel()->GetMeshes()[i]->Name();
             for (int j = 0; j < name.size(); ++j)
               combo_list.push_back(name[j]);
-            if(i != obj->GetModel()->GetMeshCount() -1)
+            if (i != obj->GetModel()->GetMeshCount() - 1)
               combo_list.push_back('\0');
           }
-          
+
           static int mesh_current = 0;
           if (!combo_list.empty())
           {
@@ -417,11 +427,40 @@ void eWindowImGui::Render()
           //@todo add displacement/ bump as separate slot
 
           combo_list.clear();
+        }
+      }
+      break;
+      case OBJECT_REF_RIGGER:
+      {
+        shObject* p_object = static_cast<shObject*>(std::get<2>(item));
+        if (p_object && *p_object)
+        {
+          shObject obj = *p_object;
+          ImGui::Text(obj->Name().c_str());
+
+          //Meshes transfer to rigger later
+          combo_list.clear();
+          for (size_t i = 0; i < obj->GetModel()->GetMeshCount(); ++i)
+          {
+            std::string name = obj->GetModel()->GetMeshes()[i]->Name();
+            for (int j = 0; j < name.size(); ++j)
+              combo_list.push_back(name[j]);
+            if (i != obj->GetModel()->GetMeshCount() - 1)
+              combo_list.push_back('\0');
+          }
+
+          static int mesh_current = 0;
+          if (!combo_list.empty())
+          {
+            if (ImGui::Combo("Object Meshes", &mesh_current, &combo_list[0]))
+            {
+            }
+          }
 
           if (obj->GetRigger())
           {
             //Animation -> transfer to rigger as well
-            text = std::string("Number of animations ") + std::to_string(obj->GetRigger()->GetAnimationCount());
+            std::string text = std::string("Number of animations ") + std::to_string(obj->GetRigger()->GetAnimationCount());
             ImGui::Text(text.c_str());
 
             //Animations
@@ -564,6 +603,20 @@ void eWindowImGui::Render()
             {
               obj->GetRigger()->Stop();
             }
+          }
+        }
+      }
+      break;
+      case OBJECT_LIST:
+      {
+        IGame* p_game = static_cast<IGame*>(std::get<2>(item));
+        auto objects = p_game->GetObjects();
+        for (auto& obj : objects)
+        {
+          bool is_visible = obj->IsVisible();
+          if(ImGui::Checkbox(obj->Name().c_str(), &is_visible))
+          {
+            obj->SetVisible(is_visible);
           }
         }
       }

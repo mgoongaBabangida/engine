@@ -110,6 +110,8 @@ void eTextureManager::LoadAllTextures()
 	m_Textures.insert(std::pair<std::string, Texture>("TButton_red", text));
 	text.loadTextureFromFile(folderPath + "transparent-michelangelo.png");
 	m_Textures.insert(std::pair<std::string, Texture>("Michelangelo", text));
+	text.loadTextureFromFile(folderPath + "cursor1.png");
+	m_Textures.insert(std::pair<std::string, Texture>("cursor1", text));
 
 	text.loadTextureFromFile(folderPath + "dice1.jpg");
 	m_Textures.insert(std::pair<std::string, Texture>("tex_dice1", text));

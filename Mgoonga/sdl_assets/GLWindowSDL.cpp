@@ -28,10 +28,13 @@ dbGLWindowSDL::dbGLWindowSDL(const IGameFactory& _factory)
 {
   guiWnd.push_back(new eWindowImGui("Lights & Cameras"));//0
   guiWnd.push_back(new eWindowImGui("Pipeline"));//1
-  guiWnd.push_back(new eWindowImGui("Object"));//2
+  guiWnd.push_back(new eWindowImGui("Object Transform"));//2
 	guiWnd.push_back(new eWindowImGui("Shader"));//3
 	guiWnd.push_back(new eMainImGuiWindow());//4
 	guiWnd.push_back(new eWindowImGui("Create"));//5
+	guiWnd.push_back(new eWindowImGui("Objects list"));//6
+	guiWnd.push_back(new eWindowImGui("Object Material"));//7
+	guiWnd.push_back(new eWindowImGui("Object Rigger"));//8
 
   on_close = std::function<void()>{ [this](){this->Close(); } };
   guiWnd[4]->Add(MENU, "Close", reinterpret_cast<void*>(&on_close));
