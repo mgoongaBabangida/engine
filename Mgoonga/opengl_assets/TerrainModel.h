@@ -21,6 +21,8 @@ public:
 	void initialize(Texture* diffuse, Texture* specular, Texture* normal, Texture* heightMap, bool spreed_texture = true);
 	
 	virtual void														Draw()							override;
+	virtual const std::string&							GetName() const override { return mesh->Name(); }
+	virtual const std::string&							GetPath() const override { return m_path; }
 
   virtual size_t													GetVertexCount() const;
   virtual size_t													GetMeshCount() const { return 1; }
@@ -46,10 +48,11 @@ public:
 	void setSpecular(uint32_t _id);
 
 private:
-	MyMesh*		mesh; // generate ourself inside constructor
-	Material	m_material;
+	MyMesh*					mesh; // generate ourself inside constructor
+	Material				m_material;
+	std::string			m_path;
 
-	Texture		m_height;
+	Texture					m_height;
 	
 	GLuint		m_size;
 	GLuint		m_rows;

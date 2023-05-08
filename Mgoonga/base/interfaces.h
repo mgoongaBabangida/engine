@@ -112,7 +112,10 @@ public:
 	virtual ~IModel() = default;
 
 	virtual void														Draw()					= 0;
-  virtual size_t													GetVertexCount() const = 0;
+	virtual const std::string&							GetName() const = 0;
+	virtual const std::string&							GetPath() const = 0;
+
+	virtual size_t													GetVertexCount() const = 0;
   virtual size_t													GetMeshCount() const = 0;
   virtual std::vector<const IMesh*>				GetMeshes() const = 0;
 	virtual std::vector<const I3DMesh*>			Get3DMeshes() const = 0;

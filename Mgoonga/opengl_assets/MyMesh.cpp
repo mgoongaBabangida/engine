@@ -2,10 +2,10 @@
 
 #include "MyMesh.h"
 #include <sstream>
-#include<iostream>
 
 //----------------------------------------------------------------------------
-MyMesh::MyMesh()
+MyMesh::MyMesh(const std::string& _name)
+	: name(_name)
 {
 }
 
@@ -17,7 +17,8 @@ MyMesh::~MyMesh()
 	glDeleteBuffers(1, &EBO);
 }
 
-MyMesh::MyMesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture*> textures)
+MyMesh::MyMesh(const std::string& _name, std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture*> textures)
+	: name(_name)
 {
 	this->vertices = vertices;
 	this->indices = indices;
@@ -26,7 +27,8 @@ MyMesh::MyMesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::v
 	this->setupMesh();
 }
 
-MyMesh::MyMesh(const ShapeData & data)
+MyMesh::MyMesh(const std::string& _name, const ShapeData & data)
+	: name(_name)
 {
 	glm::vec2 tex[4];
 	tex[0] = glm::vec2(1.0f, 1.0f);

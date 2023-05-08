@@ -46,6 +46,8 @@ class DLL_OPENGL_ASSETS SphereTexturedModel : public IModel
       {}
 
     virtual void						          Draw() override;
+    virtual const std::string&        GetName() const override { return m_mesh->Name(); }
+    virtual const std::string&        GetPath() const override { return m_path; }
 
     virtual size_t                      GetVertexCount() const override { return m_mesh->GetVertexCount();}
     virtual size_t                      GetMeshCount() const override { return 1; }
@@ -57,4 +59,5 @@ class DLL_OPENGL_ASSETS SphereTexturedModel : public IModel
 
   protected:
     std::shared_ptr<SphereTexturedMesh> m_mesh;
+    std::string                         m_path;
   };

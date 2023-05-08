@@ -28,8 +28,8 @@ eShipScript::eShipScript(Texture*			_flagTexture,
 	flag_scale = { 0.03f, 0.03f ,0.03f };
 
 	m_flag->SetTransform(new Transform);
-	std::shared_ptr<MyMesh> mesh(new MyMesh());
-	m_flag->SetModel(new MyModel(mesh, flag_tex));
+	std::shared_ptr<MyMesh> mesh(new MyMesh("flag"));
+	m_flag->SetModel(new MyModel(mesh,"flag_mesh", flag_tex));
 	m_flag->SetRenderType(eObject::RenderType::FLAG);
 }
 

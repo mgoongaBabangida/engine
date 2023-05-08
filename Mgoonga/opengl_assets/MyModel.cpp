@@ -17,10 +17,12 @@ Texture MyModel::default_roughness_mapping = {};
 Texture MyModel::default_emission_mapping = {};
 
 MyModel::MyModel()
+  :m_name("empty")
 {}
 
-MyModel::MyModel(std::shared_ptr<MyMesh> m, Texture* t, Texture* t2, Texture* t3, Texture* t4)
+MyModel::MyModel(std::shared_ptr<MyMesh> m, const std::string& _name, Texture* t, Texture* t2, Texture* t3, Texture* t4)
   : mesh(m)
+  , m_name(_name)
 {
   if (default_diffuse_mapping.id == GetDefaultTextureId())
     default_diffuse_mapping.loadTexture1x1(GREY);
@@ -71,6 +73,8 @@ MyModel::MyModel(std::shared_ptr<MyMesh> m, Texture* t, Texture* t2, Texture* t3
 MyModel::MyModel(const MyModel& _other) //shallow copy
 	: mesh(_other.mesh)
   , m_material(_other.m_material)
+  , m_name(_other.m_name)
+  , m_path(_other.m_path)
 {
 }
 

@@ -1,8 +1,8 @@
 #ifndef SAND_BOX_SCRIPT_H
 #define SAND_BOX_SCRIPT_H
+#include "stdafx.h"
 
 #include <base/interfaces.h>
-#include <vector>
 #include <math/Clock.h>
 
 //------------------------------------------------------------------

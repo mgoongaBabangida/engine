@@ -36,7 +36,7 @@ TerrainModel::TerrainModel(Texture* diffuse,
 	m_material.roughness_texture_id = t.id;
 	m_material.emissive_texture_id = t.id;
 
-	mesh = new MyMesh();
+	mesh = new MyMesh("terrain");
 	m_size = heightMap->mTextureHeight;
 	m_rows = heightMap->mTextureWidth;
 	m_columns = heightMap->mTextureHeight;
@@ -63,7 +63,7 @@ TerrainModel::TerrainModel(Texture* color)
 	m_material.roughness_texture_id = t.id;
 	m_material.emissive_texture_id = t.id;
 
-	mesh = new MyMesh();
+	mesh = new MyMesh("terrain");
 	m_size = 10;
 	makePlaneVerts(10);
 	makePlaneIndices(10);
@@ -87,7 +87,7 @@ void TerrainModel::initialize(Texture* diffuse, Texture* specular, bool spreed_t
 	if (specular != nullptr)
 		m_material.metalic_texture_id = specular->id;
 
-  mesh = new MyMesh();
+  mesh = new MyMesh("terrain");
 	m_size = diffuse->mTextureHeight;
 	makePlaneVerts(diffuse->mTextureHeight, diffuse->mTextureHeight, spreed_texture);
 	makePlaneIndices(diffuse->mTextureHeight);
@@ -118,7 +118,7 @@ void TerrainModel::initialize(Texture* diffuse,
 	m_height =	*heightMap;
 	
 	if(mesh == nullptr)
-	  mesh = new MyMesh();
+	  mesh = new MyMesh("terrain");
 
 	m_size = heightMap->mTextureHeight;
 	m_rows = heightMap->mTextureWidth;

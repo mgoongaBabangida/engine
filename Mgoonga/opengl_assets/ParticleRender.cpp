@@ -28,7 +28,7 @@ eParticleRender::eParticleRender(std::shared_ptr<MyMesh> _mesh,
 	texOffset2Location						= glGetUniformLocation(particleShader.ID(), "texOffset2");
 	texCoordInfoLocation					= glGetUniformLocation(particleShader.ID(), "texCoordInfo");
 
-	model.reset(new MyModel(_mesh, _texture));
+	model.reset(new MyModel(_mesh, "Particle model",_texture));
 	object.reset(new eObject); // @todo prob transform will do
 	object->SetModel(model.get());
 	object->SetTransform(new Transform);

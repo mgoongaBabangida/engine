@@ -1,4 +1,5 @@
 -- premake5.lua
+
 workspace "Mgoonga"
 	architecture "x64"
 	configurations { "Debug", "Release" }
@@ -6,6 +7,7 @@ workspace "Mgoonga"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+------------------------------------------------------------------------------------------------
 project "base"
 	location "base"
 	kind "SharedLib"
@@ -30,7 +32,39 @@ project "base"
 	  --{
 	  --("{COPY} %{cfg.buidtarget.relpath} ../bin/" .. outputdir .. "/Mgoonga")
 	  --}
+	  
+------------------------------------------------------------------------------------------------
+project "yaml-cpp"
+	location "yaml-cpp"
+	kind "StaticLib"
+	language "C++"
+	cppdialect "C++17"
+	targetdir ("bin/" .. outputdir .. "/")
+	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	
+   files 
+   {
+   "%{prj.name}/src/**.h",
+   "%{prj.name}/src/**.cpp",
+   
+   "%{prj.name}/include/**.h"
+   }
+   
+   includedirs 
+   { 
+    "./"; "../../third_party",
+	"%{prj.name}/include"
+   }
+	
+   filter "configurations:Debug"
+      defines { "DEBUG;_DEBUG;_WINDOWS;_USRDLL;BASE_EXPORTS" }
+      symbols "On"
 
+   filter "configurations:Release"
+      defines { "NDEBUG;_WINDOWS;_USRDLL;BASE_EXPORTS" }
+      optimize "On"
+	  
+------------------------------------------------------------------------------------------------
 project "math"
 	location "math"
 	kind "SharedLib"
@@ -193,7 +227,8 @@ project "sdl_assets"
 	  --{
 	  --("{COPY} %{cfg.buidtarget.relpath} ../bin/" .. outputdir .. "/Mgoonga")
 	  --}
-	  
+
+--------------------------------------------------------------------------------------------------	  
 project "game_assets"
 	location "game_assets"
 	kind "SharedLib"
@@ -204,7 +239,11 @@ project "game_assets"
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
    
-   includedirs { "./"; "../../third_party" }
+   includedirs 
+   {
+	"./"; "../../third_party",
+	"../yaml-cpp/include"   
+   }
 	
    libdirs 
    { 
@@ -221,6 +260,7 @@ project "game_assets"
    {  
    "base", 
    "math",
+   "yaml-cpp",
    "opengl_assets",
    "sdl_assets",
    "tcp_lib",
@@ -244,7 +284,8 @@ project "game_assets"
    filter "configurations:Release"
       defines { "NDEBUG;_WINDOWS;_USRDLL;BASE_EXPORTS" }
       optimize "On"
-	  
+
+----------------------------------------------------------------------------------------------------	  
 project "Mgoonga"
 	location "Mgoonga"
 	kind "ConsoleApp"

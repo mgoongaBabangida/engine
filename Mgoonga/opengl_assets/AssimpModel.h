@@ -1,12 +1,14 @@
 #pragma once
 
 #include "stdafx.h"
+
 //#include <assimp/Importer.hpp>
 //#include <assimp/scene.h>
 //#include <assimp/postprocess.h>
 #include <assimp-3.1.1/include/assimp/Importer.hpp>
 #include <assimp-3.1.1/include/assimp/scene.h>
 #include <assimp-3.1.1/include/assimp/postprocess.h>
+
 #include "AssimpMesh.h"
 #include "MyModel.h"
 
@@ -19,10 +21,12 @@
 class Model: public eAnimatedModel
 {
 public:
-	Model(GLchar* path, bool _m_invert_y_uv = false);
+	Model(GLchar* path, const std::string& _name, bool _m_invert_y_uv = false);
   virtual ~Model();
 
 	virtual void Draw() override;
+	virtual const std::string& GetName() const override { return m_name; }
+	virtual const std::string& GetPath() const override { return directory; }
 
   virtual size_t													GetVertexCount() const override;
   virtual size_t													GetMeshCount() const  override { return meshes.size();}
@@ -40,9 +44,9 @@ public:
 
 private:
 	/*  Model Data  */
-	std::vector<AssimpMesh>	meshes;
-	std::string				      directory;
-
+	std::vector<AssimpMesh>		meshes;
+	std::string								directory;
+	std::string								m_name;
 	/*  Functions   */
   void							              loadModel(std::string path);
   void							              processNode(aiNode* node, const aiScene* scene);

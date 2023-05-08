@@ -716,7 +716,7 @@ bool eWindowImGui::OnMouseMove(uint32_t x, uint32_t y)
 //-----------------------------------------------------------------
 void eMainImGuiWindow::Render()
 {
-  bool open = false, save = false, open_file = false;
+  bool open = false, save = false, open_file = false, open_scene = false, save_scene = false;
   ImGui::BeginMainMenuBar();
   if (ImGui::BeginMenu("File"))
   {
@@ -748,6 +748,26 @@ void eMainImGuiWindow::Render()
         }
       }
       break;
+      case MENU_OPEN_SCENE:
+      {
+        if (ImGui::MenuItem(std::get<0>(item).c_str(), NULL))
+        {
+          open_scene = true;
+          open_scene_menu_name = std::get<0>(item);
+          open_scene_callback = *(reinterpret_cast<std::function<void(const std::string&)>*>(std::get<2>(item)));
+        }
+      }
+      break;
+      case MENU_SAVE_SCENE:
+      {
+        if (ImGui::MenuItem(std::get<0>(item).c_str(), NULL))
+        {
+          save_scene = true;
+          save_scene_menu_name = std::get<0>(item);
+          save_scene_callback = *(reinterpret_cast<std::function<void(const std::string&)>*>(std::get<2>(item)));
+        }
+      }
+      break;
       }
     }
     ImGui::EndMenu();
@@ -761,6 +781,10 @@ void eMainImGuiWindow::Render()
     ImGui::OpenPopup("Save File");
   if(open_file)
     ImGui::OpenPopup(open_file_menu_name.c_str());
+  if (open_scene)
+    ImGui::OpenPopup(open_scene_menu_name.c_str());
+  if (save_scene)
+    ImGui::OpenPopup(save_scene_menu_name.c_str());
 
   /* Optional third parameter. Support opening only compressed rar/zip files.
   * Opening any other file will show error, return false and won't close the dialog.
@@ -780,6 +804,14 @@ void eMainImGuiWindow::Render()
   if (file_dialog.showFileDialog(open_file_menu_name.c_str(), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 310), ".obj"))
   {
     open_file_callback(file_dialog.selected_path);
+  }
+  if (file_dialog.showFileDialog(open_scene_menu_name.c_str(), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 310), ".mgoongaScene"))
+  {
+    open_scene_callback(file_dialog.selected_path);
+  }
+  if (file_dialog.showFileDialog(save_scene_menu_name.c_str(), imgui_addons::ImGuiFileBrowser::DialogMode::SAVE, ImVec2(700, 310), ".mgoongaScene"))
+  {
+    save_scene_callback(file_dialog.selected_path);
   }
 }
 

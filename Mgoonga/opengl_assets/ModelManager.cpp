@@ -14,14 +14,14 @@ void eModelManager::InitializePrimitives()
 	ShapeData plane = ShapeGenerator::makePlane();
 	ShapeData quad = ShapeGenerator::makeQuad();
 	ShapeData sphere = ShapeGenerator::makeSphere(40);
-	ShapeData square = ShapeGenerator::makeSquare(5.0f, 5.0f); //(Width() / Height(),1.0f )
+	ShapeData square = ShapeGenerator::makeSquare(5.0f, 5.0f); //(Width() / Height(), 1.0f )
 
-	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh>>("cube", new MyMesh(cube)));
-	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh> >("plane", new MyMesh(plane)));
-	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh> >("arrow", new MyMesh(arrow)));
-	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh> >("quad", new MyMesh(quad)));
-	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh> >("sphere", new MyMesh(sphere)));
-	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh> >("square", new MyMesh(square)));
+	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh>>("cube", new MyMesh("cube", cube)));
+	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh> >("plane", new MyMesh("plane", plane)));
+	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh> >("arrow", new MyMesh("arrow", arrow)));
+	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh> >("quad", new MyMesh("quad", quad)));
+	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh> >("sphere", new MyMesh("sphere", sphere)));
+	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh> >("square", new MyMesh("square", square)));
 
 	cube.cleanup();
 	arrow.cleanup();
@@ -45,7 +45,7 @@ std::shared_ptr<IModel> eModelManager::Find(const std::string& name)
 
 void eModelManager::Add(const std::string& name, GLchar* path, bool invert_y_uv)
 {
-	models.insert(std::pair<std::string, std::shared_ptr<IModel> >(name, new Model(path, invert_y_uv)) );
+	models.insert(std::pair<std::string, std::shared_ptr<IModel> >(name, new Model(path, name, invert_y_uv)) );
 }
 
 //@todo needs to be changed

@@ -14,7 +14,8 @@ class DLL_OPENGL_ASSETS MyModel: public IModel
 public:
 	//@todo make one constructor
 	MyModel();
-	MyModel(std::shared_ptr<MyMesh> m,
+	MyModel(std::shared_ptr<MyMesh> _mesh,
+					const std::string& _name,
 					Texture* t = nullptr,
 					Texture* t2 = nullptr,
 					Texture* t3 = nullptr,
@@ -37,8 +38,11 @@ public:
 	virtual void											SetMaterial(const Material& _material) { m_material = _material; }
 	virtual std::optional<Material>		GetMaterial() const { return m_material; }
 
-	virtual void					Draw()					override;
-	void							    Debug();
+	virtual void								Draw()					override;
+	virtual const std::string&	GetName() const override { return m_name; }
+	virtual const std::string&	GetPath() const override { return m_path; }
+
+	void												Debug();
 	
 	void SetTexture(Texture* t);
 	void setTextureDiffuse(Texture* t);
@@ -49,6 +53,8 @@ public:
 protected:
 	std::shared_ptr<MyMesh> mesh;
 	Material								m_material;
+	std::string							m_name;
+	std::string							m_path;
 
 	static Texture default_diffuse_mapping;
 	static Texture default_specular_mapping;
@@ -72,10 +78,13 @@ public:
 	virtual size_t														GetAnimationCount() const { return 0; }
 	virtual std::vector<const IAnimation*>		GetAnimations() const { return std::vector<const IAnimation*>(); }
 
-	virtual void					Draw()					override { m_mesh->Draw(); }
+	virtual void								Draw()					override { m_mesh->Draw(); }
+	virtual const std::string&	GetName() const override { return m_mesh->Name(); }
+	virtual const std::string&	GetPath() const override { return m_path; }
 
 protected:
-	IMesh* m_mesh;//-> unique_ptr
+	IMesh*									m_mesh;//-> unique_ptr
+	std::string							m_path;
 };
 
 //-------------------------------------------------------
@@ -93,8 +102,10 @@ public:
 	virtual size_t														GetAnimationCount() const { return 0; }
 	virtual std::vector<const IAnimation*>		GetAnimations() const { return std::vector<const IAnimation*>(); }
 
-	virtual void					Draw()					override { m_mesh->Draw(); }
-
+	virtual void								Draw()					override { m_mesh->Draw(); }
+	virtual const std::string&	GetName() const override { return m_mesh->Name(); }
+	virtual const std::string&	GetPath() const override { return m_path; }
 protected:
-	BezierCurveMesh* m_mesh; //-> unique_ptr
+	BezierCurveMesh*				m_mesh; //-> unique_ptr
+	std::string							m_path;
 };

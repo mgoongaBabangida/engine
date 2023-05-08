@@ -46,7 +46,9 @@ enum TypeImGui
 	OBJECT_REF_RIGGER,
 	OBJECT_LIST,
 	SHADER,
-	MENU_OPEN
+	MENU_OPEN,
+	MENU_OPEN_SCENE,
+	MENU_SAVE_SCENE
 };
 
 //--------------------------------------------------
@@ -77,6 +79,12 @@ protected:
 	std::vector<eItem>	lines;
 	std::string open_file_menu_name;
 	std::function<void(const std::string&)> open_file_callback;
+
+	std::string open_scene_menu_name;
+	std::function<void(const std::string&)> open_scene_callback;
+
+	std::string save_scene_menu_name;
+	std::function<void(const std::string&)> save_scene_callback;
 };
 
 //---------------------------------------------

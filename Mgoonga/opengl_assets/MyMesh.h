@@ -11,12 +11,12 @@
 class DLL_OPENGL_ASSETS MyMesh: public I3DMesh
 {
 public:
-	MyMesh();
+	explicit MyMesh(const std::string& _name);
 	MyMesh(const MyMesh&) = default;
 	virtual ~MyMesh();
 
-	MyMesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture*> textures);
-	explicit MyMesh(const ShapeData& data);
+	MyMesh(const std::string& _name, std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture*> textures);
+	MyMesh(const std::string& _name, const ShapeData& data);
 	
 	virtual void								Draw()			override;
 	virtual const std::string&	Name() const { return name; }

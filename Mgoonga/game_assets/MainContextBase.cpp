@@ -2,6 +2,7 @@
 
 #include "MainContextBase.h"
 #include "ObjectFactory.h"
+#include "SceneSerializer.h"
 
 #include <base/InputController.h>
 #include <tcp_lib/Network.h>
@@ -262,10 +263,6 @@ void eMainContextBase::InitializeExternalGui()
 	{
 		pipeline.UpdateShadersInfo();
 	};
-	static std::function<void(const std::string&)> add_model_callback = [this](const std::string& _path)
-	{
-		modelManager->Add("Name", (GLchar*)_path.c_str());//@todo parse real name
-	};
 
 	externalGui[1]->Add(BUTTON, "Emit particle system", (void*)&emit_partilces_callback);
 	externalGui[1]->Add(BUTTON, "Emit particle system gpu", (void*)&emit_partilces_gpu_callback);
@@ -294,13 +291,32 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[3]->Add(SHADER, "Shaders", (void*)&pipeline.GetShaderInfos());
 
 	//Main Menu
+	static std::function<void(const std::string&)> add_model_callback = [this](const std::string& _path)
+	{
+		modelManager->Add("Name", (GLchar*)_path.c_str());//@todo parse real name
+	};
 	externalGui[4]->Add(MENU_OPEN, "Add model", reinterpret_cast<void*>(&add_model_callback));
+
+	static std::function<void(const std::string&)> serealize_scene_callback = [this](const std::string& _path)
+	{
+		SceneSerializer serealizer(GetObjects(), *modelManager.get());
+		serealizer.Serialize(_path);
+	};
+	externalGui[4]->Add(MENU_SAVE_SCENE, "Serealize scene", reinterpret_cast<void*>(&serealize_scene_callback));
+	
+	static std::function<void(const std::string&)> deserealize_scene_callback = [this](const std::string& _path)
+	{
+		m_objects.clear();
+		SceneSerializer serealizer(GetObjects(), *modelManager.get());
+		m_objects = serealizer.Deserialize(_path);
+	};
+	externalGui[4]->Add(MENU_OPEN_SCENE, "Deserealize scene", reinterpret_cast<void*>(&deserealize_scene_callback));
 
 	//Create
 	std::function<void()> create_cube_callbaack = [this]()
 	{
 		ObjectFactoryBase factory;
-		shObject cube = factory.CreateObject(std::make_shared<MyModel>(modelManager->FindMesh("cube")), eObject::RenderType::PHONG, "DefaultCube");
+		shObject cube = factory.CreateObject(std::make_shared<MyModel>(modelManager->FindMesh("cube"), "default_cube"), eObject::RenderType::PHONG, "DefaultCube");
 		m_objects.push_back(cube);
 	};
 	externalGui[5]->Add(BUTTON, "Cube", (void*)&create_cube_callbaack);
@@ -308,7 +324,7 @@ void eMainContextBase::InitializeExternalGui()
 	std::function<void()> create_sphere_callbaack = [this]()
 	{
 		ObjectFactoryBase factory;
-		shObject sphere = factory.CreateObject(std::make_shared<MyModel>(modelManager->FindMesh("sphere")), eObject::RenderType::PHONG, "DefaultSphere");
+		shObject sphere = factory.CreateObject(std::make_shared<MyModel>(modelManager->FindMesh("sphere"), "default_sphere"), eObject::RenderType::PHONG, "DefaultSphere");
 		m_objects.push_back(sphere);
 	};
 	externalGui[5]->Add(BUTTON, "Sphere", (void*)&create_sphere_callbaack);
@@ -316,7 +332,7 @@ void eMainContextBase::InitializeExternalGui()
 	std::function<void()> create_plane_callbaack = [this]()
 	{
 		ObjectFactoryBase factory;
-		shObject plane = factory.CreateObject(std::make_shared<MyModel>(modelManager->FindMesh("plane")), eObject::RenderType::PHONG, "DefaultSphere");
+		shObject plane = factory.CreateObject(std::make_shared<MyModel>(modelManager->FindMesh("plane"), "default_plane"), eObject::RenderType::PHONG, "DefaultSphere");
 		m_objects.push_back(plane);
 	};
 	externalGui[5]->Add(BUTTON, "Plane", (void*)&create_plane_callbaack);
@@ -335,53 +351,62 @@ void eMainContextBase::_PreInitModelManager()
 	modelManager->InitializePrimitives();
 	//PRIMITIVES
 	modelManager->AddPrimitive("wall_cube",
-		std::shared_ptr<MyModel>(new MyModel(modelManager->FindMesh("cube"),
-			texManager->Find("Tbrickwall0_d"),
-			texManager->Find("Tbrickwall0_d"),
-			texManager->Find("Tbrickwall0_n"),
-			texManager->Find("Tblack"))));
+		std::make_shared<MyModel>(modelManager->FindMesh("cube"),
+															"wall_cube",
+															texManager->Find("Tbrickwall0_d"),
+															texManager->Find("Tbrickwall0_d"),
+															texManager->Find("Tbrickwall0_n"),
+															texManager->Find("Tblack")));
 	modelManager->AddPrimitive("container_cube",
-		std::shared_ptr<MyModel>(new MyModel(modelManager->FindMesh("cube"),
-			texManager->Find("Tcontainer0_d"),
-			texManager->Find("Tcontainer0_s"),
-			texManager->Find("Tblue"),
-			texManager->Find("Tblack"))));
+		std::make_shared<MyModel>(modelManager->FindMesh("cube"),
+															"container_cube",
+															texManager->Find("Tcontainer0_d"),
+															texManager->Find("Tcontainer0_s"),
+															texManager->Find("Tblue"),
+															texManager->Find("Tblack")));
 	modelManager->AddPrimitive("arrow",
-		std::shared_ptr<MyModel>(new MyModel(modelManager->FindMesh("arrow"),
-			texManager->Find("Tcontainer0_d"),
-			texManager->Find("Tcontainer0_s"),
-			texManager->Find("Tblue"),
-			texManager->Find("Tblack"))));
+		std::make_shared<MyModel>(modelManager->FindMesh("arrow"),
+															"arrow",
+															texManager->Find("Tcontainer0_d"),
+															texManager->Find("Tcontainer0_s"),
+															texManager->Find("Tblue"),
+															texManager->Find("Tblack")));
 	modelManager->AddPrimitive("grass_plane",
-		std::shared_ptr<MyModel>(new MyModel(modelManager->FindMesh("plane"),
-			texManager->Find("Tgrass0_d"),
-			texManager->Find("Tgrass0_d"),
-			texManager->Find("Tblue"),
-			texManager->Find("Tblack"))));
+		std::make_shared<MyModel>(modelManager->FindMesh("plane"),
+															"grass_plane",
+															texManager->Find("Tgrass0_d"),
+															texManager->Find("Tgrass0_d"),
+															texManager->Find("Tblue"),
+															texManager->Find("Tblack")));
 	modelManager->AddPrimitive("white_cube",
-		std::shared_ptr<MyModel>(new MyModel(modelManager->FindMesh("cube"),
-			texManager->Find("Twhite"))));
+		std::make_shared<MyModel>(modelManager->FindMesh("cube"),
+			"white_cube",
+			texManager->Find("Twhite")));
 	modelManager->AddPrimitive("brick_square",
-		std::shared_ptr<MyModel>(new MyModel(modelManager->FindMesh("square"),
-			texManager->Find("Tbricks0_d"),
-			texManager->Find("Tbricks0_d"),
-			texManager->Find("Tblue"),
-			texManager->Find("Tblack"))));
+		std::make_shared<MyModel>(modelManager->FindMesh("square"),
+															"brick_square",
+															texManager->Find("Tbricks0_d"),
+															texManager->Find("Tbricks0_d"),
+															texManager->Find("Tblue"),
+															texManager->Find("Tblack")));
 	modelManager->AddPrimitive("brick_cube",
-		std::shared_ptr<MyModel>(new MyModel(modelManager->FindMesh("cube"),
-			texManager->Find("Tbricks2_d"),
-			texManager->Find("Tbricks2_d"),
-			texManager->Find("Tbricks2_n"),
-			texManager->Find("Tbricks2_dp"))));
+		std::make_shared<MyModel>(modelManager->FindMesh("cube"),
+															"brick_cube",
+															texManager->Find("Tbricks2_d"),
+															texManager->Find("Tbricks2_d"),
+															texManager->Find("Tbricks2_n"),
+															texManager->Find("Tbricks2_dp")));
 	modelManager->AddPrimitive("pbr_cube",
-		std::shared_ptr<MyModel>(new MyModel(modelManager->FindMesh("cube"),
-			texManager->Find("pbr1_basecolor"),
-			texManager->Find("pbr1_metallic"),
-			texManager->Find("pbr1_normal"),
-			texManager->Find("pbr1_roughness"))));
+		std::make_shared<MyModel>(modelManager->FindMesh("cube"),
+														"pbr_cube",
+														texManager->Find("pbr1_basecolor"),
+														texManager->Find("pbr1_metallic"),
+														texManager->Find("pbr1_normal"),
+														texManager->Find("pbr1_roughness")));
 	modelManager->AddPrimitive("white_sphere",
-		std::shared_ptr<MyModel>(new MyModel(modelManager->FindMesh("sphere"),
-			texManager->Find("Twhite"))));
+		std::make_shared<MyModel>(modelManager->FindMesh("sphere"),
+														"white_sphere",
+														texManager->Find("Twhite")));
 }
 
 //------------------------------------------------------------

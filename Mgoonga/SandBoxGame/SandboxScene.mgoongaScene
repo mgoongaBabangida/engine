@@ -1,0 +1,67 @@
+Scene: Unnamed
+Objects:
+  - Object: Guid-23231-dsd0323
+    RenderingType: 0
+    NameComponent:
+      Name: WallCube
+    ModelComponent:
+      ModelName: wall_cube
+      Path: ""
+    TransformComponent:
+      Translation: [3, -0.999891937, 3]
+      Rotation: [0, 0, 0, 1]
+      Scale: [1, 1, 1]
+      Forward: [0, 0, 1]
+      Up: [0, 1, 0]
+  - Object: Guid-23231-dsd0323
+    RenderingType: 0
+    NameComponent:
+      Name: GrassPlane
+    ModelComponent:
+      ModelName: grass_plane
+      Path: ""
+    TransformComponent:
+      Translation: [0, -2, 0]
+      Rotation: [0, 0, 0, 1]
+      Scale: [1, 1, 1]
+      Forward: [0, 0, 1]
+      Up: [0, 1, 0]
+  - Object: Guid-23231-dsd0323
+    RenderingType: 0
+    NameComponent:
+      Name: Wolf
+    ModelComponent:
+      ModelName: wolf
+      Path: ../game_assets/Resources/Wolf Rigged and Game Ready
+    TransformComponent:
+      Translation: [3, -2, 0]
+      Rotation: [-0.707106769, 0, 0, 0.707106769]
+      Scale: [1.5, 1.5, 1.5]
+      Forward: [0, 0, 1]
+      Up: [0, 1, 0]
+  - Object: Guid-23231-dsd0323
+    RenderingType: 0
+    NameComponent:
+      Name: Dying
+    ModelComponent:
+      ModelName: Dying
+      Path: ../game_assets/Resources/Dying Soldier
+    TransformComponent:
+      Translation: [1, -2, 0]
+      Rotation: [0, 0, 0, 1]
+      Scale: [0.00999999978, 0.00999999978, 0.00999999978]
+      Forward: [0, 0, 1]
+      Up: [0, 1, 0]
+  - Object: Guid-23231-dsd0323
+    RenderingType: 0
+    NameComponent:
+      Name: WhiteSphere
+    ModelComponent:
+      ModelName: white_sphere
+      Path: ""
+    TransformComponent:
+      Translation: [0.5, 2, -4]
+      Rotation: [0, 0, 0, 1]
+      Scale: [0.0500000007, 0.0500000007, 0.0500000007]
+      Forward: [0, 0, 1]
+      Up: [0, 1, 0]

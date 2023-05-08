@@ -54,8 +54,9 @@ std::string Model::RootBoneName()
 }
 
 //---------------------------------------------------------------------------
-Model::Model(GLchar* path, bool _m_invert_y_uv)
+Model::Model(GLchar* path, const std::string& _name, bool _m_invert_y_uv)
 	: m_invert_y_uv(_m_invert_y_uv)
+	, m_name(_name)
 {
 	loadModel(path);
 }
