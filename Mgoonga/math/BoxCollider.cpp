@@ -26,6 +26,8 @@ void BoxCollider::CalculateExtremDots(const eObject* _object)
 		}
 	}
 	m_center = GetCenter();
+	m_radius = GetRadius();
+	m_model_name = _object->GetModel()->GetName();
 }
 
 //-------------------------------------------------------------------------------
@@ -181,6 +183,17 @@ glm::vec3 BoxCollider::GetCenter()
 												 m_dots.MaxZ - glm::length(m_dots.MaxZ - m_dots.MinZ) / 2);// always == line.M
 	}
 	return *m_center;
+}
+
+//-------------------------------------------------------------------------------
+float BoxCollider::GetRadius()
+{
+	if (m_radius == 0.0f)
+	{
+		glm::vec3 corner = glm::vec3(m_dots.MaxX, m_dots.MaxY, m_dots.MaxZ);
+		m_radius = glm::length(corner - *m_center);
+	}
+	return m_radius;
 }
 
 //-------------------------------------------------------------------------------

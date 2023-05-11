@@ -43,7 +43,7 @@ const Frame& SceletalAnimation::getCurrentFrame()
 	//return Frame(time, newFrame);
 }
 
-const Frame& SceletalAnimation::GetFrameByNumber(size_t _num)
+const Frame& SceletalAnimation::GetFrameByNumber(size_t _num) const
 {
 	if (_num < frames.size())
 		return frames[_num];

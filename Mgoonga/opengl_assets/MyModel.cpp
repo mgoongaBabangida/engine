@@ -24,15 +24,15 @@ MyModel::MyModel(std::shared_ptr<MyMesh> m, const std::string& _name, Texture* t
   : mesh(m)
   , m_name(_name)
 {
-  if (default_diffuse_mapping.id == GetDefaultTextureId())
+  if (default_diffuse_mapping.id == Texture::GetDefaultTextureId())
     default_diffuse_mapping.loadTexture1x1(GREY);
-  if (default_specular_mapping.id == GetDefaultTextureId())
+  if (default_specular_mapping.id == Texture::GetDefaultTextureId())
     default_specular_mapping.loadTexture1x1(BLACK);
-  if (default_normal_mapping.id == GetDefaultTextureId())
+  if (default_normal_mapping.id == Texture::GetDefaultTextureId())
     default_normal_mapping.loadTexture1x1(BLUE);
-  if (default_roughness_mapping.id == GetDefaultTextureId())
+  if (default_roughness_mapping.id == Texture::GetDefaultTextureId())
     default_roughness_mapping.loadTexture1x1(WHITE);
-  if (default_emission_mapping.id == GetDefaultTextureId())
+  if (default_emission_mapping.id == Texture::GetDefaultTextureId())
     default_emission_mapping.loadTexture1x1(BLACK);
 
   if (t != nullptr)

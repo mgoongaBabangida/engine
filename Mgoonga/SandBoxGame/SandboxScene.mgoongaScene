@@ -8,7 +8,7 @@ Objects:
       ModelName: wall_cube
       Path: ""
     TransformComponent:
-      Translation: [3, -0.999891937, 3]
+      Translation: [3, 1.75028467, 3]
       Rotation: [0, 0, 0, 1]
       Scale: [1, 1, 1]
       Forward: [0, 0, 1]
@@ -39,10 +39,12 @@ Objects:
       Scale: [1.5, 1.5, 1.5]
       Forward: [0, 0, 1]
       Up: [0, 1, 0]
+    RiggerComponent:
+      Path: Default
   - Object: Guid-23231-dsd0323
     RenderingType: 0
     NameComponent:
-      Name: Dying
+      Name: Soldier
     ModelComponent:
       ModelName: Dying
       Path: ../game_assets/Resources/Dying Soldier
@@ -52,6 +54,10 @@ Objects:
       Scale: [0.00999999978, 0.00999999978, 0.00999999978]
       Forward: [0, 0, 1]
       Up: [0, 1, 0]
+    RiggerComponent:
+      Path: MixamoFireWalkDie.mgoongaRigger
+    ColliderComponent:
+      Path: Soldier3Anim.mgoongaBoxColliderDynamic
   - Object: Guid-23231-dsd0323
     RenderingType: 0
     NameComponent:

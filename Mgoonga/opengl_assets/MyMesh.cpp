@@ -93,11 +93,11 @@ void MyMesh::Draw()
 	glBindVertexArray(0);
 }
 
-std::vector<const Texture*> MyMesh::GetTextures() const
+std::vector<TextureInfo> MyMesh::GetTextures() const
 {
-  std::vector<const Texture*> ret;
+  std::vector<TextureInfo> ret;
   for (const Texture* t : textures)
-    ret.push_back(t);
+    ret.emplace_back(t->type, t->path);
   return ret;
 }
 
@@ -249,11 +249,11 @@ void ParticleMesh::Draw()
 	glBindVertexArray(0);
 }
 
-std::vector<const Texture*> ParticleMesh::GetTextures() const
+std::vector<TextureInfo> ParticleMesh::GetTextures() const
 {
-  std::vector<const Texture*> ret;
+  std::vector<TextureInfo> ret;
   for (const Texture& t : textures)
-    ret.push_back(&t);
+    ret.emplace_back(t.type, t.path);
   return ret;
 }
 

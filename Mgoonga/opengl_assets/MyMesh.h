@@ -27,14 +27,15 @@ public:
 	virtual void                              BindVAO() const override { glBindVertexArray(this->VAO); }
 	virtual void                              UnbindVAO() const override { glBindVertexArray(0); }
 
-  virtual std::vector<const Texture*> GetTextures() const;
+  virtual std::vector<TextureInfo>		GetTextures() const;
+	virtual void												AddTexture(Texture* _t) override { textures.push_back(_t); }
   virtual void												setTextures(std::vector<Texture*>);
 	virtual void												setupMesh();
 	virtual void												calculatedTangent();
 
 public:
 	/*  Mesh Data  */
-	std::vector<Vertex>	vertices;
+	std::vector<Vertex>		vertices;
 	std::vector<GLuint>		indices;
 	std::vector<Texture*>	textures;
 
@@ -66,7 +67,8 @@ public:
 	virtual void                              BindVAO() const override { glBindVertexArray(this->VAO); }
 	virtual void                              UnbindVAO() const override { glBindVertexArray(0); }
 
-	virtual std::vector<const Texture*> GetTextures() const;
+	virtual std::vector<TextureInfo>	GetTextures() const;
+	virtual void											AddTexture(Texture* _t) override { textures.push_back(*_t); }
 
   void				SetUpInstances(GLuint _instances) { instances = _instances; }
 	void				updateInstancedData(std::vector<float>& buffer);
@@ -101,8 +103,6 @@ public:
 	virtual const std::string&	Name() const { return m_name; }
 	virtual size_t							GetVertexCount() const { return m_dots.size(); }
 
-	virtual std::vector<const Texture*>				GetTextures() const { return {}; }
-	
 	virtual bool HasMaterial() const { return false; }
 	virtual void SetMaterial(const Material&) {}
 	virtual std::optional<Material> GetMaterial() const { return std::nullopt; }
@@ -129,8 +129,6 @@ public:
 	virtual void								Draw();
 	virtual const std::string&	Name() const { return m_name; }
 	virtual size_t							GetVertexCount() const { return 4; }
-
-	virtual std::vector<const Texture*> GetTextures() const { return {}; }
 	
 	virtual bool HasMaterial() const { return false; }
 	virtual void SetMaterial(const Material&) {}

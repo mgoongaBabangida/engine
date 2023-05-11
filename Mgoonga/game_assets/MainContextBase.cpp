@@ -3,6 +3,8 @@
 #include "MainContextBase.h"
 #include "ObjectFactory.h"
 #include "SceneSerializer.h"
+#include "ModelManagerYAML.h"
+#include "AnimationManagerYAML.h"
 
 #include <base/InputController.h>
 #include <tcp_lib/Network.h>
@@ -10,7 +12,6 @@
 #include <tcp_lib/Client.h>
 
 #include <opengl_assets/TextureManager.h>
-#include <opengl_assets/ModelManager.h>
 #include <opengl_assets/SoundManager.h>
 #include <opengl_assets/Sound.h>
 
@@ -32,7 +33,8 @@ eMainContextBase::eMainContextBase(eInputController* _input,
 , assetsFolderPath(_assetsPath)
 , shadersFolderPath(_shadersPath)
 , texManager(new eTextureManager)
-, modelManager(new eModelManager)
+, modelManager(new ModelManagerYAML)
+, animationManager(new AnimationManagerYAML)
 , soundManager(new eSoundManager(_assetsPath))
 , externalGui(_externalGui)
 , pipeline(width, height)
@@ -299,7 +301,7 @@ void eMainContextBase::InitializeExternalGui()
 
 	static std::function<void(const std::string&)> serealize_scene_callback = [this](const std::string& _path)
 	{
-		SceneSerializer serealizer(GetObjects(), *modelManager.get());
+		SceneSerializer serealizer(GetObjects(), *modelManager.get(), *animationManager.get());
 		serealizer.Serialize(_path);
 	};
 	externalGui[4]->Add(MENU_SAVE_SCENE, "Serealize scene", reinterpret_cast<void*>(&serealize_scene_callback));
@@ -307,7 +309,7 @@ void eMainContextBase::InitializeExternalGui()
 	static std::function<void(const std::string&)> deserealize_scene_callback = [this](const std::string& _path)
 	{
 		m_objects.clear();
-		SceneSerializer serealizer(GetObjects(), *modelManager.get());
+		SceneSerializer serealizer(GetObjects(), *modelManager.get(), *animationManager.get());
 		m_objects = serealizer.Deserialize(_path);
 	};
 	externalGui[4]->Add(MENU_OPEN_SCENE, "Deserealize scene", reinterpret_cast<void*>(&deserealize_scene_callback));

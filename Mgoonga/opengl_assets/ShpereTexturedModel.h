@@ -3,7 +3,7 @@
 #include <base/interfaces.h>
 
 //---------------------------------------
-class DLL_OPENGL_ASSETS SphereTexturedMesh : public I3DMesh
+class DLL_OPENGL_ASSETS SphereTexturedMesh : public I3DMesh //@todo it has to be just MyMesh !!!
 {
 public:
   friend class SphereTexturedModel;
@@ -19,6 +19,9 @@ public:
   virtual const std::vector<unsigned int>&  GetIndices() const override { return indices; }
   virtual void                              BindVAO() const override;
   virtual void                              UnbindVAO() const override;
+
+  virtual std::vector<TextureInfo>        GetTextures() const override { return {}; }
+  virtual void                            AddTexture(Texture*) {}
 
   virtual void SetMaterial(const Material&) override;
   virtual std::optional<Material> GetMaterial() const override;
@@ -53,6 +56,9 @@ class DLL_OPENGL_ASSETS SphereTexturedModel : public IModel
     virtual size_t                      GetMeshCount() const override { return 1; }
     virtual std::vector<const IMesh*>   GetMeshes() const override { return { m_mesh.get() }; }
     virtual std::vector<const I3DMesh*> Get3DMeshes() const override { return { m_mesh.get() }; }
+
+    virtual bool														HasBones() const { return false; }
+    virtual std::vector<const IBone*>				GetBones() const { return {}; }
 
     virtual size_t                          GetAnimationCount() const override { return 0; }
     virtual std::vector<const IAnimation*>  GetAnimations() const override { return {}; }

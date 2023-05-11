@@ -2,64 +2,41 @@
 #include "Rigger.h"
 #include "AnimatedModel.h"
 
-#include <algorithm>
-#include <iostream>
+#include <algorithm>>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 #include <iterator>
 
 //-------------------------------------------------------------------------------------------
-Rigger::Rigger(eAnimatedModel* _model):model(_model)
+Rigger::Rigger(eAnimatedModel* _model)
 {
-	if(model)
+	if(_model)
 	{
-		animations		= model->Animations();
-		bones			= model->Bones();
-		nameRootBone	= model->RootBoneName();
+		animations		=					_model->Animations();
+		bones			=							_model->Bones();
+		nameRootBone	=					_model->RootBoneName();
+		globalModelTransform =	_model->GlobalTransform();
 
-		matrices.resize(bones.size());
-		for(auto& m : matrices)
-		{
-			m = UNIT_MATRIX;
-		}
-		for(auto& bone: bones)
-		{
-			auto children = bone.getChildren();
-			for(auto& child : children)
-			{
-				auto iter = std::find_if(bones.begin(), bones.end(), [&child](const Bone& bone ) {return child->Name() == bone.Name();});
-				bone.addChild(&(*iter));	//$todo remove old children
-			}
-		}
-
-		timer.reset(new math::Timer([this]()->bool
-									{
-										if (currentAnim != nullptr && !currentAnim->IsPaused())
-										{
-											bool fls = false;
-											if (matrix_flag.compare_exchange_weak(fls, true))
-											{
-												auto root = std::find_if(bones.begin(), bones.end(), [this](const Bone& bone) { return nameRootBone == bone.Name(); });
-												UpdateAnimation(*(root), currentAnim->getCurrentFrame(), UNIT_MATRIX);
-												for (auto& bone : bones)
-												{
-													matrices[bone.ID()] = bone.getAnimatedTransform();
-												}
-												matrix_flag.store(false);
-												std::this_thread::yield();
-											}
-										}
-										else if(is_active) // currentAnim == nullptr || currentAnim->IsPaused()
-										{
-											std::unique_lock lk(mutex);
-											cv.wait(lk);
-										}
-										return true;
-									}));
-		timer->start(100);
+		_Initialize();
 	}
 }
+
+//-------------------------------------------------------------------------------------------
+Rigger::Rigger(std::vector<SceletalAnimation> _animations,
+							 std::vector<Bone> _bones,
+							 std::string _rootBoneName,
+							 const glm::mat4& _globaltransform,
+							 const std::string& _path)
+: animations(_animations)
+, bones(_bones)
+, nameRootBone(_rootBoneName)
+, globalModelTransform(_globaltransform)
+, m_path(_path)
+{
+	_Initialize();
+}
+
 //-------------------------------------------------------------------------------------------
 Rigger::~Rigger()
 {
@@ -165,11 +142,11 @@ std::vector<glm::mat4> Rigger::GetMatrices(const std::string& _animationName, si
 	else
 	{
 		std::vector<glm::mat4> ret(bones.size());
-		auto root = std::find_if(bones.begin(), bones.end(), [this](const Bone& bone) { return nameRootBone == bone.Name(); });
-		UpdateAnimation(*(root), anim->GetFrameByNumber(_frame), UNIT_MATRIX); //@ potentialy not thread safe
+		auto root = std::find_if(bones.begin(), bones.end(), [this](const Bone& bone) { return nameRootBone == bone.GetName(); });
+		_UpdateAnimation(*(root), anim->GetFrameByNumber(_frame), UNIT_MATRIX); //@ potentially not thread safe
 		for (auto& bone : bones)
 		{
-			ret[bone.ID()] = bone.getAnimatedTransform();
+			ret[bone.GetID()] = bone.getAnimatedTransform();
 		}
 		return ret;
 	}
@@ -227,16 +204,16 @@ std::vector<std::string> Rigger::GetBoneNames() const
 {
 	std::vector<std::string> names;
 	for (auto& bone : bones)
-		names.push_back(bone.Name());
+		names.push_back(bone.GetName());
 	return names;
 }
 
 //-------------------------------------------------------------------------------------------
 glm::mat4 Rigger::GetBindMatrixForBone(const std::string& _boneName) const
 {
-	auto it = std::find_if(bones.begin(), bones.end(), [_boneName](const Bone& bone) {return bone.Name() == _boneName; });
+	auto it = std::find_if(bones.begin(), bones.end(), [_boneName](const Bone& bone) {return bone.GetName() == _boneName; });
 	if (it != bones.end())
-		return it->getBindTransform();
+		return it->GetLocalBindTransform();
 	return glm::mat4();
 }
 
@@ -244,14 +221,14 @@ glm::mat4 Rigger::GetBindMatrixForBone(const std::string& _boneName) const
 glm::mat4 Rigger::GetBindMatrixForBone(size_t _boneID) const
 {
 	if (_boneID < bones.size())
-		return GetBindMatrixForBone(bones[_boneID].Name());
+		return GetBindMatrixForBone(bones[_boneID].GetName());
 	return glm::mat4();
 }
 
 //-------------------------------------------------------------------------------------------
 glm::mat4 Rigger::GetCurrentMatrixForBone(const std::string& _boneName) const
 {
-	auto it = std::find_if(bones.begin(), bones.end(), [_boneName](const Bone& bone) {return bone.Name() == _boneName; });
+	auto it = std::find_if(bones.begin(), bones.end(), [_boneName](const Bone& bone) {return bone.GetName() == _boneName; });
 	if (it != bones.end())
 		return it->getAnimatedTransform();
 	return glm::mat4();
@@ -261,25 +238,75 @@ glm::mat4 Rigger::GetCurrentMatrixForBone(const std::string& _boneName) const
 glm::mat4 Rigger::GetCurrentMatrixForBone(size_t _boneID) const
 {
 	if (_boneID < bones.size())
-		return GetCurrentMatrixForBone(bones[_boneID].Name());
+		return GetCurrentMatrixForBone(bones[_boneID].GetName());
 	return glm::mat4();
 }
 
 //-------------------------------------------------------------------------------------------
-void Rigger::UpdateAnimation(Bone &bone, const Frame& frame, const glm::mat4 &ParentTransform)
+void Rigger::_Initialize()
+{
+	matrices.resize(bones.size());
+	for (auto& m : matrices)
+		m = UNIT_MATRIX;
+
+	//adding copied bones as children and deleting old connections to origin bones
+	for (auto& bone : bones)
+	{
+		std::vector<Bone*> children = bone.getChildren();
+		for (Bone* child : children)
+		{
+			auto iter = std::find_if(bones.begin(), bones.end(), [&child](const Bone& bone) {return child->GetName() == bone.GetName(); });
+			bone.addChild(&(*iter));
+		}
+		for (Bone*& old_child : children)
+		{
+			std::vector<Bone*>& new_children = bone.getChildren();
+			new_children.erase(std::remove_if(new_children.begin(), new_children.end(), [&old_child](Bone* _bone){ return _bone == old_child; }));
+		}
+	}
+
+	timer.reset(new math::Timer([this]()->bool
+		{
+			if (currentAnim != nullptr && !currentAnim->IsPaused())
+			{
+				bool fls = false;
+				if (matrix_flag.compare_exchange_weak(fls, true))
+				{
+					auto root = std::find_if(bones.begin(), bones.end(), [this](const Bone& bone) { return nameRootBone == bone.GetName(); });
+					_UpdateAnimation(*(root), currentAnim->getCurrentFrame(), UNIT_MATRIX);
+					for (auto& bone : bones)
+					{
+						matrices[bone.GetID()] = bone.getAnimatedTransform();
+					}
+					matrix_flag.store(false);
+					std::this_thread::yield();
+				}
+			}
+			else if (is_active) // currentAnim == nullptr || currentAnim->IsPaused()
+			{
+				std::unique_lock lk(mutex);
+				cv.wait(lk);
+			}
+			return true;
+		}));
+	timer->start(100);
+}
+
+//-------------------------------------------------------------------------------------------
+void Rigger::_UpdateAnimation(Bone &bone, const Frame& frame, const glm::mat4 &ParentTransform)
 {
 	glm::mat4 currentLocalTransform;
 	
-	if(frame.exists(bone.Name()))
-		currentLocalTransform = frame.pose.find(bone.Name())->second.getModelMatrix();
+	if(frame.exists(bone.GetName()))
+		currentLocalTransform = frame.pose.find(bone.GetName())->second.getModelMatrix();
 	else
-		currentLocalTransform = bone.getMTransform();
+		currentLocalTransform = bone.GetMTransform();
 	
 	glm::mat4 globalTransform = ParentTransform * currentLocalTransform;
 
-	glm::mat4 totalTransform = model->GlobalTransform() * globalTransform * bone.getBindTransform(); // OGLDev
+	glm::mat4 totalTransform = globalModelTransform * globalTransform * bone.GetLocalBindTransform(); // OGLDev
 	bone.setAnimatedTransform(totalTransform);
 
 	for(int i = 0; i<bone.NumChildren(); ++i)
-		UpdateAnimation(*(bone.getChildren()[i]), frame, globalTransform);
+		_UpdateAnimation(*(bone.getChildren()[i]), frame, globalTransform);
 }

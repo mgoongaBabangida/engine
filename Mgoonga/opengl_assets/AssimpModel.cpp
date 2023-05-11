@@ -45,12 +45,12 @@ std::string Model::RootBoneName()
 	if (!root_bone)
 	{
 		auto scene = m_scene.get();
-		std::vector<Bone>::iterator root = std::find_if(m_bones.begin(), m_bones.end(), [scene](const Bone& bone) { return scene->mRootNode->mName.C_Str() == bone.Name(); });
+		std::vector<Bone>::iterator root = std::find_if(m_bones.begin(), m_bones.end(), [scene](const Bone& bone) { return scene->mRootNode->mName.C_Str() == bone.GetName(); });
 		if (root == m_bones.end())
 			return "";
 		root_bone = &(*root);
 	}
-	return root_bone->Name();
+	return root_bone->GetName();
 }
 
 //---------------------------------------------------------------------------
@@ -106,6 +106,15 @@ std::vector<const IMesh*> Model::GetMeshes() const
 }
 
 //----------------------------------------------------------------------------
+std::vector<const IBone*> Model::GetBones() const
+{
+	std::vector<const IBone*> bones;
+	for (auto& bone : m_bones)
+		bones.push_back(&bone);
+	return bones;
+}
+
+//----------------------------------------------------------------------------
 std::vector<const IAnimation*> Model::GetAnimations() const
 {
   std::vector<const IAnimation*> ret;
@@ -117,7 +126,7 @@ std::vector<const IAnimation*> Model::GetAnimations() const
 }
 
 //----------------------------------------------------------------------------
-void Model::loadModel(string path)
+void Model::loadModel(const string& path)
 {
 	//Assimp::Importer import;
 	m_import.reset(new Assimp::Importer());
@@ -300,7 +309,7 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			mat.albedo_texture_id = diffuseMaps[0].id;
 		}
 		else
-			mat.albedo_texture_id = GetDefaultTextureId();
+			mat.albedo_texture_id = Texture::GetDefaultTextureId();
 		
 		vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		if (!specularMaps.empty())
@@ -309,7 +318,7 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			mat.metalic_texture_id = specularMaps[0].id; // should be dif?
 		}
 		else
-			mat.metalic_texture_id = GetDefaultTextureId();
+			mat.metalic_texture_id = Texture::GetDefaultTextureId();
 		
 		vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
 		if (!normalMaps.empty())
@@ -318,7 +327,7 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			mat.normal_texture_id = normalMaps[0].id;
 		}
 		else
-			mat.normal_texture_id = GetDefaultTextureId();
+			mat.normal_texture_id = Texture::GetDefaultTextureId();
 
 		//@!? height
 		/*vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
@@ -337,7 +346,7 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			mat.emissive_texture_id = emissionMaps[0].id;
 		}
 		else
-			mat.emissive_texture_id = GetDefaultTextureId();
+			mat.emissive_texture_id = Texture::GetDefaultTextureId();
 
 		//glossiness is oposite to roughness @todo needs to be inverted!!!
 		vector<Texture> roughnessMaps = loadMaterialTextures(material, aiTextureType_SHININESS, "texture_roughness");
@@ -347,7 +356,7 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			mat.roughness_texture_id = roughnessMaps[0].id;
 		}
 		else
-			mat.roughness_texture_id = GetDefaultTextureId();
+			mat.roughness_texture_id = Texture::GetDefaultTextureId();
 
 		vector<Texture> displacementMaps = loadMaterialTextures(material, aiTextureType_DISPLACEMENT, "texture_displacement");
 		if (!displacementMaps.empty())
@@ -386,7 +395,7 @@ void Model::loadNodesToBone(aiNode * node) //all nodes have names
 		loadNodesToBone(node->mChildren[i]);
 
 	std::vector<Bone>::iterator CurBoneIter = std::find_if(m_bones.begin(), m_bones.end(), [node](const Bone& bone)
-	{ return bone.Name() == node->mName.C_Str(); });
+	{ return bone.GetName() == node->mName.C_Str(); });
 	if (CurBoneIter == m_bones.end()) //not a bone
 	{
 		m_bones.push_back(Bone(m_NumBones, node->mName.C_Str(), UNIT_MATRIX, false));
@@ -404,7 +413,7 @@ void Model::loadBoneChildren(aiNode * node)
 		loadBoneChildren(node->mChildren[i]);
 
 	std::vector<Bone>::iterator CurBoneIter = std::find_if(m_bones.begin(), m_bones.end(), [node](const Bone& bone)
-	{ return bone.Name() == node->mName.C_Str(); }); // end() ? all bones should be already there
+	{ return bone.GetName() == node->mName.C_Str(); }); // end() ? all bones should be already there
 	for (uint32_t i = 0; i < node->mNumChildren; ++i)
 	{
 		int id = m_BoneMapping.find(node->mChildren[i]->mName.C_Str())->second;
@@ -441,14 +450,14 @@ SceletalAnimation Model::ProccessAnimations(const aiAnimation* anim)
 void Model::updateAnimation(Bone &bone, const Frame& frame, const glm::mat4 &ParentTransform)
 {
 	glm::mat4 currentLocalTransform;
-	if(frame.exists(bone.Name()))
-		currentLocalTransform = frame.pose.find(bone.Name())->second.getModelMatrix() ;
+	if(frame.exists(bone.GetName()))
+		currentLocalTransform = frame.pose.find(bone.GetName())->second.getModelMatrix() ;
 	else
-		currentLocalTransform =	bone.getMTransform();
+		currentLocalTransform =	bone.GetMTransform();
 	glm::mat4 globalTransform =   ParentTransform * currentLocalTransform;
 
 	//glm::mat4 totalTransform = currentTransform * bone.getInverseBindTransform(); //ThinMatrix
-	glm::mat4 totalTransform = m_GlobalInverseTransform * globalTransform * bone.getBindTransform(); // OGLDev
+	glm::mat4 totalTransform = m_GlobalInverseTransform * globalTransform * bone.GetLocalBindTransform(); // OGLDev
 	bone.setAnimatedTransform(totalTransform);
 
 	for (int i = 0; i<bone.NumChildren(); ++i)
@@ -556,12 +565,12 @@ void Model::DumpBone()
 	int i = 0;
 	for (auto& bone : m_bones)
 	{
-		std::cout << "Bone name " << bone.Name() << bone.ID() <<"index "<< i << std::endl;
+		std::cout << "Bone name " << bone.GetName() << bone.GetID() <<"index "<< i << std::endl;
 		++i;
 		std::cout << "Children " << bone.NumChildren() <<" "<< bone.getChildren().size() << std::endl;
 		for (auto& ch : bone.getChildren() )
 		{
-			std::cout << ch->Name() << ch->ID()  << std::endl;
+			std::cout << ch->GetName() << ch->GetID()  << std::endl;
 		}
 	}
 }

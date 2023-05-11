@@ -29,6 +29,9 @@ public:
   virtual std::vector<const IMesh*>				GetMeshes() const;
 	virtual std::vector<const I3DMesh*>			Get3DMeshes() const;
 
+	virtual bool														HasBones() const { return false; }
+	virtual std::vector<const IBone*>				GetBones() const { return {}; }
+
   virtual size_t													GetAnimationCount() const { return 0; }
   virtual std::vector<const IAnimation*>	GetAnimations() const {
     return std::vector<const IAnimation*>();

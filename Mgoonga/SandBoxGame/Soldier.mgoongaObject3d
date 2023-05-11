@@ -1,0 +1,486 @@
+Model3D: Dying
+Init Path: ../game_assets/Resources/Dying Soldier
+Bones:
+  - BoneName: mixamorig_Hips
+    BoneID: 0
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, -95.2399445, -0.587707996, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_Spine
+        BoneID: 1
+      - BoneName: mixamorig_LeftUpLeg
+        BoneID: 44
+      - BoneName: mixamorig_RightUpLeg
+        BoneID: 48
+  - BoneName: mixamorig_Spine
+    BoneID: 1
+    BindTransform: [1, 0, 0, 0, 0, 0.996191978, 0.0871850029, 0, 0, -0.0871850029, 0.996191978, 0, 0, -105.738861, -8.88900757, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_Spine1
+        BoneID: 2
+  - BoneName: mixamorig_Spine1
+    BoneID: 2
+    BindTransform: [1, 0, 0, 0, 0, 0.996191978, 0.0871850029, 0, 0, -0.0871850029, 0.996191978, 0, 0, -118.470497, -8.88900757, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_Spine2
+        BoneID: 3
+  - BoneName: mixamorig_Spine2
+    BoneID: 3
+    BindTransform: [1, 0, 0, 0, 0, 0.996191978, 0.0871850029, 0, 0, -0.0871850029, 0.996191978, 0, 0, -133.020935, -8.88900757, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_Neck
+        BoneID: 4
+      - BoneName: mixamorig_LeftShoulder
+        BoneID: 6
+      - BoneName: mixamorig_RightShoulder
+        BoneID: 25
+  - BoneName: mixamorig_Neck
+    BoneID: 4
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, -149.596298, 4.16949415, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_Head
+        BoneID: 5
+  - BoneName: mixamorig_Head
+    BoneID: 5
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, -155.713013, 1.74618697, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_HeadTop_End
+        BoneID: 52
+  - BoneName: mixamorig_LeftShoulder
+    BoneID: 6
+    BindTransform: [-0.0406100005, 0.968333006, -0.246337995, 0, -0.0893419981, -0.249072999, -0.964354992, 0, -0.995172977, -0.0171540007, 0.0966280028, 0, 9.17930508, 29.2276878, 144.516922, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftArm
+        BoneID: 7
+  - BoneName: mixamorig_LeftArm
+    BoneID: 7
+    BindTransform: [0.00194300001, 0.993489027, -0.113908, 0, -0.100192003, -0.113141999, -0.988514006, 0, -0.994965971, 0.0133330002, 0.0993190035, 0, 9.63305473, -3.09349203, 143.686768, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftForeArm
+        BoneID: 8
+  - BoneName: mixamorig_LeftForeArm
+    BoneID: 8
+    BindTransform: [0.0268469993, 0.995986998, -0.0853739977, 0, -0.102995999, -0.0821940005, -0.991280019, 0, -0.994319022, 0.0354060009, 0.100376002, 0, 8.93644905, -32.4006538, 143.724594, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHand
+        BoneID: 9
+  - BoneName: mixamorig_LeftHand
+    BoneID: 9
+    BindTransform: [0.113151997, 0.981742024, -0.152902007, 0, 0.106177002, -0.164957002, -0.980569005, 0, -0.987887979, 0.0947190002, -0.122904003, 0, -26.0071259, -44.5408745, 146.11441, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHandThumb1
+        BoneID: 10
+      - BoneName: mixamorig_LeftHandIndex1
+        BoneID: 13
+      - BoneName: mixamorig_LeftHandMiddle1
+        BoneID: 16
+      - BoneName: mixamorig_LeftHandRing1
+        BoneID: 19
+      - BoneName: mixamorig_LeftHandPinky1
+        BoneID: 22
+  - BoneName: mixamorig_LeftHandThumb1
+    BoneID: 10
+    BindTransform: [0.59224999, 0.732349992, -0.336010009, 0, 0.00863599963, -0.422758996, -0.906201005, 0, -0.805707991, 0.533796012, -0.256704003, 0, -44.0002022, 5.46088266, 147.966614, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHandThumb2
+        BoneID: 11
+  - BoneName: mixamorig_LeftHandThumb2
+    BoneID: 11
+    BindTransform: [0.59224999, 0.651603997, -0.473973989, 0, 0.00863599963, -0.593336999, -0.804907978, 0, -0.805707991, 0.47261399, -0.357030988, 0, -43.2786446, 31.0295429, 144.688385, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHandThumb3
+        BoneID: 12
+  - BoneName: mixamorig_LeftHandThumb3
+    BoneID: 12
+    BindTransform: [0.59224999, 0.758418977, -0.272103012, 0, 0.00863599963, -0.34365499, -0.939055979, 0, -0.805707991, 0.553806007, -0.210079998, 0, -43.3103256, -14.3359652, 146.553146, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHandThumb4
+        BoneID: 53
+  - BoneName: mixamorig_LeftHandIndex1
+    BoneID: 13
+    BindTransform: [0.212182999, 0.969951987, -0.119043998, 0, 0.0888919979, -0.140469998, -0.986086011, 0, -0.973178983, 0.198649004, -0.116025999, 0, -27.9191494, -57.344677, 144.11322, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHandIndex2
+        BoneID: 14
+  - BoneName: mixamorig_LeftHandIndex2
+    BoneID: 14
+    BindTransform: [0.212182999, 0.928348005, -0.305202007, 0, 0.0888919979, -0.329353988, -0.940012991, 0, -0.973178983, 0.172325, -0.152406007, 0, -27.9550877, -31.5318146, 153.156433, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHandIndex3
+        BoneID: 15
+  - BoneName: mixamorig_LeftHandIndex3
+    BoneID: 15
+    BindTransform: [0.212182999, 0.92117101, -0.326222986, 0, 0.0888919979, -0.350634009, -0.932283998, 0, -0.973178983, 0.168816, -0.156283006, 0, -27.9380341, -31.3545742, 153.908813, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHandIndex4
+        BoneID: 54
+  - BoneName: mixamorig_LeftHandMiddle1
+    BoneID: 16
+    BindTransform: [0.0985869989, 0.982249022, -0.159587994, 0, 0.108611003, -0.170031995, -0.979435027, 0, -0.989184022, 0.0792270005, -0.123446003, 0, -24.1561337, -54.9748764, 146.563812, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHandMiddle2
+        BoneID: 17
+  - BoneName: mixamorig_LeftHandMiddle2
+    BoneID: 17
+    BindTransform: [0.0985869989, 0.949039996, -0.299338013, 0, 0.108611003, -0.309267998, -0.944751978, 0, -0.989184022, 0.060628999, -0.133566007, 0, -24.1789112, -36.7519379, 153.453522, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHandMiddle3
+        BoneID: 18
+  - BoneName: mixamorig_LeftHandMiddle3
+    BoneID: 18
+    BindTransform: [0.0985869989, 0.946152985, -0.308342993, 0, 0.108611003, -0.318232, -0.941770971, 0, -0.989184022, 0.0593569987, -0.134136006, 0, -24.1674767, -38.6255188, 153.82756, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHandMiddle4
+        BoneID: 55
+  - BoneName: mixamorig_LeftHandRing1
+    BoneID: 19
+    BindTransform: [0.0561189987, 0.955326974, -0.290174991, 0, 0.115549996, -0.294894993, -0.948517025, 0, -0.991715014, 0.0197000001, -0.126937002, 0, -24.0242214, -36.2133827, 152.867081, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHandRing2
+        BoneID: 20
+  - BoneName: mixamorig_LeftHandRing2
+    BoneID: 20
+    BindTransform: [0.0561189987, 0.949164987, -0.309736013, 0, 0.115549996, -0.314314008, -0.942260027, 0, -0.991715014, 0.0170879997, -0.127315, 0, -24.0167065, -35.8143082, 153.635086, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHandRing3
+        BoneID: 21
+  - BoneName: mixamorig_LeftHandRing3
+    BoneID: 21
+    BindTransform: [0.0561189987, 0.990188003, -0.127975002, 0, 0.115549996, -0.133756995, -0.984255016, 0, -0.991715014, 0.0404470004, -0.121923, 0, -24.0058937, -66.3618774, 143.808609, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHandRing4
+        BoneID: 56
+  - BoneName: mixamorig_LeftHandPinky1
+    BoneID: 22
+    BindTransform: [0.00743700005, 0.966398001, -0.256942004, 0, 0.123221003, -0.255876005, -0.958823979, 0, -0.992350996, -0.0245299991, -0.120984003, 0, -23.3180714, -41.0131454, 151.434067, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHandPinky2
+        BoneID: 23
+  - BoneName: mixamorig_LeftHandPinky2
+    BoneID: 23
+    BindTransform: [0.00743700005, 0.899214983, -0.437442988, 0, 0.123221003, -0.434946001, -0.891986012, 0, -0.992350996, -0.0472679995, -0.114037, 0, -23.3240242, -13.922925, 157.015594, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHandPinky3
+        BoneID: 24
+  - BoneName: mixamorig_LeftHandPinky3
+    BoneID: 24
+    BindTransform: [0.00743700005, 0.991514981, -0.129776999, 0, 0.123221003, -0.129701003, -0.98386699, 0, -0.992350996, -0.00867400039, -0.12314, 0, -23.3009186, -65.3598633, 143.707245, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftHandPinky4
+        BoneID: 57
+  - BoneName: mixamorig_RightShoulder
+    BoneID: 25
+    BindTransform: [-0.00463799993, -0.968333006, 0.249619007, 0, 0.0866430029, -0.249072, -0.964601994, 0, 0.996228993, 0.0171540007, 0.0850550011, 0, -8.81664848, 29.3705807, 144.501373, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightArm
+        BoneID: 26
+  - BoneName: mixamorig_RightArm
+    BoneID: 26
+    BindTransform: [-0.0478040017, -0.992819011, 0.109663002, 0, 0.0754529983, -0.113063999, -0.99071902, 0, 0.996002972, -0.0390859991, 0.0803159997, 0, -7.06541681, -3.33495712, 143.83049, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightForeArm
+        BoneID: 27
+  - BoneName: mixamorig_RightForeArm
+    BoneID: 27
+    BindTransform: [0.0305940006, -0.995909989, 0.0850149989, 0, 0.0841299966, -0.0821869969, -0.993059993, 0, 0.995984972, 0.0375339985, 0.0812710002, 0, -6.07050991, -32.387516, 143.878281, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHand
+        BoneID: 28
+  - BoneName: mixamorig_RightHand
+    BoneID: 28
+    BindTransform: [0.112985998, -0.980136991, 0.162990004, 0, -0.081915997, -0.172671005, -0.981567025, 0, 0.99021399, 0.0975520015, -0.0997980013, 0, 22.6240768, -43.3517303, 147.031876, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHandThumb1
+        BoneID: 29
+      - BoneName: mixamorig_RightHandIndex1
+        BoneID: 32
+      - BoneName: mixamorig_RightHandMiddle1
+        BoneID: 35
+      - BoneName: mixamorig_RightHandRing1
+        BoneID: 38
+      - BoneName: mixamorig_RightHandPinky1
+        BoneID: 41
+  - BoneName: mixamorig_RightHandThumb1
+    BoneID: 29
+    BindTransform: [0.586261988, -0.720386982, 0.370593011, 0, 0.0149959996, -0.447724015, -0.894046009, 0, 0.809983015, 0.529703021, -0.251681, 0, 40.2513046, 9.63442802, 148.68895, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHandThumb2
+        BoneID: 30
+  - BoneName: mixamorig_RightHandThumb2
+    BoneID: 30
+    BindTransform: [0.586261988, -0.670170009, 0.455157995, 0, 0.0149959996, -0.552765012, -0.833202004, 0, 0.809983015, 0.495299995, -0.314015001, 0, 39.4811134, 23.9293289, 146.871536, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHandThumb3
+        BoneID: 31
+  - BoneName: mixamorig_RightHandThumb3
+    BoneID: 31
+    BindTransform: [0.586261988, -0.769299984, 0.253917992, 0, 0.0149959996, -0.303072006, -0.952849984, 0, 0.809983015, 0.562426984, -0.166143, 0, 39.6974411, -20.7046108, 146.822586, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHandThumb4
+        BoneID: 58
+  - BoneName: mixamorig_RightHandIndex1
+    BoneID: 32
+    BindTransform: [0.205786005, -0.966767013, 0.151703, 0, -0.0651049986, -0.168202996, -0.98360002, 0, 0.976428986, 0.192534, -0.0975549966, 0, 24.1787148, -53.6749916, 146.361542, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHandIndex2
+        BoneID: 33
+  - BoneName: mixamorig_RightHandIndex2
+    BoneID: 33
+    BindTransform: [0.205786005, -0.927910984, 0.310860008, 0, -0.0651049986, -0.329937011, -0.941754997, 0, 0.976428986, 0.173561007, -0.128307998, 0, 24.2028446, -31.8248348, 153.826492, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHandIndex3
+        BoneID: 34
+  - BoneName: mixamorig_RightHandIndex3
+    BoneID: 34
+    BindTransform: [0.205786005, -0.909094989, 0.362212986, 0, -0.0651049986, -0.38203299, -0.921853006, 0, 0.976428986, 0.166122004, -0.137804002, 0, 24.1944237, -26.3286533, 155.540237, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHandIndex4
+        BoneID: 59
+  - BoneName: mixamorig_RightHandMiddle1
+    BoneID: 35
+    BindTransform: [0.121642001, -0.978555024, 0.166231006, 0, -0.0803870037, -0.176636994, -0.980988026, 0, 0.989313006, 0.105966002, -0.100149997, 0, 22.2520065, -54.6246452, 147.395416, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHandMiddle2
+        BoneID: 36
+  - BoneName: mixamorig_RightHandMiddle2
+    BoneID: 36
+    BindTransform: [0.121642001, -0.941218972, 0.315133989, 0, -0.0803870037, -0.325791001, -0.942017972, 0, 0.989313006, 0.0892560035, -0.115291998, 0, 22.2525272, -34.2767372, 154.529007, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHandMiddle3
+        BoneID: 37
+  - BoneName: mixamorig_RightHandMiddle3
+    BoneID: 37
+    BindTransform: [0.121642001, -0.991753995, -0.0403520018, 0, -0.0803870037, 0.0306770001, -0.996291995, 0, 0.989313006, 0.124434002, -0.0759930015, 0, 22.2273464, -90.0022583, 131.084946, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHandMiddle4
+        BoneID: 60
+  - BoneName: mixamorig_RightHandRing1
+    BoneID: 38
+    BindTransform: [0.0499799997, -0.972660005, 0.226794004, 0, -0.0928070024, -0.230618, -0.968608022, 0, 0.994428992, 0.0273630004, -0.101796001, 0, 20.3278236, -47.4852867, 150.35582, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHandRing2
+        BoneID: 39
+  - BoneName: mixamorig_RightHandRing2
+    BoneID: 39
+    BindTransform: [0.0499799997, -0.961983025, 0.268496007, 0, -0.0928070024, -0.272141993, -0.957771003, 0, 0.994428992, 0.0229509994, -0.102880001, 0, 20.3247223, -43.4732971, 152.370636, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHandRing3
+        BoneID: 40
+  - BoneName: mixamorig_RightHandRing3
+    BoneID: 40
+    BindTransform: [0.0499799997, -0.997488976, 0.0501689985, 0, -0.0928070024, -0.0546530001, -0.994183004, 0, 0.994428992, 0.0450330004, -0.0953050032, 0, 20.3168602, -78.2348251, 138.548279, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHandRing4
+        BoneID: 61
+  - BoneName: mixamorig_RightHandPinky1
+    BoneID: 41
+    BindTransform: [-0.061728999, -0.967938006, 0.243487, 0, -0.111097999, -0.235772997, -0.965436995, 0, 0.991890013, -0.0866459981, -0.0929820016, 0, 16.0154858, -43.7898865, 151.324432, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHandPinky2
+        BoneID: 42
+  - BoneName: mixamorig_RightHandPinky2
+    BoneID: 42
+    BindTransform: [-0.061728999, -0.920892, 0.384900004, 0, -0.111097999, -0.376899004, -0.919568002, 0, 0.991890013, -0.099526003, -0.0790439993, 0, 16.01861, -23.721077, 156.602295, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHandPinky3
+        BoneID: 43
+  - BoneName: mixamorig_RightHandPinky3
+    BoneID: 43
+    BindTransform: [-0.061728999, -0.985993028, 0.154939994, 0, -0.111097999, -0.147484004, -0.982805014, 0, 0.991890013, -0.0778810009, -0.100437999, 0, 16.0065441, -62.7696571, 145.861694, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightHandPinky4
+        BoneID: 62
+  - BoneName: mixamorig_LeftUpLeg
+    BoneID: 44
+    BindTransform: [-1, 0, 0, 0, 0, -0.999926984, -0.0120850001, 0, 0, -0.0120850001, 0.999926984, 0, 13.4002733, 89.1921539, 1.21703887, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftLeg
+        BoneID: 45
+  - BoneName: mixamorig_LeftLeg
+    BoneID: 45
+    BindTransform: [-0.999185979, 0.0402490012, 0.002722, 0, -0.0403379984, -0.996020973, -0.0794619992, 0, -0.000487999991, -0.0795070007, 0.99683398, 0, 15.3308735, 47.3572006, 4.42204571, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftFoot
+        BoneID: 46
+  - BoneName: mixamorig_LeftFoot
+    BoneID: 46
+    BindTransform: [-0.99792397, 0.0641070008, -0.00624200003, 0, -0.044075001, -0.60899502, 0.791948974, 0, 0.0469679981, 0.790579975, 0.610556006, 0, 15.5240059, 8.91973305, -6.9264884, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftToeBase
+        BoneID: 47
+  - BoneName: mixamorig_LeftToeBase
+    BoneID: 47
+    BindTransform: [-0.99772203, 0.0634860024, -0.0228010006, 0, -0.0224489998, 0.00624600006, 0.999728024, 0, 0.0636110008, 0.997963011, -0.00480700005, 0, 15.3292236, -11.5269928, -0.340693176, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_LeftToe_End
+        BoneID: 63
+  - BoneName: mixamorig_RightUpLeg
+    BoneID: 48
+    BindTransform: [-1, 0, 0, 0, 0, -0.999920011, -0.0126550002, 0, -0, -0.0126550002, 0.999920011, 0, -13.4002733, 89.1905518, 1.33826065, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightLeg
+        BoneID: 49
+  - BoneName: mixamorig_RightLeg
+    BoneID: 49
+    BindTransform: [-0.999185979, -0.0402630009, -0.00251300004, 0, 0.0403390005, -0.996376991, -0.074872002, 0, 0.000510999991, -0.0749119967, 0.997189999, 0, -15.3308363, 47.370018, 4.2976079, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightFoot
+        BoneID: 50
+  - BoneName: mixamorig_RightFoot
+    BoneID: 50
+    BindTransform: [-0.997932971, -0.0584609993, -0.0266720001, 0, 0.0143889999, -0.607834995, 0.793932974, 0, -0.0626270026, 0.791908979, 0.607420027, 0, -15.2306108, 8.9349823, -7.49631643, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightToeBase
+        BoneID: 51
+  - BoneName: mixamorig_RightToeBase
+    BoneID: 51
+    BindTransform: [-0.996877015, -0.0787290037, -0.00613899995, 0, -0.00663900003, 0.00608599978, 0.999958992, 0, -0.0786890015, 0.996877015, -0.00658900011, 0, -15.0267773, -11.8831978, -0.780052185, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_RightToe_End
+        BoneID: 64
+  - BoneName: mixamorig_HeadTop_End
+    BoneID: 52
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 23.7127533, 9.39446926, 1]
+  - BoneName: mixamorig_LeftHandThumb4
+    BoneID: 53
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0.689879, 2.84744406, 0, 1]
+  - BoneName: mixamorig_LeftHandIndex4
+    BoneID: 54
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -0.0188839994, 2.693398, 0, 1]
+  - BoneName: mixamorig_LeftHandMiddle4
+    BoneID: 55
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -0.0113439998, 2.78309107, 0, 1]
+  - BoneName: mixamorig_LeftHandRing4
+    BoneID: 56
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0.0183269996, 2.32056808, 0, 1]
+  - BoneName: mixamorig_LeftHandPinky4
+    BoneID: 57
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0.0171530005, 1.79310894, 0, 1]
+  - BoneName: mixamorig_RightHandThumb4
+    BoneID: 58
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -0.553861022, 2.73628807, 0, 1]
+  - BoneName: mixamorig_RightHandIndex4
+    BoneID: 59
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0.0157089997, 2.55677795, 0, 1]
+  - BoneName: mixamorig_RightHandMiddle4
+    BoneID: 60
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -0.0246600006, 2.13596797, 0, 1]
+  - BoneName: mixamorig_RightHandRing4
+    BoneID: 61
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -0.0109639997, 1.61389399, 0, 1]
+  - BoneName: mixamorig_RightHandPinky4
+    BoneID: 62
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -0.00894299988, 1.90429997, 0, 1]
+  - BoneName: mixamorig_LeftToe_End
+    BoneID: 63
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 7.2063942, 0, 1]
+  - BoneName: mixamorig_RightToe_End
+    BoneID: 64
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 7.26751089, 0, 1]
+  - BoneName: Ch15
+    BoneID: 65
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    MTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+  - BoneName: RootNode
+    BoneID: 66
+    BindTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    MTransform: [0.00999999978, 0, 0, 0, 0, 0.00999999978, 0, 0, 0, 0, 0.00999999978, 0, 0, 0, 0, 1]
+    Children:
+      - BoneName: mixamorig_Hips
+        BoneID: 0
+      - BoneName: Ch15
+        BoneID: 65
+Meshes:
+  - MeshName: Ch15Mesh
+    Material:
+      albedo: [-107374176, -107374176, -107374176]
+      metallic: 0
+      roughness: 0
+      ao: 1
+      use_albedo: false
+      use_metalic: false
+      use_normal: false
+      use_roughness: false
+      use_phong_shading: false
+      albedo_texture_path: textures/Ch15_1001_Diffuse.png
+      metalic_texture_path: textures/Ch15_1001_Specular.png
+      normal_texture_path: ../game_assets/Resources/Dying Soldier/textures/Ch15_1001_Normal.png
+  - MeshName: Ch15Mesh
+    Material:
+      albedo: [-107374176, -107374176, -107374176]
+      metallic: 0
+      roughness: 0
+      ao: 1
+      use_albedo: false
+      use_metalic: false
+      use_normal: false
+      use_roughness: false
+      use_phong_shading: false
+      albedo_texture_path: textures/Ch15_1002_Diffuse.png
+      metalic_texture_path: textures/Ch15_1002_Specular.png
+      normal_texture_path: ../game_assets/Resources/Dying Soldier/textures/Ch15_1002_Normal.png
+      emissive_texture_path: textures/Ch15_1002_Emissive.png

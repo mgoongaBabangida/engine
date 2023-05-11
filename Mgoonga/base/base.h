@@ -20,6 +20,16 @@ class eObject;
 
 struct Texture;
 
+struct TextureInfo
+{
+	TextureInfo(std::string _type, std::string _path)
+		: m_type(_type)
+		, m_path(_path)
+	{}
+	std::string m_type;
+	std::string m_path; //variant path or name in manager ? or enum ?
+};
+
 //-------------------------------------------------------
 struct Material
 {

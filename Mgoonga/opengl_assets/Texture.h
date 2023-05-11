@@ -11,9 +11,7 @@
 
 enum TColor { WHITE, BLACK, BLUE, PINK, YELLOW, GREY };
 
-GLuint GetDefaultTextureId();
-
-struct /*DLL_OPENGL_ASSETS*/ Texture
+struct DLL_OPENGL_ASSETS Texture
 {
 	GLuint				  id;
 	std::string			type;
@@ -41,6 +39,8 @@ struct /*DLL_OPENGL_ASSETS*/ Texture
 		numberofRows	= t.numberofRows;
 		return *this; 
 	}
+
+	static GLuint GetDefaultTextureId();
 
 	void setNumRows(GLuint nrows) { numberofRows = nrows; }
 	void freeTexture();

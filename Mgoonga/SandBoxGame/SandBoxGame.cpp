@@ -11,8 +11,9 @@
 #include <opengl_assets/Sound.h>
 #include <opengl_assets/GUI.h>
 #include <opengl_assets/TextureManager.h>
-#include <opengl_assets/ModelManager.h>
 #include <opengl_assets/SoundManager.h>
+#include <game_assets/ModelManagerYAML.h>
+#include <game_assets/AnimationManagerYAML.h>
 
 #include <sdl_assets/ImGuiContext.h>
 
@@ -106,12 +107,13 @@ void eSandBoxGame::InitializeModels()
 	
 	//MODELS
 	modelManager->Add("wolf", (GLchar*)std::string(modelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
-	modelManager->Add("Firing", (GLchar*)std::string(modelFolderPath + "Firing Rifle Soldier/Firing Rifle.dae").c_str());
 	modelManager->Add("Dying", (GLchar*)std::string(modelFolderPath + "Dying Soldier/Dying.dae").c_str());
-	modelManager->Add("Walking", (GLchar*)std::string(modelFolderPath + "Walking Soldier/Walking.dae").c_str());
 
+	//DESERIALIZE ANIMATIONS
+	animationManager->Deserialize("Animations.mgoongaAnimations");
+	
 	//OBJECTS
-	ObjectFactoryBase factory;
+	ObjectFactoryBase factory(animationManager.get());
 
 	shObject wallCube = factory.CreateObject(modelManager->Find("wall_cube"), eObject::RenderType::PHONG, "WallCube");
 	wallCube->GetTransform()->setTranslation(vec3(3.0f, 3.0f, 3.0f));
@@ -122,39 +124,32 @@ void eSandBoxGame::InitializeModels()
 	grassPlane->GetTransform()->setTranslation(vec3(0.0f, -2.0f, 0.0f));
 	m_objects.push_back(grassPlane);
 
-	shObject wolf = factory.CreateObject(modelManager->Find("wolf"), eObject::RenderType::PHONG, "Wolf");
+	shObject wolf = factory.CreateObject(modelManager->Find("wolf"), eObject::RenderType::PHONG, "Wolf", "Default", "");
 	wolf->GetTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);
 	wolf->GetTransform()->setTranslation(vec3(3.0f, -2.0f, 0.0f));
 	wolf->GetTransform()->setScale(vec3(1.5f, 1.5f, 1.5f));
-	wolf->SetRigger(new Rigger((Model*)modelManager->Find("wolf").get())); //@todo improve
-	wolf->GetRigger()->ChangeName(std::string(), "Running");//@todo improve
 	m_objects.push_back(wolf);
 
-	shObject dying = factory.CreateObject(modelManager->Find("Dying"), eObject::RenderType::PHONG, "Dying", false); // dynamic collider
-	dying->GetTransform()->setTranslation(vec3(1.0f, -2.0f, 0.0f));
-	dying->GetTransform()->setScale(vec3(0.01f, 0.01f, 0.01f));
-	Rigger* rigger = new Rigger((Model*)modelManager->Find("Dying").get());
-
-	//Set animations manually
-	rigger->ChangeName(std::string(), "Dying");//@todo improve
-	rigger->AddAnimations(dynamic_cast<eAnimatedModel*>(modelManager->Find("Firing").get())->Animations());
-	rigger->ChangeName(std::string(), "Firing");
-	rigger->AddAnimations(dynamic_cast<eAnimatedModel*>(modelManager->Find("Walking").get())->Animations());
-	rigger->ChangeName(std::string(), "Walking");
-	dying->SetRigger(rigger); //@todo improve
-	dying->GetCollider()->CalculateExtremDots(dying.get()); //recalculate
+	shObject soldier = factory.CreateObject(modelManager->Find("Dying"),
+																					eObject::RenderType::PHONG,
+																					"Soldier",
+																					"MixamoFireWalkDie.mgoongaRigger",
+																					"Soldier3Anim.mgoongaBoxColliderDynamic",
+																					true); // dynamic collider
+	soldier->GetTransform()->setTranslation(vec3(1.0f, -2.0f, 0.0f));
+	soldier->GetTransform()->setScale(vec3(0.01f, 0.01f, 0.01f));
 
 	//Set textures manually
-	auto material1 = dying->GetModel()->GetMeshes()[0]->GetMaterial();
-	material1->normal_texture_id = texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1001_Normal.png", "soldier_normal1");
-	const_cast<IMesh*>(dying->GetModel()->GetMeshes()[0])->SetMaterial(*material1);
-	auto material2 = dying->GetModel()->GetMeshes()[1]->GetMaterial();
-	material2->normal_texture_id = texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1002_Normal.png", "soldier_normal2");
-	const_cast<IMesh*>(dying->GetModel()->GetMeshes()[1])->SetMaterial(*material2);
+	Texture* t = texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1001_Normal.png", "soldier_normal1", "texture_normal"));
+	const_cast<I3DMesh*>(soldier->GetModel()->Get3DMeshes()[0])->AddTexture(t);
+	t = texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1002_Normal.png", "soldier_normal2", "texture_normal"));
+	const_cast<I3DMesh*>(soldier->GetModel()->Get3DMeshes()[1])->AddTexture(t);
 
-	m_objects.push_back(dying);
+	m_objects.push_back(soldier);
+	/*modelManager->Save(soldier->GetModel(), "Soldier.mgoongaObject3d");
+	modelManager->Add("Soldier", "Soldier.mgoongaObject3d");*/
 
-		//light
+	//light
 	m_light_object = factory.CreateObject(modelManager->Find("white_sphere"), eObject::RenderType::PHONG, "WhiteSphere");
 	m_light_object->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
 	m_light_object->GetTransform()->setTranslation(GetMainLight().light_position);

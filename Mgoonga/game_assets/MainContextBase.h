@@ -14,7 +14,8 @@
 #include "InputStrategy.h"
 
 class eTextureManager;
-class eModelManager;
+class ModelManagerYAML;
+class AnimationManagerYAML;
 class eSoundManager;
 
 class eInputController;
@@ -112,10 +113,11 @@ protected:
 	GizmoType										m_gizmo_type = GizmoType::TRANSLATE;
 	
 	//managers
-	std::unique_ptr<eTextureManager>	texManager;
-	std::unique_ptr<eModelManager>		modelManager;
-	std::unique_ptr<eSoundManager>		soundManager;
-  std::vector<IWindowImGui*>        externalGui;
+	std::unique_ptr<eTextureManager>		texManager;
+	std::unique_ptr<ModelManagerYAML>		modelManager;
+	std::unique_ptr<AnimationManagerYAML>		animationManager;
+	std::unique_ptr<eSoundManager>			soundManager;
+  std::vector<IWindowImGui*>					externalGui;
 
 	//tcp
 	std::unique_ptr <ITcpAgent>				tcpAgent;

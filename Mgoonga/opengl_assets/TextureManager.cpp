@@ -176,6 +176,16 @@ Texture* eTextureManager::Find(const std::string& texture_name)
 	}
 }
 
+//----------------------------------------------------
+Texture* eTextureManager::FindByID(unsigned int _id)
+{
+	for (auto& texture : m_Textures)
+		if (texture.second.id == _id)
+			return &texture.second;
+	return nullptr;
+}
+
+//----------------------------------------------------
 void eTextureManager::AddTextureBox(const Texture& _texture, const std::string& _name)
 {
 	Texture text;
@@ -184,10 +194,11 @@ void eTextureManager::AddTextureBox(const Texture& _texture, const std::string& 
 }
 
 //-----------------------------------------------------
-uint64_t eTextureManager::LoadTexture(const std::string& _path, const std::string& _name)
+uint64_t eTextureManager::LoadTexture(const std::string& _path, const std::string& _name, const std::string& _type)
 {
 	Texture text;
 	text.loadTextureFromFile(_path);
+	text.type = _type;
 	m_Textures.insert(std::pair<std::string, Texture>(_name, text));
 	return text.id;
 }

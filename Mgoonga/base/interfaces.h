@@ -2,6 +2,7 @@
 #define  INTERFACES_H
 
 #include "base.h"
+
 #include <optional>
 
 #include <glm\glm\glm.hpp>
@@ -98,11 +99,27 @@ class I3DMesh : public IMesh
 {
 public:
 	virtual ~I3DMesh() = default;
-	virtual size_t														GetVertexCount() const = 0;
-	virtual const std::vector<Vertex>&				GetVertexs() const = 0;
-	virtual const std::vector<unsigned int>&	GetIndices() const = 0;
-	virtual void BindVAO()	const																	= 0;
-	virtual void UnbindVAO() const																= 0;
+	virtual size_t														GetVertexCount() const	= 0;
+	virtual const std::vector<Vertex>&				GetVertexs() const			= 0;
+	virtual const std::vector<unsigned int>&	GetIndices() const			= 0;
+	virtual std::vector<TextureInfo>					GetTextures() const			= 0;
+	virtual void AddTexture(Texture*)																	= 0;
+	virtual void BindVAO()	const																			= 0;
+	virtual void UnbindVAO() const																		= 0;
+};
+
+//----------------------------------------------------------------------------------------------
+class IBone
+{
+public:
+	virtual ~IBone() = default;
+
+	virtual const std::string& GetName()  const							= 0;
+	virtual size_t GetID() const														= 0;
+	virtual  std::vector<const IBone*> GetChildren() const	= 0;
+	virtual const glm::mat4& GetLocalBindTransform() const	= 0;
+	virtual const glm::mat4& GetMTransform() const					= 0;
+	virtual bool IsRealBone() const													= 0;
 };
 
 //----------------------------------------------------------------------------------------------
@@ -119,6 +136,9 @@ public:
   virtual size_t													GetMeshCount() const = 0;
   virtual std::vector<const IMesh*>				GetMeshes() const = 0;
 	virtual std::vector<const I3DMesh*>			Get3DMeshes() const = 0;
+
+	virtual bool														HasBones() const = 0;
+	virtual std::vector<const IBone*>				GetBones() const = 0;
 
   virtual size_t													GetAnimationCount() const = 0;
   virtual std::vector<const IAnimation*>	GetAnimations() const = 0;
@@ -142,12 +162,13 @@ class ITransform
 {
 public:
 	virtual ~ITransform() = default;
+
 	virtual glm::mat4	getModelMatrix() const = 0;
-	virtual void		setRotation(float x, float y, float z) = 0;
-	virtual void		setRotation(glm::quat q) = 0;
-	virtual void		setTranslation(glm::vec3 tr) = 0;
-	virtual void		setScale(glm::vec3 sc) = 0;
-	virtual bool		isRotationValid() = 0;
+	virtual void			setRotation(float x, float y, float z) = 0;
+	virtual void			setRotation(glm::quat q) = 0;
+	virtual void			setTranslation(glm::vec3 tr) = 0;
+	virtual void			setScale(glm::vec3 sc) = 0;
+	virtual bool			isRotationValid() = 0;
 
 	virtual glm::mat4	  getScale()			const = 0;
   virtual glm::vec3   getScaleAsVector() const = 0;
@@ -183,6 +204,10 @@ public:
 														eCollision& _collision) = 0;
 
 	virtual glm::vec3								GetCenter() = 0;
+	virtual float										GetRadius() = 0;
+	virtual const std::string&			GetModelName() = 0;
+	virtual const std::string&			GetPath() const = 0;
+	virtual void										SetPath(const std::string&) = 0;
 
 	virtual std::vector<glm::mat3>	GetBoundingTriangles(const ITransform& trans)const = 0;
 	virtual std::vector<glm::vec3>	GetExtrems(const ITransform& trans) const = 0;
@@ -209,6 +234,8 @@ public:
 	virtual size_t												GetCurrentAnimationFrameIndex() const																	= 0;
 	virtual size_t												GetBoneCount() const																									= 0;
 	virtual std::vector<glm::mat4>				GetMatrices(const std::string& _animationName, size_t _frame)					= 0;
+	virtual const std::string&						GetPath() const																												= 0;
+	virtual void													SetPath(const std::string&)																						= 0;
 };
 
 //-----------------------------------------------------------------------------------------------

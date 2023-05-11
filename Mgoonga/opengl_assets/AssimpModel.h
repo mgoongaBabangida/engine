@@ -21,7 +21,9 @@
 class Model: public eAnimatedModel
 {
 public:
-	Model(GLchar* path, const std::string& _name, bool _m_invert_y_uv = false);
+	Model(char* path,
+				const std::string& _name,
+				bool _m_invert_y_uv = false);
   virtual ~Model();
 
 	virtual void Draw() override;
@@ -32,6 +34,9 @@ public:
   virtual size_t													GetMeshCount() const  override { return meshes.size();}
 	virtual std::vector<const I3DMesh*>			Get3DMeshes() const override;
 	virtual std::vector<const IMesh*>				GetMeshes() const override;
+
+	virtual bool														HasBones() const { return !m_bones.empty(); }
+	virtual std::vector<const IBone*>				GetBones() const;
 
   virtual size_t													GetAnimationCount() const override { return m_animations.size(); }
   virtual std::vector<const IAnimation*>	GetAnimations() const override;
@@ -47,8 +52,9 @@ private:
 	std::vector<AssimpMesh>		meshes;
 	std::string								directory;
 	std::string								m_name;
+
 	/*  Functions   */
-  void							              loadModel(std::string path);
+  void							              loadModel(const std::string& path);
   void							              processNode(aiNode* node, const aiScene* scene);
 	AssimpMesh						          processMesh(aiMesh* mesh, const aiScene* scene);
 	std::vector<Texture>					  loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);

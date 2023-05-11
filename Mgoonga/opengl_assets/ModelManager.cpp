@@ -43,7 +43,7 @@ std::shared_ptr<IModel> eModelManager::Find(const std::string& name)
 	return  models.find(name)->second;
 }
 
-void eModelManager::Add(const std::string& name, GLchar* path, bool invert_y_uv)
+void eModelManager::Add(const std::string& name, char* path, bool invert_y_uv)
 {
 	models.insert(std::pair<std::string, std::shared_ptr<IModel> >(name, new Model(path, name, invert_y_uv)) );
 }

@@ -34,6 +34,9 @@ public:
 	virtual size_t														GetAnimationCount() const { return 0; }
   virtual std::vector<const IAnimation*>		GetAnimations() const { return std::vector<const IAnimation*>();}
 
+	virtual bool														HasBones() const { return false; }
+	virtual std::vector<const IBone*>				GetBones() const { return {}; }
+
 	virtual bool											HasMaterial() const { return true; }
 	virtual void											SetMaterial(const Material& _material) { m_material = _material; }
 	virtual std::optional<Material>		GetMaterial() const { return m_material; }
@@ -78,6 +81,9 @@ public:
 	virtual size_t														GetAnimationCount() const { return 0; }
 	virtual std::vector<const IAnimation*>		GetAnimations() const { return std::vector<const IAnimation*>(); }
 
+	virtual bool														HasBones() const { return false; }
+	virtual std::vector<const IBone*>				GetBones() const { return {}; }
+
 	virtual void								Draw()					override { m_mesh->Draw(); }
 	virtual const std::string&	GetName() const override { return m_mesh->Name(); }
 	virtual const std::string&	GetPath() const override { return m_path; }
@@ -101,6 +107,9 @@ public:
 	virtual std::vector<const I3DMesh*>				Get3DMeshes() const override { return std::vector<const I3DMesh*>{}; }
 	virtual size_t														GetAnimationCount() const { return 0; }
 	virtual std::vector<const IAnimation*>		GetAnimations() const { return std::vector<const IAnimation*>(); }
+
+	virtual bool														HasBones() const { return false; }
+	virtual std::vector<const IBone*>				GetBones() const { return {}; }
 
 	virtual void								Draw()					override { m_mesh->Draw(); }
 	virtual const std::string&	GetName() const override { return m_mesh->Name(); }

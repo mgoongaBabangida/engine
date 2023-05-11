@@ -9,14 +9,13 @@
 
 #include <map>
 
-
 //-------------------------------------------------------------------
 struct Frame
 {
-	size_t															timeStamp; //can be const?
+	int64_t															timeStamp;
 	std::map<std::string, Transform>		pose;
 	
-	Frame(int timeStamp, std::map<std::string, Transform> pose) 
+	Frame(int64_t timeStamp, std::map<std::string, Transform> pose) 
     : timeStamp(timeStamp), pose(pose)
   {}
 
@@ -31,15 +30,20 @@ struct Frame
 class DLL_MATH SceletalAnimation : public IAnimation
 {
 public:
-	SceletalAnimation(int dur, const std::vector<Frame> &  frames ,const std::string _name) 
-		:duration(dur), frames(frames),name(_name)	{ Start(); } // to del }
+	SceletalAnimation(int64_t dur, const std::vector<Frame> &  frames ,const std::string _name)
+		: duration(dur),
+		  frames(frames),
+		  name(_name)
+	{ Start(); }
 	
 	bool operator==(const SceletalAnimation& other) { return name == other.name && duration == other.duration; }
 	
 	const Frame&	getCurrentFrame();
-	const Frame&	GetFrameByNumber(size_t _num);
+	const Frame&	GetFrameByNumber(size_t _num) const;
+
 	size_t				GetCurFrameIndex() const;
 	size_t				GetNumFrames() const { return frames.size(); }
+	int64_t				GetDuration() const { return duration; }
 
 	virtual void Start() override;
 	virtual void Stop() override;
@@ -49,8 +53,8 @@ public:
 	void PlayOnce();
 	void FreezeFrame(size_t);
 
-	virtual const std::string& Name() const		override;
-	void SetName(const std::string& n);
+	virtual const std::string&	Name() const		override;
+	void												SetName(const std::string& n);
 
 	void Debug();
 

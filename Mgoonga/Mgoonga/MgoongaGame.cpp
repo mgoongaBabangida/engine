@@ -14,6 +14,8 @@
 #include <opengl_assets/TextureManager.h>
 #include <opengl_assets/ModelManager.h>
 #include <opengl_assets/SoundManager.h>
+#include <game_assets/ModelManagerYAML.h>
+#include <game_assets/AnimationManagerYAML.h>
 
 #include <sdl_assets/ImGuiContext.h>
 

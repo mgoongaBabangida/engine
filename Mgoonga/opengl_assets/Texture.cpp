@@ -94,7 +94,8 @@ void Texture::freeTexture()
 bool Texture::loadTexture1x1(TColor color)
 {
 	GLubyte tex[4];
-	switch (color) {
+	switch (color)
+	{
 	case WHITE:
 		tex[0]=255, tex[1] = 255, tex[2] = 255, tex[3] = 255;
 		break;
@@ -313,7 +314,7 @@ bool Texture::generatePerlin(GLuint Width, GLuint Height, bool periodic)
 	return true;
 }
 
-GLuint GetDefaultTextureId()
+GLuint Texture::GetDefaultTextureId()
 {
 	static const GLuint DEFAULT_TEXTURE_ID = (GLuint)glm::pow(2, 32) - 1;
 	return DEFAULT_TEXTURE_ID;

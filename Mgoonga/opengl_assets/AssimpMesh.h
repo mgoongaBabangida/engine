@@ -27,6 +27,9 @@ public:
   virtual size_t                            GetVertexCount() const override { return vertices.size(); }
   virtual const std::vector<Vertex>&        GetVertexs() const override { return vertices; }
   virtual const std::vector<unsigned int>&  GetIndices() const override { return indices; }
+  virtual std::vector<TextureInfo>					GetTextures() const override;
+  virtual void                              AddTexture(Texture*) override;
+
   virtual void                              BindVAO() const override { glBindVertexArray(this->VAO); }
   virtual void                              UnbindVAO() const override { glBindVertexArray(0); }
 
@@ -39,7 +42,7 @@ protected:
   void _BindMaterialTextures();
 
   /*  Mesh Data  */
-  std::vector<Vertex>	vertices;
+  std::vector<Vertex>	      vertices;
   std::vector<GLuint>			  indices;
   std::vector<Texture>			textures;
   std::string               name;
