@@ -24,6 +24,8 @@
 
 imgui_addons::ImGuiFileBrowser file_dialog;
 
+static bool	block_events = false;
+
 //---------------------------------------------------------------------
 struct UniformDisplayVisitor
 {
@@ -146,6 +148,16 @@ void eImGuiContext::CleanUp()
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
 	ImGui::DestroyContext();
+}
+
+bool eImGuiContext::BlockEvents()
+{
+  return block_events;
+}
+
+void eImGuiContext::SetBlockEvents(bool _b)
+{
+  block_events = _b;
 }
 
 void eWindowImGuiDemo::Render()
@@ -297,23 +309,26 @@ void eWindowImGui::Render()
       break;
       case OBJECT_REF_TRANSFORM:
       {
-        //@todo !!!
-        //check if obj has changed and put current mesh to 0 (save last obj?)
         shObject* p_object = static_cast<shObject*>(std::get<2>(item));
+
         if (p_object && *p_object)
         {
-          shObject obj = *p_object;
-          ImGui::Text(obj->Name().c_str());
+          if (*p_object != m_current_object)
+          {
+            m_current_object = *p_object;
+            m_combo_list.clear();
+          }
+          ImGui::Text(m_current_object->Name().c_str());
 
           static glm::vec3 g_translation, g_rotation, g_scale;
           ImGui::Text("");
-          g_translation[0] = obj->GetTransform()->getTranslation()[0];
-          g_translation[1] = obj->GetTransform()->getTranslation()[1];
-          g_translation[2] = obj->GetTransform()->getTranslation()[2];
+          g_translation[0] = m_current_object->GetTransform()->getTranslation()[0];
+          g_translation[1] = m_current_object->GetTransform()->getTranslation()[1];
+          g_translation[2] = m_current_object->GetTransform()->getTranslation()[2];
           ImGui::PushItemWidth(ImGui::GetWindowWidth());
           if (ImGui::SliderFloat3("Position", &g_translation[0], -10, 10))
           {
-            obj->GetTransform()->setTranslation(g_translation);
+            m_current_object->GetTransform()->setTranslation(g_translation);
           }
 
           ImGui::Text("Rotation");
@@ -326,7 +341,7 @@ void eWindowImGui::Render()
           ImGui::PushItemWidth(ImGui::GetWindowWidth());
           if (ImGui::SliderFloat3("", &g_rotation[0], -PI * 2, PI * 2, "%.2f"))
           {
-            auto euler = glm::eulerAngles(obj->GetTransform()->getRotation());
+            auto euler = glm::eulerAngles(m_current_object->GetTransform()->getRotation());
             //std::cout << "euler " << euler.x << " " << euler.y<< " " << euler.z << std::endl;
             //auto xRotation = glm::cross(glm::vec3(obj->GetTransform()->getRotationUpVector()), glm::vec3(obj->GetTransform()->getRotationVector()));
             auto xRotation = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -341,22 +356,22 @@ void eWindowImGui::Render()
             float angleZ = static_cast<float>(g_rotation[2]) - static_cast<float>(rot[2]);
             glm::quat rotZ = glm::angleAxis(angleZ, zRotation);
 
-            obj->GetTransform()->setRotation(rotX * rotY * rotZ* obj->GetTransform()->getRotation());
+            m_current_object->GetTransform()->setRotation(rotX * rotY * rotZ* m_current_object->GetTransform()->getRotation());
           }
 
           ImGui::Text("");
-          g_scale[0] = obj->GetTransform()->getScaleAsVector().x;
-          g_scale[1] = obj->GetTransform()->getScaleAsVector().y;
-          g_scale[2] = obj->GetTransform()->getScaleAsVector().z;
+          g_scale[0] = m_current_object->GetTransform()->getScaleAsVector().x;
+          g_scale[1] = m_current_object->GetTransform()->getScaleAsVector().y;
+          g_scale[2] = m_current_object->GetTransform()->getScaleAsVector().z;
           ImGui::PushItemWidth(ImGui::GetWindowWidth());
           if (ImGui::SliderFloat3("Scale", &g_scale[0], 0.0f, 5.0f))
           {
-            obj->GetTransform()->setScale(g_scale);
+            m_current_object->GetTransform()->setScale(g_scale);
           }
-          std::string text = std::string("Number of vertices ") + std::to_string(obj->GetModel()->GetVertexCount());
+          std::string text = std::string("Number of vertices ") + std::to_string(m_current_object->GetModel()->GetVertexCount());
           ImGui::Text(text.c_str());
           
-          text = std::string("Number of meshes ") + std::to_string(obj->GetModel()->GetMeshCount());
+          text = std::string("Number of meshes ") + std::to_string(m_current_object->GetModel()->GetMeshCount());
           ImGui::Text(text.c_str());
         }
       }
@@ -370,20 +385,20 @@ void eWindowImGui::Render()
           ImGui::Text(obj->Name().c_str());
 
           //Meshes transfer to rigger later
-          combo_list.clear();
+          m_combo_list.clear();
           for (size_t i = 0; i < obj->GetModel()->GetMeshCount(); ++i)
           {
             std::string name = obj->GetModel()->GetMeshes()[i]->Name();
             for (int j = 0; j < name.size(); ++j)
-              combo_list.push_back(name[j]);
+              m_combo_list.push_back(name[j]);
             if (i != obj->GetModel()->GetMeshCount() - 1)
-              combo_list.push_back('\0');
+              m_combo_list.push_back('\0');
           }
 
           static int mesh_current = 0;
-          if (!combo_list.empty())
+          if (!m_combo_list.empty())
           {
-            if (ImGui::Combo("Object Meshes", &mesh_current, &combo_list[0]))
+            if (ImGui::Combo("Object Meshes", &mesh_current, &m_combo_list[0]))
             {
             }
           }
@@ -426,62 +441,98 @@ void eWindowImGui::Render()
 
           //@todo add displacement/ bump as separate slot
 
-          combo_list.clear();
+          m_combo_list.clear();
         }
       }
       break;
       case OBJECT_REF_RIGGER:
       {
+        static const char* current_mesh_item = NULL;
+        static const char* current_animation_item = NULL;
+        static const char* current_frame_item = NULL;
+        static const char* current_bone_item = NULL;
+
         shObject* p_object = static_cast<shObject*>(std::get<2>(item));
         if (p_object && *p_object)
         {
-          shObject obj = *p_object;
-          ImGui::Text(obj->Name().c_str());
-
-          //Meshes transfer to rigger later
-          combo_list.clear();
-          for (size_t i = 0; i < obj->GetModel()->GetMeshCount(); ++i)
+          if (*p_object != m_current_object)
           {
-            std::string name = obj->GetModel()->GetMeshes()[i]->Name();
-            for (int j = 0; j < name.size(); ++j)
-              combo_list.push_back(name[j]);
-            if (i != obj->GetModel()->GetMeshCount() - 1)
-              combo_list.push_back('\0');
-          }
+            m_current_object = *p_object;
 
-          static int mesh_current = 0;
-          if (!combo_list.empty())
-          {
-            if (ImGui::Combo("Object Meshes", &mesh_current, &combo_list[0]))
+            mesh_names.clear();
+            current_mesh_item = m_current_object->GetModel()->GetMeshes()[0]->Name().c_str();
+            for (size_t i = 0; i < m_current_object->GetModel()->GetMeshCount(); ++i)
+              mesh_names.push_back(m_current_object->GetModel()->GetMeshes()[i]->Name() + " " + std::to_string(i));
+
+            animation_names.clear();
+            frame_names.clear();
+            bone_names.clear();
+            if (m_current_object->GetRigger())
             {
+              Rigger* rigger = dynamic_cast<Rigger*>(m_current_object->GetRigger());
+              animation_names = rigger->GetAnimationNames();
+              if (!animation_names.empty())
+              {
+                current_animation_item = animation_names[0].c_str();
+                rigger->SetCurrentAnimation(animation_names[0]);
+              }
+              for (size_t i = 0; i < rigger->GetCurrentAnimation()->GetNumFrames(); ++i)
+                frame_names.push_back(std::to_string(i));
+
+              current_frame_item = frame_names[0].c_str();
+              bone_names = rigger->GetBoneNames();
+              current_bone_item = bone_names[0].c_str();
             }
           }
 
+          // Name
+          shObject obj = *p_object;
+          ImGui::Text(obj->Name().c_str());
+
+          //Meshes
+          if (ImGui::BeginCombo("Object Meshes", current_mesh_item)) // The second parameter is the label previewed before opening the combo.
+          {
+            for (int n = 0; n < mesh_names.size(); n++)
+            {
+              bool is_selected = (current_mesh_item == mesh_names[n].c_str()); // You can store your selection however you want, outside or inside your objects
+              if (ImGui::Selectable(mesh_names[n].c_str(), is_selected))
+                current_mesh_item = mesh_names[n].c_str();
+              if (is_selected)
+                ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+            }
+            ImGui::EndCombo();
+          }
+
+          //Rigger
           if (obj->GetRigger())
           {
-            //Animation -> transfer to rigger as well
+            Rigger* rigger = dynamic_cast<Rigger*>(m_current_object->GetRigger());
+
             std::string text = std::string("Number of animations ") + std::to_string(obj->GetRigger()->GetAnimationCount());
             ImGui::Text(text.c_str());
 
             //Animations
-            Rigger* rigger = dynamic_cast<Rigger*>(obj->GetRigger());
-            std::vector<std::string> names = rigger->GetAnimationNames();
-            for (size_t i = 0; i < obj->GetRigger()->GetAnimationCount(); ++i)
+            if (ImGui::BeginCombo("Object Animations", current_animation_item)) // The second parameter is the label previewed before opening the combo.
             {
-              for (int j = 0; j < names[i].size(); ++j)
-                combo_list.push_back(names[i][j]);
-              if (i != names[i].size() - 1)
-                combo_list.push_back('\0');
-            }
-
-            static int anim_current = 0;
-            if (!combo_list.empty())
-            {
-              if (ImGui::Combo("Object Animations", &anim_current, &combo_list[0]))
+              for (int n = 0; n < animation_names.size(); n++)
               {
+                bool is_selected = (current_animation_item == animation_names[n].c_str()); // You can store your selection however you want, outside or inside your objects
+                if (ImGui::Selectable(animation_names[n].c_str(), is_selected))
+                {
+                  frame_names.clear();
+                  current_animation_item = animation_names[n].c_str();
+                  rigger->SetCurrentAnimation(animation_names[n]);
+                  for (size_t i = 0; i < rigger->GetCurrentAnimation()->GetNumFrames(); ++i)
+                    frame_names.push_back(std::to_string(i));
+                  current_frame_item = frame_names[0].c_str();
+                }
+                if (is_selected)
+                {
+                  ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+                }
               }
+              ImGui::EndCombo();
             }
-            combo_list.clear();
 
             //Frames
             if (auto* cur_anim = rigger->GetCurrentAnimation(); cur_anim != nullptr)
@@ -489,60 +540,66 @@ void eWindowImGui::Render()
               text = std::string("Number of frames ") + std::to_string(rigger->GetCurrentAnimation()->GetNumFrames());
               ImGui::Text(text.c_str());
 
-              for (size_t i = 0; i < cur_anim->GetNumFrames(); ++i)
+             //frames combo
+              if (ImGui::BeginCombo("Animation frames", current_frame_item)) // The second parameter is the label previewed before opening the combo.
               {
-                std::string number = std::to_string(i);
-                for (int j = 0; j < number.size(); ++j)
-                  combo_list.push_back(number[j]);
-                if (i != cur_anim->GetNumFrames() - 1)
-                  combo_list.push_back('\0');
-              }
-
-              static int frame_current = 0;
-              if (!combo_list.empty())
-              {
-                if (ImGui::Combo("Object Frames", &frame_current, &combo_list[0]))
+                for (int n = 0; n < frame_names.size(); n++)
                 {
+                  bool is_selected = (current_frame_item == frame_names[n].c_str()); // You can store your selection however you want, outside or inside your objects
+                  if (ImGui::Selectable(frame_names[n].c_str(), is_selected))
+                    current_frame_item = frame_names[n].c_str();
+                  if (is_selected)
+                    ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
                 }
+                ImGui::EndCombo();
               }
 
               static bool is_frame_freez = false;
               ImGui::Checkbox("FreezeFrame frame", &is_frame_freez);
               if (is_frame_freez)
-                rigger->GetCurrentAnimation()->FreezeFrame(frame_current);
+                rigger->GetCurrentAnimation()->FreezeFrame(std::stoi(current_frame_item));
               else
                 rigger->GetCurrentAnimation()->FreezeFrame(-1);
             }
 
-            combo_list.clear();
             //Bones
             text = std::string("Number of bones ") + std::to_string(obj->GetRigger()->GetBoneCount());
             ImGui::Text(text.c_str());
+
+            text = std::string("Root Bone: ") + rigger->GetNameRootBone();
+            ImGui::Text(text.c_str());
+
             static bool is_show_active_bone = false;
             ImGui::Checkbox("Show active bone", &is_show_active_bone);
-            std::vector<std::string> bone_names = rigger->GetBoneNames();
-            for (size_t i = 0; i < obj->GetRigger()->GetBoneCount(); ++i)
-            {
-              for (int j = 0; j < bone_names[i].size(); ++j)
-                combo_list.push_back(bone_names[i][j]);
-              if (i != bone_names[i].size() - 1)
-                combo_list.push_back('\0');
-            }
-            static int bone_current = 0;
+
             static glm::mat4 boneMatrix;
-            if (!combo_list.empty())
+            static int bone_current = 0;
+            //bones combo
+            if (ImGui::BeginCombo("Current bone", current_bone_item)) // The second parameter is the label previewed before opening the combo.
             {
-              if (ImGui::Combo("Object Bones", &bone_current, &combo_list[0]))
+              for (int n = 0; n < bone_names.size(); n++)
               {
+                bool is_selected = (current_bone_item == bone_names[n].c_str()); // You can store your selection however you want, outside or inside your objects
+                if (ImGui::Selectable(bone_names[n].c_str(), is_selected))
+                {
+                  current_bone_item = bone_names[n].c_str();
+                  bone_current = n;
+                }
+                if (is_selected)
+                {
+                  ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+                }
               }
+              ImGui::EndCombo();
             }
-            boneMatrix = rigger->GetCurrentMatrixForBone(bone_current);
+
+            boneMatrix = rigger->GetCurrentMatrixForBone(current_bone_item);
             if (is_show_active_bone)
               rigger->SetActiveBoneIndex(bone_current);
             else
               rigger->SetActiveBoneIndex(MAX_BONES);
 
-            combo_list.clear();
+            m_combo_list.clear();
 
             ImGui::Text("Bone animated transform Matrix");
             ImGui::Text(std::to_string(boneMatrix[0][0]).c_str()); ImGui::SameLine();
@@ -565,7 +622,7 @@ void eWindowImGui::Render()
             ImGui::Text(std::to_string(boneMatrix[3][2]).c_str()); ImGui::SameLine();
             ImGui::Text(std::to_string(boneMatrix[3][3]).c_str());
 
-            static glm::mat4 bindMatrix = rigger->GetBindMatrixForBone(bone_current);
+            static glm::mat4 bindMatrix = rigger->GetBindMatrixForBone(current_bone_item);
 
             ImGui::Text("Bone bind transform Matrix");
             ImGui::Text(std::to_string(bindMatrix[0][0]).c_str()); ImGui::SameLine();
@@ -591,13 +648,13 @@ void eWindowImGui::Render()
             //Play animation
             if (ImGui::Button("Play current animations "))
             {
-              if (obj->GetModel()->GetAnimationCount() != 0)
-                obj->GetRigger()->Apply(anim_current, false);
+              if (obj->GetRigger()->GetAnimationCount() != 0)
+                obj->GetRigger()->Apply(current_animation_item, false);
             }
             if (ImGui::Button("Play once current animations "))
             {
-              if (obj->GetModel()->GetAnimationCount() != 0)
-                obj->GetRigger()->Apply(anim_current, true);
+              if (obj->GetRigger()->GetAnimationCount() != 0)
+                obj->GetRigger()->Apply(current_animation_item, true);
             }
             if (ImGui::Button("Stop current animations "))
             {
@@ -625,20 +682,20 @@ void eWindowImGui::Render()
       {
         const std::vector<ShaderInfo>* infos = static_cast<const std::vector<ShaderInfo>*>(std::get<2>(item));
 
-        combo_list.clear();
+        m_combo_list.clear();
         for (size_t i = 0; i < infos->size(); ++i)
         {
           std::string name = (*infos)[i].name;
           for (int j = 0; j < name.size(); ++j)
-            combo_list.push_back(name[j]);
+            m_combo_list.push_back(name[j]);
           if (i != infos->size() - 1)
-            combo_list.push_back('\0');
+            m_combo_list.push_back('\0');
         }
 
         static int shader_current = 0;
-        if (!combo_list.empty())
+        if (!m_combo_list.empty())
         {
-          if (ImGui::Combo("Shaders", &shader_current, &combo_list[0]))
+          if (ImGui::Combo("Shaders", &shader_current, &m_combo_list[0]))
           {
           }
           //if (ImGui::Button("Update shaders"))
@@ -779,12 +836,21 @@ void eMainImGuiWindow::Render()
     ImGui::OpenPopup("Open File");
   if (save)
     ImGui::OpenPopup("Save File");
-  if(open_file)
+  if (open_file)
+  {
     ImGui::OpenPopup(open_file_menu_name.c_str());
+    eImGuiContext::SetBlockEvents(true);
+  }
   if (open_scene)
+  {
     ImGui::OpenPopup(open_scene_menu_name.c_str());
+    eImGuiContext::SetBlockEvents(true);
+  }
   if (save_scene)
+  {
     ImGui::OpenPopup(save_scene_menu_name.c_str());
+    eImGuiContext::SetBlockEvents(true);
+  }
 
   /* Optional third parameter. Support opening only compressed rar/zip files.
   * Opening any other file will show error, return false and won't close the dialog.
@@ -801,17 +867,20 @@ void eMainImGuiWindow::Render()
     std::cout << file_dialog.ext << std::endl;              // Access ext separately (For SAVE mode)
     //Do writing of files based on extension here
   }
-  if (file_dialog.showFileDialog(open_file_menu_name.c_str(), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 310), ".obj"))
+  if (file_dialog.showFileDialog(open_file_menu_name.c_str(), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 200), ".obj"))
   {
     open_file_callback(file_dialog.selected_path);
+    eImGuiContext::SetBlockEvents(false);
   }
-  if (file_dialog.showFileDialog(open_scene_menu_name.c_str(), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 310), ".mgoongaScene"))
+  if (file_dialog.showFileDialog(open_scene_menu_name.c_str(), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 200), ".mgoongaScene"))
   {
     open_scene_callback(file_dialog.selected_path);
+    eImGuiContext::SetBlockEvents(false);
   }
-  if (file_dialog.showFileDialog(save_scene_menu_name.c_str(), imgui_addons::ImGuiFileBrowser::DialogMode::SAVE, ImVec2(700, 310), ".mgoongaScene"))
+  if (file_dialog.showFileDialog(save_scene_menu_name.c_str(), imgui_addons::ImGuiFileBrowser::DialogMode::SAVE, ImVec2(700, 200), ".mgoongaScene"))
   {
     save_scene_callback(file_dialog.selected_path);
+    eImGuiContext::SetBlockEvents(false);
   }
 }
 

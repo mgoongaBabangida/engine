@@ -65,3 +65,5 @@ protected:
 };
 
 using shObject = std::shared_ptr<eObject>;
+
+std::vector<shObject> DLL_BASE GetObjectsWithChildren(std::vector<shObject>);

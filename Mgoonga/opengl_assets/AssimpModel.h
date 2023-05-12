@@ -42,10 +42,10 @@ public:
   virtual std::vector<const IAnimation*>	GetAnimations() const override;
 
 public:
-	std::string						          RootBoneName();
-	std::vector<Bone>				        Bones()				const { return m_bones; }
-	std::vector<SceletalAnimation>	Animations()		const { return m_animations; }
-	glm::mat4						            GlobalTransform()	const { return m_GlobalInverseTransform; }
+	std::string														RootBoneName();
+	std::vector<Bone>											Bones()				const { return m_bones; }
+	const std::vector<SceletalAnimation>&	Animations()		const { return m_animations; }
+	glm::mat4															GlobalTransform()	const { return m_GlobalInverseTransform; }
 
 private:
 	/*  Model Data  */
@@ -119,7 +119,7 @@ private:
 
 	void							loadNodesToBone(aiNode * node);
 	void							loadBoneChildren(aiNode* node);
-	SceletalAnimation	ProccessAnimations(const aiAnimation* anim);
+	void							ProccessAnimations(const aiAnimation* anim);
 	void							updateAnimation(Bone & bone,const Frame& frame, const glm::mat4 & ParentTransform);
 
 private:

@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "SceletalAnimation.h"
-#include <iostream>
 
 const Frame& SceletalAnimation::getCurrentFrame()
 {

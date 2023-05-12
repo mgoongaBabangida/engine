@@ -169,14 +169,15 @@ std::vector<glm::vec3> BoxColliderDynamic::GetExtrems(const ITransform& _trans) 
 //------------------------------------------------------------------
 glm::vec3 BoxColliderDynamic::GetCenter()
 {
-	if (!m_rigger || m_rigger->GetCurrentAnimationName() == std::string{})
+	if (!m_rigger || m_rigger->GetCurrentAnimation() == nullptr || m_rigger->GetCurrentAnimationFrameIndex() == -1)
 		return BoxCollider::GetCenter();
 	else
 	{
 		auto it = std::find_if(m_data.begin(), m_data.end(), [this](const AnimationData& _data) { return _data.name == m_rigger->GetCurrentAnimationName(); });
 		if (it != m_data.end())
 		{
-			return it->centers[m_rigger->GetCurrentAnimationFrameIndex()];
+			auto index = m_rigger->GetCurrentAnimationFrameIndex();
+			return it->centers[index];
 		}
 		else
 			return BoxCollider::GetCenter();
@@ -186,8 +187,8 @@ glm::vec3 BoxColliderDynamic::GetCenter()
 //------------------------------------------------------------------
 float BoxColliderDynamic::GetRadius()
 {
-	if (!m_rigger || m_rigger->GetCurrentAnimationName() == std::string{})
-		return 0.0f;
+	if (!m_rigger || m_rigger->GetCurrentAnimation() == nullptr)
+		return BoxCollider::GetRadius();
 	else
 	{
 		auto it = std::find_if(m_data.begin(), m_data.end(), [this](const AnimationData& _data) { return _data.name == m_rigger->GetCurrentAnimationName(); });

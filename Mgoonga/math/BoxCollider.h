@@ -43,12 +43,14 @@ protected:
 	void										_getForwardRayLengths(const ITransform& trans,
 																							 Side moveDirection,
 																							 std::vector<float>& lengths)	const;
+	bool										_CheckByRadius(const ITransform& _trans, const ITransform& _trans_other, ICollider* _other);
 
 	extremDots								m_dots;
 	std::optional<glm::vec3>	m_center = std::nullopt;
 	float											m_radius = 0.0f;
 	std::string								m_model_name;
 	std::string								m_path;
+	bool											m_check_sphere_overlap = false;
 };
 
 #endif

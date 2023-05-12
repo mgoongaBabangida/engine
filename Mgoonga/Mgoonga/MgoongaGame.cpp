@@ -3,7 +3,6 @@
 
 #include <base/InputController.h>
 
-#include <math/ParticleSystem.h>
 #include <math/ShootingParticleSystem.h>
 #include <math/Rigger.h>
 #include <math/RigidBdy.h>
@@ -12,7 +11,6 @@
 #include <opengl_assets/Texture.h>
 #include <opengl_assets/RenderManager.h>
 #include <opengl_assets/TextureManager.h>
-#include <opengl_assets/ModelManager.h>
 #include <opengl_assets/SoundManager.h>
 #include <game_assets/ModelManagerYAML.h>
 #include <game_assets/AnimationManagerYAML.h>
@@ -32,6 +30,7 @@ eMgoongaGameContext::eMgoongaGameContext(eInputController*  _input,
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
 {
   FocuseChanged.Subscribe([this](shObject _prev, shObject _new)->void { this->OnFocusedChanged(); });
+  
   if (!m_objects.empty())
   {
     m_focused = m_objects[0];
@@ -48,9 +47,13 @@ void eMgoongaGameContext::InitializeExternalGui()
   eMainContextBase::InitializeExternalGui();
 }
 
+//*********************InputObserver*********************************
 //--------------------------------------------------------------------------
 bool eMgoongaGameContext::OnKeyPress(uint32_t asci)
 {
+  if (eMainContextBase::OnKeyPress(asci))
+    return true;
+
   switch (asci)
   {
      case ASCII_J: { if (m_focused)	m_focused->GetRigidBody()->MoveLeft(m_objects); }				return true;
@@ -76,8 +79,9 @@ bool eMgoongaGameContext::OnMouseMove(uint32_t x, uint32_t y)
 {
   if (GetMainCamera().getCameraRay().IsPressed())
   {
-    if(!m_input_strategy->OnMouseMove(x,y))
+    if(m_input_strategy && !m_input_strategy->OnMouseMove(x,y))
     {
+      // input strategy has priority over frame, @todo frmae should be inside one of input strategies
       m_framed.reset(new std::vector<shObject>(GetMainCamera().getCameraRay().onMove(GetMainCamera(), m_objects, static_cast<float>(x), static_cast<float>(y)))); 	//to draw a frame
       return true;
     }
@@ -93,24 +97,21 @@ bool eMgoongaGameContext::OnMousePress(uint32_t x, uint32_t y, bool left)
 
   GetMainCamera().getCameraRay().Update(GetMainCamera(), static_cast<float>(x), static_cast<float>(y), width, height);
   GetMainCamera().getCameraRay().press(x, y);
+  //should be inside input strategy which needs it(frame, moveXZ)
   GetMainCamera().MovementSpeedRef() = 0.f;
 
   auto [new_focused, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
 
   if (new_focused != m_focused)
   {
+    FocuseChanged.Occur(m_focused, new_focused);
     m_focused = new_focused;
-    OnFocusedChanged();
   }
-	if(left)
-	{}
-  else // right click
-  {
-    if (new_focused) // right click on object
-    {
-      m_input_strategy->OnMousePress(x,y,left);
-    }
-  }
+
+  if(m_input_strategy)
+    m_input_strategy->OnMousePress(x, y, left);
+
+  // should be inside script, not here
 	if(m_focused && m_focused->GetScript())
 		m_focused->GetScript()->OnMousePress(x, y, left);
 
@@ -121,7 +122,9 @@ bool eMgoongaGameContext::OnMousePress(uint32_t x, uint32_t y, bool left)
 bool eMgoongaGameContext::OnMouseRelease()
 {
   GetMainCamera().getCameraRay().release();
-  m_input_strategy->OnMouseRelease();
+  if(m_input_strategy)
+    m_input_strategy->OnMouseRelease();
+  //should be inside input strategy which needs it(frame, moveXZ)
   GetMainCamera().MovementSpeedRef() = 0.05f;
 	return true;
 }
@@ -129,15 +132,9 @@ bool eMgoongaGameContext::OnMouseRelease()
 //------------------------------------------------------------------------------
 void eMgoongaGameContext::OnFocusedChanged()
 {
-  if (m_focused)
-  {
-
-  }
-  else
-  {
-  }
 }
 
+//*********************Initialize**************************************
 //-------------------------------------------------------------------------------
 void eMgoongaGameContext::InitializeSounds()
 {
@@ -185,7 +182,7 @@ void eMgoongaGameContext::InitializeModels()
   _InitializeHexes();
   _InitializeBezier();
 
-  m_input_strategy.reset(new InputStrategyMoveAlongXZPlane(GetMainCamera(), m_objects)); //@todo mobjects and pbr objects in one container
+  m_input_strategy.reset(new InputStrategyMoveAlongXZPlane(GetMainCamera(), GetObjectsWithChildren(m_objects)));
 
   Texture* tex = texManager->Find("TButton_red");
   Texture* flag = texManager->Find("TSpanishFlag0_s");

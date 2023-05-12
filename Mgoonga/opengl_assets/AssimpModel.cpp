@@ -422,7 +422,7 @@ void Model::loadBoneChildren(aiNode * node)
 }
 
 //-------------------------------------------------------------------------------------
-SceletalAnimation Model::ProccessAnimations(const aiAnimation* anim)
+void Model::ProccessAnimations(const aiAnimation* anim)
 {
 	int durationMsc = (int)(anim->mDuration / anim->mTicksPerSecond * 1000);//mTicksPerSecond can be 0 ?
 	int qNodes = anim->mNumChannels; //quantity of nodes(bones) in anim 45
@@ -443,7 +443,6 @@ SceletalAnimation Model::ProccessAnimations(const aiAnimation* anim)
 		}
 	}
 	m_animations.push_back(SceletalAnimation(durationMsc, frames, anim->mName.C_Str())); // duration ?
-	return m_animations.back();
 }
 
 //----------------------------------------------------------------------------------------

@@ -6,6 +6,7 @@
 //-------------------------------------------------------------------------------
 void eRigidBody::SetObject(eObject * obj) { object = obj; }
 
+//-------------------------------------------------------------------------------
 bool eRigidBody::CollidesWith(eObject* _other, Side _side)
 {
 	collision.collider = object;
@@ -17,12 +18,14 @@ bool eRigidBody::CollidesWith(eObject* _other, Side _side)
 																						 collision);
 }
 
+//-------------------------------------------------------------------------------
 void eRigidBody::ReactCollision(const eCollision& _col)
 {
 	if (_col.collider->GetScript())_col.collider->GetScript()->CollisionCallback(_col);
 	if (_col.collidee->GetScript())_col.collidee->GetScript()->CollisionCallback(_col);
 }
 
+//-------------------------------------------------------------------------------
 void eRigidBody::MoveForward(std::vector<std::shared_ptr<eObject> > objects)
 {
 	float thrsh = 0.001f;
@@ -40,6 +43,7 @@ void eRigidBody::MoveForward(std::vector<std::shared_ptr<eObject> > objects)
 	}
 }
 
+//-------------------------------------------------------------------------------
 void eRigidBody::MoveBack(std::vector<std::shared_ptr<eObject> > objects)
 {
 	float thrsh = 0.001f;
@@ -57,6 +61,7 @@ void eRigidBody::MoveBack(std::vector<std::shared_ptr<eObject> > objects)
 	}
 }
 
+//-------------------------------------------------------------------------------
 void eRigidBody::MoveRight(std::vector<std::shared_ptr<eObject> > objects)
 {
 	float thrsh = 0.001f;
@@ -74,6 +79,7 @@ void eRigidBody::MoveRight(std::vector<std::shared_ptr<eObject> > objects)
 	}
 }
 
+//-------------------------------------------------------------------------------
 void eRigidBody::MoveLeft(std::vector<std::shared_ptr<eObject> > objects)
 {
 	float thrsh = 0.001f;
@@ -91,6 +97,7 @@ void eRigidBody::MoveLeft(std::vector<std::shared_ptr<eObject> > objects)
 	}
 }
 
+//-------------------------------------------------------------------------------
 void eRigidBody::MoveUp(std::vector<std::shared_ptr<eObject> > objects)
 {
 	float thrsh = 0.001f;
@@ -108,6 +115,7 @@ void eRigidBody::MoveUp(std::vector<std::shared_ptr<eObject> > objects)
 	}
 }
 
+//-------------------------------------------------------------------------------
 void eRigidBody::MoveDown(std::vector<std::shared_ptr<eObject> > objects)
 {
 	float thrsh = 0.001f;
@@ -125,6 +133,7 @@ void eRigidBody::MoveDown(std::vector<std::shared_ptr<eObject> > objects)
 	}
 }
 
+//-------------------------------------------------------------------------------
 void eRigidBody::Move(std::vector<std::shared_ptr<eObject>> objects)
 {
 	object->GetTransform()->setTranslation(object->GetTransform()->getTranslation() += velocity);

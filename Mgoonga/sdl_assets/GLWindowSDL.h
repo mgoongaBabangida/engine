@@ -31,8 +31,8 @@ public:
 protected:
 	std::unique_ptr<math::Timer>		dTimer;
 	std::vector<IWindowImGui*>			guiWnd;
-	eInputController					       inputController;
-	std::unique_ptr<IGame>	mainContext; 
+	eInputController								inputController;
+	std::unique_ptr<IGame>					mainContext; 
 
 	SDL_Window*							window  = nullptr;
 

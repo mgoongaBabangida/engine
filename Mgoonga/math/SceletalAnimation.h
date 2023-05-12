@@ -33,9 +33,29 @@ public:
 	SceletalAnimation(int64_t dur, const std::vector<Frame> &  frames ,const std::string _name)
 		: duration(dur),
 		  frames(frames),
-		  name(_name)
+		  name(_name),
+			freeze_frame(-1),
+			cur_frame_index(-1)
 	{ Start(); }
 	
+	SceletalAnimation(const SceletalAnimation& _other)
+	{
+		*this = _other;
+	}
+
+	SceletalAnimation& operator=(const SceletalAnimation& _other)
+	{ 
+		if (&_other != this)
+		{
+			duration = _other.duration;
+			frames = _other.frames;
+			name = _other.name;
+			freeze_frame = _other.freeze_frame;
+			cur_frame_index = _other.cur_frame_index;
+		}
+		return *this;
+	}
+
 	bool operator==(const SceletalAnimation& other) { return name == other.name && duration == other.duration; }
 	
 	const Frame&	getCurrentFrame();

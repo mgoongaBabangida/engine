@@ -35,7 +35,6 @@ protected:
 	virtual void		InitializeModels()			override;
 	virtual void		InitializeRenders()			override;
 	virtual void		InitializeSounds()			override;
-	virtual void		InitializeExternalGui() override;
 };
 
 #endif //SAND_BOX_GAME_H

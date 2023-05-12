@@ -31,7 +31,7 @@ public:
 	virtual bool OnMousePress(uint32_t _x, uint32_t _y, bool _left)
 	{
 		auto [new_focused, intersaction] = m_camera.get().getCameraRay().calculateIntersaction(m_objects);
-		if (!_left) // grab if left is pressed
+		if (!_left && new_focused) // grab if left is pressed
 		{
 			m_grab_translation = new_focused->GetTransform()->getTranslation();
 			m_intersaction = intersaction;

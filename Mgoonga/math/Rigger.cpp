@@ -42,14 +42,22 @@ Rigger::~Rigger()
 {
 	is_active = false; // no more sleep
 	cv.notify_one(); // wake up
+	timer->stop();
 }
 
 //-------------------------------------------------------------------------------------------
 bool Rigger::Apply(const std::string & _animation, bool _play_once)
 {
-	if(currentAnim != nullptr && currentAnim->Name() == _animation )
+	if (currentAnim != nullptr && currentAnim->Name() == _animation)
 	{
-		currentAnim->Continue();
+		{
+			std::lock_guard lk(mutex);
+			if (_play_once)
+				currentAnim->PlayOnce();
+			else
+				currentAnim->Continue();
+		}
+		cv.notify_one();
 		return true;
 	}
 	else
@@ -58,11 +66,15 @@ bool Rigger::Apply(const std::string & _animation, bool _play_once)
 			[_animation](const SceletalAnimation& anim) { return anim.Name() == _animation; });
 		if(anim != animations.end())
 		{
-			currentAnim = &(*anim);
-			if (_play_once)
-				currentAnim->PlayOnce();
-			else
-				currentAnim->Start();
+			{
+				std::lock_guard lk(mutex);
+				currentAnim = &(*anim);
+				if (_play_once)
+					currentAnim->PlayOnce();
+				else
+					currentAnim->Start();
+			}
+			cv.notify_one();
 			return true;
 		}
 		else
@@ -102,6 +114,18 @@ bool Rigger::Apply(size_t _animation_index, bool _play_once)
   }
   else
     return false;
+}
+
+//-------------------------------------------------------------------------------------------
+void Rigger::SetCurrentAnimation(const std::string& _animationName)
+{
+	auto anim = std::find_if(animations.begin(), animations.end(),
+		[_animationName](const SceletalAnimation& anim) { return anim.Name() == _animationName; });
+	if (anim != animations.end())
+	{
+		std::lock_guard lk(mutex);
+		currentAnim = &(*anim);
+	}
 }
 
 //-------------------------------------------------------------------------------------------

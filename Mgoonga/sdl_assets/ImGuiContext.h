@@ -8,6 +8,7 @@
 #include <glew-2.1.0/include/GL/glew.h>
 #include <SDL/include/SDL_opengl.h>
 
+#include <base/Object.h>
 #include <base/InputController.h>
 #include <map>
 
@@ -20,12 +21,15 @@ public:
 	void Render();
 	void CleanUp();
 
+	static bool BlockEvents();
+	static void SetBlockEvents(bool _b);
+
 	static eImGuiContext& GetInstance(SDL_GLContext* context, SDL_Window* window);
 
 private:
 	eImGuiContext(SDL_GLContext*, SDL_Window*);
 	SDL_GLContext*	context;
-	SDL_Window*		window;
+	SDL_Window*			window;
 };
 
 enum TypeImGui
@@ -107,7 +111,13 @@ protected:
 	std::string					name;
 	bool								visible = true;
 	std::map<std::string, std::function<void()>> callbacks;
-	std::vector<char> combo_list;
+
+	std::vector<char>		m_combo_list;
+	shObject						m_current_object;
+	std::vector<std::string> mesh_names;
+	std::vector<std::string> animation_names;
+	std::vector<std::string> frame_names;
+	std::vector<std::string> bone_names;
 
 	float								window_pos_x;
   float								window_pos_y;

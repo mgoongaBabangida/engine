@@ -36,6 +36,7 @@ public:
 	virtual void													SetPath(const std::string& _path) { m_path = _path; }
 
 	SceletalAnimation*										GetCurrentAnimation() const { return currentAnim; }
+	void																	SetCurrentAnimation(const std::string& _animationName);
 
 	void AddAnimations(std::vector<SceletalAnimation>);
 	std::vector<std::string> GetAnimationNames() const;
@@ -46,6 +47,7 @@ public:
 	std::vector<std::string> GetBoneNames() const;
 	glm::mat4 GetBindMatrixForBone(const std::string& _boneName) const;
 	glm::mat4 GetBindMatrixForBone(size_t _boneID) const;
+
 	glm::mat4 GetCurrentMatrixForBone(const std::string& _boneName) const;
 	glm::mat4 GetCurrentMatrixForBone(size_t _boneID) const;
 
@@ -71,7 +73,7 @@ protected:
 	std::atomic<bool>								matrix_flag = false;
 	std::mutex											mutex;
 	std::condition_variable					cv;
-	bool														is_active = true;
+	std::atomic<bool>								is_active = true;
 
 	std::string											m_path;
 };

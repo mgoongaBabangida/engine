@@ -65,3 +65,13 @@ ITransform*			eObject::GetTransform()	const { return transform.get();	}
 ICollider*			eObject::GetCollider()	const { return collider.get(); }
 IModel*				eObject::GetModel()		const { return model.get(); }
 IRigger*			eObject::GetRigger()	const { return rigger.get(); }
+
+
+std::vector<std::shared_ptr<eObject>> GetObjectsWithChildren(std::vector<std::shared_ptr<eObject>> _objects)
+{
+	auto all_objects = _objects;
+	for (auto& obj : _objects)
+		for (auto& child : obj->GetChildrenObjects())
+			all_objects.push_back(child);
+	return all_objects;
+}

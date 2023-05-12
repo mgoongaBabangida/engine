@@ -9270,7 +9270,7 @@ void ImGui::UpdateInputEvents(bool trickle_fast_inputs)
         }
         else
         {
-            IM_ASSERT(0 && "Unknown event!");
+            //IM_ASSERT(0 && "Unknown event!");
         }
     }
 

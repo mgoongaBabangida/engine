@@ -124,6 +124,9 @@ void eMainContextBase::PaintGL()
 
 		for (auto& object : m_objects)
 		{
+			if (!object->IsVisible())
+				continue;
+
 			if (object->GetScript())
 				object->GetScript()->Update(m_objects);
 

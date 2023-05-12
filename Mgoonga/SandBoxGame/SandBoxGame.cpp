@@ -31,17 +31,7 @@ eSandBoxGame::eSandBoxGame(eInputController*  _input,
 {
 }
 
-void eSandBoxGame::PaintGL()
-{
-	eMainContextBase::PaintGL();
-}
-
 //*********************InputObserver*********************************
-bool eSandBoxGame::OnMouseMove(uint32_t x, uint32_t y)
-{
-	return false;
-}
-
 //------------------------------------------------------------------
 bool eSandBoxGame::OnKeyPress(uint32_t asci)
 {
@@ -53,7 +43,7 @@ bool eSandBoxGame::OnKeyPress(uint32_t asci)
 	case ASCII_G:
 	{
 		if (m_focused != nullptr)
-			m_focused->GetScript()->OnKeyPress(ASCII_G);
+			m_focused->GetScript()->OnKeyPress(ASCII_G); // change -> subscribe directly
 	}
 	return true;
 	default: return false;
@@ -61,18 +51,49 @@ bool eSandBoxGame::OnKeyPress(uint32_t asci)
 }
 
 //------------------------------------------------------------------
+bool eSandBoxGame::OnMouseMove(uint32_t x, uint32_t y)
+{
+	if (GetMainCamera().getCameraRay().IsPressed())
+	{
+		if (m_input_strategy && !m_input_strategy->OnMouseMove(x, y))
+		{
+			// input strategy has priority over frame, @todo frmae should be inside one of input strategies
+			m_framed.reset(new std::vector<shObject>(GetMainCamera().getCameraRay().onMove(GetMainCamera(), m_objects, static_cast<float>(x), static_cast<float>(y)))); 	//to draw a frame
+			return true;
+		}
+	}
+	return false;
+}
+
+//------------------------------------------------------------------
 bool eSandBoxGame::OnMousePress(uint32_t x, uint32_t y, bool left)
 {
+	if (m_framed)
+		m_framed->clear();
+
 	GetMainCamera().getCameraRay().Update(GetMainCamera(), x, y, static_cast<float>(width), static_cast<float>(height));
+	GetMainCamera().getCameraRay().press(x, y);
+	//should be inside input strategy which needs it(frame, moveXZ)
+	GetMainCamera().MovementSpeedRef() = 0.f;
+
 	if (left)
 	{
-		GetMainCamera().getCameraRay().press(x, y);
-		m_focused = GetMainCamera().getCameraRay().calculateIntersaction(m_objects).first;
+		//Get Visible and Children
+		auto [new_focused, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
+		if (new_focused != m_focused)
+		{
+			FocuseChanged.Occur(m_focused, new_focused);
+			m_focused = new_focused;
+		}
 	}
-	if (m_focused && m_focused->GetScript())
-	{
+
+	if (m_input_strategy)
+		m_input_strategy->OnMousePress(x, y, left);
+
+	// should be inside script, not here
+	if (m_focused && m_focused->GetScript()) // change -> subscribe directly
 		m_focused->GetScript()->OnMousePress(x, y, left);
-	}
+
 	return true;
 }
 
@@ -80,6 +101,10 @@ bool eSandBoxGame::OnMousePress(uint32_t x, uint32_t y, bool left)
 bool eSandBoxGame::OnMouseRelease()
 {
 	GetMainCamera().getCameraRay().release();
+	if (m_input_strategy)
+		m_input_strategy->OnMouseRelease();
+	//should be inside input strategy which needs it(frame, moveXZ)
+	GetMainCamera().MovementSpeedRef() = 0.05f;
 	return true;
 }
 
@@ -175,8 +200,7 @@ void eSandBoxGame::InitializeSounds()
 {
 }
 
-//**********************************External Gui*****************************
-void eSandBoxGame::InitializeExternalGui()
+void eSandBoxGame::PaintGL()
 {
-	eMainContextBase::InitializeExternalGui();
+	eMainContextBase::PaintGL();
 }

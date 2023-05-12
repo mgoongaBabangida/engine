@@ -36,53 +36,54 @@ std::vector<glm::mat3> BoxCollider::GetBoundingTriangles(const ITransform& trans
 	//extrem dots should exist
 	glm::mat4 transform = trans.getModelMatrix();
 	std::vector<glm::mat3> ret; // Getting 12 triangles of the bouning cube
+
 	ret.push_back(glm::mat3(glm::vec3(transform * glm::vec4(m_dots.MaxX, m_dots.MaxY, m_dots.MinZ, 1.0f)),
 													glm::vec3(transform * glm::vec4(m_dots.MinX, m_dots.MaxY, m_dots.MaxZ, 1.0f)),
 													glm::vec3(transform * glm::vec4(m_dots.MaxX, m_dots.MaxY, m_dots.MaxZ, 1.0f))));
 
 	ret.push_back(glm::mat3(glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MaxY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MaxY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MaxY, m_dots.MaxZ, 1.0f))));
+													glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MaxY, m_dots.MinZ, 1.0f)),
+													glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MaxY, m_dots.MaxZ, 1.0f))));
 
 	ret.push_back(glm::mat3(glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MinY, m_dots.MaxZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MaxZ, 1.0f))));
+													glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MinY, m_dots.MaxZ, 1.0f)),
+													glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MaxZ, 1.0f))));
 
 	ret.push_back(glm::mat3(glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MinY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MinY, m_dots.MaxZ, 1.0f))));
+													glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MinY, m_dots.MinZ, 1.0f)),
+													glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MinY, m_dots.MaxZ, 1.0f))));
 
 	ret.push_back(glm::mat3(glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MaxY, m_dots.MaxZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MinY, m_dots.MaxZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MaxZ, 1.0f))));
+													glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MinY, m_dots.MaxZ, 1.0f)),
+													glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MaxZ, 1.0f))));
 
 	ret.push_back(glm::mat3(glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MaxY, m_dots.MaxZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MaxZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MaxY, m_dots.MaxZ, 1.0f))));
+													glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MaxZ, 1.0f)),
+													glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MaxY, m_dots.MaxZ, 1.0f))));
 
 	ret.push_back(glm::mat3(glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MaxY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MinY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MinZ, 1.0f))));
+													glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MinY, m_dots.MinZ, 1.0f)),
+													glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MinZ, 1.0f))));
 
 	ret.push_back(glm::mat3(glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MaxY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MaxY, m_dots.MinZ, 1.0f))));
+													glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MinZ, 1.0f)),
+													glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MaxY, m_dots.MinZ, 1.0f))));
 
 	ret.push_back(glm::mat3(glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MaxY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MaxZ, 1.0f))));
+													glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MinZ, 1.0f)),
+													glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MaxZ, 1.0f))));
 
 	ret.push_back(glm::mat3(glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MaxY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MaxY, m_dots.MaxZ, 1.0f))));
+													glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MinY, m_dots.MinZ, 1.0f)),
+													glm::vec3(transform *glm::vec4(m_dots.MaxX, m_dots.MaxY, m_dots.MaxZ, 1.0f))));
 
 	ret.push_back(glm::mat3(glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MaxY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MinY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MinY, m_dots.MaxZ, 1.0f))));
+													glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MinY, m_dots.MinZ, 1.0f)),
+													glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MinY, m_dots.MaxZ, 1.0f))));
 
 	ret.push_back(glm::mat3(glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MaxY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MinY, m_dots.MinZ, 1.0f)),
-							glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MaxY, m_dots.MaxZ, 1.0f))));
+													glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MinY, m_dots.MinZ, 1.0f)),
+													glm::vec3(transform *glm::vec4(m_dots.MinX, m_dots.MaxY, m_dots.MaxZ, 1.0f))));
 
 	return ret;
 }
@@ -201,10 +202,11 @@ std::vector<dbb::line> BoxCollider::_getRays(const ITransform & trans, Side move
 {
 	std::vector<dbb::line> rays;
 	glm::vec3 fwd, fwd_dwn_l, fwd_dwn_r, fwd_up_l, fwd_up_r;
+	auto model_matrix = trans.getModelMatrix();
 	switch (moveDirection) 
 	{
 	case FORWARD:
-		fwd			= trans.getForward(); //suppose +Z  1 
+		fwd			=		trans.getForward(); //suppose +Z  1 
 		fwd_dwn_l	= glm::vec3(m_dots.MaxX, m_dots.MinY, m_dots.MaxZ);  //2
 		fwd_dwn_r	= glm::vec3(m_dots.MinX, m_dots.MinY, m_dots.MaxZ);  //3
 		fwd_up_l	= glm::vec3(m_dots.MaxX, m_dots.MaxY, m_dots.MaxZ);  //4
@@ -212,7 +214,7 @@ std::vector<dbb::line> BoxCollider::_getRays(const ITransform & trans, Side move
 		break;
 
 	case BACK:
-		fwd			= -trans.getForward(); //suppose +Z  1 
+		fwd			=		-trans.getForward(); //suppose +Z  1 
 		fwd_dwn_l	= glm::vec3(m_dots.MaxX, m_dots.MinY, m_dots.MinZ);  //2
 		fwd_dwn_r	= glm::vec3(m_dots.MinX, m_dots.MinY, m_dots.MinZ);  //3
 		fwd_up_l	= glm::vec3(m_dots.MaxX, m_dots.MaxY, m_dots.MinZ);  //4
@@ -220,7 +222,7 @@ std::vector<dbb::line> BoxCollider::_getRays(const ITransform & trans, Side move
 		break;
 
 	case LEFT:
-		fwd			= glm::vec3(glm::normalize(glm::cross(trans.getForward(), trans.getUp()))); //suppose +Z  1 
+		fwd			=		glm::vec3(glm::cross(trans.getForward(), trans.getUp())); //suppose +Z  1 
 		fwd_dwn_l	= glm::vec3(m_dots.MaxX, m_dots.MinY, m_dots.MaxZ);  //2
 		fwd_dwn_r	= glm::vec3(m_dots.MaxX, m_dots.MinY, m_dots.MinZ);  //3
 		fwd_up_l	= glm::vec3(m_dots.MaxX, m_dots.MaxY, m_dots.MaxZ);  //4
@@ -228,7 +230,7 @@ std::vector<dbb::line> BoxCollider::_getRays(const ITransform & trans, Side move
 		break;
 
 	case RIGHT:
-		fwd			= glm::vec3(glm::normalize(glm::cross(trans.getUp(), trans.getForward()))); //suppose +Z  1 
+		fwd			=		glm::vec3(glm::cross(trans.getUp(), trans.getForward())); //suppose +Z  1 
 		fwd_dwn_l	= glm::vec3(m_dots.MinX, m_dots.MinY, m_dots.MaxZ);  //2
 		fwd_dwn_r	= glm::vec3(m_dots.MinX, m_dots.MinY, m_dots.MinZ);  //3
 		fwd_up_l	= glm::vec3(m_dots.MinX, m_dots.MaxY, m_dots.MaxZ);  //4
@@ -236,7 +238,7 @@ std::vector<dbb::line> BoxCollider::_getRays(const ITransform & trans, Side move
 		break;
 
 	case UP:
-		fwd			= glm::vec3(glm::normalize(trans.getUp())); //suppose +Z  1 
+		fwd			=		glm::vec3(trans.getUp()); //suppose +Z  1 
 		fwd_dwn_l	= glm::vec3(m_dots.MinX, m_dots.MaxY, m_dots.MaxZ);  //2
 		fwd_dwn_r	= glm::vec3(m_dots.MinX, m_dots.MaxY, m_dots.MinZ);  //3
 		fwd_up_l	= glm::vec3(m_dots.MaxX, m_dots.MaxY, m_dots.MaxZ);  //4
@@ -244,7 +246,7 @@ std::vector<dbb::line> BoxCollider::_getRays(const ITransform & trans, Side move
 		break;
 
 	case DOWN:
-		fwd			= glm::vec3(glm::normalize(-trans.getUp())); //suppose +Z  1 
+		fwd			=		glm::vec3(-trans.getUp()); //suppose +Z  1 
 		fwd_dwn_l	= glm::vec3(m_dots.MaxX, m_dots.MinY, m_dots.MaxZ);  //2
 		fwd_dwn_r	= glm::vec3(m_dots.MaxX, m_dots.MinY, m_dots.MinZ);  //3
 		fwd_up_l	= glm::vec3(m_dots.MinX, m_dots.MinY, m_dots.MaxZ);  //4
@@ -252,11 +254,11 @@ std::vector<dbb::line> BoxCollider::_getRays(const ITransform & trans, Side move
 		break;
 	}
 
-	rays.push_back(dbb::line(trans.getModelMatrix() * glm::vec4(*m_center,1.0f), glm::mat3(trans.getModelMatrix()) * glm::normalize(fwd)));
-	rays.push_back(dbb::line(trans.getModelMatrix() * glm::vec4(*m_center, 1.0f), glm::mat3(trans.getModelMatrix()) * glm::normalize(fwd_dwn_l - *m_center)));
-	rays.push_back(dbb::line(trans.getModelMatrix() * glm::vec4(*m_center, 1.0f), glm::mat3(trans.getModelMatrix()) * glm::normalize(fwd_dwn_r - *m_center)));
-	rays.push_back(dbb::line(trans.getModelMatrix() * glm::vec4(*m_center, 1.0f), glm::mat3(trans.getModelMatrix()) * glm::normalize(fwd_up_l - *m_center)));
-	rays.push_back(dbb::line(trans.getModelMatrix() * glm::vec4(*m_center, 1.0f), glm::mat3(trans.getModelMatrix()) * glm::normalize(fwd_up_r - *m_center)));
+	rays.push_back(dbb::line(model_matrix * glm::vec4(*m_center,1.0f),  glm::mat3(model_matrix) * (fwd)));
+	rays.push_back(dbb::line(model_matrix * glm::vec4(*m_center, 1.0f), glm::mat3(model_matrix) * (fwd_dwn_l - *m_center)));
+	rays.push_back(dbb::line(model_matrix * glm::vec4(*m_center, 1.0f), glm::mat3(model_matrix) * (fwd_dwn_r - *m_center)));
+	rays.push_back(dbb::line(model_matrix * glm::vec4(*m_center, 1.0f), glm::mat3(model_matrix) * (fwd_up_l - *m_center)));
+	rays.push_back(dbb::line(model_matrix * glm::vec4(*m_center, 1.0f), glm::mat3(model_matrix) * (fwd_up_r - *m_center)));
 
 	glm::vec4 center4 = glm::vec4(*m_center, 1.0f);
 	_getForwardRayLengths(trans, moveDirection, lengths);
@@ -276,7 +278,7 @@ void BoxCollider::_getForwardRayLengths(const ITransform & trans, Side moveDirec
 	if (lengths.empty())
 		lengths.push_back(float());
 	glm::vec3 center = *m_center;
-	glm::vec4 center4 = glm::vec4(center, 1.0f);
+	glm::vec4 center4 = glm::vec4(*m_center, 1.0f);
 	glm::mat4 scal_mat = trans.getScale();
 	switch (moveDirection)
 	{
@@ -335,11 +337,26 @@ bool BoxCollider::CollidesWith(const ITransform & _trans,
 //-------------------------------------------------------------------
 bool BoxCollider::CollidesWith(const ITransform& _trans, std::vector<shObject> _objects, Side _moveDirection, eCollision& _collision)
 {
+	std::vector<shObject> objects_to_check = _objects;
+	if (m_check_sphere_overlap)
+	{
+		for (auto& obj : _objects)
+		{
+			if (obj->GetCollider() == this)
+				continue;
+
+			if (_CheckByRadius(_trans, *obj->GetTransform(), obj->GetCollider()))
+				objects_to_check.push_back(obj);
+		}
+		if (objects_to_check.empty())
+			return false;
+	}
+
 	std::vector<float> lengths;
 	std::vector<dbb::line> rays = _getRays(_trans, _moveDirection, lengths);
 	glm::vec3 center = _trans.getModelMatrix() * glm::vec4(GetCenter(), 1.0f);
 
-	for (auto& obj :_objects)
+	for (auto& obj : objects_to_check)
 	{
 		if (obj->GetCollider() == this)
 			continue;
@@ -351,9 +368,10 @@ bool BoxCollider::CollidesWith(const ITransform& _trans, std::vector<shObject> _
 			{
 				dbb::plane Plane(triangle);
 				glm::vec3 intersaction = dbb::intersection(Plane, rays[i]);
+
 				if (dbb::IsInside(triangle, intersaction)
-					&& glm::dot(rays[i].p, glm::vec3(intersaction - rays[i].M)) > 0.0f) // if not behind
-					if (glm::length2(intersaction - center) <= lengths[i])
+						&& glm::dot(rays[i].p, glm::vec3(intersaction - rays[i].M)) > 0.0f // if not behind
+						&& (glm::length2(intersaction - center) <= lengths[i]))
 					{
 						_collision.intersaction = intersaction;
 						_collision.triangle = triangle;
@@ -364,4 +382,17 @@ bool BoxCollider::CollidesWith(const ITransform& _trans, std::vector<shObject> _
 		}
 	}
 	return false;
+}
+
+//----------------------------------------------------------------------------------------
+bool BoxCollider::_CheckByRadius(const ITransform& _trans, const ITransform& _trans_other, ICollider* _other)
+{
+	glm::vec4 center = _trans.getModelMatrix() * glm::vec4(GetCenter(), 1.0f);
+	glm::vec4 other_center = _trans_other.getModelMatrix() * glm::vec4(_other->GetCenter(), 1.0f);
+	float distance_betwen_centers = glm::length(center - other_center);
+	float two_radius_added = (GetRadius() * _trans.getScaleAsVector().x) + (_other->GetRadius() * _trans_other.getScaleAsVector().x);
+	if (distance_betwen_centers > two_radius_added)
+		return false; //too far to collide
+	else
+		return true; // can collide
 }
