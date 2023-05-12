@@ -232,7 +232,7 @@ void eWindowImGui::Render()
   window_size_x = size.x;
   window_size_y = size.y;
   //ImGui::SetNextWindowPos(ImVec2{ window_pos_x , window_pos_y + window_size_y });
-  ImGui::SetWindowSize({ 350, 300 });
+  ImGui::SetWindowSize({ 400, 300 });
 
   for (auto& item : lines)
   {
@@ -711,6 +711,17 @@ void eWindowImGui::Render()
           }
         }
 
+      }
+      break;
+      case CONSOLE:
+      {
+        std::string result;
+        result.resize(150, '\0');
+        if (ImGui::InputText(std::get<0>(item).c_str(), &result[0], 100, ImGuiInputTextFlags_EnterReturnsTrue))
+        {
+          console_callback = *(reinterpret_cast<std::function<void(const std::string&)>*>(std::get<2>(item)));
+          console_callback(result);
+        }
       }
       break;
     }

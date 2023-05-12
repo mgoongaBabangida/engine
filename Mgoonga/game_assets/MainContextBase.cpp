@@ -342,12 +342,21 @@ void eMainContextBase::InitializeExternalGui()
 	};
 	externalGui[5]->Add(BUTTON, "Plane", (void*)&create_plane_callbaack);
 
+	//Object List
 	externalGui[6]->Add(OBJECT_LIST, "Objects List", (void*)this);
 
 	//Objects material
 	externalGui[7]->Add(OBJECT_REF_MATERIAL, "Material", (void*)&m_focused);
 	//Objects rigger
 	externalGui[8]->Add(OBJECT_REF_RIGGER, "Rigger", (void*)&m_focused);
+
+	//Console
+	static std::function<void(const std::string&)> console_plane_callbaack = [this](const std::string& _commandLine)
+	{
+		std::cout << _commandLine << std::endl;
+		// Parse _commandLine and call the function (Set uniform, set script, set material etc.)
+	};
+	externalGui[9]->Add(CONSOLE, "Console", reinterpret_cast<void*>(&console_plane_callbaack));
 }
 
 //------------------------------------------------------------
