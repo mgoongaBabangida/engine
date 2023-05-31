@@ -241,8 +241,9 @@ project "game_assets"
    
    includedirs 
    {
-	"./"; "../../third_party",
-	"../yaml-cpp/include"   
+	"./"; 
+	"../../third_party",
+	"yaml-cpp/include"   
    }
 	
    libdirs 
