@@ -2,13 +2,12 @@
 
 #include "math.h"
 #include "CameraRay.h"
-#include <base/interfaces.h>
 
 //---------------------------------------------------------------------
-class DLL_MATH Camera : public IInputObserver
+class DLL_MATH Camera
 {
 public:
-	Camera(float _width ,
+	Camera(float _width,
 				 float _height,
 				 float _nearPlane,
 				 float _farPlane,
@@ -19,9 +18,6 @@ public:
 	Camera(const Camera& other);
 	Camera&				operator=(const Camera & other);
 	~Camera() = default;
-
-	virtual bool		OnMouseMove(uint32_t x, uint32_t y) override;
-	virtual bool		OnKeyPress(uint32_t asci)			override;
 	
 	void				mouseUpdate(const glm::vec2& newMousePosition);
 
@@ -70,10 +66,10 @@ protected:
 
 	dbb::CameraRay camRay;
 
-	glm::mat4			projectionMatrix;
-	glm::mat4			projectionOrthoMatrix;
-	uint32_t			width;
-	uint32_t			height;
+	glm::mat4		projectionMatrix;
+	glm::mat4		projectionOrthoMatrix;
+	uint32_t		width;
+	uint32_t		height;
 	float				nearPlane;
 	float				farPlane;
 	uint32_t		strafeThreshold = 5;

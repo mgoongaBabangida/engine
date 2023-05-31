@@ -55,27 +55,6 @@ Camera& Camera::operator=(const Camera& other)
 	return *this;
 }
 
-bool Camera::OnMouseMove(uint32_t x, uint32_t y)
-{
-	mouseUpdate(glm::vec2(x, y));
-	return true;
-}
-
-bool Camera::OnKeyPress(uint32_t asci)
-{
-	switch(asci)
-	{
-		case ASCII_W: moveForward();  return true;
-		case ASCII_S: moveBackword(); return true;
-		case ASCII_D: strafeLeft();   return true;
-		case ASCII_A: strafeRight();  return true;
-		case ASCII_R: moveUp();		  return true;
-		case ASCII_F: moveDown();	  return true;
-		default:					  return false;
-	}
-	return false;
-}
-
 glm::mat4 Camera::getWorldToViewMatrix() const
 {
 	return glm::lookAt(position, position + viewDirection, Up);
