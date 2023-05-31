@@ -1,13 +1,37 @@
 #version 430
 
 in vec2 TexCoords;
+
 out vec4 color;
+
 uniform bool frame = false;
 uniform bool blend = false;
 uniform bool kernel = false;
+
 uniform float blurCoef = 1.0f;
+uniform vec2 CursorPos;
+
 layout(binding=1) uniform sampler2D screenTexture;
 layout(binding=2) uniform sampler2D contrastTexture;
+layout(binding=3) uniform sampler2D alphaMask;
+
+subroutine vec4 ColorCalculationPtr();
+subroutine uniform ColorCalculationPtr ColorFunction;
+
+subroutine(ColorCalculationPtr) vec4 TestColor()
+{
+float dist = distance(gl_FragCoord.xy, CursorPos);
+float alpha = texture(alphaMask, TexCoords).a;
+if(dist < 30.0f && alpha > 0.0f)
+	return texture(screenTexture, TexCoords);
+else
+	return texture(screenTexture, TexCoords) * 0.9f;
+}
+
+subroutine(ColorCalculationPtr) vec4 DefaultColor()
+{
+ return texture(screenTexture, TexCoords);
+}
 
 void main()
 {
@@ -28,6 +52,8 @@ void main()
 		col = vec4(average, average, average, 1.0);
 	}
     else
-	   col = texture(screenTexture, TexCoords);
+	{
+		col = ColorFunction();
+	}
    color = col;
 }

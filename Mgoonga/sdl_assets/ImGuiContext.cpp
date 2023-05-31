@@ -102,6 +102,7 @@ void eImGuiContext::Init()
   //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
   io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+  io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;     // Disable SDL Cursor
   //io.ConfigViewportsNoAutoMerge = true;
   //io.ConfigViewportsNoTaskBarIcon = true;
 
@@ -748,7 +749,7 @@ void eWindowImGui::Add(TypeImGui _type, const std::string & _name, void* _data)
 }
 
 //---------------------------------------------------------------------
-bool eWindowImGui::OnMousePress(uint32_t x, uint32_t y, bool left)
+bool eWindowImGui::OnMousePress(int32_t x, int32_t y, bool left)
 {
   float global_pos_x = x + viewport_offset_x + window_offset_x;
   float global_pos_y = y + viewport_offset_y + window_offset_y;
@@ -765,20 +766,40 @@ bool eWindowImGui::OnMousePress(uint32_t x, uint32_t y, bool left)
 }
 
 //---------------------------------------------------------------------
-bool eWindowImGui::OnMouseMove(uint32_t x, uint32_t y)
+bool eWindowImGui::OnMouseMove(int32_t _x, int32_t _y)
 {
-  float global_pos_x = x + viewport_offset_x + window_offset_x;
-  float global_pos_y = y + viewport_offset_y + window_offset_y;
-
-  bool is_pressed = global_pos_x > window_pos_x &&
-    global_pos_y > window_pos_y &&
-    global_pos_x < (window_pos_x + window_size_x) &&
-    global_pos_y < (window_pos_y + window_size_y);
-
-  if (is_pressed)
+  cursor_x = _x;
+  cursor_y = _y;
+  if (IsHovered())
     return true;
   else
     return false;
+}
+
+//-----------------------------------------------------------------
+bool eWindowImGui::OnMouseWheel(int32_t _x, int32_t _y)
+{
+  if (IsHovered())
+    return true;
+  else
+    return false;
+}
+
+//-----------------------------------------------------------------
+bool eWindowImGui::IsHovered()
+{
+  float global_pos_x = cursor_x + viewport_offset_x + window_offset_x;
+  float global_pos_y = cursor_y + viewport_offset_y + window_offset_y;
+  return global_pos_x > window_pos_x &&
+         global_pos_y > window_pos_y &&
+         global_pos_x < (window_pos_x + window_size_x) &&
+         global_pos_y < (window_pos_y + window_size_y);
+}
+
+//-----------------------------------------------------------------
+eMainImGuiWindow::eMainImGuiWindow()
+  : eWindowImGui("main_window")
+{
 }
 
 //-----------------------------------------------------------------
@@ -786,6 +807,14 @@ void eMainImGuiWindow::Render()
 {
   bool open = false, save = false, open_file = false, open_scene = false, save_scene = false;
   ImGui::BeginMainMenuBar();
+
+  ImVec2 pos = ImGui::GetWindowPos();
+  window_pos_x = pos.x;
+  window_pos_y = pos.y;
+  ImVec2 size = ImGui::GetWindowSize();
+  window_size_x = size.x;
+  window_size_y = size.y;
+
   if (ImGui::BeginMenu("File"))
   {
     if (ImGui::MenuItem("Open", NULL))

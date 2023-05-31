@@ -9,11 +9,11 @@
 #include <math/Transform.h>
 
 //--------------------------------------------------------------------------------------------------
-eWaterRender::eWaterRender(std::unique_ptr<MyModel> model, 
-							Texture*				waves, 
-							Texture*				DUDV, 
-							const std::string&		vertexShaderPath,
-							const std::string&		fragmentShaderPath)
+eWaterRender::eWaterRender(std::unique_ptr<MyModel> model,
+													 const Texture*				waves,
+													 const Texture*				DUDV,
+													 const std::string&		vertexShaderPath,
+													 const std::string&		fragmentShaderPath)
 	: reflection(new Texture)
 	, refraction(new Texture)
 {

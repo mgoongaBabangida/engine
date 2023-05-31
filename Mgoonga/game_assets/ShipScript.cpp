@@ -3,8 +3,8 @@
 #include <base/base.h>
 #include <opengl_assets/openglrenderpipeline.h>
 #include <math/ShootingParticleSystem.h>
-#include <opengl_assets\Sound.h>
-#include <opengl_assets\MyModel.h>
+#include <opengl_assets/Sound.h>
+#include <opengl_assets/MyModel.h>
 #include <math/BoxCollider.h>
 #include <math/RigidBdy.h>
 
@@ -50,9 +50,9 @@ bool eShipScript::OnKeyPress(uint32_t asci)
 }
 
 //------------------------------------------------------------------------------------
-bool eShipScript::OnMousePress(uint32_t x, uint32_t y, bool left)
+bool eShipScript::OnMousePress(int32_t x, int32_t y, bool left)
 {
-	// do we need this, should be cpharent with American Treasure game Mouse Press
+	// @ do we need this, should be coharent with American Treasure game Mouse Press
 	//if(!left)
 	//{
 	//	dbb::plane pl(glm::vec3(1.0f, waterHeight, 1.0f),

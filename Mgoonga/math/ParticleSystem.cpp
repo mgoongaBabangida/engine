@@ -12,7 +12,7 @@ ParticleSystem::ParticleSystem(float	 _pps,
 															 float	 _gravityComplient,
 															 float	 _lifeLength,
 															 glm::vec3 _systemCenter,
-															 Texture*  _texture,
+															 const Texture*  _texture,
 															 ISound*	 _sound,
 															 size_t	 _num_rows_in_texture,
 															 float	 _duration)

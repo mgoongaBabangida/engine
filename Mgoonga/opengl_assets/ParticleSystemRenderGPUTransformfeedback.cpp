@@ -229,7 +229,7 @@ void eParticleSystemRenderGPU_V2::Render(const Camera& _camera)
 }
 
 //---------------------------------------------------------------------------------------
-void eParticleSystemRenderGPU_V2::AddParticleSystem(glm::vec3 _startPos, Texture* _texture)
+void eParticleSystemRenderGPU_V2::AddParticleSystem(glm::vec3 _startPos, const Texture* _texture)
 {
   m_start_pos = _startPos;
   glUseProgram(m_renderShader.ID());

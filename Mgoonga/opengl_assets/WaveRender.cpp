@@ -9,9 +9,9 @@
 
 //------------------------------------------------------------------------------------------
 eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model,
-						Texture* tex,
-						Texture* normals,
-						Texture* Height,
+						const Texture* tex,
+						const Texture* normals,
+						const Texture* Height,
 						const std::string& vS,
 						const std::string& fS)
 {

@@ -21,6 +21,7 @@
 #include <math/ParticleSystem.h>
 
 #include <thread>
+#include <sstream>
 
 //-----------------------------------------------------------------
 eMainContextBase::eMainContextBase(eInputController* _input,
@@ -28,7 +29,7 @@ eMainContextBase::eMainContextBase(eInputController* _input,
 	                               const std::string& _modelsPath,
 	                               const std::string& _assetsPath,
 	                               const std::string& _shadersPath)
-: inputController(_input)
+: m_input_controller(_input)
 , modelFolderPath(_modelsPath)
 , assetsFolderPath(_assetsPath)
 , shadersFolderPath(_shadersPath)
@@ -50,9 +51,9 @@ eMainContextBase::~eMainContextBase()
 }
 
 //-------------------------------------------------------------------------
-size_t eMainContextBase::Width() { return width; }
+size_t eMainContextBase::Width() const { return width; }
 //-------------------------------------------------------------------------
-size_t eMainContextBase::Height() { return height; }
+size_t eMainContextBase::Height()  const { return height; }
 
 //--------------------------------------------------------------------------
 bool eMainContextBase::OnKeyPress(uint32_t _asci)
@@ -91,7 +92,7 @@ void eMainContextBase::InitializeGL()
 	GetMainCamera().getCameraRay().init(width, height, nearPlane, farPlane); //@todo direction of camera normalization
 
 	for (auto& gui : externalGui)
-		inputController->AddObserver(gui, MONOPOLY);
+		m_input_controller->AddObserver(gui, MONOPOLY);
 
 	InitializeTextures();
 
@@ -121,6 +122,11 @@ void eMainContextBase::PaintGL()
 	{
 		std::map<eObject::RenderType, std::vector<shObject>> objects;
 		std::vector<shObject> phong, pbr, flags, bezier, geometry;
+
+		for (auto& script : m_global_scripts)
+		{
+			script->Update(m_objects);
+		}
 
 		for (auto& object : m_objects)
 		{
@@ -196,6 +202,18 @@ std::shared_ptr<eObject> eMainContextBase::GetFocusedObject()
 }
 
 //--------------------------------------------------------------------------------
+void eMainContextBase::AddInputObserver(IInputObserver* _observer, ePriority _priority)
+{
+	m_input_controller->AddObserver(_observer, _priority);
+}
+
+//--------------------------------------------------------------------------------
+const Texture* eMainContextBase::GetTexture(const std::string& _name) const
+{
+	return texManager->Find(_name);
+}
+
+//--------------------------------------------------------------------------------
 glm::mat4 eMainContextBase::GetMainCameraViewMatrix()
 {
 	return m_cameras[0].getWorldToViewMatrix();
@@ -208,8 +226,22 @@ glm::mat4 eMainContextBase::GetMainCameraProjectionMatrix()
 }
 
 //--------------------------------------------------------------------------------
+void eMainContextBase::InitializePipline()
+{
+	pipeline.Initialize();
+}
+
+//--------------------------------------------------------------------------------
 void eMainContextBase::InitializeModels()
 {
+}
+
+//--------------------------------------------------------------------------------
+void eMainContextBase::InitializeRenders()
+{
+	pipeline.InitializeRenders(*modelManager.get(), *texManager.get(), shadersFolderPath);
+	// set uniforms
+	// exposure, shininess etc. @todo dont change every frame in render
 }
 
 //--------------------------------------------------------------------------------
@@ -217,7 +249,9 @@ void eMainContextBase::InitializeTextures()
 {
 	texManager->InitContext(assetsFolderPath);
 	texManager->LoadAllTextures();
-	//m_Textures.Find("Tbricks0_d")->second.saveToFile("MyTexture");  //Saving texture debug
+
+	//@todo print screen
+	//pipeline.GetDefaultBufferTexture().saveToFile("PrintScreen");
 }
 
 //--------------------------------------------------------------------------------
@@ -355,6 +389,19 @@ void eMainContextBase::InitializeExternalGui()
 	{
 		std::cout << _commandLine << std::endl;
 		// Parse _commandLine and call the function (Set uniform, set script, set material etc.)
+		std::string parsed, input = _commandLine;
+		std::stringstream input_stringstream(input);
+		std::vector<std::string> res;
+		while (std::getline(input_stringstream, parsed, ' '))
+		{
+			res.push_back(parsed);
+		}
+		if(res.size() == 4)
+			pipeline.SetUniformData(res[0] + " " + res[1], res[2], std::stof(res[3]));
+		else if(res.size() == 5)
+			pipeline.SetUniformData(res[0] + " " + res[1], res[2], glm::vec2(std::stof(res[3]), std::stof(res[4])));
+		else if(res.size() == 6)
+			pipeline.SetUniformData(res[0] + " " + res[1], res[2], glm::vec3(std::stof(res[3]), std::stof(res[4]), std::stof(res[5])));
 	};
 	externalGui[9]->Add(CONSOLE, "Console", reinterpret_cast<void*>(&console_plane_callbaack));
 }
@@ -431,6 +478,7 @@ Light& eMainContextBase::GetMainLight()
 
 	return m_lights[0];
 }
+
 //------------------------------------------------------------------
 Camera& eMainContextBase::GetMainCamera()
 {
@@ -502,5 +550,11 @@ void eMainContextBase::InstallTcpClient()
 			dbb::NetWork::Shutdown();
 		}
 	}
+}
+
+//----------------------------------------------------------------
+void eMainContextBase::AddGUI(const std::shared_ptr<GUI>& _gui)
+{
+	m_guis.push_back(_gui);
 }
 

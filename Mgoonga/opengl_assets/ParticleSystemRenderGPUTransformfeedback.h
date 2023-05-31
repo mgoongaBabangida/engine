@@ -25,7 +25,7 @@ public:
   Shader& GetShader() { return m_renderShader; }
 
   void	Render(const Camera& camera);
-  void	AddParticleSystem(glm::vec3 _startPos, Texture* _texture);
+  void	AddParticleSystem(glm::vec3 _startPos, const Texture* _texture);
 
 protected:
   float randFloat();
@@ -33,9 +33,9 @@ protected:
 
   Shader		m_renderShader;
 
-  math::eClock  m_clock;
-  Texture*      m_particleTexture;
-  glm::vec3     m_start_pos;
+  math::eClock    m_clock;
+  const Texture*  m_particleTexture;
+  glm::vec3       m_start_pos;
 
   int nParticles;
 

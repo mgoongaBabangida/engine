@@ -11,6 +11,7 @@
 #include <sdl_assets/sdl_assets.h>
 
 #include <opengl_assets/OpenGlRenderPipeline.h>
+
 #include "InputStrategy.h"
 
 class eTextureManager;
@@ -48,7 +49,7 @@ public:
 
 	virtual ~eMainContextBase();
 
-	Event<std::function<void(shObject, shObject)>> FocuseChanged;
+	Event<std::function<void(shObject, shObject)>> FocusChanged;
 	Event<std::function<void(shObject)>> ObjectBeingAddedToScene;
 	Event<std::function<void(shObject)>> ObjectBeingDeletedFromScene;
 
@@ -59,30 +60,35 @@ public:
 	void			InitializeGL() final;
 
 	virtual void			PaintGL() override;
-	virtual uint32_t	GetFinalImageId() override;
-	virtual std::shared_ptr<eObject> GetFocusedObject() override;
-	virtual std::vector<std::shared_ptr<eObject>> GetObjects() override { return m_objects; }
-	
+
+	virtual uint32_t																GetFinalImageId() override;
+	virtual std::shared_ptr<eObject>								GetFocusedObject() override;
+	virtual std::vector<std::shared_ptr<eObject>>		GetObjects() override { return m_objects; }
+	virtual void AddInputObserver(IInputObserver* _observer, ePriority _priority) override;
+	virtual const Texture* GetTexture(const std::string& _name) const override;
+
 	virtual glm::mat4 GetMainCameraViewMatrix() override;
 	virtual glm::mat4 GetMainCameraProjectionMatrix() override;
 	
 	virtual bool			UseGizmo() override { return m_use_guizmo; }
 	virtual uint32_t	CurGizmoType() override { return (uint32_t)m_gizmo_type; }
 
-	virtual size_t			Width() override;
-	virtual size_t			Height() override;
+	virtual size_t			Width() const override;
+	virtual size_t			Height()  const override;
 
 	void InstallTcpServer();
 	void InstallTcpClient();
 
+	virtual void AddGUI(const std::shared_ptr<GUI>&);
+
 protected:
-	virtual void		InitializePipline() {}
+	virtual void		InitializePipline();
 	virtual void		InitializeBuffers() {}
 	virtual void		InitializeModels();
-	virtual void		InitializeRenders() {}
+	virtual void		InitializeRenders();
 	virtual void		InitializeTextures();
 	virtual void		InitializeSounds()  {}
-	virtual void    InitializeExternalGui();
+	virtual void		InitializeExternalGui();
 	virtual void		Pipeline()			{}
 
 	void						_PreInitModelManager();
@@ -91,7 +97,7 @@ protected:
 
 	GameState								m_gameState = GameState::UNINITIALIZED;
 
-	eInputController*				inputController;
+	eInputController*				m_input_controller;
 	
 	std::string			modelFolderPath;
 	std::string			assetsFolderPath;
@@ -105,6 +111,8 @@ protected:
 	std::shared_ptr<std::vector<shObject>>	m_framed;
 	std::vector<std::shared_ptr<GUI>>				m_guis;
 
+	std::vector <std::shared_ptr<IScript>>	m_global_scripts;
+
 	std::unique_ptr<InputStrategy>					m_input_strategy;
 	//debuging
 	shObject																m_light_object;
@@ -113,11 +121,11 @@ protected:
 	GizmoType										m_gizmo_type = GizmoType::TRANSLATE;
 	
 	//managers
-	std::unique_ptr<eTextureManager>		texManager;
-	std::unique_ptr<ModelManagerYAML>		modelManager;
-	std::unique_ptr<AnimationManagerYAML>		animationManager;
-	std::unique_ptr<eSoundManager>			soundManager;
-  std::vector<IWindowImGui*>					externalGui;
+	std::unique_ptr<eTextureManager>					texManager;
+	std::unique_ptr<ModelManagerYAML>					modelManager;
+	std::unique_ptr<AnimationManagerYAML>			animationManager;
+	std::unique_ptr<eSoundManager>						soundManager;
+  std::vector<IWindowImGui*>								externalGui;
 
 	//tcp
 	std::unique_ptr <ITcpAgent>				tcpAgent;

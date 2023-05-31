@@ -57,14 +57,14 @@ eMainRender::~eMainRender()
 }
 
 //-----------------------------------------------------------------------------------------------------
-void eMainRender::Render(const Camera&			    camera,
-						             const Light&			      light,
+void eMainRender::Render(const Camera&								camera,
+						             const Light&									light,
 						             const std::vector<shObject>&	objects,
-                         bool                   debug_white,
-                         bool                   debug_text_coords,
-												 bool                   gamma_correction,
-												 bool                   tone_mapping,
-												 float									exposure)
+                         bool													debug_white,
+                         bool													debug_text_coords,
+												 bool													gamma_correction,
+												 bool													tone_mapping,
+												 float												exposure)
 {
 	glUseProgram(mainShader.ID());
 

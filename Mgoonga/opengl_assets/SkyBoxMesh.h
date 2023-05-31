@@ -7,7 +7,7 @@
 class eSkyBoxMesh : public IMesh
 {
 public:
-	eSkyBoxMesh(Texture*);
+	eSkyBoxMesh(const Texture*);
   ~eSkyBoxMesh();
 
 	void Draw() override;
@@ -15,11 +15,11 @@ public:
 	virtual const std::string& Name() const override { return name; }
   virtual std::vector<const Texture*> GetTextures() const;
 
-	void SetTexture(Texture* _t);
+	void SetTexture(const Texture* _t);
 
 protected:
 	GLuint	 skyboxVAO;
 	GLuint	 skyboxVBO;
-	Texture* texture;
+	const Texture* texture;
 	std::string name;
 };

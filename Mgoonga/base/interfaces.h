@@ -17,17 +17,19 @@ class IInputObserver
 {
 public:
 	virtual ~IInputObserver() = default;
-	virtual bool OnMouseMove(uint32_t x, uint32_t y)				{ return false; }
-	virtual bool OnKeyPress(uint32_t asci)							{ return false; }
-	virtual bool OnMousePress(uint32_t x, uint32_t y, bool left)	{ return false; }
+	virtual bool OnKeyPress(uint32_t asci) { return false; }
+
+	virtual bool OnMouseMove(int32_t x, int32_t y)				{ return false; }
+	virtual bool OnMousePress(int32_t x, int32_t y, bool left)	{ return false; }
 	virtual bool OnMouseRelease()									{ return false; }
+	virtual bool OnMouseWheel(int32_t x, int32_t y) { return false; }
 };
 
 //----------------------------------------------------------------------------------------------
 class IParticleSystem
 {
 public:
-	IParticleSystem(Texture* t, float s) 
+	IParticleSystem(const Texture* t, float s) 
 		: texture(t), 
 		  scale(s, s, s) {}
 	virtual ~IParticleSystem() {}
@@ -41,10 +43,10 @@ public:
 	
 	//@todo improve
 	glm::vec3								Scale()				{ return scale; }
-	Texture*								GetTexture()	{ return texture; }
+	const Texture*					GetTexture() const	{ return texture; }
 
 protected:
-	Texture*								texture;
+	const Texture*					texture;
 	glm::vec3								scale;
 };
 
@@ -287,14 +289,17 @@ public:
 	virtual uint32_t GetFinalImageId() = 0;
 	virtual std::shared_ptr<eObject> GetFocusedObject() = 0; //const ref?
 	virtual std::vector<std::shared_ptr<eObject>> GetObjects() = 0;
+	virtual const Texture* GetTexture(const std::string& _name) const = 0;
 	virtual glm::mat4 GetMainCameraViewMatrix() = 0;
 	virtual glm::mat4 GetMainCameraProjectionMatrix() = 0;
+
+	virtual void AddInputObserver(IInputObserver* _observer, ePriority _priority) = 0;
 
 	virtual bool UseGizmo() = 0;
 	virtual uint32_t CurGizmoType() = 0;
 
-	virtual size_t			Width() =0 ;
-	virtual size_t			Height() =0 ;
+	virtual size_t			Width() const = 0 ;
+	virtual size_t			Height() const = 0 ;
 };
 
 #endif

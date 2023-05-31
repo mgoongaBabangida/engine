@@ -338,6 +338,7 @@ bool Shader::SetUniformData(const std::string& _name, const UniformData& _data)
 //---------------------------------------------------
 void Shader::_SetUniform(const Uniform& _uniform)
 {
+	glUseProgram(this->id);
 	switch (_uniform.type)
 	{
 		case GL_BOOL:

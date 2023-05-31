@@ -3,6 +3,7 @@
 
 #include <base/interfaces.h>
 #include <base/Object.h>
+
 #include <math/Timer.h>
 #include <math/AnimationLeaner.h>
 #include "Texture.h"
@@ -13,12 +14,19 @@
 class DLL_OPENGL_ASSETS GUI : public IInputObserver
 {
 public:
+	enum RenderFunc
+	{
+		Default = 0,
+		CursorFollow = 1
+	};
+
 	GUI();
 	GUI(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight);
 	GUI(const GUI&);
 	virtual ~GUI() {}
 
-	virtual bool	OnMousePress(uint32_t x, uint32_t y, bool left) override;
+	virtual bool	OnMousePress(int32_t x, int32_t y, bool left) override;
+	virtual bool	OnMouseMove(int32_t _x, int32_t _y)override;
 
 	virtual void UpdateSync();
 
@@ -26,18 +34,30 @@ public:
 	void			  SetTexture(const Texture& t,
 												glm::ivec2 topLeft,
 												glm::ivec2 bottomRight);
+	void			  SetTextureMask(const Texture& t); //should it have its topLeft & bottomRight?
+
 	Texture*		GetTexture();
-	
+	Texture*		GetTextureMask();
+
 	void SetChild(std::shared_ptr<GUI>_child) { children.push_back(_child); }
 	std::vector<std::shared_ptr<GUI>> GetChildren() const { return children;}
 
 	void					virtual Perssed();
+
+	bool									isHover(int x, int y);
 	bool					virtual isPressed(int x, int y);
 
 	bool					IsVisible() const { return isVisible; }
 	void					SetVisible(bool _isVisible) { isVisible = _isVisible; }
 
-	void Move(glm::ivec2 _newTopLeft) {
+	bool					IsTransparent() const { return isTransparent; }
+	void					SetTransparent(bool _isTransparent) { isTransparent = _isTransparent; }
+
+	RenderFunc GetRenderingFunc() const { return m_render_func; }
+	void SetRenderingFunc(RenderFunc _func) { m_render_func = _func; }
+
+	void Move(glm::ivec2 _newTopLeft)
+	{
 		topleftX = _newTopLeft.x;
 		topleftY = _newTopLeft.y;
 	}
@@ -55,7 +75,8 @@ protected:
 	int32_t						screenWidth;
 	int32_t						screenHeight;
 
-	Texture					texture;
+	Texture						texture;
+	Texture						textureMask;
 
 	int32_t						topleftX;
 	int32_t						topleftY;
@@ -70,6 +91,9 @@ protected:
 	std::vector<std::shared_ptr<GUI>> children;
 	std::shared_ptr<ICommand>	cmd;
 	bool						isVisible = true;
+	bool						isTransparent = false;
+	bool						m_take_mouse_moves = true;
+	RenderFunc			m_render_func = RenderFunc::Default;
 };
 
 //----------------------------------------------
@@ -92,7 +116,7 @@ public:
 	Cursor(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight)
 		: GUIWithAlpha(topleftX, topleftY, Width, Height, scWidth, scHeight) {}
 
-	virtual bool	OnMouseMove(uint32_t x, uint32_t y) override;
+	virtual bool	OnMouseMove(int32_t x, int32_t y) override;
 };
 
 //----------------------------------------------
@@ -102,8 +126,8 @@ public:
 	Movable2D(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight)
 		:GUI(topleftX, topleftY, Width, Height, scWidth, scHeight) {}
 
-	virtual bool	OnMouseMove(uint32_t x, uint32_t y) override;
-	virtual bool	OnMousePress(uint32_t x, uint32_t y, bool left) override;
+	virtual bool	OnMouseMove(int32_t x, int32_t y) override;
+	virtual bool	OnMousePress(int32_t x, int32_t y, bool left) override;
 	virtual bool	OnMouseRelease() override;
 protected:
 	bool is_pressed = false;

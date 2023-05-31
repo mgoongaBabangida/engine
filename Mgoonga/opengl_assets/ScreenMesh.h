@@ -25,6 +25,7 @@ public:
 
 	void SetTextureOne(Texture t) { textureOne = t; }
 	void SetTextureTwo(Texture t) { textureTwo = t; }
+	void SetTextureThree(Texture t) { textureThree = t; }
 
 protected:
 	GLuint	quadVAO;
@@ -32,6 +33,7 @@ protected:
 
 	Texture textureOne;
 	Texture textureTwo;
+	Texture textureThree;
 
 	std::array<GLfloat, 24> quadVertices;
 	std::string name = "eScreenMesh";

@@ -35,18 +35,18 @@ public:
 	eRenderManager() = default;
 	~eRenderManager() = default;
 
+	void				Initialize(eModelManager& modelManager,
+												 eTextureManager& texManager,
+												 const std::string& folderPath);
+
 	const std::vector<ShaderInfo>&	GetShaderInfos() const { return shaders;}
 	void														UpdateShadersInfo();
 	bool														SetUniformData(const std::string& _renderName,
 																								 const std::string& _uniformName,
 																								 const UniformData& _data);
 
-	void				Initialize(eModelManager&	modelManager,
-								         eTextureManager&  texManager,
-								         const std::string&	folderPath);
-
 	void				AddParticleSystem(IParticleSystem* system);
-	void				AddParticleSystemGPU(glm::vec3 _startPos, Texture* _texture);
+	void				AddParticleSystemGPU(glm::vec3 _startPos, const Texture* _texture);
 
 private:
 

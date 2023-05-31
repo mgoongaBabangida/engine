@@ -17,8 +17,8 @@ public:
 
 	virtual ~TerrainModel();
 
-	void initialize(Texture* diffuse, Texture* specular, bool spreed_texture = true);
-	void initialize(Texture* diffuse, Texture* specular, Texture* normal, Texture* heightMap, bool spreed_texture = true);
+	void initialize(const Texture* diffuse, const Texture* specular, bool spreed_texture = true);
+	void initialize(const Texture* diffuse, const Texture* specular, const Texture* normal, const Texture* heightMap, bool spreed_texture = true);
 	
 	virtual void														Draw()							override;
 	virtual const std::string&							GetName() const override { return mesh->Name(); }

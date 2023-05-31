@@ -153,6 +153,15 @@ struct extremDots
 	float MinZ = 1000;
 };
 
+//--------------------------------------------------------
+enum ePriority
+{
+	WEAK,
+	STRONG,
+	MONOPOLY,
+	ALWAYS
+};
+
 //-------------------------------------------------------
 //@todo translation from SDL to ASCII should be on controller side
 enum ASCII

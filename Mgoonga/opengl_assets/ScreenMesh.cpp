@@ -39,6 +39,8 @@ void eScreenMesh::Draw()
 	glBindTexture(GL_TEXTURE_2D, textureOne.id);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, textureTwo.id);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, textureThree.id);
 
 	glBindVertexArray(quadVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -50,6 +52,7 @@ std::vector<const Texture*> eScreenMesh::GetTextures() const
   std::vector<const Texture*> ret;
   ret.push_back(&textureOne);
   ret.push_back(&textureTwo);
+	ret.push_back(&textureThree);
   return ret;
 }
 

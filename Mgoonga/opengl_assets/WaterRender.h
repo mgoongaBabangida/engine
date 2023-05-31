@@ -16,14 +16,14 @@ class eWaterRender
 {
 public:
 	eWaterRender(std::unique_ptr<MyModel> model, 
-				Texture* waves, 
-				Texture* DUDV,
+				const Texture* waves,
+				const Texture* DUDV,
 				const std::string& vertexShaderPath,
 				const std::string& fragmentShaderPath);
 	~eWaterRender();
 
-	void						Render(const Camera&	camera, 
-									   const Light&		light);
+	void						Render(const Camera&	camera,
+												 const Light&		light);
 	
 	Shader& GetShader() { return waterShader; }
 

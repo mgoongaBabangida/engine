@@ -2,7 +2,7 @@
 #include "SkyBoxRender.h"
 #include <math/Transform.h>
 
-eSkyBoxRender::eSkyBoxRender(Texture*			_texture, 
+eSkyBoxRender::eSkyBoxRender(const Texture*			_texture, 
 							const std::string&  vertexShaderPath, 
 							const std::string&  fragmentShaderPath)
 {
@@ -28,7 +28,7 @@ void eSkyBoxRender::Render(const Camera& _camera)
 	skyBox->Draw();
 }
 
-void eSkyBoxRender::SetSkyBoxTexture(Texture* _t)
+void eSkyBoxRender::SetSkyBoxTexture(const Texture* _t)
 {
 	skyBox->SetTexture(_t);
 }

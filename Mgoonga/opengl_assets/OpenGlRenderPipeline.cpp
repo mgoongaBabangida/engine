@@ -37,7 +37,7 @@ void eOpenGlRenderPipeline::AddParticleSystem(IParticleSystem* _system)
 	renderManager->AddParticleSystem(_system);
 }
 
-void eOpenGlRenderPipeline::AddParticleSystemGPU(glm::vec3 _startPos, Texture* _texture)
+void eOpenGlRenderPipeline::AddParticleSystemGPU(glm::vec3 _startPos, const Texture* _texture)
 {
 	renderManager->AddParticleSystemGPU(_startPos, _texture);
 }
@@ -48,6 +48,12 @@ const std::vector<ShaderInfo>& eOpenGlRenderPipeline::GetShaderInfos() const
 void eOpenGlRenderPipeline::UpdateShadersInfo()
 {
 	renderManager->UpdateShadersInfo();
+}
+
+//-------------------------------------------------------------------------------------------
+bool eOpenGlRenderPipeline::SetUniformData(const std::string& _renderName, const std::string& _uniformName, const UniformData& _data)
+{
+	return renderManager.get()->SetUniformData(_renderName, _uniformName, _data);
 }
 
 //-------------------------------------------------------------------------------------------
@@ -481,16 +487,22 @@ void eOpenGlRenderPipeline::RenderContrast(const Camera& _camera)
 
 void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, const Camera& _camera)
 {
-	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	
+
 	for(auto& gui : guis)
 	{
 		if (gui->GetTexture() && gui->IsVisible())
 		{
+			if (gui->IsTransparent())
+				glEnable(GL_BLEND);
+			else
+				glDisable(GL_BLEND);
+
 			renderManager->ScreenRender()->SetTexture(*(gui->GetTexture())); //copy texture
+			renderManager->ScreenRender()->SetTextureMask(*(gui->GetTextureMask()));
+			renderManager->ScreenRender()->SetRenderingFunction(gui->GetRenderingFunc());
 			renderManager->ScreenRender()->Render(gui->getTopLeft(), gui->getBottomRight(),
-																						gui->getTopLeftTexture(), gui->getBottomRightTexture(), 
+																						gui->getTopLeftTexture(), gui->getBottomRightTexture(),
 																						width, height);
 		}
 		gui->UpdateSync();
@@ -498,7 +510,13 @@ void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, c
 		{
 			if (child->GetTexture() && child->IsVisible())
 			{
+				if (child->IsTransparent())
+					glEnable(GL_BLEND);
+				else
+					glDisable(GL_BLEND);
+
 				renderManager->ScreenRender()->SetTexture(*(child->GetTexture())); //copy texture
+				renderManager->ScreenRender()->SetTextureMask(*(child->GetTextureMask()));
 				renderManager->ScreenRender()->Render(child->getTopLeft(), child->getBottomRight(), 
 																							child->getTopLeftTexture(), child->getBottomRightTexture(), 
 																							width, height);

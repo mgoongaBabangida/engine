@@ -184,8 +184,8 @@ void eMgoongaGameContext::InitializeModels()
 
   m_input_strategy.reset(new InputStrategyMoveAlongXZPlane(GetMainCamera(), GetObjectsWithChildren(m_objects)));
 
-  Texture* tex = texManager->Find("TButton_red");
-  Texture* flag = texManager->Find("TSpanishFlag0_s");
+  const Texture* tex = texManager->Find("TButton_red");
+  const Texture* flag = texManager->Find("TSpanishFlag0_s");
   glm::ivec2 topLeft{ 160, 450 };
   glm::ivec2 bottomRight{ 1030, 725 };
 
@@ -202,22 +202,22 @@ void eMgoongaGameContext::InitializeModels()
 
  /* m_guis.emplace_back(new Cursor(0, 0, (bottomRight.x - topLeft.x) / 4, (bottomRight.y - topLeft.y) / 4, width, height));
   m_guis[1]->SetTexture(*tex, topLeft, bottomRight);*/
-  Texture* cursor = texManager->Find("cursor1");
+  const Texture* cursor = texManager->Find("cursor1");
   m_guis.emplace_back(new Cursor(0, 0, 30, 30, width, height));
   m_guis[1]->SetTexture(*cursor, { 0,0 }, { cursor->mTextureWidth, cursor->mTextureHeight });
   m_guis.emplace_back(new Movable2D(400, 0, 60, 60, width, height));
   m_guis[2]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight });
 
-  inputController->AddObserver(this, WEAK);
-  inputController->AddObserver(&GetMainCamera().getCameraRay(), WEAK);
-  inputController->AddObserver(&GetMainCamera(), WEAK);
-  inputController->AddObserver(m_guis[0].get(), MONOPOLY);//monopoly takes only mouse
-  inputController->AddObserver(m_guis[1].get(), WEAK);
-  inputController->AddObserver(m_guis[2].get(), STRONG);
-  inputController->AddObserver(externalGui[0], MONOPOLY);
-  inputController->AddObserver(externalGui[1], MONOPOLY);
-  inputController->AddObserver(externalGui[2], MONOPOLY);
-  inputController->AddObserver(externalGui[3], MONOPOLY);
+  m_input_controller->AddObserver(this, WEAK);
+  m_input_controller->AddObserver(&GetMainCamera().getCameraRay(), WEAK);
+  m_input_controller->AddObserver(&GetMainCamera(), WEAK);
+  m_input_controller->AddObserver(m_guis[0].get(), MONOPOLY);//monopoly takes only mouse
+  m_input_controller->AddObserver(m_guis[1].get(), WEAK);
+  m_input_controller->AddObserver(m_guis[2].get(), STRONG);
+  m_input_controller->AddObserver(externalGui[0], MONOPOLY);
+  m_input_controller->AddObserver(externalGui[1], MONOPOLY);
+  m_input_controller->AddObserver(externalGui[2], MONOPOLY);
+  m_input_controller->AddObserver(externalGui[3], MONOPOLY);
 }
 
 //-------------------------------------------------------------------------
@@ -283,10 +283,10 @@ void eMgoongaGameContext::_InitMainTestSceane()
   //TERRAIN
   std::unique_ptr<TerrainModel> terrainModel = modelManager->CloneTerrain("simple");
   terrainModel->initialize(texManager->Find("Tgrass0_d"),
-    texManager->Find("Tgrass0_d"),
-    texManager->Find("Tblue"),
-    texManager->Find("TOcean0_s"),
-    false);
+                           texManager->Find("Tgrass0_d"),
+                           texManager->Find("Tblue"),
+                           texManager->Find("TOcean0_s"),
+                           false);
 
   //OBJECTS
   ObjectFactoryBase factory;

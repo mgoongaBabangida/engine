@@ -64,6 +64,7 @@ public:
 	virtual void Add(TypeImGui, const std::string& name, void*)		{}
 	virtual void SetViewportOffset(float x_offset, float y_offset) {}
 	virtual void SetWindowOffset(float x_offset, float y_offset) {}
+	virtual bool IsHovered() { return false; }
 };
 
 //--------------------------------------------------
@@ -74,38 +75,21 @@ public:
 };
 
 //---------------------------------------------
-class eMainImGuiWindow : public IWindowImGui
-{
-	using eItem = std::tuple<std::string, TypeImGui, void*>;
-public:
-	virtual void Render()	override;
-	virtual void Add(TypeImGui, const std::string& name, void*) override;
-protected:
-	std::vector<eItem>	lines;
-	std::string open_file_menu_name;
-	std::function<void(const std::string&)> open_file_callback;
-
-	std::string open_scene_menu_name;
-	std::function<void(const std::string&)> open_scene_callback;
-
-	std::string save_scene_menu_name;
-	std::function<void(const std::string&)> save_scene_callback;
-};
-
-//---------------------------------------------
 class eWindowImGui : public IWindowImGui
 {
 	using eItem = std::tuple<std::string, TypeImGui, void*>;
 public:
-  eWindowImGui(const std::string& _name);
+  explicit eWindowImGui(const std::string& _name);
 	void SetViewportOffset(float x_offset, float y_offset);
 	void SetWindowOffset(float x_offset, float y_offset);
 	
 	virtual void Render()	override;
 	virtual void Add(TypeImGui, const std::string& name, void*) override;
   
-	virtual bool OnMousePress(uint32_t x, uint32_t y, bool left) override;
-  virtual bool OnMouseMove(uint32_t x, uint32_t y) override;
+	virtual bool OnMousePress(int32_t x, int32_t y, bool left) override;
+  virtual bool OnMouseMove(int32_t x, int32_t y) override;
+	virtual bool OnMouseWheel(int32_t x, int32_t y) override;
+	virtual bool IsHovered() override;
 
 protected:
 	std::vector<eItem>	lines;
@@ -130,6 +114,28 @@ protected:
 	float								viewport_offset_y;
 	float								window_offset_x;
 	float								window_offset_y;
+	float								cursor_x;
+	float								cursor_y;
+};
+
+//---------------------------------------------
+class eMainImGuiWindow : public eWindowImGui
+{
+	using eItem = std::tuple<std::string, TypeImGui, void*>;
+public:
+	eMainImGuiWindow();
+	virtual void Render()	override;
+	virtual void Add(TypeImGui, const std::string& name, void*) override;
+protected:
+	std::vector<eItem>	lines;
+	std::string open_file_menu_name;
+	std::function<void(const std::string&)> open_file_callback;
+
+	std::string open_scene_menu_name;
+	std::function<void(const std::string&)> open_scene_callback;
+
+	std::string save_scene_menu_name;
+	std::function<void(const std::string&)> save_scene_callback;
 };
 
 struct eDockSpaceImGui

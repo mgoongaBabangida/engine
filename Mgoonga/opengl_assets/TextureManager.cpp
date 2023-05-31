@@ -112,6 +112,10 @@ void eTextureManager::LoadAllTextures()
 	m_Textures.insert(std::pair<std::string, Texture>("Michelangelo", text));
 	text.loadTextureFromFile(folderPath + "cursor1.png");
 	m_Textures.insert(std::pair<std::string, Texture>("cursor1", text));
+	text.loadTextureFromFile(folderPath + "menu2.png");
+	m_Textures.insert(std::pair<std::string, Texture>("menu2", text));
+	text.loadTextureFromFile(folderPath + "menu3.png");
+	m_Textures.insert(std::pair<std::string, Texture>("menu3", text));
 
 	text.loadTextureFromFile(folderPath + "dice1.jpg");
 	m_Textures.insert(std::pair<std::string, Texture>("tex_dice1", text));
@@ -166,18 +170,19 @@ void eTextureManager::LoadAllTextures()
   m_Textures.insert(std::pair<std::string, Texture>("pbr1_roughness", text));
 }
 
-Texture* eTextureManager::Find(const std::string& texture_name)
+const Texture* eTextureManager::Find(const std::string& texture_name) const
 {
 	if (m_Textures.find(texture_name) != m_Textures.end())
 		return &m_Textures.find(texture_name)->second;
-	else {
+	else
+	{
 		std::cout << "texture not found!" << std::endl;
 		return nullptr;
 	}
 }
 
 //----------------------------------------------------
-Texture* eTextureManager::FindByID(unsigned int _id)
+const Texture* eTextureManager::FindByID(unsigned int _id) const
 {
 	for (auto& texture : m_Textures)
 		if (texture.second.id == _id)

@@ -30,7 +30,7 @@ void eRenderManager::AddParticleSystem(IParticleSystem* system)
 }
 
 //----------------------------------------------------------------------------------------------------------------
-void eRenderManager::AddParticleSystemGPU(glm::vec3 _startPos, Texture* _texture)
+void eRenderManager::AddParticleSystemGPU(glm::vec3 _startPos, const Texture* _texture)
 {
 	m_particleRenderGPU->AddParticleSystem(_startPos, _texture);
 }
@@ -50,15 +50,15 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 
 	//Water Renderer adjust
 	m_waterRender.reset(new eWaterRender(modelManager.ClonePrimitive("brick_square"),
-										texManager.Find("Twaves0_n"),
-										texManager.Find("TwaterDUDV"),
-										folderPath + "WaterVertexShader.glsl",
-										folderPath + "WaterFragmentShader.glsl"));
+																			 texManager.Find("Twaves0_n"),
+																			 texManager.Find("TwaterDUDV"),
+																			 folderPath + "WaterVertexShader.glsl",
+																			 folderPath + "WaterFragmentShader.glsl"));
 	shader_lambda(m_waterRender.get());
 	//SkyBox Renderer
 	m_skyboxRender.reset(new eSkyBoxRender(texManager.Find("TcubeSkyWater2"),
-										folderPath + "SkyBoxVertexShader.glsl",
-										folderPath + "SkyBoxFragmentShader.glsl"));
+																				folderPath + "SkyBoxVertexShader.glsl",
+																				folderPath + "SkyBoxFragmentShader.glsl"));
 	shader_lambda(m_skyboxRender.get());
 	//Screen Renderer
 	m_screenRender.reset(new eScreenRender(*(texManager.Find("TcubeSkyWater1")),
@@ -79,17 +79,17 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 	shader_lambda(m_outlineRender.get());
 	//eSkyNoiseRender
 	m_skynoiseRender.reset(new eSkyNoiseRender(modelManager.ClonePrimitive("brick_square"),
-											   texManager.Find("Tperlin_n"), 
-											   folderPath + "SkyNoiseVertexShader.glsl", 
-											   folderPath + "SkyNoiseFragmentShader.glsl"));
+																						texManager.Find("Tperlin_n"), 
+																						folderPath + "SkyNoiseVertexShader.glsl", 
+																						folderPath + "SkyNoiseFragmentShader.glsl"));
 	shader_lambda(m_skynoiseRender.get());
 
 	m_waverender.reset(new eWaveRender(modelManager.CloneTerrain("simple"),
-										texManager.Find("TSpanishFlag0_s"),
-										texManager.Find("Tblue"),
-										texManager.Find("Tblack"), 
-										folderPath + "WaveVertexShader.glsl",
-										folderPath + "PhongFragmentShader.glsl"));
+																		texManager.Find("TSpanishFlag0_s"),
+																		texManager.Find("Tblue"),
+																		texManager.Find("Tblack"), 
+																		folderPath + "WaveVertexShader.glsl",
+																		folderPath + "PhongFragmentShader.glsl"));
 	shader_lambda(m_waverender.get());
 
 	m_hexrender.reset(new eHexRender(folderPath + "Vertex3DSimple.glsl",
@@ -138,7 +138,7 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																				 folderPath + "BezierTessellation1Shader.glsl",
 																				 folderPath + "BezierTessellation2Shader.glsl"));
 	shader_lambda(m_bezierRender.get());
-	// Mesh line 
+	// Mesh line
 	m_meshlineRender.reset(new eMeshLineRender(folderPath + "PhongVertexShader.glsl", folderPath + "StencilFragmentShader.glsl"));
 	shader_lambda(m_meshlineRender.get());
 }

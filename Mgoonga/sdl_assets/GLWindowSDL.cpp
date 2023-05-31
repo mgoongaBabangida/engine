@@ -80,8 +80,9 @@ bool dbGLWindowSDL::InitializeGL()
 	SDL_DisplayMode current;
 	SDL_GetCurrentDisplayMode(0, &current);
 	
-	window	= SDL_CreateWindow("OpenGl", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH+575, HEIGHT+150, //@todo
+	window	= SDL_CreateWindow("Mgoonga", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH+575, HEIGHT+150, //@todo
 		SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL /*| SDL_WINDOW_RESIZABLE*/ | SDL_WINDOW_ALLOW_HIGHDPI);
+	
 	SDL_GL_SetSwapInterval(1); // Enable vsync
 	
 	if(window == nullptr)
@@ -98,10 +99,12 @@ bool dbGLWindowSDL::InitializeGL()
 	{
 		return false;
 	}
+
 	eImGuiContext::GetInstance(&context, window).Init();
 
 	mainContext->InitializeGL();
 	SDL_GL_MakeCurrent(window, NULL);
+
 	dTimer.reset(new math::Timer([this]()->bool
 								{
 									this->PaintGL();
@@ -153,10 +156,14 @@ void dbGLWindowSDL::Run()
 			}
 			else if(SDL_MOUSEMOTION == windowEvent.type)
 			{
-				if (windowEvent.motion.x < viewport_offset.x || windowEvent.motion.y < viewport_offset.y || ImGuizmo::IsOver() || ImGuizmo::IsUsing())
+				if (ImGuizmo::IsOver() || ImGuizmo::IsUsing())
 					continue;
 				inputController.OnMouseMove(windowEvent.motion.x - viewport_offset.x,
 																		windowEvent.motion.y - viewport_offset.y);
+			}
+			else if (SDL_MOUSEWHEEL == windowEvent.type)
+			{
+				inputController.OnMouseWheel(windowEvent.wheel.x, windowEvent.wheel.y);
 			}
 		}
 	}
@@ -183,6 +190,18 @@ void dbGLWindowSDL::PaintGL()
 	}
 	eImGuiContext::GetInstance(&context, window).NewFrame();
 
+	SDL_ShowCursor(SDL_DISABLE);
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+	for (auto* gui : guiWnd)
+	{
+		if (gui->IsHovered()) //@todo main menu should work as well
+		{
+			SDL_ShowCursor(SDL_ENABLE);
+			io.ConfigFlags &= ~ImGuiConfigFlags_NoMouseCursorChange;
+		}
+	}
+
 	//ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 	mainContext->PaintGL();
 
@@ -199,6 +218,7 @@ void dbGLWindowSDL::PaintGL()
 		gui->SetViewportOffset(viewport_offset.x, viewport_offset.y);
 		gui->Render();
 	}
+
 	eImGuiContext::GetInstance(&context, window).Render();
 	SDL_GL_SwapWindow(window);
 }
@@ -293,7 +313,8 @@ void dbGLWindowSDL::OnDockSpace()
 			}
 		}
 		ImGuizmo::SetRect(viewport_pos.x - window_x + border_x, viewport_pos.y - window_y + border_y, WIDTH, HEIGHT);
-		ImGui::End();
+		
+		ImGui::End(); //Game
 
 	ImGui::End();
 }

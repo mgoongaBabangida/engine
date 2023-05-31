@@ -5,13 +5,6 @@
 
 #include "interfaces.h"
 
-enum ePriority
-{
-	WEAK,
-	STRONG,
-	MONOPOLY,
-};
-
 //-------------------------------------------------------
 class DLL_BASE eInputController
 {
@@ -21,9 +14,11 @@ public:
 	virtual bool OnKeyPress(uint32_t asci);
 	virtual void OnMousePress(uint32_t x, uint32_t y, bool left);
 	virtual void OnMouseRelease();
-	void		 AddObserver(IInputObserver*, ePriority);
+	virtual void OnMouseWheel(int32_t x, int32_t y);
+	void				 AddObserver(IInputObserver*, ePriority);
 
 private:
 	std::vector<IInputObserver*>	observersPriority;
 	std::deque<IInputObserver*>		observers;
+	std::vector<IInputObserver*>	observersAlways;
 };

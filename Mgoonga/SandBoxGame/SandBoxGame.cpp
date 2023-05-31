@@ -9,11 +9,13 @@
 #include <math/ParticleSystem.h>
 
 #include <opengl_assets/Sound.h>
-#include <opengl_assets/GUI.h>
 #include <opengl_assets/TextureManager.h>
 #include <opengl_assets/SoundManager.h>
+
 #include <game_assets/ModelManagerYAML.h>
 #include <game_assets/AnimationManagerYAML.h>
+#include <game_assets/GUIController.h>
+#include <game_assets/CameraFreeController.h>
 
 #include <sdl_assets/ImGuiContext.h>
 
@@ -51,7 +53,7 @@ bool eSandBoxGame::OnKeyPress(uint32_t asci)
 }
 
 //------------------------------------------------------------------
-bool eSandBoxGame::OnMouseMove(uint32_t x, uint32_t y)
+bool eSandBoxGame::OnMouseMove(int32_t x, int32_t y)
 {
 	if (GetMainCamera().getCameraRay().IsPressed())
 	{
@@ -66,13 +68,14 @@ bool eSandBoxGame::OnMouseMove(uint32_t x, uint32_t y)
 }
 
 //------------------------------------------------------------------
-bool eSandBoxGame::OnMousePress(uint32_t x, uint32_t y, bool left)
+bool eSandBoxGame::OnMousePress(int32_t x, int32_t y, bool left)
 {
 	if (m_framed)
 		m_framed->clear();
 
 	GetMainCamera().getCameraRay().Update(GetMainCamera(), x, y, static_cast<float>(width), static_cast<float>(height));
 	GetMainCamera().getCameraRay().press(x, y);
+
 	//should be inside input strategy which needs it(frame, moveXZ)
 	GetMainCamera().MovementSpeedRef() = 0.f;
 
@@ -82,7 +85,7 @@ bool eSandBoxGame::OnMousePress(uint32_t x, uint32_t y, bool left)
 		auto [new_focused, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
 		if (new_focused != m_focused)
 		{
-			FocuseChanged.Occur(m_focused, new_focused);
+			FocusChanged.Occur(m_focused, new_focused);
 			m_focused = new_focused;
 		}
 	}
@@ -111,7 +114,7 @@ bool eSandBoxGame::OnMouseRelease()
 //*********************Initialize**************************************
 void eSandBoxGame::InitializePipline()
 {
-	pipeline.Initialize();
+	eMainContextBase::InitializePipline();
 	pipeline.SwitchSkyBox(false);
 	pipeline.SwitchWater(false);
 	pipeline.GetSkyNoiseOnRef() = false;
@@ -120,12 +123,15 @@ void eSandBoxGame::InitializePipline()
 	// call all the enable pipeline functions
 }
 
+//-------------------------------------------------------------------------
 void eSandBoxGame::InitializeBuffers()
 {
+	eMainContextBase::InitializeBuffers();
 	GetMainLight().type = eLightType::DIRECTION;
 	pipeline.InitializeBuffers(GetMainLight().type == eLightType::POINT); //@todo add possibility to choose buffers
 }
 
+//-------------------------------------------------------------------------
 void eSandBoxGame::InitializeModels()
 {
 	eMainContextBase::InitializeModels();
@@ -165,9 +171,9 @@ void eSandBoxGame::InitializeModels()
 	soldier->GetTransform()->setScale(vec3(0.01f, 0.01f, 0.01f));
 
 	//Set textures manually
-	Texture* t = texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1001_Normal.png", "soldier_normal1", "texture_normal"));
+	Texture* t = const_cast<Texture*>(texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1001_Normal.png", "soldier_normal1", "texture_normal")));
 	const_cast<I3DMesh*>(soldier->GetModel()->Get3DMeshes()[0])->AddTexture(t);
-	t = texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1002_Normal.png", "soldier_normal2", "texture_normal"));
+	t = const_cast<Texture*>(texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1002_Normal.png", "soldier_normal2", "texture_normal")));
 	const_cast<I3DMesh*>(soldier->GetModel()->Get3DMeshes()[1])->AddTexture(t);
 
 	m_objects.push_back(soldier);
@@ -180,27 +186,25 @@ void eSandBoxGame::InitializeModels()
 	m_light_object->GetTransform()->setTranslation(GetMainLight().light_position);
 	m_objects.push_back(m_light_object);
 
-	//gui
-	Texture* cursor = texManager->Find("cursor1");
-	m_guis.emplace_back(new Cursor(0, 0, 30, 30, width, height));
-	m_guis[0]->SetTexture(*cursor, { 0,0 }, { cursor->mTextureWidth, cursor->mTextureHeight });
+	m_global_scripts.push_back(std::make_shared<GUIController>(this, this->pipeline, soundManager->GetSound("page_sound")));
+	m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera()));
 
-	inputController->AddObserver(m_guis[0].get(), WEAK);
-	inputController->AddObserver(this, WEAK);
-	inputController->AddObserver(&GetMainCamera().getCameraRay(), WEAK);
-	inputController->AddObserver(&GetMainCamera(), WEAK);
+	m_input_controller->AddObserver(this, WEAK);
+	m_input_controller->AddObserver(&GetMainCamera().getCameraRay(), WEAK);
+	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
 }
 
+//------------------------------------------------------------------------
 void eSandBoxGame::InitializeRenders()
 {
-	pipeline.InitializeRenders(*modelManager.get(), *texManager.get(), shadersFolderPath);
+	eMainContextBase::InitializeRenders();
+	// set uniforms
+	// exposure, shininess etc. @todo dont change every frame in render
 }
 
+//------------------------------------------------------------------------
 void eSandBoxGame::InitializeSounds()
 {
-}
-
-void eSandBoxGame::PaintGL()
-{
-	eMainContextBase::PaintGL();
+	eMainContextBase::InitializeSounds();
+	//@todo transfer from inside the manager
 }

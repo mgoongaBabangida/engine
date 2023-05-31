@@ -9,8 +9,10 @@ eSoundManager::eSoundManager(const std::string& _path)
 	context.reset(new SoundContext());
 	context->init();
 	context->LoadWavFile(assetsFolderPath + "Cannon+5.wav");
+	context->LoadWavFile(assetsFolderPath + "page-flip-01a.wav");
 
-	sounds.push_back(std::unique_ptr<RemSnd>(new RemSnd(context->buffers.find(assetsFolderPath + "Cannon+5.wav")->second, true, "shot_sound")));
+	sounds.push_back(std::unique_ptr<RemSnd>(new RemSnd(context->GetBuffers().find(assetsFolderPath + "Cannon+5.wav")->second, true, "shot_sound")));
+	sounds.push_back(std::unique_ptr<RemSnd>(new RemSnd(context->GetBuffers().find(assetsFolderPath + "page-flip-01a.wav")->second, false, "page_sound")));
 }
 
 SoundContext* eSoundManager::GetContext()
@@ -23,7 +25,7 @@ RemSnd* eSoundManager::GetSound(const std::string& _name)
 	//$todo sounds should be copied 
 	return (std::find_if(sounds.begin(), sounds.end(), [&_name](const std::unique_ptr<RemSnd>& snd)->bool 
 														{ 
-															return snd->Name() == _name;  
+															return snd->Name() == _name;
 														}))->get();
 }
 

@@ -9,12 +9,12 @@
 class eSkyBoxRender
 {
 public:
-	eSkyBoxRender(Texture*			 cubeTexture,
+	eSkyBoxRender(const Texture*			 cubeTexture,
 				  const std::string& vertexShaderPath,
 				  const std::string& fragmentShaderPath);
 
 	void Render(const Camera& camera);	
-	void SetSkyBoxTexture(Texture*);
+	void SetSkyBoxTexture(const Texture*);
 
 	Shader& GetShader() { return skyboxShader; }
 

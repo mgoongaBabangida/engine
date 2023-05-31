@@ -63,3 +63,18 @@ void eScreenRender::RenderKernel()
 	screenMesh->Draw();
 	glUniform1i(kernelLoc, GL_FALSE);
 }
+
+//---------------------------------------------------------------
+void eScreenRender::SetRenderingFunction(int32_t _function)
+{
+	if(_function == 0)
+	{
+		GLuint DefaultRendering = glGetSubroutineIndex(screenShader.ID(), GL_FRAGMENT_SHADER, "DefaultColor");
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &DefaultRendering);
+	}
+	else if(_function == 1)
+	{
+		GLuint CursorFollowRendering = glGetSubroutineIndex(screenShader.ID(), GL_FRAGMENT_SHADER, "TestColor");
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &CursorFollowRendering);
+	}
+}

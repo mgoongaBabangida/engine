@@ -6,7 +6,7 @@
 
 //------------------------------------------------------------------------------------------------------
 eSkyNoiseRender::eSkyNoiseRender(std::unique_ptr<MyModel>	_model, 
-								 Texture*					_noise, 
+								 const Texture*					_noise, 
 								 const std::string&			_vS, 
 								 const std::string&			_fS)
 {

@@ -20,7 +20,8 @@ MyModel::MyModel()
   :m_name("empty")
 {}
 
-MyModel::MyModel(std::shared_ptr<MyMesh> m, const std::string& _name, Texture* t, Texture* t2, Texture* t3, Texture* t4)
+MyModel::MyModel(std::shared_ptr<MyMesh> m, const std::string& _name, 
+  const Texture* t, const Texture* t2, const Texture* t3, const Texture* t4)
   : mesh(m)
   , m_name(_name)
 {
@@ -88,26 +89,26 @@ std::vector<MyMesh*> MyModel::getMeshes() const
   return meshes;
 }
 
-void MyModel::SetTexture(Texture* t) 
+void MyModel::SetTexture(const Texture* t)
 { 
   m_material.albedo_texture_id = t->id;
   m_material.metalic_texture_id = t->id;
   m_material.normal_texture_id = t->id;
 }
 
-void MyModel::setTextureDiffuse(Texture* t)
+void MyModel::setTextureDiffuse(const Texture* t)
 { 
   m_material.albedo_texture_id = t->id;
 }
-void MyModel::setTextureSpecular(Texture* t)
+void MyModel::setTextureSpecular(const Texture* t)
 { 
   m_material.metalic_texture_id = t->id;
 }
-void MyModel::setTextureBump(Texture* t)
+void MyModel::setTextureBump(const Texture* t)
 { 
   m_material.normal_texture_id = t->id;
 }
-void MyModel::setTextureFourth(Texture* t)
+void MyModel::setTextureFourth(const Texture* t)
 { 
   m_material.roughness_texture_id = t->id;
 }

@@ -21,6 +21,7 @@ GUI::GUI(const GUI& _other)
 	: screenWidth(_other.screenWidth)
     , screenHeight(_other.screenHeight)
     , texture(_other.texture)
+	  , textureMask(_other.textureMask)
     , topleftX(_other.topleftX)
     , topleftY(_other.topleftY)
     , Width(_other.Width)
@@ -30,7 +31,7 @@ GUI::GUI(const GUI& _other)
 {
 }
 
-bool GUI::OnMousePress(uint32_t x, uint32_t y, bool left)
+bool GUI::OnMousePress(int32_t x, int32_t y, bool left)
 {
 	if(left && isVisible && isPressed(x, y))
 	{
@@ -38,6 +39,14 @@ bool GUI::OnMousePress(uint32_t x, uint32_t y, bool left)
 		return true;
 	}
 	return false;
+}
+
+bool GUI::OnMouseMove(int32_t _x, int32_t _y)
+{
+	if (isHover(_x, _y) && isVisible)
+		return m_take_mouse_moves;
+	else
+		return false;
 }
 
 void GUI::UpdateSync()
@@ -59,15 +68,30 @@ void GUI::SetTexture(const Texture& t, glm::ivec2 topLeft, glm::ivec2 bottomRigh
 	tex_Height = bottomRight.y - topLeft.y;
 }
 
+void GUI::SetTextureMask(const Texture& t)
+{
+	textureMask = t;
+}
+
 Texture * GUI::GetTexture()
 {
 	 return &texture;
+}
+
+Texture* GUI::GetTextureMask()
+{
+	return &textureMask;
 }
 
 void GUI::Perssed()
 {
   if(cmd)
 		cmd->Execute();
+}
+
+bool GUI::isHover(int x, int y)
+{
+	return x > topleftX && y > topleftY && x < (topleftX + Width) && y < (topleftY + Height);
 }
 
 bool GUI::isPressed(int x, int y)
@@ -163,14 +187,14 @@ void GUIWithAlpha::UpdateSync()
 }
 
 //-------------------------------------------------------------
-bool Cursor::OnMouseMove(uint32_t x, uint32_t y)
+bool Cursor::OnMouseMove(int32_t x, int32_t y)
 {
 	Move({ x,y });
 	return false;
 }
 
 //-------------------------------------------------------------
-bool Movable2D::OnMouseMove(uint32_t x, uint32_t y)
+bool Movable2D::OnMouseMove(int32_t x, int32_t y)
 {
 	if(is_pressed)
 		Move({ x - m_press_coords.first,y - m_press_coords.second });
@@ -178,7 +202,7 @@ bool Movable2D::OnMouseMove(uint32_t x, uint32_t y)
 }
 
 //-------------------------------------------------------------
-bool Movable2D::OnMousePress(uint32_t x, uint32_t y, bool left)
+bool Movable2D::OnMousePress(int32_t x, int32_t y, bool left)
 {
 	if (GUI::OnMousePress(x, y, left))
 	{

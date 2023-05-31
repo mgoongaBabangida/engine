@@ -13,16 +13,18 @@
 class SoundContext //singleton
 {
 public:
-	bool init();
-	bool exit();
-	std::map<std::string, ALuint> buffers;
+	bool		init();
+	bool		exit();
+	bool		LoadWavFile(const std::string& Filename);
 
-	bool		LoadWavFile(const std::string &Filename);
+	const std::map<std::string, ALuint>& GetBuffers() const { return buffers; }
 
-private:
-	ALCdevice*	device;
-	ALCcontext* context;
+protected:
 	bool		endWithError(std::string str);
+
+	std::map<std::string, ALuint> buffers;
+	ALCdevice*										device;
+	ALCcontext*										context;
 };
 
 //---------------------------------------------------------

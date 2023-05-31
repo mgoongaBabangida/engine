@@ -18,8 +18,10 @@ public:
 	void RenderFrame(glm::vec2 _top_left, glm::vec2 _right_botom, float viewport_width, float viewport_height);
 	void RenderKernel();
 	
+	void SetRenderingFunction(int32_t);
 	void SetTexture(Texture t)			    { screenMesh->SetTextureOne(t); }
 	void SetTextureContrast(Texture t)	{ screenMesh->SetTextureTwo(t); }
+	void SetTextureMask(Texture t)			{ screenMesh->SetTextureThree(t); }
 
 	Shader& GetShader() { return screenShader; }
 protected:

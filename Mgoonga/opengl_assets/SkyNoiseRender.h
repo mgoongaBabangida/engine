@@ -16,7 +16,7 @@ class eObject;
 class eSkyNoiseRender
 {
 public:
-	eSkyNoiseRender(std::unique_ptr<MyModel> model, Texture* noise, const std::string&, const std::string&);
+	eSkyNoiseRender(std::unique_ptr<MyModel> model, const Texture* noise, const std::string&, const std::string&);
 	~eSkyNoiseRender();
 
 	void Render(const Camera& camera);

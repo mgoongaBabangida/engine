@@ -1,5 +1,6 @@
 #ifndef SHIP_SCRIPT_H
 #define SHIP_SCRIPT_H
+
 #include "game_assets.h"
 
 #include <base/interfaces.h>
@@ -29,7 +30,7 @@ public:
 	eShipScript& operator=(const eShipScript&)	= delete;
 
 	virtual bool	OnKeyPress(uint32_t asci)							override;
-	virtual bool	OnMousePress(uint32_t x, uint32_t y, bool left)		override;
+	virtual bool	OnMousePress(int32_t x, int32_t y, bool left)		override;
 
 	virtual void	Update(std::vector<std::shared_ptr<eObject> > objs) override;
 

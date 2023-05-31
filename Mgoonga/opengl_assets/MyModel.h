@@ -16,10 +16,10 @@ public:
 	MyModel();
 	MyModel(std::shared_ptr<MyMesh> _mesh,
 					const std::string& _name,
-					Texture* t = nullptr,
-					Texture* t2 = nullptr,
-					Texture* t3 = nullptr,
-					Texture* t4 = nullptr);
+					const Texture* t = nullptr,
+					const Texture* t2 = nullptr,
+					const Texture* t3 = nullptr,
+					const Texture* t4 = nullptr);
 	MyModel(const MyModel& _other);
 
 	virtual ~MyModel();
@@ -47,11 +47,11 @@ public:
 
 	void												Debug();
 	
-	void SetTexture(Texture* t);
-	void setTextureDiffuse(Texture* t);
-	void setTextureSpecular(Texture* t);
-	void setTextureBump(Texture* t);
-	void setTextureFourth(Texture* t);
+	void SetTexture(const Texture* t);
+	void setTextureDiffuse(const Texture* t);
+	void setTextureSpecular(const Texture* t);
+	void setTextureBump(const Texture* t);
+	void setTextureFourth(const Texture* t);
 
 protected:
 	std::shared_ptr<MyMesh> mesh;

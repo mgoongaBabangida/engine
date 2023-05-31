@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "SkyBoxMesh.h"
 
-eSkyBoxMesh::eSkyBoxMesh(Texture* _texture)
+eSkyBoxMesh::eSkyBoxMesh(const Texture* _texture)
 {
 	texture = _texture;
 
@@ -84,7 +84,7 @@ std::vector<const Texture*> eSkyBoxMesh::GetTextures() const
   return ret;
 }
 
-void eSkyBoxMesh::SetTexture(Texture * _t)
+void eSkyBoxMesh::SetTexture(const Texture * _t)
 {
 	texture = _t;
 }

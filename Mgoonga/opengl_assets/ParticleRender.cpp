@@ -11,7 +11,7 @@
 
 //------------------------------------------------------------------------------------------
 eParticleRender::eParticleRender(std::shared_ptr<MyMesh> _mesh,
-								 Texture*				 _texture,
+								 const Texture*				 _texture,
 								 const std::string&		 _vertexShaderPath,
 								 const std::string&		 _fragmentShaderPath)
 : instancedBuffer(ParticleMesh::MAXPARTICLES  * ParticleMesh::SIZEOF / sizeof(float), 0.0f)

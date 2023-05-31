@@ -2,7 +2,7 @@
 #include "Rigger.h"
 #include "AnimatedModel.h"
 
-#include <algorithm>>
+#include <algorithm>
 #include <thread>
 #include <mutex>
 #include <condition_variable>

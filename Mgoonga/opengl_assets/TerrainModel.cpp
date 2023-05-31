@@ -79,7 +79,7 @@ TerrainModel::TerrainModel(const TerrainModel& _other)
 {}
 
 //----------------------------------------------------------------
-void TerrainModel::initialize(Texture* diffuse, Texture* specular, bool spreed_texture)
+void TerrainModel::initialize(const Texture* diffuse, const Texture* specular, bool spreed_texture)
 {
 	if (diffuse != nullptr)
 		m_material.albedo_texture_id = diffuse->id;
@@ -100,10 +100,10 @@ void TerrainModel::initialize(Texture* diffuse, Texture* specular, bool spreed_t
 }
 
 //----------------------------------------------------------------
-void TerrainModel::initialize(Texture* diffuse,
-														  Texture* specular,
-														  Texture* normal,
-														  Texture* heightMap,
+void TerrainModel::initialize(const Texture* diffuse,
+														  const Texture* specular,
+														  const Texture* normal,
+														  const Texture* heightMap,
 														  bool spreed_texture)
 {
 	if (diffuse != nullptr)
