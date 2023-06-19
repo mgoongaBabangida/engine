@@ -139,6 +139,8 @@ void eSandBoxGame::InitializeModels()
 	//MODELS
 	modelManager->Add("wolf", (GLchar*)std::string(modelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
 	modelManager->Add("Dying", (GLchar*)std::string(modelFolderPath + "Dying Soldier/Dying.dae").c_str());
+	modelManager->Add("MapleTree", (GLchar*)std::string(modelFolderPath + "MapleTree/MapleTree.obj").c_str());
+	modelManager->Add("Cottage", (GLchar*)std::string(modelFolderPath + "85-cottage_obj/cottage_obj.obj").c_str());
 
 	//DESERIALIZE ANIMATIONS
 	animationManager->Deserialize("Animations.mgoongaAnimations");
@@ -148,9 +150,26 @@ void eSandBoxGame::InitializeModels()
 
 	shObject wallCube = factory.CreateObject(modelManager->Find("wall_cube"), eObject::RenderType::PHONG, "WallCube");
 	wallCube->GetTransform()->setTranslation(vec3(3.0f, 3.0f, 3.0f));
-	wallCube->SetScript(new eSandBoxScript());
+	wallCube->SetScript(new eSandBoxScript(this));
 	m_objects.push_back(wallCube);
 	
+	shObject mapleTree = factory.CreateObject(modelManager->Find("MapleTree"), eObject::RenderType::PHONG, "MapleTree");
+	mapleTree->GetTransform()->setTranslation(vec3(3.0f, -2.0f, -2.0f));
+	mapleTree->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
+	m_objects.push_back(mapleTree);
+
+	shObject cottage = factory.CreateObject(modelManager->Find("Cottage"), eObject::RenderType::PHONG, "Cottage");
+	cottage->GetTransform()->setTranslation(vec3(0.5f, -2.01f, -2.0f));
+	cottage->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
+	m_objects.push_back(cottage);
+	Texture* t = const_cast<Texture*>(texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/85-cottage_obj/cottage_diffuse.png", "cottage_diffuse1", "texture_diffuse")));
+	for(auto& mesh : cottage->GetModel()->Get3DMeshes())
+		const_cast<I3DMesh*>(mesh)->AddTexture(t);
+
+	t = const_cast<Texture*>(texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/85-cottage_obj/cottage_normal.png", "cottage_normal1", "texture_normal")));
+	for (auto& mesh : cottage->GetModel()->Get3DMeshes())
+		const_cast<I3DMesh*>(mesh)->AddTexture(t);
+
 	shObject grassPlane = factory.CreateObject(modelManager->Find("grass_plane"), eObject::RenderType::PHONG, "GrassPlane");
 	grassPlane->GetTransform()->setTranslation(vec3(0.0f, -2.0f, 0.0f));
 	m_objects.push_back(grassPlane);
@@ -171,7 +190,7 @@ void eSandBoxGame::InitializeModels()
 	soldier->GetTransform()->setScale(vec3(0.01f, 0.01f, 0.01f));
 
 	//Set textures manually
-	Texture* t = const_cast<Texture*>(texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1001_Normal.png", "soldier_normal1", "texture_normal")));
+	t = const_cast<Texture*>(texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1001_Normal.png", "soldier_normal1", "texture_normal")));
 	const_cast<I3DMesh*>(soldier->GetModel()->Get3DMeshes()[0])->AddTexture(t);
 	t = const_cast<Texture*>(texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1002_Normal.png", "soldier_normal2", "texture_normal")));
 	const_cast<I3DMesh*>(soldier->GetModel()->Get3DMeshes()[1])->AddTexture(t);
@@ -190,7 +209,6 @@ void eSandBoxGame::InitializeModels()
 	m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera()));
 
 	m_input_controller->AddObserver(this, WEAK);
-	m_input_controller->AddObserver(&GetMainCamera().getCameraRay(), WEAK);
 	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
 }
 

@@ -33,7 +33,7 @@ public:
 	virtual void												setupMesh();
 	virtual void												calculatedTangent();
 
-public:
+public: //@todo should be protected
 	/*  Mesh Data  */
 	std::vector<Vertex>		vertices;
 	std::vector<GLuint>		indices;
@@ -64,6 +64,7 @@ public:
   virtual size_t														GetVertexCount() const override { return vertices.size(); }
 	virtual const std::vector<Vertex>&				GetVertexs() const override { return vertices; }
 	virtual const std::vector<unsigned int>&	GetIndices() const override { return indices; }
+
 	virtual void                              BindVAO() const override { glBindVertexArray(this->VAO); }
 	virtual void                              UnbindVAO() const override { glBindVertexArray(0); }
 
@@ -85,6 +86,7 @@ protected:
 	GLuint VAO, VBO, EBO;
 	GLuint VBOinstanced;
 	std::string name= "ParticleMesh";
+
 	/*  Functions    */
 	virtual void		setupMesh();
 };
@@ -121,8 +123,8 @@ class DLL_OPENGL_ASSETS BezierCurveMesh : public IMesh
 {
 public:
 	explicit BezierCurveMesh(const dbb::Bezier& _bezier);
-
 	virtual ~BezierCurveMesh();
+
 	dbb::Bezier& GetBezier() { return m_bezier; };
 	void Update();
 

@@ -11,6 +11,9 @@ bool eRigidBody::CollidesWith(eObject* _other, Side _side)
 {
 	collision.collider = object;
 	collision.collidee = _other;
+	if (!_other->GetCollider())
+		return false;
+
 	return object->GetCollider()->CollidesWith(*(object->GetTransform()),
 																						 *(_other->GetTransform()),
 																						 *(_other->GetCollider()),

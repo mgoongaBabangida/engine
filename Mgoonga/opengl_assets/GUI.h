@@ -17,7 +17,8 @@ public:
 	enum RenderFunc
 	{
 		Default = 0,
-		CursorFollow = 1
+		CursorFollow = 1,
+		GreyKernel = 2
 	};
 
 	GUI();
@@ -47,11 +48,11 @@ public:
 	bool									isHover(int x, int y);
 	bool					virtual isPressed(int x, int y);
 
-	bool					IsVisible() const { return isVisible; }
-	void					SetVisible(bool _isVisible) { isVisible = _isVisible; }
+	bool					IsVisible() const { return m_is_visible; }
+	void					SetVisible(bool _isVisible) { m_is_visible = _isVisible; }
 
-	bool					IsTransparent() const { return isTransparent; }
-	void					SetTransparent(bool _isTransparent) { isTransparent = _isTransparent; }
+	bool					IsTransparent() const { return m_is_transparent; }
+	void					SetTransparent(bool _isTransparent) { m_is_transparent = _isTransparent; }
 
 	RenderFunc GetRenderingFunc() const { return m_render_func; }
 	void SetRenderingFunc(RenderFunc _func) { m_render_func = _func; }
@@ -90,10 +91,23 @@ protected:
 
 	std::vector<std::shared_ptr<GUI>> children;
 	std::shared_ptr<ICommand>	cmd;
-	bool						isVisible = true;
-	bool						isTransparent = false;
-	bool						m_take_mouse_moves = true;
+	bool						m_is_visible = true;
+	bool						m_is_transparent = false;
+	bool						m_take_mouse_moves = false;
 	RenderFunc			m_render_func = RenderFunc::Default;
+};
+
+//------------------------------------------------------
+struct GUICommand : public ICommand
+{
+	GUICommand(std::function<void()> _func)
+		:m_func(_func)
+	{}
+	virtual void Execute()
+	{
+		m_func();
+	}
+	std::function<void()> m_func;
 };
 
 //----------------------------------------------
@@ -124,7 +138,10 @@ class DLL_OPENGL_ASSETS Movable2D : public GUI
 {
 public:
 	Movable2D(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight)
-		:GUI(topleftX, topleftY, Width, Height, scWidth, scHeight) {}
+		: GUI(topleftX, topleftY, Width, Height, scWidth, scHeight)
+	{
+		m_take_mouse_moves = true;
+	}
 
 	virtual bool	OnMouseMove(int32_t x, int32_t y) override;
 	virtual bool	OnMousePress(int32_t x, int32_t y, bool left) override;

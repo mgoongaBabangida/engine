@@ -1,475 +1,194 @@
 #include "stdafx.h"
 #include "AmericanTreasureGame.h"
+#include "GameController.h"
 
 #include <base/InputController.h>
 
-#include <math/Random.h>
-#include <math/Camera.h>
-#include <math/CameraRay.h>
+#include <math/ShootingParticleSystem.h>
+#include <math/Rigger.h>
+#include <math/RigidBdy.h>
+#include <math/BoxCollider.h>
 
-#include <opengl_assets/OpenGlRenderPipeline.h>
-#include <opengl_assets/GUI.h>
-#include <opengl_assets/Sound.h>
+#include <opengl_assets/Texture.h>
+#include <opengl_assets/RenderManager.h>
 #include <opengl_assets/TextureManager.h>
-#include <opengl_assets/ModelManager.h>
 #include <opengl_assets/SoundManager.h>
 #include <game_assets/ModelManagerYAML.h>
 #include <game_assets/AnimationManagerYAML.h>
+#include <game_assets/GUIController.h>
+#include <game_assets/CameraFreeController.h>
 
 #include <sdl_assets/ImGuiContext.h>
 
 #include <game_assets/ObjectFactory.h>
+#include <game_assets/BezierCurveUIController.h>
 
-#include "Hex.h"
-#include "ATGameClasses.h"
-
-//#include <math.h>
-#include <algorithm>
-
-//-------------------------------------------------------------------------------------------
-class eTurnController : public ICommand
+//---------------------------------------------------------------------------
+AmericanTreasureGame::AmericanTreasureGame(eInputController* _input,
+  std::vector<IWindowImGui*> _externalGui,
+  const std::string& _modelsPath,
+  const std::string& _assetsPath,
+  const std::string& _shadersPath)
+  : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
 {
-public:
-	eTurnController(eAmericanTreasureGame& gc) : game_context(gc) {}
+  FocusChanged.Subscribe([this](shObject _prev, shObject _new)->void { this->OnFocusedChanged(); });
 
-	virtual void Execute() override
-	{
-		if (game_context.get().focused && !game_context.get().focused->HasMoved())
-		{
-			current_dice = math::Random::RandomInt(1, 6);
-			dice_rolled = true;
-		}
-	}
-
-	//-------------------------------------------------------------------------------------------
-  void Update()
+  if (!m_objects.empty())
   {
-    //hex_distance multiplied by shooting distance
+    m_focused = m_objects[0];
+    FocusChanged.Occur(shObject{}, m_focused);
+  }
+}
+
+//--------------------------------------------------------------------------
+AmericanTreasureGame::~AmericanTreasureGame() {}
+
+//--------------------------------------------------------------------------
+void AmericanTreasureGame::InitializeExternalGui()
+{
+  eMainContextBase::InitializeExternalGui();
+}
+
+//*********************InputObserver*********************************
+//--------------------------------------------------------------------------
+bool AmericanTreasureGame::OnKeyPress(uint32_t asci)
+{
+  return eMainContextBase::OnKeyPress(asci);
+}
+
+//--------------------------------------------------------------------------
+bool AmericanTreasureGame::OnMouseMove(int32_t x, int32_t y)
+{
+  if (GetMainCamera().getCameraRay().IsPressed())
+  {
+    if (m_input_strategy && !m_input_strategy->OnMouseMove(x, y))
     {
-      if (glm::length(shooter->GetTransform()->getTranslation() - target->GetTransform()->getTranslation()) <= (Hex::radius))
-      {
-        //Calculate fight outcome
-      }
+      // input strategy has priority over frame, @todo frmae should be inside one of input strategies
+      m_framed.reset(new std::vector<shObject>(GetMainCamera().getCameraRay().onMove(GetMainCamera(), m_objects, static_cast<float>(x), static_cast<float>(y)))); 	//to draw a frame
+      return true;
     }
   }
-
-	//-------------------------------------------------------------------------------------------
-	Texture* GetDiceTexture()
-	{
-		switch (current_dice)
-		{
-		case 1: return game_context.get().texManager->Find("tex_dice1"); break;
-		case 2: return game_context.get().texManager->Find("tex_dice2"); break;
-		case 3: return game_context.get().texManager->Find("tex_dice3"); break;
-		case 4: return game_context.get().texManager->Find("tex_dice4"); break;
-		case 5: return game_context.get().texManager->Find("tex_dice5"); break;
-		case 6: return game_context.get().texManager->Find("tex_dice6"); break;
-		}
-		return nullptr; //assert
-	}
-
-	//-------------------------------------------------------------------------------------------
-	bool CanBeChosen(std::shared_ptr<eShip> _ship)
-	{
-		return (_ship->IsSpanish() && spanish_turn) || (!_ship->IsSpanish() && !spanish_turn)
-				&& (!game_context.get().focused || game_context.get().focused->HasMoved());
-	}
-
-	//------------------------------------------------------------------------------------------
-	int32_t CurrentDice() { return current_dice; }
-
-	//-------------------------------------------------------------------------------------------
-	void CheckAllMoved()
-	{
-		if (std::find_if(game_context.get().ships.begin(), game_context.get().ships.end(),
-			[this](std::shared_ptr<eShip> ship) { return ship->IsSpanish() == spanish_turn && !ship->HasMoved(); })
-			== game_context.get().ships.end())
-		{
-			spanish_turn = !spanish_turn;
-			for (auto ship : game_context.get().ships)
-				ship->SetHasMoved(false);
-		}
-	}
-
-	//----------------------------------------------------------------------------------------------
-	bool DiceRolled()		{ return dice_rolled; }
-	//----------------------------------------------------------------------------------------------
-	void ResetDiceRolled()	{ dice_rolled = false; }
-
-	std::shared_ptr<eShip> shooter = nullptr; //make setters or friend?
-	std::shared_ptr<eShip> target  = nullptr;
-
-protected:
-	std::reference_wrapper<eAmericanTreasureGame> game_context;
-	int32_t	current_dice = 6;
-	bool	spanish_turn = true;
-	bool	dice_rolled = false;
-};
-
-//-------------------------------------------------------------------------------------------
-eAmericanTreasureGame::eAmericanTreasureGame(eInputController* _input,
-                       std::vector<IWindowImGui*> _externalGui,
-											 const std::string& _modelsPath,
-											 const std::string& _assetsPath,
-											 const std::string& _shadersPath)
-: eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
-, camRay(new dbb::CameraRay())
-, pipeline(new eOpenGlRenderPipeline(width, height))
-, camera(new Camera(width, height, nearPlane, farPlane))
-{
-	_externalGui[0]->Add(SLIDER_FLOAT, "Ydir", &light.light_position.y);
-	_externalGui[0]->Add(SLIDER_FLOAT, "Zdir", &light.light_position.z);
-	_externalGui[0]->Add(SLIDER_FLOAT, "Xdir", &light.light_position.x);
-
-	_externalGui[0]->Add(SLIDER_FLOAT, "camera positoin X", &camera->ViewDirectionRef().x);
-	_externalGui[0]->Add(SLIDER_FLOAT, "camera positoin Y", &camera->ViewDirectionRef().y);
-	_externalGui[0]->Add(SLIDER_FLOAT, "camera positoin Z", &camera->ViewDirectionRef().z);
-	
-	//Light init!
-	light.ambient = vec3(0.3f, 0.3f, 0.3f);
-	light.diffuse = vec3(0.65f, 0.65f, 0.65f);
-	light.specular = vec3(0.5f, 0.5f, 0.5f);
+  return false;
 }
 
-//-------------------------------------------------------------------------------------------
-bool eAmericanTreasureGame::OnKeyPress(uint32_t asci)
+//--------------------------------------------------------------------------
+bool AmericanTreasureGame::OnMousePress(int32_t x, int32_t y, bool left)
 {
-	switch (asci)
-	{
-		//for debuf temp
-	case ASCII_G: { if (focused)	focused->GetScript()->OnKeyPress(ASCII_G); }	return true;
-	default: return false;
-	}
+  if (m_framed)
+    m_framed->clear();
+
+  GetMainCamera().getCameraRay().Update(GetMainCamera(), x, y, static_cast<float>(width), static_cast<float>(height));
+  GetMainCamera().getCameraRay().press(x, y);
+
+  //should be inside input strategy which needs it(frame, moveXZ)
+  GetMainCamera().MovementSpeedRef() = 0.f;
+
+  if (left)
+  {
+    //Get Visible and Children
+    auto [picked, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
+    if (picked != m_focused)
+      ObjectPicked.Occur(picked);
+  }
+
+  if (m_input_strategy)
+    m_input_strategy->OnMousePress(x, y, left);
+
+  return false;
 }
 
-//-------------------------------------------------------------------------------------------
-bool eAmericanTreasureGame::OnMousePress(uint32_t x, uint32_t y, bool left)
+//---------------------------------------------------------------------------------
+bool AmericanTreasureGame::OnMouseRelease()
 {
-	turn_context->CheckAllMoved();
-
-	camRay->Update(*camera, static_cast<float>(x), static_cast<float>(y), static_cast<float>(width), static_cast<float>(height));
-	camRay->press(static_cast<float>(x), static_cast<float>(y));
-	auto clicked = camRay->calculateIntersaction(m_objects).first;
-	
-	if (clicked != nullptr && clicked->Name() == "Terrain")
-		clicked = nullptr;
-
-	for (auto ship : ships)
-	{
-		if (left)
-		{
-			if (ship == clicked && turn_context->CanBeChosen(ship))
-			{
-				focused = std::static_pointer_cast<eShip>(clicked);
-				break;
-			}
-			else if (ship != clicked && ship == ships.back())// left click with no ship
-			{
-				focused = nullptr;
-			}
-		}
-		else //right click
-		{
-			if (ship == clicked && focused && clicked != focused
-				&& ship->IsSpanish() != focused->IsSpanish()
-				&& !focused->HasMoved()
-				&& turn_context->DiceRolled())// right click on other ship try to attack
-			{
-				//unite for loops
-				auto target_hex = std::find_if(hexes.begin(), hexes.end(), [this, ship](const Hex& hex)
-				{
-					return glm::length(ship->GetTransform()->getTranslation() - glm::vec3{ hex.x(), waterHeight, hex.z() }) < (0.5f * 0.57f); //radius
-				});
-				auto focused_hex = std::find_if(hexes.begin(), hexes.end(), [this](const Hex& hex)
-				{
-					return glm::length(focused->GetTransform()->getTranslation() - glm::vec3{ hex.x(), waterHeight, hex.z() }) < (0.5f * 0.57f); //radius
-				});
-				if (target_hex != hexes.end() && focused_hex != hexes.end())
-				{
-					std::vector<Hex*> path = focused_hex->MakePath(&(*target_hex));
-					if (path.size() > 1)
-					{
-						glm::vec3 destination = { path[path.size() - 2]->x(), waterHeight, path[path.size() - 2]->z() };
-						focused->getShipScript()->SetDestination(destination);
-						focused->SetHasMoved(true);
-						focused->getShipScript()->SetShootAfterMove(true);
-						turn_context->ResetDiceRolled();
-					}
-					else if (path.size() == 1)
-					{
-						focused->getShipScript()->Shoot();
-					}
-					turn_context->shooter = focused;
-					turn_context->target  = ship;
-				}
-				else
-				{
-					assert("can not find current hex!");
-				}
-			}
-		}
-	}
-		for (auto& base : bases)
-		{
-			if (base == clicked && focused && !left) // right click on a base
-			{
-				break;
-			}
-		}
-
-		if (focused && !clicked && !left && focused->GetScript()) // right click on water
-		{
-			dbb::plane pl(glm::vec3(1.0f, waterHeight, 1.0f),
-				glm::vec3(0.0f, waterHeight, 0.0f),
-				glm::vec3(0.0f, waterHeight, 1.0f)); // arbitrary triangle on waterHeight plane
-			glm::vec3 target = dbb::intersection(pl, camRay->getLine());
-			for (auto& hex : hexes)
-			{
-				if (hex.IsOn(target.x, target.z) && hex.IsWater(terrain, waterHeight))
-				{
-					auto cur_hex = std::find_if(hexes.begin(), hexes.end(), [this](const Hex& hex) 
-					{ 
-						return glm::length(focused->GetTransform()->getTranslation() - glm::vec3{ hex.x(), waterHeight, hex.z() }) < (0.5f * 0.57f); //radius
-					});
-					if (cur_hex != hexes.end() && turn_context->DiceRolled())
-					{
-						std::vector<Hex*> path = cur_hex->MakePath(&hex);
-						if (!path.empty())
-						{
-							glm::vec3 destination = { path.back()->x(), waterHeight, path.back()->z() };
-							focused->getShipScript()->SetDestination(destination);
-							focused->SetHasMoved(true);
-							turn_context->ResetDiceRolled();
-						}
-					}
-					else
-					{
-						assert("can not find current hex!");
-					}
-				}						
-			}
-		}
-
-	if (focused)
-	{
-		externalGui[0]->Add(SLIDER_FLOAT, "focused positoin X", &focused->GetTransform()->getTranslationRef().x);
-    externalGui[0]->Add(SLIDER_FLOAT, "focused positoin Y", &focused->GetTransform()->getTranslationRef().y);
-    externalGui[0]->Add(SLIDER_FLOAT, "focused positoin Z", &focused->GetTransform()->getTranslationRef().z);
-	}
-	return true;
+  GetMainCamera().getCameraRay().release();
+  if (m_input_strategy)
+    m_input_strategy->OnMouseRelease();
+  //should be inside input strategy which needs it(frame, moveXZ)
+  GetMainCamera().MovementSpeedRef() = 0.05f;
+  return true;
 }
 
-//-------------------------------------------------------------------------------------------
-void eAmericanTreasureGame::InitializePipline()
+//------------------------------------------------------------------------------
+void AmericanTreasureGame::OnFocusedChanged()
 {
-	pipeline->Initialize();
-	pipeline->SwitchSkyBox(false);
 }
 
-//-------------------------------------------------------------------------------------------
-void eAmericanTreasureGame::InitializeBuffers()
+//*********************Initialize**************************************
+//-------------------------------------------------------------------------------
+void AmericanTreasureGame::InitializeSounds()
 {
-	//add posibility to init buffers separately
-	pipeline->InitializeBuffers();
+  //sound->loadListner(GetMainCamera().getPosition().x, GetMainCamera().getPosition().y, GetMainCamera().getPosition().z); //!!!
 }
 
-//-------------------------------------------------------------------------------------------
-void eAmericanTreasureGame::InitializeModels()
+//-------------------------------------------------------------------------------
+void AmericanTreasureGame::InitializePipline()
 {
-	turn_context = std::make_shared<eTurnController>(*this);
-
-	eMainContextBase::InitializeModels();
-
-	//MODELS
-	modelManager->Add("nanosuit", (GLchar*)std::string(modelFolderPath + "nanosuit/nanosuit.obj").c_str());
-
-	//TERRAIN MODEL
-	terrainModel = modelManager->CloneTerrain("simple");
-	terrainModel->initialize(texManager->Find("Tgrass0_d"),
-							 texManager->Find("Tgrass0_d"),
-							 texManager->Find("Tblue"),
-							 texManager->Find("TOcean0_s"));
-	terrain = std::make_shared<eTerrain>(terrainModel.get());
-
-	//BASES
-	std::shared_ptr<eBase> wallCube = std::shared_ptr<eBase>(new eBase(modelManager->Find("wall_cube").get(), new eBaseScript(texManager->Find("TPirate_flag0_s"))));
-	wallCube->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
-	wallCube->GetTransform()->setTranslation(vec3(1.3f, 2.2f, 0.7f));
-	m_objects.push_back(wallCube);
-	bases.push_back(wallCube);
-
-	std::shared_ptr<eBase> wallCube2 = std::shared_ptr<eBase>(new eBase(modelManager->Find("wall_cube").get(), new eBaseScript(texManager->Find("TPirate_flag0_s"))));
-	wallCube2->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
-	wallCube2->GetTransform()->setTranslation(vec3(-0.5f, 2.2f, -0.5f));
-	m_objects.push_back(wallCube2);
-	bases.push_back(wallCube2);
-
-	std::shared_ptr<eBase> brickCube = std::shared_ptr<eBase>(new eBase(modelManager->Find("brick_cube").get(), new eBaseScript(texManager->Find("TSpanishFlag0_s"))));
-	brickCube->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
-	brickCube->GetTransform()->setTranslation(vec3(-1.3f, 2.2f, 3.5f));
-	m_objects.push_back(brickCube);
-	bases.push_back(brickCube);
-
-	std::shared_ptr<eBase> brickCube2 = std::shared_ptr<eBase>(new eBase(modelManager->Find("brick_cube").get(), new eBaseScript(texManager->Find("TSpanishFlag0_s"))));
-	brickCube2->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
-	brickCube2->GetTransform()->setTranslation(vec3(1.5f, 2.2f, 3.5f));
-	m_objects.push_back(brickCube2);
-	bases.push_back(brickCube2);
-
-	std::shared_ptr<eBase> brickCube3 = std::shared_ptr<eBase>(new eBase(modelManager->Find("brick_cube").get(), new eBaseScript(texManager->Find("TSpanishFlag0_s"))));
-	brickCube3->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
-	brickCube3->GetTransform()->setTranslation(vec3(1.5f, 2.2f, -3.0f));
-	m_objects.push_back(brickCube3);
-	bases.push_back(brickCube3);
-
-	std::shared_ptr<eBase> brickCube4 = std::shared_ptr<eBase>(new eBase(modelManager->Find("brick_cube").get(), new eBaseScript(texManager->Find("TSpanishFlag0_s"))));
-	brickCube4->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
-	brickCube4->GetTransform()->setTranslation(vec3(-1.3f, 2.2f, -3.5f));
-	m_objects.push_back(brickCube4);
-	bases.push_back(brickCube4);
-
-	std::shared_ptr<eTerrain> terrain = std::shared_ptr<eTerrain>(new eTerrain(terrainModel.get(), "Terrain"));
-	terrain->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
-	terrain->GetTransform()->setTranslation(vec3(0.0f, 1.8f, 0.0f));
-	m_objects.push_back(terrain);
-
-	//SHIPS @todo shuold be created in factory !
-	//1
-	//need to load listeners for sounds somewhere, sounds should be copied
-	auto* shipScript = new eShipScript(texManager->Find("TSpanishFlag0_s"),
-										*pipeline,
-		                *camera.get(),
-										texManager->Find("Tatlas2"),
-										soundManager->GetSound("shot_sound"),
-										waterHeight);
-
-	std::shared_ptr<eShip> nanosuit = std::make_shared<eShip>(modelManager->Find("nanosuit").get(), shipScript, true, "spanish_1");
-	nanosuit->GetTransform()->setTranslation(vec3(0.0f, 2.0f, 0.0f));
-	nanosuit->GetTransform()->setScale(vec3(0.03f, 0.03f, 0.03f));
-	ships.push_back(nanosuit);
-	m_objects.push_back(nanosuit);
-	
-	//2
-	//@todo need to load listners for sounds somewhere, sounds should be copied !!!
-	auto* shipScript2 = new eShipScript(texManager->Find("TPirate_flag0_s"),
-		*pipeline,
-		*camera.get(),
-		texManager->Find("Tatlas2"),
-		soundManager->GetSound("shot_sound"),
-		waterHeight);
-
-	std::shared_ptr<eShip> nanosuit2 = std::make_shared<eShip>(modelManager->Find("nanosuit").get(), shipScript2, false, "pirat_1");
-	nanosuit2->GetTransform()->setTranslation(vec3(1.0f, 2.0f, 1.0f));
-	nanosuit2->GetTransform()->setScale(vec3(0.03f, 0.03f, 0.03f));
-	ships.push_back(nanosuit2);
-	m_objects.push_back(nanosuit2);
-
-	//3
-	//need to load listeners for sounds somewhere, sounds should be copied
-	auto* shipScript3 = new eShipScript(texManager->Find("TSpanishFlag0_s"),
-		*pipeline,
-		*camera.get(),
-		texManager->Find("Tatlas2"),
-		soundManager->GetSound("shot_sound"),
-		waterHeight);
-
-	std::shared_ptr<eShip> nanosuit3 = std::make_shared<eShip>(modelManager->Find("nanosuit").get(), shipScript3, true, "spanish_2");
-	nanosuit3->GetTransform()->setTranslation(vec3(1.0f, 2.0f, -1.0f));
-	nanosuit3->GetTransform()->setScale(vec3(0.03f, 0.03f, 0.03f));
-	ships.push_back(nanosuit3);
-	m_objects.push_back(nanosuit3);
-
-	//4
-	//need to load listners for sounds somewhere, sounds should be copied
-	auto* shipScript4 = new eShipScript(texManager->Find("TPirate_flag0_s"),
-		*pipeline,
-		*camera.get(),
-		texManager->Find("Tatlas2"),
-		soundManager->GetSound("shot_sound"),
-		waterHeight);
-
-	std::shared_ptr<eShip> nanosuit4 = std::make_shared<eShip>(modelManager->Find("nanosuit").get(), shipScript4, false, "pirat_2");
-	nanosuit4->GetTransform()->setTranslation(vec3(1.0f, 2.0f, 2.0f));
-	nanosuit4->GetTransform()->setScale(vec3(0.03f, 0.03f, 0.03f));
-	ships.push_back(nanosuit4);
-	m_objects.push_back(nanosuit4);
-
-	//Camera Ray
-	camRay->init(static_cast<float>(width), static_cast<float>(height), nearPlane, farPlane);
-
-	inputController->AddObserver(this, STRONG);
-	inputController->AddObserver(camera.get(), WEAK);
-	inputController->AddObserver(camRay.get(), WEAK);
-
-	guis.emplace_back(new GUI(width / 4 * 3, height / 4 * 3, width / 4, height / 4, width, height));
-	guis[0]->setCommand(turn_context);
-	inputController->AddObserver(guis[0].get(), MONOPOLY);
+  eMainContextBase::InitializePipline();
+  pipeline.SwitchSkyBox(false);
+  pipeline.SwitchWater(true);
+  pipeline.GetSkyNoiseOnRef() = false;
+  pipeline.GetKernelOnRef() = false;
+  this->m_use_guizmo = false;
+  // call all the enable pipeline functions
 }
 
-//-------------------------------------------------------------------------------------------
-void eAmericanTreasureGame::InitializeRenders()
+//-----------------------------------------------------------------------------
+void AmericanTreasureGame::InitializeBuffers()
 {
-	_InitializeHexes();
-
-	pipeline->InitializeRenders(*modelManager.get(), *texManager.get(), shadersFolderPath);
-	//texManager.AddTextureBox(pipeline->GetSkyNoiseTexture(), "noise_skybox"); //test
-	pipeline->SetSkyBoxTexture(texManager->Find("TcubeSkyWater2")); //TcubeSkyWater2
+  GetMainLight().type = eLightType::DIRECTION;
+  pipeline.InitializeBuffers(GetMainLight().type == eLightType::POINT);
 }
 
-//-------------------------------------------------------------------------------------------
-void eAmericanTreasureGame::_InitializeHexes()
+//-----------------------------------------------------------------------------
+void AmericanTreasureGame::InitializeModels()
 {
-	float z_move = glm::sin(glm::radians(240.0f)) * Hex::radius;
-	for (int i = -6; i < 6; ++i)
-		for (int j = -5; j < 5; ++j)
-		{
-			hexes.push_back(glm::vec2(glm::cos(glm::radians(0.0f)) * Hex::radius * i,					z_move * 2 * j));
-			hexes.push_back(glm::vec2(glm::cos(glm::radians(60.0f)) * Hex::radius * i * 2 + Hex::radius / 2,  z_move + z_move * 2 * j));
-		}
-	std::vector<glm::vec3> dots;
-	for (auto& hex : hexes)
-	{
-		hex.SetNeighbour(hexes);
-		dots.emplace_back(glm::vec3{ hex.x(), Hex::common_height,  hex.z() });
-		//hex.Debug();
-	}
-	ObjectFactoryBase factory;
-	hex_model = factory.CreateObject(std::make_shared<SimpleModel>(new SimpleGeometryMesh(dots, Hex::radius)), eObject::RenderType::GEOMETRY);
+  eMainContextBase::InitializeModels();
+
+  //MODELS
+  modelManager->Add("ship", (GLchar*)std::string(modelFolderPath + "Cabin_cruise/19291_Cabin_cruise_v2_NEW.obj").c_str());
+
+  std::vector<const Texture*> textures{ texManager->Find("pbr1_basecolor"),
+                                        texManager->Find("pbr1_metallic"),
+                                        texManager->Find("pbr1_normal"),
+                                        texManager->Find("pbr1_roughness") };
+
+  modelManager->Add("sphere_textured", textures /*std::vector<const Texture*>{}*/); // or textures
+  modelManager->Add("sphere_red");//@todo
+
+  //@todo separate init scene member func
+  _InitMainTestSceane();
+
+  //GLOBAL CONTROLLERS
+  m_global_scripts.push_back(std::make_shared<GameController>(this, modelManager.get(), texManager.get(), soundManager.get(), pipeline, GetMainCamera()));
+  m_global_scripts.push_back(std::make_shared<GUIController>(this, this->pipeline, soundManager->GetSound("page_sound")));
+  m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera()));
+
+  m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
 }
 
-//-------------------------------------------------------------------------------------------
-void eAmericanTreasureGame::PaintGL()
+//-------------------------------------------------------------------------
+void AmericanTreasureGame::InitializeRenders()
 {
-	eMainContextBase::PaintGL();
+  eMainContextBase::InitializeRenders();
+  /*pipeline.GetRenderManager().AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f),
+                                                                   texManager->Find("Tatlas2"),
+                                                                   soundManager->GetSound("shot_sound"),
+                                                                   texManager->Find("Tatlas2")->numberofRows));*/
+}
 
-	angle += 0.003f;
-	light.light_position = vec4(sin(angle) * 4.0f, cos(angle) * 4.0f, 0.0f, 1.0f);
-	
-	turn_context->Update();
+//-------------------------------------------------------------------------------
+void AmericanTreasureGame::PaintGL()
+{
+  eMainContextBase::PaintGL();
+}
 
-	guis[0]->SetTexture(*turn_context->GetDiceTexture(), { 0,0 },
-		{ turn_context->GetDiceTexture()->mTextureWidth, turn_context->GetDiceTexture()->mTextureHeight });
-
-	std::vector<shObject> flags;
-	for (auto &ship : ships)
-	{
-		if (ship->GetScript())
-		{
-			ship->GetScript()->Update(m_objects);
-			flags.push_back(ship->GetChildrenObjects()[0]);
-		}
-	}
-
-	for(auto &base : bases)
-		flags.push_back(base->GetChildrenObjects()[0]);
-	
-	std::map<eObject::RenderType, std::vector<shObject>> objects;
-	objects.insert({ eObject::RenderType::PHONG, m_objects });
-	objects.insert({ eObject::RenderType::GEOMETRY, {hex_model} });
-	if(focused)
-		objects.insert({ eObject::RenderType::OUTLINED, std::vector<shObject>{ focused } });
-	else
-		objects.insert({ eObject::RenderType::OUTLINED, std::vector<shObject>{} });
-	objects.insert({ eObject::RenderType::FLAG, flags });
-	pipeline->RenderFrame(objects, *camera.get(), light, guis);
+//----------------------------------------------------
+void AmericanTreasureGame::_InitMainTestSceane()
+{
+  ObjectFactoryBase factory;
+  //light
+  m_light_object = factory.CreateObject(modelManager->Find("white_sphere"), eObject::RenderType::PHONG, "WhiteSphere");
+  m_light_object->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
+  m_light_object->GetTransform()->setTranslation(GetMainLight().light_position);
+  m_objects.push_back(m_light_object);
 }

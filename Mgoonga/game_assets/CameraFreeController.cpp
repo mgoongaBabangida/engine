@@ -15,7 +15,7 @@ CameraFreeController::~CameraFreeController()
 }
 
 //----------------------------------------------------------
-void	CameraFreeController::Update(std::vector<std::shared_ptr<eObject>> _objs)
+void	CameraFreeController::Update(float _tick)
 {
 }
 

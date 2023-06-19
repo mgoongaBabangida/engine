@@ -65,9 +65,11 @@ protected:
 	eObject* object = nullptr;
 public:
 	virtual ~IScript() = default;
-	virtual void																			Update(std::vector<std::shared_ptr<eObject>> objs) = 0;
-	virtual void																			CollisionCallback(const eCollision&)				{}
+	virtual void																			Initialize() {}
+	virtual void																			Update(float _tick) = 0;
+	virtual void																			CollisionCallback(const eCollision&)	{}
 	void																							SetObject(eObject* obj) { object = obj; }
+	const eObject*																		GetScriptObject() const { return object; }
 };
 
 //-----------------------------------------------------------------------------
@@ -289,7 +291,12 @@ public:
 	virtual uint32_t GetFinalImageId() = 0;
 	virtual std::shared_ptr<eObject> GetFocusedObject() = 0; //const ref?
 	virtual std::vector<std::shared_ptr<eObject>> GetObjects() = 0;
+	virtual void AddObject(std::shared_ptr<eObject>) = 0;
+	virtual void SetFocused(std::shared_ptr<eObject>) = 0;
+
 	virtual const Texture* GetTexture(const std::string& _name) const = 0;
+	virtual Light& GetMainLight() = 0;
+
 	virtual glm::mat4 GetMainCameraViewMatrix() = 0;
 	virtual glm::mat4 GetMainCameraProjectionMatrix() = 0;
 

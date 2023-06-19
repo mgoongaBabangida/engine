@@ -61,19 +61,19 @@ Texture eGlBufferContext::GetTexture(eBuffer _buffer)
 {
 	switch (_buffer)
 	{
-	case eBuffer::BUFFER_DEFAULT:		return defaultFBO.GetTexture();
-	case eBuffer::BUFFER_SHADOW:		return depthFBO.GetTexture();
-	case eBuffer::BUFFER_BRIGHT_FILTER: return brightFilterFBO.GetTexture();
-	case eBuffer::BUFFER_GAUSSIAN_ONE:	return gausian1FBO.GetTexture();
-	case eBuffer::BUFFER_GAUSSIAN_TWO:	return gausian2FBO.GetTexture();
-	case eBuffer::BUFFER_REFLECTION:	return reflectionFBO.GetTexture();	
-	case eBuffer::BUFFER_REFRACTION:	return refractionFBO.GetTexture();	
-	case eBuffer::BUFFER_SCREEN:		return screenFBO.GetTexture();
-	case eBuffer::BUFFER_MTS:			return mtsFBO.GetTexture();
-	case eBuffer::BUFFER_DEFFERED:		return gFBO.GetTexture0();
-	case eBuffer::BUFFER_DEFFERED1:		return gFBO.GetTexture1();
-	case eBuffer::BUFFER_DEFFERED2:		return gFBO.GetTexture2();
-	case eBuffer::BUFFER_SQUERE:		return squereFBO.GetTexture();
+		case eBuffer::BUFFER_DEFAULT:		return defaultFBO.GetTexture();
+		case eBuffer::BUFFER_SHADOW:		return depthFBO.GetTexture();
+		case eBuffer::BUFFER_BRIGHT_FILTER: return brightFilterFBO.GetTexture();
+		case eBuffer::BUFFER_GAUSSIAN_ONE:	return gausian1FBO.GetTexture();
+		case eBuffer::BUFFER_GAUSSIAN_TWO:	return gausian2FBO.GetTexture();
+		case eBuffer::BUFFER_REFLECTION:	return reflectionFBO.GetTexture();	
+		case eBuffer::BUFFER_REFRACTION:	return refractionFBO.GetTexture();	
+		case eBuffer::BUFFER_SCREEN:		return screenFBO.GetTexture();
+		case eBuffer::BUFFER_MTS:			return mtsFBO.GetTexture();
+		case eBuffer::BUFFER_DEFFERED:		return gFBO.GetTexture0();
+		case eBuffer::BUFFER_DEFFERED1:		return gFBO.GetTexture1();
+		case eBuffer::BUFFER_DEFFERED2:		return gFBO.GetTexture2();
+		case eBuffer::BUFFER_SQUERE:		return squereFBO.GetTexture();
 	}
 	return Texture();/*?*/
 }

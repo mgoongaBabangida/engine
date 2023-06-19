@@ -12,7 +12,7 @@ public:
   explicit CameraFreeController(Camera&);
   virtual ~CameraFreeController();
 
-  virtual void		Update(std::vector<std::shared_ptr<eObject>> _objs) override;
+  virtual void		Update(float _tick) override;
 
   virtual bool		OnMouseMove(int32_t _x, int32_t _y) override;
   virtual bool		OnKeyPress(uint32_t _asci)			override;

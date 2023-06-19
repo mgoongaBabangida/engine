@@ -27,13 +27,13 @@ GUI::GUI(const GUI& _other)
     , Width(_other.Width)
     , Height(_other.Height)
     , cmd(_other.cmd)
-    , isVisible(_other.isVisible)
+    , m_is_visible(_other.m_is_visible)
 {
 }
 
 bool GUI::OnMousePress(int32_t x, int32_t y, bool left)
 {
-	if(left && isVisible && isPressed(x, y))
+	if(left && m_is_visible && isPressed(x, y))
 	{
 		Perssed();
 		return true;
@@ -43,7 +43,7 @@ bool GUI::OnMousePress(int32_t x, int32_t y, bool left)
 
 bool GUI::OnMouseMove(int32_t _x, int32_t _y)
 {
-	if (isHover(_x, _y) && isVisible)
+	if (isHover(_x, _y) && m_is_visible)
 		return m_take_mouse_moves;
 	else
 		return false;

@@ -26,6 +26,9 @@ public:
 	//Properties
 	bool IsVisible() const { return m_is_visible; }
 	void SetVisible(bool _visible) { m_is_visible = _visible; }
+	bool IsPickable() const { return m_is_pickable; }
+	void SetPickable(bool _pickable) { m_is_pickable = _pickable; }
+
 	RenderType GetRenderType() const { return m_render_type; }
 	void SetRenderType(RenderType _render_type) { m_render_type = _render_type; }
 
@@ -61,6 +64,7 @@ protected:
 	std::vector<std::shared_ptr<eObject>> m_children;
 
 	bool m_is_visible = true;
+	bool m_is_pickable = true;
 	RenderType m_render_type = RenderType::PHONG;
 };
 

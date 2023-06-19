@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "TextureManager.h"
 #include "Texture.h"
-#include <iostream>
 
 #define DEVIL_IMAGE
 #define SDL_IMAGE
@@ -80,9 +79,9 @@ void eTextureManager::LoadAllTextures()
 	
 	text.loadTextureFromFile(folderPath + "heightmap.png");
 	m_Textures.insert(std::pair<std::string, Texture>("Theightmap0_n", text));
-	text.loadTextureFromFile(folderPath + "waterDuDV.png");
+	text.loadTextureFromFile(folderPath + "waterDuDV.png", GL_RGBA, GL_REPEAT);
 	m_Textures.insert(std::pair<std::string, Texture>("TwaterDUDV", text));
-	text.loadTextureFromFile(folderPath + "DUDVwaves.png");//, GL_RGBA, GL_REPEAT
+	text.loadTextureFromFile(folderPath + "DUDVwaves.png", GL_RGBA, GL_REPEAT);
 	m_Textures.insert(std::pair<std::string, Texture>("Twaves0_n", text));
 	text.loadTextureFromFile(folderPath + "heightmap.png");
 	m_Textures.insert(std::pair<std::string, Texture>("Theightmap0_n", text));
@@ -116,6 +115,8 @@ void eTextureManager::LoadAllTextures()
 	m_Textures.insert(std::pair<std::string, Texture>("menu2", text));
 	text.loadTextureFromFile(folderPath + "menu3.png");
 	m_Textures.insert(std::pair<std::string, Texture>("menu3", text));
+	text.loadTextureFromFile(folderPath + "ship_icon.png");
+	m_Textures.insert(std::pair<std::string, Texture>("ship1", text));
 
 	text.loadTextureFromFile(folderPath + "dice1.jpg");
 	m_Textures.insert(std::pair<std::string, Texture>("tex_dice1", text));
@@ -129,10 +130,6 @@ void eTextureManager::LoadAllTextures()
 	m_Textures.insert(std::pair<std::string, Texture>("tex_dice5", text));
 	text.loadTextureFromFile(folderPath + "dice6.png");
 	m_Textures.insert(std::pair<std::string, Texture>("tex_dice6", text));
-	
-	text.loadTextureFromFile(folderPath + "bloom_test.jpg");
-	text.setNumRows(4);
-	m_Textures.insert(std::pair<std::string, Texture>("Tbloom_test", text));
 
 	// Cubemap (Skybox)
 	std::vector<std::string> faces;

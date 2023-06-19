@@ -1,6 +1,5 @@
 #pragma once
 
-#include <base/interfaces.h>
 #include <base/Object.h>
 
 #include "math.h"
@@ -13,7 +12,7 @@ class Camera;
 namespace dbb
 {
 	//------------------------------------------------------------------------------------
-	class DLL_MATH CameraRay : public IInputObserver
+	class DLL_MATH CameraRay
 	{
 	public:
 		CameraRay(float w,float h, float n,float f, float pers_angle);

@@ -20,12 +20,19 @@ subroutine uniform ColorCalculationPtr ColorFunction;
 
 subroutine(ColorCalculationPtr) vec4 TestColor()
 {
-float dist = distance(gl_FragCoord.xy, CursorPos);
-float alpha = texture(alphaMask, TexCoords).a;
-if(dist < 30.0f && alpha > 0.0f)
-	return texture(screenTexture, TexCoords);
-else
-	return texture(screenTexture, TexCoords) * 0.9f;
+	float dist = distance(gl_FragCoord.xy, CursorPos);
+	float alpha = texture(alphaMask, TexCoords).a;
+	if(dist < 30.0f && alpha > 0.0f)
+		return texture(screenTexture, TexCoords);
+	else
+		return texture(screenTexture, TexCoords) * 0.9f;
+}	
+
+subroutine(ColorCalculationPtr) vec4 GreyKernelColor()
+{
+	vec4 col = texture(screenTexture, TexCoords);
+	float average = 0.2126 * col.r + 0.7152 * col.g + 0.0722 * col.b;
+	return vec4(average, average, average, 1.0);
 }
 
 subroutine(ColorCalculationPtr) vec4 DefaultColor()

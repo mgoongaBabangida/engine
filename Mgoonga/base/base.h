@@ -95,20 +95,20 @@ struct ShaderInfo
 	const std::vector<Uniform>& uniforms;
 };
 
-const float PI = 3.14159265359f;
+constexpr float PI = 3.14159265359f;
 
-static const glm::vec3 NONE{ glm::vec3(-100.0f, -100.0f, -100.0f) }; //@todo
+static constexpr glm::vec3 NONE{ glm::vec3(-100.0f, -100.0f, -100.0f) }; //@todo
 
-const glm::vec3 XAXIS		= glm::vec3(1.0f, 0.0f, 0.0f);
-const glm::vec3 YAXIS		= glm::vec3(0.0f, 1.0f, 0.0f);
-const glm::vec3 ZAXIS		= glm::vec3(0.0f, 0.0f, 1.0f);
+constexpr glm::vec3 XAXIS		= glm::vec3(1.0f, 0.0f, 0.0f);
+constexpr glm::vec3 YAXIS		= glm::vec3(0.0f, 1.0f, 0.0f);
+constexpr glm::vec3 ZAXIS		= glm::vec3(0.0f, 0.0f, 1.0f);
 
-const glm::mat4 UNIT_MATRIX = glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+constexpr glm::mat4 UNIT_MATRIX = glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
                                         0.0f, 1.0f, 0.0f, 0.0f,
                                         0.0f, 0.0f, 1.0f, 0.0f,
                                         0.0f, 0.0f, 0.0f, 1.0f);
 
-const int32_t MAX_BONES = 100;
+constexpr int32_t MAX_BONES = 100;
 
 //-------------------------------------------------------
 struct Vertex

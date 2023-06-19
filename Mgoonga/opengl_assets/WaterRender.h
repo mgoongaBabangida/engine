@@ -27,10 +27,13 @@ public:
 	
 	Shader& GetShader() { return waterShader; }
 
+	float& WaveSpeedFactor() { return wave_speed_fator; }
+
 protected:
 	Shader										waterShader;
-	std::unique_ptr<MyModel>	water;
+
 	std::unique_ptr<eObject>	object;
+	MyModel*									water_model = nullptr;
 
 	GLuint						fullTransformationUniformLocation;
 	GLuint						modelToWorldMatrixUniformLocation;
@@ -41,9 +44,7 @@ protected:
 	GLuint						clipPlaneLoc;
 	
 	math::eClock		clock;
-	float						 move_factor	= 0.0f;
-	float						 waterHeight = 2.0f;
-	bool						 incr		= true;
-	std::unique_ptr<Texture> reflection;
-	std::unique_ptr<Texture> refraction;
+	float						move_factor	= 0.0f;
+	float						waterHeight = 2.0f;
+	float						wave_speed_fator = 100'000.0f;
 };

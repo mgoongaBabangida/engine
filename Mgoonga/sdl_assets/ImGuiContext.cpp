@@ -410,8 +410,9 @@ void eWindowImGui::Render()
             material = *(obj->GetModel()->GetMeshes()[mesh_current]->GetMaterial());
           else if (obj->GetModel()->HasMaterial())
             material = *(obj->GetModel()->GetMaterial());
-          else
-            assert(false && "Neither mesh nor model have material!");
+          //@todo terrain has to have material
+          /*else
+            assert(false && "Neither mesh nor model have material!");*/
 
           ImGui::Text("Albedo texture(Diffuse)");
           ImGui::Image((void*)(intptr_t)(material.albedo_texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
@@ -485,6 +486,9 @@ void eWindowImGui::Render()
               current_bone_item = bone_names[0].c_str();
             }
           }
+
+          if (!p_object)
+            return;
 
           // Name
           shObject obj = *p_object;

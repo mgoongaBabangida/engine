@@ -59,7 +59,7 @@ glm::quat Transform::RotationBetweenVectors(glm::vec3 start, glm::vec3 dest)
 			rotationAxis = glm::cross(glm::vec3(1.0f, 0.0f, 0.0f), start);
 
 		rotationAxis = normalize(rotationAxis);
-		return glm::angleAxis(180.0f, rotationAxis);
+		return glm::angleAxis(glm::radians(180.0f), rotationAxis);
 	}
 
 	rotationAxis = cross(start,dest);
@@ -105,22 +105,28 @@ void Transform::billboard(glm::vec3 direction)
 	setRotation(Xrot, Yrot, 0);
 }
 
-bool Transform::turnTo(glm::vec3 dest, float speed) //$todo speed is not used
+bool Transform::turnTo(glm::vec3 dest, float speed) //@todo speed is not used
 {	
 	if (dest == m_translation)
 		return false;
 
 	glm::vec3 target_dir	= glm::normalize(glm::vec3(dest - m_translation) );
 	glm::vec3 cur_directoin = glm::normalize(glm::mat3(glm::toMat4(q_rotation)) * forward);
-	float angle				= glm::dot(cur_directoin, target_dir);
 
-	glm::vec3 asix = glm::cross(cur_directoin, target_dir);
+	float angle			= glm::dot(cur_directoin, target_dir);
+	glm::vec3 asix	= glm::cross(cur_directoin, target_dir);
 
-	if (angle > 0.99f || angle < -1.0f || glm::length(asix) == 0)
+	if (angle > 0.999f || angle < -1.0f)
 		return false;
 	
 	glm::quat rot;
-	if (angle > 0.0f)
+	if (target_dir + cur_directoin == glm::vec3{} || (angle == 1.0f && glm::length(asix) == 0)) // 180 degrees
+	{ 
+		rot = RotationBetweenVectors(cur_directoin, target_dir); //will not be correct if speed is used
+		setRotation(rot * getRotation());
+		return true;
+	}
+	else if (angle > 0.0f)
 		{ rot = glm::toQuat(glm::rotate(UNIT_MATRIX, glm::acos(angle), asix));}
 	else if (angle < 0.0f)
 		{ rot = glm::toQuat(glm::rotate(UNIT_MATRIX, 2 * PI - (glm::acos(angle)), -asix));}

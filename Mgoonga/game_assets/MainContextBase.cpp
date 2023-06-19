@@ -69,6 +69,11 @@ bool eMainContextBase::OnKeyPress(uint32_t _asci)
 			else if (m_gizmo_type == GizmoType::SCALE)
 				m_gizmo_type = GizmoType::TRANSLATE;
 		}
+		case ASCII_L:
+		{
+			m_l_pressed = true;
+			//pipeline.GetDefaultBufferTexture().saveToFile("PrintScreen.png");
+		}
 	return true;
 	default: return false;
 	}
@@ -112,6 +117,10 @@ void eMainContextBase::InitializeGL()
 
   InitializeExternalGui();
 
+	InitializeScripts();
+
+	m_global_clock.start();
+	
 	m_gameState = GameState::LOADED;
 }
 
@@ -120,12 +129,13 @@ void eMainContextBase::PaintGL()
 {
 	if (m_gameState == GameState::LOADED)
 	{
+		float msc = static_cast<float>(m_global_clock.newFrame());
 		std::map<eObject::RenderType, std::vector<shObject>> objects;
 		std::vector<shObject> phong, pbr, flags, bezier, geometry;
 
 		for (auto& script : m_global_scripts)
 		{
-			script->Update(m_objects);
+			script->Update(msc);
 		}
 
 		for (auto& object : m_objects)
@@ -134,7 +144,7 @@ void eMainContextBase::PaintGL()
 				continue;
 
 			if (object->GetScript())
-				object->GetScript()->Update(m_objects);
+				object->GetScript()->Update(msc);
 
 			for (auto& child : object->GetChildrenObjects())
 			{
@@ -182,6 +192,14 @@ void eMainContextBase::PaintGL()
 		objects.insert({ eObject::RenderType::GEOMETRY, geometry });
 
 		pipeline.RenderFrame(objects, GetMainCamera(), GetMainLight(), m_guis);
+
+		if (m_l_pressed)
+		{
+			Texture t;
+			t = pipeline.GetDefaultBufferTexture();
+			t.saveToFile("PrintScreen.png");
+			m_l_pressed = false;
+		}
 	}
 	else if (m_gameState == GameState::LOADING)
 	{
@@ -199,6 +217,34 @@ uint32_t eMainContextBase::GetFinalImageId()
 std::shared_ptr<eObject> eMainContextBase::GetFocusedObject()
 {
 	return m_focused;
+}
+
+//--------------------------------------------------------------------------------
+void eMainContextBase::AddObject(std::shared_ptr<eObject> _object)
+{
+	m_objects.push_back(_object);
+}
+
+//--------------------------------------------------------------------------------
+void eMainContextBase::SetFocused(std::shared_ptr<eObject> _newFocused)
+{
+	auto old_focused = m_focused;
+	m_focused = _newFocused;
+	FocusChanged.Occur(old_focused, _newFocused);
+}
+
+//--------------------------------------------------------------------------------
+void eMainContextBase::SetFocused(const eObject* _newFocused)
+{
+	for (shObject object : m_objects)
+	{
+		if (object.get() == _newFocused)
+		{
+			auto old_focused = m_focused;
+			m_focused = object;
+			FocusChanged.Occur(old_focused, object);
+		}
+	}
 }
 
 //--------------------------------------------------------------------------------
@@ -249,9 +295,21 @@ void eMainContextBase::InitializeTextures()
 {
 	texManager->InitContext(assetsFolderPath);
 	texManager->LoadAllTextures();
+}
 
-	//@todo print screen
-	//pipeline.GetDefaultBufferTexture().saveToFile("PrintScreen");
+//--------------------------------------------------------------------------------
+void eMainContextBase::InitializeScripts()
+{
+	for (auto& script : m_global_scripts)
+	{
+		script->Initialize();
+	}
+	for (auto& object : m_objects)
+	{
+		if(object->GetScript())
+			object->GetScript()->Initialize();
+	}
+	m_input_controller->AddObserver(this, STRONG);
 }
 
 //--------------------------------------------------------------------------------

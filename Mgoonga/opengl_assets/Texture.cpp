@@ -270,35 +270,39 @@ bool Texture::makeRandom1DTexture(unsigned int _size)
 	return true;
 }
 
-bool Texture::generatePerlin(GLuint Width, GLuint Height, bool periodic)
+bool Texture::generatePerlin(GLuint _width, GLuint _height, bool periodic)
 {
-	this->mTextureWidth = Width;
-	this->mTextureHeight = Height;
-	float a = 1.0f; float b = 2.0f;
-	GLubyte *data = new GLubyte[Width*Height * 4];
-	float xFactor = 1.0f / (Width - 1);
-	float yFactor = 1.0f / (Height - 1);
-	mChannels = 4; //octaves
-	for (uint32_t row = 0; row < Height; row++) {
-		for (uint32_t col = 0; col < Width; col++) {  //row?
-			float x = xFactor* col;
+	this->mTextureWidth = _width;
+	this->mTextureHeight = _height;
+	float a = 1.0f;
+	float b = 2.0f;
+	float xFactor = 1.0f / (_width - 1);
+	float yFactor = 1.0f / (_height - 1);
+	this->mChannels = 4; //octaves
+
+	GLubyte *data = new GLubyte[_width * _height * 4];
+	for (uint32_t row = 0; row < _height; row++)
+	{
+		for (uint32_t col = 0; col < _width; col++)  //row?
+		{
+			float x = xFactor * col;
 			float y = yFactor * row;
 			float sum = 0.0f;
 			float freq = a;
 			float scale = b;
-			for (int oct = 0; oct < 4; ++oct) {
+			for (int oct = 0; oct < mChannels; ++oct)
+			{
 				glm::vec2 p(x * freq, y * freq);
 				float val = 0.0f;
-					if(periodic) {
-						val = glm::perlin(p, glm::vec2(freq) ) / scale;
-					}
-					else {
+				if(periodic)
+					val = glm::perlin(p, glm::vec2(freq) ) / scale;
+				else
 					val = glm::perlin(p) / scale;
-					}
+
 				sum += val;
 				float result = (sum + 1.0f) / 2.0f;
 
-				data[((row*Width + col) * 4) + oct] = (GLubyte)(result*255.0f);
+				data[((row * _width + col) * 4) + oct] = (GLubyte)(result * 255.0f);
 				freq *= 2.0f;
 				scale *= b;
 			}

@@ -49,6 +49,7 @@ public:
 
 	virtual ~eMainContextBase();
 
+	Event<std::function<void(shObject)>> ObjectPicked;
 	Event<std::function<void(shObject, shObject)>> FocusChanged;
 	Event<std::function<void(shObject)>> ObjectBeingAddedToScene;
 	Event<std::function<void(shObject)>> ObjectBeingDeletedFromScene;
@@ -64,9 +65,16 @@ public:
 	virtual uint32_t																GetFinalImageId() override;
 	virtual std::shared_ptr<eObject>								GetFocusedObject() override;
 	virtual std::vector<std::shared_ptr<eObject>>		GetObjects() override { return m_objects; }
+	virtual void AddObject(std::shared_ptr<eObject> _object) override;
+	virtual void SetFocused(std::shared_ptr<eObject>) override;
+	void SetFocused(const eObject* _newFocused);
+
 	virtual void AddInputObserver(IInputObserver* _observer, ePriority _priority) override;
 	virtual const Texture* GetTexture(const std::string& _name) const override;
 
+	virtual Light& GetMainLight() override;
+
+	Camera& GetMainCamera();
 	virtual glm::mat4 GetMainCameraViewMatrix() override;
 	virtual glm::mat4 GetMainCameraProjectionMatrix() override;
 	
@@ -88,23 +96,24 @@ protected:
 	virtual void		InitializeRenders();
 	virtual void		InitializeTextures();
 	virtual void		InitializeSounds()  {}
+	virtual void		InitializeScripts();
 	virtual void		InitializeExternalGui();
 	virtual void		Pipeline()			{}
 
 	void						_PreInitModelManager();
-	Light&					GetMainLight();
-	Camera&					GetMainCamera();
 
 	GameState								m_gameState = GameState::UNINITIALIZED;
 
 	eInputController*				m_input_controller;
 	
-	std::string			modelFolderPath;
-	std::string			assetsFolderPath;
-	std::string			shadersFolderPath;
+	std::string							modelFolderPath;
+	std::string							assetsFolderPath;
+	std::string							shadersFolderPath;
 
 	std::vector<Light>					m_lights;
 	std::vector<Camera>					m_cameras;
+
+	math::eClock								m_global_clock;
 
 	shObject																m_focused;
 	std::vector<shObject>										m_objects;
@@ -136,6 +145,7 @@ protected:
 	size_t		height		= 600;
 	float			nearPlane	= 0.1f;
 	float			farPlane	= 20.0f;
+	bool m_l_pressed = false;
 
 	eOpenGlRenderPipeline							pipeline;
 };

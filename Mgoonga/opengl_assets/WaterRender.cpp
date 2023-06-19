@@ -14,8 +14,6 @@ eWaterRender::eWaterRender(std::unique_ptr<MyModel> model,
 													 const Texture*				DUDV,
 													 const std::string&		vertexShaderPath,
 													 const std::string&		fragmentShaderPath)
-	: reflection(new Texture)
-	, refraction(new Texture)
 {
 	waterShader.installShaders(vertexShaderPath.c_str(), fragmentShaderPath.c_str());
 	
@@ -26,16 +24,15 @@ eWaterRender::eWaterRender(std::unique_ptr<MyModel> model,
 	lightPosLoc							= glGetUniformLocation(waterShader.ID(), "lightPosition");
 	lightColorLoc						= glGetUniformLocation(waterShader.ID(), "lightColor");
 
-	water.swap(model);
-	water->setTextureBump(waves);
-	water->setTextureFourth(DUDV);
-	//@todo object not used , model & transform
+	water_model = model.get();
+	model->setTextureBump(waves);
+	model->setTextureFourth(DUDV);
 	object.reset(new eObject);
-	object->SetModel(water.get());
+	object->SetModel(model.release());
 	object->SetTransform(new Transform);
 	object->GetTransform()->setTranslation(glm::vec3(0.0f, waterHeight, 0.0f));
 	object->GetTransform()->setRotation(PI / 2, 0.0f, 0.0f);
-	object->GetTransform()->setScale(glm::vec3(1.18f, 1.8f, 1.0f)); // the size of the pixture
+	object->GetTransform()->setScale(glm::vec3(1.2f, 1.8f, 1.0f)); // the size of the pixture
 
 	clock.start();
 }
@@ -46,19 +43,15 @@ void eWaterRender::Render(const Camera& camera, const Light& light)
 
 	glm::mat4 worldToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
 
-	*reflection = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFLECTION);
-	*refraction = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFRACTION);
-	water->setTextureDiffuse(reflection.get());
-	water->setTextureSpecular(refraction.get());
+	Texture texture_reflection = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFLECTION);
+	Texture texture_refraction = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFRACTION);
+	water_model->setTextureDiffuse(&texture_reflection);
+	water_model->setTextureSpecular(&texture_refraction);
 	
-	//move factor (has to be improved)
 	glUniform1f(WaterFactorLoc, move_factor);
 
 	int msc = clock.newFrame();
-	move_factor += (float)msc / 10000.0f;
-
-	if (move_factor > 0.05f)
-		move_factor = -0.05f;
+	move_factor += (float)msc / wave_speed_fator;
 
 	glUniform3f(CameraPosLoc,	camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
 	glUniform3f(lightPosLoc,	light.light_position.x,	light.light_position.y,	light.light_position.z);// , light.light_position.w);
@@ -73,7 +66,4 @@ void eWaterRender::Render(const Camera& camera, const Light& light)
 
 eWaterRender::~eWaterRender()
 {
-	water.release();
-	reflection->freeTexture();
-	refraction->freeTexture();
 }

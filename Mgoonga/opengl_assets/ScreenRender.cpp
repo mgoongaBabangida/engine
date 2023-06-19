@@ -77,4 +77,9 @@ void eScreenRender::SetRenderingFunction(int32_t _function)
 		GLuint CursorFollowRendering = glGetSubroutineIndex(screenShader.ID(), GL_FRAGMENT_SHADER, "TestColor");
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &CursorFollowRendering);
 	}
+	else if (_function == 2)
+	{
+		GLuint GreyKernelRendering = glGetSubroutineIndex(screenShader.ID(), GL_FRAGMENT_SHADER, "GreyKernelColor");
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &GreyKernelRendering);
+	}
 }

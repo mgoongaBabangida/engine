@@ -202,15 +202,18 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		vector.z = mesh->mNormals[i].z;
 		vertex.Normal = vector;
 
-		vector.x = mesh->mTangents[i].x;
-		vector.y = mesh->mTangents[i].y;
-		vector.z = mesh->mTangents[i].z;
-		vertex.tangent = vector;
+		if (mesh->mTangents != NULL)
+		{
+			vector.x = mesh->mTangents[i].x;
+			vector.y = mesh->mTangents[i].y;
+			vector.z = mesh->mTangents[i].z;
+			vertex.tangent = vector;
 
-		vector.x = mesh->mBitangents[i].x;
-		vector.y = mesh->mBitangents[i].y;
-		vector.z = mesh->mBitangents[i].z;
-		vertex.bitangent = vector;
+			vector.x = mesh->mBitangents[i].x;
+			vector.y = mesh->mBitangents[i].y;
+			vector.z = mesh->mBitangents[i].z;
+			vertex.bitangent = vector;
+		}
 
 		if (mesh->HasTextureCoords(0)) // Does the mesh contain texture coordinates?
 		{
@@ -297,6 +300,7 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		for (GLuint j = 0; j < face.mNumIndices; j++)
 			indices.push_back(face.mIndices[j]);
 	}
+
 	//-----------------------------Process material-------------------------------------------------
 	Material mat;
 	if (mesh->mMaterialIndex >= 0)
@@ -365,8 +369,7 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			//mat. = displacementMaps[0].id;
 		}
 	}
-	std::string n = mesh->mName.C_Str();
-	return AssimpMesh { vertices, indices, textures, mat, mesh->mName.C_Str() };
+	return AssimpMesh { vertices, indices, textures, mat, mesh->mName.C_Str(), mesh->mTangents == NULL };
 }
 
 //-------------------------------------------------------------------------------------------

@@ -15,7 +15,7 @@ public:
   explicit BezierCurveUIController(shObject _bezier_object);
   virtual ~BezierCurveUIController();
 
-  virtual void	Update(std::vector<std::shared_ptr<eObject> > objs) override;
+  virtual void	Update(float _tick) override;
 protected:
   shObject m_bezier_object;
   dbb::Bezier* m_bezier;

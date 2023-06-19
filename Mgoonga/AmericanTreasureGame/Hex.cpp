@@ -1,8 +1,7 @@
 #include "stdafx.h"
 #include "Hex.h"
-#include "ATGameClasses.h"
+
 #include <algorithm>
-#include <iostream>
 
 const float	Hex::common_height = 2.01f;
 const float	Hex::radius = 0.5f;
@@ -24,13 +23,13 @@ bool Hex::IsOn(float x, float z)
 	};*/
 
 	std::vector<glm::vec3> m_dots{
-		glm::vec3(0.866, 0.0, 0.5)  * radius * 0.57f,
-		glm::vec3(0.0, 0.0, 1.0)    * radius * 0.57f,
-		glm::vec3(-0.866, 0.0, 0.5) * radius * 0.57f,
-		glm::vec3(-0.866, 0.0, -0.5)* radius * 0.57f,
-		glm::vec3(0.0, 0.0, -1.0)   * radius * 0.57f,
-		glm::vec3(0.866, 0.0, -0.5) * radius * 0.57f,
-		glm::vec3(0.866, 0.0, 0.5)  * radius * 0.57f
+		glm::vec3(0.866,	0.0,	0.5)	* radius * 0.57f,
+		glm::vec3(0.0,		0.0,	1.0)	* radius * 0.57f,
+		glm::vec3(-0.866, 0.0,	0.5)	* radius * 0.57f,
+		glm::vec3(-0.866, 0.0, -0.5)	* radius * 0.57f,
+		glm::vec3(0.0,		0.0, -1.0)	* radius * 0.57f,
+		glm::vec3(0.866,	0.0, -0.5)	* radius * 0.57f,
+		glm::vec3(0.866,	0.0,	0.5)	* radius * 0.57f
 	};
 
 	for (int i = 0; i < 6; ++i)
@@ -43,29 +42,121 @@ bool Hex::IsOn(float x, float z)
 }
 
 //------------------------------------------------------------------------------------
-bool Hex::IsWater(std::shared_ptr<eTerrain> _terrain, float _waterHeight)
+bool Hex::IsWater(shObject _terrain, float _waterHeight)
 {
-	glm::vec4 hex_transformed = glm::inverse(_terrain->GetTransform()->getModelMatrix()) 
+	glm::vec4 hex_transformed = glm::inverse(_terrain->GetTransform()->getModelMatrix())
 								* glm::vec4{ m_center.x, _waterHeight, m_center.y, 1.0f };
-	return _terrain->getTerrainModel()->GetHeight(hex_transformed.x, hex_transformed.z) < hex_transformed.y;
+	ITerrainModel* terrain_model = dynamic_cast<ITerrainModel*>(_terrain->GetModel());
+	if (!terrain_model)
+		return false;
+	return terrain_model->GetHeight(hex_transformed.x, hex_transformed.z) < hex_transformed.y;
 }
 
 //------------------------------------------------------------------------------------------
-std::vector<Hex*> Hex::MakePath(Hex* _destination)
+std::deque<Hex*> Hex::MakePath(const Hex* _destination, shObject _terrain, float _waterHeight)
 {
-	std::vector<Hex*> path;
+	std::deque<Hex*> path;
 	if (_destination == this)
 		return path;
 	Hex* cur = this;
 	while (cur != _destination)
 	{
-		if		(_destination->m_center.x > cur->m_center.x  && _destination->m_center.y == cur->m_center.y) cur = cur->up;
-		else if (_destination->m_center.x < cur->m_center.x  && _destination->m_center.y == cur->m_center.y) cur = cur->down;
-		else if (_destination->m_center.x >= cur->m_center.x && _destination->m_center.y > cur->m_center.y)	 cur = cur->up_right;
-		else if (_destination->m_center.x >= cur->m_center.x && _destination->m_center.y < cur->m_center.y)	 cur = cur->up_left;
-		else if (_destination->m_center.x < cur->m_center.x  && _destination->m_center.y > cur->m_center.y)	 cur = cur->down_right;
-		else if (_destination->m_center.x < cur->m_center.x  && _destination->m_center.y < cur->m_center.y)	 cur = cur->down_left;
+		if (_destination->m_center.x > cur->m_center.x && _destination->m_center.y == cur->m_center.y)
+		{
+			if (cur->up->IsWater(_terrain, _waterHeight))
+				cur = cur->up;
+			else if (cur->up_right->IsWater(_terrain, _waterHeight))
+				cur = cur->up_right;
+			else if (cur->up_left->IsWater(_terrain, _waterHeight))
+				cur = cur->up_left;
+			else if (cur->down_right->IsWater(_terrain, _waterHeight))
+				cur = cur->down_right;
+			else if (cur->down_left->IsWater(_terrain, _waterHeight))
+				cur = cur->down_left;
+			else if (cur->down->IsWater(_terrain, _waterHeight))
+				cur = cur->down;
+		}
+		else if (_destination->m_center.x < cur->m_center.x && _destination->m_center.y == cur->m_center.y)
+		{
+			if (cur->down->IsWater(_terrain, _waterHeight))
+				cur = cur->down;
+			else if (cur->down_right->IsWater(_terrain, _waterHeight))
+				cur = cur->down_right;
+			else if (cur->down_left->IsWater(_terrain, _waterHeight))
+				cur = cur->down_left;
+			else if (cur->up_right->IsWater(_terrain, _waterHeight))
+				cur = cur->up_right;
+			else if (cur->up_left->IsWater(_terrain, _waterHeight))
+				cur = cur->up_left;
+			else if (cur->up->IsWater(_terrain, _waterHeight))
+				cur = cur->up;
+		}
+		else if (_destination->m_center.x >= cur->m_center.x && _destination->m_center.y > cur->m_center.y)
+		{
+			if (cur->up_right->IsWater(_terrain, _waterHeight))
+				cur = cur->up_right;
+			else if (cur->up->IsWater(_terrain, _waterHeight))
+				cur = cur->up;
+			else if (cur->down_right->IsWater(_terrain, _waterHeight))
+				cur = cur->down_right;
+			else if (cur->up_left->IsWater(_terrain, _waterHeight))
+				cur = cur->up_left;
+			else if (cur->down->IsWater(_terrain, _waterHeight))
+				cur = cur->down;
+			else if (cur->down_left->IsWater(_terrain, _waterHeight))
+				cur = cur->down_left;
+		}
+		else if (_destination->m_center.x >= cur->m_center.x && _destination->m_center.y < cur->m_center.y)
+		{
+			if (cur->up_left->IsWater(_terrain, _waterHeight))
+				cur = cur->up_left;
+			else if (cur->up->IsWater(_terrain, _waterHeight))
+				cur = cur->up;
+			else if (cur->down_left->IsWater(_terrain, _waterHeight))
+				cur = cur->down_left;
+			else if (cur->down->IsWater(_terrain, _waterHeight))
+				cur = cur->down;
+			else if (cur->up_right->IsWater(_terrain, _waterHeight))
+				cur = cur->up_right;
+			else if (cur->down_right->IsWater(_terrain, _waterHeight))
+				cur = cur->down_right;
+		}
+		else if (_destination->m_center.x < cur->m_center.x && _destination->m_center.y > cur->m_center.y)
+		{
+			if (cur->down_right->IsWater(_terrain, _waterHeight))
+				cur = cur->down_right;
+			else if (cur->up_right->IsWater(_terrain, _waterHeight))
+				cur = cur->up_right;
+			else if (cur->down->IsWater(_terrain, _waterHeight))
+				cur = cur->down;
+			else if (cur->down_left->IsWater(_terrain, _waterHeight))
+				cur = cur->down_left;
+			else if (cur->up->IsWater(_terrain, _waterHeight))
+				cur = cur->up;
+			else if (cur->up_left->IsWater(_terrain, _waterHeight))
+				cur = cur->up_left;
+		}
+		else if (_destination->m_center.x < cur->m_center.x && _destination->m_center.y < cur->m_center.y)
+		{
+			if (cur->down_left->IsWater(_terrain, _waterHeight))
+				cur = cur->down_left;
+			else if (cur->down->IsWater(_terrain, _waterHeight))
+				cur = cur->down;
+			else if (cur->up_left->IsWater(_terrain, _waterHeight))
+				cur = cur->up_left;
+			else if (cur->down_right->IsWater(_terrain, _waterHeight))
+				cur = cur->down_right;
+			else if (cur->up->IsWater(_terrain, _waterHeight))
+				cur = cur->up;
+			else if (cur->up_right->IsWater(_terrain, _waterHeight))
+				cur = cur->up_right;
+		}
 		
+		if (path.size() >= 6)
+		{
+			return path; //assert 
+		}
+
 		if (cur)
 			path.push_back(cur);
 		else
@@ -77,18 +168,21 @@ std::vector<Hex*> Hex::MakePath(Hex* _destination)
 //------------------------------------------------------------------------------------------
 void Hex::SetNeighbour(std::vector<Hex>& hexes)
 {
-	std::vector<Hex>::iterator neighbour = std::find_if(hexes.begin(), hexes.end(), [this](Hex& other) { return fabs(other.x() - x() - radius)  < 0.01f
-																											 && fabs(other.z() - (z())) < 0.01f; });
+	std::vector<Hex>::iterator neighbour = std::find_if(hexes.begin(), hexes.end(), [this](Hex& other)
+		{ return fabs(other.x() - x() - radius)  < 0.01f && fabs(other.z() - (z())) < 0.01f; });
+
 	if (neighbour != hexes.end())
 		up = &(*neighbour);
 	
-	neighbour = std::find_if(hexes.begin(), hexes.end(), [this](Hex& other) { return fabs(other.x() - x() + radius) < 0.01f  && fabs(other.z() - (z())) < 0.01f; });
+	neighbour = std::find_if(hexes.begin(), hexes.end(), [this](Hex& other)
+		{ return fabs(other.x() - x() + radius) < 0.01f  && fabs(other.z() - (z())) < 0.01f; });
 	
 	if(neighbour != hexes.end())
 		down = &(*neighbour);
 	
-	neighbour = std::find_if(hexes.begin(), hexes.end(), [this](Hex& other) { return fabs(other.x()  - (x() + glm::cos(glm::radians(60.0f)) * radius)) < 0.01f 
-																				  && fabs(other.z()  - (z() + glm::sin(glm::radians(60.0f)) * radius)) < 0.01f ;});
+	neighbour = std::find_if(hexes.begin(), hexes.end(), [this](Hex& other)
+		{ return fabs(other.x()  - (x() + glm::cos(glm::radians(60.0f)) * radius)) < 0.01f && fabs(other.z()  - (z() + glm::sin(glm::radians(60.0f)) * radius)) < 0.01f ;});
+	
 	if (neighbour != hexes.end())
 		up_right = &(*neighbour);
 
@@ -97,13 +191,15 @@ void Hex::SetNeighbour(std::vector<Hex>& hexes)
 	if (neighbour != hexes.end())
 		down_right = &(*neighbour);
 
-	neighbour = std::find_if(hexes.begin(), hexes.end(), [this](Hex& other) { return fabs(other.x() - (x() + glm::cos(glm::radians(240.0f)) * radius)) < 0.01f
-																				  && fabs(other.z() - (z() + glm::sin(glm::radians(240.0f)) * radius)) < 0.01f; });
+	neighbour = std::find_if(hexes.begin(), hexes.end(), [this](Hex& other)
+		{ return fabs(other.x() - (x() + glm::cos(glm::radians(240.0f)) * radius)) < 0.01f && fabs(other.z() - (z() + glm::sin(glm::radians(240.0f)) * radius)) < 0.01f; });
+	
 	if (neighbour != hexes.end())
 		down_left = &(*neighbour);
 
-	neighbour = std::find_if(hexes.begin(), hexes.end(), [this](Hex& other) { return fabs(other.x() - (x() + glm::cos(glm::radians(300.0f)) * radius)) < 0.01f
-																				  && fabs(other.z() - (z() + glm::sin(glm::radians(300.0f)) * radius)) < 0.01f; });
+	neighbour = std::find_if(hexes.begin(), hexes.end(), [this](Hex& other)
+		{ return fabs(other.x() - (x() + glm::cos(glm::radians(300.0f)) * radius)) < 0.01f && fabs(other.z() - (z() + glm::sin(glm::radians(300.0f)) * radius)) < 0.01f; });
+	
 	if (neighbour != hexes.end())
 		up_left = &(*neighbour);
 }

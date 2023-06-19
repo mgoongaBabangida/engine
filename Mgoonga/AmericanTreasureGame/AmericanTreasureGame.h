@@ -1,67 +1,52 @@
 #ifndef AMERICAN_TREASURE_H
 #define AMERICAN_TREASURE_H
 
-#include <base/Object.h>
+
+#include <base/base.h>
+
+#include <math/Camera.h>
+#include <math/CameraRay.h>
+
+#include <opengl_assets/GUI.h>
+#include <opengl_assets/TerrainModel.h>
 
 #include <game_assets/MainContextBase.h>
+#include <game_assets/InputStrategy.h>
 
-class eOpenGlRenderPipeline;
-class Camera;
-namespace dbb { class CameraRay; }
-class GUI;
-class eShip;
-class eBase;
-class eTerrain;
-class TerrainModel;
-class Hex;
 class IWindowImGui;
-class eTurnController;
 
-//*********************************************************************
-// eAmericanTreasureGame
-//*********************************************************************
-class eAmericanTreasureGame : public eMainContextBase
+//-------------------------------------------------------------------------------
+class AmericanTreasureGame : public eMainContextBase
 {
 public:
-	friend class eTurnController;
+	AmericanTreasureGame(eInputController*,
+		std::vector<IWindowImGui*> _externalGui,
+		const std::string& modelsPath,
+		const std::string& assetsPath,
+		const std::string& shadersPath);
 
-	eAmericanTreasureGame(eInputController*,
-              std::vector<IWindowImGui*> _externalGui,
-						  const std::string& modelsPath,
-						  const std::string& assetsPath,
-						  const std::string& shadersPath);
-	virtual ~eAmericanTreasureGame() = default;
+	virtual ~AmericanTreasureGame();
 
-	virtual bool OnKeyPress(uint32_t asci)	override;
-	virtual	void PaintGL()					        override;
+	virtual void			PaintGL()										    override;
+
+	virtual bool			OnMouseMove(int32_t x, int32_t y)				      override;
+	virtual bool			OnKeyPress(uint32_t asci)						            override;
+	virtual bool			OnMousePress(int32_t x, int32_t y, bool left) override;
+	virtual bool			OnMouseRelease()								                override;
+
+	void OnFocusedChanged();
+	void _InitMainTestSceane();
 
 protected:
-	virtual bool OnMousePress(uint32_t x, uint32_t y, bool left) override;
-	virtual void InitializePipline()		override;
-	virtual void InitializeBuffers()		override;
-	virtual void InitializeModels()			override;
-	virtual void InitializeRenders()		override;
+	virtual void			InitializePipline()								override;
+	virtual void			InitializeBuffers()								override;
+	virtual void			InitializeModels()								override;
+	virtual void			InitializeRenders()								override;
+	virtual void			InitializeSounds()								override;
+	virtual void      InitializeExternalGui()           override;
 
-	void		_InitializeHexes();
+protected:
 
-	std::shared_ptr<eTurnController>	  turn_context;
-	std::vector<std::shared_ptr<eShip>>	ships;
-	std::vector<std::shared_ptr<eBase>>	bases;
-	std::shared_ptr<eShip>				      focused;
-	std::vector<shObject>				        m_objects;
-	std::unique_ptr<TerrainModel>		    terrainModel;
-	std::shared_ptr<eTerrain>			      terrain;
-	shObject														hex_model;
-
-	std::unique_ptr<Camera>				  camera;
-	std::unique_ptr<dbb::CameraRay>	camRay;
-	std::unique_ptr<eOpenGlRenderPipeline>			pipeline;
-	std::vector<std::shared_ptr<GUI>>	guis;
-  std::vector<Hex>					      hexes;
-  Light								            light;
-  float								            waterHeight = 2.0f;
-  float								            angle = 0.0f;
 };
-
 #endif //AMERICAN_TREASURE_H
 

@@ -6,7 +6,7 @@
 #include <math/BoxCollider.h>
 
 //---------------------------------------------------------------------------
-eBaseScript::eBaseScript(Texture* flag_texture)
+eBaseScript::eBaseScript(const Texture* flag_texture)
 	: flag_tex(flag_texture)
 	, flag(new eObject{})
 {
@@ -18,7 +18,7 @@ eBaseScript::~eBaseScript()
 	delete flag;
 }
 
-void eBaseScript::Update(std::vector<std::shared_ptr<eObject>> objs)
+void eBaseScript::Update(float _tick)
 {
 }
 

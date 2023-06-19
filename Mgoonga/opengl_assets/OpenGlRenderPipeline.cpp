@@ -29,7 +29,7 @@
 
 #include <algorithm>
 
-void	eOpenGlRenderPipeline::SetSkyBoxTexture(Texture* _t)
+void	eOpenGlRenderPipeline::SetSkyBoxTexture(const Texture* _t)
 { renderManager->SkyBoxRender()->SetSkyBoxTexture(_t); }
 
 void eOpenGlRenderPipeline::AddParticleSystem(IParticleSystem* _system)
@@ -125,12 +125,12 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	std::vector<shObject> flags = _objects.find(eObject::RenderType::FLAG)->second;
 	std::vector<shObject> geometry_obj = _objects.find(eObject::RenderType::GEOMETRY)->second;
 	std::vector<shObject> bezier_objs = _objects.find(eObject::RenderType::BEZIER_CURVE)->second;
+	auto phong_pbr_objects = phong_objs;
+	phong_pbr_objects.insert(phong_pbr_objects.end(), pbr_objs.begin(), pbr_objs.end());
 
 	//Shadow Render Pass
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SHADOW);
-	auto shadow_objects = phong_objs;
-	shadow_objects.insert(shadow_objects.end(), pbr_objs.begin(), pbr_objs.end());
-	if (shadows) { RenderShadows(_camera, _light, shadow_objects); }
+	if (shadows) { RenderShadows(_camera, _light, phong_pbr_objects); }
 
 	if (_light.type == eLightType::DIRECTION || _light.type == eLightType::SPOT)
 		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW, GL_TEXTURE1);
@@ -148,10 +148,10 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 
 	if (water)
 	{
-		RenderReflection(_camera, _light, phong_objs);
+		RenderReflection(_camera, _light, phong_objs, pbr_objs);
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_REFRACTION);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		RenderRefraction(_camera, _light, phong_objs);
+		RenderRefraction(_camera, _light, phong_objs, pbr_objs);
 	}
   glDisable(GL_CLIP_DISTANCE0);
 
@@ -187,24 +187,28 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 			glStencilMask(0xFF);
 	  }
 	}
+
 	//Render not outlined objects
-	std::vector<shObject> not_outlined;
-	std::set_difference(phong_objs.begin(), phong_objs.end(),
-		                  focused.begin(), focused.end(),
-		                  std::back_inserter(not_outlined),
-		                  [](auto& a, auto& b) { return &a < &b; });
+	{
+		std::vector<shObject> not_outlined;
+		std::set_difference(phong_objs.begin(), phong_objs.end(),
+			focused.begin(), focused.end(),
+			std::back_inserter(not_outlined),
+			[](auto& a, auto& b) { return &a < &b; });
 
-	RenderMain(_camera, _light, not_outlined);
+		RenderMain(_camera, _light, not_outlined);
 
-	not_outlined.clear();
-	std::set_difference(pbr_objs.begin(), pbr_objs.end(),
-		focused.begin(), focused.end(),
-		std::back_inserter(not_outlined),
-		[](auto& a, auto& b) { return &a < &b; });
-	RenderPBR(_camera, _light, not_outlined);
+		not_outlined.clear();
+		std::set_difference(pbr_objs.begin(), pbr_objs.end(),
+			focused.begin(), focused.end(),
+			std::back_inserter(not_outlined),
+			[](auto& a, auto& b) { return &a < &b; });
+
+		RenderPBR(_camera, _light, not_outlined);
+	}
 
 	//Mesh Line
-	renderManager->MeshLineRender()->Render(_camera, _light, phong_objs);
+	renderManager->MeshLineRender()->Render(_camera, _light, phong_pbr_objects);
 
 	//Flags
 	if (flags_on) { RenderFlags(_camera, _light, flags); }
@@ -246,9 +250,9 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	{
 		std::vector<glm::vec3> extrems_total;
 		std::vector<GLuint> indices_total;
-		for (GLuint i = 0; i < phong_objs.size(); i++)
+		for (GLuint i = 0; i < phong_pbr_objects.size(); i++)
 		{
-			std::vector<glm::vec3> extrems = phong_objs[i]->GetCollider()->GetExtrems(*phong_objs[i]->GetTransform());
+			std::vector<glm::vec3> extrems = phong_pbr_objects[i]->GetCollider()->GetExtrems(*phong_pbr_objects[i]->GetTransform());
 			extrems_total.insert(extrems_total.end(), extrems.begin(), extrems.end());
 			indices_total.push_back(0 + i * 8);
 			indices_total.push_back(1 + i * 8);
@@ -391,22 +395,24 @@ void eOpenGlRenderPipeline::RenderSkybox(const Camera& _camera)
   glDepthFunc(GL_LESS);
 }
 
-void eOpenGlRenderPipeline::RenderReflection(Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
+void eOpenGlRenderPipeline::RenderReflection(Camera& _camera, const Light& _light, std::vector<shObject>& _phong_objects, std::vector<shObject>& _pbr_objects)
 {
 	renderManager->MainRender()->SetClipPlane(-waterHeight);
 
 	Camera tem_cam = _camera;
 	_camera.setPosition(glm::vec3(tem_cam.getPosition().x, 2 * (tem_cam.getPosition().y - waterHeight), tem_cam.getPosition().z));
-	_camera.setDirection(glm::reflect(_camera.getDirection(), glm::vec3(0, 1, 0)));//water normal
+	_camera.setDirection(glm::reflect(_camera.getDirection(), glm::vec3(0, 1, 0))); //water normal
 
-	renderManager->MainRender()->Render(_camera, _light, _objects, false, false, true, tone_mapping, exposure);
+	renderManager->MainRender()->Render(_camera, _light, _phong_objects, false, false, true, tone_mapping, exposure);
+	renderManager->PBRRender()->Render(_camera, _light, _pbr_objects);
 	_camera = tem_cam;
 }
 
-void eOpenGlRenderPipeline::RenderRefraction(Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
+void eOpenGlRenderPipeline::RenderRefraction(Camera& _camera, const Light& _light, std::vector<shObject>& _phong_objects, std::vector<shObject>& _pbr_objects)
 {
 	renderManager->MainRender()->SetClipPlane(waterHeight);
-	renderManager->MainRender()->Render(_camera, _light, _objects, false, false, true, tone_mapping, exposure);
+	renderManager->MainRender()->Render(_camera, _light, _phong_objects, false, false, true, tone_mapping, exposure);
+	renderManager->PBRRender()->Render(_camera, _light, _pbr_objects);
 	renderManager->MainRender()->SetClipPlane(10);
 
 	//glDisable(GL_CLIP_DISTANCE0);

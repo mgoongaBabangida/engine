@@ -40,7 +40,7 @@ public:
 													 const std::string& _uniformName,
 													 const UniformData& _data);
 
-	void			SetSkyBoxTexture(Texture* _t);
+	void			SetSkyBoxTexture(const Texture* _t);
 	
 	void AddParticleSystem(IParticleSystem* system);
 	void AddParticleSystemGPU(glm::vec3 _startPos, const Texture* _texture);
@@ -81,8 +81,8 @@ public:
 protected:
 	void			RenderShadows(const Camera&, const Light&, std::vector<shObject>&);
 	void			RenderSkybox(const Camera&);
-	void			RenderReflection(Camera&, const Light&, std::vector<shObject>&);
-	void			RenderRefraction(Camera&, const Light&, std::vector<shObject>&);
+	void			RenderReflection(Camera&, const Light&, std::vector<shObject>&, std::vector<shObject>&);
+	void			RenderRefraction(Camera&, const Light&, std::vector<shObject>&, std::vector<shObject>&);
 	void			RenderSkyNoise(const Camera&);
 	void			RenderMain(const Camera&, const Light&, const std::vector<shObject>&);
 	void			RenderOutlineFocused(const Camera&, const Light&, const std::vector<shObject>&);

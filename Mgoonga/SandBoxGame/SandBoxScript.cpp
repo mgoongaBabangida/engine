@@ -3,8 +3,14 @@
 #include <base/Object.h>
 #include "SandBoxScript.h"
 
-void eSandBoxScript::Update(std::vector<std::shared_ptr<eObject>> objs)
+eSandBoxScript::eSandBoxScript(const IGame* _game)
+	: m_game(_game)
 {
+}
+
+void eSandBoxScript::Update(float _tick)
+{
+	std::vector<std::shared_ptr<eObject>> objs;
 	if(!clock.isActive())
 		clock.start();
 

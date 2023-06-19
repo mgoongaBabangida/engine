@@ -9,9 +9,11 @@
 class eSandBoxScript : public IScript
 {
 public:
-	virtual void	Update(std::vector<std::shared_ptr<eObject>> objs);
+	explicit eSandBoxScript(const IGame*);
+	virtual void	Update(float _tick) override;
 	virtual void	CollisionCallback(const eCollision&);
 protected:
+	const IGame*	m_game;
 	math::eClock	clock;
 	float			g = 0.000098f;//per millisecond
 };

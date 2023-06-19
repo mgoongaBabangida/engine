@@ -14,6 +14,8 @@
 #include <opengl_assets/SoundManager.h>
 #include <game_assets/ModelManagerYAML.h>
 #include <game_assets/AnimationManagerYAML.h>
+//#include <game_assets/GUIController.h>
+#include <game_assets/CameraFreeController.h>
 
 #include <sdl_assets/ImGuiContext.h>
 
@@ -29,12 +31,12 @@ eMgoongaGameContext::eMgoongaGameContext(eInputController*  _input,
 						                             const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
 {
-  FocuseChanged.Subscribe([this](shObject _prev, shObject _new)->void { this->OnFocusedChanged(); });
+  FocusChanged.Subscribe([this](shObject _prev, shObject _new)->void { this->OnFocusedChanged(); });
   
   if (!m_objects.empty())
   {
     m_focused = m_objects[0];
-    FocuseChanged.Occur(shObject{}, m_focused);
+    FocusChanged.Occur(shObject{}, m_focused);
   }
 }
 
@@ -75,7 +77,7 @@ bool eMgoongaGameContext::OnKeyPress(uint32_t asci)
 }
 
 //--------------------------------------------------------------------------
-bool eMgoongaGameContext::OnMouseMove(uint32_t x, uint32_t y)
+bool eMgoongaGameContext::OnMouseMove(int32_t x, int32_t y)
 {
   if (GetMainCamera().getCameraRay().IsPressed())
   {
@@ -90,7 +92,7 @@ bool eMgoongaGameContext::OnMouseMove(uint32_t x, uint32_t y)
 }
 
 //--------------------------------------------------------------------------
-bool eMgoongaGameContext::OnMousePress(uint32_t x, uint32_t y, bool left)
+bool eMgoongaGameContext::OnMousePress(int32_t x, int32_t y, bool left)
 {
   if (m_framed)
     m_framed->clear();
@@ -104,7 +106,7 @@ bool eMgoongaGameContext::OnMousePress(uint32_t x, uint32_t y, bool left)
 
   if (new_focused != m_focused)
   {
-    FocuseChanged.Occur(m_focused, new_focused);
+    FocusChanged.Occur(m_focused, new_focused);
     m_focused = new_focused;
   }
 
@@ -209,21 +211,21 @@ void eMgoongaGameContext::InitializeModels()
   m_guis[2]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight });
 
   m_input_controller->AddObserver(this, WEAK);
-  m_input_controller->AddObserver(&GetMainCamera().getCameraRay(), WEAK);
-  m_input_controller->AddObserver(&GetMainCamera(), WEAK);
   m_input_controller->AddObserver(m_guis[0].get(), MONOPOLY);//monopoly takes only mouse
   m_input_controller->AddObserver(m_guis[1].get(), WEAK);
   m_input_controller->AddObserver(m_guis[2].get(), STRONG);
-  m_input_controller->AddObserver(externalGui[0], MONOPOLY);
-  m_input_controller->AddObserver(externalGui[1], MONOPOLY);
-  m_input_controller->AddObserver(externalGui[2], MONOPOLY);
-  m_input_controller->AddObserver(externalGui[3], MONOPOLY);
+
+  //GLOBAL CONTROLLERS
+  //m_global_scripts.push_back(std::make_shared<GUIController>(this, this->pipeline, soundManager->GetSound("page_sound")));
+  m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera()));
+
+  m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
 }
 
 //-------------------------------------------------------------------------
 void eMgoongaGameContext::InitializeRenders()
 {
-	pipeline.InitializeRenders(*modelManager.get(), *texManager.get(), shadersFolderPath);
+  eMainContextBase::InitializeRenders();
 	/*pipeline.GetRenderManager().AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f),
                                                                    texManager->Find("Tatlas2"),
                                                                    soundManager->GetSound("shot_sound"),
@@ -315,7 +317,8 @@ void eMgoongaGameContext::_InitMainTestSceane()
   nanosuit->GetTransform()->setScale(vec3(0.12f, 0.12f, 0.12f));
   m_objects.push_back(nanosuit);
 
-  nanosuit->SetScript(new eShipScript(texManager->Find("TSpanishFlag0_s"),
+  nanosuit->SetScript(new eShipScript(this,
+                                      texManager->Find("TSpanishFlag0_s"),
                                       pipeline,
                                       GetMainCamera(),
                                       texManager->Find("Tatlas2"),

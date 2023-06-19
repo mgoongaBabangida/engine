@@ -102,5 +102,5 @@ void eColorFBO::BindForReading(GLenum TextureUnit)
 
 Texture eColorFBO::GetTexture()
 {
-	return Texture(m_texture, m_width, m_height);
+	return Texture(m_texture, m_width, m_height, 4);
 }

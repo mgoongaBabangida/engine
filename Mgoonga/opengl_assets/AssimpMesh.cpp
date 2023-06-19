@@ -15,7 +15,8 @@ AssimpMesh::AssimpMesh(vector<Vertex> _vertices,
                        vector<GLuint> _indices,
                        vector<Texture> _textures,
                        const Material _material,
-                       const std::string& _name)
+                       const std::string& _name,
+                       bool _calculate_tangent)
 {
 	this->vertices = _vertices;
 	this->indices = _indices;
@@ -23,6 +24,8 @@ AssimpMesh::AssimpMesh(vector<Vertex> _vertices,
   this->m_material = _material;
   this->name = _name.empty() ? "Default" : _name;
 	this->setupMesh();
+  if(_calculate_tangent)
+    this->calculatedTangent();
 
   if(default_diffuse_mapping.id == Texture::GetDefaultTextureId())
     default_diffuse_mapping.loadTexture1x1(GREY);
@@ -102,6 +105,45 @@ void AssimpMesh::AddTexture(Texture* _texture)
 void AssimpMesh::SetMaterial(const Material& _material)
 {
   m_material = _material;
+}
+
+void AssimpMesh::calculatedTangent()
+{
+  for (int i = 0; i < indices.size(); i += 3)
+  {
+    glm::vec3 pos1 = vertices[indices[i]].Position;
+    glm::vec3 pos2 = vertices[indices[i + 1]].Position;
+    glm::vec3 pos3 = vertices[indices[i + 2]].Position;
+    glm::vec2 uv1 = vertices[indices[i]].TexCoords;
+    glm::vec2 uv2 = vertices[indices[i + 1]].TexCoords;
+    glm::vec2 uv3 = vertices[indices[i + 2]].TexCoords;
+    // calculate tangent/bitangent vectors of both triangles
+    glm::vec3 tangent1, bitangent1;
+    // - triangle 1
+    glm::vec3 edge1 = pos2 - pos1;
+    glm::vec3 edge2 = pos3 - pos1;
+    glm::vec2 deltaUV1 = uv2 - uv1;
+    glm::vec2 deltaUV2 = uv3 - uv1;
+
+    GLfloat f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+    tangent1.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+    tangent1.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+    tangent1.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+    tangent1 = glm::normalize(tangent1);
+
+    bitangent1.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+    bitangent1.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+    bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+    bitangent1 = glm::normalize(bitangent1);
+
+    vertices[indices[i]].tangent = tangent1;
+    vertices[indices[i + 1]].tangent = tangent1;
+    vertices[indices[i + 2]].tangent = tangent1;
+    vertices[indices[i]].bitangent = bitangent1;
+    vertices[indices[i + 1]].bitangent = bitangent1;
+    vertices[indices[i + 2]].bitangent = bitangent1;
+  }
 }
 
 void AssimpMesh::_BindRawTextures()

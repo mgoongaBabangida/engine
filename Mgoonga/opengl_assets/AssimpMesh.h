@@ -13,7 +13,8 @@ public:
              std::vector<GLuint> indices,
              std::vector<Texture> textures,
              const Material material,
-             const std::string& name = "Default");
+             const std::string& name = "Default",
+             bool _calculate_tangent = false);
   virtual ~AssimpMesh();
 
   AssimpMesh(const AssimpMesh&) = delete;
@@ -36,6 +37,8 @@ public:
   virtual bool											HasMaterial() const override { return true; }
   virtual void											SetMaterial(const Material&) override;
   virtual std::optional<Material>		GetMaterial() const override { return m_material; }
+
+  virtual void												calculatedTangent();
 
 protected:
   void _BindRawTextures();

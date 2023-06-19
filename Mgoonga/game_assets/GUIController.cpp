@@ -9,23 +9,16 @@
 #include <opengl_assets/GUI.h>
 #include <opengl_assets/openglrenderpipeline.h>
 
-struct MenuCommand : public ICommand
-{
-	MenuCommand(std::function<void()> _func)
-		:m_func(_func)
-	{}
-	virtual void Execute()
-	{
-		m_func();
-	}
-	std::function<void()> m_func;
-};
-
 //-------------------------------------------------------------
 GUIController::GUIController(eMainContextBase* _game, eOpenGlRenderPipeline& _pipeline, RemSnd* _pageg_sound)
 	: m_game(_game)
 	, m_pipeline(_pipeline)
 	, m_page_sound(_pageg_sound)
+{
+}
+
+//-------------------------------------------------------------
+void GUIController::Initialize()
 {
 	// init gui
 	glm::vec2 menu_size = { 600 , 400 };
@@ -41,12 +34,12 @@ GUIController::GUIController(eMainContextBase* _game, eOpenGlRenderPipeline& _pi
 	m_game->AddInputObserver(menu.get(), MONOPOLY);
 
 	//inverted logic for y-axis makes it confusing
-	m_buttons.push_back(dbb::Rect{glm::vec2{260 + pos_x, 510 - pos_y}, glm::vec2{90, 35}});
-	m_buttons.push_back(dbb::Rect{glm::vec2{260 + pos_x, 450 - pos_y}, glm::vec2{95, 40}});
-	m_buttons.push_back(dbb::Rect{glm::vec2{260 + pos_x, 380 - pos_y}, glm::vec2{90, 35}});
-	m_buttons.push_back(dbb::Rect{glm::vec2{260 + pos_x, 325 - pos_y}, glm::vec2{85, 30}});
+	m_buttons.push_back(dbb::Rect{ glm::vec2{260 + pos_x, 510 - pos_y}, glm::vec2{90, 35} });
+	m_buttons.push_back(dbb::Rect{ glm::vec2{260 + pos_x, 450 - pos_y}, glm::vec2{95, 40} });
+	m_buttons.push_back(dbb::Rect{ glm::vec2{260 + pos_x, 380 - pos_y}, glm::vec2{90, 35} });
+	m_buttons.push_back(dbb::Rect{ glm::vec2{260 + pos_x, 325 - pos_y}, glm::vec2{85, 30} });
 
-	menu->setCommand(std::make_shared<MenuCommand>([this, menu]()
+	menu->setCommand(std::make_shared<GUICommand>([this, menu]()
 		{
 			for (auto& rect : m_buttons)
 			{
@@ -74,7 +67,7 @@ GUIController::~GUIController()
 }
 
 //-------------------------------------------------------------
-void GUIController::Update(std::vector<std::shared_ptr<eObject>> _objs)
+void GUIController::Update(float _tick)
 {
 	if(m_is_menu_active)
 		m_pipeline.get().SetUniformData("class eScreenRender", "CursorPos", glm::vec2(m_cursor_x, m_cursor_y));

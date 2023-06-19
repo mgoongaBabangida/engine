@@ -7,20 +7,21 @@
 
 #include <glm\glm\glm.hpp>
 
+//@todo delete
 //-------------------------------------------------------------------
 class DLL_GAME_ASSETS eBaseScript : public IScript
 {
 public:
-	eBaseScript(Texture* flag_texture);
+	eBaseScript(const Texture* flag_texture);
 	virtual ~eBaseScript();
 
-	virtual void	Update(std::vector<std::shared_ptr<eObject> > objs) override;
+	virtual void	Update(float _tick) override;
 
 protected:
 	Texture*      tex;
 	Texture*      normals;
 	Texture*      height;
-	Texture*		  flag_tex;
+	const Texture*		  flag_tex;
 	glm::vec3		  flag_scale = { 0.01f, 0.01f ,0.01f };
 	eObject*			flag;
 };

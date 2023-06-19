@@ -66,7 +66,7 @@ namespace dbb
 
 		for (auto &obj : objects)
 		{
-			if (!obj->GetCollider())
+			if (!obj->GetCollider() || !obj->IsPickable())
 				continue;
 
 			std::vector<glm::mat3> boundings = obj->GetCollider()->GetBoundingTriangles(*(obj->GetTransform()));

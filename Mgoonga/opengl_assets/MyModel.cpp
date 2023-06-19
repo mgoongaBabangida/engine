@@ -17,7 +17,7 @@ Texture MyModel::default_roughness_mapping = {};
 Texture MyModel::default_emission_mapping = {};
 
 MyModel::MyModel()
-  :m_name("empty")
+  : m_name("empty")
 {}
 
 MyModel::MyModel(std::shared_ptr<MyMesh> m, const std::string& _name, 
@@ -71,6 +71,7 @@ MyModel::MyModel(std::shared_ptr<MyMesh> m, const std::string& _name,
   m_material.emissive_texture_id = default_emission_mapping.id;
 }
 
+//-----------------------------------------------------------------
 MyModel::MyModel(const MyModel& _other) //shallow copy
 	: mesh(_other.mesh)
   , m_material(_other.m_material)

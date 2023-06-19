@@ -5,7 +5,7 @@ namespace dbb
 {
   struct Rect
   {
-    // this is for inverted y  asix(from bottom to top) so its confusing need to improve
+    // this is for inverted y asix(from bottom to top) so its confusing need to improve
     bool IsInside(glm::vec2 _pos)
     {
       if (_pos.x >= m_top_left.x && (_pos.x - m_top_left.x) <= m_size.x

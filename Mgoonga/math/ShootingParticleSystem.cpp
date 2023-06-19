@@ -10,7 +10,7 @@ ShootingParticleSystem::ShootingParticleSystem(float	  _pps,
 												float	  _gravityComplient,
 												float	  _lifeLength,
 												glm::vec3 _systemCenter,
-												Texture*  _texture,
+												const Texture*  _texture,
 												ISound*	  _sound,
 												float	  _duration)
 : ParticleSystem(_pps,_speed, _gravityComplient, _lifeLength,_systemCenter,_texture,_sound, static_cast<int64_t>(_duration))

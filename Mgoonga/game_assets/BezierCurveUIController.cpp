@@ -32,7 +32,7 @@ BezierCurveUIController::~BezierCurveUIController()
 }
 
 //------------------------------------------------------
-void BezierCurveUIController::Update(std::vector<std::shared_ptr<eObject>> objs)
+void BezierCurveUIController::Update(float _tick)
 {
   if (m_bezier)
   {

@@ -5,13 +5,11 @@
 #include <base/interfaces.h>
 #include <base/Object.h>
 
+#include <math/Rect.h>
+
 class eMainContextBase;
 class eOpenGlRenderPipeline;
 class RemSnd;
-namespace dbb
-{
-  struct Rect;
-}
 
 //---------------------------------------------------------
 class DLL_GAME_ASSETS GUIController : public IScript
@@ -20,7 +18,8 @@ public:
   GUIController(eMainContextBase*, eOpenGlRenderPipeline&, RemSnd*);
   virtual ~GUIController();
 
-  virtual void	Update(std::vector<std::shared_ptr<eObject>> _objs) override;
+  virtual void Initialize() override;
+  virtual void	Update(float _tick) override;
   virtual bool OnMouseMove(int32_t _x, int32_t _y) override;
 
 protected:

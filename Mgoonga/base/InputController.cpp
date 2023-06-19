@@ -40,7 +40,7 @@ bool eInputController::OnKeyPress(uint32_t asci)
 		{
 			if(observer->OnKeyPress(asci))
 				return false;
-			taken = false; //do not take keyboard, only mouse
+			taken = false; //do not take keyboard, only mouse ?
 			break;
 		}
 	}
@@ -81,8 +81,11 @@ void eInputController::OnMousePress(uint32_t x, uint32_t y, bool left)
 	{
 		for (auto& observer : observers)
 		{
-			if (observer)
-				observer->OnMousePress(x, y, left);
+			if (observer && observer->OnMousePress(x, y, left))
+			{
+				taken = true;
+				break;
+			}
 		}
 	}
 

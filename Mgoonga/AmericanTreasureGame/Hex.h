@@ -1,7 +1,10 @@
 #pragma once
 
+#include <base/Object.h>
 #include <math/PlaneLine.h>
 #include <math.h>
+
+#include <deque>
 
 class eTerrain;
 
@@ -17,8 +20,8 @@ public:
 	float z() const { return m_center.y; }
 
 	bool IsOn(float x, float z);
-	bool IsWater(std::shared_ptr<eTerrain> terrain, float waterHeight);
-	std::vector<Hex*> MakePath(Hex*);
+	bool IsWater(shObject terrain, float waterHeight);
+	std::deque<Hex*> MakePath(const Hex* _destination, shObject _terrain, float _waterHeight);
 	void SetNeighbour(std::vector<Hex>&);
 	void Debug();
 

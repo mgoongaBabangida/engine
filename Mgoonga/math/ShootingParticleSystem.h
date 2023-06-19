@@ -11,7 +11,7 @@ public:
 						   float	 _gravityComplient,
 						   float	 _lifeLength,
 						   glm::vec3 _systemCenter,
-						   Texture*  _texture,
+						   const Texture*  _texture,
 						   ISound*	 _sound,
 						   float	 _duration = 10000.0f);
 	virtual ~ShootingParticleSystem();
