@@ -334,30 +334,27 @@ void eWindowImGui::Render()
 
           ImGui::Text("Rotation");
           
-         /* auto euler = glm::eulerAngles(obj->GetTransform()->getRotation());
-          std::cout << glm::abs(static_cast<float>(euler.z) - static_cast<float>(g_rotation.z)) << std::endl;
-          */
-          
-          glm::vec3 rot = g_rotation;
+          //prob assign g_rotation only when changing the object
+          glm::vec3 rot = g_rotation = glm::eulerAngles(m_current_object->GetTransform()->getRotation());
           ImGui::PushItemWidth(ImGui::GetWindowWidth());
           if (ImGui::SliderFloat3("", &g_rotation[0], -PI * 2, PI * 2, "%.2f"))
           {
             auto euler = glm::eulerAngles(m_current_object->GetTransform()->getRotation());
             //std::cout << "euler " << euler.x << " " << euler.y<< " " << euler.z << std::endl;
-            //auto xRotation = glm::cross(glm::vec3(obj->GetTransform()->getRotationUpVector()), glm::vec3(obj->GetTransform()->getRotationVector()));
-            auto xRotation = glm::vec3(1.0f, 0.0f, 0.0f);
+            auto xRotation = glm::cross(glm::vec3(m_current_object->GetTransform()->getRotationUpVector()),
+              glm::vec3(m_current_object->GetTransform()->getRotationVector()));
             float angleX = static_cast<float>(g_rotation[0]) - static_cast<float>(rot[0]);
             glm::quat rotX = glm::angleAxis(angleX, xRotation);
             
-            auto yRotation = glm::vec3(0.0f, 1.0f, 0.0f); //glm::vec3(obj->GetTransform()->getRotationUpVector())
+            auto yRotation = glm::vec3(m_current_object->GetTransform()->getRotationUpVector());
             float angleY = static_cast<float>(g_rotation[1]) - static_cast<float>(rot[1]);
             glm::quat rotY = glm::angleAxis(angleY, yRotation);
             
-            auto zRotation = glm::vec3(0.0f, 0.0f, 1.0f); //lm::vec3(obj->GetTransform()->getRotationVector())
+            auto zRotation = glm::vec3(m_current_object->GetTransform()->getRotationVector());
             float angleZ = static_cast<float>(g_rotation[2]) - static_cast<float>(rot[2]);
             glm::quat rotZ = glm::angleAxis(angleZ, zRotation);
 
-            m_current_object->GetTransform()->setRotation(rotX * rotY * rotZ* m_current_object->GetTransform()->getRotation());
+            m_current_object->GetTransform()->setRotation(rotX * rotY * rotZ * m_current_object->GetTransform()->getRotation());
           }
 
           ImGui::Text("");
@@ -727,6 +724,23 @@ void eWindowImGui::Render()
           console_callback = *(reinterpret_cast<std::function<void(const std::string&)>*>(std::get<2>(item)));
           console_callback(result);
         }
+      }
+      break;
+      case PARTICLE_SYSTEM:
+      {
+        std::unique_ptr<IParticleSystem>* p_psystem = static_cast<std::unique_ptr<IParticleSystem>*>(std::get<2>(item));
+        ImGui::SliderFloat("Cone Angle", &p_psystem->get()->ConeAngle(), 0.0f, 2.0f);
+        ImGui::SliderFloat("Speed", &p_psystem->get()->Speed(), 0.0f, 1.0f);
+        ImGui::SliderFloat("Base Radius", &p_psystem->get()->BaseRadius(), 0.0f, 1.0f);
+        float scale = p_psystem->get()->Scale().x;
+        if(ImGui::SliderFloat("Size", &scale, 0.0f, 1.0f))
+        {
+          p_psystem->get()->Scale() = glm::vec3{ scale ,scale ,scale };
+        }
+        ImGui::SliderFloat("Life Length", &p_psystem->get()->LifeLength(), 1.0f, 100.0f);
+        ImGui::SliderInt("Particles Per Second", &p_psystem->get()->ParticlesPerSecond(), 1, 100);
+        ImGui::SliderFloat("Gravity", &p_psystem->get()->Gravity(), 0.0f, 10.0f);
+        ImGui::Checkbox("Loop", & p_psystem->get()->Loop());
       }
       break;
     }

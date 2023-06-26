@@ -24,7 +24,7 @@ eBezierRender* eRenderManager::BezierRender() { return m_bezierRender.get(); }
 eMeshLineRender* eRenderManager::MeshLineRender(){ return m_meshlineRender.get(); }
 
 //----------------------------------------------------------------------------------------------------------------
-void eRenderManager::AddParticleSystem(IParticleSystem* system) 
+void eRenderManager::AddParticleSystem(std::shared_ptr<IParticleSystem> system)
 {
 	m_particleRender->AddParticleSystem(system);
 }

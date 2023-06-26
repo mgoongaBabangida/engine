@@ -32,7 +32,7 @@
 void	eOpenGlRenderPipeline::SetSkyBoxTexture(const Texture* _t)
 { renderManager->SkyBoxRender()->SetSkyBoxTexture(_t); }
 
-void eOpenGlRenderPipeline::AddParticleSystem(IParticleSystem* _system)
+void eOpenGlRenderPipeline::AddParticleSystem(std::shared_ptr<IParticleSystem> _system)
 {
 	renderManager->AddParticleSystem(_system);
 }

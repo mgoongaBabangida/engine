@@ -5,6 +5,7 @@
 #include "SceneSerializer.h"
 #include "ModelManagerYAML.h"
 #include "AnimationManagerYAML.h"
+#include "ParticleSystemToolController.h"
 
 #include <base/InputController.h>
 #include <tcp_lib/Network.h>
@@ -347,10 +348,12 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[1]->Add(SLIDER_FLOAT, "Blur coefficients", &pipeline.GetBlurCoefRef());
 	std::function<void()> emit_partilces_callback = [this]()
 	{
-		pipeline.AddParticleSystem(new ParticleSystem(50, 0, 0, 10000, glm::vec3(0.0f, 3.0f, -2.5f),
-			texManager->Find("Tatlas2"),
-			soundManager->GetSound("shot_sound"),
-			texManager->Find("Tatlas2")->numberofRows));
+		auto sys = std::make_shared<ParticleSystem>(50, 0, 0, 10000, glm::vec3(0.0f, 3.0f, -2.5f),
+																								texManager->Find("Tatlas2"),
+																								soundManager->GetSound("shot_sound"),
+																								texManager->Find("Tatlas2")->numberofRows);
+		sys->Start();
+		pipeline.AddParticleSystem(sys);
 	};
 	std::function<void()> emit_partilces_gpu_callback = [this]()
 	{
@@ -462,6 +465,8 @@ void eMainContextBase::InitializeExternalGui()
 			pipeline.SetUniformData(res[0] + " " + res[1], res[2], glm::vec3(std::stof(res[3]), std::stof(res[4]), std::stof(res[5])));
 	};
 	externalGui[9]->Add(CONSOLE, "Console", reinterpret_cast<void*>(&console_plane_callbaack));
+
+	m_global_scripts.push_back(std::make_shared<ParticleSystemToolController>(externalGui[10], texManager.get(), soundManager.get(), pipeline));
 }
 
 //------------------------------------------------------------

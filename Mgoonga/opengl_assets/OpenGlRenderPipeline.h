@@ -42,7 +42,7 @@ public:
 
 	void			SetSkyBoxTexture(const Texture* _t);
 	
-	void AddParticleSystem(IParticleSystem* system);
+	void AddParticleSystem(std::shared_ptr<IParticleSystem> system);
 	void AddParticleSystemGPU(glm::vec3 _startPos, const Texture* _texture);
 
 	void			SwitchSkyBox(bool on) { skybox = on; }

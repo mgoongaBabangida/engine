@@ -36,6 +36,7 @@ dbGLWindowSDL::dbGLWindowSDL(const IGameFactory& _factory)
 	guiWnd.push_back(new eWindowImGui("Object Material"));//7
 	guiWnd.push_back(new eWindowImGui("Object Rigger"));//8
 	guiWnd.push_back(new eWindowImGui("Console"));//9
+	guiWnd.push_back(new eWindowImGui("Particle System Tool"));//10
 
   on_close = std::function<void()>{ [this](){this->Close(); } };
   guiWnd[4]->Add(MENU, "Close", reinterpret_cast<void*>(&on_close));

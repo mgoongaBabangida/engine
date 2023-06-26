@@ -5,37 +5,47 @@
 
 namespace math {
 
-	Timer::Timer(std::function<bool()> c) :callable(c)
+	Timer::Timer(std::function<bool()> c) :callable(c), active(false)
 	{
 
 	}
 
 	bool Timer::start(unsigned int period)
 	{
-		active = true;
-		clock.start();
-		std::function<bool()> func = [this, period]()->bool {
-			while (active)
-			{
-				if (clock.timeEllapsedLastFrameMsc() >= period)
+		bool fls = false;
+		if (!active.compare_exchange_weak(fls, true))
+		{
+			return false;
+		}
+		else
+		{
+			clock.start();
+			std::function<bool()> func = [this, period]()->bool {
+				while (active)
 				{
-					this->callable();
-					this->clock.newFrame();
+					if (clock.timeEllapsedLastFrameMsc() >= period)
+					{
+						this->callable();
+						this->clock.newFrame();
+					}
 				}
-			}
-			return true;
-		};
+				return true;
+			};
 
-		fut = std::async(func);
-		return true;
+			fut = std::async(func);
+			return true;
+		}
 	}
 
 	bool Timer::stop()
 	{
-		if (active)
+		bool is_true = true;
+		if (active.compare_exchange_strong(is_true, false))
 		{
-			active = false;
-			fut.get();
+			if(fut.valid())
+				fut.get();
+			else
+				return false;
 			return true;
 		}
 		return false;

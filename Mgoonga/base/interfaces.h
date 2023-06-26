@@ -29,25 +29,32 @@ public:
 class IParticleSystem
 {
 public:
-	IParticleSystem(const Texture* t, float s) 
-		: texture(t), 
-		  scale(s, s, s) {}
+	IParticleSystem(const Texture* t)
+		: texture(t) {}
 	virtual ~IParticleSystem() {}
 
 	static const int MAX_PARTICLES = 1000;
 
+	virtual void								            Start() = 0;
 	virtual void														GenerateParticles()			= 0;
 	virtual std::vector<Particle>::iterator PrepareParticles(glm::vec3 cameraPosition)	= 0;
 	virtual std::vector<Particle>&					GetParticles()	= 0;
 	virtual bool														IsFinished()		= 0;
 	
+	virtual float& ConeAngle() = 0;
+	virtual glm::vec3& Scale()	= 0;
+	virtual float& Speed() = 0;
+	virtual float& BaseRadius() = 0;
+	virtual float& LifeLength() = 0;
+	virtual int& ParticlesPerSecond() = 0;
+	virtual bool& Loop() = 0;
+	virtual float& Gravity() = 0;
+
 	//@todo improve
-	glm::vec3								Scale()				{ return scale; }
 	const Texture*					GetTexture() const	{ return texture; }
 
 protected:
 	const Texture*					texture;
-	glm::vec3								scale;
 };
 
 //----------------------------------------------------------------------------------------------

@@ -53,7 +53,8 @@ enum TypeImGui
 	MENU_OPEN,
 	MENU_OPEN_SCENE,
 	MENU_SAVE_SCENE,
-	CONSOLE
+	CONSOLE,
+	PARTICLE_SYSTEM
 };
 
 //--------------------------------------------------
@@ -80,8 +81,8 @@ class eWindowImGui : public IWindowImGui
 	using eItem = std::tuple<std::string, TypeImGui, void*>;
 public:
   explicit eWindowImGui(const std::string& _name);
-	void SetViewportOffset(float x_offset, float y_offset);
-	void SetWindowOffset(float x_offset, float y_offset);
+	virtual void SetViewportOffset(float x_offset, float y_offset) override;
+	virtual void SetWindowOffset(float x_offset, float y_offset) override;
 	
 	virtual void Render()	override;
 	virtual void Add(TypeImGui, const std::string& name, void*) override;

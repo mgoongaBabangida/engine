@@ -2,7 +2,7 @@
 #include "ShipScript.h"
 #include <base/base.h>
 
-#include <math/ShootingParticleSystem.h>
+#include <math/ParticleSystem.h>
 #include <math/BoxCollider.h>
 #include <math/RigidBdy.h>
 
@@ -121,12 +121,13 @@ void eShipScript::Shoot()
 {
 	glm::vec4 modelCenter	=	object->GetTransform()->getModelMatrix() 
 								* glm::vec4(object->GetCollider()->GetCenter(), 1.0f);
-	IParticleSystem* system = new ShootingParticleSystem(10, 0, 0, 10000,
+	std::shared_ptr<IParticleSystem> system = std::make_shared<ParticleSystem>(10, 0, 0, 10000,
 														modelCenter + object->GetTransform()->getRotationVector() * 0.2f, // ask hexes
-														shoot_tex, 
+														shoot_tex,
 														shoot_snd,
 														10000);
 	//@todo no connection to rendering. Add pt sys in different way
+	system->Start();
 	pipeline.get().AddParticleSystem(system);
 	shoot_after_move = false;
 }

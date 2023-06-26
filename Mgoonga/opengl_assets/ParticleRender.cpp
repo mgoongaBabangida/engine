@@ -52,6 +52,9 @@ void eParticleRender::Render(const Camera& _camera)
 	int info = 0;
 	for(auto& system : systems)
 	{
+		if (system->IsFinished())
+			continue;
+
 		object->GetTransform()->billboard(_camera.getDirection());
 		object->GetTransform()->setScale(system->Scale());
 
@@ -65,6 +68,7 @@ void eParticleRender::Render(const Camera& _camera)
 			{
 				instances++;
 				object->GetTransform()->setTranslation(iter->getPosition());
+				//@todo scale should be individual as well
 				glm::mat4 modelViewMatrix = _camera.getWorldToViewMatrix() * object->GetTransform()->getModelMatrix();
 				
 				for (int i = 0; i < 4; ++i) {
@@ -93,14 +97,14 @@ void eParticleRender::Render(const Camera& _camera)
 		++info;
 	}
 
-	auto toRemove = std::remove_if(systems.begin(), systems.end(),[](std::shared_ptr<IParticleSystem> sys) {return sys->IsFinished();});
+	auto toRemove = std::remove_if(systems.begin(), systems.end(),[](std::shared_ptr<IParticleSystem> sys) { return sys->IsFinished();});
 	if(toRemove != systems.end())
 	{
 		systems.erase(toRemove);
 	}
 }
 
-void eParticleRender::AddParticleSystem(IParticleSystem* sys)
+void eParticleRender::AddParticleSystem(std::shared_ptr<IParticleSystem> _sys)
 {
-	systems.push_back(std::shared_ptr<IParticleSystem>(sys));
+	systems.push_back(_sys);
 }

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ParticleSystem.h"
+#include "Random.h"
 #include <base/base.h>
 
 #include <algorithm>
@@ -16,24 +17,38 @@ ParticleSystem::ParticleSystem(float	 _pps,
 															 ISound*	 _sound,
 															 size_t	 _num_rows_in_texture,
 															 float	 _duration)
-: IParticleSystem(_texture, 0.05f)
-, duration(_duration)
+: IParticleSystem(_texture)
+, m_duration(_duration)
 , m_pps(static_cast<uint32_t>(_pps))
 , m_speed(_speed)
-, m_gravityComplient(_gravityComplient)
-, m_lifeLength(_lifeLength)
-, systemCenter(_systemCenter)
+, m_scale(0.05f, 0.05f, 0.05f)
+, m_gravity_complient(_gravityComplient)
+, m_life_length(_lifeLength / 1000)
+, m_system_center(_systemCenter)
 , sound(_sound)
 , num_rows_in_texture(_num_rows_in_texture)
 , m_particles(MAX_PARTICLES, Particle{})
 {
   m_particles.resize(MAX_PARTICLES);
-	clock.start();
+}
 
-	if(sound)
+//--------------------------------------------------------------------------------------
+ParticleSystem::~ParticleSystem()
+{
+	if (timer)
+		timer->stop();
+}
+
+//-------------------------------------------------------------------------
+void ParticleSystem::Start()
+{
+	timer.reset(new math::Timer([this]()->bool {this->Update(); return true; }));
+
+	clock.restart();
+
+	if (sound)
 		sound->Play();
 
-	timer.reset(new math::Timer([this]()->bool {this->Update(); return true; }));
 	timer->start(100);
 	srand(time(0));
 }
@@ -41,7 +56,7 @@ ParticleSystem::ParticleSystem(float	 _pps,
 //-------------------------------------------------------------------------
 void ParticleSystem::GenerateParticles()
 {
-	if(clock.timeEllapsedMsc() < duration)
+	if(clock.timeEllapsedMsc() < m_duration || m_loop)
 	{
 		int64_t msc = clock.newFrame();
 		float new_particles = (float)msc / 1000.0f * (float)m_pps;
@@ -61,33 +76,51 @@ void ParticleSystem::GenerateParticles()
 void ParticleSystem::emitParticles()
 {
 	glm::vec3 dir = _calculateParticles();
+	glm::vec3 origin = m_system_center;
+	if (m_base_radius > 0.0f)
+	{
+		origin.x = origin.x + math::Random::RandomFloat(-m_base_radius, m_base_radius);
+		origin.z = origin.z + math::Random::RandomFloat(-m_base_radius, m_base_radius);
+	}
 
 	if (cur_particles < MAX_PARTICLES)
 	{
-		m_particles[cur_particles].reset(systemCenter, dir, 0, m_lifeLength, 0, 0, static_cast<uint32_t>(num_rows_in_texture));
+		m_particles[cur_particles].reset(origin, dir, m_gravity_complient, m_life_length * 1000, 0, 0, static_cast<uint32_t>(num_rows_in_texture));
 		++cur_particles;
 	}
-	else 
+	else
 	{
 		auto prt = std::find_if(m_particles.begin(), m_particles.end(), [](Particle& pt) {return !pt.isAlive(); });
 		if (prt != m_particles.end())
-			prt->reset(systemCenter, dir, 0, m_lifeLength, 0, 0, static_cast<uint32_t>(num_rows_in_texture));
+			prt->reset(origin, dir, m_gravity_complient, m_life_length * 1000, 0, 0, static_cast<uint32_t>(num_rows_in_texture));
 	}
 }
 
 //--------------------------------------------------------------------------------------
 glm::vec3 ParticleSystem::_calculateParticles()
 {
-	glm::vec3 dir(0.0);
-	float theta, phi;
-	float angle = ((float)(1 + rand() % 100)) / 100;
-	theta = glm::mix(0.0f, PI / 6.0f, angle);
-	phi = glm::mix(0.0f, PI * 2, angle);
-	dir.x = (sinf(theta)*cosf(phi)) / 50;// (30 + (1 + rand() % 20));
-	dir.y = (cosf(theta)) / 50;// (30 + (1 + rand() % 20));
-	dir.z = (sinf(theta) * sinf(phi)) / 50;// (30 + (1 + rand() % 20));
+	if (m_type == CONE)
+	{
+		float theta = glm::mix(0.0f, m_cone_angle,	math::Random::RandomFloat(0.0f, 1.0f));
+		float phi = glm::mix(0.0f, PI * 2.0f,				math::Random::RandomFloat(0.0f, 1.0f));
 
-	return dir;
+		glm::vec3 dir(0.0);
+		dir.x = (sinf(theta) * cosf(phi)) * m_speed;	// (30 + (1 + rand() % 20));
+		dir.y = (cosf(theta))							* m_speed;	// (30 + (1 + rand() % 20));
+		dir.z = (sinf(theta) * sinf(phi)) * m_speed;	// (30 + (1 + rand() % 20));
+		return dir;
+	}
+	else if (m_type == SPHERE) //@todo also use speed
+	{
+		glm::vec3 dir(
+			math::Random::RandomFloat(0.0f, 1.0f) * 2.0f - 1.0f,
+			math::Random::RandomFloat(0.0f, 1.0f) * 2.0f - 1.0f,
+			math::Random::RandomFloat(0.0f, 1.0f) * 2.0f - 1.0f
+		);
+		return glm::normalize(dir) / math::Random::RandomFloat(300.0f, 600.0f);
+	}
+	assert("ParticleSystem::_calculateParticles");
+	return {};
 }
 
 //-----------------------------------------------------------------------------------
@@ -109,13 +142,10 @@ std::vector<Particle>::iterator ParticleSystem::PrepareParticles(glm::vec3 _came
 //---------------------------------------------------------------------------------------
 bool ParticleSystem::IsFinished()
 {
-	return clock.timeEllapsedMsc() > duration + m_lifeLength;
-}
-
-//--------------------------------------------------------------------------------------
-ParticleSystem::~ParticleSystem()
-{
-	timer->stop();
+	if (!m_loop)
+		return clock.timeEllapsedMsc() > m_duration + (m_life_length * 1000);
+	else
+		return false;
 }
 
 //-------------------------------------------------------------------------------------

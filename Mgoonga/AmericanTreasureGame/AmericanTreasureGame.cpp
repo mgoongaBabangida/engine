@@ -4,7 +4,7 @@
 
 #include <base/InputController.h>
 
-#include <math/ShootingParticleSystem.h>
+#include <math/ParticleSystem.h>
 #include <math/Rigger.h>
 #include <math/RigidBdy.h>
 #include <math/BoxCollider.h>

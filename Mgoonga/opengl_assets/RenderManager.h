@@ -1,7 +1,5 @@
 #pragma once
 
-#include <math/ShootingParticleSystem.h> //@todo separate particle system base
-
 #include "opengl_assets.h"
 
 #include "ModelManager.h"
@@ -45,7 +43,7 @@ public:
 																								 const std::string& _uniformName,
 																								 const UniformData& _data);
 
-	void				AddParticleSystem(IParticleSystem* system);
+	void				AddParticleSystem(std::shared_ptr<IParticleSystem> system);
 	void				AddParticleSystemGPU(glm::vec3 _startPos, const Texture* _texture);
 
 private:

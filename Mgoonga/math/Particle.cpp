@@ -26,14 +26,12 @@ void Particle::setTextureOffset(glm::vec2& offset, int index)
 //----------------------------------------------------------------
 bool Particle::Update()
 {
+	//@todo update scale, speed and other over lifetime with formula
 	// if not timer should be different
 	m_velocity.y += GRAVITY * m_gravityEffect;//  *(m_elapsedTime / 10); //el time 0-5
 	m_position += m_velocity;
-	m_elapsedTime += speed;
+	m_elapsedTime += speed; // @todo speed is fixed for update call
 
 	updateTextureCoordInfo();
-	alive = m_elapsedTime < m_lifelength;
-	/*if (!alive)
-		m_position =glm::vec3(1000, -1000,1000);*/
-	return alive;
+	return m_elapsedTime < m_lifelength;
 }

@@ -23,7 +23,7 @@ public:
 	~eParticleRender();
 
 	void	Render(const Camera &camera);
-	void	AddParticleSystem(IParticleSystem* sys);
+	void	AddParticleSystem(std::shared_ptr<IParticleSystem> sys);
 
 	Shader& GetShader() { return particleShader; }
 
