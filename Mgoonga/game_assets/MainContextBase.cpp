@@ -342,10 +342,12 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[1]->Add(CHECKBOX, "Kernel", &pipeline.GetKernelOnRef());
 	externalGui[1]->Add(CHECKBOX, "Sky noise", &pipeline.GetSkyNoiseOnRef());
 	externalGui[1]->Add(CHECKBOX, "Use gizmo", &m_use_guizmo);
+	externalGui[1]->Add(CHECKBOX, "Outline focused", &pipeline.GetOutlineFocusedRef());
 	externalGui[1]->Add(CHECKBOX, "Gamma Correction", &pipeline.GetGammaCorrectionRef());
 	externalGui[1]->Add(CHECKBOX, "Gamma Tone Mapping", &pipeline.GetToneMappingRef());
 	externalGui[1]->Add(SLIDER_FLOAT, "Gamma Exposure", &pipeline.GetExposureRef());
 	externalGui[1]->Add(SLIDER_FLOAT, "Blur coefficients", &pipeline.GetBlurCoefRef());
+	
 	std::function<void()> emit_partilces_callback = [this]()
 	{
 		auto sys = std::make_shared<ParticleSystem>(50, 0, 0, 10000, glm::vec3(0.0f, 3.0f, -2.5f),

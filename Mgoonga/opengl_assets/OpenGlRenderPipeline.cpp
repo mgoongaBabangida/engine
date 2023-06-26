@@ -5,27 +5,10 @@
 #include "GUI.h"
 
 #include "GlBufferContext.h"
+
 #include "RenderManager.h"
 #include "TextureManager.h"
 #include "ModelManager.h"
-#include "RenderManager.h"
-
-#include "WaterRender.h"
-#include "SkyBoxRender.h"
-#include "ScreenRender.h"
-#include "ParticleRender.h"
-#include "MainRender.h"
-#include "OutlinRender.h"
-#include "SkyNoiseRender.h"
-#include "WaveRender.h"
-#include "HexRender.h"
-#include "GaussianBlurRender.h"
-#include "BrightFilterrender.h"
-#include "ShadowRender.h"
-#include "LinesRender.h"
-#include "TextRender.h"
-#include "PBRRender.h"
-#include "MeshLineRender.h"
 
 #include <algorithm>
 
@@ -123,7 +106,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	std::vector<shObject> focused = _objects.find(eObject::RenderType::OUTLINED)->second;
 	std::vector<shObject> pbr_objs = _objects.find(eObject::RenderType::PBR)->second;
 	std::vector<shObject> flags = _objects.find(eObject::RenderType::FLAG)->second;
-	std::vector<shObject> geometry_obj = _objects.find(eObject::RenderType::GEOMETRY)->second;
+	std::vector<shObject> geometry_objs = _objects.find(eObject::RenderType::GEOMETRY)->second;
 	std::vector<shObject> bezier_objs = _objects.find(eObject::RenderType::BEZIER_CURVE)->second;
 	auto phong_pbr_objects = phong_objs;
 	phong_pbr_objects.insert(phong_pbr_objects.end(), pbr_objs.begin(), pbr_objs.end());
@@ -163,15 +146,15 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 
 	glEnable(GL_STENCIL_TEST);
 	//4. Rendering to main FBO with stencil
-	if (focus)
+	if (outline_focused)
 	{
-	  for (const auto& obj : focused)
-	  {
+		for (const auto& obj : focused)
+		{
 			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 			glStencilFunc(GL_ALWAYS, 1, 0xFF);
 			glStencilMask(0xFF);
 
-			if(std::find(phong_objs.begin(), phong_objs.end(), obj)!= phong_objs.end())
+			if (std::find(phong_objs.begin(), phong_objs.end(), obj) != phong_objs.end())
 				RenderMain(_camera, _light, { obj });
 			else
 				RenderPBR(_camera, _light, { obj });
@@ -180,13 +163,15 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 			glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 			glStencilMask(0x00);
 
-	    RenderOutlineFocused(_camera, _light, { obj });
+			RenderOutlineFocused(_camera, _light, { obj });
 
 			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 			glStencilFunc(GL_ALWAYS, 0, 0xFF);
 			glStencilMask(0xFF);
-	  }
+		}
 	}
+	else
+		focused.clear();
 
 	//Render not outlined objects
 	{
@@ -219,13 +204,16 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	// Rendering WaterQuad
 	if (water) { RenderWater(_camera, _light); }
 
-	// Hexes
+	// Geometry
 	if (geometry)
 	{
-		if (!geometry_obj.empty())
+		if (!geometry_objs.empty())
 		{
-			auto* mesh = dynamic_cast<const SimpleGeometryMesh*>(geometry_obj[0]->GetModel()->GetMeshes()[0]);
-			RenderGeometry(_camera, *mesh);
+			for (auto& obj : geometry_objs)
+			{
+				auto* mesh = dynamic_cast<const SimpleGeometryMesh*>(obj->GetModel()->GetMeshes()[0]);
+				RenderGeometry(_camera, *mesh);
+			}
 		}
 	}
 

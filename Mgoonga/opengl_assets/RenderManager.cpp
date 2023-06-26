@@ -14,7 +14,7 @@ eMainRender*		 eRenderManager::MainRender() { return m_mainRender.get(); }
 eOutlineRender*		 eRenderManager::OutlineRender() { return m_outlineRender.get(); }
 eSkyNoiseRender*	 eRenderManager::SkyNoiseRender() { return m_skynoiseRender.get(); }
 eWaveRender*		 eRenderManager::WaveRender() { return m_waverender.get(); }
-eHexRender*			 eRenderManager::HexRender() { return m_hexrender.get(); }
+eGeometryRender*			 eRenderManager::HexRender() { return m_hexrender.get(); }
 eGaussianBlurRender* eRenderManager::GaussianBlurRender() { return m_gaussianRender.get(); }
 eBrightFilterRender* eRenderManager::BrightFilterRender() { return m_brightRender.get(); }
 eLinesRender*		 eRenderManager::LinesRender() { return m_linesRender.get(); }
@@ -92,9 +92,9 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																		folderPath + "PhongFragmentShader.glsl"));
 	shader_lambda(m_waverender.get());
 
-	m_hexrender.reset(new eHexRender(folderPath + "Vertex3DSimple.glsl",
+	m_hexrender.reset(new eGeometryRender(folderPath + "Vertex3DSimple.glsl",
 																	 folderPath + "StencilFragmentShader.glsl",
-																	 folderPath + "HexGeometry.glsl"));
+																	 folderPath + "Geometry.glsl"));
 	shader_lambda(m_hexrender.get());
 
 	m_gaussianRender.reset(new eGaussianBlurRender(1200, 600, //@todo

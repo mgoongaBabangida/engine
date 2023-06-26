@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "ScreenMesh.h"
-#include <iostream>
 
 eScreenMesh::eScreenMesh(Texture _textureOne, Texture _textureTwo): textureOne(_textureOne), textureTwo(_textureTwo)
 {
@@ -123,6 +122,7 @@ void eScreenMesh::SetViewPortToDefault()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_DYNAMIC_DRAW);
 }
 
+//------------------------------------------------------------------------------------------------------------
 eFrameMesh::eFrameMesh()
 {
   frameVertices = {

@@ -319,9 +319,11 @@ void ParticleMesh::updateInstancedData(std::vector<float>& buffer)
 }
 
 //------------------------------------------------------------
-SimpleGeometryMesh::SimpleGeometryMesh(const std::vector<glm::vec3>& _dots, float _radius)
+SimpleGeometryMesh::SimpleGeometryMesh(const std::vector<glm::vec3>& _dots, float _radius, GeometryType _type, glm::vec3 _color)
 	: m_dots(_dots)
 	, m_radius(_radius)
+	, m_type(_type)
+	, m_color(_color)
 {
 	// Setup hex VAO
 	if (!m_dots.empty())
@@ -330,7 +332,7 @@ SimpleGeometryMesh::SimpleGeometryMesh(const std::vector<glm::vec3>& _dots, floa
 		glGenBuffers(1, &hexVBO);
 		glBindVertexArray(hexVAO);
 		glBindBuffer(GL_ARRAY_BUFFER, hexVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * m_dots.size(), &m_dots[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * m_dots.size(), &m_dots[0], GL_DYNAMIC_DRAW);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 		glBindVertexArray(0);
@@ -342,6 +344,14 @@ SimpleGeometryMesh::~SimpleGeometryMesh()
 {
 	glDeleteVertexArrays(1, &hexVAO);
 	glDeleteBuffers(1, &hexVBO);
+}
+
+//-------------------------------------------------------------------------------------
+void SimpleGeometryMesh::SetDots(const std::vector<glm::vec3>& _dots)
+{
+	m_dots = _dots;
+	glBindBuffer(GL_ARRAY_BUFFER, hexVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * m_dots.size(), &m_dots[0], GL_DYNAMIC_DRAW);
 }
 
 //-----------------------------------------------------------

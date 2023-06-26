@@ -60,6 +60,7 @@ public:
 	bool& GetSkyNoiseOnRef() { return sky_noise; }
 	bool& GetGammaCorrectionRef() { return gamma_correction; }
 	bool& GetToneMappingRef() { return tone_mapping; }
+	bool& GetOutlineFocusedRef() { return outline_focused; }
 	float& GetExposureRef() { return exposure; }
 
 	glm::vec4 debug_float = {0.0f,0.0f,0.0f,0.0f};
@@ -100,7 +101,6 @@ protected:
 	bool			skybox		= true;
 	bool			shadows		= true;
 	bool			water		= true;
-	bool			focus		= true;
 	bool			flags_on		= true;
 	bool			geometry	= true;
 	bool			particles	= true;
@@ -112,6 +112,7 @@ protected:
 	bool			bezier_curve = true;
 	bool			gamma_correction = true;
 	bool			tone_mapping = true;
+	bool			outline_focused = true;
 	float			exposure = 1.0f;
 
 	const uint32_t  width		  = 1200;

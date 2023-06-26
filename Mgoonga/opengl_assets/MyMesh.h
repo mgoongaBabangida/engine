@@ -95,11 +95,19 @@ protected:
 class DLL_OPENGL_ASSETS SimpleGeometryMesh : public IMesh
 {
 public:
-	SimpleGeometryMesh(const std::vector<glm::vec3>&, float);
+	enum class GeometryType
+	{
+		Hex = 0,
+		Circle = 1
+	};
 
-	~SimpleGeometryMesh();
+	SimpleGeometryMesh(const std::vector<glm::vec3>&, float _radius, GeometryType _type, glm::vec3 _color);
+	virtual ~SimpleGeometryMesh();
 
 	float GetRadius() const { return m_radius; }
+	glm::vec3 GetColor() const { return m_color; }
+	GeometryType GetGeometryType() const { return m_type; }
+	void SetDots(const std::vector<glm::vec3>&);
 
 	virtual void								Draw();
 	virtual const std::string&	Name() const { return m_name; }
@@ -112,7 +120,9 @@ public:
 protected:
 	std::string m_name = "SimpleGeometryMesh";
 	std::vector<glm::vec3> m_dots;
-	float									 m_radius; //@todo?
+	float									 m_radius;
+	glm::vec3							 m_color;
+	GeometryType					 m_type;
 
 	GLuint hexVAO;
 	GLuint hexVBO;

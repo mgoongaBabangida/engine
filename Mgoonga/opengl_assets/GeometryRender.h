@@ -7,18 +7,15 @@
 class SimpleGeometryMesh;
 
 //----------------------------------------------------
-class eHexRender
+class eGeometryRender
 {
 public:
-	eHexRender(const std::string& vS, const std::string& fS, const std::string&	gS);
-  ~eHexRender();
+	eGeometryRender(const std::string& vS, const std::string& fS, const std::string&	gS);
+  ~eGeometryRender();
 
 	void Render(glm::mat4 mvp, SimpleGeometryMesh& _mesh);
 
 	Shader& GetShader() { return hex_shader; }
 private:
 	Shader hex_shader;
-
-	GLuint MVPLoc;
-	GLuint radiusLoc;
 };
