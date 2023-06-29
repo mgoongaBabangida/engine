@@ -41,6 +41,7 @@ void GameController::Initialize()
   m_game->GetMainLight().intensity = glm::vec3{ 150.0f, 150.0f , 150.0f };
   m_game->GetMainCamera().setPosition(glm::vec3{-4.0f, 4.0f, 0.0f});
   m_game->GetMainCamera().setDirection(glm::normalize(glm::vec3{ 0.815, -0.588f, -0.018f }));
+  m_pipeline.get().GetOutlineFocusedRef() = false;
 
   m_game->ObjectPicked.Subscribe([this](shObject _picked)->void { this->OnObjectPicked(_picked); });
 
@@ -49,7 +50,34 @@ void GameController::Initialize()
   _InitializeHexes();
   _InitializeShips();
 
+  ObjectFactoryBase factory;
+  m_choice_circle = new SimpleGeometryMesh({ NONE }, 0.15f, SimpleGeometryMesh::GeometryType::Circle, { 5.0f, 5.0f, 0.0f });
+  m_game->AddObject(factory.CreateObject(std::make_shared<SimpleModel>(m_choice_circle), eObject::RenderType::GEOMETRY, "Choice circle"));
+
   m_game->AddInputObserver(this, STRONG);
+
+  m_warrining = std::make_shared<Text>();
+  m_warrining->font = "ARIALN";
+  m_warrining->pos_x = 200.0f;
+  m_warrining->pos_y = 25.0f;
+  m_warrining->scale = 1.0f;
+  m_warrining->color = glm::vec3(1.0f, 1.0f, 1.0f);
+  m_warrining->mvp = glm::ortho(0.0f, (float)m_game->Width(), 0.0f, (float)m_game->Height());
+  m_game->AddText(std::make_shared<Text>(*m_warrining));
+}
+
+//--------------------------------------------------------------------------
+bool GameController::OnKeyPress(uint32_t _asci)
+{
+  switch (_asci)
+  {
+  case ASCII_J:
+  {
+    m_dice_gui->Perssed();
+  }
+  return true;
+  default: return false;
+  }
 }
 
 //----------------------------------------------------------------
@@ -64,8 +92,30 @@ bool GameController::OnMousePress(int32_t _x, int32_t _y, bool _left)
 {
   if (!_left)
   {
-    if (!m_game->GetFocusedObject() || _CurrentShipHasMoved() || !m_dice_rolled || !m_current_path.empty())
+    if (!m_game->GetFocusedObject())
+    {
+      m_warrining->content = "Choose a ship to move";
+      m_game->GetTexts().back() = std::make_shared<Text>(*m_warrining);
       return true;
+    }
+    else if (_CurrentShipHasMoved())
+    {
+      m_warrining->content = "This ship has already moved";
+      m_game->GetTexts().back() = std::make_shared<Text>(*m_warrining);
+      return true;
+    }
+    else if (!m_dice_rolled)
+    {
+      m_warrining->content = "Roll the dice before moving";
+      m_game->GetTexts().back() = std::make_shared<Text>(*m_warrining);
+      return true;
+    }
+    else if (!m_current_path.empty())
+    {
+      m_warrining->content = "The ship can not move there";
+      m_game->GetTexts().back() = std::make_shared<Text>(*m_warrining);
+      return true;
+    }
     else // player rolled dice and has not moved yet. so, lets calculate wheather and how they can move
     {
     auto focused = m_game->GetFocusedObject();
@@ -91,6 +141,8 @@ bool GameController::OnMousePress(int32_t _x, int32_t _y, bool _left)
             m_current_path = cur_hex->MakePath(&hex, m_terrain, waterHeight);
             if (m_current_path.size() > m_current_dice) // can move less or equal to dice
             {
+              m_warrining->content = "The ship can not move there";
+              m_game->GetTexts().back() = std::make_shared<Text>(*m_warrining);
               m_current_path.clear();
               return true;
             }
@@ -99,6 +151,8 @@ bool GameController::OnMousePress(int32_t _x, int32_t _y, bool _left)
               glm::vec3 destination = { m_current_path.front()->x(), waterHeight, m_current_path.front()->z() };
               m_current_path.pop_front();
               m_ships[m_focused_index]->SetDestination(destination);
+              m_warrining->content = "";
+              m_game->GetTexts().back() = std::make_shared<Text>(*m_warrining);
               return true;
             }
           }
@@ -131,7 +185,7 @@ bool GameController::OnMouseRelease()
 //-------------------------------------------------------------
 void GameController::Update(float _tick)
 {
-  for (int i = 0; i < m_ships.size(); i++)
+  for (int i = 0; i < m_ships.size(); ++i)
   {
     if (m_ships[i]->GetScriptObject() == m_game->GetFocusedObject().get()
       && m_ships[i]->GetDestination() == NONE
@@ -141,11 +195,25 @@ void GameController::Update(float _tick)
       m_current_path.pop_front();
       m_ships[m_focused_index]->SetDestination(destination);
     }
+
+    if (m_ships[i]->GetScriptObject() == m_game->GetFocusedObject().get())
+      m_choice_circle->SetDots({ m_ships[i]->GetScriptObject()->GetTransform()->getTranslation() + glm::vec3{0.0f,0.01f,0.0f} });
   }
 
   if (std::all_of(m_has_moved.begin(), m_has_moved.end(), [](bool _val) { return _val; }))
   {
     std::for_each(m_has_moved.begin(), m_has_moved.end(), [](bool& _val) { _val = false; });
+  }
+
+  //update icons move status
+  for (int i = 0; i < m_status_icons.size(); ++i)
+  {
+    const Texture* red_tex = m_game->GetTexture("red_circle");
+    const Texture* green_tex = m_game->GetTexture("green_circle");
+    if (m_has_moved[i])
+      m_status_icons[i]->SetTexture(*red_tex, { 0,0 }, { red_tex->mTextureWidth, red_tex->mTextureHeight });
+    else
+      m_status_icons[i]->SetTexture(*green_tex, { 0,0 }, { green_tex->mTextureWidth, green_tex->mTextureHeight });
   }
 }
 
@@ -166,6 +234,11 @@ void GameController::OnObjectPicked(std::shared_ptr<eObject> _picked)
         m_ship_icons[i]->SetRenderingFunc(GUI::RenderFunc::GreyKernel);
     }
   }
+  else
+  {
+    m_warrining->content = "You should move current ship before choosing next one";
+    m_game->GetTexts().back() = std::make_shared<Text>(*m_warrining);
+  }
 }
 
 //------------------------------------------------------------
@@ -174,28 +247,28 @@ void GameController::_InitializeDiceLogicAndVisual()
   float pos_x = 10.0f;
   float pos_y = m_game->Height() - 125.0f - 10.0f;
   glm::vec2 icon_size = { 125.0f , 125.0f };
-  std::shared_ptr<GUI> dice_gui = std::make_shared<GUI>(pos_x, pos_y, icon_size.x, icon_size.y, m_game->Width(), m_game->Height());
+  m_dice_gui = std::make_shared<GUI>(pos_x, pos_y, icon_size.x, icon_size.y, m_game->Width(), m_game->Height());
   auto dice_tex = _GetDiceTexture();
-  dice_gui->SetTexture(*dice_tex, { 0,0 }, { dice_tex->mTextureWidth, dice_tex->mTextureHeight });
-  dice_gui->setCommand(std::make_shared<GUICommand>([this, dice_gui]()
+  m_dice_gui->SetTexture(*dice_tex, { 0,0 }, { dice_tex->mTextureWidth, dice_tex->mTextureHeight });
+  m_dice_gui->setCommand(std::make_shared<GUICommand>([this]()
     {
       if (!m_dice_rolled && m_game->GetFocusedObject() && !_CurrentShipHasMoved())
       {
         m_current_dice = math::Random::RandomInt(1, 6);
         m_dice_rolled = true;
         auto dice_tex = _GetDiceTexture();
-        dice_gui->SetTexture(*dice_tex, { 0,0 }, { dice_tex->mTextureWidth, dice_tex->mTextureHeight });
+        m_dice_gui->SetTexture(*dice_tex, { 0,0 }, { dice_tex->mTextureWidth, dice_tex->mTextureHeight });
       }
     }));
-  m_game->AddGUI(dice_gui);
-  m_game->AddInputObserver(dice_gui.get(), MONOPOLY);
+  m_game->AddGUI(m_dice_gui);
+  m_game->AddInputObserver(m_dice_gui.get(), MONOPOLY);
 }
 
 //------------------------------------------------------------
 void GameController::_InitializeShipIcons()
 {
   glm::vec2 icon_size = { 50 , 50 };
-  for (int i = 0; i < m_ship_quantity; i++)
+  for (int i = 0; i < m_ship_quantity; ++i)
   {
     float pos_x = (10 + icon_size.x) * i;
     float pos_y = 10;
@@ -226,6 +299,19 @@ void GameController::_InitializeShipIcons()
     m_game->AddInputObserver(ship_gui.get(), MONOPOLY);
     m_ship_icons.push_back(ship_gui);
   }
+
+  //icons move status
+  icon_size = { 20 , 20 };
+  for (int i = 0; i < m_ship_quantity; ++i)
+  {
+    float pos_x = 35 + 60 * i;
+    float pos_y = 50;
+    std::shared_ptr<GUI> status_gui = std::make_shared<GUIWithAlpha>(pos_x, pos_y, icon_size.x, icon_size.y, m_game->Width(), m_game->Height());
+    status_gui->SetRenderingFunc(GUI::RenderFunc::Default);
+    status_gui->SetTransparent(true);
+    m_game->AddGUI(status_gui);
+    m_status_icons.push_back(status_gui);
+  }
 }
 
 //------------------------------------------------------------
@@ -246,7 +332,8 @@ void GameController::_InitializeHexes()
     //hex.Debug();
   }
   ObjectFactoryBase factory;
-  m_game->AddObject(factory.CreateObject(std::make_shared<SimpleModel>(new SimpleGeometryMesh(dots, Hex::radius)), eObject::RenderType::GEOMETRY));
+  m_game->AddObject(factory.CreateObject(std::make_shared<SimpleModel>(new SimpleGeometryMesh(dots, Hex::radius * 0.57f, SimpleGeometryMesh::GeometryType::Hex, {1.0f, 1.0f, 0.0f})),
+                                                                                              eObject::RenderType::GEOMETRY));
 }
 
 //------------------------------------------------------------
