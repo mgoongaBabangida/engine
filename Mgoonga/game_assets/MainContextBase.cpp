@@ -130,10 +130,14 @@ void eMainContextBase::PaintGL()
 {
 	if (m_gameState == GameState::LOADED)
 	{
-		float msc = static_cast<float>(m_global_clock.newFrame());
+		int64_t tick = m_global_clock.newFrame();
 		std::map<eObject::RenderType, std::vector<shObject>> objects;
 		std::vector<shObject> phong, pbr, flags, bezier, geometry;
 
+		if(!m_texts.empty())
+			m_texts[0]->content = { "FPS " + std::to_string(1000 / tick) };
+
+		float msc = static_cast<float>(tick);
 		for (auto& script : m_global_scripts)
 		{
 			script->Update(msc);
@@ -192,7 +196,7 @@ void eMainContextBase::PaintGL()
 		objects.insert({ eObject::RenderType::BEZIER_CURVE, bezier });
 		objects.insert({ eObject::RenderType::GEOMETRY, geometry });
 
-		pipeline.RenderFrame(objects, GetMainCamera(), GetMainLight(), m_guis);
+		pipeline.RenderFrame(objects, GetMainCamera(), GetMainLight(), m_guis, m_texts);
 
 		if (m_l_pressed)
 		{
@@ -301,6 +305,15 @@ void eMainContextBase::InitializeTextures()
 //--------------------------------------------------------------------------------
 void eMainContextBase::InitializeScripts()
 {
+	std::shared_ptr<Text> t =std::make_shared<Text>();
+	t->font = "ARIALN";
+	t->pos_x = 25.0f;
+	t->pos_y = 25.0f;
+	t->scale = 1.0f;
+	t->color = glm::vec3(0.8, 0.8f, 0.0f);
+	t->mvp = glm::ortho(0.0f, (float)width, 0.0f, (float)height);
+	m_texts.push_back(t);
+
 	for (auto& script : m_global_scripts)
 	{
 		script->Initialize();
@@ -621,5 +634,17 @@ void eMainContextBase::InstallTcpClient()
 void eMainContextBase::AddGUI(const std::shared_ptr<GUI>& _gui)
 {
 	m_guis.push_back(_gui);
+}
+
+//----------------------------------------------------------------
+void eMainContextBase::AddText(std::shared_ptr<Text> _text)
+{
+	m_texts.push_back(_text);
+}
+
+//----------------------------------------------------------------
+std::vector<std::shared_ptr<Text>>& eMainContextBase::GetTexts()
+{
+	return m_texts;
 }
 

@@ -62,14 +62,16 @@ public:
 
 	virtual void			PaintGL() override;
 
+	virtual void	AddObject(std::shared_ptr<eObject> _object) override;
+	virtual void	SetFocused(std::shared_ptr<eObject>) override;
+	void					SetFocused(const eObject* _newFocused);
+
+	virtual void AddInputObserver(IInputObserver* _observer, ePriority _priority) override;
+
 	virtual uint32_t																GetFinalImageId() override;
 	virtual std::shared_ptr<eObject>								GetFocusedObject() override;
 	virtual std::vector<std::shared_ptr<eObject>>		GetObjects() override { return m_objects; }
-	virtual void AddObject(std::shared_ptr<eObject> _object) override;
-	virtual void SetFocused(std::shared_ptr<eObject>) override;
-	void SetFocused(const eObject* _newFocused);
 
-	virtual void AddInputObserver(IInputObserver* _observer, ePriority _priority) override;
 	virtual const Texture* GetTexture(const std::string& _name) const override;
 
 	virtual Light& GetMainLight() override;
@@ -88,6 +90,8 @@ public:
 	void InstallTcpClient();
 
 	virtual void AddGUI(const std::shared_ptr<GUI>&);
+	virtual void AddText(std::shared_ptr<Text>);
+	virtual std::vector<std::shared_ptr<Text>>& GetTexts();
 
 protected:
 	virtual void		InitializePipline();
@@ -119,6 +123,7 @@ protected:
 	std::vector<shObject>										m_objects;
 	std::shared_ptr<std::vector<shObject>>	m_framed;
 	std::vector<std::shared_ptr<GUI>>				m_guis;
+	std::vector<std::shared_ptr<Text>>			m_texts;
 
 	std::vector <std::shared_ptr<IScript>>	m_global_scripts;
 

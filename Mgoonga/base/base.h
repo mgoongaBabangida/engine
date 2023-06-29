@@ -22,7 +22,7 @@ struct Texture;
 
 struct TextureInfo
 {
-	TextureInfo(std::string _type, std::string _path)
+	TextureInfo(const std::string& _type, const std::string& _path)
 		: m_type(_type)
 		, m_path(_path)
 	{}
@@ -95,7 +95,7 @@ struct ShaderInfo
 	const std::vector<Uniform>& uniforms;
 };
 
-constexpr float PI = 3.14159265359f;
+constexpr float PI = 3.1415926536f;
 
 static constexpr glm::vec3 NONE{ glm::vec3(-100.0f, -100.0f, -100.0f) }; //@todo
 
@@ -160,6 +160,18 @@ enum ePriority
 	STRONG,
 	MONOPOLY,
 	ALWAYS
+};
+
+//--------------------------------------------------------
+struct Text
+{
+	std::string content;
+	std::string font;
+	glm::vec3 color;
+	float pos_x;
+	float pos_y;
+	float scale;
+	glm::mat4 mvp;
 };
 
 //-------------------------------------------------------

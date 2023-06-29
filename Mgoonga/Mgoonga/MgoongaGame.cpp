@@ -192,6 +192,7 @@ void eMgoongaGameContext::InitializeModels()
 
   m_guis.emplace_back(new GUIWithAlpha(0, 0, (bottomRight.x - topLeft.x) / 4, (bottomRight.y - topLeft.y) / 4, width, height));
   m_guis[0]->SetTexture(*tex, topLeft, bottomRight);
+  m_guis[0]->SetTransparent(true);
   m_guis[0]->SetChild(std::make_shared<GUIWithAlpha>(0, (bottomRight.y - topLeft.y) / 4, (bottomRight.x - topLeft.x) / 4, (bottomRight.y - topLeft.y) / 4, width, height));
   m_guis[0]->GetChildren()[0]->SetTexture(*tex, topLeft, bottomRight);
   m_guis[0]->GetChildren()[0]->SetVisible(false);
@@ -255,7 +256,8 @@ void eMgoongaGameContext::_InitializeHexes()
                                    z_move + z_move * 2 * j });
     }
   ObjectFactoryBase factory;
-  m_objects.push_back(factory.CreateObject(std::make_shared<SimpleModel>(new SimpleGeometryMesh(m_dots, radius)), eObject::RenderType::GEOMETRY));
+  m_objects.push_back(factory.CreateObject(std::make_shared<SimpleModel>(new SimpleGeometryMesh(m_dots, radius, SimpleGeometryMesh::GeometryType::Hex, { 1.0f, 1.0f, 0.0f })),
+    eObject::RenderType::GEOMETRY));
 }
 
 //----------------------------------------------------

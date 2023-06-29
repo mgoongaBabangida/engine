@@ -118,18 +118,23 @@ void eTextureManager::LoadAllTextures()
 	text.loadTextureFromFile(folderPath + "ship_icon.png");
 	m_Textures.insert(std::pair<std::string, Texture>("ship1", text));
 
-	text.loadTextureFromFile(folderPath + "dice1.jpg");
+	text.loadTextureFromFile(folderPath + "dice1.png");
 	m_Textures.insert(std::pair<std::string, Texture>("tex_dice1", text));
-	text.loadTextureFromFile(folderPath + "dice2.jpg");
+	text.loadTextureFromFile(folderPath + "dice2.png");
 	m_Textures.insert(std::pair<std::string, Texture>("tex_dice2", text));
 	text.loadTextureFromFile(folderPath + "dice3.png");
 	m_Textures.insert(std::pair<std::string, Texture>("tex_dice3", text));
 	text.loadTextureFromFile(folderPath + "dice4.png");
 	m_Textures.insert(std::pair<std::string, Texture>("tex_dice4", text));
-	text.loadTextureFromFile(folderPath + "dice5.jpg");
+	text.loadTextureFromFile(folderPath + "dice5.png");
 	m_Textures.insert(std::pair<std::string, Texture>("tex_dice5", text));
 	text.loadTextureFromFile(folderPath + "dice6.png");
 	m_Textures.insert(std::pair<std::string, Texture>("tex_dice6", text));
+
+	text.loadTextureFromFile(folderPath + "red-circle.png");
+	m_Textures.insert(std::pair<std::string, Texture>("red_circle", text));
+	text.loadTextureFromFile(folderPath + "green-circle.png");
+	m_Textures.insert(std::pair<std::string, Texture>("green_circle", text));
 
 	// Cubemap (Skybox)
 	std::vector<std::string> faces;
