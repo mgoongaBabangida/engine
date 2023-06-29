@@ -25,7 +25,7 @@ public:
 		 m_scale(scale), 
 		 numRowsInTexture(_numRows)
 	{
-		GRAVITY = 0.0098;
+		GRAVITY = 0.0098f;
 	}
 
 	Particle()

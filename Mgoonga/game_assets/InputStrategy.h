@@ -51,7 +51,7 @@ public:
 																					 static_cast<float>(_y),
 																					 m_camera.get().getWidth(),
 																					 m_camera.get().getHeight());
-			m_camera.get().getCameraRay().press(_x, _y);
+			m_camera.get().getCameraRay().press((float)_x, (float)_y);
 			
 			dbb::plane pl(m_intersaction,
 				glm::vec3(0.0f, m_intersaction.y, 1.0f),
