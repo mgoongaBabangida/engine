@@ -22,7 +22,9 @@ public:
 
   void FreeTextures();
 
-	void Draw();
+	void Draw() override;
+  void DrawInstanced(int32_t instances)override;
+
   virtual const std::string& Name() const override { return name;}
 
   virtual size_t                            GetVertexCount() const override { return vertices.size(); }

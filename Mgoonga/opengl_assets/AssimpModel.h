@@ -26,7 +26,9 @@ public:
 				bool _m_invert_y_uv = false);
   virtual ~Model();
 
-	virtual void Draw() override;
+	virtual void Draw()  ;
+	virtual void DrawInstanced(int32_t _instances) override;
+
 	virtual const std::string& GetName() const override { return m_name; }
 	virtual const std::string& GetPath() const override { return directory; }
 

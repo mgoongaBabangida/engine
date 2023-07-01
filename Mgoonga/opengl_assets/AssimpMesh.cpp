@@ -78,6 +78,15 @@ void AssimpMesh::Draw()
 	glBindVertexArray(0);
 }
 
+void AssimpMesh::DrawInstanced(int32_t instances)
+{
+  _BindMaterialTextures(); // _BindRawTextures();
+  // Draw mesh
+  glBindVertexArray(this->VAO);
+  glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)this->indices.size(), GL_UNSIGNED_INT, (GLvoid*)(0), instances);
+  glBindVertexArray(0);
+}
+
 std::vector<TextureInfo> AssimpMesh::GetTextures() const
 {
    std::vector<TextureInfo> ret;

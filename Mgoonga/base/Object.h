@@ -29,6 +29,9 @@ public:
 	bool IsPickable() const { return m_is_pickable; }
 	void SetPickable(bool _pickable) { m_is_pickable = _pickable; }
 
+	void SetInstancingTag(const std::string& _tag) { m_instancing_tag = _tag; }
+	const std::string& GetInstancingTag() const { return m_instancing_tag; }
+
 	RenderType GetRenderType() const { return m_render_type; }
 	void SetRenderType(RenderType _render_type) { m_render_type = _render_type; }
 
@@ -66,6 +69,7 @@ protected:
 	bool m_is_visible = true;
 	bool m_is_pickable = true;
 	RenderType m_render_type = RenderType::PHONG;
+	std::string m_instancing_tag;
 };
 
 using shObject = std::shared_ptr<eObject>;

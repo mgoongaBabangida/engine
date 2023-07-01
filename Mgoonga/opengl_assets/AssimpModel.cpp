@@ -67,15 +67,22 @@ Model::~Model()
 	for (auto& mesh : meshes)
 		mesh.FreeTextures();
 	
-	//need to read Assimp doc, looks like we do not won it
+	//need to read Assimp doc, looks like we do not own it
 	m_scene.release();
 }
 
 //---------------------------------------------------------------------------
 void Model::Draw()
 {
-	for (GLuint i = 0; i < this->meshes.size(); i++)
+	for (GLuint i = 0; i < this->meshes.size(); ++i)
 		this->meshes[i].Draw();
+}
+
+//---------------------------------------------------------------------------
+void Model::DrawInstanced(int32_t _instances)
+{
+	for (GLuint i = 0; i < this->meshes.size(); ++i)
+		this->meshes[i].DrawInstanced(_instances);
 }
 
 //---------------------------------------------------------------------------

@@ -97,7 +97,7 @@ protected:
 	void			RenderOutlineFocused(const Camera&, const Light&, const std::vector<shObject>&);
 	void			RenderFlags(const Camera&, const Light&, std::vector<shObject>);
 	void			RenderWater(const Camera&, const Light&);
-	void			RenderGeometry(const Camera&, const SimpleGeometryMesh& _mesh);	//hex latter other things
+	void			RenderGeometry(const Camera&, const SimpleGeometryMesh& _mesh);
 	void			RenderParticles(const Camera&);
 	void			RenderBlur(const Camera&);
 	void			RenderContrast(const Camera& _camera);
@@ -122,7 +122,7 @@ protected:
 	bool			gamma_correction = true;
 	bool			tone_mapping = true;
 	bool			outline_focused = true;
-	bool			ssao = true;
+	bool			ssao = false;
 	float			exposure = 1.0f;
 
 	const uint32_t  width		  = 1200;

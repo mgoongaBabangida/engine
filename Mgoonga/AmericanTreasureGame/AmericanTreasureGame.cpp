@@ -77,7 +77,7 @@ bool AmericanTreasureGame::OnMousePress(int32_t x, int32_t y, bool left)
   if (m_framed)
     m_framed->clear();
 
-  GetMainCamera().getCameraRay().Update(GetMainCamera(), x, y, static_cast<float>(width), static_cast<float>(height));
+  GetMainCamera().getCameraRay().Update(GetMainCamera(), static_cast<float>(x), static_cast<float>(y), static_cast<float>(width), static_cast<float>(height));
   GetMainCamera().getCameraRay().press(x, y);
 
   //should be inside input strategy which needs it(frame, moveXZ)

@@ -117,6 +117,7 @@ public:
 	virtual void AddTexture(Texture*)																	= 0;
 	virtual void BindVAO()	const																			= 0;
 	virtual void UnbindVAO() const																		= 0;
+	virtual void DrawInstanced(int32_t) {}
 };
 
 //----------------------------------------------------------------------------------------------
@@ -140,6 +141,8 @@ public:
 	virtual ~IModel() = default;
 
 	virtual void														Draw()					= 0;
+	virtual void														DrawInstanced(int32_t) {}
+
 	virtual const std::string&							GetName() const = 0;
 	virtual const std::string&							GetPath() const = 0;
 

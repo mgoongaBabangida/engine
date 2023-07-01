@@ -19,6 +19,8 @@ public:
 protected:
   Shader pbrShader;
 
+  void _SetMaterial(shObject _obj);
+
   std::vector<glm::mat4> matrices;
 
   GLuint albedoLoc;

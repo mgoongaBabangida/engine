@@ -267,11 +267,11 @@ void GameController::_InitializeDiceLogicAndVisual()
 //------------------------------------------------------------
 void GameController::_InitializeShipIcons()
 {
-  glm::vec2 icon_size = { 50 , 50 };
+  glm::vec2 icon_size = { 50.0f , 50.0f };
   for (int i = 0; i < m_ship_quantity; ++i)
   {
-    float pos_x = (10 + icon_size.x) * i;
-    float pos_y = 10;
+    float pos_x = (10.0f + icon_size.x) * i;
+    float pos_y = 10.0f;
     const Texture* ship_tex = m_game->GetTexture("ship1");
     std::shared_ptr<GUI> ship_gui = std::make_shared<GUI>(pos_x, pos_y, icon_size.x, icon_size.y, m_game->Width(), m_game->Height());
     ship_gui->SetTexture(*ship_tex, { 0,0 }, { ship_tex->mTextureWidth, ship_tex->mTextureHeight });
@@ -301,11 +301,11 @@ void GameController::_InitializeShipIcons()
   }
 
   //icons move status
-  icon_size = { 20 , 20 };
+  icon_size = { 20.0f , 20.0f };
   for (int i = 0; i < m_ship_quantity; ++i)
   {
-    float pos_x = 35 + 60 * i;
-    float pos_y = 50;
+    float pos_x = 35.0f + 60.0f * i;
+    float pos_y = 50.0f;
     std::shared_ptr<GUI> status_gui = std::make_shared<GUIWithAlpha>(pos_x, pos_y, icon_size.x, icon_size.y, m_game->Width(), m_game->Height());
     status_gui->SetRenderingFunc(GUI::RenderFunc::Default);
     status_gui->SetTransparent(true);
@@ -391,6 +391,7 @@ void GameController::_InitializeShips()
       m_soundManager->GetSound("shot_sound"),
       m_pipeline.get().GetWaterHeight());
     ship->SetScript(script);
+    ship->SetInstancingTag("spanish_ship");
     m_ships.push_back(script);
 
     m_game->AddInputObserver(ship->GetScript(), WEAK);
