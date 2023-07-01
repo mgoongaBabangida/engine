@@ -32,6 +32,13 @@ eScreenMesh::~eScreenMesh()
   glGenBuffers(1, &quadVBO);
 }
 
+void eScreenMesh::DrawUnTextured()
+{
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);
+}
+
 void eScreenMesh::Draw()
 {
 	glActiveTexture(GL_TEXTURE1);

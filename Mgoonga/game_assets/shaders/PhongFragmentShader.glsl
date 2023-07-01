@@ -42,11 +42,13 @@ subroutine uniform LightingPtr LightingFunction;
 
 layout(binding=0) uniform samplerCube 	   depth_cube_map;// Shadow point
 layout(binding=1) uniform sampler2D		   depth_texture; // Shadow dir
+
 layout(binding=2) uniform sampler2D        texture_diffuse1;
 layout(binding=3) uniform sampler2D        texture_specular1;
 layout(binding=4) uniform sampler2D        texture_normal1;
 layout(binding=5) uniform sampler2D        texture_depth1;
 layout(binding=6) uniform sampler2D        texture_emissionl;
+layout(binding=7) uniform sampler2D        texture_ssao;
 
 uniform vec3 eyePositionWorld;
 uniform bool normalMapping = true;
@@ -54,6 +56,7 @@ uniform bool shadow_directional = true;
 
 uniform float far_plane;
 uniform float shininess = 32.0f;
+uniform float ssao_threshold = 0.9f;
 
 uniform bool gamma_correction = true;
 uniform bool debug_white_color = false;
@@ -223,13 +226,24 @@ void main()
 		bNormal = theNormal;
 
   //Ambient
+  vec2 buf_relative_tex_coord = vec2(gl_FragCoord[0]/ 1200.0f, gl_FragCoord[1] / 600.0f);
+  float AmbientOcclusion = 1.0f;
+  
+  if(gamma_correction)
+	AmbientOcclusion = texture(texture_ssao, buf_relative_tex_coord).r;
+  else
+	AmbientOcclusion = texture(texture_ssao, buf_relative_tex_coord).r;
+  
+  if(AmbientOcclusion < ssao_threshold)
+	AmbientOcclusion = 0.0f;
+	
   vec3 dif_texture;
 	if(gamma_correction)
 		dif_texture = vec3(pow(texture(texture_diffuse1, Texcoord).rgb, vec3(2.2f)));
 	else
 		dif_texture = vec3(texture(texture_diffuse1, Texcoord));
 		
-  vec3 ambientLight = light.ambient * dif_texture; 
+  vec3 ambientLight = light.ambient * dif_texture * AmbientOcclusion; 
 
      float shadow;
 	 vec3 lightVector = -normalize(vec3(light.direction));	 
@@ -241,25 +255,27 @@ void main()
   vec3 difspec = LightingFunction(light, bNormal, thePosition, Texcoord);
 
   if(debug_white_texcoords)
-	outColor = vec4(dif_texture.r * 2, dif_texture.g /2, dif_texture.b / 2, 1.0f); 
+	outColor = vec4(AmbientOcclusion, AmbientOcclusion, AmbientOcclusion, 1.0f); 
   else if(debug_white_color)
 	outColor = vec4(vec3(shadow / far_plane), 1.0);
   else
+	{
 	outColor = vec4(ambientLight + difspec * shadow, 1.0);
   
-  vec3 emissive_color;
-	if(gamma_correction)
-		emissive_color = vec3(pow(texture(texture_emissionl, Texcoord).rgb, vec3(2.2f)));
-	else
-		emissive_color = vec3(texture(texture_emissionl, Texcoord));
+	vec3 emissive_color;
+		if(gamma_correction)
+			emissive_color = vec3(pow(texture(texture_emissionl, Texcoord).rgb, vec3(2.2f)));
+		else
+			emissive_color = vec3(texture(texture_emissionl, Texcoord));
 
-  outColor.rgb += emissive_color;
+		outColor.rgb += emissive_color;
   
-  if(tone_mapping)
-	outColor.rgb = vec3(1.0) - exp(-outColor.rgb * hdr_exposure);
+		if(tone_mapping)
+			outColor.rgb = vec3(1.0) - exp(-outColor.rgb * hdr_exposure);
 	 
-  if(gamma_correction)
-	outColor.rgb = pow(outColor.rgb, vec3(1.0/2.2f));
+		if(gamma_correction)
+		outColor.rgb = pow(outColor.rgb, vec3(1.0/2.2f));
+	}
 };
 
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal )

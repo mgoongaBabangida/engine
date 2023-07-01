@@ -75,6 +75,8 @@ void eOpenGlRenderPipeline::InitializeBuffers(bool _needsShadowCubeMap)
   eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_ONE, 600, 300); //@todo numbers
   eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_TWO, 600, 300);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFFERED, width, height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SSAO, width, height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SSAO_BLUR, width, height);
   //eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFFERED2, width, height);
 }
 
@@ -94,9 +96,10 @@ Texture eOpenGlRenderPipeline::GetSkyNoiseTexture(const Camera& _camera)
 
 //-----------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vector<shObject>> _objects,
-																			  Camera& _camera,
-																			  const Light& _light,
-																			  std::vector<std::shared_ptr<GUI>>& guis)
+																				Camera& _camera,
+																				const Light& _light,
+																				std::vector<std::shared_ptr<GUI>>& _guis,
+																				std::vector<std::shared_ptr<Text>>& _texts)
 {
   /*std::sort(focused.begin(), focused.end(), [_camera](const shObject& obj1, const shObject& obj2)
     { return glm::length2(_camera.getPosition() - obj1->GetTransform()->getTranslation())
@@ -137,6 +140,22 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		RenderRefraction(_camera, _light, phong_objs, pbr_objs);
 	}
   glDisable(GL_CLIP_DISTANCE0);
+
+	// SSAO
+	if (ssao)
+	{
+		RenderSSAO(_camera, _light, phong_pbr_objects);
+		glActiveTexture(GL_TEXTURE7);
+		glBindTexture(GL_TEXTURE_2D, eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SSAO_BLUR).id);
+	}
+	else
+	{
+		static Texture t;
+		if(t.id == Texture::GetDefaultTextureId())
+			t.loadTexture1x1(WHITE);
+		glActiveTexture(GL_TEXTURE7);
+		glBindTexture(GL_TEXTURE_2D, t.id);
+	}
 
 		mts ? eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS)
 			: eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
@@ -327,18 +346,11 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 																							 static_cast<float>(height));
 	}
 
-	RenderGui(guis, _camera);
-
-  static math::eClock clock;
-  std::string fps;
-  if (clock.isActive())
-    fps = { "FPS " + std::to_string(1000 / clock.newFrame()) };
-  if (!clock.isActive())
-    clock.start();
+	RenderGui(_guis, _camera);
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	renderManager->TextRender()->RenderText(fps, 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f), width, height);
+	renderManager->TextRender()->RenderText(_camera, _texts, width, height);
 	glDisable(GL_BLEND);
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -531,6 +543,23 @@ void eOpenGlRenderPipeline::RenderPBR(const Camera& _camera, const Light& _light
 }
 
 //-------------------------------------------------------
+void eOpenGlRenderPipeline::RenderSSAO(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
+{
+	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFFERED);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	renderManager->SSAORender()->RenderGeometry(_camera, _light, _objects);
+	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SSAO);
+	glClear(GL_COLOR_BUFFER_BIT);
+	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_DEFFERED, GL_TEXTURE2);
+	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_DEFFERED1, GL_TEXTURE3);
+	renderManager->SSAORender()->RenderSSAO(_camera);
+	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SSAO_BLUR);
+	glClear(GL_COLOR_BUFFER_BIT);
+	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SSAO, GL_TEXTURE2);
+	renderManager->SSAORender()->RenderSSAOBlur(_camera);
+}
+
+//-------------------------------------------------------
 Texture eOpenGlRenderPipeline::GetDefaultBufferTexture() const
 {
 	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_DEFAULT);
@@ -582,4 +611,22 @@ Texture eOpenGlRenderPipeline::GetScreenBufferTexture() const
 Texture eOpenGlRenderPipeline::GetBrightFilter() const
 {
 	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_BRIGHT_FILTER);
+}
+
+//----------------------------------------------------
+Texture eOpenGlRenderPipeline::GetSSAO() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SSAO);
+}
+
+//----------------------------------------------------
+Texture eOpenGlRenderPipeline::GetDefferedOne() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_DEFFERED);
+}
+
+//----------------------------------------------------
+Texture eOpenGlRenderPipeline::GetDefferedTwo() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_DEFFERED1);
 }

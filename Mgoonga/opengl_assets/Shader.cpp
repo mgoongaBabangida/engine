@@ -3,6 +3,8 @@
 
 #include <fstream>
 
+//@todo make one function installShaders//
+
 //------------------------------------------------------------------------------------
 void Shader::installShaders(const char* VertexShaderName, const char* FragmentShaderName, bool _transformFeedback)
 {

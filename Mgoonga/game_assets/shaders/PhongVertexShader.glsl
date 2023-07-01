@@ -47,8 +47,8 @@ else
   gl_Position	= modelToProjectionMatrix * v;
   LightSpacePos = shadowMatrix * modelToWorldMatrix * v;
 
-  vec4 WorldPosV	    = modelToWorldMatrix * v;	  //water
-  gl_ClipDistance[0]	= dot(WorldPosV,clip_plane);  //water
+  vec4 WorldPosV	= modelToWorldMatrix * v;	//water
+  gl_ClipDistance[0]	= dot(WorldPosV, clip_plane);  	//water
 
   Texcoord = texcoord;
 
@@ -56,14 +56,16 @@ else
   vec3 nbitangent	= mat3(BoneTransform) * bitangent;
   vec3 nnormal		= mat3(BoneTransform) * normal;
 
-  theNormal		= normalize(mat3(modelToWorldMatrix)* normalize(normal));
-  thePosition	= vec3(modelToWorldMatrix * v);// vec4(position ,1.0)
+  theNormal		= normalize(mat3(modelToWorldMatrix) * normalize(normal));
+  thePosition		= vec3(modelToWorldMatrix * v);// vec4(position ,1.0)
   
   vec3 T = normalize(vec3(modelToWorldMatrix * vec4(tangent,   0.0)));
   vec3 B = normalize(vec3(modelToWorldMatrix * vec4(bitangent, 0.0)));
   vec3 N = normalize(vec3(modelToWorldMatrix * vec4(normal,    0.0)));
+
   if (dot(cross(N, T), B) < 0.0)
-                T = T * -1.0;
+     T = T * -1.0;
+
   TBN = mat3(T,B,N);
   
   float t = weights[0] + weights[1] + weights[2] + weights[3];

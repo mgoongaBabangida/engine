@@ -19,6 +19,8 @@ enum class eBuffer
 	BUFFER_DEFFERED1,
 	BUFFER_DEFFERED2,
 	BUFFER_SQUERE,
+	BUFFER_SSAO,
+	BUFFER_SSAO_BLUR
 };
 
 //---------------------------------------------------------------------------
@@ -46,15 +48,17 @@ public:
 	}
 
 private:
-	eColorFBO		  defaultFBO;
-	ShadowMapFBO	depthFBO;
-  eColorFBO		  screenFBO;
-  eColorFBO		  mtsFBO;
-  eColorFBO		  reflectionFBO;
-  eColorFBO		  refractionFBO;
-  eColorFBO		  brightFilterFBO;
-  eColorFBO		  gausian1FBO;
-  eColorFBO		  gausian2FBO;
-  eColorFBO		  squereFBO;
-	eGFBO			    gFBO;
+	eColorFBO		   defaultFBO;
+	ShadowMapFBO	 depthFBO;
+  eColorFBO		   screenFBO;
+  eColorFBO		   mtsFBO;
+  eColorFBO		   reflectionFBO;
+  eColorFBO		   refractionFBO;
+  eColorFBO		   brightFilterFBO;
+  eColorFBO		   gausian1FBO;
+  eColorFBO		   gausian2FBO;
+  eColorFBO		   squereFBO;
+	eGFBO			     gFBO;
+	SimpleColorFBO ssaoFBO;
+	SimpleColorFBO ssaoBlurFBO;
 };

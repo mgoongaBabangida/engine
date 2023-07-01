@@ -12,6 +12,8 @@ public:
 	eScreenMesh(Texture textureOne, Texture textureTwo);
   ~eScreenMesh();
 
+	void DrawUnTextured();
+
 	virtual void								Draw() override;
   virtual size_t							GetVertexCount() const { return 4; }
 	virtual const std::string&	Name() const override { return name; }

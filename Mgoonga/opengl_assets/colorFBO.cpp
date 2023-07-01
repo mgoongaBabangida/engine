@@ -4,10 +4,6 @@
 
 eColorFBO::~eColorFBO()
 {
-	if (m_fbo != 0) {
-		glDeleteFramebuffers(1, &m_fbo);
-    glDeleteTextures(1, &m_texture);
-	}
 }
 
 bool eColorFBO::Init(unsigned int WindowWidth, unsigned int WindowHeight, bool multisample)
@@ -89,18 +85,46 @@ void eColorFBO::ResolveToScreen(unsigned int WindowWidth, unsigned int WindowHei
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 }
 
-void eColorFBO::BindForWriting()
+void SimpleColorFBO::BindForWriting()
 {
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo);
 }
 
-void eColorFBO::BindForReading(GLenum TextureUnit)
+void SimpleColorFBO::BindForReading(GLenum TextureUnit)
 {
 	glActiveTexture(TextureUnit);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 }
 
-Texture eColorFBO::GetTexture()
+Texture SimpleColorFBO::GetTexture()
 {
 	return Texture(m_texture, m_width, m_height, 4);
+}
+
+bool SimpleColorFBO::Init(unsigned int WindowWidth, unsigned int WindowHeight, bool multisample)
+{
+	m_width = WindowWidth;
+	m_height = WindowHeight;
+
+	glGenFramebuffers(1, &m_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+
+	// SSAO color buffer
+	glGenTextures(1, &m_texture);
+	glBindTexture(GL_TEXTURE_2D, m_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, WindowWidth, WindowHeight, 0, GL_RED, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture, 0);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "SSAO Framebuffer not complete!" << std::endl;
+	return true;
+}
+
+SimpleColorFBO::~SimpleColorFBO()
+{
+	if (m_fbo != 0) {
+		glDeleteFramebuffers(1, &m_fbo);
+		glDeleteTextures(1, &m_texture);
+	}
 }

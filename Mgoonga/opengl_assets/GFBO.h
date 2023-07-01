@@ -12,6 +12,7 @@ public:
 
 	bool		Init(unsigned int WindowWidth, unsigned int WindowHeight, bool multisample = false);
 	void		BindForWriting();
+
 	void		BindForReading0(GLenum TextureUnit);
 	void		BindForReading1(GLenum TextureUnit);
 	void		BindForReading2(GLenum TextureUnit);

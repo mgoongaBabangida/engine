@@ -55,6 +55,7 @@ protected:
 
 	GLuint DebugWhiteLoc;
 	GLuint DebugTexcoordsLoc;
+
 	GLuint GammaCorrectionLoc;
 	GLuint ToneMappingLoc;
 	GLuint HdrExposureLoc;

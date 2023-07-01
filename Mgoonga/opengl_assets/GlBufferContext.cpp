@@ -16,6 +16,8 @@ void eGlBufferContext::BufferInit(eBuffer _buffer, unsigned int _width, unsigned
 		case eBuffer::BUFFER_MTS:						mtsFBO.Init(_width, _height, true);		break;
 		case eBuffer::BUFFER_DEFFERED:			gFBO.Init(_width, _height);						break;
 		case eBuffer::BUFFER_SQUERE:				squereFBO.Init(_width, _height);			break; // assert width == height
+		case eBuffer::BUFFER_SSAO:					ssaoFBO.Init(_width, _height);				break;
+		case eBuffer::BUFFER_SSAO_BLUR:			ssaoBlurFBO.Init(_width, _height);		break;
 	}
 }
 
@@ -34,6 +36,8 @@ void eGlBufferContext::EnableWrittingBuffer(eBuffer _buffer)
 		case eBuffer::BUFFER_MTS:						mtsFBO.BindForWriting();						break;
 		case eBuffer::BUFFER_DEFFERED:			gFBO.BindForWriting();							break;
 		case eBuffer::BUFFER_SQUERE:				squereFBO.BindForWriting();					break;
+		case eBuffer::BUFFER_SSAO:					ssaoFBO.BindForWriting();						break;
+		case eBuffer::BUFFER_SSAO_BLUR:			ssaoBlurFBO.BindForWriting();				break;
 	}
 }
 
@@ -54,6 +58,8 @@ void eGlBufferContext::EnableReadingBuffer(eBuffer _buffer, GLenum _slot)
 		case eBuffer::BUFFER_DEFFERED1:			gFBO.BindForReading1(_slot);							break;
 		case eBuffer::BUFFER_DEFFERED2:			gFBO.BindForReading2(_slot);							break;
 		case eBuffer::BUFFER_SQUERE:				squereFBO.BindForReading(_slot);					break;
+		case eBuffer::BUFFER_SSAO:					ssaoFBO.BindForReading(_slot);						break;
+		case eBuffer::BUFFER_SSAO_BLUR:			ssaoBlurFBO.BindForReading(_slot);				break;
 	}
 }
 
@@ -61,19 +67,21 @@ Texture eGlBufferContext::GetTexture(eBuffer _buffer)
 {
 	switch (_buffer)
 	{
-		case eBuffer::BUFFER_DEFAULT:		return defaultFBO.GetTexture();
-		case eBuffer::BUFFER_SHADOW:		return depthFBO.GetTexture();
+		case eBuffer::BUFFER_DEFAULT:				return defaultFBO.GetTexture();
+		case eBuffer::BUFFER_SHADOW:				return depthFBO.GetTexture();
 		case eBuffer::BUFFER_BRIGHT_FILTER: return brightFilterFBO.GetTexture();
 		case eBuffer::BUFFER_GAUSSIAN_ONE:	return gausian1FBO.GetTexture();
 		case eBuffer::BUFFER_GAUSSIAN_TWO:	return gausian2FBO.GetTexture();
-		case eBuffer::BUFFER_REFLECTION:	return reflectionFBO.GetTexture();	
-		case eBuffer::BUFFER_REFRACTION:	return refractionFBO.GetTexture();	
-		case eBuffer::BUFFER_SCREEN:		return screenFBO.GetTexture();
-		case eBuffer::BUFFER_MTS:			return mtsFBO.GetTexture();
-		case eBuffer::BUFFER_DEFFERED:		return gFBO.GetTexture0();
-		case eBuffer::BUFFER_DEFFERED1:		return gFBO.GetTexture1();
-		case eBuffer::BUFFER_DEFFERED2:		return gFBO.GetTexture2();
-		case eBuffer::BUFFER_SQUERE:		return squereFBO.GetTexture();
+		case eBuffer::BUFFER_REFLECTION:		return reflectionFBO.GetTexture();
+		case eBuffer::BUFFER_REFRACTION:		return refractionFBO.GetTexture();
+		case eBuffer::BUFFER_SCREEN:				return screenFBO.GetTexture();
+		case eBuffer::BUFFER_MTS:						return mtsFBO.GetTexture();
+		case eBuffer::BUFFER_DEFFERED:			return gFBO.GetTexture0();
+		case eBuffer::BUFFER_DEFFERED1:			return gFBO.GetTexture1();
+		case eBuffer::BUFFER_DEFFERED2:			return gFBO.GetTexture2();
+		case eBuffer::BUFFER_SQUERE:				return squereFBO.GetTexture();
+		case eBuffer::BUFFER_SSAO:					return ssaoFBO.GetTexture();
+		case eBuffer::BUFFER_SSAO_BLUR:			return ssaoBlurFBO.GetTexture();
 	}
 	return Texture();/*?*/
 }
@@ -106,6 +114,8 @@ GLuint eGlBufferContext::GetId(eBuffer _buffer)
 	case eBuffer::BUFFER_DEFFERED1:			return gFBO.ID();
 	case eBuffer::BUFFER_DEFFERED2:			return gFBO.ID();
 	case eBuffer::BUFFER_SQUERE:				return squereFBO.ID();
+	case eBuffer::BUFFER_SSAO:					return ssaoFBO.ID();
+	case eBuffer::BUFFER_SSAO_BLUR:			return ssaoBlurFBO.ID();
 	}
 }
 
@@ -128,5 +138,7 @@ glm::ivec2 eGlBufferContext::GetSize(eBuffer _buffer)
 	case eBuffer::BUFFER_DEFFERED1:			return gFBO.Size();
 	case eBuffer::BUFFER_DEFFERED2:			return gFBO.Size();
 	case eBuffer::BUFFER_SQUERE:				return squereFBO.Size();
+	case eBuffer::BUFFER_SSAO:					return ssaoFBO.Size();
+	case eBuffer::BUFFER_SSAO_BLUR:			return ssaoBlurFBO.Size();
 	}
 }

@@ -12,7 +12,7 @@ Texture::Texture()
 	path = "empty";
 	id = GetDefaultTextureId();
 	mTextureWidth = 1, mTextureHeight = 1;
-	loadTexture1x1(YELLOW);
+	//loadTexture1x1(YELLOW);
 }
 
 Texture::Texture(GLuint Width, GLuint Height)

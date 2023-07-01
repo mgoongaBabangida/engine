@@ -27,8 +27,12 @@ public:
 	eOpenGlRenderPipeline(uint32_t width, uint32_t height);
 	~eOpenGlRenderPipeline();
 
-	void			RenderFrame(std::map<eObject::RenderType, std::vector<shObject>>, Camera&, const Light&, std::vector<std::shared_ptr<GUI>>&);
-	//gui should be const latter ?, and camera prob
+	void			RenderFrame(std::map<eObject::RenderType, std::vector<shObject>> _objects,
+												Camera& _camera,
+												const Light& _light,
+												std::vector<std::shared_ptr<GUI>>& _guis,
+												std::vector<std::shared_ptr<Text>>& _texts);
+	//@todo gui should be const latter ?, and camera prob
 	
 	void			Initialize();
 	void			InitializeBuffers(bool _needsShadowCubeMap = false);
@@ -62,6 +66,7 @@ public:
 	bool& GetToneMappingRef() { return tone_mapping; }
 	bool& GetOutlineFocusedRef() { return outline_focused; }
 	float& GetExposureRef() { return exposure; }
+	bool& GetSSAOEnabledRef() { return ssao; }
 
 	glm::vec4 debug_float = {0.0f,0.0f,0.0f,0.0f};
 
@@ -78,6 +83,9 @@ public:
   Texture GetMtsBufferTexture() const;
   Texture GetScreenBufferTexture() const;
   Texture GetBrightFilter() const;
+	Texture GetSSAO() const;
+	Texture GetDefferedOne() const;
+	Texture GetDefferedTwo() const;
 
 protected:
 	void			RenderShadows(const Camera&, const Light&, std::vector<shObject>&);
@@ -95,6 +103,7 @@ protected:
 	void			RenderContrast(const Camera& _camera);
 	void			RenderGui(std::vector<std::shared_ptr<GUI>>&, const Camera&);
 	void			RenderPBR(const Camera&, const Light& _light, std::vector<shObject> _objs);
+	void			RenderSSAO(const Camera&, const Light&, std::vector<shObject>&);
 
 	bool			mousepress	= true; //to draw framed objects
 	bool			mts			= true;
@@ -113,6 +122,7 @@ protected:
 	bool			gamma_correction = true;
 	bool			tone_mapping = true;
 	bool			outline_focused = true;
+	bool			ssao = true;
 	float			exposure = 1.0f;
 
 	const uint32_t  width		  = 1200;

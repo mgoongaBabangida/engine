@@ -22,6 +22,7 @@ eTextRender* eRenderManager::TextRender() { return m_textRender.get(); }
 ePBRRender* eRenderManager::PBRRender(){ return m_pbrRender.get(); }
 eBezierRender* eRenderManager::BezierRender() { return m_bezierRender.get(); }
 eMeshLineRender* eRenderManager::MeshLineRender(){ return m_meshlineRender.get(); }
+eSSAORender* eRenderManager::SSAORender() { return m_SSAORender.get(); }
 
 //----------------------------------------------------------------------------------------------------------------
 void eRenderManager::AddParticleSystem(std::shared_ptr<IParticleSystem> system)
@@ -62,8 +63,8 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 	shader_lambda(m_skyboxRender.get());
 	//Screen Renderer
 	m_screenRender.reset(new eScreenRender(*(texManager.Find("TcubeSkyWater1")),
-										folderPath + "PostProcessingVertexShader.glsl",
-										folderPath + "PostProcessingFragmentShader.glsl"));
+																					folderPath + "PostProcessingVertexShader.glsl",
+																					folderPath + "PostProcessingFragmentShader.glsl"));
 	shader_lambda(m_screenRender.get());
 	//PhongRender
 	m_mainRender.reset(new eMainRender(folderPath + "PhongVertexShader.glsl", folderPath + "PhongFragmentShader.glsl"));
@@ -93,8 +94,8 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 	shader_lambda(m_waverender.get());
 
 	m_hexrender.reset(new eGeometryRender(folderPath + "Vertex3DSimple.glsl",
-																	 folderPath + "StencilFragmentShader.glsl",
-																	 folderPath + "Geometry.glsl"));
+																				folderPath + "StencilFragmentShader.glsl",
+																				folderPath + "Geometry.glsl"));
 	shader_lambda(m_hexrender.get());
 
 	m_gaussianRender.reset(new eGaussianBlurRender(1200, 600, //@todo
@@ -141,6 +142,14 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 	// Mesh line
 	m_meshlineRender.reset(new eMeshLineRender(folderPath + "PhongVertexShader.glsl", folderPath + "StencilFragmentShader.glsl"));
 	shader_lambda(m_meshlineRender.get());
+
+	//SSAO
+	m_SSAORender.reset(new  eSSAORender(folderPath + "GeometryPassVertexShader.glsl",
+																			folderPath + "GeometryPassFragmentShader.glsl",
+																			folderPath + "PostProcessingVertexShader.glsl",
+																			folderPath + "SSAOFragmentShader.glsl",
+																			folderPath + "SSAOFragmentBlur.glsl"));
+	shader_lambda(m_SSAORender.get());
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -169,6 +178,7 @@ void eRenderManager::UpdateShadersInfo()
 	shader_lambda(m_pbrRender.get());
 	shader_lambda(m_bezierRender.get());
 	shader_lambda(m_meshlineRender.get());
+	shader_lambda(m_SSAORender.get());
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -218,6 +228,8 @@ bool eRenderManager::SetUniformData(const std::string& _renderName, const std::s
 	if (shader_lambda(m_bezierRender.get()))
 		return true;
 	if(shader_lambda(m_meshlineRender.get()))
+		return true;
+	if (shader_lambda(m_SSAORender.get()))
 		return true;
 
 	return false;
