@@ -77,7 +77,8 @@ void eOpenGlRenderPipeline::InitializeBuffers(bool _needsShadowCubeMap)
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFFERED, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SSAO, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SSAO_BLUR, width, height);
-  //eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFFERED2, width, height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_IBL_CUBEMAP, 512, 512);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_IBL_CUBEMAP_IRR, 32, 32);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -104,7 +105,9 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
   /*std::sort(focused.begin(), focused.end(), [_camera](const shObject& obj1, const shObject& obj2)
     { return glm::length2(_camera.getPosition() - obj1->GetTransform()->getTranslation())
     > glm::length2(_camera.getPosition() - obj2->GetTransform()->getTranslation()); });*/
-	
+
+	if (m_first_call) { RenderIBL(_camera); m_first_call = false; }
+
 	std::vector<shObject> phong_objs = _objects.find(eObject::RenderType::PHONG)->second;
 	std::vector<shObject> focused = _objects.find(eObject::RenderType::OUTLINED)->second;
 	std::vector<shObject> pbr_objs = _objects.find(eObject::RenderType::PBR)->second;
@@ -560,6 +563,37 @@ void eOpenGlRenderPipeline::RenderSSAO(const Camera& _camera, const Light& _ligh
 }
 
 //-------------------------------------------------------
+void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
+{
+	glDisable(GL_CULL_FACE);
+	glViewport(0, 0, (GLsizei)512, (GLsizei)512); //@todo numbers // don't forget to configure the viewport to the capture dimensions.
+	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_IBL_CUBEMAP);
+	auto cube_id = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP).id;
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cube_id);
+	renderManager->IBLRender()->RenderCubemap(_camera, cube_id);
+
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cube_id);
+	glViewport(0, 0, 32, 32);
+	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_IBL_CUBEMAP_IRR);
+	auto irr_id = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP_IRR).id;
+	renderManager->IBLRender()->RenderIBLMap(_camera, irr_id);
+
+	glActiveTexture(GL_TEXTURE9);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, irr_id);
+	glViewport(0, 0, width, height);
+	/*static Texture skybox = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP_IRR);
+	renderManager->SkyBoxRender()->SetSkyBoxTexture(&skybox);*/
+	glEnable(GL_CULL_FACE);
+}
+
+//-------------------------------------------------------
+bool& eOpenGlRenderPipeline::GetRotateSkyBox()
+{
+	return renderManager->SkyBoxRender()->GetRotateSkyBoxRef();
+}
+
+//-------------------------------------------------------
 Texture eOpenGlRenderPipeline::GetDefaultBufferTexture() const
 {
 	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_DEFAULT);
@@ -629,4 +663,16 @@ Texture eOpenGlRenderPipeline::GetDefferedOne() const
 Texture eOpenGlRenderPipeline::GetDefferedTwo() const
 {
 	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_DEFFERED1);
+}
+
+//----------------------------------------------------
+Texture eOpenGlRenderPipeline::GetHdrTexture() const
+{
+	return renderManager->IBLRender()->GetHdrTexture();
+}
+
+//----------------------------------------------------
+Texture eOpenGlRenderPipeline::GetHdrCubeMap() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP);
 }

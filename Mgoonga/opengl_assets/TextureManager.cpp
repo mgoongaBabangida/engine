@@ -161,6 +161,9 @@ void eTextureManager::LoadAllTextures()
 	text.setNumRows(4);
 	m_Textures.insert(std::pair<std::string, Texture>("Tatlas2", text));
 
+	text.loadHdr(folderPath + "drackenstein_quarry_8k.hdr");
+	m_Textures.insert(std::pair<std::string, Texture>("hdr1", text));
+
 	//pbr sphere
   text.loadTextureFromFile(folderPath + "sphere_pbr1/rustediron2_basecolor.png");
   m_Textures.insert(std::pair<std::string, Texture>("pbr1_basecolor", text));

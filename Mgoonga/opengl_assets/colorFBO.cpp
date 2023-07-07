@@ -128,3 +128,54 @@ SimpleColorFBO::~SimpleColorFBO()
 		glDeleteTextures(1, &m_texture);
 	}
 }
+
+CubemapFBO::~CubemapFBO()
+{
+	m_textureBuffer.freeTexture();
+	if (m_fbo != 0) {
+		glDeleteFramebuffers(1, &m_fbo);
+		glDeleteTextures(1, &m_texture);
+	}
+}
+
+bool CubemapFBO::Init(unsigned int _size)
+{
+	m_width = _size;
+	m_height = _size;
+	glGenFramebuffers(1, &m_fbo);
+	glGenRenderbuffers(1, &m_rbo);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, _size, _size);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
+	
+	m_textureBuffer.makeCubemap(_size);
+	m_texture = m_textureBuffer.id;
+
+	for (unsigned int i = 0; i < 6; ++i)
+	{
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+			GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_texture, 0);
+	}
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "Cube Framebuffer not complete!" << std::endl;
+	return true;
+}
+
+void CubemapFBO::BindForWriting()
+{
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo);
+	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
+}
+
+void CubemapFBO::BindForReading(GLenum TextureUnit)
+{
+	glActiveTexture(TextureUnit);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_texture);
+}
+
+Texture CubemapFBO::GetTexture()
+{
+	return Texture(m_texture, m_width, m_height, 4); //!
+}

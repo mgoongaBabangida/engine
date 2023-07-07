@@ -45,6 +45,32 @@ protected:
 	GLuint		m_rbo;
 };
 
+//-------------------------------------------------------------------------------------
+class CubemapFBO
+{
+public:
+	~CubemapFBO();
+
+	 bool		Init(unsigned int _size);
+
+	 void		BindForWriting();
+	 void		BindForReading(GLenum TextureUnit);
+
+	 Texture		GetTexture();
+	 GLuint  ID() { return m_fbo; }
+	 GLuint		Width() { return  m_width; }
+	 GLuint		Height() { return  m_height; }
+	 glm::ivec2 Size() { return { m_width , m_height }; }
+
+protected:
+	GLuint		m_fbo;
+	GLuint		m_texture;
+	GLuint		m_width;
+	GLuint		m_height;
+	GLuint		m_rbo;
+
+	Texture		m_textureBuffer;
+};
 
 #endif /* COLORFBO_H */
 

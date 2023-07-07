@@ -20,7 +20,9 @@ enum class eBuffer
 	BUFFER_DEFFERED2,
 	BUFFER_SQUERE,
 	BUFFER_SSAO,
-	BUFFER_SSAO_BLUR
+	BUFFER_SSAO_BLUR,
+	BUFFER_IBL_CUBEMAP,
+	BUFFER_IBL_CUBEMAP_IRR
 };
 
 //---------------------------------------------------------------------------
@@ -61,4 +63,6 @@ private:
 	eGFBO			     gFBO;
 	SimpleColorFBO ssaoFBO;
 	SimpleColorFBO ssaoBlurFBO;
+	CubemapFBO		 iblCubemapFBO;
+	CubemapFBO		 iblCubemapIrrFBO;
 };

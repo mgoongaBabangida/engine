@@ -24,6 +24,7 @@
 #include "ParticleSystemRenderGPUTransformfeedback.h"
 #include "MeshLineRender.h"
 #include "SSAORender.h"
+#include "IBLRender.h"
 
 //----------------------------------------------------------------------------------------------
 class eRenderManager
@@ -68,6 +69,7 @@ private:
 	eBezierRender* BezierRender();
 	eMeshLineRender* MeshLineRender();
 	eSSAORender* SSAORender();
+	eIBLRender* IBLRender();
 
 private:
 	std::unique_ptr<eWaterRender>		 m_waterRender;
@@ -89,6 +91,7 @@ private:
 	std::unique_ptr<eBezierRender>   m_bezierRender;
 	std::unique_ptr<eMeshLineRender>   m_meshlineRender;
 	std::unique_ptr<eSSAORender>   m_SSAORender;
+	std::unique_ptr<eIBLRender>   m_iblRender;
 
 	std::string							folderPath;
 	std::vector<ShaderInfo>	shaders;

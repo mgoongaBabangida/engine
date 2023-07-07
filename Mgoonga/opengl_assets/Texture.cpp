@@ -1,10 +1,20 @@
 #include "stdafx.h"
 #include "Texture.h"
+
 #include <glm/glm/gtc/noise.hpp>
 #include "TextureImplDevIl.h"
 #include "TextureImplSDL.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include <math/Random.h>
+
+GLuint Texture::GetDefaultTextureId()
+{
+	static const GLuint DEFAULT_TEXTURE_ID = (GLuint)glm::pow(2, 32) - 1;
+	return DEFAULT_TEXTURE_ID;
+}
 
 Texture::Texture()
 {
@@ -12,6 +22,7 @@ Texture::Texture()
 	path = "empty";
 	id = GetDefaultTextureId();
 	mTextureWidth = 1, mTextureHeight = 1;
+	mChannels = 4;
 	//loadTexture1x1(YELLOW);
 }
 
@@ -58,23 +69,23 @@ bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenu
 	return true;
 }
 
-uint8_t* Texture::getPixelBuffer()
-{
-	int sizeOfByte = sizeof(unsigned char);
+uint8_t* Texture::getPixelBuffer(GLenum _target, GLenum _format, GLenum _type)
+{ 
+	int sizeOfByte = /*_format == GL_FLOAT ? sizeof(float) :*/ sizeof(unsigned char);
 	int bytesToUsePerPixel = mChannels;
 	int theSize = mTextureWidth * mTextureHeight * sizeOfByte * bytesToUsePerPixel;
 	uint8_t* imData = (uint8_t*)malloc(theSize);
 
 	glBindTexture(GL_TEXTURE_2D, this->id);
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)imData); //generic
+	glGetTexImage(_target, 0, _format, _type, (void*)imData); //generic
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return imData;
 }
 
-bool Texture::saveToFile(const std::string &path)
+bool Texture::saveToFile(const std::string &path, GLenum _target, GLenum _format, GLenum _type)
 {
-	uint8_t* imData = getPixelBuffer();
-	eTextureImplDevIl::SaveToFile(imData, path, mTextureWidth, mTextureHeight, mChannels);
+	uint8_t* imData = getPixelBuffer(_target, _format, _type);
+	eTextureImplDevIl::SaveToFile(imData, path, mTextureWidth, mTextureHeight, mChannels); //rgb/rgba byte/float ?
 	free(imData);
 	return true;
 }
@@ -169,6 +180,7 @@ bool Texture::loadCubemap(std::vector<std::string> faces)
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLuint*)ilGetData());
     //
     ilDeleteImages(1, &imgID);
+		// delete[] pixmap; @todo
     //
   }
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -205,6 +217,33 @@ bool Texture::makeCubemap(Texture* _texture)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
+	return true;
+}
+
+bool Texture::makeCubemap(size_t _size)
+{
+	//@todo cistomize - channels, rgb16f etc.
+	mChannels = 3;
+	mTextureWidth = _size;
+	mTextureHeight = _size;
+
+	glGenTextures(1, &id);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	int buffer_size = mTextureWidth * mTextureHeight * mChannels;
+
+	for (GLuint i = 0; i < 6; ++i)
+	{
+		std::vector<float> xData(buffer_size, 0.2f + i * 0.2f);
+		glBindTexture(GL_TEXTURE_2D, id);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, mTextureWidth, mTextureHeight, 0, GL_RGB, GL_FLOAT, &xData[0]);
+	}
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	return true;
 }
 
@@ -252,7 +291,8 @@ bool Texture::makeRandom1DTexture(unsigned int _size)
 {
 	glm::vec3* pRandomData = new glm::vec3[_size];
 
-	for (unsigned int i = 0; i < _size; i++) {
+	for (unsigned int i = 0; i < _size; i++)
+	{
 		pRandomData[i].x = math::Random::RandomFloat(0.0f, 1.0f);
 		pRandomData[i].y = math::Random::RandomFloat(0.0f, 1.0f);
 		pRandomData[i].z = math::Random::RandomFloat(0.0f, 1.0f);
@@ -260,7 +300,7 @@ bool Texture::makeRandom1DTexture(unsigned int _size)
 
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_1D, id);
-	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, _size, 0.0f, GL_RGB, GL_FLOAT, pRandomData);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, _size, 0, GL_RGB, GL_FLOAT, pRandomData);//?
 	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -278,6 +318,7 @@ bool Texture::generatePerlin(GLuint _width, GLuint _height, bool periodic)
 	float b = 2.0f;
 	float xFactor = 1.0f / (_width - 1);
 	float yFactor = 1.0f / (_height - 1);
+
 	this->mChannels = 4; //octaves
 
 	GLubyte *data = new GLubyte[_width * _height * 4];
@@ -318,8 +359,28 @@ bool Texture::generatePerlin(GLuint _width, GLuint _height, bool periodic)
 	return true;
 }
 
-GLuint Texture::GetDefaultTextureId()
+bool Texture::loadHdr(const std::string& _path)
 {
-	static const GLuint DEFAULT_TEXTURE_ID = (GLuint)glm::pow(2, 32) - 1;
-	return DEFAULT_TEXTURE_ID;
+	stbi_set_flip_vertically_on_load(true);
+	path = _path;
+	float* data = stbi_loadf(_path.c_str(), &mTextureWidth, &mTextureHeight, &mChannels, 0);
+	if (data)
+	{
+		glGenTextures(1, &id);
+		glBindTexture(GL_TEXTURE_2D, id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, mTextureWidth, mTextureHeight, 0, GL_RGB, GL_FLOAT, data);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		stbi_image_free(data);
+		return true;
+	}
+	else
+	{
+		std::cout << "Failed to load HDR image." << std::endl;
+		return false;
+	}
 }

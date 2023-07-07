@@ -19,6 +19,9 @@ layout(binding=3) uniform sampler2D metallicMap;
 layout(binding=4) uniform sampler2D normalMap;
 layout(binding=5) uniform sampler2D roughnessMap;
 
+// IBL
+layout(binding=9) uniform samplerCube irradianceMap;
+
 // lights
 uniform vec3 lightPositions[1];
 uniform vec3 lightColors[1];
@@ -38,6 +41,7 @@ void main()
    vec3 theNormal_f;
    float metallic_f;
    float roughness_f;
+   
    if(textured)	
    {
      albedo_f    = pow(texture(albedoMap, Texcoord).rgb, vec3(2.2));
@@ -58,7 +62,8 @@ void main()
    
     vec3 N = normalize(theNormal_f);
     vec3 V = normalize(camPos - thePosition);
-
+	vec3 R = reflect(-V, N);
+	
     vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo_f, metallic_f);
 	           
@@ -78,23 +83,33 @@ void main()
         float G   = GeometrySmith(N, V, L, roughness_f);      
         vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);       
         
+		vec3 numerator    = NDF * G * F;
+        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+        vec3 specular     = numerator / max(denominator, 0.001); 
+		
         vec3 kS = F;
         vec3 kD = vec3(1.0) - kS;
-        kD *= 1.0 - metallic_f;	  
-        
-        vec3 numerator    = NDF * G * F;
-        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-        vec3 specular     = numerator / max(denominator, 0.001);  
+        kD *= 1.0 - metallic_f;	   
             
         // add to outgoing radiance Lo
         float NdotL = max(dot(N, L), 0.0);                
         Lo += (kD * albedo_f / PI + specular) * radiance * NdotL; 
-    }   
-  
-    vec3 ambient = vec3(0.03) * albedo_f * ao;
+    }
+
+	// ambient lighting (we now use IBL as the ambient term)
+    vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);	
+	vec3 kD = 1.0 - kS;
+	kD *= 1.0 - metallic;
+	vec3 irradiance = texture(irradianceMap, N).rgb;
+	vec3 diffuse      = irradiance * albedo;
+	vec3 ambient = (kD * diffuse) * ao;
+	// vec3 ambient = vec3(0.002);
+	
     vec3 color = ambient + Lo;
 	
+    // HDR tonemapping
     color = color / (color + vec3(1.0));
+    // gamma correct
     color = pow(color, vec3(1.0/2.2));  
    
     FragColor = vec4(color, 1.0);

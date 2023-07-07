@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "RenderManager.h"
 #include "MyModel.h"
+
 #include <algorithm>
 
 //--------------------------------------------------------------------------------
@@ -23,6 +24,7 @@ ePBRRender* eRenderManager::PBRRender(){ return m_pbrRender.get(); }
 eBezierRender* eRenderManager::BezierRender() { return m_bezierRender.get(); }
 eMeshLineRender* eRenderManager::MeshLineRender(){ return m_meshlineRender.get(); }
 eSSAORender* eRenderManager::SSAORender() { return m_SSAORender.get(); }
+eIBLRender* eRenderManager::IBLRender() { return  m_iblRender.get(); }
 
 //----------------------------------------------------------------------------------------------------------------
 void eRenderManager::AddParticleSystem(std::shared_ptr<IParticleSystem> system)
@@ -150,6 +152,13 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																			folderPath + "SSAOFragmentShader.glsl",
 																			folderPath + "SSAOFragmentBlur.glsl"));
 	shader_lambda(m_SSAORender.get());
+
+	//IBL
+	m_iblRender.reset(new  eIBLRender(folderPath + "hdrToCubemapVs.glsl",
+																		folderPath + "hdrToCubemapFs.glsl",
+																		folderPath + "irradianceFs.glsl",
+																		texManager.Find("hdr1")));
+	shader_lambda(m_iblRender.get());
 }
 
 //----------------------------------------------------------------------------------------------------

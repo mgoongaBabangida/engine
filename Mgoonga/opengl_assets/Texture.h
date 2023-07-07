@@ -45,15 +45,17 @@ struct DLL_OPENGL_ASSETS Texture
 	void setNumRows(GLuint nrows) { numberofRows = nrows; }
 	void freeTexture();
 
-	uint8_t* getPixelBuffer();
-	bool saveToFile(const std::string &path);
+	uint8_t* getPixelBuffer(GLenum _target = GL_TEXTURE_2D, GLenum format = GL_RGBA, GLenum _type = GL_UNSIGNED_BYTE);
+	bool saveToFile(const std::string &path, GLenum _target = GL_TEXTURE_2D, GLenum format = GL_RGBA, GLenum _type = GL_UNSIGNED_BYTE);
 
 	bool loadTextureFromFile(const std::string& path, GLenum format = GL_RGBA, GLenum wrap = GL_CLAMP_TO_EDGE);
 	bool loadTexture1x1(TColor color);
 	bool loadCubemap(std::vector<std::string> faces);
+	bool loadHdr(const std::string& _path);
 	bool generatePerlin(GLuint Width, GLuint Height, bool periodic);
 
 	bool makeCubemap(Texture*);
+	bool makeCubemap(size_t size);
 	bool makeDepthTexture();
 	bool makeDepthCubeMap();
 	bool makeRandom1DTexture(unsigned int _size);

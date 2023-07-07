@@ -7,7 +7,7 @@
 class eSkyBoxMesh : public IMesh
 {
 public:
-	eSkyBoxMesh(const Texture*);
+	eSkyBoxMesh(const Texture* = nullptr);
   ~eSkyBoxMesh();
 
 	void Draw() override;

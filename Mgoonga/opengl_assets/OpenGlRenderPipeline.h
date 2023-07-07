@@ -67,6 +67,7 @@ public:
 	bool& GetOutlineFocusedRef() { return outline_focused; }
 	float& GetExposureRef() { return exposure; }
 	bool& GetSSAOEnabledRef() { return ssao; }
+	bool& GetRotateSkyBox();
 
 	glm::vec4 debug_float = {0.0f,0.0f,0.0f,0.0f};
 
@@ -86,6 +87,8 @@ public:
 	Texture GetSSAO() const;
 	Texture GetDefferedOne() const;
 	Texture GetDefferedTwo() const;
+	Texture GetHdrTexture() const;
+	Texture GetHdrCubeMap() const;
 
 protected:
 	void			RenderShadows(const Camera&, const Light&, std::vector<shObject>&);
@@ -104,6 +107,7 @@ protected:
 	void			RenderGui(std::vector<std::shared_ptr<GUI>>&, const Camera&);
 	void			RenderPBR(const Camera&, const Light& _light, std::vector<shObject> _objs);
 	void			RenderSSAO(const Camera&, const Light&, std::vector<shObject>&);
+	void			RenderIBL(const Camera& _camera);
 
 	bool			mousepress	= true; //to draw framed objects
 	bool			mts			= true;
@@ -130,6 +134,7 @@ protected:
 
 	float			waterHeight = 2.0f;
   float     blur_coef   = 0.5f;
+	bool			m_first_call = true;
 
 	std::unique_ptr<eRenderManager>	renderManager;
 };
