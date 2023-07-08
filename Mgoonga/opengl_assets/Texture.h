@@ -41,6 +41,7 @@ struct DLL_OPENGL_ASSETS Texture
 	}
 
 	static GLuint GetDefaultTextureId();
+	static Texture GetTexture1x1(TColor color);
 
 	void setNumRows(GLuint nrows) { numberofRows = nrows; }
 	void freeTexture();
@@ -49,7 +50,6 @@ struct DLL_OPENGL_ASSETS Texture
 	bool saveToFile(const std::string &path, GLenum _target = GL_TEXTURE_2D, GLenum format = GL_RGBA, GLenum _type = GL_UNSIGNED_BYTE);
 
 	bool loadTextureFromFile(const std::string& path, GLenum format = GL_RGBA, GLenum wrap = GL_CLAMP_TO_EDGE);
-	bool loadTexture1x1(TColor color);
 	bool loadCubemap(std::vector<std::string> faces);
 	bool loadHdr(const std::string& _path);
 	bool generatePerlin(GLuint Width, GLuint Height, bool periodic);
@@ -87,6 +87,9 @@ struct DLL_OPENGL_ASSETS Texture
 
 		return true;
 	}
+
+protected:
+	bool _loadTexture1x1(TColor color);
 };
 
 

@@ -10,10 +10,7 @@
 TerrainModel::TerrainModel()
 	: mesh(nullptr)
 {
-	Texture t;
-	t.loadTexture1x1(BLACK);
-	m_material.roughness_texture_id = t.id; //free teyxture, make static Texture function
-	m_material.emissive_texture_id = t.id;
+	m_material.roughness_texture_id = m_material.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
 }
 
 //----------------------------------------------------------------
@@ -31,10 +28,7 @@ TerrainModel::TerrainModel(Texture* diffuse,
 	if (normal != nullptr)
 		m_material.normal_texture_id = normal->id;
 
-	Texture t;
-	t.loadTexture1x1(BLACK);
-	m_material.roughness_texture_id = t.id;
-	m_material.emissive_texture_id = t.id;
+	m_material.roughness_texture_id = m_material.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
 
 	mesh = new MyMesh("terrain");
 	m_size = heightMap->mTextureHeight;
@@ -58,10 +52,7 @@ TerrainModel::TerrainModel(Texture* color)
 	if (color != nullptr)
 		m_material.metalic_texture_id = color->id;
 
-	Texture t;
-	t.loadTexture1x1(BLACK);
-	m_material.roughness_texture_id = t.id;
-	m_material.emissive_texture_id = t.id;
+	m_material.roughness_texture_id = m_material.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
 
 	mesh = new MyMesh("terrain");
 	m_size = 10;

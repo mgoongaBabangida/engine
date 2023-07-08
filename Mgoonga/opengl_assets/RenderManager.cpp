@@ -89,8 +89,8 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 
 	m_waverender.reset(new eWaveRender(modelManager.CloneTerrain("simple"),
 																		texManager.Find("TSpanishFlag0_s"),
-																		texManager.Find("Tblue"),
-																		texManager.Find("Tblack"), 
+																		&Texture::GetTexture1x1(BLUE),
+																		&Texture::GetTexture1x1(BLACK),
 																		folderPath + "WaveVertexShader.glsl",
 																		folderPath + "PhongFragmentShader.glsl"));
 	shader_lambda(m_waverender.get());

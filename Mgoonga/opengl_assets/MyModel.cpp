@@ -10,12 +10,6 @@
 #include <glm\glm/gtx/quaternion.hpp>
 #include <glm\glm/gtx/norm.hpp>
 
-Texture MyModel::default_diffuse_mapping = {};
-Texture MyModel::default_specular_mapping = {};
-Texture MyModel::default_normal_mapping = {};
-Texture MyModel::default_roughness_mapping = {};
-Texture MyModel::default_emission_mapping = {};
-
 MyModel::MyModel()
   : m_name("empty")
 {}
@@ -25,24 +19,13 @@ MyModel::MyModel(std::shared_ptr<MyMesh> m, const std::string& _name,
   : mesh(m)
   , m_name(_name)
 {
-  if (default_diffuse_mapping.id == Texture::GetDefaultTextureId())
-    default_diffuse_mapping.loadTexture1x1(GREY);
-  if (default_specular_mapping.id == Texture::GetDefaultTextureId())
-    default_specular_mapping.loadTexture1x1(BLACK);
-  if (default_normal_mapping.id == Texture::GetDefaultTextureId())
-    default_normal_mapping.loadTexture1x1(BLUE);
-  if (default_roughness_mapping.id == Texture::GetDefaultTextureId())
-    default_roughness_mapping.loadTexture1x1(WHITE);
-  if (default_emission_mapping.id == Texture::GetDefaultTextureId())
-    default_emission_mapping.loadTexture1x1(BLACK);
-
   if (t != nullptr)
   {
     m_material.albedo_texture_id = t->id;
     m_material.use_albedo = true;
   }
   else
-    m_material.albedo_texture_id = default_diffuse_mapping.id;
+    m_material.albedo_texture_id = Texture::GetTexture1x1(GREY).id;
   
   if (t2 != nullptr)
   {
@@ -50,15 +33,14 @@ MyModel::MyModel(std::shared_ptr<MyMesh> m, const std::string& _name,
     m_material.use_metalic = true;
   }
   else
-    m_material.metalic_texture_id = default_specular_mapping.id;
-
+    m_material.metalic_texture_id = Texture::GetTexture1x1(BLACK).id;
   if (t3 != nullptr)
   {
     m_material.normal_texture_id = t3->id;
     m_material.use_normal = true;
   }
   else
-    m_material.normal_texture_id = default_normal_mapping.id;
+    m_material.normal_texture_id = Texture::GetTexture1x1(BLUE).id;
 
   if (t4 != nullptr)
   {
@@ -66,9 +48,9 @@ MyModel::MyModel(std::shared_ptr<MyMesh> m, const std::string& _name,
     m_material.use_roughness = true;
   }
   else
-    m_material.roughness_texture_id = default_emission_mapping.id; //!!! add default emissive
+    m_material.roughness_texture_id = Texture::GetTexture1x1(WHITE).id;
 
-  m_material.emissive_texture_id = default_emission_mapping.id;
+  m_material.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;//!!! add default emissive
 }
 
 //-----------------------------------------------------------------

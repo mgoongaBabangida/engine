@@ -16,6 +16,40 @@ GLuint Texture::GetDefaultTextureId()
 	return DEFAULT_TEXTURE_ID;
 }
 
+Texture Texture::GetTexture1x1(TColor color)
+{
+	static Texture white;
+	static Texture black;
+	static Texture blue;
+	static Texture pink;
+	static Texture yellow;
+	static Texture grey;
+
+	if (white.id == GetDefaultTextureId())
+		white._loadTexture1x1(WHITE);
+	if (black.id == GetDefaultTextureId())
+		black._loadTexture1x1(BLACK);
+	if (blue.id == GetDefaultTextureId())
+		blue._loadTexture1x1(BLUE);
+	if (pink.id == GetDefaultTextureId())
+		pink._loadTexture1x1(PINK);
+	if (yellow.id == GetDefaultTextureId())
+		yellow._loadTexture1x1(YELLOW);
+	if (grey.id == GetDefaultTextureId())
+		grey._loadTexture1x1(GREY);
+
+	switch (color)
+	{
+		case WHITE: return white;
+		case BLACK: return black;
+		case BLUE: return blue;
+		case PINK: return pink;
+		case YELLOW: return yellow;
+		case GREY: return grey;
+	}
+	assert("unknown color in Texture!");
+}
+
 Texture::Texture()
 {
 	type = "default";
@@ -102,7 +136,7 @@ void Texture::freeTexture()
 	mTextureHeight = 0;
 }
 
-bool Texture::loadTexture1x1(TColor color)
+bool Texture::_loadTexture1x1(TColor color)
 {
 	GLubyte tex[4];
 	switch (color)

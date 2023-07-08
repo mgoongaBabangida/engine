@@ -153,11 +153,8 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	}
 	else
 	{
-		static Texture t;
-		if(t.id == Texture::GetDefaultTextureId())
-			t.loadTexture1x1(WHITE);
 		glActiveTexture(GL_TEXTURE7);
-		glBindTexture(GL_TEXTURE_2D, t.id);
+		glBindTexture(GL_TEXTURE_2D, Texture::GetTexture1x1(WHITE).id);
 	}
 
 		mts ? eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS)

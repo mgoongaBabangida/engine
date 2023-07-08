@@ -18,6 +18,21 @@ eTextureManager::~eTextureManager()
   for (auto& node : m_Textures)
     glDeleteTextures(1, &node.second.id);
 
+	// free static textures
+	GLuint id;
+	id = Texture::GetTexture1x1(WHITE).id;
+	glDeleteTextures(1, &id);
+	id = Texture::GetTexture1x1(BLACK).id;
+	glDeleteTextures(1, &id);
+	id = Texture::GetTexture1x1(BLUE).id;
+	glDeleteTextures(1, &id);
+	id = Texture::GetTexture1x1(PINK).id;
+	glDeleteTextures(1, &id);
+	id = Texture::GetTexture1x1(YELLOW).id;
+	glDeleteTextures(1, &id);
+	id = Texture::GetTexture1x1(GREY).id;
+	glDeleteTextures(1, &id);
+
 #ifdef SDL_IMAGE
 	{ IMG_Quit(); }
 #endif
@@ -58,18 +73,6 @@ void eTextureManager::LoadAllTextures()
 	text.type = "";
 	text.loadTextureFromFile(folderPath + "container2_specular.png");
 	m_Textures.insert(std::pair<std::string, Texture>("Tcontainer0_s", text));
-	
-	text.loadTexture1x1(WHITE);
-	m_Textures.insert(std::pair<std::string, Texture>("Twhite", text));
-	
-	text.loadTexture1x1(BLACK);
-	m_Textures.insert(std::pair<std::string, Texture>("Tblack", text));
-	
-	text.loadTexture1x1(BLUE);
-	m_Textures.insert(std::pair<std::string, Texture>("Tblue", text));
-	
-	text.loadTexture1x1(PINK);
-	m_Textures.insert(std::pair<std::string, Texture>("Tpink", text));
 	
 	text.loadTextureFromFile(folderPath + "brickwall.jpg");//"brickwall.jpg"
 	m_Textures.insert(std::pair<std::string, Texture>("Tbrickwall0_d", text));

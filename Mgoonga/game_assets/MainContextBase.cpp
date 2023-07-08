@@ -499,39 +499,39 @@ void eMainContextBase::_PreInitModelManager()
 															texManager->Find("Tbrickwall0_d"),
 															texManager->Find("Tbrickwall0_d"),
 															texManager->Find("Tbrickwall0_n"),
-															texManager->Find("Tblack")));
+															&Texture::GetTexture1x1(BLACK)));
 	modelManager->AddPrimitive("container_cube",
 		std::make_shared<MyModel>(modelManager->FindMesh("cube"),
 															"container_cube",
 															texManager->Find("Tcontainer0_d"),
 															texManager->Find("Tcontainer0_s"),
-															texManager->Find("Tblue"),
-															texManager->Find("Tblack")));
+															&Texture::GetTexture1x1(BLUE),
+															&Texture::GetTexture1x1(BLACK)));
 	modelManager->AddPrimitive("arrow",
 		std::make_shared<MyModel>(modelManager->FindMesh("arrow"),
 															"arrow",
 															texManager->Find("Tcontainer0_d"),
 															texManager->Find("Tcontainer0_s"),
-															texManager->Find("Tblue"),
-															texManager->Find("Tblack")));
+															&Texture::GetTexture1x1(BLUE),
+															&Texture::GetTexture1x1(BLACK)));
 	modelManager->AddPrimitive("grass_plane",
 		std::make_shared<MyModel>(modelManager->FindMesh("plane"),
 															"grass_plane",
 															texManager->Find("Tgrass0_d"),
 															texManager->Find("Tgrass0_d"),
-															texManager->Find("Tblue"),
-															texManager->Find("Tblack")));
+															&Texture::GetTexture1x1(BLUE),
+															&Texture::GetTexture1x1(BLACK)));
 	modelManager->AddPrimitive("white_cube",
 		std::make_shared<MyModel>(modelManager->FindMesh("cube"),
-			"white_cube",
-			texManager->Find("Twhite")));
+															"white_cube",
+															&Texture::GetTexture1x1(WHITE)));
 	modelManager->AddPrimitive("brick_square",
 		std::make_shared<MyModel>(modelManager->FindMesh("square"),
 															"brick_square",
 															texManager->Find("Tbricks0_d"),
 															texManager->Find("Tbricks0_d"),
-															texManager->Find("Tblue"),
-															texManager->Find("Tblack")));
+															&Texture::GetTexture1x1(BLUE),
+															&Texture::GetTexture1x1(BLACK)));
 	modelManager->AddPrimitive("brick_cube",
 		std::make_shared<MyModel>(modelManager->FindMesh("cube"),
 															"brick_cube",
@@ -549,7 +549,7 @@ void eMainContextBase::_PreInitModelManager()
 	modelManager->AddPrimitive("white_sphere",
 		std::make_shared<MyModel>(modelManager->FindMesh("sphere"),
 														"white_sphere",
-														texManager->Find("Twhite")));
+														&Texture::GetTexture1x1(WHITE)));
 }
 
 //------------------------------------------------------------
