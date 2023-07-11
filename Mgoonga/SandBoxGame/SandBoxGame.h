@@ -21,10 +21,8 @@ public:
 				const std::string& shadersPath);
 	virtual ~eSandBoxGame() = default;
 
-	virtual bool			OnMouseMove(int32_t x, int32_t y)							override;
 	virtual bool			OnKeyPress(uint32_t asci)												override;
 	virtual bool			OnMousePress(int32_t x, int32_t y, bool left) override;
-	virtual bool			OnMouseRelease()																override;
 
 protected:
 

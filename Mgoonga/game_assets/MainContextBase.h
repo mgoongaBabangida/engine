@@ -55,8 +55,11 @@ public:
 	Event<std::function<void(shObject)>> ObjectBeingDeletedFromScene;
 
 	//IInputObserver
-	virtual bool			OnKeyPress(uint32_t asci)		override;
-	
+	virtual bool	OnKeyPress(uint32_t asci)					override;
+	virtual bool	OnMouseMove(int32_t x, int32_t y) override;
+	virtual bool	OnMousePress(int32_t x, int32_t y, bool left) override;
+	virtual bool	OnMouseRelease() override;
+
 	//IGame
 	void			InitializeGL() final;
 

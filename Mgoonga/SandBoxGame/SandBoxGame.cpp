@@ -6,7 +6,6 @@
 #include <math/Rigger.h>
 #include <math/BoxCollider.h>
 #include <math/RigidBdy.h>
-#include <math/ParticleSystem.h>
 
 #include <opengl_assets/Sound.h>
 #include <opengl_assets/TextureManager.h>
@@ -53,62 +52,18 @@ bool eSandBoxGame::OnKeyPress(uint32_t asci)
 }
 
 //------------------------------------------------------------------
-bool eSandBoxGame::OnMouseMove(int32_t x, int32_t y)
-{
-	if (GetMainCamera().getCameraRay().IsPressed())
-	{
-		if (m_input_strategy && !m_input_strategy->OnMouseMove(x, y))
-		{
-			// input strategy has priority over frame, @todo frmae should be inside one of input strategies
-			m_framed.reset(new std::vector<shObject>(GetMainCamera().getCameraRay().onMove(GetMainCamera(), m_objects, static_cast<float>(x), static_cast<float>(y)))); 	//to draw a frame
-			return true;
-		}
-	}
-	return false;
-}
-
-//------------------------------------------------------------------
 bool eSandBoxGame::OnMousePress(int32_t x, int32_t y, bool left)
 {
-	if (m_framed)
-		m_framed->clear();
+	bool ret = eMainContextBase::OnMousePress(x, y, left);
 
-	GetMainCamera().getCameraRay().Update(GetMainCamera(), x, y, static_cast<float>(width), static_cast<float>(height));
-	GetMainCamera().getCameraRay().press(x, y);
-
-	//should be inside input strategy which needs it(frame, moveXZ)
-	GetMainCamera().MovementSpeedRef() = 0.f;
-
-	if (left)
+	auto [new_focused, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
+	if (new_focused != m_focused)
 	{
-		//Get Visible and Children
-		auto [new_focused, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
-		if (new_focused != m_focused)
-		{
-			FocusChanged.Occur(m_focused, new_focused);
-			m_focused = new_focused;
-		}
+		FocusChanged.Occur(m_focused, new_focused);
+		m_focused = new_focused;
+		return true;
 	}
-
-	if (m_input_strategy)
-		m_input_strategy->OnMousePress(x, y, left);
-
-	// should be inside script, not here
-	if (m_focused && m_focused->GetScript()) // change -> subscribe directly
-		m_focused->GetScript()->OnMousePress(x, y, left);
-
-	return true;
-}
-
-//------------------------------------------------------------------
-bool eSandBoxGame::OnMouseRelease()
-{
-	GetMainCamera().getCameraRay().release();
-	if (m_input_strategy)
-		m_input_strategy->OnMouseRelease();
-	//should be inside input strategy which needs it(frame, moveXZ)
-	GetMainCamera().MovementSpeedRef() = 0.05f;
-	return true;
+	return ret;
 }
 
 //*********************Initialize**************************************

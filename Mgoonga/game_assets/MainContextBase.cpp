@@ -56,6 +56,7 @@ size_t eMainContextBase::Width() const { return width; }
 //-------------------------------------------------------------------------
 size_t eMainContextBase::Height()  const { return height; }
 
+//*********************InputObserver*********************************
 //--------------------------------------------------------------------------
 bool eMainContextBase::OnKeyPress(uint32_t _asci)
 {
@@ -78,6 +79,58 @@ bool eMainContextBase::OnKeyPress(uint32_t _asci)
 	return true;
 	default: return false;
 	}
+}
+
+//--------------------------------------------------------------------------
+bool eMainContextBase::OnMouseMove(int32_t x, int32_t y)
+{
+	if (GetMainCamera().getCameraRay().IsPressed())
+	{
+		if (m_input_strategy && !m_input_strategy->OnMouseMove(x, y))
+		{
+			// input strategy has priority over frame, @todo frmae should be inside one of input strategies
+			m_framed.reset(new std::vector<shObject>(GetMainCamera().getCameraRay().onMove(GetMainCamera(), m_objects, static_cast<float>(x), static_cast<float>(y)))); 	//to draw a frame
+			return true;
+		}
+	}
+	return false;
+}
+
+//--------------------------------------------------------------------------
+bool eMainContextBase::OnMousePress(int32_t x, int32_t y, bool left)
+{
+	if (m_framed)
+		m_framed->clear();
+
+	GetMainCamera().getCameraRay().Update(GetMainCamera(), static_cast<float>(x), static_cast<float>(y), static_cast<float>(width), static_cast<float>(height));
+	GetMainCamera().getCameraRay().press(x, y);
+
+	//should be inside input strategy which needs it(frame, moveXZ)
+	GetMainCamera().MovementSpeedRef() = 0.f;
+
+	if (left)
+	{
+		//Get Visible and Children
+		auto [picked, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
+		if (picked != m_focused)
+			ObjectPicked.Occur(picked);
+	}
+
+	if (m_input_strategy)
+		m_input_strategy->OnMousePress(x, y, left);
+
+	return false;
+}
+
+//---------------------------------------------------------------------------------
+bool eMainContextBase::OnMouseRelease()
+{
+	GetMainCamera().getCameraRay().release();
+	if (m_input_strategy)
+		m_input_strategy->OnMouseRelease();
+	//should be inside input strategy which needs it(frame, moveXZ)
+	GetMainCamera().MovementSpeedRef() = 0.05f;
+	return true;
 }
 
 //--------------------------------------------------------------------------
