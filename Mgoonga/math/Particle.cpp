@@ -33,5 +33,6 @@ bool Particle::Update()
 	m_elapsedTime += speed; // @todo speed is fixed for update call
 
 	updateTextureCoordInfo();
-	return m_elapsedTime < m_lifelength;
+	alive = m_elapsedTime < m_lifelength;
+	return alive;
 }

@@ -25,11 +25,14 @@ eWaterRender::eWaterRender(std::unique_ptr<MyModel> model,
 	lightColorLoc						= glGetUniformLocation(waterShader.ID(), "lightColor");
 
 	water_model = model.get();
+
 	model->setTextureBump(waves);
 	model->setTextureFourth(DUDV);
+
 	object.reset(new eObject);
 	object->SetModel(model.release());
 	object->SetTransform(new Transform);
+
 	object->GetTransform()->setTranslation(glm::vec3(0.0f, waterHeight, 0.0f));
 	object->GetTransform()->setRotation(PI / 2, 0.0f, 0.0f);
 	object->GetTransform()->setScale(glm::vec3(1.2f, 1.8f, 1.0f)); // the size of the pixture

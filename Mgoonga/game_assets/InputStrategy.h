@@ -49,8 +49,8 @@ public:
 			m_camera.get().getCameraRay().Update(m_camera.get(),
 																					 static_cast<float>(_x),
 																					 static_cast<float>(_y),
-																					 m_camera.get().getWidth(),
-																					 m_camera.get().getHeight());
+																					 static_cast<float>(m_camera.get().getWidth()),
+																					 static_cast<float>(m_camera.get().getHeight()));
 			m_camera.get().getCameraRay().press((float)_x, (float)_y);
 			
 			dbb::plane pl(m_intersaction,
