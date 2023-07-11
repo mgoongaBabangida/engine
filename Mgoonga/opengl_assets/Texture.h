@@ -55,7 +55,7 @@ struct DLL_OPENGL_ASSETS Texture
 	bool generatePerlin(GLuint Width, GLuint Height, bool periodic);
 
 	bool makeCubemap(Texture*);
-	bool makeCubemap(size_t size);
+	bool makeCubemap(size_t size, bool _mipmap = false);
 	bool makeDepthTexture();
 	bool makeDepthCubeMap();
 	bool makeRandom1DTexture(unsigned int _size);

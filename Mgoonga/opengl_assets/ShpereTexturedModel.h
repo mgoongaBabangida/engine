@@ -44,7 +44,7 @@ protected:
 class DLL_OPENGL_ASSETS SphereTexturedModel : public IModel
   {
   public:
-    SphereTexturedModel(SphereTexturedMesh* _mesh)
+    explicit SphereTexturedModel(SphereTexturedMesh* _mesh)
       :m_mesh(_mesh)
       {}
 

@@ -254,7 +254,7 @@ bool Texture::makeCubemap(Texture* _texture)
 	return true;
 }
 
-bool Texture::makeCubemap(size_t _size)
+bool Texture::makeCubemap(size_t _size, bool _mipmap)
 {
 	//@todo cistomize - channels, rgb16f etc.
 	mChannels = 3;
@@ -264,10 +264,14 @@ bool Texture::makeCubemap(size_t _size)
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
 
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	if(_mipmap)
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	else
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	int buffer_size = mTextureWidth * mTextureHeight * mChannels;
 
@@ -277,6 +281,10 @@ bool Texture::makeCubemap(size_t _size)
 		glBindTexture(GL_TEXTURE_2D, id);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, mTextureWidth, mTextureHeight, 0, GL_RGB, GL_FLOAT, &xData[0]);
 	}
+
+	if(_mipmap)
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	return true;
 }

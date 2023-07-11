@@ -69,6 +69,15 @@ void eGlBufferContext::EnableReadingBuffer(eBuffer _buffer, GLenum _slot)
 	}
 }
 
+GLuint eGlBufferContext::GetRboID(eBuffer _buffer)
+{
+	switch (_buffer)
+	{
+		case eBuffer::BUFFER_IBL_CUBEMAP:				return iblCubemapFBO.RboID();
+			//@todo all other
+	}
+}
+
 Texture eGlBufferContext::GetTexture(eBuffer _buffer)
 {
 	switch (_buffer)

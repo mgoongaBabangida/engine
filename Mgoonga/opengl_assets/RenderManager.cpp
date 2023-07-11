@@ -157,6 +157,9 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 	m_iblRender.reset(new  eIBLRender(folderPath + "hdrToCubemapVs.glsl",
 																		folderPath + "hdrToCubemapFs.glsl",
 																		folderPath + "irradianceFs.glsl",
+																		folderPath + "prefilterFs.glsl",
+																		folderPath + "SimpleVertexShader.glsl",
+																		folderPath + "BrdfFs.glsl",
 																		texManager.Find("hdr1")));
 	shader_lambda(m_iblRender.get());
 }

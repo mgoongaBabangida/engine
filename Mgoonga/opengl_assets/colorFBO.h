@@ -58,6 +58,7 @@ public:
 
 	 Texture		GetTexture();
 	 GLuint  ID() { return m_fbo; }
+	 GLuint  RboID() { return m_rbo; }
 	 GLuint		Width() { return  m_width; }
 	 GLuint		Height() { return  m_height; }
 	 glm::ivec2 Size() { return { m_width , m_height }; }

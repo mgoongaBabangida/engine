@@ -36,7 +36,10 @@ public:
 	void BufferInit(eBuffer, unsigned int, unsigned int, bool _param = false);
 	void EnableWrittingBuffer(eBuffer);
 	void EnableReadingBuffer(eBuffer, GLenum slot);
+
 	Texture GetTexture(eBuffer);
+	GLuint GetRboID(eBuffer _buffer);
+
 	void ResolveMtsToScreen() { mtsFBO.ResolveToFBO(&screenFBO); }
 	void BlitFromTo(eBuffer, eBuffer, GLenum bit);
 

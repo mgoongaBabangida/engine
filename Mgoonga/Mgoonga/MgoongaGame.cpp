@@ -13,7 +13,6 @@
 #include <opengl_assets/SoundManager.h>
 #include <game_assets/ModelManagerYAML.h>
 #include <game_assets/AnimationManagerYAML.h>
-//#include <game_assets/GUIController.h>
 #include <game_assets/CameraFreeController.h>
 
 #include <sdl_assets/ImGuiContext.h>
@@ -171,13 +170,32 @@ void eMgoongaGameContext::InitializeModels()
 
   modelManager->Add("Dying", (GLchar*)std::string(modelFolderPath + "Dying Soldier/Dying.dae").c_str());
 
-  std::vector<const Texture*> textures{ texManager->Find("pbr1_basecolor"),
-                                        texManager->Find("pbr1_metallic"),
-                                        texManager->Find("pbr1_normal"),
-                                        texManager->Find("pbr1_roughness") };
-  modelManager->Add("sphere_textured", textures /*std::vector<const Texture*>{}*/); // or textures
-  modelManager->Add("sphere_red");//@todo
-  
+  Material pbr1;
+  pbr1.albedo_texture_id = texManager->Find("pbr1_basecolor")->id;
+  pbr1.metalic_texture_id = texManager->Find("pbr1_metallic")->id;
+  pbr1.normal_texture_id = texManager->Find("pbr1_normal")->id;
+  pbr1.roughness_texture_id = texManager->Find("pbr1_roughness")->id;
+  pbr1.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
+  pbr1.use_albedo = pbr1.use_metalic = pbr1.use_normal = pbr1.use_roughness = true;
+
+  Material red;
+  red.albedo = glm::vec3(0.9f, 0.0f, 0.0f);
+  red.ao = 1.0f;
+  red.roughness = 0.5;
+  red.metallic = 0.5;
+
+  Material gold;
+  gold.albedo_texture_id = texManager->Find("pbr_gold_basecolor")->id;
+  gold.metalic_texture_id = texManager->Find("pbr_gold_metallic")->id;
+  gold.normal_texture_id = texManager->Find("pbr_gold_normal")->id;
+  gold.roughness_texture_id = texManager->Find("pbr_gold_roughness")->id;
+  gold.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
+  gold.use_albedo = gold.use_metalic = gold.use_normal = gold.use_roughness = true;
+
+  modelManager->Add("sphere_textured", Primitive::SPHERE, std::move(pbr1));
+  modelManager->Add("sphere_red", Primitive::SPHERE, std::move(red));
+  modelManager->Add("sphere_gold", Primitive::SPHERE, std::move(gold));
+
   //@todo separate init scene member func
   _InitMainTestSceane();
   _InitializeHexes();
@@ -216,7 +234,6 @@ void eMgoongaGameContext::InitializeModels()
   m_input_controller->AddObserver(m_guis[2].get(), STRONG);
 
   //GLOBAL CONTROLLERS
-  //m_global_scripts.push_back(std::make_shared<GUIController>(this, this->pipeline, soundManager->GetSound("page_sound")));
   m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera()));
 
   m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
@@ -256,7 +273,7 @@ void eMgoongaGameContext::_InitializeHexes()
                                    z_move + z_move * 2 * j });
     }
   ObjectFactoryBase factory;
-  m_objects.push_back(factory.CreateObject(std::make_shared<SimpleModel>(new SimpleGeometryMesh(m_dots, radius, SimpleGeometryMesh::GeometryType::Hex, { 1.0f, 1.0f, 0.0f })),
+  m_objects.push_back(factory.CreateObject(std::make_shared<SimpleModel>(new SimpleGeometryMesh(m_dots, 0.5f * 0.57f, SimpleGeometryMesh::GeometryType::Hex, { 1.0f, 1.0f, 0.0f })),
     eObject::RenderType::GEOMETRY));
 }
 
@@ -287,7 +304,7 @@ void eMgoongaGameContext::_InitMainTestSceane()
   std::unique_ptr<TerrainModel> terrainModel = modelManager->CloneTerrain("simple");
   terrainModel->initialize(texManager->Find("Tgrass0_d"),
                            texManager->Find("Tgrass0_d"),
-                           texManager->Find("Tblue"),
+                           &Texture::GetTexture1x1(BLUE),
                            texManager->Find("TOcean0_s"),
                            false);
 
@@ -367,6 +384,10 @@ void eMgoongaGameContext::_InitMainTestSceane()
   shObject obj = factory.CreateObject(modelManager->Find("sphere_textured"), eObject::RenderType::PBR, "SpherePBR");
   obj->GetTransform()->setTranslation(glm::vec3(-2.0f, 3.5f, 1.5f));
   m_objects.push_back(obj);
+
+  shObject goldsphere = factory.CreateObject(modelManager->Find("sphere_gold"), eObject::RenderType::PBR, "SpherePBRGold");
+  goldsphere->GetTransform()->setTranslation(vec3(-7.0f, 3.5f, 2.0f));
+  m_objects.push_back(goldsphere);
 
   shObject dying = factory.CreateObject(modelManager->Find("Dying"), eObject::RenderType::PHONG, "Dying");
   dying->GetTransform()->setTranslation(vec3(1.0f, 2.0f, -2.0f));

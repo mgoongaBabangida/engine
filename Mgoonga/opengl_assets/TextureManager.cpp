@@ -176,6 +176,16 @@ void eTextureManager::LoadAllTextures()
   m_Textures.insert(std::pair<std::string, Texture>("pbr1_normal", text));
   text.loadTextureFromFile(folderPath + "sphere_pbr1/rustediron2_roughness.png");
   m_Textures.insert(std::pair<std::string, Texture>("pbr1_roughness", text));
+
+	//pbr gold
+	text.loadTextureFromFile(folderPath + "pbr_gold/gold-scuffed_basecolor-boosted.png");
+	m_Textures.insert(std::pair<std::string, Texture>("pbr_gold_basecolor", text));
+	text.loadTextureFromFile(folderPath + "pbr_gold/gold-scuffed_metallic.png");
+	m_Textures.insert(std::pair<std::string, Texture>("pbr_gold_metallic", text));
+	text.loadTextureFromFile(folderPath + "pbr_gold/gold-scuffed_normal.png");
+	m_Textures.insert(std::pair<std::string, Texture>("pbr_gold_normal", text));
+	text.loadTextureFromFile(folderPath + "pbr_gold/gold-scuffed_roughness.png");
+	m_Textures.insert(std::pair<std::string, Texture>("pbr_gold_roughness", text));
 }
 
 const Texture* eTextureManager::Find(const std::string& texture_name) const

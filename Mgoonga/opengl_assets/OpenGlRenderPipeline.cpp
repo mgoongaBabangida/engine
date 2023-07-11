@@ -563,12 +563,14 @@ void eOpenGlRenderPipeline::RenderSSAO(const Camera& _camera, const Light& _ligh
 void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 {
 	glDisable(GL_CULL_FACE);
+	// load hdr env
 	glViewport(0, 0, (GLsizei)512, (GLsizei)512); //@todo numbers // don't forget to configure the viewport to the capture dimensions.
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_IBL_CUBEMAP);
 	auto cube_id = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP).id;
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cube_id);
 	renderManager->IBLRender()->RenderCubemap(_camera, cube_id);
 
+	//irradiance
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cube_id);
 	glViewport(0, 0, 32, 32);
@@ -576,8 +578,43 @@ void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 	auto irr_id = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP_IRR).id;
 	renderManager->IBLRender()->RenderIBLMap(_camera, irr_id);
 
+	//dots artifacts
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cube_id);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+	// prefilter
+	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_IBL_CUBEMAP, GL_TEXTURE2);
+	//glActiveTexture(GL_TEXTURE2); //any
+	//glBindTexture(GL_TEXTURE_CUBE_MAP, cube_id);
+	Texture prefilter; //free ?
+	prefilter.makeCubemap(128, true);
+	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_IBL_CUBEMAP);
+	renderManager->IBLRender()->RenderPrefilterMap(_camera, prefilter.id, eGlBufferContext::GetInstance().GetRboID(eBuffer::BUFFER_IBL_CUBEMAP));
+
+	//Pre-computing the BRDF
+	// then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
+	glBindFramebuffer(GL_FRAMEBUFFER, eGlBufferContext::GetInstance().GetId(eBuffer::BUFFER_IBL_CUBEMAP));
+	glBindRenderbuffer(GL_RENDERBUFFER, eGlBufferContext::GetInstance().GetRboID(eBuffer::BUFFER_IBL_CUBEMAP));
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderManager->IBLRender()->GetLUTTextureID(), 0);
+
+	glViewport(0, 0, 512, 512);
+	renderManager->IBLRender()->RenderBrdf();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
+	//set textures to pbr
 	glActiveTexture(GL_TEXTURE9);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, irr_id);
+	
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, prefilter.id);
+
+	glActiveTexture(GL_TEXTURE11);
+	glBindTexture(GL_TEXTURE_2D, renderManager->IBLRender()->GetLUTTextureID());
+
 	glViewport(0, 0, width, height);
 	/*static Texture skybox = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP_IRR);
 	renderManager->SkyBoxRender()->SetSkyBoxTexture(&skybox);*/
