@@ -358,7 +358,7 @@ bool BoxCollider::CollidesWith(const ITransform& _trans, std::vector<shObject> _
 
 	for (auto& obj : objects_to_check)
 	{
-		if (obj->GetCollider() == this)
+		if (obj->GetCollider() == this || obj->GetCollider() == nullptr)
 			continue;
 
 		std::vector<glm::mat3> boundings = obj->GetCollider()->GetBoundingTriangles(*obj->GetTransform());

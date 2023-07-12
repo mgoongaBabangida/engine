@@ -19,14 +19,12 @@ ePBRRender::ePBRRender(const std::string& vS, const std::string& fS)
   metallicLoc       = glGetUniformLocation(pbrShader.ID(), "metallic");
   roughnessLoc      = glGetUniformLocation(pbrShader.ID(), "roughness");
   aoLoc             = glGetUniformLocation(pbrShader.ID(), "ao");
-  lightPositionsLoc = glGetUniformLocation(pbrShader.ID(), "lightPositions");
-  lightColorsLoc    = glGetUniformLocation(pbrShader.ID(), "lightColors");
   camPosLoc         = glGetUniformLocation(pbrShader.ID(), "camPos");
 
   //vertex shader
   fullTransformationUniformLocation = glGetUniformLocation(pbrShader.ID(), "modelToProjectionMatrix");
   modelToWorldMatrixUniformLocation = glGetUniformLocation(pbrShader.ID(), "modelToWorldMatrix");
-  shadowMatrixUniformLocation = glGetUniformLocation(pbrShader.ID(), "shadowMatrix"); //shadow
+  shadowMatrixUniformLocation       = glGetUniformLocation(pbrShader.ID(), "shadowMatrix"); //shadow
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -39,33 +37,34 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
   glm::mat4 shadowMatrix = camera.getProjectionBiasedMatrix() * worldToViewMatrix;
   glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE, &shadowMatrix[0][0]);
   
-  glm::mat4 worldToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
-  
-  std::vector<glm::vec3> lpositions;
-  std::vector<glm::vec3> lcolors;
+  glm::mat4 worldToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix(); 
+  {
+    std::vector<glm::vec3> lpositions;
+    std::vector<glm::vec3> lcolors;
 
-  lpositions.push_back(_light.light_position);
-  lcolors.push_back({ _light.intensity });
+    lpositions.push_back(_light.light_position);
+    lcolors.push_back({ _light.intensity });
 
-  std::string loc_p = "lightPositions";
-  GLuint loc_pos = glGetUniformLocation(pbrShader.ID(), loc_p.c_str());
-  glUniform3fv(loc_pos, 1, &lpositions[0][0]);
+    GLuint loc_pos = glGetUniformLocation(pbrShader.ID(), "lightPositions");
+    glUniform3fv(loc_pos, 1, &lpositions[0][0]);
 
-  std::string loc_c = "lightColors";
-  GLuint loc_col = glGetUniformLocation(pbrShader.ID(), loc_c.c_str());
-  glUniform3fv(loc_col, 1, &lcolors[0][0]);
+    GLuint loc_col = glGetUniformLocation(pbrShader.ID(), "lightColors");
+    glUniform3fv(loc_col, 1, &lcolors[0][0]);
+  }
 
   std::map<std::string, std::vector<shObject>> instanced;
   for (auto& object : objects)
   {
     if (object->GetInstancingTag().empty())
     {
-      glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * object->GetTransform()->getModelMatrix();
+      if(!object->Is2DScreenSpace())
+        modelToProjectionMatrix = worldToProjectionMatrix * object->GetTransform()->getModelMatrix();
+      else
+        modelToProjectionMatrix = object->GetTransform()->getModelMatrix();
       glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
       glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &object->GetTransform()->getModelMatrix()[0][0]);
 
       _SetMaterial(object);
-
       object->GetModel()->Draw();
     }
     else

@@ -8,10 +8,11 @@ BezierCurveUIController::BezierCurveUIController(shObject _bezier_object)
 : m_bezier_object(_bezier_object)
 {
   auto bezier_objects = m_bezier_object->GetChildrenObjects();
-  bezier_objects[0]->GetTransform()->setScale({ 0.1f,0.1f,0.1f });
-  bezier_objects[1]->GetTransform()->setScale({ 0.1f,0.1f,0.1f });
-  bezier_objects[2]->GetTransform()->setScale({ 0.1f,0.1f,0.1f });
-  bezier_objects[3]->GetTransform()->setScale({ 0.1f,0.1f,0.1f });
+
+  bezier_objects[0]->GetTransform()->setScale({ 0.02f, 0.02f, 0.02f });
+  bezier_objects[1]->GetTransform()->setScale({ 0.02f, 0.02f, 0.02f });
+  bezier_objects[2]->GetTransform()->setScale({ 0.02f, 0.02f, 0.02f });
+  bezier_objects[3]->GetTransform()->setScale({ 0.02f, 0.02f, 0.02f });
 
   m_bezier_mesh = dynamic_cast<const BezierCurveMesh*>(m_bezier_object->GetModel()->GetMeshes()[0]);
   if (m_bezier_mesh)

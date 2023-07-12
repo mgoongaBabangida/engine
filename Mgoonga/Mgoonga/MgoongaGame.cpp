@@ -19,7 +19,6 @@
 
 #include <game_assets/ShipScript.h>
 #include <game_assets/ObjectFactory.h>
-#include <game_assets/BezierCurveUIController.h>
 
 //---------------------------------------------------------------------------
 eMgoongaGameContext::eMgoongaGameContext(eInputController*  _input,
@@ -159,7 +158,6 @@ void eMgoongaGameContext::InitializeModels()
   //@todo separate init scene member func
   _InitMainTestSceane();
   _InitializeHexes();
-  _InitializeBezier();
 
   m_input_strategy.reset(new InputStrategyMoveAlongXZPlane(GetMainCamera(), GetObjectsWithChildren(m_objects)));
 
@@ -235,26 +233,6 @@ void eMgoongaGameContext::_InitializeHexes()
   ObjectFactoryBase factory;
   m_objects.push_back(factory.CreateObject(std::make_shared<SimpleModel>(new SimpleGeometryMesh(m_dots, 0.5f * 0.57f, SimpleGeometryMesh::GeometryType::Hex, { 1.0f, 1.0f, 0.0f })),
     eObject::RenderType::GEOMETRY));
-}
-
-//----------------------------------------------------
-void eMgoongaGameContext::_InitializeBezier()
-{
-  dbb::Bezier bezier;
-  bezier.p0 = { 1.0f, 3.0f, 0.0f };
-  bezier.p1 = { 3.0f, 3.0f, 3.0f };
-  bezier.p2 = { 4.2f, 3.0f, -2.5f };
-  bezier.p3 = { 8.0f, 3.0f, 1.0f };
-  ObjectFactoryBase factory;
-  shObject bezier_model = factory.CreateObject(std::make_shared<BezierCurveModel>(new BezierCurveMesh(bezier)), eObject::RenderType::BEZIER_CURVE);
-  m_objects.push_back(bezier_model);
-
-  for (int i = 0 ; i < 4; ++i)
-  {
-    shObject pbr_sphere = factory.CreateObject(modelManager->Find("sphere_red"), eObject::RenderType::PBR, "SphereBezierPBR " + std::to_string(i));
-    bezier_model->GetChildrenObjects().push_back(pbr_sphere);
-  }
-  bezier_model->SetScript(new BezierCurveUIController(bezier_model));
 }
 
 //----------------------------------------------------

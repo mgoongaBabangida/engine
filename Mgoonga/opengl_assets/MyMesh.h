@@ -132,10 +132,11 @@ protected:
 class DLL_OPENGL_ASSETS BezierCurveMesh : public IMesh
 {
 public:
-	explicit BezierCurveMesh(const dbb::Bezier& _bezier);
+	explicit BezierCurveMesh(const dbb::Bezier& _bezier, bool _is2D = false);
 	virtual ~BezierCurveMesh();
 
 	dbb::Bezier& GetBezier() { return m_bezier; };
+	bool Is2D() { return m_2d; }
 	void Update();
 
 	virtual void								Draw();
@@ -151,4 +152,5 @@ protected:
 	dbb::Bezier m_bezier;
 	GLuint VAO;
 	GLuint VBO;
+	bool m_2d = false;
 };

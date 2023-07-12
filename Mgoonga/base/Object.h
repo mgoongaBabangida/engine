@@ -28,6 +28,8 @@ public:
 	void SetVisible(bool _visible) { m_is_visible = _visible; }
 	bool IsPickable() const { return m_is_pickable; }
 	void SetPickable(bool _pickable) { m_is_pickable = _pickable; }
+	bool Is2DScreenSpace() const { return m_is_2d_screen_space; }
+	void Set2DScreenSpace(bool _2d) { m_is_2d_screen_space = _2d; }
 
 	void SetInstancingTag(const std::string& _tag) { m_instancing_tag = _tag; }
 	const std::string& GetInstancingTag() const { return m_instancing_tag; }
@@ -68,6 +70,7 @@ protected:
 
 	bool m_is_visible = true;
 	bool m_is_pickable = true;
+	bool m_is_2d_screen_space = false;
 	RenderType m_render_type = RenderType::PHONG;
 	std::string m_instancing_tag;
 };

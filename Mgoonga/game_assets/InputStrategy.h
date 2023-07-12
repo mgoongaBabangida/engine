@@ -78,6 +78,7 @@ public:
 		if (m_grab_camera_line != std::nullopt && m_translation_vector != glm::vec3{ 0.f,0.f,0.0f })
 			m_dragged->GetTransform()->setTranslation(m_grab_translation + m_translation_vector);
 	}
+
 protected:
 	std::reference_wrapper<Camera>	m_camera;
 	std::vector<shObject>						m_objects;
@@ -86,4 +87,57 @@ protected:
 	glm::vec3												m_intersaction;
 	glm::vec3												m_grab_translation;
 	glm::vec3												m_translation_vector = glm::vec3{ 0.f,0.f,0.0f };
+};
+
+//---------------------------------------------------------------
+class InputStrategy2DMove : public InputStrategy
+{
+public:
+	InputStrategy2DMove(IGame*_game) :m_game(_game) {}
+
+	virtual bool OnMouseMove(uint32_t _x, uint32_t _y) 
+	{
+		if (m_grabbed != nullptr)
+		{
+			float x_ss = (((float)_x / (float)m_game->Width()) - 0.5f) * 2.0f;
+			float y_ss = -(((float)_y / (float)m_game->Height()) - 0.5f) * 2.0f;
+			m_grabbed->GetTransform()->setTranslation({ x_ss, y_ss , 0.0f });
+			return true;
+		}
+		return false;
+	}
+
+	virtual bool OnMousePress(uint32_t _x, uint32_t _y, bool _left)
+	{ 
+		if (!_left)
+		{
+			std::vector<std::shared_ptr<eObject>> objs = GetObjectsWithChildren(m_game->GetObjects());
+			float x_ss = (((float)_x / (float)m_game->Width()) - 0.5f) * 2.0f;
+			float y_ss = -(((float)_y / (float)m_game->Height()) - 0.5f) * 2.0f;
+			for (auto& obj : objs)
+			{
+				if (obj->Is2DScreenSpace())
+				{
+					float delta_x = abs(obj->GetTransform()->getTranslation().x - x_ss);
+					float delta_y = abs(obj->GetTransform()->getTranslation().y - y_ss);
+					if (delta_x < 0.01f && delta_y < 0.01f)
+					{
+						m_grabbed = obj;
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	virtual bool OnMouseRelease()
+	{
+		m_grabbed = nullptr;
+		return false;
+	}
+
+protected:
+	IGame* m_game = nullptr;
+	shObject m_grabbed = nullptr;
 };

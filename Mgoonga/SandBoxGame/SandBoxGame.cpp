@@ -97,6 +97,13 @@ void eSandBoxGame::InitializeModels()
 	modelManager->Add("MapleTree", (GLchar*)std::string(modelFolderPath + "MapleTree/MapleTree.obj").c_str());
 	modelManager->Add("Cottage", (GLchar*)std::string(modelFolderPath + "85-cottage_obj/cottage_obj.obj").c_str());
 
+	Material red;
+	red.albedo = glm::vec3(0.9f, 0.0f, 0.0f);
+	red.ao = 1.0f;
+	red.roughness = 1.0f;
+	red.metallic = 0.0f;
+	modelManager->Add("sphere_red", Primitive::SPHERE, std::move(red));
+
 	//DESERIALIZE ANIMATIONS
 	animationManager->Deserialize("Animations.mgoongaAnimations");
 	
@@ -108,22 +115,29 @@ void eSandBoxGame::InitializeModels()
 	wallCube->SetScript(new eSandBoxScript(this));
 	m_objects.push_back(wallCube);
 	
-	shObject mapleTree = factory.CreateObject(modelManager->Find("MapleTree"), eObject::RenderType::PHONG, "MapleTree");
-	mapleTree->GetTransform()->setTranslation(vec3(3.0f, -2.0f, -2.0f));
-	mapleTree->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
-	m_objects.push_back(mapleTree);
+	if (false) // mapleTree
+	{
+		shObject mapleTree = factory.CreateObject(modelManager->Find("MapleTree"), eObject::RenderType::PHONG, "MapleTree");
+		mapleTree->GetTransform()->setTranslation(vec3(3.0f, -2.0f, -2.0f));
+		mapleTree->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
+		m_objects.push_back(mapleTree);
+	}
 
-	shObject cottage = factory.CreateObject(modelManager->Find("Cottage"), eObject::RenderType::PHONG, "Cottage");
-	cottage->GetTransform()->setTranslation(vec3(0.5f, -2.01f, -2.0f));
-	cottage->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
-	m_objects.push_back(cottage);
-	Texture* t = const_cast<Texture*>(texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/85-cottage_obj/cottage_diffuse.png", "cottage_diffuse1", "texture_diffuse")));
-	for(auto& mesh : cottage->GetModel()->Get3DMeshes())
-		const_cast<I3DMesh*>(mesh)->AddTexture(t);
+	Texture* t = nullptr;
+	if (false) //cottage
+	{
+		shObject cottage = factory.CreateObject(modelManager->Find("Cottage"), eObject::RenderType::PHONG, "Cottage");
+		cottage->GetTransform()->setTranslation(vec3(0.5f, -2.01f, -2.0f));
+		cottage->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
+		m_objects.push_back(cottage);
+		t = const_cast<Texture*>(texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/85-cottage_obj/cottage_diffuse.png", "cottage_diffuse1", "texture_diffuse")));
+		for (auto& mesh : cottage->GetModel()->Get3DMeshes())
+			const_cast<I3DMesh*>(mesh)->AddTexture(t);
 
-	t = const_cast<Texture*>(texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/85-cottage_obj/cottage_normal.png", "cottage_normal1", "texture_normal")));
-	for (auto& mesh : cottage->GetModel()->Get3DMeshes())
-		const_cast<I3DMesh*>(mesh)->AddTexture(t);
+		t = const_cast<Texture*>(texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/85-cottage_obj/cottage_normal.png", "cottage_normal1", "texture_normal")));
+		for (auto& mesh : cottage->GetModel()->Get3DMeshes())
+			const_cast<I3DMesh*>(mesh)->AddTexture(t);
+	}
 
 	shObject grassPlane = factory.CreateObject(modelManager->Find("grass_plane"), eObject::RenderType::PHONG, "GrassPlane");
 	grassPlane->GetTransform()->setTranslation(vec3(0.0f, -2.0f, 0.0f));

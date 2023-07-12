@@ -6,6 +6,7 @@
 #include "ModelManagerYAML.h"
 #include "AnimationManagerYAML.h"
 #include "ParticleSystemToolController.h"
+#include "BezierCurveUIController.h"
 
 #include <base/InputController.h>
 #include <tcp_lib/Network.h>
@@ -508,6 +509,51 @@ void eMainContextBase::InitializeExternalGui()
 		m_objects.push_back(plane);
 	};
 	externalGui[5]->Add(BUTTON, "Plane", (void*)&create_plane_callbaack);
+
+	std::function<void()> create_bezier_callbaack = [this]()
+	{
+		dbb::Bezier bezier;
+		bezier.p0 = { -1.0f, -1.0f, 0.0f };
+		bezier.p1 = { -0.5f, -0.5f, 0.0f };
+		bezier.p2 = { 0.5f, 0.5f, 0.0f };
+		bezier.p3 = { 1.0f, 1.0f, 0.0f };
+
+		ObjectFactoryBase factory;
+		shObject bezier_model = factory.CreateObject(std::make_shared<BezierCurveModel>(new BezierCurveMesh(bezier, /*2d*/true)), eObject::RenderType::BEZIER_CURVE);
+		m_objects.push_back(bezier_model);
+
+		for (int i = 0; i < 4; ++i)
+		{
+			shObject pbr_sphere = factory.CreateObject(modelManager->Find("sphere_red"), eObject::RenderType::PBR, "SphereBezierPBR " + std::to_string(i));
+			bezier_model->GetChildrenObjects().push_back(pbr_sphere);
+			pbr_sphere->Set2DScreenSpace(true);
+		}
+		bezier_model->SetScript(new BezierCurveUIController(bezier_model));
+		m_input_strategy.reset(new InputStrategy2DMove(this));
+	};
+	externalGui[5]->Add(BUTTON, "Bezier Curve 2D", (void*)&create_bezier_callbaack);
+
+	std::function<void()> create_bezier_callbaack_3d = [this]()
+	{
+		dbb::Bezier bezier;
+		bezier.p0 = { 1.0f, 3.0f, 0.0f };
+		bezier.p1 = { 3.0f, 3.0f, 3.0f };
+		bezier.p2 = { 4.2f, 3.0f, -2.5f };
+		bezier.p3 = { 8.0f, 3.0f, 1.0f };
+
+		ObjectFactoryBase factory;
+		shObject bezier_model = factory.CreateObject(std::make_shared<BezierCurveModel>(new BezierCurveMesh(bezier, /*2d*/true)), eObject::RenderType::BEZIER_CURVE);
+		m_objects.push_back(bezier_model);
+
+		for (int i = 0; i < 4; ++i)
+		{
+			shObject pbr_sphere = factory.CreateObject(modelManager->Find("sphere_red"), eObject::RenderType::PBR, "SphereBezierPBR " + std::to_string(i));
+			bezier_model->GetChildrenObjects().push_back(pbr_sphere);
+		}
+		bezier_model->SetScript(new BezierCurveUIController(bezier_model));
+		m_input_strategy.reset(new InputStrategyMoveAlongXZPlane(GetMainCamera(), GetObjectsWithChildren(m_objects)));
+	};
+	externalGui[5]->Add(BUTTON, "Bezier Curve 3D", (void*)&create_bezier_callbaack_3d);
 
 	//Object List
 	externalGui[6]->Add(OBJECT_LIST, "Objects List", (void*)this);

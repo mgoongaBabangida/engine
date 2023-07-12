@@ -27,11 +27,11 @@ protected:
   GLuint metallicLoc;
   GLuint roughnessLoc;
   GLuint aoLoc;
-  GLuint lightPositionsLoc;
-  GLuint lightColorsLoc;
   GLuint camPosLoc;
 
   GLuint fullTransformationUniformLocation;
   GLuint modelToWorldMatrixUniformLocation;
   GLuint shadowMatrixUniformLocation;
+
+  glm::mat4 modelToProjectionMatrix;
 };

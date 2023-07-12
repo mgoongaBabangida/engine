@@ -91,7 +91,7 @@ protected:
 class DLL_OPENGL_ASSETS BezierCurveModel : public IModel //@todo need to improve
 {
 public:
-	BezierCurveModel(BezierCurveMesh* _m) :m_mesh(_m) {}
+	explicit BezierCurveModel(BezierCurveMesh* _m) : m_mesh(_m) {}
 
 	virtual ~BezierCurveModel() { delete m_mesh; }
 

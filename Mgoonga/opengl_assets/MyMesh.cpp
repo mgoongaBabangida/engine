@@ -363,8 +363,9 @@ void SimpleGeometryMesh::Draw()
 }
 
 //-------------------------------------------
-BezierCurveMesh::BezierCurveMesh(const dbb::Bezier& _bezier)
-	:m_bezier(_bezier)
+BezierCurveMesh::BezierCurveMesh(const dbb::Bezier& _bezier, bool _is2D)
+	: m_bezier(_bezier)
+	, m_2d(_is2D)
 {
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);

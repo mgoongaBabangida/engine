@@ -33,7 +33,6 @@ public:
 
   void OnFocusedChanged();
   void _InitializeHexes();
-  void _InitializeBezier();
   void _InitMainTestSceane();
 
 protected:

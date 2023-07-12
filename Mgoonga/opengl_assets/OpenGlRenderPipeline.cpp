@@ -511,6 +511,7 @@ void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, c
 																						gui->getTopLeftTexture(), gui->getBottomRightTexture(),
 																						width, height);
 		}
+
 		gui->UpdateSync();
 		for (auto& child : gui->GetChildren())
 		{

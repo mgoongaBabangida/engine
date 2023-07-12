@@ -20,13 +20,23 @@ void eBezierRender::Render(const Camera& _camera, std::vector<const BezierCurveM
 {
   glUseProgram(m_bezier_shader.ID());
 
-  glm::mat4 mvp = _camera.getProjectionMatrix() * _camera.getWorldToViewMatrix() * UNIT_MATRIX;
-  glUniformMatrix4fv(m_mvp, 1, GL_FALSE, &mvp[0][0]);
   glUniform1i(m_numSegments, 30);
   glUniform1i(m_numStrips, 1);
 
-  for (auto& mesh : _meshes)
-    const_cast<BezierCurveMesh*>(mesh)->Draw();
+  for (auto& cmesh : _meshes)
+  {
+    BezierCurveMesh* mesh = const_cast<BezierCurveMesh*>(cmesh);
+    if (mesh->Is2D())
+    {
+      glUniformMatrix4fv(m_mvp, 1, GL_FALSE, &UNIT_MATRIX[0][0]);
+    }
+    else
+    {
+      glm::mat4 mvp = _camera.getProjectionMatrix() * _camera.getWorldToViewMatrix() * UNIT_MATRIX;
+      glUniformMatrix4fv(m_mvp, 1, GL_FALSE, &mvp[0][0]);
+    }
+    mesh->Draw();
+  }
 }
 
 //-------------------------------------
