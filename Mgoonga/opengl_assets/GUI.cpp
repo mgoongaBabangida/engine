@@ -17,6 +17,15 @@ GUI::GUI(int topleftX, int topleftY, int Width, int Height, int scWidth, int scH
 		screenHeight(scHeight)
 	{}
 
+GUI::GUI(const dbb::Rect& _rect, int scWidth, int scHeight)
+	: topleftX(_rect.m_top_left.x),
+		topleftY(_rect.m_top_left.y),
+		Width(_rect.m_size.x),
+		Height(_rect.m_size.y),
+		screenWidth(scWidth),
+		screenHeight(scHeight)
+{}
+
 GUI::GUI(const GUI& _other)
 	: screenWidth(_other.screenWidth)
     , screenHeight(_other.screenHeight)

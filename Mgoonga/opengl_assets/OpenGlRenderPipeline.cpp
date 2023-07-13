@@ -349,7 +349,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	RenderGui(_guis, _camera);
 
   glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	renderManager->TextRender()->RenderText(_camera, _texts, width, height);
 	glDisable(GL_BLEND);
 
@@ -494,6 +494,7 @@ void eOpenGlRenderPipeline::RenderContrast(const Camera& _camera)
 void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, const Camera& _camera)
 {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //todo@ for real transparency
 
 	for(auto& gui : guis)
 	{
@@ -507,7 +508,7 @@ void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, c
 			renderManager->ScreenRender()->SetTexture(*(gui->GetTexture())); //copy texture
 			renderManager->ScreenRender()->SetTextureMask(*(gui->GetTextureMask()));
 			renderManager->ScreenRender()->SetRenderingFunction(gui->GetRenderingFunc());
-			renderManager->ScreenRender()->Render(gui->getTopLeft(), gui->getBottomRight(),
+			renderManager->ScreenRender()->Render(gui->getTopLeft(),				gui->getBottomRight(),
 																						gui->getTopLeftTexture(), gui->getBottomRightTexture(),
 																						width, height);
 		}

@@ -16,6 +16,7 @@ public:
 	virtual void OnMouseRelease();
 	virtual void OnMouseWheel(int32_t x, int32_t y);
 	void				 AddObserver(IInputObserver*, ePriority);
+	void				 DeleteObserver(IInputObserver*);
 
 private:
 	std::vector<IInputObserver*>	observersPriority;

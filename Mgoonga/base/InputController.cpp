@@ -165,3 +165,14 @@ void eInputController::AddObserver(IInputObserver* _obs, ePriority _priority)
 		case ALWAYS:		observersAlways.push_back(_obs);		break;
 	}
 }
+
+//---------------------------------------------------------------------------
+void eInputController::DeleteObserver(IInputObserver* _obs)
+{
+	if(auto it = std::remove(observersPriority.begin(), observersPriority.end(), (_obs)); it!= observersPriority.end())
+		observersPriority.erase(it);
+	else if(auto it = std::remove(observers.begin(), observers.end(), (_obs)); it != observers.end())
+		observers.erase(it);
+	else if (auto it = std::remove(observersAlways.begin(), observersAlways.end(), (_obs)); it != observersAlways.end())
+		observersAlways.erase(it);
+}

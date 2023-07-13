@@ -87,7 +87,7 @@ bool eMainContextBase::OnMouseMove(int32_t x, int32_t y)
 {
 	if (GetMainCamera().getCameraRay().IsPressed())
 	{
-		if (m_input_strategy && !m_input_strategy->OnMouseMove(x, y))
+		if (m_input_strategy && !m_input_strategy->OnMouseMove(x, y) && m_framed_choice_enabled)
 		{
 			// input strategy has priority over frame, @todo frmae should be inside one of input strategies
 			m_framed.reset(new std::vector<shObject>(GetMainCamera().getCameraRay().onMove(GetMainCamera(), m_objects, static_cast<float>(x), static_cast<float>(y)))); 	//to draw a frame
@@ -281,7 +281,15 @@ std::shared_ptr<eObject> eMainContextBase::GetFocusedObject()
 //--------------------------------------------------------------------------------
 void eMainContextBase::AddObject(std::shared_ptr<eObject> _object)
 {
+	ObjectBeingAddedToScene.Occur(_object);
 	m_objects.push_back(_object);
+}
+
+//--------------------------------------------------------------------------------
+void eMainContextBase::DeleteObject(std::shared_ptr<eObject> _object)
+{
+	ObjectBeingDeletedFromScene.Occur(_object); // check if its on scene
+	m_objects.erase(std::remove(m_objects.begin(), m_objects.end(),(_object)));
 }
 
 //--------------------------------------------------------------------------------
@@ -310,6 +318,12 @@ void eMainContextBase::SetFocused(const eObject* _newFocused)
 void eMainContextBase::AddInputObserver(IInputObserver* _observer, ePriority _priority)
 {
 	m_input_controller->AddObserver(_observer, _priority);
+}
+
+//-------------------------------------------------------------------------------
+void eMainContextBase::DeleteInputObserver(IInputObserver* _observer)
+{
+	m_input_controller->DeleteObserver(_observer);
 }
 
 //--------------------------------------------------------------------------------
@@ -513,10 +527,10 @@ void eMainContextBase::InitializeExternalGui()
 	std::function<void()> create_bezier_callbaack = [this]()
 	{
 		dbb::Bezier bezier;
-		bezier.p0 = { -1.0f, -1.0f, 0.0f };
-		bezier.p1 = { -0.5f, -0.5f, 0.0f };
-		bezier.p2 = { 0.5f, 0.5f, 0.0f };
-		bezier.p3 = { 1.0f, 1.0f, 0.0f };
+		bezier.p0 = { -0.85f, -0.75f, 0.0f };
+		bezier.p1 = { -0.45f, -0.33f, 0.0f };
+		bezier.p2 = {  0.17f,  0.31f, 0.0f };
+		bezier.p3 = {  0.55f,  0.71f, 0.0f };
 
 		ObjectFactoryBase factory;
 		shObject bezier_model = factory.CreateObject(std::make_shared<BezierCurveModel>(new BezierCurveMesh(bezier, /*2d*/true)), eObject::RenderType::BEZIER_CURVE);
@@ -528,7 +542,7 @@ void eMainContextBase::InitializeExternalGui()
 			bezier_model->GetChildrenObjects().push_back(pbr_sphere);
 			pbr_sphere->Set2DScreenSpace(true);
 		}
-		bezier_model->SetScript(new BezierCurveUIController(bezier_model));
+		bezier_model->SetScript(new BezierCurveUIController(this, bezier_model, 0.02f, texManager->Find("pseudo_imgui")));
 		m_input_strategy.reset(new InputStrategy2DMove(this));
 	};
 	externalGui[5]->Add(BUTTON, "Bezier Curve 2D", (void*)&create_bezier_callbaack);
@@ -542,7 +556,7 @@ void eMainContextBase::InitializeExternalGui()
 		bezier.p3 = { 8.0f, 3.0f, 1.0f };
 
 		ObjectFactoryBase factory;
-		shObject bezier_model = factory.CreateObject(std::make_shared<BezierCurveModel>(new BezierCurveMesh(bezier, /*2d*/true)), eObject::RenderType::BEZIER_CURVE);
+		shObject bezier_model = factory.CreateObject(std::make_shared<BezierCurveModel>(new BezierCurveMesh(bezier, /*2d*/false)), eObject::RenderType::BEZIER_CURVE);
 		m_objects.push_back(bezier_model);
 
 		for (int i = 0; i < 4; ++i)
@@ -550,7 +564,7 @@ void eMainContextBase::InitializeExternalGui()
 			shObject pbr_sphere = factory.CreateObject(modelManager->Find("sphere_red"), eObject::RenderType::PBR, "SphereBezierPBR " + std::to_string(i));
 			bezier_model->GetChildrenObjects().push_back(pbr_sphere);
 		}
-		bezier_model->SetScript(new BezierCurveUIController(bezier_model));
+		bezier_model->SetScript(new BezierCurveUIController(this, bezier_model, 0.1f));
 		m_input_strategy.reset(new InputStrategyMoveAlongXZPlane(GetMainCamera(), GetObjectsWithChildren(m_objects)));
 	};
 	externalGui[5]->Add(BUTTON, "Bezier Curve 3D", (void*)&create_bezier_callbaack_3d);
@@ -737,6 +751,12 @@ void eMainContextBase::InstallTcpClient()
 void eMainContextBase::AddGUI(const std::shared_ptr<GUI>& _gui)
 {
 	m_guis.push_back(_gui);
+}
+
+//----------------------------------------------------------------
+void eMainContextBase::DeleteGUI(const std::shared_ptr<GUI>& _gui)
+{
+	m_guis.erase(std::remove(m_guis.begin(), m_guis.end(), (_gui)));
 }
 
 //----------------------------------------------------------------

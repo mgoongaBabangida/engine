@@ -89,11 +89,19 @@ protected:
 	glm::vec3												m_translation_vector = glm::vec3{ 0.f,0.f,0.0f };
 };
 
+
+// This works together with bezier 2d tool, move controll points with right button
 //---------------------------------------------------------------
 class InputStrategy2DMove : public InputStrategy
 {
 public:
-	InputStrategy2DMove(IGame*_game) :m_game(_game) {}
+	InputStrategy2DMove(IGame*_game) :m_game(_game)
+	{
+		//represents the gui window in NDC coordenate space with inverted y - coordinate
+		// should come in constructor
+		x_restriction = { -0.9f, 0.56f };
+		y_restriction = { -0.8f, 0.73f };
+	}
 
 	virtual bool OnMouseMove(uint32_t _x, uint32_t _y) 
 	{
@@ -101,10 +109,13 @@ public:
 		{
 			float x_ss = (((float)_x / (float)m_game->Width()) - 0.5f) * 2.0f;
 			float y_ss = -(((float)_y / (float)m_game->Height()) - 0.5f) * 2.0f;
-			m_grabbed->GetTransform()->setTranslation({ x_ss, y_ss , 0.0f });
-			return true;
+			if (x_ss > x_restriction.x && x_ss < x_restriction.y
+			 && y_ss > y_restriction.x && y_ss < y_restriction.y)
+			{
+				m_grabbed->GetTransform()->setTranslation({ x_ss, y_ss , 0.0f });
+			}
 		}
-		return false;
+		return true;
 	}
 
 	virtual bool OnMousePress(uint32_t _x, uint32_t _y, bool _left)
@@ -120,7 +131,7 @@ public:
 				{
 					float delta_x = abs(obj->GetTransform()->getTranslation().x - x_ss);
 					float delta_y = abs(obj->GetTransform()->getTranslation().y - y_ss);
-					if (delta_x < 0.01f && delta_y < 0.01f)
+					if (delta_x < grab_threshold && delta_y < grab_threshold)
 					{
 						m_grabbed = obj;
 						return true;
@@ -140,4 +151,7 @@ public:
 protected:
 	IGame* m_game = nullptr;
 	shObject m_grabbed = nullptr;
+	glm::vec2 x_restriction = { -1.0f, 1.0f };
+	glm::vec2 y_restriction = { -1.0f, 1.0f };
+	float grab_threshold = 0.02f;
 };

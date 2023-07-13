@@ -299,9 +299,13 @@ public:
 	virtual void		InitializeGL() = 0;
 	virtual void		PaintGL() = 0;
 	virtual uint32_t GetFinalImageId() = 0;
+
 	virtual std::shared_ptr<eObject> GetFocusedObject() = 0; //const ref?
 	virtual std::vector<std::shared_ptr<eObject>> GetObjects() = 0;
+
 	virtual void AddObject(std::shared_ptr<eObject>) = 0;
+	virtual void DeleteObject(std::shared_ptr<eObject>) = 0;
+
 	virtual void SetFocused(std::shared_ptr<eObject>) = 0;
 
 	virtual const Texture* GetTexture(const std::string& _name) const = 0;
@@ -311,6 +315,7 @@ public:
 	virtual glm::mat4 GetMainCameraProjectionMatrix() = 0;
 
 	virtual void AddInputObserver(IInputObserver* _observer, ePriority _priority) = 0;
+	virtual void DeleteInputObserver(IInputObserver* _observer) = 0;
 
 	virtual bool UseGizmo() = 0;
 	virtual uint32_t CurGizmoType() = 0;

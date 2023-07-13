@@ -66,10 +66,13 @@ public:
 	virtual void			PaintGL() override;
 
 	virtual void	AddObject(std::shared_ptr<eObject> _object) override;
+	virtual void	DeleteObject(std::shared_ptr<eObject> _object) override;
+
 	virtual void	SetFocused(std::shared_ptr<eObject>) override;
 	void					SetFocused(const eObject* _newFocused);
 
 	virtual void AddInputObserver(IInputObserver* _observer, ePriority _priority) override;
+	virtual void DeleteInputObserver(IInputObserver* _observer) override;
 
 	virtual uint32_t																GetFinalImageId() override;
 	virtual std::shared_ptr<eObject>								GetFocusedObject() override;
@@ -93,6 +96,8 @@ public:
 	void InstallTcpClient();
 
 	virtual void AddGUI(const std::shared_ptr<GUI>&);
+	virtual void DeleteGUI(const std::shared_ptr<GUI>&);
+
 	virtual void AddText(std::shared_ptr<Text>);
 	virtual std::vector<std::shared_ptr<Text>>& GetTexts();
 
@@ -154,6 +159,7 @@ protected:
 	float			nearPlane	= 0.1f;
 	float			farPlane	= 20.0f;
 	bool m_l_pressed = false;
+	bool m_framed_choice_enabled = true;
 
 	eOpenGlRenderPipeline							pipeline;
 };

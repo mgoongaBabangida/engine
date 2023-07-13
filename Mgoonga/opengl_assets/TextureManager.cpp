@@ -139,6 +139,9 @@ void eTextureManager::LoadAllTextures()
 	text.loadTextureFromFile(folderPath + "green-circle.png");
 	m_Textures.insert(std::pair<std::string, Texture>("green_circle", text));
 
+	text.loadTextureFromFile(folderPath + "pseudo_imgui.png");
+	m_Textures.insert(std::pair<std::string, Texture>("pseudo_imgui", text));
+
 	// Cubemap (Skybox)
 	std::vector<std::string> faces;
 	faces.push_back(folderPath + "right.jpg");

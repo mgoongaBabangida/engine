@@ -6,6 +6,7 @@
 
 #include <math/Timer.h>
 #include <math/AnimationLeaner.h>
+#include <math/Rect.h>
 #include "Texture.h"
 
 #include "opengl_assets.h"
@@ -23,6 +24,7 @@ public:
 
 	GUI();
 	GUI(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight);
+	GUI(const dbb::Rect&, int scWidth, int scHeight);
 	GUI(const GUI&);
 	virtual ~GUI() {}
 
@@ -53,6 +55,9 @@ public:
 
 	bool					IsTransparent() const { return m_is_transparent; }
 	void					SetTransparent(bool _isTransparent) { m_is_transparent = _isTransparent; }
+
+	bool					IsTakingMouseEvents() const { return m_take_mouse_moves; }
+	void					SetTakeMouseEvents(bool _take_mouse_moves) { m_take_mouse_moves = _take_mouse_moves; }
 
 	RenderFunc GetRenderingFunc() const { return m_render_func; }
 	void SetRenderingFunc(RenderFunc _func) { m_render_func = _func; }
@@ -91,6 +96,7 @@ protected:
 
 	std::vector<std::shared_ptr<GUI>> children;
 	std::shared_ptr<ICommand>	cmd;
+
 	bool						m_is_visible = true;
 	bool						m_is_transparent = false;
 	bool						m_take_mouse_moves = false;

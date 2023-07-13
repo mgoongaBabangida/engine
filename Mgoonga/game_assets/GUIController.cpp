@@ -24,6 +24,7 @@ void GUIController::Initialize()
 	glm::vec2 menu_size = { 600 , 400 };
 	float pos_x = m_game->Width() / 2 - menu_size.x / 2;
 	float pos_y = m_game->Height() / 2 - menu_size.y / 2;
+
 	const Texture* menu_tex = m_game->GetTexture("menu3");
 	const Texture* mask_tex = m_game->GetTexture("menu2");
 	std::shared_ptr<GUI> menu = std::make_shared<GUI>(pos_x, pos_y, menu_size.x, menu_size.y, m_game->Width(), m_game->Height());
