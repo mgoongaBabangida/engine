@@ -247,8 +247,9 @@ void TerrainModel::generateNormals(GLuint rows, GLuint columns)
 	{
 		// Load to normal map
 		GLfloat* buffer = new GLfloat[mesh->vertices.size() * 4];
-		for (int i = 0; i < mesh->vertices.size(); ++i) {
-			buffer[i * 4] = (mesh->vertices[i].Normal.x + 1.0f) / 2.0f;
+		for (int i = 0; i < mesh->vertices.size(); ++i)
+		{
+			buffer[i * 4]			= (mesh->vertices[i].Normal.x + 1.0f) / 2.0f;
 			buffer[i * 4 + 1] = (mesh->vertices[i].Normal.z + 1.0f) / 2.0f;
 			buffer[i * 4 + 2] = (mesh->vertices[i].Normal.y + 1.0f) / 2.0f;
 			buffer[i * 4 + 3] = 1.0f;

@@ -239,7 +239,8 @@ void eWindowImGui::Render()
   {
     switch (std::get<1>(item))
     {
-      case SLIDER_FLOAT: ImGui::SliderFloat(std::get<0>(item).c_str(), static_cast<float*>(std::get<2>(item)), -10.0f, 10.0f); break; // -10 10 $todo
+      case SLIDER_FLOAT: ImGui::SliderFloat(std::get<0>(item).c_str(), static_cast<float*>(std::get<2>(item)), -10.0f, 10.0f); break; // -10 10 @todo
+      case SLIDER_INT:   ImGui::SliderInt(std::get<0>(item).c_str(), static_cast<int*>(std::get<2>(item)), 0, 3200); break; //@todo
       case TEXT:         ImGui::Text(std::get<0>(item).c_str()); break;
       case CHECKBOX:     ImGui::Checkbox(std::get<0>(item).c_str(), static_cast<bool*>(std::get<2>(item))); break;
       case TEXTURE:

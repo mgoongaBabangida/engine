@@ -54,7 +54,8 @@ enum TypeImGui
 	MENU_OPEN_SCENE,
 	MENU_SAVE_SCENE,
 	CONSOLE,
-	PARTICLE_SYSTEM
+	PARTICLE_SYSTEM,
+	SLIDER_INT
 };
 
 //--------------------------------------------------

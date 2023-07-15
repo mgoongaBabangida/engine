@@ -356,8 +356,10 @@ bool Texture::generatePerlin(GLuint _width, GLuint _height, bool periodic)
 {
 	this->mTextureWidth = _width;
 	this->mTextureHeight = _height;
+
 	float a = 1.0f;
 	float b = 2.0f;
+
 	float xFactor = 1.0f / (_width - 1);
 	float yFactor = 1.0f / (_height - 1);
 

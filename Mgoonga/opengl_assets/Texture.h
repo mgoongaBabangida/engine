@@ -61,7 +61,7 @@ struct DLL_OPENGL_ASSETS Texture
 	bool makeRandom1DTexture(unsigned int _size);
 
 	template<class GLtype>
-	bool TextureFromBuffer(GLtype* buffer, GLuint Width, GLuint Height)
+	bool TextureFromBuffer(GLtype* buffer, GLuint Width, GLuint Height, GLuint format= GL_RGBA)
 	{
 		GLenum type ;
 		if (std::is_same_v<GLtype, GLfloat> == true)
@@ -76,9 +76,12 @@ struct DLL_OPENGL_ASSETS Texture
 		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glGenTextures(1, &this->id);
 		glBindTexture(GL_TEXTURE_2D, id);
-		glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA, this->mTextureWidth, this->mTextureHeight);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_RGBA, type, buffer);
-		mChannels = 4; //RGBA
+		glTexStorage2D(GL_TEXTURE_2D, 1, format, this->mTextureWidth, this->mTextureHeight);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, mTextureWidth, mTextureHeight, 0, format, type, buffer);
+		if(format == GL_RGBA)
+			mChannels = 4;
+		else if(GL_RED)
+			mChannels = 1;
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
