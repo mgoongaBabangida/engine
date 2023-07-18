@@ -15,7 +15,8 @@ public:
 															 eSoundManager* _soundManager,
 															 eOpenGlRenderPipeline& _pipeline);
 	virtual void Update(float _tick) override {}
-
+	
+	virtual~ParticleSystemToolController();
 protected:
   std::shared_ptr<IParticleSystem> m_psystem;
 };

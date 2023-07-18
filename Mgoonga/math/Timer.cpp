@@ -20,7 +20,8 @@ namespace math {
 		else
 		{
 			clock.start();
-			std::function<bool()> func = [this, period]()->bool {
+			std::function<bool()> func = [this, period]()->bool
+			{
 				while (active)
 				{
 					if (clock.timeEllapsedLastFrameMsc() >= period)

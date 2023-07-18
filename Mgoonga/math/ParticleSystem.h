@@ -18,15 +18,15 @@ public:
 		SPHERE //@todo donate or custom model
 	};
 
-	ParticleSystem(float	 _pps,
-								 float	 _speed,
-								 float	 _gravityComplient,
-								 float	 _lifeLength,
-								 glm::vec3 _systemCenter,
-								 const Texture*  _texture,
-								 ISound*	 _sound,
-								 size_t	 _num_rows_in_texture,
-								 float	 _duration = 10000.0f);
+	ParticleSystem(float						_pps,
+								 float						_speed,
+								 float						_gravityComplient,
+								 float						_lifeLength,
+								 glm::vec3				_systemCenter,
+								 const Texture*		_texture,
+								 ISound*					_sound,
+								 size_t						_num_rows_in_texture,
+								 float						_duration = 10000.0f);
 	
 	ParticleSystem(const ParticleSystem&) = delete;
 	ParticleSystem& operator=(const ParticleSystem&) = delete;
@@ -38,21 +38,24 @@ public:
 	virtual std::vector<Particle>::iterator		PrepareParticles(glm::vec3 cameraPosition);
 	virtual std::vector<Particle>&				    GetParticles()	{ return  m_particles; }
 	virtual bool								              IsFinished();
+	virtual bool								              IsStarted();
+	virtual void								              Reset();
 
-	virtual float& ConeAngle() override { return m_cone_angle; }
-	virtual float& Speed() override { return m_speed; }
-	virtual glm::vec3& Scale() override { return m_scale; } // @todo should be individual property of a particle
-	virtual float& BaseRadius() override { return m_base_radius; }
-	virtual float& LifeLength() override { return m_life_length; }
-	virtual int& ParticlesPerSecond() override { return m_pps; }
-	virtual bool& Loop() override { return m_loop; }
-	virtual float& Gravity() override { return m_gravity_complient; }
+	virtual float&			ConeAngle() override { return m_cone_angle; }
+	virtual float&			Speed() override { return m_speed; }
+	virtual glm::vec3&	Scale() override { return m_scale; } // @todo should be individual property of a particle
+	virtual float&			BaseRadius() override { return m_base_radius; }
+	virtual float&			LifeLength() override { return m_life_length; }
+	virtual int&				ParticlesPerSecond() override { return m_pps; }
+	virtual bool&				Loop() override { return m_loop; }
+	virtual float&			Gravity() override { return m_gravity_complient; }
 
 	virtual ~ParticleSystem();
 
 protected:
 	virtual void									Update();
-	void													emitParticles();
+
+	void													_emitParticles();
 	virtual	glm::vec3							_calculateParticles();
 
 	std::vector<Particle>				m_particles;

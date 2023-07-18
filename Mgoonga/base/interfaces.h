@@ -40,7 +40,9 @@ public:
 	virtual std::vector<Particle>::iterator PrepareParticles(glm::vec3 cameraPosition)	= 0;
 	virtual std::vector<Particle>&					GetParticles()	= 0;
 	virtual bool														IsFinished()		= 0;
-	
+	virtual bool								            IsStarted()			= 0;
+	virtual void								            Reset()					= 0;
+
 	virtual float& ConeAngle() = 0;
 	virtual glm::vec3& Scale()	= 0;
 	virtual float& Speed() = 0;

@@ -42,14 +42,17 @@ ParticleSystem::~ParticleSystem()
 //-------------------------------------------------------------------------
 void ParticleSystem::Start()
 {
-	timer.reset(new math::Timer([this]()->bool {this->Update(); return true; }));
+	if (timer)
+		timer->stop();
+
+	timer.reset(new math::Timer([this]()->bool { this->Update(); return true; }));
 
 	clock.restart();
 
 	if (sound)
 		sound->Play();
 
-	timer->start(100);
+	timer->start(40);
 	srand(time(0));
 }
 
@@ -61,7 +64,7 @@ void ParticleSystem::GenerateParticles()
 		int64_t msc = clock.newFrame();
 		float new_particles = (float)msc / 1000.0f * (float)m_pps;
 		for (int i = 0; i < new_particles; ++i)
-			emitParticles();
+			_emitParticles();
 	}
 	else
 	{
@@ -73,7 +76,7 @@ void ParticleSystem::GenerateParticles()
 }
 
 //------------------------------------------------------------------------------
-void ParticleSystem::emitParticles()
+void ParticleSystem::_emitParticles()
 {
 	glm::vec3 dir = _calculateParticles();
 	glm::vec3 origin = m_system_center;
@@ -130,7 +133,7 @@ std::vector<Particle>::iterator ParticleSystem::PrepareParticles(glm::vec3 _came
 	std::vector<Particle>::iterator n_end = m_particles.begin();
 	
 	//Find last alive and set distance
-	while(n_end != m_particles.end() && n_end->isAlive()) 
+	while(n_end != m_particles.end() && n_end->isAlive())
 	{
 		n_end->setDistance(glm::length(glm::vec3(_cameraPosition - n_end->getPosition())));
 		++n_end;
@@ -146,6 +149,18 @@ bool ParticleSystem::IsFinished()
 		return clock.timeEllapsedMsc() > m_duration + (m_life_length * 1000);
 	else
 		return false;
+}
+
+//------------------------------------------------------------------------------
+bool ParticleSystem::IsStarted()
+{
+	return clock.isActive();
+}
+
+//-------------------------------------------------------------------------------------
+void ParticleSystem::Reset()
+{
+	clock.reset();
 }
 
 //-------------------------------------------------------------------------------------

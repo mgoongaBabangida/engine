@@ -37,6 +37,7 @@ eParticleRender::eParticleRender(std::shared_ptr<MyMesh> _mesh,
 	mesh.reset(new ParticleMesh(quad));
 	quad.cleanup();
 }
+
 //--------------------------------------------------------------------------------------
 eParticleRender::~eParticleRender()
 {
@@ -52,11 +53,14 @@ void eParticleRender::Render(const Camera& _camera)
 	int info = 0;
 	for(auto& system : systems)
 	{
+		if (!system->IsStarted())
+			system->Start();
+
 		if (system->IsFinished())
 			continue;
 
 		object->GetTransform()->billboard(_camera.getDirection());
-		object->GetTransform()->setScale(system->Scale());
+		object->GetTransform()->setScale(system->Scale());//@todo scale should be individual as well
 
 		int counter		= 0;
 		int instances	= 0;
@@ -106,5 +110,6 @@ void eParticleRender::Render(const Camera& _camera)
 
 void eParticleRender::AddParticleSystem(std::shared_ptr<IParticleSystem> _sys)
 {
-	systems.push_back(_sys);
+	if (std::find(systems.begin(), systems.end(), _sys) == systems.end())
+		systems.push_back(_sys);
 }
