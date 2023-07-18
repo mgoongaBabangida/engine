@@ -47,10 +47,13 @@ eOpenGlRenderPipeline::eOpenGlRenderPipeline(uint32_t _width, uint32_t _height)
 {
 }
 
+//-------------------------------------------------------------------------------------------
 eOpenGlRenderPipeline::~eOpenGlRenderPipeline()
 {
+	m_prefilter.freeTexture();
 }
 
+//-------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::Initialize()
 {
 	glEnable(GL_DEPTH_TEST);
@@ -62,6 +65,7 @@ void eOpenGlRenderPipeline::Initialize()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
 }
 
+//-------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::InitializeBuffers(bool _needsShadowCubeMap)
 {
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFAULT, width, height);
@@ -591,10 +595,9 @@ void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_IBL_CUBEMAP, GL_TEXTURE2);
 	//glActiveTexture(GL_TEXTURE2); //any
 	//glBindTexture(GL_TEXTURE_CUBE_MAP, cube_id);
-	Texture prefilter; //free ?
-	prefilter.makeCubemap(128, true);
+	m_prefilter.makeCubemap(128, true);
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_IBL_CUBEMAP);
-	renderManager->IBLRender()->RenderPrefilterMap(_camera, prefilter.id, eGlBufferContext::GetInstance().GetRboID(eBuffer::BUFFER_IBL_CUBEMAP));
+	renderManager->IBLRender()->RenderPrefilterMap(_camera, m_prefilter.id, eGlBufferContext::GetInstance().GetRboID(eBuffer::BUFFER_IBL_CUBEMAP));
 
 	//Pre-computing the BRDF
 	// then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
@@ -612,7 +615,7 @@ void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 	glBindTexture(GL_TEXTURE_CUBE_MAP, irr_id);
 	
 	glActiveTexture(GL_TEXTURE10);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, prefilter.id);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_prefilter.id);
 
 	glActiveTexture(GL_TEXTURE11);
 	glBindTexture(GL_TEXTURE_2D, renderManager->IBLRender()->GetLUTTextureID());

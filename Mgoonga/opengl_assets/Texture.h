@@ -8,6 +8,7 @@
 
 #include <type_traits>
 #include <assert.h>
+#include <set>
 
 enum TColor { WHITE, BLACK, BLUE, PINK, YELLOW, GREY };
 
@@ -42,6 +43,7 @@ struct DLL_OPENGL_ASSETS Texture
 
 	static GLuint GetDefaultTextureId();
 	static Texture GetTexture1x1(TColor color);
+	static bool freeTexture(unsigned int _id);
 
 	void setNumRows(GLuint nrows) { numberofRows = nrows; }
 	void freeTexture();
@@ -74,8 +76,8 @@ struct DLL_OPENGL_ASSETS Texture
 		this->mTextureWidth = Width;
 		this->mTextureHeight = Height;
 		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		if(id == GetDefaultTextureId())
-			glGenTextures(1, &this->id);
+		if (id == GetDefaultTextureId())
+			_genTexture();
 		glBindTexture(GL_TEXTURE_2D, id);
 		glTexStorage2D(GL_TEXTURE_2D, 1, format, this->mTextureWidth, this->mTextureHeight);
 		glTexImage2D(GL_TEXTURE_2D, 0, format, mTextureWidth, mTextureHeight, 0, format, type, buffer);
@@ -94,6 +96,9 @@ struct DLL_OPENGL_ASSETS Texture
 
 protected:
 	bool _loadTexture1x1(TColor color);
+	void _genTexture();
+	static unsigned int textures_in_use;
+	static std::set<unsigned int> indexes_in_use;
 };
 
 

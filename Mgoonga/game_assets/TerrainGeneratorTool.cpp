@@ -81,8 +81,11 @@ TerrainGeneratorTool::TerrainGeneratorTool(eMainContextBase* _game, eModelManage
 	_imgui->Add(TEXTURE, "Color texture", (void*)m_color_texture.id);
 }
 
+//-----------------------------------------------------------------------------
 TerrainGeneratorTool::~TerrainGeneratorTool()
 {
+	m_color_texture.freeTexture();
+	m_noise_texture.freeTexture();
 }
 
 //-----------------------------------------------------------------------------

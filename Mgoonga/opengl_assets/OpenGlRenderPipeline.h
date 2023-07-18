@@ -137,6 +137,7 @@ protected:
 	bool			m_first_call = true;
 
 	std::unique_ptr<eRenderManager>	renderManager;
+	Texture m_prefilter; //@todo move to renderer
 };
 
 #endif // PIPELINE_H

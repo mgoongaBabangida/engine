@@ -123,20 +123,20 @@ void eSandBoxGame::InitializeModels()
 		m_objects.push_back(mapleTree);
 	}
 
-	Texture* t = nullptr;
+	Texture t;
 	if (false) //cottage
 	{
 		shObject cottage = factory.CreateObject(modelManager->Find("Cottage"), eObject::RenderType::PHONG, "Cottage");
 		cottage->GetTransform()->setTranslation(vec3(0.5f, -2.01f, -2.0f));
 		cottage->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
 		m_objects.push_back(cottage);
-		t = const_cast<Texture*>(texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/85-cottage_obj/cottage_diffuse.png", "cottage_diffuse1", "texture_diffuse")));
+		t.loadTextureFromFile("../game_assets/Resources/85-cottage_obj/cottage_diffuse.png");
 		for (auto& mesh : cottage->GetModel()->Get3DMeshes())
-			const_cast<I3DMesh*>(mesh)->AddTexture(t);
+			const_cast<I3DMesh*>(mesh)->AddTexture(&t);
 
-		t = const_cast<Texture*>(texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/85-cottage_obj/cottage_normal.png", "cottage_normal1", "texture_normal")));
+		t.loadTextureFromFile("../game_assets/Resources/85-cottage_obj/cottage_normal.png");
 		for (auto& mesh : cottage->GetModel()->Get3DMeshes())
-			const_cast<I3DMesh*>(mesh)->AddTexture(t);
+			const_cast<I3DMesh*>(mesh)->AddTexture(&t);
 	}
 
 	shObject grassPlane = factory.CreateObject(modelManager->Find("grass_plane"), eObject::RenderType::PHONG, "GrassPlane");
@@ -159,10 +159,10 @@ void eSandBoxGame::InitializeModels()
 	soldier->GetTransform()->setScale(vec3(0.01f, 0.01f, 0.01f));
 
 	//Set textures manually
-	t = const_cast<Texture*>(texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1001_Normal.png", "soldier_normal1", "texture_normal")));
-	const_cast<I3DMesh*>(soldier->GetModel()->Get3DMeshes()[0])->AddTexture(t);
-	t = const_cast<Texture*>(texManager->FindByID(texManager->LoadTexture("../game_assets/Resources/Dying Soldier/textures/Ch15_1002_Normal.png", "soldier_normal2", "texture_normal")));
-	const_cast<I3DMesh*>(soldier->GetModel()->Get3DMeshes()[1])->AddTexture(t);
+	t.loadTextureFromFile("../game_assets/Resources/Dying Soldier/textures/Ch15_1001_Normal.png");
+	const_cast<I3DMesh*>(soldier->GetModel()->Get3DMeshes()[0])->AddTexture(&t);
+	t.loadTextureFromFile("../game_assets/Resources/Dying Soldier/textures/Ch15_1002_Normal.png");
+	const_cast<I3DMesh*>(soldier->GetModel()->Get3DMeshes()[1])->AddTexture(&t);
 
 	m_objects.push_back(soldier);
 	/*modelManager->Save(soldier->GetModel(), "Soldier.mgoongaObject3d");

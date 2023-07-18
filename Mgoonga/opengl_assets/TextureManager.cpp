@@ -16,22 +16,15 @@
 eTextureManager::~eTextureManager()
 {
   for (auto& node : m_Textures)
-    glDeleteTextures(1, &node.second.id);
+    node.second.freeTexture();
 
 	// free static textures
-	GLuint id;
-	id = Texture::GetTexture1x1(WHITE).id;
-	glDeleteTextures(1, &id);
-	id = Texture::GetTexture1x1(BLACK).id;
-	glDeleteTextures(1, &id);
-	id = Texture::GetTexture1x1(BLUE).id;
-	glDeleteTextures(1, &id);
-	id = Texture::GetTexture1x1(PINK).id;
-	glDeleteTextures(1, &id);
-	id = Texture::GetTexture1x1(YELLOW).id;
-	glDeleteTextures(1, &id);
-	id = Texture::GetTexture1x1(GREY).id;
-	glDeleteTextures(1, &id);
+	Texture::freeTexture(Texture::GetTexture1x1(WHITE).id);
+	Texture::freeTexture(Texture::GetTexture1x1(BLACK).id);
+	Texture::freeTexture(Texture::GetTexture1x1(BLUE).id);
+	Texture::freeTexture(Texture::GetTexture1x1(PINK).id);
+	Texture::freeTexture(Texture::GetTexture1x1(YELLOW).id);
+	Texture::freeTexture(Texture::GetTexture1x1(GREY).id);
 
 #ifdef SDL_IMAGE
 	{ IMG_Quit(); }
@@ -86,8 +79,6 @@ void eTextureManager::LoadAllTextures()
 	m_Textures.insert(std::pair<std::string, Texture>("TwaterDUDV", text));
 	text.loadTextureFromFile(folderPath + "DUDVwaves.png", GL_RGBA, GL_REPEAT);
 	m_Textures.insert(std::pair<std::string, Texture>("Twaves0_n", text));
-	text.loadTextureFromFile(folderPath + "heightmap.png");
-	m_Textures.insert(std::pair<std::string, Texture>("Theightmap0_n", text));
 	text.generatePerlin(600, 600, true); //HARDCODING!
 	m_Textures.insert(std::pair<std::string, Texture>("Tperlin_n", text));
 	text.loadTextureFromFile(folderPath + "spanish.jpg");
