@@ -74,7 +74,8 @@ struct DLL_OPENGL_ASSETS Texture
 		this->mTextureWidth = Width;
 		this->mTextureHeight = Height;
 		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glGenTextures(1, &this->id);
+		if(id == GetDefaultTextureId())
+			glGenTextures(1, &this->id);
 		glBindTexture(GL_TEXTURE_2D, id);
 		glTexStorage2D(GL_TEXTURE_2D, 1, format, this->mTextureWidth, this->mTextureHeight);
 		glTexImage2D(GL_TEXTURE_2D, 0, format, mTextureWidth, mTextureHeight, 0, format, type, buffer);

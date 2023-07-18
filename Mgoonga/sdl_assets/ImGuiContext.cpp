@@ -729,19 +729,22 @@ void eWindowImGui::Render()
       break;
       case PARTICLE_SYSTEM:
       {
-        std::unique_ptr<IParticleSystem>* p_psystem = static_cast<std::unique_ptr<IParticleSystem>*>(std::get<2>(item));
-        ImGui::SliderFloat("Cone Angle", &p_psystem->get()->ConeAngle(), 0.0f, 2.0f);
-        ImGui::SliderFloat("Speed", &p_psystem->get()->Speed(), 0.0f, 1.0f);
-        ImGui::SliderFloat("Base Radius", &p_psystem->get()->BaseRadius(), 0.0f, 1.0f);
-        float scale = p_psystem->get()->Scale().x;
-        if(ImGui::SliderFloat("Size", &scale, 0.0f, 1.0f))
+        std::shared_ptr<IParticleSystem>* p_psystem = static_cast<std::shared_ptr<IParticleSystem>*>(std::get<2>(item));
+        if (p_psystem)
         {
-          p_psystem->get()->Scale() = glm::vec3{ scale ,scale ,scale };
+          ImGui::SliderFloat("Cone Angle", &p_psystem->get()->ConeAngle(), 0.0f, 2.0f);
+          ImGui::SliderFloat("Speed", &p_psystem->get()->Speed(), 0.0f, 1.0f);
+          ImGui::SliderFloat("Base Radius", &p_psystem->get()->BaseRadius(), 0.0f, 1.0f);
+          float scale = p_psystem->get()->Scale().x;
+          if (ImGui::SliderFloat("Size", &scale, 0.0f, 1.0f))
+          {
+            p_psystem->get()->Scale() = glm::vec3{ scale ,scale ,scale };
+          }
+          ImGui::SliderFloat("Life Length", &p_psystem->get()->LifeLength(), 1.0f, 100.0f);
+          ImGui::SliderInt("Particles Per Second", &p_psystem->get()->ParticlesPerSecond(), 1, 100);
+          ImGui::SliderFloat("Gravity", &p_psystem->get()->Gravity(), 0.0f, 10.0f);
+          ImGui::Checkbox("Loop", &p_psystem->get()->Loop());
         }
-        ImGui::SliderFloat("Life Length", &p_psystem->get()->LifeLength(), 1.0f, 100.0f);
-        ImGui::SliderInt("Particles Per Second", &p_psystem->get()->ParticlesPerSecond(), 1, 100);
-        ImGui::SliderFloat("Gravity", &p_psystem->get()->Gravity(), 0.0f, 10.0f);
-        ImGui::Checkbox("Loop", & p_psystem->get()->Loop());
       }
       break;
     }

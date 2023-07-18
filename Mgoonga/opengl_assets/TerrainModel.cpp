@@ -91,34 +91,35 @@ void TerrainModel::initialize(const Texture* diffuse, const Texture* specular, b
 }
 
 //----------------------------------------------------------------
-void TerrainModel::initialize(const Texture* diffuse,
-														  const Texture* specular,
-														  const Texture* normal,
-														  const Texture* heightMap,
+void TerrainModel::initialize(const Texture* _diffuse,
+														  const Texture* _specular,
+														  const Texture* _normal,
+														  const Texture* _heightMap,
 														  bool spreed_texture)
 {
-	if (diffuse != nullptr)
-		m_material.albedo_texture_id = diffuse->id;
+	if (_diffuse != nullptr)
+		m_material.albedo_texture_id = _diffuse->id;
 
-	if (specular != nullptr)
-		m_material.metalic_texture_id = specular->id;
+	if (_specular != nullptr)
+		m_material.metalic_texture_id = _specular->id;
 
-	if (normal != nullptr)
-		m_material.normal_texture_id = normal->id;
+	if (_normal != nullptr)
+		m_material.normal_texture_id = _normal->id;
 
-	m_height =	*heightMap;
+	m_height =	*_heightMap;
 	
 	if(mesh == nullptr)
 	  mesh = new MyMesh("terrain");
 
-	m_size = heightMap->mTextureHeight;
-	m_rows = heightMap->mTextureWidth;
-	m_columns = heightMap->mTextureHeight;
+	m_size = _heightMap->mTextureHeight;
+	m_rows = _heightMap->mTextureWidth;
+	m_columns = _heightMap->mTextureHeight;
 
-	makePlaneVerts(heightMap->mTextureWidth, heightMap->mTextureHeight, spreed_texture);
-	makePlaneIndices(heightMap->mTextureWidth, heightMap->mTextureHeight);
-	assignHeights(*heightMap);
-	generateNormals(heightMap->mTextureWidth, heightMap->mTextureHeight);
+	makePlaneVerts(_heightMap->mTextureWidth, _heightMap->mTextureHeight, spreed_texture);
+	makePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 1);
+	makePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 2);
+	assignHeights(*_heightMap);
+	generateNormals(_heightMap->mTextureWidth, _heightMap->mTextureHeight);
 	
 	mesh->calculatedTangent();
 	mesh->setupMesh();
@@ -127,9 +128,9 @@ void TerrainModel::initialize(const Texture* diffuse,
 }
 
 //----------------------------------------------------------------
-std::vector<MyMesh*>	TerrainModel::getMeshes()				const 
+std::vector<MyMesh*>	TerrainModel::getMeshes()	const
 { 
-  return std::vector<MyMesh*>{ mesh};
+  return std::vector<MyMesh*>{mesh};
 }
 
 //------------------------------------------------------------
@@ -172,35 +173,45 @@ glm::vec3 TerrainModel::GetNormal(float x, float z)
 	return vert.Normal;
 }
 
-void TerrainModel::assignHeights(Texture heightMap)
+void TerrainModel::assignHeights(const Texture& _heightMap)
 {
-	GLfloat* buffer = new GLfloat[heightMap.mTextureHeight * heightMap.mTextureWidth * 4 ]; 
-
-	glBindTexture(GL_TEXTURE_2D, heightMap.id);
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buffer);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	int counter = 0;
-	for (int i = 0; i < heightMap.mTextureHeight * heightMap.mTextureWidth * 4; i += 4) 
+	glBindTexture(GL_TEXTURE_2D, _heightMap.id);
+	if (_heightMap.mChannels == 4)
 	{
-		mesh->vertices[i / 4].Position.y = (float)buffer[i];
-		counter++;
+		GLfloat* buffer = new GLfloat[_heightMap.mTextureHeight * _heightMap.mTextureWidth * 4];
+
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buffer);
+		int counter = 0;
+		for (int i = 0; i < _heightMap.mTextureHeight * _heightMap.mTextureWidth * 4; i += 4)
+			mesh->vertices[i / 4].Position.y = (float)buffer[i];
+		delete[] buffer;
 	}
-	delete[] buffer;
+	else if (_heightMap.mChannels == 1)
+	{
+		GLfloat* buffer = new GLfloat[_heightMap.mTextureHeight * _heightMap.mTextureWidth];
+
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, buffer);
+		int counter = 0;
+		for (int i = 0; i < _heightMap.mTextureHeight * _heightMap.mTextureWidth; ++i)
+			mesh->vertices[i].Position.y = (float)buffer[i];
+		delete[] buffer;
+	}
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void TerrainModel::generateNormals(GLuint size)
 {
-	for (unsigned int i = 0; i < mesh->indices.size(); i += 3) 
+	for (unsigned int i = 0; i < mesh->indicesLods[0].size(); i += 3) 
 	{
-		glm::vec3& pos1 = mesh->vertices[mesh->indices[i]].Position;
-		glm::vec3& pos2 = mesh->vertices[mesh->indices[i + 1]].Position;
-		glm::vec3& pos3 = mesh->vertices[mesh->indices[i + 2]].Position;
+		glm::vec3& pos1 = mesh->vertices[mesh->indicesLods[0][i]].Position;
+		glm::vec3& pos2 = mesh->vertices[mesh->indicesLods[0][i + 1]].Position;
+		glm::vec3& pos3 = mesh->vertices[mesh->indicesLods[0][i + 2]].Position;
 		glm::vec3 normal = glm::normalize(glm::cross(glm::vec3(pos3 - pos1), glm::vec3(pos2 - pos1)));  //side ?
-		mesh->vertices[mesh->indices[i]].Normal += normal;
-		mesh->vertices[mesh->indices[i + 1]].Normal += normal;
-		mesh->vertices[mesh->indices[i + 2]].Normal += normal;
+		mesh->vertices[mesh->indicesLods[0][i]].Normal += normal;
+		mesh->vertices[mesh->indicesLods[0][i + 1]].Normal += normal;
+		mesh->vertices[mesh->indicesLods[0][i + 2]].Normal += normal;
 	}
-	for (unsigned int i = 0; i < mesh->vertices.size(); ++i) 
+	for (unsigned int i = 0; i < mesh->vertices.size(); ++i)
 	{
 		mesh->vertices[i].Normal = glm::normalize(mesh->vertices[i].Normal);
 	}
@@ -225,27 +236,27 @@ void TerrainModel::generateNormals(GLuint size)
 
 void TerrainModel::generateNormals(GLuint rows, GLuint columns)
 {
-	for (unsigned int i = 0; i < mesh->indices.size(); i += 3) 
+	for (unsigned int i = 0; i < mesh->indicesLods[0].size(); i += 3) 
 	{
-		glm::vec3& pos1 = mesh->vertices[mesh->indices[i]].Position;
-		glm::vec3& pos2 = mesh->vertices[mesh->indices[i + 1]].Position;
-		glm::vec3& pos3 = mesh->vertices[mesh->indices[i + 2]].Position;
+		glm::vec3& pos1 = mesh->vertices[mesh->indicesLods[0][i]].Position;
+		glm::vec3& pos2 = mesh->vertices[mesh->indicesLods[0][i + 1]].Position;
+		glm::vec3& pos3 = mesh->vertices[mesh->indicesLods[0][i + 2]].Position;
 		glm::vec3 normal = glm::normalize(glm::cross(glm::vec3(pos3 - pos1), glm::vec3(pos2 - pos1)));  //side ?
 		
 		if (normal.y < 0)
 			normal = -normal;
-		mesh->vertices[mesh->indices[i]].Normal += normal;
-		mesh->vertices[mesh->indices[i + 1]].Normal += normal;
-		mesh->vertices[mesh->indices[i + 2]].Normal += normal;
+		mesh->vertices[mesh->indicesLods[0][i]].Normal += normal;
+		mesh->vertices[mesh->indicesLods[0][i + 1]].Normal += normal;
+		mesh->vertices[mesh->indicesLods[0][i + 2]].Normal += normal;
 	}
 
 	for (unsigned int i = 0; i < mesh->vertices.size(); ++i)
 	{
 		mesh->vertices[i].Normal = glm::normalize(mesh->vertices[i].Normal);
 	}
-	if (false)
+
+	if (false) 		// Load to normal map
 	{
-		// Load to normal map
 		GLfloat* buffer = new GLfloat[mesh->vertices.size() * 4];
 		for (int i = 0; i < mesh->vertices.size(); ++i)
 		{
@@ -330,52 +341,57 @@ void TerrainModel::makePlaneVerts(unsigned int rows, unsigned int columns, bool 
 
 void TerrainModel::makePlaneIndices(unsigned int dimensions)
 {
-	mesh->indices.resize((dimensions) * (dimensions) * 2 * 3);// 2 triangles per square, 3 indices per triangle dim-1???
+	mesh->indicesLods[0].resize((dimensions) * (dimensions) * 2 * 3);// 2 triangles per square, 3 indices per triangle dim-1???
 		int runner = 0;
 	for (int row = 0; row < dimensions - 1; row++)
 	{
 		for (int col = 0; col < dimensions - 1; col++) //order?
 		{
-			mesh->indices[runner++] = dimensions * row + col;
-			mesh->indices[runner++] = dimensions * row + col + dimensions;
-			mesh->indices[runner++] = dimensions * row + col + dimensions + 1;
+			mesh->indicesLods[0][runner++] = dimensions * row + col;
+			mesh->indicesLods[0][runner++] = dimensions * row + col + dimensions;
+			mesh->indicesLods[0][runner++] = dimensions * row + col + dimensions + 1;
 
-			mesh->indices[runner++] = dimensions * row + col;
-			mesh->indices[runner++] = dimensions * row + col + dimensions + 1;
-			mesh->indices[runner++] = dimensions * row + col + 1;
+			mesh->indicesLods[0][runner++] = dimensions * row + col;
+			mesh->indicesLods[0][runner++] = dimensions * row + col + dimensions + 1;
+			mesh->indicesLods[0][runner++] = dimensions * row + col + 1;
 		}
 	}
 }
 
-void TerrainModel::makePlaneIndices(unsigned int rows,unsigned int columns)
+void TerrainModel::makePlaneIndices(unsigned int rows,unsigned int columns, unsigned int _lod)
 {
-	mesh->indices.resize((rows) * (columns) * 2 * 3);// 2 triangles per square, 3 indices per triangle dim-1???
+	if (mesh->indicesLods.size() < _lod)
+		mesh->indicesLods.push_back({});
+
+	mesh->indicesLods[_lod-1].resize((rows) * (columns) * 2 * 3);// 2 triangles per square, 3 indices per triangle dim-1???
 	int runner = 0;
 	float MinX = 0, MinZ = 0, MaxX = 0, MaxZ = 0;
-	for (int col = 0; col < columns-1; col++)
+	for (int col = 0; col < columns- _lod; col+= _lod)
 	{
-		for (int row = 0; row < rows-1; row++)
+		for (int row = 0; row < rows- _lod; row+= _lod)
 		{
-			mesh->indices[runner++] = col * rows + row;
-			mesh->indices[runner++] = col * rows + row + rows;
-			mesh->indices[runner++] = col * rows + row + rows + 1;
-
-			mesh->indices[runner++] = col * rows + row;
-			mesh->indices[runner++] = col * rows + row + rows + 1;
-			mesh->indices[runner++] = col * rows + row + 1;
+			mesh->indicesLods[_lod-1][runner++] = col * rows + row;
+			mesh->indicesLods[_lod-1][runner++] = col * rows + row + rows* _lod;
+			mesh->indicesLods[_lod-1][runner++] = col * rows + row + rows* _lod + _lod;
 			
-			for (int i = 0; i < 6 && runner < mesh->indices.size(); i++) {
-				if (mesh->vertices[mesh->indices[runner - i]].Position.x < MinX)
-					MinX = mesh->vertices[mesh->indices[runner - i]].Position.x;
-				if (mesh->vertices[mesh->indices[runner - i]].Position.x > MaxX)
-					MaxX = mesh->vertices[mesh->indices[runner - i]].Position.x;
-				if (mesh->vertices[mesh->indices[runner - i]].Position.z < MinZ)
-					MinZ = mesh->vertices[mesh->indices[runner - i]].Position.z;
-				if (mesh->vertices[mesh->indices[runner - i]].Position.z > MaxZ)
-					MaxZ = mesh->vertices[mesh->indices[runner - i]].Position.z;
+			mesh->indicesLods[_lod-1][runner++] = col * rows + row;
+			mesh->indicesLods[_lod-1][runner++] = col * rows + row + rows* _lod + _lod;
+			mesh->indicesLods[_lod-1][runner++] = col * rows + row + _lod;
+			
+			for (int i = 0; i < 6 && runner < mesh->indicesLods[_lod - 1].size(); ++i)
+			{
+				if (mesh->vertices[mesh->indicesLods[_lod - 1][runner - i]].Position.x < MinX)
+					MinX = mesh->vertices[mesh->indicesLods[_lod - 1][runner - i]].Position.x;
+				if (mesh->vertices[mesh->indicesLods[_lod - 1][runner - i]].Position.x > MaxX)
+					MaxX = mesh->vertices[mesh->indicesLods[_lod - 1][runner - i]].Position.x;
+				if (mesh->vertices[mesh->indicesLods[_lod - 1][runner - i]].Position.z < MinZ)
+					MinZ = mesh->vertices[mesh->indicesLods[_lod - 1][runner - i]].Position.z;
+				if (mesh->vertices[mesh->indicesLods[_lod - 1][runner - i]].Position.z > MaxZ)
+					MaxZ = mesh->vertices[mesh->indicesLods[_lod - 1][runner - i]].Position.z;
 			}
 		}
 	}
+	mesh->indicesLods[_lod - 1].resize(runner);
 }
 
 void TerrainModel::Draw()
@@ -393,7 +409,7 @@ void TerrainModel::Draw()
 	glBindTexture(GL_TEXTURE_2D, m_material.roughness_texture_id);
 
 	glActiveTexture(GL_TEXTURE6);
-	glBindTexture(GL_TEXTURE_2D, m_material.emissive_texture_id); //should be black
+	glBindTexture(GL_TEXTURE_2D, m_material.emissive_texture_id);
 
 	mesh->Draw();
 }
@@ -423,7 +439,7 @@ std::vector<glm::vec3> TerrainModel::GetPositions() const
 
 std::vector<GLuint> TerrainModel::GetIndeces() const
 {
-	return mesh->indices;
+	return mesh->indicesLods[0];
 }
 
 TerrainModel::~TerrainModel()

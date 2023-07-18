@@ -7,6 +7,8 @@
 MyMesh::MyMesh(const std::string& _name)
 	: name(_name)
 {
+	indicesLods.push_back({});
+	EBO.push_back({});
 }
 
 //---------------------------------------------------------------------------
@@ -14,14 +16,16 @@ MyMesh::~MyMesh()
 {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
+	glDeleteBuffers(1, &EBO[0]);
 }
 
 MyMesh::MyMesh(const std::string& _name, std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture*> textures)
 	: name(_name)
 {
+	indicesLods.push_back({});
+	EBO.push_back({});
 	this->vertices = vertices;
-	this->indices = indices;
+	this->indicesLods[0] = indices;
 	this->textures = textures;
 
 	this->setupMesh();
@@ -30,6 +34,8 @@ MyMesh::MyMesh(const std::string& _name, std::vector<Vertex> vertices, std::vect
 MyMesh::MyMesh(const std::string& _name, const ShapeData & data)
 	: name(_name)
 {
+	indicesLods.push_back({});
+	EBO.push_back({});
 	glm::vec2 tex[4];
 	tex[0] = glm::vec2(1.0f, 1.0f);
 	tex[1] = glm::vec2(0.0f, 1.0f);
@@ -46,16 +52,16 @@ MyMesh::MyMesh(const std::string& _name, const ShapeData & data)
 	}
 
 	for (uint32_t i = 0; i < data.numIndices; ++i)
-		indices.push_back(data.indices[i]);
+		indicesLods[0].push_back(data.indices[i]);
 
-	for (uint32_t i = 0; i < indices.size(); i += 3)
+	for (uint32_t i = 0; i < indicesLods[0].size(); i += 3)
 	{
-		glm::vec3 pos1 = vertices[indices[i]].Position;
-		glm::vec3 pos2 = vertices[indices[i+1]].Position;
-		glm::vec3 pos3 = vertices[indices[i+2]].Position;
-		glm::vec2 uv1 = vertices[indices[i]].TexCoords;
-		glm::vec2 uv2 = vertices[indices[i + 1]].TexCoords;
-		glm::vec2 uv3 = vertices[indices[i + 2]].TexCoords;
+		glm::vec3 pos1 = vertices[indicesLods[0][i]].Position;
+		glm::vec3 pos2 = vertices[indicesLods[0][i+1]].Position;
+		glm::vec3 pos3 = vertices[indicesLods[0][i+2]].Position;
+		glm::vec2 uv1 = vertices[indicesLods[0][i]].TexCoords;
+		glm::vec2 uv2 = vertices[indicesLods[0][i + 1]].TexCoords;
+		glm::vec2 uv3 = vertices[indicesLods[0][i + 2]].TexCoords;
 		// calculate tangent/bitangent vectors of both triangles
 		glm::vec3 tangent1, bitangent1;
 		// - triangle 1
@@ -76,21 +82,30 @@ MyMesh::MyMesh(const std::string& _name, const ShapeData & data)
 		bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
 		bitangent1 = glm::normalize(bitangent1);
 
-		vertices[indices[i]].tangent = tangent1;
-		vertices[indices[i+1]].tangent = tangent1;
-		vertices[indices[i+2]].tangent = tangent1;
-		vertices[indices[i]].bitangent = bitangent1;
-		vertices[indices[i + 1]].bitangent = bitangent1;
-		vertices[indices[i + 2]].bitangent = bitangent1;
+		vertices[indicesLods[0][i]].tangent = tangent1;
+		vertices[indicesLods[0][i+1]].tangent = tangent1;
+		vertices[indicesLods[0][i+2]].tangent = tangent1;
+		vertices[indicesLods[0][i]].bitangent = bitangent1;
+		vertices[indicesLods[0][i + 1]].bitangent = bitangent1;
+		vertices[indicesLods[0][i + 2]].bitangent = bitangent1;
 	}
 	this->setupMesh();
 }
 
 void MyMesh::Draw()
 {
-	glBindVertexArray(this->VAO);
-	glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+	if (m_render_mode == RenderMode::DEFAULT)
+	{
+		glBindVertexArray(this->VAO);
+		glDrawElements(GL_TRIANGLES, this->indicesLods[LOD_index__in_use].size(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+	}
+	else if (m_render_mode == RenderMode::WIREFRAME)
+	{
+		glBindVertexArray(this->VAO);
+		glDrawElements(GL_LINES, this->indicesLods[LOD_index__in_use].size(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+	}
 }
 
 std::vector<TextureInfo> MyMesh::GetTextures() const
@@ -110,16 +125,16 @@ void MyMesh::setupMesh()
 {
 	glGenVertexArrays(1, &this->VAO);
 	glGenBuffers(1, &this->VBO);
-	glGenBuffers(1, &this->EBO);
+	glGenBuffers(1, &this->EBO[0]);
 
 	glBindVertexArray(this->VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
 	glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex),
 		&this->vertices[0], GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(GLuint),
-		&this->indices[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO[0]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indicesLods[0].size() * sizeof(GLuint),
+		&this->indicesLods[0][0], GL_STATIC_DRAW);
 
 	// Vertex Positions
 	glEnableVertexAttribArray(0);
@@ -154,14 +169,14 @@ void MyMesh::setupMesh()
 
 void MyMesh::calculatedTangent()
 {
-	for (int i = 0; i < indices.size(); i += 3)
+	for (int i = 0; i < indicesLods[0].size(); i += 3)
 	{
-		glm::vec3 pos1 = vertices[indices[i]].Position;
-		glm::vec3 pos2 = vertices[indices[i + 1]].Position;
-		glm::vec3 pos3 = vertices[indices[i + 2]].Position;
-		glm::vec2 uv1 = vertices[indices[i]].TexCoords;
-		glm::vec2 uv2 = vertices[indices[i + 1]].TexCoords;
-		glm::vec2 uv3 = vertices[indices[i + 2]].TexCoords;
+		glm::vec3 pos1 = vertices[indicesLods[0][i]].Position;
+		glm::vec3 pos2 = vertices[indicesLods[0][i + 1]].Position;
+		glm::vec3 pos3 = vertices[indicesLods[0][i + 2]].Position;
+		glm::vec2 uv1 = vertices[indicesLods[0][i]].TexCoords;
+		glm::vec2 uv2 = vertices[indicesLods[0][i + 1]].TexCoords;
+		glm::vec2 uv3 = vertices[indicesLods[0][i + 2]].TexCoords;
 		// calculate tangent/bitangent vectors of both triangles
 		glm::vec3 tangent1, bitangent1;
 		// - triangle 1
@@ -182,13 +197,38 @@ void MyMesh::calculatedTangent()
 		bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
 		bitangent1 = glm::normalize(bitangent1);
 
-		vertices[indices[i]].tangent = tangent1;
-		vertices[indices[i + 1]].tangent = tangent1;
-		vertices[indices[i + 2]].tangent = tangent1;
-		vertices[indices[i]].bitangent = bitangent1;
-		vertices[indices[i + 1]].bitangent = bitangent1;
-		vertices[indices[i + 2]].bitangent = bitangent1;
+		vertices[indicesLods[0][i]].tangent = tangent1;
+		vertices[indicesLods[0][i + 1]].tangent = tangent1;
+		vertices[indicesLods[0][i + 2]].tangent = tangent1;
+		vertices[indicesLods[0][i]].bitangent = bitangent1;
+		vertices[indicesLods[0][i + 1]].bitangent = bitangent1;
+		vertices[indicesLods[0][i + 2]].bitangent = bitangent1;
 	}
+}
+
+//--------------------------------------------------------------------------------------------------------------
+bool MyMesh::SwitchLOD(GLuint _LOD) //starts from one
+{
+	if (LOD_index__in_use + 1 == _LOD)
+		return true;
+
+	if (indicesLods.size() >= _LOD)
+	{
+		if (EBO.size() < _LOD) // EBO for this lod does not exists
+		{
+			EBO.push_back({});
+			glGenBuffers(1, &this->EBO[_LOD - 1]);
+		}
+
+		glBindVertexArray(this->VAO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO[_LOD - 1]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indicesLods[_LOD - 1].size() * sizeof(GLuint),
+			&this->indicesLods[_LOD - 1][0], GL_STATIC_DRAW);
+
+		LOD_index__in_use = _LOD - 1; //!@ starts from zero
+		return true;
+	}
+	return false;
 }
 
 //--------------------------------------------------------------------------------------------------------------

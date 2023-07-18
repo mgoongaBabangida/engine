@@ -11,8 +11,10 @@
 class DLL_OPENGL_ASSETS MyMesh: public I3DMesh
 {
 public:
+	enum class RenderMode { DEFAULT, WIREFRAME };
+
 	explicit MyMesh(const std::string& _name);
-	MyMesh(const MyMesh&) = default;
+	MyMesh(const MyMesh&) = delete;
 	virtual ~MyMesh();
 
 	MyMesh(const std::string& _name, std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture*> textures);
@@ -23,7 +25,7 @@ public:
 
   virtual size_t														GetVertexCount() const override { return vertices.size(); }
 	virtual const std::vector<Vertex>&				GetVertexs() const override { return vertices; }
-	virtual const std::vector<unsigned int>&	GetIndices() const override { return indices; }
+	virtual const std::vector<unsigned int>&	GetIndices() const override { return indicesLods[0]; }
 	virtual void                              BindVAO() const override { glBindVertexArray(this->VAO); }
 	virtual void                              UnbindVAO() const override { glBindVertexArray(0); }
 
@@ -33,16 +35,26 @@ public:
 	virtual void												setupMesh();
 	virtual void												calculatedTangent();
 
+	bool SwitchLOD(GLuint _LOD);
+	GLuint LODInUse() const { return LOD_index__in_use + 1; }
+
+	void SetRenderMode(RenderMode _mode) { m_render_mode = _mode; }
+	RenderMode GetRenderMode() { return m_render_mode; }
+
 public: //@todo should be protected
 	/*  Mesh Data  */
 	std::vector<Vertex>		vertices;
-	std::vector<GLuint>		indices;
+	std::vector<std::vector<GLuint>>	indicesLods;
 	std::vector<Texture*>	textures;
 
 protected:
 	/*  Render data  */
-	GLuint VAO, VBO, EBO;
+	GLuint VAO;
+	GLuint VBO;
+	std::vector<GLuint> EBO;
 	std::string name;
+	GLuint LOD_index__in_use = 0;
+	RenderMode m_render_mode = RenderMode::DEFAULT;
 };
 
 //----------------------------------------------------------------------------------------------

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <base/interfaces.h>
 #include <glm/glm/gtc/noise.hpp>
 #include <opengl_assets/Texture.h>
@@ -7,6 +8,10 @@
 #include <set>
 
 class IWindowImGui;
+class eMainContextBase;
+class eModelManager;
+class eObject;
+class TerrainModel;
 
 struct TerrainType
 {
@@ -21,7 +26,7 @@ class TerrainGeneratorTool : public IScript
 {
 public:
 
-  TerrainGeneratorTool(IWindowImGui* _imgui);
+  TerrainGeneratorTool(eMainContextBase* _game, eModelManager* _modelManager, IWindowImGui* _imgui);
   virtual ~TerrainGeneratorTool();
 
   virtual void Update(float _tick) override;
@@ -32,11 +37,13 @@ protected:
 
   void _GenerateColorMap();
 
-  std::vector<GLfloat>    m_noise_map;
-  std::vector<glm::vec4>  m_color_map;
-  Texture m_noise_texture;
-  Texture m_color_texture;
-  std::set<TerrainType> m_terrain_types;
+  std::vector<GLfloat>     m_noise_map;
+  std::vector<glm::vec4>   m_color_map;
+  Texture                  m_noise_texture;
+  Texture                  m_color_texture;
+  std::set<TerrainType>    m_terrain_types;
+  std::shared_ptr<eObject> m_terrain;
+  TerrainModel*            m_terrain_pointer;
 
   GLuint m_width = 100;
   GLuint m_height = 100;
@@ -46,4 +53,7 @@ protected:
   float m_lacunarity = 2.0f;
   glm::vec2 m_noise_offset = {0.0f, 0.0f};
   GLuint m_seed = 1;
+
+  eMainContextBase* m_game = nullptr;
+  eModelManager* m_modelManager = nullptr;
 };

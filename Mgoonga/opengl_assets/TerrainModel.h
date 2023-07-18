@@ -20,7 +20,7 @@ public:
 	void initialize(const Texture* diffuse, const Texture* specular, bool spreed_texture = true);
 	void initialize(const Texture* diffuse, const Texture* specular, const Texture* normal, const Texture* heightMap, bool spreed_texture = true);
 	
-	virtual void														Draw()							override;
+	virtual void														Draw()					override;
 	virtual const std::string&							GetName() const override { return mesh->Name(); }
 	virtual const std::string&							GetPath() const override { return m_path; }
 
@@ -40,7 +40,7 @@ public:
 	float							GetHeight(float x , float z)	override;
 	glm::vec3					GetNormal(float x, float z)		override;
 
-	void							makePlaneIndices(unsigned int rows, unsigned int columns);
+	void							makePlaneIndices(unsigned int rows, unsigned int columns, unsigned int _lod = 1);
 	
 	std::vector<glm::vec3>	GetPositions()			const;
 	std::vector<GLuint>		  GetIndeces()			const;
@@ -66,7 +66,7 @@ private:
 	void			makePlaneVerts(unsigned int dimensions, bool spreed_texture = true);
 	void			makePlaneVerts(unsigned int rows, unsigned int columns, bool spreed_texture = true);
 	void			makePlaneIndices(unsigned int dimensions);
-	void			assignHeights(Texture heightMap);
+	void			assignHeights(const Texture& heightMap);
 	void			generateNormals(GLuint size);
 	void			generateNormals(GLuint rows, GLuint columns);
 	Vertex		findVertex(float x, float z);

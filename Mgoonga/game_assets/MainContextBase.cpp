@@ -49,6 +49,7 @@ eMainContextBase::eMainContextBase(eInputController* _input,
 //-------------------------------------------------------------------------
 eMainContextBase::~eMainContextBase()
 {
+	m_global_scripts.clear();
 	if(tcpTimer)
 		tcpTimer->stop();
 }
@@ -600,7 +601,7 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[9]->Add(CONSOLE, "Console", reinterpret_cast<void*>(&console_plane_callbaack));
 
 	m_global_scripts.push_back(std::make_shared<ParticleSystemToolController>(externalGui[10], texManager.get(), soundManager.get(), pipeline));
-	m_global_scripts.push_back(std::make_shared<TerrainGeneratorTool>(externalGui[11]));
+	m_global_scripts.push_back(std::make_shared<TerrainGeneratorTool>(this, modelManager.get(), externalGui[11]));
 }
 
 //------------------------------------------------------------
