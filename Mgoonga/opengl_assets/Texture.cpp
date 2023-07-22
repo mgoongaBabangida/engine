@@ -105,15 +105,16 @@ bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenu
 	// Load textures
 	_genTexture();
 	glBindTexture(GL_TEXTURE_2D, id);
-	glTexImage2D(GL_TEXTURE_2D, 
+	glTexImage2D(GL_TEXTURE_2D,
 				0, 
-				mChannels == 4 ? GL_RGBA : GL_RGB, 
+				mChannels == 4 ? GL_RGBA : GL_RGB,
 				mTextureWidth, 
 				mTextureHeight, 
 				0, 
-				mChannels == 4 ? GL_RGBA : GL_RGB, 
-				GL_UNSIGNED_BYTE, 
+				mChannels == 4 ? GL_RGBA : GL_RGB,
+				GL_UNSIGNED_BYTE,
 				(GLubyte*)data);
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -459,6 +460,37 @@ bool Texture::loadHdr(const std::string& _path)
 		std::cout << "Failed to load HDR image." << std::endl;
 		return false;
 	}
+}
+
+//----------------------------------------------------------------------
+bool Texture::loadTexture2DArray(std::vector<std::string> _paths)
+{
+	path = "";
+	type = "";
+	mTextureWidth = 512; //?
+	mTextureHeight = 512;
+	GLsizei layers = _paths.size();
+	glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &id);
+	++textures_in_use;
+	indexes_in_use.insert(id);
+	glTextureStorage3D(id, 1, GL_RGBA8, mTextureWidth, mTextureHeight, layers);
+
+	uint32_t ilId;
+	for (int layer = 0; layer < _paths.size(); ++layer)
+	{
+		mChannels = eTextureImplDevIl::LoadTexture(_paths[layer], ilId, mTextureWidth, mTextureHeight); //rgb ? rgba
+		uint8_t* data = nullptr;
+		eTextureImplDevIl::AssignPixels(data, mTextureWidth, mTextureHeight);
+		glTextureSubImage3D(id, 0/*mipmap_level*/, 0/*offset.x*/, 0/*offset.y*/, layer/*offset.z*/, mTextureWidth, mTextureHeight, 1 /*layer*/, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		eTextureImplDevIl::DeleteImage(ilId);
+	}
+
+	glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	return true;
 }
 
 //----------------------------------------------------------------------

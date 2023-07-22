@@ -73,6 +73,8 @@ void eMainRender::Render(const Camera&								camera,
 	glUniform1i(GammaCorrectionLoc, gamma_correction);
 	glUniform1i(ToneMappingLoc, tone_mapping);
 	glUniform1f(HdrExposureLoc, exposure);
+	mainShader.SetUniformData("ssao_threshold", ssao_threshold);
+	mainShader.SetUniformData("ssao_strength", ssao_strength);
 
 	glUniform3f(lightAmbientLoc,  light.ambient.x,		   light.ambient.y,	        light.ambient.z);
 	glUniform3f(lightDiffuseLoc,  light.diffuse.x,		   light.diffuse.y,	        light.diffuse.z);
@@ -88,7 +90,6 @@ void eMainRender::Render(const Camera&								camera,
 
 	if (light.type == eLightType::POINT)
 	{
-
 		glUniform1f(glGetUniformLocation(mainShader.ID(), "shininess"), 16.0f);
 		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + light.light_direction,
 																							glm::vec3(0.0f, 1.0f, 0.0f));
@@ -126,6 +127,11 @@ void eMainRender::Render(const Camera&								camera,
 		glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * object->GetTransform()->getModelMatrix();
 		glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
 		glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &object->GetTransform()->getModelMatrix()[0][0]);
+
+		if (object->IsTextureBlending())
+			mainShader.SetUniformData("texture_blending", true);
+		else
+			mainShader.SetUniformData("texture_blending", false);
 
 		if (object->GetRigger() != nullptr)
 		{

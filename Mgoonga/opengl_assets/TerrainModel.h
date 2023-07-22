@@ -12,13 +12,13 @@ class DLL_OPENGL_ASSETS TerrainModel : public ITerrainModel
 public:
 	TerrainModel();
 	explicit TerrainModel(Texture* heightMap); //@todo copy generation in private !!!
-	TerrainModel(Texture * diffuse, Texture * specular, Texture * m_normal, Texture * heightMap);
+	TerrainModel(Texture* diffuse, Texture* specular, Texture* m_normal, Texture* heightMap);
 	TerrainModel(const TerrainModel& other);
 
 	virtual ~TerrainModel();
 
-	void initialize(const Texture* diffuse, const Texture* specular, bool spreed_texture = true);
-	void initialize(const Texture* diffuse, const Texture* specular, const Texture* normal, const Texture* heightMap, bool spreed_texture = true);
+	void initialize(const Texture* diffuse, const Texture* specular, const Texture* normal= nullptr, const Texture* heightMap = nullptr,
+								  bool spreed_texture = true, float _height_scale = 1.0f);
 	
 	virtual void														Draw()					override;
 	virtual const std::string&							GetName() const override { return mesh->Name(); }
@@ -49,6 +49,7 @@ public:
 
 	void setDiffuse(uint32_t _id);
 	void setSpecular(uint32_t _id);
+	void setAlbedoTextureArray(const Texture*);
 
 private:
 	MyMesh*					mesh; // generate ourself inside constructor
@@ -56,7 +57,8 @@ private:
 	std::string			m_path;
 
 	Texture					m_height;
-	
+	const Texture*	m_albedo_texture_array = nullptr;
+
 	GLuint		m_size;
 	GLuint		m_rows;
 	GLuint		m_columns;
@@ -66,7 +68,7 @@ private:
 	void			makePlaneVerts(unsigned int dimensions, bool spreed_texture = true);
 	void			makePlaneVerts(unsigned int rows, unsigned int columns, bool spreed_texture = true);
 	void			makePlaneIndices(unsigned int dimensions);
-	void			assignHeights(const Texture& heightMap);
+	void			assignHeights(const Texture& heightMap, float _height_scale = 1.0f);
 	void			generateNormals(GLuint size);
 	void			generateNormals(GLuint rows, GLuint columns);
 	Vertex		findVertex(float x, float z);

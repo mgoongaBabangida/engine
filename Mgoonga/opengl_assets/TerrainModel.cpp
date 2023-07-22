@@ -70,32 +70,12 @@ TerrainModel::TerrainModel(const TerrainModel& _other)
 {}
 
 //----------------------------------------------------------------
-void TerrainModel::initialize(const Texture* diffuse, const Texture* specular, bool spreed_texture)
-{
-	if (diffuse != nullptr)
-		m_material.albedo_texture_id = diffuse->id;
-
-	if (specular != nullptr)
-		m_material.metalic_texture_id = specular->id;
-
-  mesh = new MyMesh("terrain");
-	m_size = diffuse->mTextureHeight;
-	makePlaneVerts(diffuse->mTextureHeight, diffuse->mTextureHeight, spreed_texture);
-	makePlaneIndices(diffuse->mTextureHeight);
-	generateNormals(m_size);
-	
-	mesh->calculatedTangent();
-	mesh->setupMesh();
-	//does my mesh need textures ?
-  //mesh->setTextures({ diffuse , specular , &m_normal , &m_height });
-}
-
-//----------------------------------------------------------------
 void TerrainModel::initialize(const Texture* _diffuse,
 														  const Texture* _specular,
 														  const Texture* _normal,
 														  const Texture* _heightMap,
-														  bool spreed_texture)
+														  bool spreed_texture,
+															float _height_scale)
 {
 	if (_diffuse != nullptr)
 		m_material.albedo_texture_id = _diffuse->id;
@@ -106,21 +86,31 @@ void TerrainModel::initialize(const Texture* _diffuse,
 	if (_normal != nullptr)
 		m_material.normal_texture_id = _normal->id;
 
-	m_height =	*_heightMap;
-	
-	if(mesh == nullptr)
-	  mesh = new MyMesh("terrain");
+	if (mesh == nullptr)
+		mesh = new MyMesh("terrain");
 
-	m_size = _heightMap->mTextureHeight;
-	m_rows = _heightMap->mTextureWidth;
-	m_columns = _heightMap->mTextureHeight;
+	if (_heightMap != nullptr)
+	{
+		m_height = *_heightMap;
 
-	makePlaneVerts(_heightMap->mTextureWidth, _heightMap->mTextureHeight, spreed_texture);
-	makePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 1);
-	makePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 2);
-	assignHeights(*_heightMap);
-	generateNormals(_heightMap->mTextureWidth, _heightMap->mTextureHeight);
-	
+		m_size = _heightMap->mTextureHeight;
+		m_rows = _heightMap->mTextureWidth;
+		m_columns = _heightMap->mTextureHeight;
+
+		makePlaneVerts(_heightMap->mTextureWidth, _heightMap->mTextureHeight, spreed_texture);
+		makePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 1);
+		makePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 2);
+		assignHeights(*_heightMap, _height_scale);
+		generateNormals(_heightMap->mTextureWidth, _heightMap->mTextureHeight);
+	}
+	else
+	{
+		m_size = _diffuse->mTextureHeight;
+		makePlaneVerts(_diffuse->mTextureHeight, _diffuse->mTextureHeight, spreed_texture);
+		makePlaneIndices(_diffuse->mTextureHeight);
+		generateNormals(m_size);
+	}
+
 	mesh->calculatedTangent();
 	mesh->setupMesh();
 	//does my mesh need textures ?
@@ -143,6 +133,12 @@ void	TerrainModel::setDiffuse(uint32_t _id)
 void	TerrainModel::setSpecular(uint32_t _id)
 {
 	m_material.metallic = _id;
+}
+
+//----------------------------------------------------------------
+void TerrainModel::setAlbedoTextureArray(const Texture* _t)
+{
+	m_albedo_texture_array = _t;
 }
 
 //----------------------------------------------------------------
@@ -173,7 +169,7 @@ glm::vec3 TerrainModel::GetNormal(float x, float z)
 	return vert.Normal;
 }
 
-void TerrainModel::assignHeights(const Texture& _heightMap)
+void TerrainModel::assignHeights(const Texture& _heightMap, float _height_scale)
 {
 	glBindTexture(GL_TEXTURE_2D, _heightMap.id);
 	if (_heightMap.mChannels == 4)
@@ -183,7 +179,7 @@ void TerrainModel::assignHeights(const Texture& _heightMap)
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buffer);
 		int counter = 0;
 		for (int i = 0; i < _heightMap.mTextureHeight * _heightMap.mTextureWidth * 4; i += 4)
-			mesh->vertices[i / 4].Position.y = (float)buffer[i];
+			mesh->vertices[i / 4].Position.y = (float)(buffer[i] * _height_scale);
 		delete[] buffer;
 	}
 	else if (_heightMap.mChannels == 1)
@@ -193,7 +189,7 @@ void TerrainModel::assignHeights(const Texture& _heightMap)
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, buffer);
 		int counter = 0;
 		for (int i = 0; i < _heightMap.mTextureHeight * _heightMap.mTextureWidth; ++i)
-			mesh->vertices[i].Position.y = (float)buffer[i];
+			mesh->vertices[i].Position.y = (float)(buffer[i] * _height_scale);
 		delete[] buffer;
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -410,6 +406,14 @@ void TerrainModel::Draw()
 
 	glActiveTexture(GL_TEXTURE6);
 	glBindTexture(GL_TEXTURE_2D, m_material.emissive_texture_id);
+
+	if (m_albedo_texture_array != nullptr)
+	{
+		glActiveTexture(GL_TEXTURE12);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, m_albedo_texture_array->id);
+
+		glBindTextureUnit(12, m_albedo_texture_array->id);
+	}
 
 	mesh->Draw();
 }

@@ -180,6 +180,16 @@ void eTextureManager::LoadAllTextures()
 	m_Textures.insert(std::pair<std::string, Texture>("pbr_gold_normal", text));
 	text.loadTextureFromFile(folderPath + "pbr_gold/gold-scuffed_roughness.png");
 	m_Textures.insert(std::pair<std::string, Texture>("pbr_gold_roughness", text));
+
+	//terrain 2d array
+	std::vector<std::string> paths{
+		folderPath + "terrain_sebastian_lague/Water.png",
+		folderPath + "terrain_sebastian_lague/Grass.png",
+		folderPath + "terrain_sebastian_lague/Rocks 1.png",
+		folderPath + "terrain_sebastian_lague/Snow.png",
+	};
+	text.loadTexture2DArray(paths);
+	m_Textures.insert(std::pair<std::string, Texture>("terrain_albedo_array_lague", text));
 }
 
 const Texture* eTextureManager::Find(const std::string& texture_name) const

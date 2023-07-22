@@ -303,17 +303,30 @@ void	Shader::GetUniformDataFromShader()
 			break;
 			case GL_SAMPLER_2D:
 			{
-
+				GLint res; // just the location of texture slot not texture id
+				glGetUniformiv(id, uniform.location, &res);
+				uniform.data = static_cast<int32_t>(res);
 			}
 			break;
 			case GL_SAMPLER_CUBE:
 			{
-
+				GLint res; // just the location of texture slot not texture id
+				glGetUniformiv(id, uniform.location, &res);
+				uniform.data = static_cast<int32_t>(res);
 			}
 			break;
 			case GL_SAMPLER_2D_SHADOW:
 			{
-
+				GLint res; // just the location of texture slot not texture id
+				glGetUniformiv(id, uniform.location, &res);
+				uniform.data = static_cast<int32_t>(res);
+			}
+			break;
+			case GL_SAMPLER_2D_ARRAY:
+			{
+				GLint res; // just the location of texture slot not texture id
+				glGetUniformiv(id, uniform.location, &res);
+				uniform.data = static_cast<int32_t>(res);
 			}
 			break;
 			default:
@@ -334,6 +347,17 @@ bool Shader::SetUniformData(const std::string& _name, const UniformData& _data)
 		_SetUniform(*it);
 		return true;
 	}
+	else // try to set it anyway
+	{
+		if (const int32_t* pval = std::get_if<int32_t>(&_data))
+			glUniform1i(glGetUniformLocation(id, _name.c_str()), *pval);
+		else if (const size_t* pval = std::get_if<size_t>(&_data))
+			glUniform1i(glGetUniformLocation(id, _name.c_str()), *pval);
+		else if (const bool* pval = std::get_if<bool>(&_data))
+			glUniform1i(glGetUniformLocation(id, _name.c_str()), *pval);
+		else if (const float* pval = std::get_if<float>(&_data))
+			glUniform1f(glGetUniformLocation(id, _name.c_str()), *pval);
+	}
 	return false;
 }
 
@@ -351,14 +375,18 @@ void Shader::_SetUniform(const Uniform& _uniform)
 		break;
 		case GL_INT:
 		{
-			int32_t data = std::get<int32_t>(_uniform.data);
-			glUniform1i(_uniform.location, data);
+			if(const int32_t* pval =  std::get_if<int32_t>(&_uniform.data))
+				glUniform1i(_uniform.location, *pval);
+			else if(const size_t* pval = std::get_if<size_t>(&_uniform.data))
+				glUniform1i(_uniform.location, *pval);
 		}
 		break;
 		case GL_UNSIGNED_INT:
 		{
-			size_t data = std::get<size_t>(_uniform.data);
-			glUniform1i(_uniform.location, data);
+			if (const int32_t* pval = std::get_if<int32_t>(&_uniform.data))
+				glUniform1i(_uniform.location, *pval);
+			else if (const size_t* pval = std::get_if<size_t>(&_uniform.data))
+				glUniform1i(_uniform.location, *pval);
 		}
 		break;
 		case GL_FLOAT:

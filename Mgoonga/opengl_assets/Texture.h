@@ -41,19 +41,21 @@ struct DLL_OPENGL_ASSETS Texture
 		return *this; 
 	}
 
-	static GLuint GetDefaultTextureId();
-	static Texture GetTexture1x1(TColor color);
-	static bool freeTexture(unsigned int _id);
+	static GLuint		GetDefaultTextureId();
+	static Texture	GetTexture1x1(TColor color);
+	static bool			freeTexture(unsigned int _id);
 
 	void setNumRows(GLuint nrows) { numberofRows = nrows; }
 	void freeTexture();
 
-	uint8_t* getPixelBuffer(GLenum _target = GL_TEXTURE_2D, GLenum format = GL_RGBA, GLenum _type = GL_UNSIGNED_BYTE);
-	bool saveToFile(const std::string &path, GLenum _target = GL_TEXTURE_2D, GLenum format = GL_RGBA, GLenum _type = GL_UNSIGNED_BYTE);
+	uint8_t*	getPixelBuffer(GLenum _target = GL_TEXTURE_2D, GLenum format = GL_RGBA, GLenum _type = GL_UNSIGNED_BYTE);
+	bool			saveToFile(const std::string &path, GLenum _target = GL_TEXTURE_2D, GLenum format = GL_RGBA, GLenum _type = GL_UNSIGNED_BYTE);
 
 	bool loadTextureFromFile(const std::string& path, GLenum format = GL_RGBA, GLenum wrap = GL_CLAMP_TO_EDGE);
 	bool loadCubemap(std::vector<std::string> faces);
 	bool loadHdr(const std::string& _path);
+	bool loadTexture2DArray(std::vector<std::string> _paths);
+
 	bool generatePerlin(GLuint Width, GLuint Height, bool periodic);
 
 	bool makeCubemap(Texture*);
@@ -97,6 +99,7 @@ struct DLL_OPENGL_ASSETS Texture
 protected:
 	bool _loadTexture1x1(TColor color);
 	void _genTexture();
+
 	static unsigned int textures_in_use;
 	static std::set<unsigned int> indexes_in_use;
 };

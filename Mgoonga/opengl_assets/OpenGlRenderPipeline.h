@@ -68,6 +68,8 @@ public:
 	float& GetExposureRef() { return exposure; }
 	bool& GetSSAOEnabledRef() { return ssao; }
 	bool& GetRotateSkyBox();
+	float& GetSaoThresholdRef();
+	float& GetSaoStrengthRef();
 
 	glm::vec4 debug_float = {0.0f,0.0f,0.0f,0.0f};
 

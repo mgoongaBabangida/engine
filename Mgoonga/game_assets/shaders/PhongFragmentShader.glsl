@@ -1,4 +1,4 @@
-#version 430
+#version 460 core
 
 out vec4 outColor;
 
@@ -31,13 +31,15 @@ in vec3 theNormal;
 in vec3 thePosition;
 in vec2 Texcoord;
 in vec4 LightSpacePos;
+in vec4 LocalSpacePos;
+in vec3 LocalSpaceNormal;
 in mat3 TBN;
 in vec4 debug;
 
 uniform Material material;
 uniform Light light;
 
-subroutine vec3 LightingPtr(Light light, vec3 normal, vec3 thePosition, vec2 TexCoords);
+subroutine vec3 LightingPtr(Light light, vec3 normal, vec3 thePosition, vec3 diffuseTexture, vec2 Texcoords);
 subroutine uniform LightingPtr LightingFunction;
 
 layout(binding=0) uniform samplerCube 	   depth_cube_map;// Shadow point
@@ -50,6 +52,8 @@ layout(binding=5) uniform sampler2D        texture_depth1;
 layout(binding=6) uniform sampler2D        texture_emissionl;
 layout(binding=7) uniform sampler2D        texture_ssao;
 
+layout(binding=12) uniform sampler2DArray  texture_array_albedo;
+
 uniform vec3 eyePositionWorld;
 uniform bool normalMapping = true;
 uniform bool shadow_directional = true;
@@ -57,6 +61,7 @@ uniform bool shadow_directional = true;
 uniform float far_plane;
 uniform float shininess = 32.0f;
 uniform float ssao_threshold = 0.9f;
+uniform float ssao_strength = 0.6f;
 
 uniform bool gamma_correction = true;
 uniform bool debug_white_color = false;
@@ -65,28 +70,125 @@ uniform bool debug_white_texcoords = false;
 uniform bool tone_mapping = true;
 uniform float hdr_exposure = 1.0f;
 
+const int max_texture_array_size = 8;
+const float epsilon = 0.001f;
+
+uniform bool texture_blending = false;
+uniform float min_height = 0.0f;
+uniform float max_height = 1.0f;
+uniform float base_start_heights[max_texture_array_size];
+uniform int color_count = 4;
+uniform float textureScale[max_texture_array_size];
+
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal);
 float ShadowCalculationCubeMap(vec3 fragPos);
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir);
 
-subroutine(LightingPtr) vec3 calculatePhongPointSpecDif(Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
+float inverseLerp(float a, float b, float value)
+{
+	return clamp((value-a)/(b-a), 0.0f, 1.0f);
+}
+
+vec3 triplaner(float layer, vec3 blendAxes)
+{
+	int index = int(layer);
+	vec3 scaledWorldPos = vec3(LocalSpacePos) / textureScale[index];
+	if(gamma_correction)
+	{
+		vec3 xProjection = vec3(pow(texture(texture_array_albedo, vec3(scaledWorldPos.yz, layer)).rgb, vec3(2.2f))) * blendAxes.x;
+		vec3 yProjection = vec3(pow(texture(texture_array_albedo, vec3(scaledWorldPos.xz, layer)).rgb, vec3(2.2f))) * blendAxes.y;
+		vec3 zProjection = vec3(pow(texture(texture_array_albedo, vec3(scaledWorldPos.xy, layer)).rgb, vec3(2.2f))) * blendAxes.z;
+		return xProjection + yProjection + zProjection;
+	}
+	else
+	{
+		vec3 xProjection = vec3(texture(texture_array_albedo, vec3(scaledWorldPos.yz, layer))) * blendAxes.x;
+		vec3 yProjection = vec3(texture(texture_array_albedo, vec3(scaledWorldPos.xz, layer))) * blendAxes.y;
+		vec3 zProjection = vec3(texture(texture_array_albedo, vec3(scaledWorldPos.xy, layer))) * blendAxes.z;
+		return xProjection + yProjection + zProjection;
+	}
+	//return vec3(pow(texture(texture_array_albedo, vec3(scaledWorldPos.yz, layer)).rgb, vec3(2.2f)));		
+}
+
+vec3 SampleAlbedoTexture(vec2 TexCoords)
+{
+	if(!texture_blending)
+	{
+	if(gamma_correction)
+		return vec3(pow(texture(texture_diffuse1, TexCoords).rgb, vec3(2.2f)));
+	else
+		return vec3(texture(texture_diffuse1, TexCoords));
+	}
+	else
+	{
+		vec3 colorAlbedo;
+		float heightPercent = inverseLerp(min_height, max_height, LocalSpacePos.y);
+		
+		vec3 blendAxes = abs(LocalSpaceNormal);
+		blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
+		
+		for(int i = 0; i < color_count; ++i)
+		{
+			//float drawStrength = inverseLerp(-base_blends[i]/2 - epsilon, base_blends[i]/2, heightPercent-base_start_heights[i]);
+			//vec3 texture_color = triplaner(i, blendAxes);
+			//colorAlbedo = colorAlbedo * (1-drawStrength) + texture_color * drawStrength;
+			
+			if(heightPercent >= base_start_heights[i] && heightPercent <= base_start_heights[i+1])
+			{
+				vec3 colorMain = triplaner(i, blendAxes);
+				if(base_start_heights[i+1] - heightPercent < 0.05f)
+				{
+					float mixing = 1.0f / 0.05f;
+					vec3 colorMix = triplaner(i+1, blendAxes);
+					colorAlbedo = mix(colorMix, colorMain, (base_start_heights[i+1] - heightPercent) * mixing);
+				}
+				else
+					colorAlbedo = colorMain;
+			}
+		}
+		return colorAlbedo;		
+	}
+}
+
+vec3 CalculateAlbedo(vec3  lightVector, vec3 normal, vec3 diffuseTexture)
+{
+	float Brightness   = clamp(dot(lightVector, normal), 0, 1);
+	if(!texture_blending)
+	{
+		return vec3(light.diffuse * Brightness * diffuseTexture);
+	}
+	else
+	{
+		return vec3(light.diffuse * Brightness * diffuseTexture);
+	}
+}
+
+vec3 SampleSpecularTexture(vec2 TexCoords)
+{
+	if(!texture_blending)
+	{
+		// no gamma_correction for specular ?
+		return vec3(texture(texture_specular1, TexCoords));
+	}
+	else
+	{
+		return SampleAlbedoTexture(TexCoords);
+	}
+}
+
+subroutine(LightingPtr) vec3 calculatePhongPointSpecDif(Light light, vec3 normal, vec3 thePosition, vec3 diffuseTexture, vec2 Texcoords)
 {
   //Diffuse
-  vec3 lightVector  = normalize(vec3(light.position)-thePosition);
-  float Brightness  = clamp(dot(lightVector, normal), 0, 1);
-  vec3 diffuseLight;
-  if(gamma_correction)
-	diffuseLight = vec3(light.diffuse * Brightness * pow(texture(texture_diffuse1, TexCoords).rgb, vec3(2.2f)));
-  else
-	diffuseLight = vec3(light.diffuse * Brightness * vec3(texture(texture_diffuse1, TexCoords))); //Brightness * material.diffuse
-  
+  vec3  lightVector  = normalize(vec3(light.position) - thePosition);
+  vec3  diffuseLight = CalculateAlbedo(lightVector, normal, diffuseTexture);
+
   //Specular
   vec3 Reflaction = reflect(-lightVector,normal);
   vec3 eyeVector  = normalize(eyePositionWorld-thePosition); 
   float spec      = clamp(dot(Reflaction,eyeVector), 0, 1);
 
   spec = pow(spec, shininess);
-  vec3 specularLight = vec3(light.specular *spec * vec3(texture(texture_specular1, TexCoords)));//* material.specular
+  vec3 specularLight = vec3(light.specular *spec * SampleSpecularTexture(Texcoords));//* material.specular
   specularLight=clamp(specularLight,0,1);
 
   // Attenuation
@@ -99,16 +201,12 @@ subroutine(LightingPtr) vec3 calculatePhongPointSpecDif(Light light, vec3 normal
     return diffuseLight + specularLight;
 }
 
-subroutine(LightingPtr) vec3 calculatePhongDirectionalSpecDif(Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
+subroutine(LightingPtr) vec3 calculatePhongDirectionalSpecDif(Light light, vec3 normal, vec3 thePosition, vec3 diffuseTexture, vec2 Texcoords)
 {
     vec3 lightVector = -normalize(vec3(light.direction));
     // diffuse shadingfloat 
 	float Brightness  = clamp(dot(lightVector, normal), 0, 1);
-	vec3 diffuseLight;
-	if(gamma_correction)
-		diffuseLight = vec3(light.diffuse * Brightness * pow(texture(texture_diffuse1, TexCoords).rgb, vec3(2.2f)));
-	else
-		diffuseLight  = vec3(light.diffuse  * Brightness * vec3(texture(texture_diffuse1, TexCoords)));
+	vec3 diffuseLight = CalculateAlbedo(lightVector, normal, diffuseTexture);
 	
    // specular shading
     vec3 Reflaction = reflect(-lightVector, normal);
@@ -116,13 +214,13 @@ subroutine(LightingPtr) vec3 calculatePhongDirectionalSpecDif(Light light, vec3 
 	float spec      = clamp(dot(Reflaction,eyeVector), 0, 1);	
     
 	spec = pow(spec, shininess);   
-	vec3 specularLight = light.specular * spec * vec3(texture(texture_specular1, TexCoords));
+	vec3 specularLight = light.specular * spec * SampleSpecularTexture(Texcoords);
 	specularLight=clamp(specularLight,0,1);
 	
     return diffuseLight + specularLight;
 }
 
-subroutine(LightingPtr) vec3 calculatePhongFlashSpecDif(Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
+subroutine(LightingPtr) vec3 calculatePhongFlashSpecDif(Light light, vec3 normal, vec3 thePosition, vec3 diffuseTexture, vec2 Texcoords)
 {
 	vec3 lightDir= normalize(vec3(light.position)-thePosition);
 	float theta     = dot(lightDir, normalize(-light.direction));
@@ -131,30 +229,26 @@ subroutine(LightingPtr) vec3 calculatePhongFlashSpecDif(Light light, vec3 normal
 
 	if(theta > light.cutOff) 
 	{
-		vec3 ret = calculatePhongPointSpecDif(light, normal, thePosition, TexCoords);
+		vec3 ret = calculatePhongPointSpecDif(light, normal, thePosition, diffuseTexture, Texcoords);
 		return ret *= intensity;
 	}
 	else
 	 return vec3(0.0f,0.0f,0.0f);
 }
 
-subroutine(LightingPtr) vec3 calculateBlinnPhongPointSpecDif (Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
+subroutine(LightingPtr) vec3 calculateBlinnPhongPointSpecDif (Light light, vec3 normal, vec3 thePosition, vec3 diffuseTexture, vec2 Texcoords)
 {
   //Diffuse
   vec3 lightVector  = normalize(vec3(light.position)-thePosition);
   float Brightness  = clamp(dot(lightVector, normal),0,1);
-  vec3 diffuseLight;
-	if(gamma_correction)
-		diffuseLight = vec3(light.diffuse * Brightness * pow(texture(texture_diffuse1, TexCoords).rgb, vec3(2.2f)));
-	else
-		diffuseLight = vec3(light.diffuse * Brightness * vec3(texture(texture_diffuse1, TexCoords)));//Brightness*material.diffuse
+  vec3 diffuseLight = CalculateAlbedo(lightVector, normal, diffuseTexture);
   
   //Specular
   vec3 eyeVector= normalize(eyePositionWorld-thePosition); 
   vec3 halfvector = normalize(eyeVector+lightVector);
   float spec=clamp(dot(normal, halfvector), 0, 1);
   spec=pow(spec, shininess);
-  vec3 specularLight=vec3(light.specular *spec * vec3(texture(texture_specular1, TexCoords)));//* material.specular
+  vec3 specularLight=vec3(light.specular *spec * SampleSpecularTexture(Texcoords));//* material.specular
   specularLight=clamp(specularLight,0,1);
 
   // Attenuation
@@ -167,29 +261,25 @@ subroutine(LightingPtr) vec3 calculateBlinnPhongPointSpecDif (Light light, vec3 
     return diffuseLight + specularLight;
 }
 
-subroutine(LightingPtr) vec3 calculateBlinnPhongDirectionalSpecDif(Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
+subroutine(LightingPtr) vec3 calculateBlinnPhongDirectionalSpecDif(Light light, vec3 normal, vec3 thePosition, vec3 diffuseTexture, vec2 Texcoords)
 {
     vec3 lightVector = -normalize(vec3(light.direction));
     // diffuse shadingfloat 
 	float Brightness  = clamp(dot(lightVector, normal), 0, 1);
-	vec3 diffuseLight;
-	if(gamma_correction)
-		diffuseLight = vec3(light.diffuse * Brightness * pow(texture(texture_diffuse1, TexCoords).rgb, vec3(2.2f)));
-	else
-		diffuseLight  = vec3(light.diffuse  * Brightness * vec3(texture(texture_diffuse1, TexCoords)));
+	vec3 diffuseLight = CalculateAlbedo(lightVector, normal, diffuseTexture);
 	
    //Specular
     vec3 eyeVector= normalize(eyePositionWorld-thePosition); 
     vec3 halfvector = normalize(eyeVector+lightVector);
     float spec = clamp(dot(normal, halfvector), 0, 1);
     spec=pow(spec, shininess);
-    vec3 specularLight = vec3(light.specular * spec * vec3(texture(texture_specular1, TexCoords)));//* material.specular
+    vec3 specularLight = vec3(light.specular * spec * SampleSpecularTexture(Texcoords));//* material.specular
     specularLight=clamp(specularLight,0,1);	
 	
     return diffuseLight + specularLight;
 }
 
-subroutine(LightingPtr) vec3 calculateBlinnPhongFlashSpecDif(Light light, vec3 normal, vec3 thePosition, vec2 TexCoords)
+subroutine(LightingPtr) vec3 calculateBlinnPhongFlashSpecDif(Light light, vec3 normal, vec3 thePosition, vec3 diffuseTexture, vec2 Texcoords)
 {
 	vec3 lightDir= normalize(vec3(light.position)-thePosition);
 	float theta     = dot(lightDir, normalize(-light.direction));
@@ -198,7 +288,7 @@ subroutine(LightingPtr) vec3 calculateBlinnPhongFlashSpecDif(Light light, vec3 n
 
 	if(theta > light.cutOff) 
 	{
-		vec3 ret = calculateBlinnPhongPointSpecDif(light, normal, thePosition, TexCoords);
+		vec3 ret = calculateBlinnPhongPointSpecDif(light, normal, thePosition, diffuseTexture, Texcoords);
 		return ret *= intensity;
 	}
 	else
@@ -226,7 +316,7 @@ void main()
 		bNormal = theNormal;
 
   //Ambient
-  vec2 buf_relative_tex_coord = vec2(gl_FragCoord[0]/ 1200.0f, gl_FragCoord[1] / 600.0f);
+  vec2 buf_relative_tex_coord = vec2(gl_FragCoord[0]/ 1200.0f, gl_FragCoord[1] / 600.0f); // @todo magic numbers
   float AmbientOcclusion = 1.0f;
   
   if(gamma_correction)
@@ -235,29 +325,26 @@ void main()
 	AmbientOcclusion = texture(texture_ssao, buf_relative_tex_coord).r;
   
   if(AmbientOcclusion < ssao_threshold)
-	AmbientOcclusion = 0.0f;
+    AmbientOcclusion = AmbientOcclusion * ssao_strength;
 	
-  vec3 dif_texture;
-	if(gamma_correction)
-		dif_texture = vec3(pow(texture(texture_diffuse1, Texcoord).rgb, vec3(2.2f)));
-	else
-		dif_texture = vec3(texture(texture_diffuse1, Texcoord));
-		
+  vec3 dif_texture = SampleAlbedoTexture(Texcoord);
+			
   vec3 ambientLight = light.ambient * dif_texture * AmbientOcclusion; 
 
-     float shadow;
+  float shadow;
 	 vec3 lightVector = -normalize(vec3(light.direction));	 
      if(shadow_directional)
 		shadow =  ShadowCalculation(LightSpacePos, lightVector, bNormal);
      else
 		shadow =  ShadowCalculationCubeMap(thePosition);
 
-  vec3 difspec = LightingFunction(light, bNormal, thePosition, Texcoord);
+  //Diffuse and Specular
+  vec3 difspec = LightingFunction(light, bNormal, thePosition, dif_texture, Texcoord);
 
   if(debug_white_texcoords)
-	outColor = vec4(AmbientOcclusion, AmbientOcclusion, AmbientOcclusion, 1.0f); 
+	outColor = vec4(1.0f,1.0f,1.0f,1.0f); 
   else if(debug_white_color)
-	outColor = vec4(vec3(shadow / far_plane), 1.0);
+	outColor = vec4(CalculateAlbedo(lightVector, bNormal, dif_texture), 1.0f);
   else
 	{
 	outColor = vec4(ambientLight + difspec * shadow, 1.0);
@@ -274,7 +361,7 @@ void main()
 			outColor.rgb = vec3(1.0) - exp(-outColor.rgb * hdr_exposure);
 	 
 		if(gamma_correction)
-		outColor.rgb = pow(outColor.rgb, vec3(1.0/2.2f));
+			outColor.rgb = pow(outColor.rgb, vec3(1.0/2.2f));
 	}
 };
 

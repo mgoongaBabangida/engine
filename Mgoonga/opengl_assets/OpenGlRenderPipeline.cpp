@@ -99,6 +99,9 @@ Texture eOpenGlRenderPipeline::GetSkyNoiseTexture(const Camera& _camera)
 	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SQUERE);
 }
 
+float& eOpenGlRenderPipeline::GetSaoThresholdRef() { return renderManager->GetSsaoThresholdRef(); }
+float& eOpenGlRenderPipeline::GetSaoStrengthRef() { return renderManager->GetSsaoStrengthRef(); }
+
 //-----------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vector<shObject>> _objects,
 																				Camera& _camera,

@@ -27,8 +27,13 @@ public:
 	void	SetShadowMatrix(glm::mat4 shadow_matrix);
 
 	Shader& GetShader() { return mainShader; }
+
+	float& GetSaoThresholdRef() { return ssao_threshold; }
+	float& GetSaoStrengthRef() { return ssao_strength; }
+
 protected:
 	Shader mainShader;
+
 	GLuint fullTransformationUniformLocation;
 	GLuint modelToWorldMatrixUniformLocation;
 	GLuint eyePositionWorldUniformLocation;
@@ -59,6 +64,9 @@ protected:
 	GLuint GammaCorrectionLoc;
 	GLuint ToneMappingLoc;
 	GLuint HdrExposureLoc;
+
+	float ssao_threshold = 0.9f;
+	float ssao_strength = 0.6f;
 
 	std::vector<glm::mat4> matrices;
 	glm::mat4			         shadowMatrix;
