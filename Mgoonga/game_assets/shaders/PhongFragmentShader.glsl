@@ -90,15 +90,16 @@ float inverseLerp(float a, float b, float value)
 }
 
 vec3 triplaner(float layer, vec3 blendAxes)
-{
+{  
 	int index = int(layer);
 	vec3 scaledWorldPos = vec3(LocalSpacePos) / textureScale[index];
 	if(gamma_correction)
 	{
-		vec3 xProjection = vec3(pow(texture(texture_array_albedo, vec3(scaledWorldPos.yz, layer)).rgb, vec3(2.2f))) * blendAxes.x;
-		vec3 yProjection = vec3(pow(texture(texture_array_albedo, vec3(scaledWorldPos.xz, layer)).rgb, vec3(2.2f))) * blendAxes.y;
-		vec3 zProjection = vec3(pow(texture(texture_array_albedo, vec3(scaledWorldPos.xy, layer)).rgb, vec3(2.2f))) * blendAxes.z;
-		return xProjection + yProjection + zProjection;
+	  vec3 xProjection = vec3(pow(texture(texture_array_albedo, vec3(scaledWorldPos.yz, layer)).rgb, vec3(2.2f))) * abs(blendAxes.x);
+	  vec3 yProjection = vec3(pow(texture(texture_array_albedo, vec3(scaledWorldPos.xz, layer)).rgb, vec3(2.2f))) * abs(blendAxes.y);
+	  vec3 zProjection = vec3(pow(texture(texture_array_albedo, vec3(scaledWorldPos.xy, layer)).rgb, vec3(2.2f))) * abs(blendAxes.z);
+	  //return xProjection + zProjection;
+	  return xProjection + yProjection + zProjection;
 	}
 	else
 	{
@@ -114,9 +115,9 @@ vec3 SampleAlbedoTexture(vec2 TexCoords)
 {
 	if(!texture_blending)
 	{
-	if(gamma_correction)
+	  if(gamma_correction)
 		return vec3(pow(texture(texture_diffuse1, TexCoords).rgb, vec3(2.2f)));
-	else
+	  else
 		return vec3(texture(texture_diffuse1, TexCoords));
 	}
 	else
@@ -124,8 +125,8 @@ vec3 SampleAlbedoTexture(vec2 TexCoords)
 		vec3 colorAlbedo;
 		float heightPercent = inverseLerp(min_height, max_height, LocalSpacePos.y);
 		
-		vec3 blendAxes = abs(LocalSpaceNormal);
-		blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
+		vec3 blendAxes = LocalSpaceNormal;
+		blendAxes = normalize(blendAxes);
 		
 		for(int i = 0; i < color_count; ++i)
 		{

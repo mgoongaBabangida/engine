@@ -10,6 +10,7 @@
 #include <opengl_assets/SoundManager.h>
 #include <opengl_assets/Sound.h>
 #include <opengl_assets/openglrenderpipeline.h>
+#include <opengl_assets/TerrainModel.h>
 
 #include <game_assets/MainContextBase.h>
 #include <game_assets/ShipScript.h>
@@ -280,7 +281,7 @@ void GameController::_InitializeShipIcons()
     {
         for (int i = 0; i < m_ship_icons.size(); i++)
         {
-          if (m_ship_icons[i]->isPressed(m_cursor_pos.x, m_cursor_pos.y))
+          if (m_ship_icons[i]->isPressed((int)m_cursor_pos.x, (int)m_cursor_pos.y))
           {
             if (!m_dice_rolled)
             {
@@ -342,10 +343,12 @@ void GameController::_InitializeShips()
   //TERRAIN
   std::unique_ptr<TerrainModel> terrainModel = m_modelManager->CloneTerrain("simple");
   terrainModel->initialize(m_texManager->Find("Tgrass0_d"),
-    m_texManager->Find("Tgrass0_d"),
-    m_texManager->Find("Tblue"),
-    m_texManager->Find("TOcean0_s"),
-    true);
+                           m_texManager->Find("Tgrass0_d"),
+                           &Texture::GetTexture1x1(BLUE),
+                           m_texManager->Find("TOcean0_s"),
+                           true);
+  terrainModel->setAlbedoTextureArray(m_game->GetTexture("terrain_albedo_array_2"));
+  //terrainModel->getMeshes()[0]->SetRenderMode(MyMesh::RenderMode::WIREFRAME);
 
   //OBJECTS
   ObjectFactoryBase factory;
@@ -354,9 +357,37 @@ void GameController::_InitializeShips()
   m_terrain->SetName("Terrain");
   m_terrain->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
   m_terrain->GetTransform()->setTranslation(vec3(0.0f, 1.8f, 0.0f));
+  m_terrain->SetTextureBlending(true);
   m_terrain->SetPickable(false);
   m_game->AddObject(m_terrain);
 
+  //SET UNIFORMS
+  m_pipeline.get().SetUniformData("class eMainRender", "min_height", 0.0f);
+  m_pipeline.get().SetUniformData("class eMainRender", "max_height", 1.0f);
+  m_pipeline.get().SetUniformData("class eMainRender", "color_count", 2);
+
+  std::set<TerrainType> terrain_types;
+  terrain_types.insert({ "mounten",		0.0f, 0.8f, {0.5f, 0.5f, 0.0f } });
+  terrain_types.insert({ "grass",		0.8f,	1.0f, {0.0f, 1.0f, 0.0f} });
+  terrain_types.insert({ "grass",		1.0f,	1.0f, {0.0f, 1.0f, 0.0f} });
+
+  int counter = 0;
+  for (const auto& type : terrain_types)
+  {
+    m_pipeline.get().SetUniformData("class eMainRender",
+      "base_start_heights[" + std::to_string(counter) + "]",
+      type.threshold_start);
+
+    m_pipeline.get().SetUniformData("class eMainRender",
+      "textureScale[" + std::to_string(counter) + "]",
+      5.0f);
+    ++counter;
+  }
+  m_pipeline.get().SetUniformData("class eMainRender",
+    "base_start_heights[" + std::to_string(counter) + "]",
+    1.0f);
+
+  //SHIPS
   Material material;
   material.albedo = glm::vec3(0.9f, 0.0f, 0.0f);
   material.ao = 1.0f;
@@ -372,24 +403,23 @@ void GameController::_InitializeShips()
   for (int i = 0; i < colors.size(); ++i)
   {
     //material.albedo = colors[i];
-    shObject ship = factory.CreateObject(m_modelManager->Find("ship"), eObject::RenderType::PBR, "Ship" + std::to_string(i));
-    ship->GetTransform()->setScale(vec3(0.0005f, 0.0005f, 0.0005f));
+    //shObject ship = factory.CreateObject(m_modelManager->Find("ship"), eObject::RenderType::PBR, "Ship" + std::to_string(i));
+    shObject ship = factory.CreateObject(m_modelManager->Find("wall_cube"), eObject::RenderType::PHONG, "Ship" + std::to_string(i));
+    ship->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
     ship->GetTransform()->setTranslation(vec3(m_hexes[90 + i*2].x(), m_pipeline.get().GetWaterHeight(), m_hexes[90 + i * 2].z()));
-    
-    ship->GetTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);
     ship->GetTransform()->setUp(glm::vec3(0.0f, 0.0f, 1.0f));
-    ship->GetTransform()->setForward(glm::vec3(1.0f, 0.0f, 0.0f));
+    ship->GetTransform()->setForward(glm::vec3(-1.0f, 0.0f, 0.0f));
 
     for (auto& mesh : ship->GetModel()->Get3DMeshes())
       const_cast<I3DMesh*>(mesh)->SetMaterial(material); //@todo
 
     auto script = new eShipScript(m_game,
-      m_texManager->Find("TSpanishFlag0_s"),
-      m_pipeline,
-      m_camera,
-      m_texManager->Find("Tatlas2"),
-      m_soundManager->GetSound("shot_sound"),
-      m_pipeline.get().GetWaterHeight());
+                                  m_texManager->Find("TSpanishFlag0_s"),
+                                  m_pipeline,
+                                  m_camera,
+                                  m_texManager->Find("Tatlas2"),
+                                  m_soundManager->GetSound("shot_sound"),
+                                  m_pipeline.get().GetWaterHeight());
     ship->SetScript(script);
     ship->SetInstancingTag("spanish_ship");
     m_ships.push_back(script);

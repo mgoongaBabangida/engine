@@ -5,7 +5,6 @@
 #include "MainContextBase.h"
 
 #include <sdl_assets/ImGuiContext.h>
-#include <opengl_assets/TerrainModel.h>
 #include <opengl_assets/ModelManager.h>
 #include <opengl_assets/TextureManager.h>
 #include <opengl_assets/openglrenderpipeline.h>
@@ -50,11 +49,11 @@ void TerrainGeneratorTool::Initialize()
 	//TERRAIN
 	std::unique_ptr<TerrainModel> terrainModel = m_modelManager->CloneTerrain("simple");
 	terrainModel->initialize(&m_color_texture,
-		&m_color_texture,
-		&Texture::GetTexture1x1(BLUE),
-		&m_noise_texture,
-		true,
-		m_height_scale);
+													 &m_color_texture,
+													 &Texture::GetTexture1x1(BLUE),
+													 &m_noise_texture,
+													 true,
+													 m_height_scale);
 
 	//OBJECTS
 	ObjectFactoryBase factory;
@@ -94,6 +93,8 @@ void TerrainGeneratorTool::Initialize()
 	{
 		if (m_terrain_pointer->getMeshes()[0]->LODInUse() == 1)
 			m_terrain_pointer->getMeshes()[0]->SwitchLOD(2);
+		else if (m_terrain_pointer->getMeshes()[0]->LODInUse() == 2)
+			m_terrain_pointer->getMeshes()[0]->SwitchLOD(3);
 		else
 			m_terrain_pointer->getMeshes()[0]->SwitchLOD(1);
 	};
@@ -294,10 +295,4 @@ void TerrainGeneratorTool::_GenerateColorMap()
 			}
 		}
 	}
-}
-
-//-----------------------------------------------------------------------------
-bool operator<(const TerrainType& _one, const TerrainType& _two)
-{
-	return _one.threshold_start < _two.threshold_start;
 }

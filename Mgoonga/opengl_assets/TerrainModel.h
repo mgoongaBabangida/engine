@@ -6,6 +6,16 @@
 
 struct Texture;
 
+struct TerrainType
+{
+	std::string name;
+	float       threshold_start;
+	float       threshold_finish;
+	glm::vec3   color;
+};
+
+bool DLL_OPENGL_ASSETS operator<(const TerrainType& _one, const TerrainType& _two);
+
 //---------------------------------------------------------------------------------------------------
 class DLL_OPENGL_ASSETS TerrainModel : public ITerrainModel
 {

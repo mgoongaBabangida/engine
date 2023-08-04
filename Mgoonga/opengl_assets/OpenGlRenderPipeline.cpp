@@ -406,13 +406,13 @@ void eOpenGlRenderPipeline::RenderReflection(Camera& _camera, const Light& _ligh
 {
 	renderManager->MainRender()->SetClipPlane(-waterHeight);
 
-	Camera tem_cam = _camera;
-	_camera.setPosition(glm::vec3(tem_cam.getPosition().x, 2 * (tem_cam.getPosition().y - waterHeight), tem_cam.getPosition().z));
+	Camera temp_cam = _camera;
+	_camera.setPosition(glm::vec3(temp_cam.getPosition().x, waterHeight - (temp_cam.getPosition().y - waterHeight), temp_cam.getPosition().z));
 	_camera.setDirection(glm::reflect(_camera.getDirection(), glm::vec3(0, 1, 0))); //water normal
 
 	renderManager->MainRender()->Render(_camera, _light, _phong_objects, false, false, true, tone_mapping, exposure);
 	renderManager->PBRRender()->Render(_camera, _light, _pbr_objects);
-	_camera = tem_cam;
+	_camera = temp_cam;
 }
 
 void eOpenGlRenderPipeline::RenderRefraction(Camera& _camera, const Light& _light, std::vector<shObject>& _phong_objects, std::vector<shObject>& _pbr_objects)

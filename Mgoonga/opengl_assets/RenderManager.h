@@ -48,6 +48,8 @@ public:
 	void				AddParticleSystem(std::shared_ptr<IParticleSystem> system);
 	void				AddParticleSystemGPU(glm::vec3 _startPos, const Texture* _texture);
 
+	float& GetSsaoThresholdRef() { return m_mainRender->GetSaoThresholdRef(); }
+	float& GetSsaoStrengthRef() { return m_mainRender->GetSaoStrengthRef(); }
 private:
 
 	eWaterRender*		WaterRender();
@@ -78,17 +80,17 @@ private:
 	std::unique_ptr<eParticleRender>	 m_particleRender;
 	std::unique_ptr <eParticleSystemRenderGPU_V2> m_particleRenderGPU;
 	std::unique_ptr<eShadowRender>		 m_shadowRender;
-	std::unique_ptr<eMainRender>		 m_mainRender;
+	std::unique_ptr<eMainRender>				 m_mainRender;
 	std::unique_ptr<eOutlineRender>		 m_outlineRender;
 	std::unique_ptr<eSkyNoiseRender>	 m_skynoiseRender;
-	std::unique_ptr<eWaveRender>		 m_waverender;
-	std::unique_ptr<eGeometryRender>			 m_hexrender;
-	std::unique_ptr<eGaussianBlurRender> m_gaussianRender;
-	std::unique_ptr<eBrightFilterRender> m_brightRender;
-	std::unique_ptr<eLinesRender>		 m_linesRender;
-	std::unique_ptr<eTextRender>     m_textRender;
-	std::unique_ptr<ePBRRender>      m_pbrRender;
-	std::unique_ptr<eBezierRender>   m_bezierRender;
+	std::unique_ptr<eWaveRender>						m_waverender;
+	std::unique_ptr<eGeometryRender>				m_hexrender;
+	std::unique_ptr<eGaussianBlurRender>		m_gaussianRender;
+	std::unique_ptr<eBrightFilterRender>		m_brightRender;
+	std::unique_ptr<eLinesRender>					  m_linesRender;
+	std::unique_ptr<eTextRender>					  m_textRender;
+	std::unique_ptr<ePBRRender>						  m_pbrRender;
+	std::unique_ptr<eBezierRender>				  m_bezierRender;
 	std::unique_ptr<eMeshLineRender>   m_meshlineRender;
 	std::unique_ptr<eSSAORender>   m_SSAORender;
 	std::unique_ptr<eIBLRender>   m_iblRender;

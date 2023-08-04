@@ -190,6 +190,13 @@ void eTextureManager::LoadAllTextures()
 	};
 	text.loadTexture2DArray(paths);
 	m_Textures.insert(std::pair<std::string, Texture>("terrain_albedo_array_lague", text));
+
+	std::vector<std::string> paths2{
+		folderPath + "terrain_sebastian_lague/Rocks 2.png",
+		folderPath + "terrain_sebastian_lague/Grass.png",
+	};
+	text.loadTexture2DArray(paths2);
+	m_Textures.insert(std::pair<std::string, Texture>("terrain_albedo_array_2", text));
 }
 
 const Texture* eTextureManager::Find(const std::string& texture_name) const

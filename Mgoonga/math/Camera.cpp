@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Camera.h"
 #include <glm\glm\gtx\transform.hpp>
-#include <iostream>
 
 //---------------------------------------------------------------------
 Camera::Camera(float      _width,
@@ -96,7 +95,7 @@ const glm::mat4& Camera::getProjectionMatrix() const
 void Camera::mouseUpdate(const glm::vec2& newMousePosition)
 {
 	glm::vec2 mouseDelta = newMousePosition - oldMousePosition;
-	if(glm::length(mouseDelta) > 5.0f)
+	if(glm::length(mouseDelta) > 5.0f) //@todo magic number
 	{
 		oldMousePosition = newMousePosition;
 	}

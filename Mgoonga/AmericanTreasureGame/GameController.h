@@ -46,9 +46,9 @@ protected:
   const Texture* _GetDiceTexture() const;
 
   eMainContextBase* m_game = nullptr;
-  eModelManager* m_modelManager = nullptr;
-  eTextureManager* m_texManager = nullptr;
-  eSoundManager* m_soundManager = nullptr;
+  eModelManager*    m_modelManager = nullptr;
+  eTextureManager*  m_texManager = nullptr;
+  eSoundManager*    m_soundManager = nullptr;
 
   std::reference_wrapper<eOpenGlRenderPipeline> m_pipeline;
   std::reference_wrapper<Camera> m_camera;

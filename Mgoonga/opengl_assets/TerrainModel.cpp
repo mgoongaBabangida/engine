@@ -4,6 +4,7 @@
 #include "Texture.h"
 
 #include <algorithm>
+#include<cmath> 
 
 //@todo improve constructor - initialization
 //----------------------------------------------------------------
@@ -98,8 +99,10 @@ void TerrainModel::initialize(const Texture* _diffuse,
 		m_columns = _heightMap->mTextureHeight;
 
 		makePlaneVerts(_heightMap->mTextureWidth, _heightMap->mTextureHeight, spreed_texture);
+		//@todo make lod number outside
 		makePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 1);
 		makePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 2);
+		makePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 3);
 		assignHeights(*_heightMap, _height_scale);
 		generateNormals(_heightMap->mTextureWidth, _heightMap->mTextureHeight);
 	}
@@ -150,25 +153,28 @@ void TerrainModel::setAlbedoTextureArray(const Texture* _t)
 	newZ = newZ + (glm::round((z - newZ) * devisor)) / devisor;
 
 	auto vert = std::find_if(mesh->vertices.begin(), mesh->vertices.end(), [newX, newZ](const Vertex& v)
-																		   {return v.Position.x == newX && v.Position.z == newZ; });
+													{return v.Position.x == newX && v.Position.z == newZ; });
 	if (vert != mesh->vertices.end())
 		return *vert;
 	else
 		return Vertex();// std::optional
 }
 
+ //----------------------------------------------------------------
 float TerrainModel::GetHeight(float x, float z)
 {
 	Vertex vert = findVertex(x, z);
 		return vert.Position.y;
 }
 
+//----------------------------------------------------------------
 glm::vec3 TerrainModel::GetNormal(float x, float z)
 {
 	Vertex vert = findVertex(x, z);
 	return vert.Normal;
 }
 
+//----------------------------------------------------------------
 void TerrainModel::assignHeights(const Texture& _heightMap, float _height_scale)
 {
 	glBindTexture(GL_TEXTURE_2D, _heightMap.id);
@@ -195,6 +201,7 @@ void TerrainModel::assignHeights(const Texture& _heightMap, float _height_scale)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+//----------------------------------------------------------------
 void TerrainModel::generateNormals(GLuint size)
 {
 	for (unsigned int i = 0; i < mesh->indicesLods[0].size(); i += 3) 
@@ -230,6 +237,7 @@ void TerrainModel::generateNormals(GLuint size)
 	}
 }
 
+//----------------------------------------------------------------
 void TerrainModel::generateNormals(GLuint rows, GLuint columns)
 {
 	for (unsigned int i = 0; i < mesh->indicesLods[0].size(); i += 3) 
@@ -269,6 +277,7 @@ void TerrainModel::generateNormals(GLuint rows, GLuint columns)
 	}
 }
 
+//----------------------------------------------------------------
 void TerrainModel::makePlaneVerts(unsigned int dimensions, bool spreed_texture)
 {
 	mesh->vertices.resize(dimensions * dimensions);
@@ -282,6 +291,7 @@ void TerrainModel::makePlaneVerts(unsigned int dimensions, bool spreed_texture)
 			thisVert.Position.z = (float)(i - half) / devisor;
 			thisVert.Position.y = 0;
 			thisVert.Normal = glm::vec3(0.0f, 1.0f, 0.0f);
+
       if (spreed_texture)
       {
         thisVert.TexCoords.x = j / (float)dimensions;
@@ -296,6 +306,7 @@ void TerrainModel::makePlaneVerts(unsigned int dimensions, bool spreed_texture)
 	}
 }
 
+//----------------------------------------------------------------
 void TerrainModel::makePlaneVerts(unsigned int rows, unsigned int columns, bool spreed_texture)
 {
 	mesh->vertices.resize(rows * columns);
@@ -335,6 +346,7 @@ void TerrainModel::makePlaneVerts(unsigned int rows, unsigned int columns, bool 
 	}
 }
 
+//----------------------------------------------------------------
 void TerrainModel::makePlaneIndices(unsigned int dimensions)
 {
 	mesh->indicesLods[0].resize((dimensions) * (dimensions) * 2 * 3);// 2 triangles per square, 3 indices per triangle dim-1???
@@ -354,6 +366,7 @@ void TerrainModel::makePlaneIndices(unsigned int dimensions)
 	}
 }
 
+//----------------------------------------------------------------
 void TerrainModel::makePlaneIndices(unsigned int rows,unsigned int columns, unsigned int _lod)
 {
 	if (mesh->indicesLods.size() < _lod)
@@ -362,17 +375,18 @@ void TerrainModel::makePlaneIndices(unsigned int rows,unsigned int columns, unsi
 	mesh->indicesLods[_lod-1].resize((rows) * (columns) * 2 * 3);// 2 triangles per square, 3 indices per triangle dim-1???
 	int runner = 0;
 	float MinX = 0, MinZ = 0, MaxX = 0, MaxZ = 0;
-	for (int col = 0; col < columns- _lod; col+= _lod)
+	unsigned int lod_scale = pow(2,(_lod-1));
+	for (int col = 0; col < columns- lod_scale; col+= lod_scale)
 	{
-		for (int row = 0; row < rows- _lod; row+= _lod)
+		for (int row = 0; row < rows- lod_scale; row+= lod_scale)
 		{
 			mesh->indicesLods[_lod-1][runner++] = col * rows + row;
-			mesh->indicesLods[_lod-1][runner++] = col * rows + row + rows* _lod;
-			mesh->indicesLods[_lod-1][runner++] = col * rows + row + rows* _lod + _lod;
+			mesh->indicesLods[_lod-1][runner++] = col * rows + row + rows* lod_scale;
+			mesh->indicesLods[_lod-1][runner++] = col * rows + row + rows* lod_scale + lod_scale;
 			
 			mesh->indicesLods[_lod-1][runner++] = col * rows + row;
-			mesh->indicesLods[_lod-1][runner++] = col * rows + row + rows* _lod + _lod;
-			mesh->indicesLods[_lod-1][runner++] = col * rows + row + _lod;
+			mesh->indicesLods[_lod-1][runner++] = col * rows + row + rows* lod_scale + lod_scale;
+			mesh->indicesLods[_lod-1][runner++] = col * rows + row + lod_scale;
 			
 			for (int i = 0; i < 6 && runner < mesh->indicesLods[_lod - 1].size(); ++i)
 			{
@@ -390,6 +404,7 @@ void TerrainModel::makePlaneIndices(unsigned int rows,unsigned int columns, unsi
 	mesh->indicesLods[_lod - 1].resize(runner);
 }
 
+//----------------------------------------------------------------
 void TerrainModel::Draw()
 {
 	glActiveTexture(GL_TEXTURE2);
@@ -418,21 +433,25 @@ void TerrainModel::Draw()
 	mesh->Draw();
 }
 
+//----------------------------------------------------------------
 size_t TerrainModel::GetVertexCount() const
 {
   return mesh->vertices.size();
 }
 
+//----------------------------------------------------------------
 std::vector<const IMesh*> TerrainModel::GetMeshes() const
 {
   return std::vector<const IMesh*>{mesh};
 }
 
+//----------------------------------------------------------------
 std::vector<const I3DMesh*> TerrainModel::Get3DMeshes() const
 {
 	return std::vector<const I3DMesh*>{mesh};
 }
 
+//----------------------------------------------------------------
 std::vector<glm::vec3> TerrainModel::GetPositions() const
 {
 	std::vector<glm::vec3> ret;
@@ -441,11 +460,13 @@ std::vector<glm::vec3> TerrainModel::GetPositions() const
 	return ret; // @todo to improve
 }
 
+//----------------------------------------------------------------
 std::vector<GLuint> TerrainModel::GetIndeces() const
 {
 	return mesh->indicesLods[0];
 }
 
+//----------------------------------------------------------------
 TerrainModel::~TerrainModel()
 {
 	if (mesh != nullptr)
@@ -453,4 +474,11 @@ TerrainModel::~TerrainModel()
 	//custom normals
  /* normal.freeTexture(); !!!*/
 }
+
+//----------------------------------------------------------------
+bool operator<(const TerrainType& _one, const TerrainType& _two)
+{
+	return _one.threshold_start < _two.threshold_start;
+}
+
 

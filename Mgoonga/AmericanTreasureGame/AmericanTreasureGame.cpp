@@ -87,7 +87,7 @@ void AmericanTreasureGame::InitializeModels()
   
   //MODELS
   //modelManager->Add("ship", (GLchar*)std::string(modelFolderPath + "Cabin_cruise/19291_Cabin_cruise_v2_NEW.obj").c_str());
-  modelManager->Add("ship", (GLchar*)std::string(modelFolderPath + "ShipFBX.fbx").c_str());
+  modelManager->Add("ship", (GLchar*)std::string(modelFolderPath + "ShipFBX(2).fbx").c_str());
 
   Material pbr1;
   pbr1.albedo_texture_id = texManager->Find("pbr1_basecolor")->id;

@@ -3,6 +3,7 @@
 #include <base/interfaces.h>
 #include <glm/glm/gtc/noise.hpp>
 #include <opengl_assets/Texture.h>
+#include <opengl_assets/TerrainModel.h>
 
 #include <vector>
 #include <set>
@@ -11,28 +12,18 @@ class IWindowImGui;
 class eMainContextBase;
 class eModelManager;
 class eObject;
-class TerrainModel;
 class eTextureManager;
 class eOpenGlRenderPipeline;
 
-struct TerrainType
-{
-  std::string name;
-  float       threshold_start;
-  float       threshold_finish;
-  glm::vec3   color;
-};
-
-bool operator<(const TerrainType& _one, const TerrainType& _two);
-
+//---------------------------------------------------------------------
 class TerrainGeneratorTool : public IScript
 {
 public:
   TerrainGeneratorTool(eMainContextBase* _game,
-    eModelManager*  _modelManager,
-    eTextureManager* _texManager,
-    eOpenGlRenderPipeline& _pipeline,
-    IWindowImGui* _imgui);
+                       eModelManager*  _modelManager,
+                       eTextureManager* _texManager,
+                       eOpenGlRenderPipeline& _pipeline,
+                       IWindowImGui* _imgui);
   virtual ~TerrainGeneratorTool();
 
   virtual void Update(float _tick) override;

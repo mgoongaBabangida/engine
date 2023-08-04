@@ -123,7 +123,7 @@ void eWaveRender::Render(const Camera&					camera,
 	glUniform3fv(eyePositionWorldUniformLocation, 1, &camera.getPosition()[0]);
 
 	glUniform1f(TimeFactorLoc, time);
-	int32_t msc = clock.newFrame();
+	int32_t msc = (int32_t)clock.newFrame();
 	float dur = (float)msc / 1000.0f;
 	time += dur;
 
