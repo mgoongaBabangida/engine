@@ -14,7 +14,8 @@ public:
 		FLAG,
 		OUTLINED,
 		GEOMETRY,
-		BEZIER_CURVE
+		BEZIER_CURVE,
+		LINES
 	};
 
 	explicit eObject() {} //@todo

@@ -19,11 +19,11 @@ eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model,
 
 	modelToWorldMatrixUniformLocation	= glGetUniformLocation(wave_shader.ID(), "modelToWorldMatrix");
 	fullTransformationUniformLocation	= glGetUniformLocation(wave_shader.ID(), "MVP");
-	modelViewMatrixLocation				= glGetUniformLocation(wave_shader.ID(), "ModelViewMatrix");
-	normalMatrixLocation				= glGetUniformLocation(wave_shader.ID(), "NormalMatrix");
-	shadowMatrixUniformLocation			= glGetUniformLocation(wave_shader.ID(), "shadowMatrix");
+	modelViewMatrixLocation						= glGetUniformLocation(wave_shader.ID(), "ModelViewMatrix");
+	normalMatrixLocation							= glGetUniformLocation(wave_shader.ID(), "NormalMatrix");
+	shadowMatrixUniformLocation				= glGetUniformLocation(wave_shader.ID(), "shadowMatrix");
 	eyePositionWorldUniformLocation		= glGetUniformLocation(wave_shader.ID(), "eyePositionWorld");
-	FarPlaneUniformLocation = glGetUniformLocation(wave_shader.ID(), "far_plane");
+	FarPlaneUniformLocation						= glGetUniformLocation(wave_shader.ID(), "far_plane");
 
 	glUseProgram(wave_shader.ID());
 	//Light
@@ -53,7 +53,6 @@ eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model,
 	clock.start();
 	
 	model->initialize(tex, tex);
-	m_model = model.get();
 	m_object.reset(new eObject);
 	m_object->SetModel(model.release());
 	m_object->SetTransform(new Transform);
@@ -68,9 +67,6 @@ void eWaveRender::Render(const Camera&					camera,
 												 const Light&						light,
 												 std::vector<shObject>	flags)
 {
-	if (!m_model)
-		return;
-
 	glUseProgram(wave_shader.ID());
 
 	glm::mat4 worldToProjectionMatrix	= camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
@@ -129,6 +125,7 @@ void eWaveRender::Render(const Camera&					camera,
 
 	glDisable(GL_CULL_FACE); //@todo transfer
 	glUniform1i(glGetUniformLocation(wave_shader.ID(), "normalMapping"), GL_FALSE);
+
 	for(auto& flag : flags)
 	{
 		//move this outside
@@ -141,8 +138,7 @@ void eWaveRender::Render(const Camera&					camera,
 		m_object->GetTransform()->setRotation(cur * plus);
 
 		// set with texture id
-		m_model->setDiffuse(flag->GetModel()->GetMaterial()->albedo_texture_id);
-		m_model->setSpecular(flag->GetModel()->GetMaterial()->metalic_texture_id);
+		m_object->GetModel()->SetMaterial(flag->GetModel()->GetMaterial().value());
 
 		glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * m_object->GetTransform()->getModelMatrix();
 		glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
@@ -153,6 +149,7 @@ void eWaveRender::Render(const Camera&					camera,
 
 		m_object->GetModel()->Draw();
 	}
+
 	glUniform1i(glGetUniformLocation(wave_shader.ID(), "normalMapping"), GL_TRUE);
 	glEnable(GL_CULL_FACE); //todo transfer
 }

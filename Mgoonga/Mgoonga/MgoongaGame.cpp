@@ -183,8 +183,10 @@ void eMgoongaGameContext::InitializeModels()
   const Texture* cursor = texManager->Find("cursor1");
   m_guis.emplace_back(new Cursor(0, 0, 30, 30, width, height));
   m_guis[1]->SetTexture(*cursor, { 0,0 }, { cursor->mTextureWidth, cursor->mTextureHeight });
-  m_guis.emplace_back(new Movable2D(400, 0, 60, 60, width, height));
+  m_guis.emplace_back(new GUI(400, 0, 60, 60, width, height));
   m_guis[2]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight });
+  m_guis[2]->SetTakeMouseEvents(true);
+  m_guis[2]->SetMovable2D(true);
 
   m_input_controller->AddObserver(this, WEAK);
   m_input_controller->AddObserver(m_guis[0].get(), MONOPOLY);//monopoly takes only mouse

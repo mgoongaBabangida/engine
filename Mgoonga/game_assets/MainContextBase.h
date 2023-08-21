@@ -49,10 +49,10 @@ public:
 
 	virtual ~eMainContextBase();
 
-	Event<std::function<void(shObject)>> ObjectPicked;
-	Event<std::function<void(shObject, shObject)>> FocusChanged;
-	Event<std::function<void(shObject)>> ObjectBeingAddedToScene;
-	Event<std::function<void(shObject)>> ObjectBeingDeletedFromScene;
+	Event<std::function<void(shObject)>>						ObjectPicked;
+	Event<std::function<void(shObject, shObject)>>	FocusChanged;
+	Event<std::function<void(shObject)>>						ObjectBeingAddedToScene;
+	Event<std::function<void(shObject)>>						ObjectBeingDeletedFromScene;
 
 	//IInputObserver
 	virtual bool	OnKeyPress(uint32_t asci)					override;
@@ -76,6 +76,7 @@ public:
 
 	virtual uint32_t																GetFinalImageId() override;
 	virtual std::shared_ptr<eObject>								GetFocusedObject() override;
+	std::shared_ptr<eObject>												GetHoveredObject();
 	virtual std::vector<std::shared_ptr<eObject>>		GetObjects() override { return m_objects; }
 
 	virtual const Texture* GetTexture(const std::string& _name) const override;
@@ -128,6 +129,7 @@ protected:
 	math::eClock								m_global_clock;
 
 	shObject																m_focused;
+	shObject																m_hovered;
 	std::vector<shObject>										m_objects;
 	std::shared_ptr<std::vector<shObject>>	m_framed;
 	std::vector<std::shared_ptr<GUI>>				m_guis;
@@ -154,12 +156,14 @@ protected:
 	std::unique_ptr<math::Timer>			tcpTimer;
 
 	//@todo delete
-	size_t		width		= 1200;
-	size_t		height		= 600;
+	uint32_t	width			= 1200;
+	uint32_t	height		= 600;
 	float			nearPlane	= 0.1f;
 	float			farPlane	= 20.0f;
+
 	bool m_l_pressed = false;
 	bool m_framed_choice_enabled = true;
+	bool m_update_hovered = false;
 
 	eOpenGlRenderPipeline							pipeline;
 };

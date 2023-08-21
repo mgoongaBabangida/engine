@@ -103,10 +103,10 @@ void main()
     vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness_f);
 	vec3 kS = F;
 	vec3 kD = 1.0 - kS;
-	kD *= 1.0 - metallic;
+	kD *= 1.0 - metallic_f;
 	
 	vec3 irradiance = texture(irradianceMap, N).rgb;
-	vec3 diffuse      = irradiance * albedo;
+	vec3 diffuse      = irradiance * albedo_f;
 	
 	// sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
     const float MAX_REFLECTION_LOD = 4.0;

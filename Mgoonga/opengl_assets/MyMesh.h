@@ -166,3 +166,31 @@ protected:
 	GLuint VBO;
 	bool m_2d = false;
 };
+
+//------------------------------------------------------
+class DLL_OPENGL_ASSETS LineMesh : public IMesh
+{
+public:
+	LineMesh(const std::vector<glm::vec3>&, const std::vector<GLuint>&, glm::vec3);
+	glm::vec3 GetColor() const { return m_color; }
+	~LineMesh();
+
+	void UpdateData(const std::vector<glm::vec3>&, const std::vector<GLuint>&, glm::vec3);
+
+	GLuint VAO, VBO, EBO;
+	std::vector<glm::vec3>	m_verices;
+	std::vector<GLuint>			m_indices;
+
+	virtual void								Draw();
+	virtual const std::string&	Name() const { return m_name; }
+	virtual size_t							GetVertexCount() const { return m_verices.size(); }
+
+	virtual bool HasMaterial() const { return false; }
+	virtual void SetMaterial(const Material&) {}
+	virtual std::optional<Material> GetMaterial() const { return std::nullopt; }
+
+protected:
+	std::string m_name = "LineMesh";
+
+	glm::vec3								m_color;
+};

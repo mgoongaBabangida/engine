@@ -92,13 +92,16 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
   }
 }
 
+//---------------------------------------------------------------------------------
 void ePBRRender::_SetMaterial(shObject _obj)
 {
   if (_obj->GetModel()->HasMaterial())
   {
     Material material = _obj->GetModel()->GetMaterial().value();
     if (material.use_albedo)
+    {
       glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 1);
+    }
     else
     {
       glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 0);
@@ -118,7 +121,9 @@ void ePBRRender::_SetMaterial(shObject _obj)
       {
         Material material = mesh->GetMaterial().value();
         if (material.use_albedo)
+        {
           glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 1);
+        }
         else
         {
           glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 0);

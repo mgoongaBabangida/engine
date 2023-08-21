@@ -1,5 +1,7 @@
 #include "pch.h"
+
 #include "Server.h"
+
 #include "Network.h"
 #include "TCPConnection.h"
 #include "Packet.h"
@@ -57,8 +59,9 @@ bool Server::Frame()
                 newConnectionFD.revents = 0;
                 master_fd.push_back(newConnectionFD);
 
-                connection.AddSent("Welcome!");
+                ConnectionEstablished.Occur<const dbb::TCPConnection&>(connection);
                 connections.push_back(connection);
+                connections.back().AddSent("Welcome!");
             }
             else
             {
@@ -66,7 +69,7 @@ bool Server::Frame()
             }
         }
 
-        for (int i = use_fd.size() - 1; i >= 1; i--)
+        for (int i = use_fd.size() - 1; i >= 1; --i)
         {
             int connectionIndex = i - 1;
             dbb::TCPConnection& connection = connections[connectionIndex];
@@ -100,9 +103,9 @@ bool Server::Frame()
             }
             if (use_fd[i].revents & POLLWRNORM)
             {
-                connection.Send();
+              connection.Send();
                 if (connection.IsCurrentPacketSent()) //If full packet contents have been sent
-                    connection.ClearSentPacket();
+                  connection.ClearSentPacket();
             }
         }
     }
@@ -120,14 +123,25 @@ void Server::CloseConnection(int connectionIndex, std::string reason)
 	connections.erase(connections.begin() + connectionIndex);
 }
 
-//------------------------------------------
+//------------------------------------------------------------
 void Server::SendMsgToAll(std::string&& msg)
 {
-    for (size_t i = use_fd.size() - 1; i >= 1; i--)
+    for (size_t i = use_fd.size() - 1; i >= 1; --i)
     {
       size_t connectionIndex = i - 1;
       dbb::TCPConnection& connection = connections[connectionIndex];
       connection.AddSent(std::move(msg));
     }
+}
+
+//--------------------------------------------------------
+void Server::SendMsgToAll(std::vector<uint32_t>&& msg)
+{
+  for (size_t i = use_fd.size() - 1; i >= 1; --i)
+  {
+    size_t connectionIndex = i - 1;
+    dbb::TCPConnection& connection = connections[connectionIndex];
+    connection.AddSent(std::move(msg));
+  }
 }
 

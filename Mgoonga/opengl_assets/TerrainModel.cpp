@@ -76,7 +76,8 @@ void TerrainModel::initialize(const Texture* _diffuse,
 														  const Texture* _normal,
 														  const Texture* _heightMap,
 														  bool spreed_texture,
-															float _height_scale)
+															float _height_scale,
+															float _max_height)
 {
 	if (_diffuse != nullptr)
 		m_material.albedo_texture_id = _diffuse->id;
@@ -103,7 +104,7 @@ void TerrainModel::initialize(const Texture* _diffuse,
 		makePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 1);
 		makePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 2);
 		makePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 3);
-		assignHeights(*_heightMap, _height_scale);
+		assignHeights(*_heightMap, _height_scale, _max_height);
 		generateNormals(_heightMap->mTextureWidth, _heightMap->mTextureHeight);
 	}
 	else
@@ -175,7 +176,7 @@ glm::vec3 TerrainModel::GetNormal(float x, float z)
 }
 
 //----------------------------------------------------------------
-void TerrainModel::assignHeights(const Texture& _heightMap, float _height_scale)
+void TerrainModel::assignHeights(const Texture& _heightMap, float _height_scale, float _max_height)
 {
 	glBindTexture(GL_TEXTURE_2D, _heightMap.id);
 	if (_heightMap.mChannels == 4)
@@ -185,7 +186,10 @@ void TerrainModel::assignHeights(const Texture& _heightMap, float _height_scale)
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buffer);
 		int counter = 0;
 		for (int i = 0; i < _heightMap.mTextureHeight * _heightMap.mTextureWidth * 4; i += 4)
-			mesh->vertices[i / 4].Position.y = (float)(buffer[i] * _height_scale);
+		{
+			float height = (float)(buffer[i] * _height_scale);
+			mesh->vertices[i / 4].Position.y = height <= _max_height ? height : _max_height;
+		}
 		delete[] buffer;
 	}
 	else if (_heightMap.mChannels == 1)
@@ -195,7 +199,10 @@ void TerrainModel::assignHeights(const Texture& _heightMap, float _height_scale)
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, buffer);
 		int counter = 0;
 		for (int i = 0; i < _heightMap.mTextureHeight * _heightMap.mTextureWidth; ++i)
-			mesh->vertices[i].Position.y = (float)(buffer[i] * _height_scale);
+		{
+			float height = (float)(buffer[i] * _height_scale);
+			mesh->vertices[i].Position.y = height <= _max_height ? height : _max_height;
+		}
 		delete[] buffer;
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);

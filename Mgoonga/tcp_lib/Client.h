@@ -8,6 +8,7 @@ public:
 	bool Initialize(dbb::IPEndPoint ip) override { return Connect(ip); }
 	bool Frame() override;
 	void SendMsg(std::string&& msg) override;
+	void SendMsg(std::vector<uint32_t>&& msg) override;
 	bool IsConnected() override;
 	
 	bool Connect(dbb::IPEndPoint ip);

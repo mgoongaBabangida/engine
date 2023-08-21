@@ -4,10 +4,12 @@
 
 #include <memory>
 
+//-------------------------------------------------------
 GUI::GUI()
 {
 }
 
+//-------------------------------------------------------
 GUI::GUI(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight)
 	: topleftX(topleftX),
 		topleftY(topleftY),
@@ -17,6 +19,7 @@ GUI::GUI(int topleftX, int topleftY, int Width, int Height, int scWidth, int scH
 		screenHeight(scHeight)
 	{}
 
+//-------------------------------------------------------
 GUI::GUI(const dbb::Rect& _rect, int scWidth, int scHeight)
 	: topleftX(_rect.m_top_left.x),
 		topleftY(_rect.m_top_left.y),
@@ -26,6 +29,7 @@ GUI::GUI(const dbb::Rect& _rect, int scWidth, int scHeight)
 		screenHeight(scHeight)
 {}
 
+//-------------------------------------------------------
 GUI::GUI(const GUI& _other)
 	: screenWidth(_other.screenWidth)
     , screenHeight(_other.screenHeight)
@@ -40,34 +44,57 @@ GUI::GUI(const GUI& _other)
 {
 }
 
+//-------------------------------------------------------
 bool GUI::OnMousePress(int32_t x, int32_t y, bool left)
 {
 	if(left && m_is_visible && isPressed(x, y))
 	{
+		m_is_pressed = true;
+		m_press_coords = { x - topleftX , y - topleftY };
 		Perssed();
 		return true;
 	}
 	return false;
 }
 
+//-------------------------------------------------------------
+bool GUI::OnMouseRelease()
+{
+	if (m_is_pressed)
+	{
+		if (cmd && m_is_execute_on_release)
+			cmd->Execute();
+		m_is_pressed = false;
+		return true;
+	}
+	return false;
+}
+
+//-------------------------------------------------------
 bool GUI::OnMouseMove(int32_t _x, int32_t _y)
 {
+	if (m_is_pressed && m_take_mouse_moves && m_is_moveble2d)
+		Move({ _x - m_press_coords.first, _y - m_press_coords.second });
+
 	if (isHover(_x, _y) && m_is_visible)
 		return m_take_mouse_moves;
 	else
 		return false;
 }
 
+//-------------------------------------------------------
 void GUI::UpdateSync()
 {
 
 }
 
+//-------------------------------------------------------
 void GUI::setCommand(std::shared_ptr<ICommand> com)
 {
 	cmd = com;
 }
 
+//-------------------------------------------------------
 void GUI::SetTexture(const Texture& t, glm::ivec2 topLeft, glm::ivec2 bottomRight)
 {
 	texture = t;
@@ -77,62 +104,74 @@ void GUI::SetTexture(const Texture& t, glm::ivec2 topLeft, glm::ivec2 bottomRigh
 	tex_Height = bottomRight.y - topLeft.y;
 }
 
+//-------------------------------------------------------
 void GUI::SetTextureMask(const Texture& t)
 {
 	textureMask = t;
 }
 
+//-------------------------------------------------------
 Texture * GUI::GetTexture()
 {
 	 return &texture;
 }
 
+//-------------------------------------------------------
 Texture* GUI::GetTextureMask()
 {
 	return &textureMask;
 }
 
+//-------------------------------------------------------
 void GUI::Perssed()
 {
-  if(cmd)
+  if(cmd && !m_is_execute_on_release)
 		cmd->Execute();
 }
 
+//-------------------------------------------------------
 bool GUI::isHover(int x, int y)
 {
 	return x > topleftX && y > topleftY && x < (topleftX + Width) && y < (topleftY + Height);
 }
 
+//-------------------------------------------------------
 bool GUI::isPressed(int x, int y)
 {
 	return x > topleftX && y > topleftY && x < (topleftX + Width) && y < (topleftY + Height);
 }
 
+//-------------------------------------------------------
 glm::ivec4 GUI::getViewPort() const
 {
 	return glm::ivec4(topleftX, screenHeight - topleftY - Height, Width, Height);
 }
 
+//-------------------------------------------------------
 glm::ivec2 GUI::getTopLeft() const
 {
 	return glm::ivec2(topleftX, topleftY);
 }
 
+//-------------------------------------------------------
 glm::ivec2 GUI::getBottomRight() const
 {
 	return glm::ivec2(topleftX + Width, topleftY + Height);
 }
 
+//-------------------------------------------------------
 glm::ivec2 GUI::getTopLeftTexture() const
 {
 	return glm::ivec2(tex_topleftX, tex_topleftY);
 }
 
+//-------------------------------------------------------
 glm::ivec2 GUI::getBottomRightTexture() const
 {
 	return glm::ivec2(tex_topleftX + tex_Width, tex_topleftY + tex_Height);
 }
 
+//-------------------------------------------------------
 std::pair<uint32_t, uint32_t> GUI::pointOnGUI(uint32_t x_window, uint32_t y_window)
 {
 	//works if it is inside
@@ -199,37 +238,6 @@ void GUIWithAlpha::UpdateSync()
 bool Cursor::OnMouseMove(int32_t x, int32_t y)
 {
 	Move({ x,y });
-	return false;
-}
-
-//-------------------------------------------------------------
-bool Movable2D::OnMouseMove(int32_t x, int32_t y)
-{
-	if(is_pressed)
-		Move({ x - m_press_coords.first,y - m_press_coords.second });
-	return is_pressed;
-}
-
-//-------------------------------------------------------------
-bool Movable2D::OnMousePress(int32_t x, int32_t y, bool left)
-{
-	if (GUI::OnMousePress(x, y, left))
-	{
-		is_pressed = true;
-		m_press_coords = {x - topleftX , y - topleftY};
-		return true;
-	}
-	return false;
-}
-
-//-------------------------------------------------------------
-bool Movable2D::OnMouseRelease()
-{
-	if (is_pressed)
-	{
-		is_pressed = false;
-		return true;
-	}
 	return false;
 }
 

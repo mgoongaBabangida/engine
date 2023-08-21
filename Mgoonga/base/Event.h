@@ -7,7 +7,7 @@ class Event
 {
 public:
   int32_t Subscribe(Callback _callback);
-  void Unsubscribe(int32_t _subscriptionHandle);
+  void    Unsubscribe(int32_t _subscriptionHandle);
   template<class...Args>
   void Occur(Args... args);
 private:
@@ -18,7 +18,7 @@ private:
 template<class Callback>
 inline int32_t Event<Callback>::Subscribe(Callback _callback)
 {
-  m_callbacks.insert({ counter++, _callback });
+  m_callbacks.insert({ ++counter, _callback });
   return counter;
 }
 

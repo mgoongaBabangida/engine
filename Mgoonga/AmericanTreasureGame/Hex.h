@@ -16,12 +16,17 @@ public:
 	static const float	radius;
 
 	Hex(glm::vec2 c) : m_center( c ) {}
+
 	float x() const { return m_center.x; }
 	float z() const { return m_center.y; }
 
 	bool IsOn(float x, float z);
 	bool IsWater(shObject terrain, float waterHeight);
+	bool IsTaken() const { return m_taken; }
+	void SetTaken(bool _taken) { m_taken = _taken; }
+
 	std::deque<Hex*> MakePath(const Hex* _destination, shObject _terrain, float _waterHeight);
+
 	void SetNeighbour(std::vector<Hex>&);
 	void Debug();
 
@@ -33,4 +38,6 @@ protected:
 	Hex*		down		= nullptr;
 	Hex*		down_right	= nullptr;
 	Hex*		down_left	= nullptr;
+
+	bool m_taken = false;
 };

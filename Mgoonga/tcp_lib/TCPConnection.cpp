@@ -14,6 +14,51 @@ namespace dbb
 		return m_socket;
 	}
 
+	TCPConnection::TCPConnection(const TCPConnection& _other)
+	{
+		*this = _other;
+	}
+
+	const TCPConnection& TCPConnection::operator=(const TCPConnection& _other)
+	{
+		m_socket = _other.m_socket;
+		endpoint = _other.endpoint;
+		stringRepresentation = _other.stringRepresentation;
+
+		StringMessageRecieved = _other.StringMessageRecieved;
+		IntArrayMessageRecieved = _other.IntArrayMessageRecieved;
+
+		m_sent_pack = _other.m_sent_pack;
+		m_recv_pack = _other.m_recv_pack;
+
+		m_extraction_offset = _other.m_extraction_offset;
+		m_packet_size = _other.m_packet_size;
+		m_buffer[dbb::g_max_packetSize] = _other.m_buffer[dbb::g_max_packetSize];
+		return *this;
+	}
+
+	TCPConnection::TCPConnection(TCPConnection&& _other)
+	{
+		*this = std::move(_other);
+	}
+
+	void TCPConnection::operator=(TCPConnection&& _other)
+	{
+		m_socket = std::move(_other.m_socket);
+		endpoint = std::move(_other.endpoint);
+		stringRepresentation = std::move(_other.stringRepresentation);
+
+		StringMessageRecieved = std::move(_other.StringMessageRecieved);
+		IntArrayMessageRecieved = std::move(_other.IntArrayMessageRecieved);
+
+		m_sent_pack = std::move(_other.m_sent_pack);
+		m_recv_pack = std::move(_other.m_recv_pack);
+
+		m_extraction_offset = _other.m_extraction_offset;
+		m_packet_size = _other.m_packet_size;
+		m_buffer[dbb::g_max_packetSize] = std::move(_other.m_buffer[dbb::g_max_packetSize]);
+	}
+
 	void TCPConnection::Close()
 	{
 		m_socket.Close();
@@ -68,10 +113,20 @@ namespace dbb
 				{
 					m_recv_pack.m_buffer.resize(m_packet_size);
 					memcpy(&m_recv_pack.m_buffer[0], m_buffer, m_packet_size);
-					if (!ProcessPacket(m_recv_pack))
+					if (auto res = ProcessPacket(m_recv_pack); !res.first)
 						error = "Failed to process packet";
 					else
+					{
+						if (const std::string* pcontent = std::get_if<std::string>(&res.second))
+						{
+							StringMessageRecieved.Occur(*pcontent, stringRepresentation);
+						}
+						else if (const std::vector<uint32_t > * pcontent = std::get_if<std::vector<uint32_t>>(&res.second))
+						{
+							IntArrayMessageRecieved.Occur(*pcontent, stringRepresentation);
+						}
 						m_recv_pack.Clear();
+					}
 					m_packet_size = 0;
 					m_extraction_offset = 0;
 				}
@@ -84,6 +139,14 @@ namespace dbb
 	{
 		dbb::Packet msg(dbb::PacketType::PT_ChatMessage);
 		msg << sent;
+		m_sent_pack = msg;
+	}
+
+	void TCPConnection::AddSent(std::vector<uint32_t>&& sent)
+	{
+		dbb::Packet msg(dbb::PacketType::PT_Intarray);
+		for(uint32_t i : sent)
+			msg << i ;
 		m_sent_pack = msg;
 	}
 

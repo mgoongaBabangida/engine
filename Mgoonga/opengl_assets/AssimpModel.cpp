@@ -318,6 +318,7 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		{
 			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 			mat.albedo_texture_id = diffuseMaps[0].id;
+			mat.use_albedo = true;
 		}
 		else
 			mat.albedo_texture_id = Texture::GetDefaultTextureId();
@@ -327,6 +328,7 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		{
 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 			mat.metalic_texture_id = specularMaps[0].id; // should be dif?
+			mat.use_metalic = true;
 		}
 		else
 			mat.metalic_texture_id = Texture::GetDefaultTextureId();
@@ -336,6 +338,7 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		{
 			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 			mat.normal_texture_id = normalMaps[0].id;
+			mat.use_normal = true;
 		}
 		else
 			mat.normal_texture_id = Texture::GetDefaultTextureId();
@@ -365,6 +368,7 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		{
 			textures.insert(textures.end(), roughnessMaps.begin(), roughnessMaps.end());
 			mat.roughness_texture_id = roughnessMaps[0].id;
+			mat.use_roughness;
 		}
 		else
 			mat.roughness_texture_id = Texture::GetDefaultTextureId();
@@ -389,11 +393,19 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 		mat->GetTexture(type, i, &str);
 		Texture texture;
 		string filename = string(str.C_Str());
+
+		std::string substring_to_delete = "C:\\\\Users\\\\58sal\\\\Desktop\\\\stylized_ship";
+		std::string::size_type it = filename.find(substring_to_delete);
+		if (it != std::string::npos)
+			filename.erase(it, substring_to_delete.length());
+
 		filename = directory + '/' + filename;
-		texture.loadTextureFromFile(filename.c_str());
-		texture.type = typeName;
-		texture.path = str.C_Str();
-		textures.push_back(texture);
+		if (texture.loadTextureFromFile(filename.c_str()))
+		{
+			texture.type = typeName;
+			texture.path = str.C_Str();
+			textures.push_back(texture);
+		}
 	}
 	return textures;
 }

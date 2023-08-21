@@ -29,6 +29,7 @@ public:
 	virtual ~GUI() {}
 
 	virtual bool	OnMousePress(int32_t x, int32_t y, bool left) override;
+	virtual bool	OnMouseRelease() override;
 	virtual bool	OnMouseMove(int32_t _x, int32_t _y)override;
 
 	virtual void UpdateSync();
@@ -55,6 +56,12 @@ public:
 
 	bool					IsTransparent() const { return m_is_transparent; }
 	void					SetTransparent(bool _isTransparent) { m_is_transparent = _isTransparent; }
+
+	bool					IsMovable2D() const { return m_is_moveble2d; }
+	void					SetMovable2D(bool _isMovable2D) { m_is_moveble2d = _isMovable2D; }
+
+	bool					IsExecuteOnRelease() const { return m_is_execute_on_release; }
+	void					SetExecuteOnRelease(bool _is_execute_on_release) { m_is_execute_on_release = _is_execute_on_release; }
 
 	bool					IsTakingMouseEvents() const { return m_take_mouse_moves; }
 	void					SetTakeMouseEvents(bool _take_mouse_moves) { m_take_mouse_moves = _take_mouse_moves; }
@@ -100,7 +107,11 @@ protected:
 	bool						m_is_visible = true;
 	bool						m_is_transparent = false;
 	bool						m_take_mouse_moves = false;
+	bool						m_is_moveble2d = false;
 	RenderFunc			m_render_func = RenderFunc::Default;
+	std::pair<size_t, size_t> m_press_coords;
+	bool						m_is_pressed = false;
+	bool						m_is_execute_on_release = false;
 };
 
 //------------------------------------------------------
@@ -121,12 +132,12 @@ class DLL_OPENGL_ASSETS GUIWithAlpha : public GUI
 {
 public:
 	GUIWithAlpha(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight);
+
 	virtual bool isPressed(int x, int y) override;
 	virtual void Perssed() override;
 	virtual void UpdateSync() override;
 protected:
 	bool m_check_if_pressed = false;
-	std::pair<size_t, size_t> m_press_coords; //move to base?
 };
 
 //----------------------------------------------
@@ -137,24 +148,6 @@ public:
 		: GUIWithAlpha(topleftX, topleftY, Width, Height, scWidth, scHeight) {}
 
 	virtual bool	OnMouseMove(int32_t x, int32_t y) override;
-};
-
-//----------------------------------------------
-class DLL_OPENGL_ASSETS Movable2D : public GUI
-{
-public:
-	Movable2D(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight)
-		: GUI(topleftX, topleftY, Width, Height, scWidth, scHeight)
-	{
-		m_take_mouse_moves = true;
-	}
-
-	virtual bool	OnMouseMove(int32_t x, int32_t y) override;
-	virtual bool	OnMousePress(int32_t x, int32_t y, bool left) override;
-	virtual bool	OnMouseRelease() override;
-protected:
-	bool is_pressed = false;
-	std::pair<size_t, size_t> m_press_coords; //move to base?
 };
 
 //----------------------------------------------
@@ -192,6 +185,7 @@ public:
 	virtual void Execute() override;
 };
 
+//-----------------------------------------------
 class DLL_OPENGL_ASSETS AnimStart : public ICommand
 {
 	shObject m_obj;
@@ -201,6 +195,7 @@ public:
 	virtual void Execute() override;
 };
 
+//-----------------------------------------------
 class DLL_OPENGL_ASSETS AnimStop : public ICommand
 {
 	shObject m_obj;

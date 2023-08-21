@@ -12,10 +12,10 @@
 
 //----------------------------------------------------------------
 eShipScript::eShipScript(IGame* _game,
-												const Texture*			_flagTexture,
-												eOpenGlRenderPipeline&		_pipeline,
+												const Texture*					_flagTexture,
+												eOpenGlRenderPipeline&	_pipeline,
 												Camera&									_camera,
-												const Texture*						_shoting_texture,
+												const Texture*					_shoting_texture,
 												RemSnd*									_shooting_sound,
 												float										_waterHeight)
 : m_game(_game)
@@ -33,7 +33,7 @@ eShipScript::eShipScript(IGame* _game,
 
 	m_flag->SetTransform(new Transform);
 	std::shared_ptr<MyMesh> mesh(new MyMesh("flag"));
-	m_flag->SetModel(new MyModel(mesh,"flag_mesh", flag_tex));
+	m_flag->SetModel(new MyModel(mesh,"flag_mesh", flag_tex, flag_tex));
 	m_flag->SetRenderType(eObject::RenderType::FLAG);
 }
 
@@ -89,13 +89,13 @@ void eShipScript::Update(float _tick)
 {
 	_UpdateFlagPos();
 
-	auto objs = m_game->GetObjects();
+	/*auto objs = m_game->GetObjects();
 	std::vector<std::shared_ptr<eObject> > objsToCollide;
 	for (std::shared_ptr<eObject> obj : objs)
 	{
 		if(obj->Name() != "Terrain")
 			objsToCollide.push_back(obj);
-	}
+	}*/
 
 	if(object && destination != NONE)
 	{
@@ -103,7 +103,7 @@ void eShipScript::Update(float _tick)
 		{
 			if (glm::length2(object->GetTransform()->getTranslation() - destination) > move_speed)
 			{
-				object->GetRigidBody()->MoveForward(objsToCollide);
+				object->GetRigidBody()->MoveForward({});
 			}
 			else
 			{
@@ -121,11 +121,11 @@ void eShipScript::Shoot()
 {
 	glm::vec4 modelCenter	=	object->GetTransform()->getModelMatrix() 
 								* glm::vec4(object->GetCollider()->GetCenter(), 1.0f);
-	std::shared_ptr<IParticleSystem> system = std::make_shared<ParticleSystem>(10, 0, 0, 10000,
+	std::shared_ptr<IParticleSystem> system = std::make_shared<ParticleSystem>(10, 0, 0, 10'000,
 														modelCenter + object->GetTransform()->getRotationVector() * 0.2f, // ask hexes
 														shoot_tex,
 														shoot_snd,
-														10000);
+														10'000);
 	//@todo no connection to rendering. Add pt sys in different way
 	system->Start();
 	pipeline.get().AddParticleSystem(system);

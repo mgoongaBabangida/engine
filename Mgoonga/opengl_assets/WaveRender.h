@@ -29,7 +29,6 @@ public:
 private:
 	Shader											wave_shader;
 	std::unique_ptr<eObject>		m_object;
-	TerrainModel*								m_model = nullptr;
 	
 	math::eClock					clock;
 	float							time		= 0.0f;

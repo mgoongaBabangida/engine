@@ -41,32 +41,35 @@ namespace dbb {
 		unsigned short m_port = 0;
 	};
 
+	//------------------------------------------------------------------
 	class  EXPORT Socket
 	{
 		using SocketHandle = SOCKET;
+
 	public:
 		Socket(IPVersion versin = IPVersion::IPv4, SocketHandle handle = INVALID_SOCKET);
-		PResult Create();
-		PResult Close();
-		PResult Bind(const IPEndPoint&);
-		PResult Listen(const IPEndPoint&, uint32_t backlog = 5);
-		PResult Connect(const IPEndPoint&);
+		PResult									Create();
+		PResult									Close();
+		PResult									Bind(const IPEndPoint&);
+		PResult									Listen(const IPEndPoint&, uint32_t backlog = 5);
+		PResult									Connect(const IPEndPoint&);
 		std::optional<uint32_t> Send(const void*data, int bytesSent);
 		std::optional<uint32_t> Recv(void* data, int bytesRecieved);
-		PResult SendAll(const void* data, int bytesSent);
-		PResult RecvAll(void* destination, int bytesRecieved);
-		PResult Send(Packet&);
-		PResult Recv(Packet&);
-		std::optional<Socket> Accept();
-		SocketHandle GetHandle() const;
-		IPVersion GetIPVersion() const;
-		size_t GetSocketError() const;
-		PResult SetBlocking(bool isblocking);
-		IPEndPoint GetAcceptedEndPoint() const;
+		PResult									SendAll(const void* data, int bytesSent);
+		PResult									RecvAll(void* destination, int bytesRecieved);
+		PResult									Send(Packet&);
+		PResult									Recv(Packet&);
+		std::optional<Socket>		Accept();
+		SocketHandle						GetHandle() const;
+		IPVersion								GetIPVersion() const;
+		size_t									GetSocketError() const;
+		PResult									SetBlocking(bool isblocking);
+		IPEndPoint							GetAcceptedEndPoint() const;
+
 	protected:
-		SocketHandle m_handle = INVALID_SOCKET;
-		IPVersion m_version = IPVersion::IPv4;
-		size_t m_lastError = 0;
-		IPEndPoint acceptedConnection;
+		SocketHandle	m_handle = INVALID_SOCKET;
+		IPVersion			m_version = IPVersion::IPv4;
+		size_t				m_lastError = 0;
+		IPEndPoint		acceptedConnection;
 	};
 }

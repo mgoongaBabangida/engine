@@ -97,7 +97,7 @@ void eTextureManager::LoadAllTextures()
 	m_Textures.insert(std::pair<std::string, Texture>("Tbricks2_dp", text));
 	text.loadTextureFromFile(folderPath + "pirate.png");
 	m_Textures.insert(std::pair<std::string, Texture>("TPirate_flag0_s", text));
-	text.loadTextureFromFile(folderPath + "ocean1.jpg");
+	text.loadTextureFromFile(folderPath + "ocean.jpg");
 	m_Textures.insert(std::pair<std::string, Texture>("TOcean0_s", text));
 	text.loadTextureFromFile(folderPath + "red_button.png");
 	m_Textures.insert(std::pair<std::string, Texture>("TButton_red", text));
@@ -111,6 +111,8 @@ void eTextureManager::LoadAllTextures()
 	m_Textures.insert(std::pair<std::string, Texture>("menu3", text));
 	text.loadTextureFromFile(folderPath + "ship_icon.png");
 	m_Textures.insert(std::pair<std::string, Texture>("ship1", text));
+	text.loadTextureFromFile(folderPath + "frame.png");
+	m_Textures.insert(std::pair<std::string, Texture>("golden_frame", text));
 
 	text.loadTextureFromFile(folderPath + "dice1.png");
 	m_Textures.insert(std::pair<std::string, Texture>("tex_dice1", text));
@@ -192,7 +194,7 @@ void eTextureManager::LoadAllTextures()
 	m_Textures.insert(std::pair<std::string, Texture>("terrain_albedo_array_lague", text));
 
 	std::vector<std::string> paths2{
-		folderPath + "terrain_sebastian_lague/Rocks 2.png",
+		folderPath + "terrain_sebastian_lague/Sandy grass.png",
 		folderPath + "terrain_sebastian_lague/Grass.png",
 	};
 	text.loadTexture2DArray(paths2);

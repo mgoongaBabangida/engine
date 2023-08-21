@@ -87,6 +87,14 @@ bool eMainContextBase::OnKeyPress(uint32_t _asci)
 //--------------------------------------------------------------------------
 bool eMainContextBase::OnMouseMove(int32_t x, int32_t y)
 {
+	if (m_update_hovered)
+	{
+		GetMainCamera().getCameraRay().Update(GetMainCamera(), static_cast<float>(x), static_cast<float>(y), static_cast<float>(width), static_cast<float>(height));
+		GetMainCamera().getCameraRay().press((float)x, (float)y);
+		auto [picked, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
+		m_hovered = picked;
+	}
+
 	if (GetMainCamera().getCameraRay().IsPressed())
 	{
 		if (m_input_strategy && !m_input_strategy->OnMouseMove(x, y) && m_framed_choice_enabled)
@@ -188,7 +196,7 @@ void eMainContextBase::PaintGL()
 	{
 		int64_t tick = m_global_clock.newFrame();
 		std::map<eObject::RenderType, std::vector<shObject>> objects;
-		std::vector<shObject> phong, pbr, flags, bezier, geometry;
+		std::vector<shObject> phong, pbr, flags, bezier, geometry, lines;
 
 		if(!m_texts.empty())
 			m_texts[0]->content = { "FPS " + std::to_string(1000 / tick) };
@@ -227,6 +235,8 @@ void eMainContextBase::PaintGL()
 				phong.push_back(object);
 			else if (object->GetRenderType() == eObject::RenderType::FLAG)
 				flags.push_back(object);
+			else if (object->GetRenderType() == eObject::RenderType::LINES)
+				lines.push_back(object);
 		}
 
 		if(m_input_strategy)
@@ -251,6 +261,7 @@ void eMainContextBase::PaintGL()
 		objects.insert({ eObject::RenderType::PBR, pbr });
 		objects.insert({ eObject::RenderType::BEZIER_CURVE, bezier });
 		objects.insert({ eObject::RenderType::GEOMETRY, geometry });
+		objects.insert({ eObject::RenderType::LINES, lines });
 
 		pipeline.RenderFrame(objects, GetMainCamera(), GetMainLight(), m_guis, m_texts);
 
@@ -278,6 +289,12 @@ uint32_t eMainContextBase::GetFinalImageId()
 std::shared_ptr<eObject> eMainContextBase::GetFocusedObject()
 {
 	return m_focused;
+}
+
+//--------------------------------------------------------------------------------
+std::shared_ptr<eObject> eMainContextBase::GetHoveredObject()
+{
+	return m_hovered;
 }
 
 //--------------------------------------------------------------------------------
@@ -603,7 +620,7 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[9]->Add(CONSOLE, "Console", reinterpret_cast<void*>(&console_plane_callbaack));
 
 	m_global_scripts.push_back(std::make_shared<ParticleSystemToolController>(externalGui[10], texManager.get(), soundManager.get(), pipeline));
-	m_global_scripts.push_back(std::make_shared<TerrainGeneratorTool>(this, modelManager.get(), texManager.get(), pipeline, externalGui[11]));
+	//m_global_scripts.push_back(std::make_shared<TerrainGeneratorTool>(this, modelManager.get(), texManager.get(), pipeline, externalGui[11]));
 }
 
 //------------------------------------------------------------

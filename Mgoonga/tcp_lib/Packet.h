@@ -2,6 +2,7 @@
 #include "pch.h"
 #include <vector>
 #include <string>
+#include <variant>
 
 namespace dbb
 {
@@ -12,6 +13,9 @@ namespace dbb
 		PT_Intarray
 	};
 
+	using PacketContent = std::variant<std::string, std::vector<uint32_t>>;
+
+	//--------------------------------------------------------
 	class EXPORT Packet
 	{
 		friend class Socket;
@@ -25,8 +29,8 @@ namespace dbb
 
 		Packet(PacketType = PacketType::PT_Invalid);
 
-		PacketType GetPacketType();
-		void AssignPacketType(PacketType);
+		PacketType	GetPacketType();
+		void				AssignPacketType(PacketType);
 
 		void Clear();
 		void Append(void* data, int size);
@@ -36,13 +40,15 @@ namespace dbb
 
 		Packet& operator <<(const std::string& data);
 		Packet& operator >>(std::string& data);
+
 	/*protected:*/
 		std::vector<char> m_buffer;
-		uint32_t m_extraction_offset = 0;
-		PacketTask task = PacketTask::ProcessPacketSize;
+		uint32_t					m_extraction_offset = 0;
+		PacketTask				task = PacketTask::ProcessPacketSize;
 	};
 }
 
-bool EXPORT ProcessPacket(dbb::Packet& packet);
+//--------------------------------------------------------
+std::pair<bool, dbb::PacketContent> EXPORT ProcessPacket(dbb::Packet& packet);
 
 

@@ -17,13 +17,14 @@ bool Client::Connect(dbb::IPEndPoint ip)
        std::cout << "dbb::Socket::Create is successful" << std::endl;
        if (m_socket.Connect(ip) == dbb::PResult::SUCCESS || m_socket.GetSocketError() == WSAEWOULDBLOCK)
        {
-           std::cout << "socket.Connect is successful" << std::endl;
-		   connection = { m_socket, ip };
-		   master_fd.fd = m_socket.GetHandle();
-		   master_fd.events = POLLRDNORM | POLLWRNORM;
-		   master_fd.revents = 0;
-           is_connected = true;
-           return true;
+         std::cout << "socket.Connect is successful" << std::endl;
+		     connection = { m_socket, ip };
+		     master_fd.fd = m_socket.GetHandle();
+		     master_fd.events = POLLRDNORM | POLLWRNORM;
+		     master_fd.revents = 0;
+         is_connected = true;
+         ConnectionEstablished.Occur<const dbb::TCPConnection&>(connection);
+         return true;
        }
        else
        {
@@ -99,10 +100,16 @@ void Client::CloseConnection(const std::string& reason)
 	connection.Close();
 }
 
-//------------------------------------------
+//------------------------------------------------------------------------
 void Client::SendMsg(std::string&& msg)
 {
     connection.AddSent(std::move(msg));
+}
+
+//------------------------------------------------------------------------
+void Client::SendMsg(std::vector<uint32_t>&& msg)
+{
+  connection.AddSent(std::move(msg));
 }
 
     //    dbb::Packet incomingPacket;

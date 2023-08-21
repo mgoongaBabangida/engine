@@ -439,3 +439,52 @@ void BezierCurveMesh::Update()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 4, &m_bezier, GL_DYNAMIC_DRAW);
 }
+
+//-------------------------------------------
+LineMesh::LineMesh(const std::vector<glm::vec3>& _verices, const std::vector<GLuint>& _indices, glm::vec3 _color)
+	: m_verices(_verices)
+	, m_indices(_indices)
+	, m_color(_color)
+{
+	// Setup VAO
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
+
+	glBindVertexArray(VAO);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glBindVertexArray(0);
+}
+
+//-------------------------------------------
+LineMesh::~LineMesh()
+{
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+}
+
+//-------------------------------------------
+void LineMesh::UpdateData(const std::vector<glm::vec3>& _verices, const std::vector<GLuint>& _indices, glm::vec3 _color)
+{
+	m_verices = _verices;
+	m_indices = _indices;
+	m_color = _color;
+}
+
+//-------------------------------------------
+void LineMesh::Draw()
+{
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * m_verices.size(), &m_verices[0], GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(GLuint), &m_indices[0], GL_DYNAMIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+
+	glDrawElements(GL_LINES, m_indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}

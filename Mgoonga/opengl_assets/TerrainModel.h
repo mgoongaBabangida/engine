@@ -27,8 +27,8 @@ public:
 
 	virtual ~TerrainModel();
 
-	void initialize(const Texture* diffuse, const Texture* specular, const Texture* normal= nullptr, const Texture* heightMap = nullptr,
-								  bool spreed_texture = true, float _height_scale = 1.0f);
+	void initialize(const Texture* diffuse, const Texture* specular, const Texture* normal = nullptr, const Texture* heightMap = nullptr,
+		bool spreed_texture = true, float _height_scale = 1.0f, float _max_height = 1.0f);
 	
 	virtual void														Draw()					override;
 	virtual const std::string&							GetName() const override { return mesh->Name(); }
@@ -39,13 +39,9 @@ public:
   virtual std::vector<const IMesh*>				GetMeshes() const;
 	virtual std::vector<const I3DMesh*>			Get3DMeshes() const;
 
-	virtual bool														HasBones() const { return false; }
-	virtual std::vector<const IBone*>				GetBones() const { return {}; }
-
-  virtual size_t													GetAnimationCount() const { return 0; }
-  virtual std::vector<const IAnimation*>	GetAnimations() const {
-    return std::vector<const IAnimation*>();
-  }
+	virtual bool											HasMaterial() const { return true; }
+	virtual void											SetMaterial(const Material& _m) { m_material = _m; }
+	virtual std::optional<Material>		GetMaterial() const { return m_material; }
 
 	float							GetHeight(float x , float z)	override;
 	glm::vec3					GetNormal(float x, float z)		override;
@@ -61,7 +57,7 @@ public:
 	void setSpecular(uint32_t _id);
 	void setAlbedoTextureArray(const Texture*);
 
-private:
+protected:
 	MyMesh*					mesh; // generate ourself inside constructor
 	Material				m_material;
 	std::string			m_path;
@@ -78,10 +74,18 @@ private:
 	void			makePlaneVerts(unsigned int dimensions, bool spreed_texture = true);
 	void			makePlaneVerts(unsigned int rows, unsigned int columns, bool spreed_texture = true);
 	void			makePlaneIndices(unsigned int dimensions);
-	void			assignHeights(const Texture& heightMap, float _height_scale = 1.0f);
+	void			assignHeights(const Texture& heightMap, float _height_scale = 1.0f, float _max_height = 1.0f);
 	void			generateNormals(GLuint size);
 	void			generateNormals(GLuint rows, GLuint columns);
 	Vertex		findVertex(float x, float z);
+
+	virtual bool														HasBones() const { return false; }
+	virtual std::vector<const IBone*>				GetBones() const { return {}; }
+
+	virtual size_t													GetAnimationCount() const { return 0; }
+	virtual std::vector<const IAnimation*>	GetAnimations() const {
+		return std::vector<const IAnimation*>();
+	}
 };
 
 

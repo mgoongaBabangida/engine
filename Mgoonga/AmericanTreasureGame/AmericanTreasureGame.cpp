@@ -25,10 +25,10 @@
 
 //---------------------------------------------------------------------------
 AmericanTreasureGame::AmericanTreasureGame(eInputController* _input,
-  std::vector<IWindowImGui*> _externalGui,
-  const std::string& _modelsPath,
-  const std::string& _assetsPath,
-  const std::string& _shadersPath)
+                                           std::vector<IWindowImGui*> _externalGui,
+                                           const std::string& _modelsPath,
+                                           const std::string& _assetsPath,
+                                           const std::string& _shadersPath)
   : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
 {
   FocusChanged.Subscribe([this](shObject _prev, shObject _new)->void { this->OnFocusedChanged(); });
@@ -88,6 +88,7 @@ void AmericanTreasureGame::InitializeModels()
   //MODELS
   //modelManager->Add("ship", (GLchar*)std::string(modelFolderPath + "Cabin_cruise/19291_Cabin_cruise_v2_NEW.obj").c_str());
   modelManager->Add("ship", (GLchar*)std::string(modelFolderPath + "ShipFBX(2).fbx").c_str());
+  modelManager->Add("pirate_ship", (GLchar*)std::string(modelFolderPath + "Pirate Ship/stylized_ship.obj").c_str());
 
   Material pbr1;
   pbr1.albedo_texture_id = texManager->Find("pbr1_basecolor")->id;
@@ -109,8 +110,9 @@ void AmericanTreasureGame::InitializeModels()
   //@todo separate init scene member func
   _InitMainTestSceane();
 
-  //GLOBAL CONTROLLERS
-  m_global_scripts.push_back(std::make_shared<GameController>(this, modelManager.get(), texManager.get(), soundManager.get(), pipeline, GetMainCamera()));
+  //GLOBAL CONTROLLERS 
+  IWindowImGui* debug_window = this->externalGui.size() > 12 ? externalGui[12] : nullptr;
+  m_global_scripts.push_back(std::make_shared<GameController>(this, modelManager.get(), texManager.get(), soundManager.get(), pipeline, GetMainCamera(), debug_window));
   m_global_scripts.push_back(std::make_shared<GUIController>(this, this->pipeline, soundManager->GetSound("page_sound")));
   m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera()));
 

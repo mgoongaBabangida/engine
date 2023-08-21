@@ -28,21 +28,30 @@ eLinesRender::~eLinesRender()
 }
 
 //-----------------------------------------------------------------------------------------------------
-void eLinesRender::Render(const Camera& _camera, const std::vector<glm::vec3>& _lines, std::vector<GLuint> _indices)
+void eLinesRender::Render(const Camera& _camera, std::vector<const LineMesh*>& _meshes)
 {
   glUseProgram(linesShader.ID());
   glm::mat4 mvp = _camera.getProjectionMatrix() * _camera.getWorldToViewMatrix() * UNIT_MATRIX;
   glUniformMatrix4fv(MVPLoc, 1, GL_FALSE, &mvp[0][0]);
 
-  glBindVertexArray(VAO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)* _lines.size(), &_lines[0], GL_DYNAMIC_DRAW);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(GLuint), &_indices[0], GL_DYNAMIC_DRAW);
+  for (auto& mesh : _meshes)
+  {
+    linesShader.SetUniformData("color", mesh->GetColor());
+    //mesh->Draw();
 
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    if (mesh->m_verices.empty())
+      continue;
 
-	glDrawElements(GL_LINES, _indices.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * mesh->m_verices.size(), &mesh->m_verices[0], GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->m_indices.size() * sizeof(GLuint), &mesh->m_indices[0], GL_DYNAMIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+
+    glDrawElements(GL_LINES, mesh->m_indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+  }
 }

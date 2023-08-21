@@ -121,6 +121,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	std::vector<shObject> flags = _objects.find(eObject::RenderType::FLAG)->second;
 	std::vector<shObject> geometry_objs = _objects.find(eObject::RenderType::GEOMETRY)->second;
 	std::vector<shObject> bezier_objs = _objects.find(eObject::RenderType::BEZIER_CURVE)->second;
+	std::vector<shObject> lines_objs = _objects.find(eObject::RenderType::LINES)->second;
 	auto phong_pbr_objects = phong_objs;
 	phong_pbr_objects.insert(phong_pbr_objects.end(), pbr_objs.begin(), pbr_objs.end());
 
@@ -259,12 +260,20 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		}
 	}
 
+	std::vector<const LineMesh*> line_meshes{};
+	for (auto obj : lines_objs)
+	{
+		const LineMesh* mesh = dynamic_cast<const LineMesh*>(obj->GetModel()->GetMeshes()[0]);
+		if (mesh)
+			line_meshes.push_back(mesh);
+	}
 	// Bounding boxes
 	if (draw_bounding_boxes)
 	{
+		static LineMesh bounding_boxes_mesh({}, {}, {});
 		std::vector<glm::vec3> extrems_total;
 		std::vector<GLuint> indices_total;
-		for (GLuint i = 0; i < phong_pbr_objects.size(); i++)
+		for (GLuint i = 0; i < phong_pbr_objects.size(); ++i)
 		{
 			std::vector<glm::vec3> extrems = phong_pbr_objects[i]->GetCollider()->GetExtrems(*phong_pbr_objects[i]->GetTransform());
 			extrems_total.insert(extrems_total.end(), extrems.begin(), extrems.end());
@@ -293,8 +302,10 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 			indices_total.push_back(3 + i * 8);
 			indices_total.push_back(7 + i * 8);
 		}
-		renderManager->LinesRender()->Render(_camera, extrems_total, indices_total);
+		bounding_boxes_mesh.UpdateData(extrems_total, indices_total, { 1.0f, 1.0f, 0.0f});
+		line_meshes.push_back(&bounding_boxes_mesh);
 	}
+	renderManager->LinesRender()->Render(_camera, line_meshes);
 
 	//  Draw skybox firs
 	if (skybox)

@@ -92,6 +92,7 @@ project "math"
 	  --("{COPY} %{cfg.buidtarget.relpath} ../bin/" .. outputdir .. "/Mgoonga")
 	  --}
 
+--------------------------------------------------------------------------------------------------
 project "tcp_lib"
 	location "tcp_lib"
 	kind "SharedLib"
@@ -102,8 +103,13 @@ project "tcp_lib"
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
    
-   includedirs { "../../third_party" }
+   includedirs { "./"; "../../third_party" }
 	
+   links
+   {  
+   "base" 
+   }
+   
    filter "configurations:Debug"
       defines { "DEBUG;_DEBUG;_WINDOWS;_USRDLL;BASE_EXPORTS" }
       symbols "On"
@@ -116,7 +122,8 @@ project "tcp_lib"
 	  --{
 	  --("{COPY} %{cfg.buidtarget.relpath} ../bin/" .. outputdir .. "/Mgoonga")
 	  --}
-	  
+
+--------------------------------------------------------------------------------------------------	  
 project "opengl_assets"
 	location "opengl_assets"
 	kind "SharedLib"
@@ -174,6 +181,7 @@ project "opengl_assets"
 	  --("{COPY} %{cfg.buidtarget.relpath} ../bin/" .. outputdir .. "/Mgoonga")
 	  --}
 
+--------------------------------------------------------------------------------------------------
 project "sdl_assets"
 	location "sdl_assets"
 	kind "SharedLib"
@@ -337,7 +345,8 @@ project "Mgoonga"
    filter "configurations:Release"
       defines { "NDEBUG;_WINDOWS" }
       optimize "On"
-	  
+
+----------------------------------------------------------------------------------------------------	  
 project "AmericanTreasureGame"
 	location "AmericanTreasureGame"
 	kind "ConsoleApp"
@@ -367,6 +376,7 @@ project "AmericanTreasureGame"
    "math",
    "opengl_assets",
    "sdl_assets",
+   "tcp_lib",
    "game_assets",
    "assimpd", 
    "opengl32",
@@ -388,7 +398,8 @@ project "AmericanTreasureGame"
    filter "configurations:Release"
       defines { "NDEBUG;_WINDOWS" }
       optimize "On"
-	  
+
+----------------------------------------------------------------------------------------------------	  
 project "SandBoxGame"
 	location "SandBoxGame"
 	kind "ConsoleApp"
