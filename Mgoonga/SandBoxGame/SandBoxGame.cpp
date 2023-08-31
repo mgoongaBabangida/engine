@@ -5,7 +5,7 @@
 
 #include <math/Rigger.h>
 #include <math/BoxCollider.h>
-#include <math/RigidBdy.h>
+#include <math/RigidBody.h>
 
 #include <opengl_assets/Sound.h>
 #include <opengl_assets/TextureManager.h>
@@ -19,6 +19,7 @@
 #include <sdl_assets/ImGuiContext.h>
 
 #include <game_assets/ObjectFactory.h>
+#include <game_assets/ShootScript.h>
 
 #include "SandBoxScript.h"
 
@@ -94,8 +95,8 @@ void eSandBoxGame::InitializeModels()
 	//MODELS
 	modelManager->Add("wolf", (GLchar*)std::string(modelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
 	modelManager->Add("Dying", (GLchar*)std::string(modelFolderPath + "Dying Soldier/Dying.dae").c_str());
-	modelManager->Add("MapleTree", (GLchar*)std::string(modelFolderPath + "MapleTree/MapleTree.obj").c_str());
-	modelManager->Add("Cottage", (GLchar*)std::string(modelFolderPath + "85-cottage_obj/cottage_obj.obj").c_str());
+	//modelManager->Add("MapleTree", (GLchar*)std::string(modelFolderPath + "MapleTree/MapleTree.obj").c_str());
+	//modelManager->Add("Cottage", (GLchar*)std::string(modelFolderPath + "85-cottage_obj/cottage_obj.obj").c_str());
 
 	Material red;
 	red.albedo = glm::vec3(0.9f, 0.0f, 0.0f);
@@ -174,10 +175,14 @@ void eSandBoxGame::InitializeModels()
 	m_light_object->GetTransform()->setTranslation(GetMainLight().light_position);
 	m_objects.push_back(m_light_object);
 
+	m_global_scripts.push_back(std::make_shared<ShootScript>(this, modelManager.get()));
+	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
+
 	m_global_scripts.push_back(std::make_shared<GUIController>(this, this->pipeline, soundManager->GetSound("page_sound")));
 	m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera()));
 
 	m_input_controller->AddObserver(this, WEAK);
+
 	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
 }
 

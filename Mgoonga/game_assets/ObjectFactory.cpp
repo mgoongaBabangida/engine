@@ -2,7 +2,7 @@
 #include "ObjectFactory.h"
 
 #include <math/Rigger.h>
-#include <math/RigidBdy.h>
+#include <math/RigidBody.h>
 #include <math/BoxColliderDynamic.h>
 #include <math/AnimatedModel.h>
 

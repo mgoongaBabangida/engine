@@ -219,6 +219,8 @@ public:
 														Side _moveDirection,
 														eCollision& _collision) = 0;
 
+	virtual bool IsInsideOfAABB(const ITransform& _trans, const ITransform& trans2, const ICollider& other) = 0;
+
 	virtual glm::vec3								GetCenter() = 0;
 	virtual float										GetRadius() = 0;
 	virtual const std::string&			GetModelName() = 0;
@@ -262,6 +264,19 @@ public:
 
 	virtual void SetObject(eObject* obj) =0;
 
+	virtual bool Update(float _dt, std::vector<std::shared_ptr<eObject> > objects) = 0;
+
+	virtual void ApplyForce(glm::vec3 _force) = 0;
+	virtual void ApplyForce(glm::vec3 _direction, float _magitude) = 0;
+
+	virtual void ApplyAcceleration(glm::vec3 _acceleration) = 0;
+	virtual void ApplyAcceleration(glm::vec3 _direction, float _magitude) = 0;
+
+	virtual void ApplyImpulse(glm::vec3 _force, float _dt) = 0;
+	virtual void ApplyImpulse(glm::vec3 _direction, float _magitude, float _dt) = 0;
+
+	virtual void TransferEnergy(float _joules) = 0;
+
 	virtual void TurnRight(std::vector<std::shared_ptr<eObject> > objects) = 0;
 	virtual void TurnLeft(std::vector<std::shared_ptr<eObject> > objects) = 0;
 	virtual void LeanRight(std::vector<std::shared_ptr<eObject> > objects) = 0;
@@ -276,7 +291,7 @@ public:
 	virtual void MoveUp(std::vector<std::shared_ptr<eObject> > objects) = 0;
 	virtual void MoveDown(std::vector<std::shared_ptr<eObject> > objects) = 0;
 
-	virtual void Move(std::vector<std::shared_ptr<eObject> > objects) = 0;
+	virtual void Move(std::vector<std::shared_ptr<eObject> > objects, float _dt = 0.0f) = 0;
 	virtual void Turn(glm::vec3 direction, std::vector<std::shared_ptr<eObject>> objects) = 0;
 
 	virtual void				SetCurrentVelocity(glm::vec3 _vel) = 0;
@@ -315,6 +330,9 @@ public:
 
 	virtual glm::mat4 GetMainCameraViewMatrix() = 0;
 	virtual glm::mat4 GetMainCameraProjectionMatrix() = 0;
+
+	virtual glm::vec3 GetMainCameraPosition() const = 0;
+	virtual glm::vec3 GetMainCameraDirection() const = 0;
 
 	virtual void AddInputObserver(IInputObserver* _observer, ePriority _priority) = 0;
 	virtual void DeleteInputObserver(IInputObserver* _observer) = 0;

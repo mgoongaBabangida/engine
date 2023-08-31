@@ -4,7 +4,7 @@
 
 #include <math/ParticleSystem.h>
 #include <math/BoxCollider.h>
-#include <math/RigidBdy.h>
+#include <math/RigidBody.h>
 
 #include <opengl_assets/Sound.h>
 #include <opengl_assets/MyModel.h>

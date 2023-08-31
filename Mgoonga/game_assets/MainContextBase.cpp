@@ -202,12 +202,12 @@ void eMainContextBase::PaintGL()
 			m_texts[0]->content = { "FPS " + std::to_string(1000 / tick) };
 
 		float msc = static_cast<float>(tick);
-		for (auto& script : m_global_scripts)
+		for (auto script : m_global_scripts)
 		{
 			script->Update(msc);
 		}
 
-		for (auto& object : m_objects)
+		for (shObject object : m_objects)
 		{
 			if (!object->IsVisible())
 				continue;
@@ -249,7 +249,7 @@ void eMainContextBase::PaintGL()
 			phong.push_back(m_light_object);
 		}
 
-		//need better design less copying
+		//@todo need better design less copying
 		std::shared_ptr<std::vector<shObject>> focused_output = m_framed;
 		if (!focused_output || !(focused_output->size() > 1))
 			focused_output = m_focused ? std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{ m_focused })
@@ -307,8 +307,11 @@ void eMainContextBase::AddObject(std::shared_ptr<eObject> _object)
 //--------------------------------------------------------------------------------
 void eMainContextBase::DeleteObject(std::shared_ptr<eObject> _object)
 {
-	ObjectBeingDeletedFromScene.Occur(_object); // check if its on scene
-	m_objects.erase(std::remove(m_objects.begin(), m_objects.end(),(_object)));
+	if (auto it = std::remove(m_objects.begin(), m_objects.end(), _object); it != m_objects.end())
+	{
+		ObjectBeingDeletedFromScene.Occur(_object);
+		m_objects.erase(it);
+	}
 }
 
 //--------------------------------------------------------------------------------
@@ -361,6 +364,18 @@ glm::mat4 eMainContextBase::GetMainCameraViewMatrix()
 glm::mat4 eMainContextBase::GetMainCameraProjectionMatrix()
 {
 	return m_cameras[0].getProjectionMatrix();
+}
+
+//--------------------------------------------------------------------------------
+glm::vec3 eMainContextBase::GetMainCameraPosition() const
+{
+	return m_cameras[0].getPosition();
+}
+
+//-------------------------------------------------------------------------------
+glm::vec3 eMainContextBase::GetMainCameraDirection() const
+{
+	return m_cameras[0].getDirection();
 }
 
 //--------------------------------------------------------------------------------

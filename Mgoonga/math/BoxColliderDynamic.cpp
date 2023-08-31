@@ -194,7 +194,10 @@ float BoxColliderDynamic::GetRadius()
 		auto it = std::find_if(m_data.begin(), m_data.end(), [this](const AnimationData& _data) { return _data.name == m_rigger->GetCurrentAnimationName(); });
 		if (it != m_data.end())
 		{
-			return it->radiuses[m_rigger->GetCurrentAnimationFrameIndex()];
+			if(auto frame_index = m_rigger->GetCurrentAnimationFrameIndex(); frame_index < it->extremDots.size() && frame_index >= 0)
+				return it->radiuses[m_rigger->GetCurrentAnimationFrameIndex()];
+			else
+				return BoxCollider::GetRadius();
 		}
 		else
 			return BoxCollider::GetRadius();

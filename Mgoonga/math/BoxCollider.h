@@ -25,6 +25,8 @@ public:
 														Side moveDirection,
 														eCollision& collision) override;
 	
+	virtual bool IsInsideOfAABB(const ITransform& _trans, const ITransform& _trans2, const ICollider& _other) override;
+
 	virtual glm::vec3								GetCenter() override;
 	virtual float										GetRadius() override;
 	virtual const std::string&			GetModelName() override { return m_model_name;  }
@@ -50,7 +52,7 @@ protected:
 	float											m_radius = 0.0f;
 	std::string								m_model_name;
 	std::string								m_path;
-	bool											m_check_sphere_overlap = false;
+	bool											m_check_sphere_overlap = true;
 };
 
 #endif

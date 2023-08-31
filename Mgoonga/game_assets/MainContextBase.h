@@ -87,6 +87,9 @@ public:
 	virtual glm::mat4 GetMainCameraViewMatrix() override;
 	virtual glm::mat4 GetMainCameraProjectionMatrix() override;
 	
+	virtual glm::vec3 GetMainCameraPosition() const override;
+	virtual glm::vec3 GetMainCameraDirection() const override;
+
 	virtual bool			UseGizmo() override { return m_use_guizmo; }
 	virtual uint32_t	CurGizmoType() override { return (uint32_t)m_gizmo_type; }
 
