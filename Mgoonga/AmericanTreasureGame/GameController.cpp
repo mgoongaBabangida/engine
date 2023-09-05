@@ -98,9 +98,9 @@ void GameController::Initialize()
   m_game->AddText(m_warrining);
 
   //_InstallTcpServer();
-  _InstallTcpClient();
+  //_InstallTcpClient();
 
-  m_side = Side::PIRATE;
+ /* m_side = Side::PIRATE;*/
 
   //DEBUG FIELDS
   std::function<void()> switch_mode__callback = [this]()
@@ -245,14 +245,17 @@ bool GameController::OnMousePress(int32_t _x, int32_t _y, bool _left)
                 return true;
               }
 
-              std::vector<uint32_t> content { (uint32_t)(m_current_path.size() + 2),
-                                             (uint32_t)MessageType::MOVE,
-                                             m_focused_index };
-              std::vector<uint32_t> path(_GetCurPathIndices());
-              content.insert(content.end(), path.begin(), path.end());
+              if (m_side != Side::BOTH) // send tcp event
+              {
+                std::vector<uint32_t> content{ (uint32_t)(m_current_path.size() + 2),
+                                               (uint32_t)MessageType::MOVE,
+                                               m_focused_index };
+                std::vector<uint32_t> path(_GetCurPathIndices());
+                content.insert(content.end(), path.begin(), path.end());
 
-              if (m_tcpAgent)
-                m_tcpAgent->SendMsg(std::move(content));
+                if (m_tcpAgent)
+                  m_tcpAgent->SendMsg(std::move(content));
+              }
 
               _UpdatePathVisual();
               hex.SetTaken(true);
@@ -808,12 +811,13 @@ void GameController::_InitializeShips()
   for (int i = 0; i < m_ship_quantity; ++i)
   {
     //material.albedo = colors[i];
-    //shObject ship = factory.CreateObject(m_modelManager->Find("ship"), eObject::RenderType::PBR, "Ship" + std::to_string(i));
-    shObject ship = factory.CreateObject(m_modelManager->Find("wall_cube"), eObject::RenderType::PHONG, "Ship" + std::to_string(i));
+    shObject ship = factory.CreateObject(m_modelManager->Find("ship"), eObject::RenderType::PBR, "Ship" + std::to_string(i));
+    //shObject ship = factory.CreateObject(m_modelManager->Find("wall_cube"), eObject::RenderType::PHONG, "Ship" + std::to_string(i));
     ship->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
     ship->GetTransform()->setTranslation(vec3(m_hexes[90 + i*2].x(), m_pipeline.get().GetWaterHeight(), m_hexes[90 + i * 2].z()));
     ship->GetTransform()->setUp(glm::vec3(0.0f, 0.0f, 1.0f));
     ship->GetTransform()->setForward(glm::vec3(-1.0f, 0.0f, 0.0f));
+
     m_hexes[90 + i * 2].SetTaken(true);
 
     for (auto& mesh : ship->GetModel()->Get3DMeshes())
@@ -836,13 +840,18 @@ void GameController::_InitializeShips()
 
   for (int i = 0; i < m_ship_quantity_pirate; ++i)
   {
-    //shObject ship = factory.CreateObject(m_modelManager->Find("pirate_ship"), eObject::RenderType::PBR, "Pirate" + std::to_string(i));
-    shObject ship = factory.CreateObject(m_modelManager->Find("brick_cube"), eObject::RenderType::PHONG, "Ship" + std::to_string(i));
-    //ship->GetTransform()->setScale(vec3(0.04f, 0.04f, 0.04f));
-    ship->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
+    shObject ship = factory.CreateObject(m_modelManager->Find("pirate_ship"), eObject::RenderType::PBR, "Pirate" + std::to_string(i));
+    //shObject ship = factory.CreateObject(m_modelManager->Find("brick_cube"), eObject::RenderType::PHONG, "Ship" + std::to_string(i));
+    ship->GetTransform()->setScale(vec3(0.04f, 0.04f, 0.04f));
+    //ship->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
     ship->GetTransform()->setTranslation(vec3(m_hexes[26 + i * 20].x(), m_pipeline.get().GetWaterHeight(), m_hexes[26 + i * 20].z()));
     ship->GetTransform()->setUp(glm::vec3(0.0f, 0.0f, 1.0f));
-    ship->GetTransform()->setForward(glm::vec3(-1.0f, 0.0f, 0.0f));
+    ship->GetTransform()->setRotation(0.0f, PI/2, 0.0f);
+    ship->GetTransform()->setForward(glm::vec3(1.0f, 0.0f, 0.0f));
+
+    ship->SetInstancingTag("pirate_ship");
+    
+    m_hexes[26 + i * 20].SetTaken(true);
 
     if(i == 0)
     {
@@ -897,8 +906,6 @@ void GameController::_InitializeShips()
         }
       }
     }
-
-    m_hexes[26 + i * 20].SetTaken(true);
 
     //for (auto& mesh : ship->GetModel()->Get3DMeshes())
     //  const_cast<I3DMesh*>(mesh)->SetMaterial(material); //@todo
@@ -1116,7 +1123,7 @@ void GameController::_UpdatePathVisual()
   m_path_mesh->UpdateData(verices, indices, { 1.0f, 1.0f ,1.0f });
 
   //text destination
-  m_destination_text->content = std::to_string(m_current_path.size());
+  m_destination_text->content = std::to_string(m_current_path.size() + 1);
 }
 
 //-------------------------------------------------------------

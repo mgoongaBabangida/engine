@@ -71,6 +71,7 @@ public:
 protected:
   void OnObjectPicked(std::shared_ptr<eObject> _picked);
   void OnFrameMoved(std::shared_ptr<GUI> _frame);
+
   void _OnConnectionEstablished(const dbb::TCPConnection& _connection);
   void _OnTCPMessageRecieved(const std::vector<uint32_t>);
 
