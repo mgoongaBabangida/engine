@@ -23,19 +23,21 @@ public:
 		, q_rotation(1.0f, 0.0f, 0.0f, 0.0f)
 		, scaleIncrement(m_scale.x * 0.015f)
 		{ UpdateModelMatrix();}
-	
-	glm::mat4			getModelMatrix() const;
 
 	void				    setRotation(float x, float y, float z);
 	void				    setRotation(glm::quat q)	 { q_rotation = q;		UpdateModelMatrix(); }
 	virtual void		setTranslation(glm::vec3 tr) { m_translation = tr;	UpdateModelMatrix(); }
 	virtual void		setScale(glm::vec3 sc) { m_scale = sc;	scaleIncrement = m_scale.x * 0.015f;	UpdateModelMatrix(); }
-	
+	void						setForward(glm::vec3 _fwd) { forward = _fwd; }
+	void						setUp(glm::vec3 _up) { Up = _up; }
+	virtual void		setModelMatrix(const glm::mat4&);
+
 	bool				isRotationValid();
 
 	static glm::quat	RotationBetweenVectors(glm::vec3 start, glm::vec3 dest);
 	static Transform	interpolate(const Transform& first, const Transform& second, float progression);
 	
+	const glm::mat4&		 getModelMatrix() const;
 	virtual glm::mat4	   getScale()			const { return  glm::scale(glm::vec3(m_scale.x, m_scale.y, m_scale.z)) ; }
   glm::vec3            getScaleAsVector() const { return m_scale; }
 	virtual glm::vec3	   getTranslation()	const { return  m_translation; }
@@ -43,9 +45,6 @@ public:
 	virtual glm::quat	   getRotation()		const { return  q_rotation; }
 	glm::vec4			       getRotationVector() const;
 	glm::vec4			       getRotationUpVector() const;
-
-	void								 setForward(glm::vec3 _fwd){forward = _fwd; }
-	void								 setUp(glm::vec3 _up) { Up = _up; }
 	glm::vec3			       getForward()		const { return forward; }
 	glm::vec3			       getUp()				const { return Up; }
 	

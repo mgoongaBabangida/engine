@@ -21,6 +21,7 @@
 #include <sdl_assets/ImGuiContext.h>
 
 #include <math/Clock.h>
+#include <math/Rigger.h>
 #include <math/ParticleSystem.h>
 
 #include <thread>
@@ -610,8 +611,22 @@ void eMainContextBase::InitializeExternalGui()
 
 	//Objects material
 	externalGui[7]->Add(OBJECT_REF_MATERIAL, "Material", (void*)&m_focused);
+
 	//Objects rigger
+	externalGui[8]->Add(GAME, "Game", (void*)&(*this));
 	externalGui[8]->Add(OBJECT_REF_RIGGER, "Rigger", (void*)&m_focused);
+	static std::function<void(shObject, const std::string&)> load_rigger = [this](shObject obj, const std::string& _path)
+	{
+		IRigger* rigger = animationManager->DeserializeRigger(_path);
+		obj->SetRigger(rigger);
+	};
+	externalGui[8]->Add(ADD_CALLBACK, "Load Rigger", reinterpret_cast<void*>(&load_rigger));
+	static std::function<void(shObject, const std::string&)> save_rigger = [this](shObject obj, const std::string& _path)
+	{
+		IRigger* rigger = obj->GetRigger();
+		animationManager->SerializeRigger(dynamic_cast<const Rigger*>(rigger), _path);
+	};
+	externalGui[8]->Add(ADD_CALLBACK, "Save Rigger", reinterpret_cast<void*>(&save_rigger));
 
 	//Console
 	static std::function<void(const std::string&)> console_plane_callbaack = [this](const std::string& _commandLine)

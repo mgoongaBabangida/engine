@@ -20,6 +20,7 @@
 
 #include <game_assets/ObjectFactory.h>
 #include <game_assets/ShootScript.h>
+#include <game_assets/AnimationSocketScript.h>
 
 #include "SandBoxScript.h"
 
@@ -44,7 +45,7 @@ bool eSandBoxGame::OnKeyPress(uint32_t asci)
 	{
 	case ASCII_G:
 	{
-		if (m_focused != nullptr)
+		if (m_focused != nullptr && m_focused->GetScript())
 			m_focused->GetScript()->OnKeyPress(ASCII_G); // change -> subscribe directly
 	}
 	return true;
@@ -153,11 +154,12 @@ void eSandBoxGame::InitializeModels()
 	shObject soldier = factory.CreateObject(modelManager->Find("Dying"),
 																					eObject::RenderType::PHONG,
 																					"Soldier",
-																					"MixamoFireWalkDie.mgoongaRigger",
-																					"Soldier3Anim.mgoongaBoxColliderDynamic",
-																					true); // dynamic collider
+																					"Default", //"MixamoFireWalkDie.mgoongaRigger",
+																					"" //"Soldier3Anim.mgoongaBoxColliderDynamic",
+																					/*true*/); // dynamic collider
 	soldier->GetTransform()->setTranslation(vec3(1.0f, -2.0f, 0.0f));
 	soldier->GetTransform()->setScale(vec3(0.01f, 0.01f, 0.01f));
+	soldier->SetScript(new AnimationSocketScript(this));
 
 	//Set textures manually
 	t.loadTextureFromFile("../game_assets/Resources/Dying Soldier/textures/Ch15_1001_Normal.png");

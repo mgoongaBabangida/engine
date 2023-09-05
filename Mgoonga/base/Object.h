@@ -27,10 +27,13 @@ public:
 	//Properties
 	bool IsVisible() const { return m_is_visible; }
 	void SetVisible(bool _visible) { m_is_visible = _visible; }
+
 	bool IsPickable() const { return m_is_pickable; }
 	void SetPickable(bool _pickable) { m_is_pickable = _pickable; }
+
 	bool Is2DScreenSpace() const { return m_is_2d_screen_space; }
 	void Set2DScreenSpace(bool _2d) { m_is_2d_screen_space = _2d; }
+
 	bool IsTextureBlending() const { return m_is_texture_blending; }
 	void SetTextureBlending(bool _tex_blending) { m_is_texture_blending = _tex_blending; }
 
@@ -41,6 +44,7 @@ public:
 	void SetRenderType(RenderType _render_type) { m_render_type = _render_type; }
 
 	std::vector<std::shared_ptr<eObject>>&	GetChildrenObjects() { return m_children; }
+	void AddChildObject(std::shared_ptr<eObject> _obj) { m_children.push_back(_obj); }
 
 	//Setters
 	void				SetRigger(IRigger* r);

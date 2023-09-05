@@ -9,7 +9,9 @@
 #include <SDL/include/SDL_opengl.h>
 
 #include <base/Object.h>
+#include <base/interfaces.h>
 #include <base/InputController.h>
+
 #include <map>
 
 //---------------------------------------------------
@@ -55,7 +57,9 @@ enum TypeImGui
 	MENU_SAVE_SCENE,
 	CONSOLE,
 	PARTICLE_SYSTEM,
-	SLIDER_INT
+	SLIDER_INT,
+	ADD_CALLBACK,
+	GAME
 };
 
 //--------------------------------------------------
@@ -98,14 +102,16 @@ protected:
 	std::string					name;
 	bool								visible = true;
 	std::map<std::string, std::function<void()>> callbacks;
+	std::map<std::string, std::function<void(shObject, const std::string&)>> callbacks_string;
+	IGame* mp_game = nullptr;
 
 	//should be specific for descendents
-	std::vector<char>		m_combo_list;
-	shObject						m_current_object;
-	std::vector<std::string> mesh_names;
-	std::vector<std::string> animation_names;
-	std::vector<std::string> frame_names;
-	std::vector<std::string> bone_names;
+	std::vector<char>					m_combo_list;
+	shObject									m_current_object;
+	std::vector<std::string>	mesh_names;
+	std::vector<std::string>	animation_names;
+	std::vector<std::string>	frame_names;
+	std::vector<std::string>	bone_names;
 	std::function<void(const std::string&)> console_callback;
 
 	float								window_pos_x;

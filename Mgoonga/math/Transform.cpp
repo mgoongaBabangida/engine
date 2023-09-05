@@ -30,9 +30,37 @@ void Transform::UpdateModelMatrix()
 	totalTransform = glm::translate(m_translation)* rotatM0* glm::scale(glm::vec3(m_scale.x, m_scale.y, m_scale.z));
 }
 
-glm::mat4 Transform::getModelMatrix() const
+const glm::mat4& Transform::getModelMatrix() const
 {
 	return totalTransform;
+}
+
+void Transform::setModelMatrix(const glm::mat4& _mat)
+{
+	totalTransform = _mat;
+	m_translation = { _mat[0][3],_mat[1][3], _mat[2][3] };
+	float s_x = glm::length(glm::vec3{ _mat[0][0],_mat[1][0], _mat[2][0] });
+	float s_y = glm::length(glm::vec3{ _mat[0][1],_mat[1][1], _mat[2][1] });
+	float s_z = glm::length(glm::vec3{ _mat[0][2],_mat[1][2], _mat[2][2] });
+	m_scale = { s_x, s_y , s_z };
+	glm::mat4 rotation;
+	rotation[0][0] = _mat[0][0] / s_x;
+	rotation[0][1] = _mat[0][1] / s_y;
+	rotation[0][2] = _mat[0][2] / s_z;
+	rotation[0][3] = 0;
+	rotation[1][0] = _mat[1][0] / s_x;
+	rotation[1][1] = _mat[1][1] / s_y;
+	rotation[1][2] = _mat[1][2] / s_z;
+	rotation[1][3] = 0;
+	rotation[2][0] = _mat[2][0] / s_x;
+	rotation[2][1] = _mat[2][1] / s_y;
+	rotation[2][2] = _mat[2][2] / s_z;
+	rotation[2][3] = 0;
+	rotation[3][0] = 0;
+	rotation[3][1] = 0;
+	rotation[3][2] = 0;
+	rotation[3][3] = 1;
+	q_rotation = glm::quat(rotation);
 }
 
 bool Transform::isRotationValid()

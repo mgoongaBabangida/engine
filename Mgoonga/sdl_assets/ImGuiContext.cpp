@@ -1,10 +1,6 @@
 #include "stdafx.h"
 #include "ImGuiContext.h"
 
-#include <SDL/include/SDL.h>
-#include <glew-2.1.0/include/GL/glew.h>
-#include <SDL/include/SDL_opengl.h>
-
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
 #include "imgui/imgui_impl_opengl3.h"
@@ -16,7 +12,6 @@
 #include <iostream>
 
 #include <base/base.h>
-#include <base/Object.h>
 #include <math/Rigger.h>
 #include <opengl_assets/Texture.h>
 
@@ -206,7 +201,7 @@ void eWindowImGuiDemo::Render()
 }
 
 eWindowImGui::eWindowImGui(const std::string & _name)
-  :name(_name)
+  : name(_name)
 {
 }
 
@@ -233,7 +228,7 @@ void eWindowImGui::Render()
   window_size_x = size.x;
   window_size_y = size.y;
   //ImGui::SetNextWindowPos(ImVec2{ window_pos_x , window_pos_y + window_size_y });
-  ImGui::SetWindowSize({ 400, 300 });
+  ImGui::SetWindowSize({ 400, 300 }); //@todo why this size?
 
   for (auto& item : lines)
   {
@@ -451,11 +446,14 @@ void eWindowImGui::Render()
         static const char* current_animation_item = NULL;
         static const char* current_frame_item = NULL;
         static const char* current_bone_item = NULL;
+        static const char* current_bone_child_item = NULL;
+        static const char* current_game_object_item = NULL;
+        static Rigger* g_rigger = nullptr;
 
         shObject* p_object = static_cast<shObject*>(std::get<2>(item));
         if (p_object && *p_object)
         {
-          if (*p_object != m_current_object)
+          if (*p_object != m_current_object || (*p_object)->GetRigger() != g_rigger)
           {
             m_current_object = *p_object;
 
@@ -482,6 +480,7 @@ void eWindowImGui::Render()
               current_frame_item = frame_names[0].c_str();
               bone_names = rigger->GetBoneNames();
               current_bone_item = bone_names[0].c_str();
+              g_rigger = rigger;
             }
           }
 
@@ -596,6 +595,31 @@ void eWindowImGui::Render()
               ImGui::EndCombo();
             }
 
+            // parrent bone
+            if (const Bone* parent = rigger->GetParent(current_bone_item); parent)
+              text = std::string("Parent bone: ") + parent->GetName().c_str();
+            else
+              text = std::string("Parent bone: none");
+            ImGui::Text(text.c_str());
+            // children bones
+            const auto& children = rigger->GetChildren(current_bone_item);
+            if (ImGui::BeginCombo("Children bones :", current_bone_child_item))
+            {
+              for (int n = 0; n < children.size(); ++n)
+              {
+                bool is_selected = (current_bone_child_item == children[n]->GetName().c_str());
+                if (ImGui::Selectable(children[n]->GetName().c_str(), is_selected))
+                {
+                  current_bone_child_item = children[n]->GetName().c_str();
+                }
+                if (is_selected)
+                {
+                  ImGui::SetItemDefaultFocus();
+                }
+              }
+              ImGui::EndCombo();
+            }
+
             boneMatrix = rigger->GetCurrentMatrixForBone(current_bone_item);
             if (is_show_active_bone)
               rigger->SetActiveBoneIndex(bone_current);
@@ -625,7 +649,7 @@ void eWindowImGui::Render()
             ImGui::Text(std::to_string(boneMatrix[3][2]).c_str()); ImGui::SameLine();
             ImGui::Text(std::to_string(boneMatrix[3][3]).c_str());
 
-            static glm::mat4 bindMatrix = rigger->GetBindMatrixForBone(current_bone_item);
+            /*static glm::mat4 bindMatrix = rigger->GetBindMatrixForBone(current_bone_item);
 
             ImGui::Text("Bone bind transform Matrix");
             ImGui::Text(std::to_string(bindMatrix[0][0]).c_str()); ImGui::SameLine();
@@ -646,7 +670,7 @@ void eWindowImGui::Render()
             ImGui::Text(std::to_string(bindMatrix[3][0]).c_str()); ImGui::SameLine();
             ImGui::Text(std::to_string(bindMatrix[3][1]).c_str()); ImGui::SameLine();
             ImGui::Text(std::to_string(bindMatrix[3][2]).c_str()); ImGui::SameLine();
-            ImGui::Text(std::to_string(bindMatrix[3][3]).c_str());
+            ImGui::Text(std::to_string(bindMatrix[3][3]).c_str());*/
 
             //Play animation
             if (ImGui::Button("Play current animations "))
@@ -664,6 +688,61 @@ void eWindowImGui::Render()
               obj->GetRigger()->Stop();
             }
           }
+
+          // Save Load Animations and Dynamic Collider
+          static std::string load_path(150, '\0');
+          if (ImGui::InputText("Load Animations from", &load_path[0], 100, ImGuiInputTextFlags_EnterReturnsTrue))
+          {
+
+          }
+          if (ImGui::Button("Load"))
+          {
+            if (auto it = callbacks_string.find("Load Rigger"); it != callbacks_string.end())
+              it->second(m_current_object, load_path);
+          }
+          static std::string save_path(150, '\0');
+          if (ImGui::InputText("Save Animations to", &save_path[0], 100, ImGuiInputTextFlags_EnterReturnsTrue))
+          {
+
+          }
+          if (ImGui::Button("Save"))
+          {
+            if (auto it = callbacks_string.find("Save Rigger"); it != callbacks_string.end())
+              it->second(m_current_object, save_path);
+          }
+
+          //Socket
+          ImGui::Text("Socket");
+          auto objects = mp_game->GetObjects();
+          if (ImGui::BeginCombo("Game Objects", current_game_object_item))
+          {
+            for (int n = 0; n < objects.size(); ++n)
+            {
+              bool is_selected = (current_game_object_item == objects[n]->Name().c_str());
+              if (ImGui::Selectable(objects[n]->Name().c_str(), is_selected))
+              {
+                current_game_object_item = objects[n]->Name().c_str();
+              }
+              if (is_selected)
+              {
+                ImGui::SetItemDefaultFocus();
+              }
+            }
+            ImGui::EndCombo();
+          }
+          if (ImGui::Button("Create Socket"))
+          {
+            if (current_game_object_item)
+            {
+              shObject child;
+              for (auto& obj : objects)
+              {
+                if (obj->Name() == current_game_object_item)
+                  child = obj;
+              }
+              m_current_object->GetRigger()->CreateSocket(child, current_bone_item);
+            }
+          }
         }
       }
       break;
@@ -679,6 +758,11 @@ void eWindowImGui::Render()
             obj->SetVisible(is_visible);
           }
         }
+      }
+      break;
+      case GAME :
+      {
+        mp_game = static_cast<IGame*>(std::get<2>(item));
       }
       break;
       case SHADER:
@@ -745,6 +829,12 @@ void eWindowImGui::Render()
           ImGui::SliderFloat("Gravity", &p_psystem->get()->Gravity(), 0.0f, 10.0f);
           ImGui::Checkbox("Loop", &p_psystem->get()->Loop());
         }
+      }
+      break;
+      case ADD_CALLBACK:
+      {
+        std::function<void(shObject, const std::string&)> callback = *(reinterpret_cast<std::function<void(shObject, const std::string&)>*>(std::get<2>(item)));
+        callbacks_string.insert({ std::get<0>(item), callback });
       }
       break;
     }

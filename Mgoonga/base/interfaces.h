@@ -179,28 +179,30 @@ class ITransform
 public:
 	virtual ~ITransform() = default;
 
-	virtual glm::mat4	getModelMatrix() const = 0;
-	virtual void			setRotation(float x, float y, float z) = 0;
-	virtual void			setRotation(glm::quat q) = 0;
-	virtual void			setTranslation(glm::vec3 tr) = 0;
-	virtual void			setScale(glm::vec3 sc) = 0;
-	virtual bool			isRotationValid() = 0;
+	virtual void	setRotation(float x, float y, float z) = 0;
+	virtual void	setRotation(glm::quat q) = 0;
+	virtual void	setTranslation(glm::vec3 tr) = 0;
+	virtual void	setScale(glm::vec3 sc) = 0;
+	virtual void	setUp(glm::vec3 _up) = 0;
+	virtual void	setForward(glm::vec3 _fwd) = 0;
+	virtual void	setModelMatrix(const glm::mat4&) = 0;
 
-	virtual glm::mat4	  getScale()			const = 0;
-  virtual glm::vec3   getScaleAsVector() const = 0;
-	virtual glm::vec3	  getTranslation()	const = 0;
-	virtual glm::vec3&	getTranslationRef() = 0;
-	virtual glm::quat	  getRotation()		const = 0;
-	virtual glm::vec4   getRotationVector() const = 0;
-	virtual glm::vec4		getRotationUpVector() const = 0;
-	virtual void				setForward(glm::vec3 _fwd) = 0;
-	virtual void				setUp(glm::vec3 _up) = 0;
-	virtual glm::vec3   getForward()		const = 0;
-	virtual glm::vec3   getUp()				const = 0;
-	virtual void		    incrementScale() = 0;
-	virtual void		    decrementScale() = 0;
-	virtual void		    billboard(glm::vec3 direction) = 0;
-	virtual bool		    turnTo(glm::vec3 dest, float speed) = 0;
+	virtual const glm::mat4&	getModelMatrix() const = 0;
+	virtual glm::mat4					getScale()			const = 0;
+  virtual glm::vec3					getScaleAsVector() const = 0;
+	virtual glm::vec3					getTranslation()	const = 0;
+	virtual glm::vec3&				getTranslationRef() = 0;
+	virtual glm::quat					getRotation()		const = 0;
+	virtual glm::vec4					getRotationVector() const = 0;
+	virtual glm::vec4					getRotationUpVector() const = 0;
+	virtual glm::vec3					getUp()				const = 0;
+	virtual glm::vec3					getForward()		const = 0;
+
+	virtual void		incrementScale() = 0;
+	virtual void		decrementScale() = 0;
+	virtual void		billboard(glm::vec3 direction) = 0;
+	virtual bool		turnTo(glm::vec3 dest, float speed) = 0;
+	virtual bool		isRotationValid() = 0;
 };
 
 //----------------------------------------------------------------------------------------------
@@ -240,20 +242,23 @@ class IRigger
 {
 public:
 	virtual ~IRigger() = default;
-	virtual bool													Apply(const std::string& _animation, bool _play_once)									= 0;
-  virtual bool													Apply(size_t _animation_index, bool _play_once)												= 0;
-	virtual void													Stop()																																= 0;
-	virtual bool													ChangeName(const std::string& _oldName, const std::string& _newName)	= 0;
-	virtual const std::vector<glm::mat4>&	GetMatrices()																													= 0;
-	virtual size_t												GetAnimationCount() const																							= 0;
-	virtual IAnimation*										GetCurrentAnimation() const																						= 0;
-	virtual std::vector<std::string>			GetAnimationNames() const																							= 0;
-	virtual const std::string&						GetCurrentAnimationName() const																				= 0;
-	virtual size_t												GetCurrentAnimationFrameIndex() const																	= 0;
-	virtual size_t												GetBoneCount() const																									= 0;
-	virtual std::vector<glm::mat4>				GetMatrices(const std::string& _animationName, size_t _frame)					= 0;
-	virtual const std::string&						GetPath() const																												= 0;
-	virtual void													SetPath(const std::string&)																						= 0;
+	virtual bool													Apply(const std::string& _animation, bool _play_once)																		= 0;
+  virtual bool													Apply(size_t _animation_index, bool _play_once)																					= 0;
+	virtual void													Stop()																																									= 0;
+	virtual bool													ChangeName(const std::string& _oldName, const std::string& _newName)										= 0;
+	virtual void													CreateSocket(const std::shared_ptr<eObject>& _socket_obj, const std::string& _boneName) = 0;
+	virtual std::vector<AnimationSocket>	GetSockets() const																																			= 0;
+
+	virtual const std::vector<glm::mat4>&	GetMatrices()																																						= 0;
+	virtual size_t												GetAnimationCount() const																																= 0;
+	virtual IAnimation*										GetCurrentAnimation() const																															= 0;
+	virtual std::vector<std::string>			GetAnimationNames() const																																= 0;
+	virtual const std::string&						GetCurrentAnimationName() const																													= 0;
+	virtual size_t												GetCurrentAnimationFrameIndex() const																										= 0;
+	virtual size_t												GetBoneCount() const																																		= 0;
+	virtual std::vector<glm::mat4>				GetMatrices(const std::string& _animationName, size_t _frame)														= 0;
+	virtual const std::string&						GetPath() const																																					= 0;
+	virtual void													SetPath(const std::string&)																															= 0;
 };
 
 //-----------------------------------------------------------------------------------------------

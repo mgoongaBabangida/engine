@@ -2,6 +2,8 @@
 #include "Rigger.h"
 #include "AnimatedModel.h"
 
+#include <base/Object.h>
+
 #include <algorithm>
 #include <thread>
 #include <mutex>
@@ -148,6 +150,27 @@ bool Rigger::ChangeName(const std::string & _oldName, const std::string & _newNa
 }
 
 //-------------------------------------------------------------------------------------------
+void Rigger::CreateSocket(const std::shared_ptr<eObject>& _socket_obj, const std::string& _boneName)
+{
+	AnimationSocket socket;
+	socket.m_socket_object = _socket_obj.get();
+	auto it = std::find_if(bones.begin(), bones.end(), [_boneName](const Bone& _bone) { return _bone.GetName() == _boneName; });
+	if (it != bones.end())
+	{
+		socket.m_bone_name = it->GetName();
+		socket.m_bone_id = it->GetID();
+		socket.m_pre_transform = _socket_obj.get()->GetTransform()->getModelMatrix();
+		m_sockets.push_back(std::move(socket));
+	}
+}
+
+//-------------------------------------------------------------------------------------------
+std::vector<AnimationSocket> Rigger::GetSockets() const
+{
+	return m_sockets;
+}
+
+//-------------------------------------------------------------------------------------------
 const std::vector<glm::mat4>& Rigger::GetMatrices()
 {
 	eRaii raii(this);
@@ -221,6 +244,35 @@ std::vector<std::string> Rigger::GetAnimationNames() const
 	for (auto& anim : animations)
 		names.push_back(anim.Name());
 	return names;
+}
+
+//-------------------------------------------------------------------------------------------
+const Bone* Rigger::GetParent(const std::string& _boneName)
+{
+	auto it = std::find_if(bones.begin(), bones.end(), [_boneName](const Bone& bone)
+		{
+			const auto& children = bone.GetChildren();
+			for (unsigned int i = 0; i < children.size(); ++i)
+			{
+				if (children[i]->GetName() == _boneName)
+					return true;
+			}
+			return false;
+		});
+	if (it != bones.end())
+		return &(*it);
+	else
+		return nullptr;
+}
+
+//-------------------------------------------------------------------------------------------
+const std::vector<Bone*> Rigger::GetChildren(const std::string& _boneName)
+{
+	auto it = std::find_if(bones.begin(), bones.end(), [_boneName](const Bone& bone) { return bone.GetName() == _boneName; });
+	if (it == bones.end())
+		return {};
+	else
+		return it->getChildren();
 }
 
 //-------------------------------------------------------------------------------------------

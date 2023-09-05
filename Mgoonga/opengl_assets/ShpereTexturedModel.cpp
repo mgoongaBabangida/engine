@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "ShpereTexturedModel.h"
 
 #include <glew-2.1.0\include\GL\glew.h>

@@ -23,9 +23,9 @@ public:
 	const glm::mat4&						getAnimatedTransform() const						{ return animatedTransform; }
 	glm::mat4										getInverseBindTransform()const					{ return inverseBindTransform; }
 
-	virtual size_t							GetID()const														{ return index; }
-	virtual const std::string&	GetName() const									{ return name; }
-	virtual bool								IsRealBone() const { return realBone; }
+	virtual size_t							GetID()const				{ return index; }
+	virtual const std::string&	GetName() const			{ return name; }
+	virtual bool								IsRealBone() const	{ return realBone; }
 
 	void												setMTransform(glm::mat4 trans) { mTransform = trans; }
 

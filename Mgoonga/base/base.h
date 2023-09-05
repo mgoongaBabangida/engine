@@ -60,8 +60,8 @@ struct Light
 	eLightType type = eLightType::POINT;
 	glm::vec4  light_position;
 	glm::vec3  light_direction;
-	glm::vec3  ambient = { 0.1f, 0.1f, 0.1f };
-	glm::vec3  diffuse = { 0.45f, 0.45f, 0.45f };
+	glm::vec3  ambient  = { 0.1f, 0.1f, 0.1f };
+	glm::vec3  diffuse  = { 0.45f, 0.45f, 0.45f };
 	glm::vec3  specular = { 0.45f, 0.45f, 0.45f };
 
 	float constant	= 1.0f;
@@ -104,9 +104,9 @@ constexpr glm::vec3 YAXIS		= glm::vec3(0.0f, 1.0f, 0.0f);
 constexpr glm::vec3 ZAXIS		= glm::vec3(0.0f, 0.0f, 1.0f);
 
 constexpr glm::mat4 UNIT_MATRIX = glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
-                                        0.0f, 1.0f, 0.0f, 0.0f,
-                                        0.0f, 0.0f, 1.0f, 0.0f,
-                                        0.0f, 0.0f, 0.0f, 1.0f);
+																						0.0f, 1.0f, 0.0f, 0.0f,
+																						0.0f, 0.0f, 1.0f, 0.0f,
+																						0.0f, 0.0f, 0.0f, 1.0f);
 
 constexpr int32_t MAX_BONES = 100;
 
@@ -172,6 +172,15 @@ struct Text
 	float pos_y;
 	float scale;
 	glm::mat4 mvp;
+};
+
+//--------------------------------------------------------
+struct AnimationSocket
+{
+	eObject* m_socket_object = nullptr;
+	std::string m_bone_name;
+	unsigned int m_bone_id;
+	glm::mat4 m_pre_transform;
 };
 
 //-------------------------------------------------------
