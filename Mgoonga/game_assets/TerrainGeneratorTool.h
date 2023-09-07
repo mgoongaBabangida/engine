@@ -53,6 +53,8 @@ protected:
   GLuint    m_seed = 1;
   float     m_height_scale = 7.0f;
   float     m_texture_scale[8];
+  float     m_max_height_coef = 1.0f;
+  float     m_min_height_coef = 0.0f;
 
   eMainContextBase* m_game = nullptr;
   eModelManager*    m_modelManager = nullptr;

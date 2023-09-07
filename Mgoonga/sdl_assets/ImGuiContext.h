@@ -59,7 +59,9 @@ enum TypeImGui
 	PARTICLE_SYSTEM,
 	SLIDER_INT,
 	ADD_CALLBACK,
-	GAME
+	GAME,
+	SLIDER_FLOAT_LARGE,
+	SLIDER_INT_NERROW
 };
 
 //--------------------------------------------------
@@ -92,9 +94,9 @@ public:
 	virtual void Render()	override;
 	virtual void Add(TypeImGui, const std::string& name, void*) override;
   
-	virtual bool OnMousePress(int32_t x, int32_t y, bool left) override;
-  virtual bool OnMouseMove(int32_t x, int32_t y) override;
-	virtual bool OnMouseWheel(int32_t x, int32_t y) override;
+	virtual bool OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier) override;
+  virtual bool OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier) override;
+	virtual bool OnMouseWheel(int32_t x, int32_t y, KeyModifiers _modifier) override;
 	virtual bool IsHovered() override;
 
 protected:
@@ -118,10 +120,12 @@ protected:
   float								window_pos_y;
   float								window_size_x;
   float								window_size_y;
+
 	float								viewport_offset_x;
 	float								viewport_offset_y;
 	float								window_offset_x;
 	float								window_offset_y;
+
 	float								cursor_x;
 	float								cursor_y;
 };
@@ -134,6 +138,9 @@ public:
 	eMainImGuiWindow();
 	virtual void Render()	override;
 	virtual void Add(TypeImGui, const std::string& name, void*) override;
+	virtual bool OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier) override;
+	virtual bool IsHovered() override;
+
 protected:
 	std::vector<eItem>	lines;
 	std::string open_file_menu_name;

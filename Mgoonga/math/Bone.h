@@ -56,9 +56,11 @@ protected:
 	size_t								index;
 	std::string						name;
 	std::vector<Bone*>		children;
+
 	glm::mat4							animatedTransform;
 	glm::mat4							localBindTransform;
 	glm::mat4							inverseBindTransform;
 	glm::mat4							mTransform = UNIT_MATRIX; //for empty nodes
+
 	bool									realBone = true;
 };

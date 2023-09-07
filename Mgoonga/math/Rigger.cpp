@@ -155,7 +155,7 @@ void Rigger::CreateSocket(const std::shared_ptr<eObject>& _socket_obj, const std
 	AnimationSocket socket;
 	socket.m_socket_object = _socket_obj.get();
 	auto it = std::find_if(bones.begin(), bones.end(), [_boneName](const Bone& _bone) { return _bone.GetName() == _boneName; });
-	if (it != bones.end())
+	if (it != bones.end() && _socket_obj.get())
 	{
 		socket.m_bone_name = it->GetName();
 		socket.m_bone_id = it->GetID();

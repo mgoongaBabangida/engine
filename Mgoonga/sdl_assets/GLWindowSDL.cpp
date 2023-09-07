@@ -19,6 +19,8 @@
 SDL_GLContext					context;
 ImVec2								viewport_offset;
 
+const unsigned int ENGINE_CONTROLS_SPACE_X = 575;
+const unsigned int ENGINE_CONTROLS_SPACE_Y = 125;
 
 //***************************************
 //dbGLWindowSDL::~dbGLWindowSDL
@@ -83,7 +85,7 @@ bool dbGLWindowSDL::InitializeGL()
 	SDL_DisplayMode current;
 	SDL_GetCurrentDisplayMode(0, &current);
 	
-	window	= SDL_CreateWindow("Mgoonga", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH+575, HEIGHT+150, //@todo
+	window	= SDL_CreateWindow("Mgoonga", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH + ENGINE_CONTROLS_SPACE_X, HEIGHT + ENGINE_CONTROLS_SPACE_Y,
 		SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL /*| SDL_WINDOW_RESIZABLE*/ | SDL_WINDOW_ALLOW_HIGHDPI);
 	
 	SDL_GL_SetSwapInterval(1); // Enable vsync
@@ -106,6 +108,8 @@ bool dbGLWindowSDL::InitializeGL()
 	eImGuiContext::GetInstance(&context, window).Init();
 
 	mainContext->InitializeGL();
+	ImGuizmo::AllowAxisFlip(false);
+
 	SDL_GL_MakeCurrent(window, NULL);
 
 	dTimer.reset(new math::Timer([this]()->bool
@@ -116,6 +120,7 @@ bool dbGLWindowSDL::InitializeGL()
 	dTimer->start(15); //~70 fps
 	return true;
 }
+
 //======================================
 //dbGLWindowSDL::Run
 //---------------------------------------
@@ -134,6 +139,15 @@ void dbGLWindowSDL::Run()
 			if (eImGuiContext::BlockEvents())
 				continue;
 
+			KeyModifiers mod = KeyModifiers::NONE;
+			SDL_Keymod state = SDL_GetModState();
+			if ((SDL_GetModState() & KMOD_SHIFT) && (SDL_GetModState() & KMOD_CTRL))
+				mod = KeyModifiers::CTRL_SHIFT;
+			else if ((SDL_GetModState() & KMOD_SHIFT))
+				mod = KeyModifiers::SHIFT;
+			else if ((SDL_GetModState() & KMOD_CTRL))
+				mod = KeyModifiers::CTRL;
+
       if (windowEvent.type == SDL_KEYDOWN && windowEvent.key.keysym.sym == SDLK_ESCAPE)
 			{
 				dTimer->stop();
@@ -142,31 +156,35 @@ void dbGLWindowSDL::Run()
 			}
 			else if(SDL_KEYDOWN == windowEvent.type)
 			{
-				if (!inputController.OnKeyPress(windowEvent.key.keysym.sym))
+				if (!inputController.OnKeyPress(windowEvent.key.keysym.sym, mod))
 					return;
 			}
 			else if(SDL_MOUSEBUTTONDOWN == windowEvent.type)
 			{
-				if(windowEvent.motion.x < viewport_offset.x || windowEvent.motion.y < viewport_offset.y || ImGuizmo::IsOver() || ImGuizmo::IsUsing())
+				if(windowEvent.motion.x < viewport_offset.x || windowEvent.motion.y < viewport_offset.y || ImGuizmo::IsUsing())
 					continue;
 				inputController.OnMousePress(windowEvent.motion.x - viewport_offset.x,
 																		 windowEvent.motion.y - viewport_offset.y,
-																		 windowEvent.button.button == SDL_BUTTON_LEFT);
+																		 windowEvent.button.button == SDL_BUTTON_LEFT,
+																		 mod);
 			}
 			else if(SDL_MOUSEBUTTONUP == windowEvent.type)
 			{
-				inputController.OnMouseRelease();
+				if (ImGuizmo::IsUsing())
+					continue;
+				inputController.OnMouseRelease(mod);
 			}
 			else if(SDL_MOUSEMOTION == windowEvent.type)
 			{
-				if (ImGuizmo::IsOver() || ImGuizmo::IsUsing())
+				if (ImGuizmo::IsUsing())
 					continue;
 				inputController.OnMouseMove(windowEvent.motion.x - viewport_offset.x,
-																		windowEvent.motion.y - viewport_offset.y);
+																		windowEvent.motion.y - viewport_offset.y,
+																		mod);
 			}
 			else if (SDL_MOUSEWHEEL == windowEvent.type)
 			{
-				inputController.OnMouseWheel(windowEvent.wheel.x, windowEvent.wheel.y);
+				inputController.OnMouseWheel(windowEvent.wheel.x, windowEvent.wheel.y, mod);
 			}
 		}
 	}
@@ -192,6 +210,7 @@ void dbGLWindowSDL::PaintGL()
 		flag = true;
 	}
 	eImGuiContext::GetInstance(&context, window).NewFrame();
+	ImGuizmo::BeginFrame();
 
 	SDL_ShowCursor(SDL_DISABLE);
 	ImGuiIO& io = ImGui::GetIO();
@@ -316,7 +335,8 @@ void dbGLWindowSDL::OnDockSpace()
 			}
 		}
 		ImGuizmo::SetRect(viewport_pos.x - window_x + border_x, viewport_pos.y - window_y + border_y, WIDTH, HEIGHT);
-		
+		//Guizmo end!
+
 		ImGui::End(); //Game
 
 	ImGui::End();

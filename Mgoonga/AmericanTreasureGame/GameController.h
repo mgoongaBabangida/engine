@@ -63,10 +63,10 @@ public:
   virtual void Initialize() override;
   virtual void Update(float _tick) override;
 
-  virtual bool OnKeyPress(uint32_t _asci);
-  virtual bool OnMouseMove(int32_t _x, int32_t _y) override;
-  virtual bool OnMousePress(int32_t x, int32_t y, bool left) override;
-  virtual bool OnMouseRelease() override;
+  virtual bool OnKeyPress(uint32_t _asci, KeyModifiers _modifier);
+  virtual bool OnMouseMove(int32_t _x, int32_t _y, KeyModifiers _modifier) override;
+  virtual bool OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier) override;
+  virtual bool OnMouseRelease(KeyModifiers _modifier) override;
 
 protected:
   void OnObjectPicked(std::shared_ptr<eObject> _picked);

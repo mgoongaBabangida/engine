@@ -62,7 +62,7 @@ size_t eMainContextBase::Height()  const { return height; }
 
 //*********************InputObserver*********************************
 //--------------------------------------------------------------------------
-bool eMainContextBase::OnKeyPress(uint32_t _asci)
+bool eMainContextBase::OnKeyPress(uint32_t _asci, KeyModifiers _modifier)
 {
 	switch (_asci)
 	{
@@ -74,19 +74,20 @@ bool eMainContextBase::OnKeyPress(uint32_t _asci)
 				m_gizmo_type = GizmoType::SCALE;
 			else if (m_gizmo_type == GizmoType::SCALE)
 				m_gizmo_type = GizmoType::TRANSLATE;
+			return true;
 		}
 		case ASCII_L:
 		{
 			m_l_pressed = true;
 			//pipeline.GetDefaultBufferTexture().saveToFile("PrintScreen.png");
+			return true;
 		}
-	return true;
 	default: return false;
 	}
 }
 
 //--------------------------------------------------------------------------
-bool eMainContextBase::OnMouseMove(int32_t x, int32_t y)
+bool eMainContextBase::OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier)
 {
 	if (m_update_hovered)
 	{
@@ -109,8 +110,11 @@ bool eMainContextBase::OnMouseMove(int32_t x, int32_t y)
 }
 
 //--------------------------------------------------------------------------
-bool eMainContextBase::OnMousePress(int32_t x, int32_t y, bool left)
+bool eMainContextBase::OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier)
 {
+	if (_modifier == KeyModifiers::SHIFT)
+		return true;
+
 	if (m_framed)
 		m_framed->clear();
 
@@ -135,7 +139,7 @@ bool eMainContextBase::OnMousePress(int32_t x, int32_t y, bool left)
 }
 
 //---------------------------------------------------------------------------------
-bool eMainContextBase::OnMouseRelease()
+bool eMainContextBase::OnMouseRelease(KeyModifiers _modifier)
 {
 	GetMainCamera().getCameraRay().release();
 	if (m_input_strategy)
@@ -650,7 +654,7 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[9]->Add(CONSOLE, "Console", reinterpret_cast<void*>(&console_plane_callbaack));
 
 	m_global_scripts.push_back(std::make_shared<ParticleSystemToolController>(externalGui[10], texManager.get(), soundManager.get(), pipeline));
-	//m_global_scripts.push_back(std::make_shared<TerrainGeneratorTool>(this, modelManager.get(), texManager.get(), pipeline, externalGui[11]));
+	m_global_scripts.push_back(std::make_shared<TerrainGeneratorTool>(this, modelManager.get(), texManager.get(), pipeline, externalGui[11]));
 }
 
 //------------------------------------------------------------

@@ -43,7 +43,7 @@ eShipScript::~eShipScript()
 }
 
 //------------------------------------------------------------------------------------
-bool eShipScript::OnKeyPress(uint32_t asci)
+bool eShipScript::OnKeyPress(uint32_t asci, KeyModifiers _modifier)
 {
 	if(asci == ASCII_G)
 	{
@@ -54,7 +54,7 @@ bool eShipScript::OnKeyPress(uint32_t asci)
 }
 
 //------------------------------------------------------------------------------------
-bool eShipScript::OnMousePress(int32_t x, int32_t y, bool left)
+bool eShipScript::OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier)
 {
 	if(m_game->GetFocusedObject().get() == this->object)
 	{

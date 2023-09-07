@@ -1,15 +1,16 @@
 #ifndef GUI_H
 #define GUI_H
 
+#include "opengl_assets.h"
+
 #include <base/interfaces.h>
 #include <base/Object.h>
 
 #include <math/Timer.h>
 #include <math/AnimationLeaner.h>
 #include <math/Rect.h>
-#include "Texture.h"
 
-#include "opengl_assets.h"
+#include "Texture.h"
 
 //---------------------------------------------------------------
 class DLL_OPENGL_ASSETS GUI : public IInputObserver
@@ -28,9 +29,9 @@ public:
 	GUI(const GUI&);
 	virtual ~GUI() {}
 
-	virtual bool	OnMousePress(int32_t x, int32_t y, bool left) override;
-	virtual bool	OnMouseRelease() override;
-	virtual bool	OnMouseMove(int32_t _x, int32_t _y)override;
+	virtual bool	OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier) override;
+	virtual bool	OnMouseRelease(KeyModifiers _modifier) override;
+	virtual bool	OnMouseMove(int32_t _x, int32_t _y, KeyModifiers _modifier)override;
 
 	virtual void UpdateSync();
 
@@ -147,7 +148,7 @@ public:
 	Cursor(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight)
 		: GUIWithAlpha(topleftX, topleftY, Width, Height, scWidth, scHeight) {}
 
-	virtual bool	OnMouseMove(int32_t x, int32_t y) override;
+	virtual bool	OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier) override;
 };
 
 //----------------------------------------------

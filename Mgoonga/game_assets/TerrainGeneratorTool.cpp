@@ -53,7 +53,8 @@ void TerrainGeneratorTool::Initialize()
 													 &Texture::GetTexture1x1(BLUE),
 													 &m_noise_texture,
 													 true,
-													 m_height_scale);
+													 m_height_scale,
+													 m_height_scale * m_max_height_coef);
 
 	//OBJECTS
 	ObjectFactoryBase factory;
@@ -115,12 +116,12 @@ void TerrainGeneratorTool::Initialize()
 	m_imgui->Add(TEXTURE, "Noise texture", (void*)m_noise_texture.id);
 	m_imgui->Add(SLIDER_INT, "Noise width", &m_width);
 	m_imgui->Add(SLIDER_INT, "Noise height", &m_height);
-	m_imgui->Add(SLIDER_FLOAT, "Scale", &m_scale);
-	m_imgui->Add(SLIDER_INT, "Octaves", &m_octaves);
+	m_imgui->Add(SLIDER_FLOAT_LARGE, "Scale", &m_scale);
+	m_imgui->Add(SLIDER_INT_NERROW, "Octaves", &m_octaves);
 	m_imgui->Add(SLIDER_FLOAT, "Persistance", &m_persistance);
 	m_imgui->Add(SLIDER_FLOAT, "Lacunarity", &m_lacunarity);
-	m_imgui->Add(SLIDER_FLOAT, "Offset X", &m_noise_offset[0]);
-	m_imgui->Add(SLIDER_FLOAT, "Offset Y", &m_noise_offset[1]);
+	m_imgui->Add(SLIDER_FLOAT_LARGE, "Offset X", &m_noise_offset[0]);
+	m_imgui->Add(SLIDER_FLOAT_LARGE, "Offset Y", &m_noise_offset[1]);
 	m_imgui->Add(SLIDER_INT, "Seed", &m_seed);
 	m_imgui->Add(SLIDER_FLOAT, "Height Scale", &m_height_scale);
 	m_imgui->Add(SLIDER_FLOAT, "Texture Scale 0", &m_texture_scale[0]);
@@ -148,6 +149,7 @@ void TerrainGeneratorTool::Update(float _tick)
 	static float last_persistance = m_persistance;
 	static float last_lacunarirty = m_lacunarity;
 	static glm::vec2 noise_offset = { 0.0f, 0.0f };
+	static GLuint octaves = 4;
 	static GLuint seed = 1;
 	static float last_height_scale = m_height_scale;
 
@@ -173,6 +175,7 @@ void TerrainGeneratorTool::Update(float _tick)
 			last_persistance								!= m_persistance ||
 			last_lacunarirty								!= m_lacunarity ||
 			noise_offset										!= m_noise_offset ||
+			octaves													!= m_octaves ||
 			seed														!= m_seed ||
 			last_height_scale								!= m_height_scale)
 	{
@@ -197,7 +200,8 @@ void TerrainGeneratorTool::Update(float _tick)
 																	&Texture::GetTexture1x1(BLUE),
 																	&m_noise_texture,
 																	true,
-																	m_height_scale);
+																	m_height_scale,
+																	m_height_scale * m_max_height_coef);
 
 		//update uniforms
 		m_pipeline.get().SetUniformData("class eMainRender", "max_height", m_height_scale);
@@ -208,6 +212,7 @@ void TerrainGeneratorTool::Update(float _tick)
 	last_persistance = m_persistance;
 	last_lacunarirty = m_lacunarity;
 	noise_offset = m_noise_offset;
+	octaves = m_octaves;
 	seed = m_seed;
 	last_height_scale = m_height_scale;
 	last_texture_scales0 = m_texture_scale[0];

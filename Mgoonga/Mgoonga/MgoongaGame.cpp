@@ -48,9 +48,9 @@ void eMgoongaGameContext::InitializeExternalGui()
 
 //*********************InputObserver*********************************
 //--------------------------------------------------------------------------
-bool eMgoongaGameContext::OnKeyPress(uint32_t asci)
+bool eMgoongaGameContext::OnKeyPress(uint32_t asci, KeyModifiers _modifier)
 {
-  if (eMainContextBase::OnKeyPress(asci))
+  if (eMainContextBase::OnKeyPress(asci, _modifier))
     return true;
 
   switch (asci)
@@ -74,9 +74,9 @@ bool eMgoongaGameContext::OnKeyPress(uint32_t asci)
 }
 
 //--------------------------------------------------------------------------
-bool eMgoongaGameContext::OnMousePress(int32_t x, int32_t y, bool left)
+bool eMgoongaGameContext::OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier)
 {
-  bool ret = eMainContextBase::OnMousePress(x,y,left);
+  bool ret = eMainContextBase::OnMousePress(x,y,left, _modifier);
 
   auto [new_focused, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
   if (new_focused != m_focused)

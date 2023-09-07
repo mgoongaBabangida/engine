@@ -45,7 +45,7 @@ GUI::GUI(const GUI& _other)
 }
 
 //-------------------------------------------------------
-bool GUI::OnMousePress(int32_t x, int32_t y, bool left)
+bool GUI::OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier)
 {
 	if(left && m_is_visible && isPressed(x, y))
 	{
@@ -58,7 +58,7 @@ bool GUI::OnMousePress(int32_t x, int32_t y, bool left)
 }
 
 //-------------------------------------------------------------
-bool GUI::OnMouseRelease()
+bool GUI::OnMouseRelease(KeyModifiers _modifier)
 {
 	if (m_is_pressed)
 	{
@@ -71,7 +71,7 @@ bool GUI::OnMouseRelease()
 }
 
 //-------------------------------------------------------
-bool GUI::OnMouseMove(int32_t _x, int32_t _y)
+bool GUI::OnMouseMove(int32_t _x, int32_t _y, KeyModifiers _modifier)
 {
 	if (m_is_pressed && m_take_mouse_moves && m_is_moveble2d)
 		Move({ _x - m_press_coords.first, _y - m_press_coords.second });
@@ -235,7 +235,7 @@ void GUIWithAlpha::UpdateSync()
 }
 
 //-------------------------------------------------------------
-bool Cursor::OnMouseMove(int32_t x, int32_t y)
+bool Cursor::OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier)
 {
 	Move({ x,y });
 	return false;

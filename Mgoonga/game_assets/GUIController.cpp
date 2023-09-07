@@ -75,7 +75,7 @@ void GUIController::Update(float _tick)
 }
 
 //----------------------------------------------------------------
-bool GUIController::OnMouseMove(int32_t _x, int32_t _y)
+bool GUIController::OnMouseMove(int32_t _x, int32_t _y, KeyModifiers _modifier)
 {
 	// it is probably safer to pass in relative coordinates
 	/*float curPosX = (float(_x) / m_game->Width());

@@ -144,7 +144,7 @@ void GameController::Initialize()
 }
 
 //--------------------------------------------------------------------------
-bool GameController::OnKeyPress(uint32_t _asci)
+bool GameController::OnKeyPress(uint32_t _asci, KeyModifiers _modifier)
 {
   switch (_asci)
   {
@@ -158,14 +158,14 @@ bool GameController::OnKeyPress(uint32_t _asci)
 }
 
 //----------------------------------------------------------------
-bool GameController::OnMouseMove(int32_t _x, int32_t _y)
+bool GameController::OnMouseMove(int32_t _x, int32_t _y, KeyModifiers _modifier)
 {
   m_cursor_pos = { _x , _y };
   return false;
 }
 
 //----------------------------------------------------------------
-bool GameController::OnMousePress(int32_t _x, int32_t _y, bool _left)
+bool GameController::OnMousePress(int32_t _x, int32_t _y, bool _left, KeyModifiers _modifier)
 {
   if (!_left) // right click
   {
@@ -276,11 +276,11 @@ bool GameController::OnMousePress(int32_t _x, int32_t _y, bool _left)
 }
 
 //----------------------------------------------------------------
-bool GameController::OnMouseRelease()
+bool GameController::OnMouseRelease(KeyModifiers _modifier)
 {
   if (m_game_state == GameState::SPANISH_TO_MOVE)
   {
-    for (int i = 0; i < m_ships.size(); i++)
+    for (int i = 0; i < m_ships.size(); ++i)
     {
       if (m_ships[i]->GetScriptObject() == m_game->GetFocusedObject().get()
         && m_ships[i]->GetDestination() != NONE)
@@ -292,7 +292,7 @@ bool GameController::OnMouseRelease()
   }
   else if (m_game_state == GameState::PIRATE_TO_MOVE)
   {
-    for (int i = 0; i < m_ships_pirate.size(); i++)
+    for (int i = 0; i < m_ships_pirate.size(); ++i)
     {
       if (m_ships_pirate[i]->GetScriptObject() == m_game->GetFocusedObject().get()
           && m_ships_pirate[i]->GetDestination() != NONE)

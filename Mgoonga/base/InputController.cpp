@@ -2,12 +2,12 @@
 #include "InputController.h"
 
 //------------------------------------------------------------------
-void eInputController::OnMouseMove(uint32_t x, uint32_t y)
+void eInputController::OnMouseMove(uint32_t x, uint32_t y, KeyModifiers _modifiers)
 {
 	bool taken = false;
 	for(auto& observer : observersPriority)
 	{
-		if(observer && observer->OnMouseMove(x, y))
+		if(observer && observer->OnMouseMove(x, y, _modifiers))
 		{
 			taken = true;
 			break;
@@ -19,26 +19,26 @@ void eInputController::OnMouseMove(uint32_t x, uint32_t y)
 		for(auto& observer : observers)
 		{
 			if (observer)
-				observer->OnMouseMove(x, y);
+				observer->OnMouseMove(x, y, _modifiers);
 		}
 	}
 
 	for (auto& observer : observersAlways)
 	{
 		if (observer)
-			observer->OnMouseMove(x, y);
+			observer->OnMouseMove(x, y, _modifiers);
 	}
 }
 
 //------------------------------------------------------------------
-bool eInputController::OnKeyPress(uint32_t asci)
+bool eInputController::OnKeyPress(uint32_t asci, KeyModifiers _modifier)
 {
 	bool taken = false;
 	for (auto& observer : observersPriority)
 	{
 		if (observer)
 		{
-			if(observer->OnKeyPress(asci))
+			if(observer->OnKeyPress(asci, _modifier))
 				return false;
 			taken = false; //do not take keyboard, only mouse ?
 			break;
@@ -50,7 +50,7 @@ bool eInputController::OnKeyPress(uint32_t asci)
 		for (auto& observer : observers)
 		{
       if (observer)
-        if (observer->OnKeyPress(asci))
+        if (observer->OnKeyPress(asci, _modifier))
           break;
 		}
 	}
@@ -58,7 +58,7 @@ bool eInputController::OnKeyPress(uint32_t asci)
 	for (auto& observer : observersAlways)
 	{
 		if (observer)
-			if (observer->OnKeyPress(asci))
+			if (observer->OnKeyPress(asci, _modifier))
 				break;
 	}
 
@@ -66,12 +66,12 @@ bool eInputController::OnKeyPress(uint32_t asci)
 }
 
 //----------------------------------------------------------------------
-void eInputController::OnMousePress(uint32_t x, uint32_t y, bool left)
+void eInputController::OnMousePress(uint32_t x, uint32_t y, bool left, KeyModifiers _modifier)
 {
 	bool taken = false;
 	for (auto& observer : observersPriority)
 	{
-		if (observer && observer->OnMousePress(x,y,left))
+		if (observer && observer->OnMousePress(x,y,left, _modifier))
 		{
 			taken = true;
 			break;
@@ -81,7 +81,7 @@ void eInputController::OnMousePress(uint32_t x, uint32_t y, bool left)
 	{
 		for (auto& observer : observers)
 		{
-			if (observer && observer->OnMousePress(x, y, left))
+			if (observer && observer->OnMousePress(x, y, left, _modifier))
 			{
 				taken = true;
 				break;
@@ -92,17 +92,17 @@ void eInputController::OnMousePress(uint32_t x, uint32_t y, bool left)
 	for (auto& observer : observersAlways)
 	{
 		if (observer)
-			observer->OnMousePress(x, y, left);
+			observer->OnMousePress(x, y, left, _modifier);
 	}
 }
 
 //----------------------------------------------------------------------
-void eInputController::OnMouseWheel(int32_t _x, int32_t _y)
+void eInputController::OnMouseWheel(int32_t _x, int32_t _y, KeyModifiers _modifier)
 {
 	bool taken = false;
 	for (auto& observer : observersPriority)
 	{
-		if (observer && observer->OnMouseWheel(_x, _y))
+		if (observer && observer->OnMouseWheel(_x, _y, _modifier))
 		{
 			taken = true;
 			break;
@@ -114,24 +114,24 @@ void eInputController::OnMouseWheel(int32_t _x, int32_t _y)
 		for (auto& observer : observers)
 		{
 			if (observer)
-				observer->OnMouseWheel(_x, _y);
+				observer->OnMouseWheel(_x, _y, _modifier);
 		}
 	}
 
 	for (auto& observer : observersAlways)
 	{
 		if (observer)
-			observer->OnMouseWheel(_x, _y);
+			observer->OnMouseWheel(_x, _y, _modifier);
 	}
 }
 
 //----------------------------------------------------------------------
-void eInputController::OnMouseRelease()
+void eInputController::OnMouseRelease(KeyModifiers _modifier)
 {
 	bool taken = false;
 	for (auto& observer : observersPriority)
 	{
-		if (observer && observer->OnMouseRelease())
+		if (observer && observer->OnMouseRelease(_modifier))
 		{
 			taken = true;
 			break;
@@ -143,14 +143,14 @@ void eInputController::OnMouseRelease()
 		for (auto& observer : observers)
 		{
 			if (observer)
-				observer->OnMouseRelease();
+				observer->OnMouseRelease(_modifier);
 		}
 	}
 
 	for (auto& observer : observersAlways)
 	{
 		if (observer)
-			observer->OnMouseRelease();
+			observer->OnMouseRelease(_modifier);
 	}
 }
 

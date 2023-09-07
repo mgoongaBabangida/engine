@@ -36,9 +36,9 @@ eSandBoxGame::eSandBoxGame(eInputController*  _input,
 
 //*********************InputObserver*********************************
 //------------------------------------------------------------------
-bool eSandBoxGame::OnKeyPress(uint32_t asci)
+bool eSandBoxGame::OnKeyPress(uint32_t asci, KeyModifiers _modifier)
 {
-	if (eMainContextBase::OnKeyPress(asci))
+	if (eMainContextBase::OnKeyPress(asci, _modifier))
 		return true;
 
 	switch (asci)
@@ -46,7 +46,7 @@ bool eSandBoxGame::OnKeyPress(uint32_t asci)
 	case ASCII_G:
 	{
 		if (m_focused != nullptr && m_focused->GetScript())
-			m_focused->GetScript()->OnKeyPress(ASCII_G); // change -> subscribe directly
+			m_focused->GetScript()->OnKeyPress(ASCII_G, _modifier); // change -> subscribe directly
 	}
 	return true;
 	default: return false;
@@ -54,18 +54,19 @@ bool eSandBoxGame::OnKeyPress(uint32_t asci)
 }
 
 //------------------------------------------------------------------
-bool eSandBoxGame::OnMousePress(int32_t x, int32_t y, bool left)
+bool eSandBoxGame::OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier)
 {
-	bool ret = eMainContextBase::OnMousePress(x, y, left);
-
-	auto [new_focused, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
-	if (new_focused != m_focused)
+	if (bool ret = eMainContextBase::OnMousePress(x, y, left, _modifier); !ret)
 	{
-		FocusChanged.Occur(m_focused, new_focused);
-		m_focused = new_focused;
-		return true;
+		auto [new_focused, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
+		if (new_focused != m_focused)
+		{
+			FocusChanged.Occur(m_focused, new_focused);
+			m_focused = new_focused;
+			return true;
+		}
+		return ret;
 	}
-	return ret;
 }
 
 //*********************Initialize**************************************

@@ -210,6 +210,15 @@ enum ASCII
 };
 
 //-------------------------------------------------------
+enum class KeyModifiers : uint32_t
+{
+	NONE = 0,
+	SHIFT = 1,
+	CTRL = 2,
+	CTRL_SHIFT = 3
+};
+
+//-------------------------------------------------------
 struct eThreeFloat
 {
 	std::array<float, 3> data = { 0.f, 0.f, 0.f };

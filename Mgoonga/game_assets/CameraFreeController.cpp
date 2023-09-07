@@ -20,14 +20,14 @@ void	CameraFreeController::Update(float _tick)
 }
 
 //-----------------------------------------------------------
-bool CameraFreeController::OnMouseMove(int32_t _x, int32_t _y)
+bool CameraFreeController::OnMouseMove(int32_t _x, int32_t _y, KeyModifiers _modifiers)
 {
 	m_camera.get().mouseUpdate(glm::vec2(_x, _y));
 	return true;
 }
 
 //-----------------------------------------------------------
-bool CameraFreeController::OnKeyPress(uint32_t _asci)
+bool CameraFreeController::OnKeyPress(uint32_t _asci, KeyModifiers _modifier)
 {
 	switch (_asci)
 	{
@@ -43,7 +43,7 @@ bool CameraFreeController::OnKeyPress(uint32_t _asci)
 }
 
 //-----------------------------------------------------------
-bool CameraFreeController::OnMouseWheel(int32_t _x, int32_t _y)
+bool CameraFreeController::OnMouseWheel(int32_t _x, int32_t _y, KeyModifiers _modifier)
 {
 	if(_y > 0)
 		m_camera.get().moveForward();

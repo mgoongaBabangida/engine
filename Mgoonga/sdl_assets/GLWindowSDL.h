@@ -29,6 +29,8 @@ public:
 	void		OnDockSpace();
 
 protected:
+	void										PaintGL(); //update? tick?
+
 	std::unique_ptr<math::Timer>		dTimer;
 	std::vector<IWindowImGui*>			guiWnd;
 	eInputController								inputController;
@@ -41,8 +43,6 @@ protected:
 
   bool                    running = true;
   std::function<void()>		on_close;
-
-	void										PaintGL(); //update? tick?
 };
 
 //----------------------------------------------------------------------

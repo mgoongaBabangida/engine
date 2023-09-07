@@ -17,12 +17,12 @@ class IInputObserver
 {
 public:
 	virtual ~IInputObserver() = default;
-	virtual bool OnKeyPress(uint32_t asci) { return false; }
 
-	virtual bool OnMouseMove(int32_t x, int32_t y)				{ return false; }
-	virtual bool OnMousePress(int32_t x, int32_t y, bool left)	{ return false; }
-	virtual bool OnMouseRelease()									{ return false; }
-	virtual bool OnMouseWheel(int32_t x, int32_t y) { return false; }
+	virtual bool OnKeyPress(uint32_t asci, KeyModifiers _modifier)											{ return false; }
+	virtual bool OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier)							{ return false; }
+	virtual bool OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier)	{ return false; }
+	virtual bool OnMouseRelease(KeyModifiers _modifier)																	{ return false; }
+	virtual bool OnMouseWheel(int32_t x, int32_t y, KeyModifiers _modifier)							{ return false; }
 };
 
 //----------------------------------------------------------------------------------------------
@@ -43,14 +43,14 @@ public:
 	virtual bool								            IsStarted()			= 0;
 	virtual void								            Reset()					= 0;
 
-	virtual float& ConeAngle() = 0;
-	virtual glm::vec3& Scale()	= 0;
-	virtual float& Speed() = 0;
-	virtual float& BaseRadius() = 0;
-	virtual float& LifeLength() = 0;
-	virtual int& ParticlesPerSecond() = 0;
-	virtual bool& Loop() = 0;
-	virtual float& Gravity() = 0;
+	virtual float&			ConeAngle() = 0;
+	virtual glm::vec3&	Scale()	= 0;
+	virtual float&			Speed() = 0;
+	virtual float&			BaseRadius() = 0;
+	virtual float&			LifeLength() = 0;
+	virtual int&				ParticlesPerSecond() = 0;
+	virtual bool&				Loop() = 0;
+	virtual float&			Gravity() = 0;
 
 	//@todo improve
 	const Texture*					GetTexture() const	{ return texture; }

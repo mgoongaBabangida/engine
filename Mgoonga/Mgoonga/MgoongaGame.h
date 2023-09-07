@@ -28,8 +28,8 @@ public:
 
 	virtual void			PaintGL()										    override;
 
-	virtual bool			OnKeyPress(uint32_t asci)						          override;
-	virtual bool			OnMousePress(int32_t x, int32_t y, bool left) override;
+	virtual bool			OnKeyPress(uint32_t asci, KeyModifiers _modifier)	override;
+	virtual bool			OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier) override;
 
   void OnFocusedChanged();
   void _InitializeHexes();

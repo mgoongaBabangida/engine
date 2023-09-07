@@ -4,6 +4,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
 #include "imgui/imgui_impl_opengl3.h"
+#include "imgui/imgui_internal.h"
 
 #include "ImGuiFileBrowser.h"
 
@@ -234,10 +235,35 @@ void eWindowImGui::Render()
   {
     switch (std::get<1>(item))
     {
-      case SLIDER_FLOAT: ImGui::SliderFloat(std::get<0>(item).c_str(), static_cast<float*>(std::get<2>(item)), -10.0f, 10.0f); break; // -10 10 @todo
-      case SLIDER_INT:   ImGui::SliderInt(std::get<0>(item).c_str(), static_cast<int*>(std::get<2>(item)), 0, 3200); break; //@todo
-      case TEXT:         ImGui::Text(std::get<0>(item).c_str()); break;
-      case CHECKBOX:     ImGui::Checkbox(std::get<0>(item).c_str(), static_cast<bool*>(std::get<2>(item))); break;
+      case SLIDER_FLOAT:
+      {
+        float* f = static_cast<float*>(std::get<2>(item));
+        ImGui::SliderFloat(std::get<0>(item).c_str(), f, -10.0f, 10.0f); // -10 10 @todo
+
+        ImGui::SetItemKeyOwner(ImGuiKey_MouseWheelY);
+        if (ImGui::IsItemHovered())
+        {
+          float wheel = ImGui::GetIO().MouseWheel;
+          if (wheel)
+          {
+            if (ImGui::IsItemActive())
+            {
+              ImGui::ClearActiveID();
+            }
+            else
+            {
+              *f += wheel;
+            }
+          }
+        }
+
+      } break;
+
+      case SLIDER_FLOAT_LARGE:  ImGui::SliderFloat(std::get<0>(item).c_str(), static_cast<float*>(std::get<2>(item)), -250.0f, 250.0f); break;
+      case SLIDER_INT:          ImGui::SliderInt(std::get<0>(item).c_str(), static_cast<int*>(std::get<2>(item)), 0, 1024); break; //@todo
+      case SLIDER_INT_NERROW:   ImGui::SliderInt(std::get<0>(item).c_str(), static_cast<int*>(std::get<2>(item)), 0, 20); break;
+      case TEXT:                ImGui::Text(std::get<0>(item).c_str()); break;
+      case CHECKBOX:            ImGui::Checkbox(std::get<0>(item).c_str(), static_cast<bool*>(std::get<2>(item))); break;
       case TEXTURE:
       {
         ImGui::Text(std::get<0>(item).c_str());
@@ -861,7 +887,7 @@ void eWindowImGui::Add(TypeImGui _type, const std::string & _name, void* _data)
 }
 
 //---------------------------------------------------------------------
-bool eWindowImGui::OnMousePress(int32_t x, int32_t y, bool left)
+bool eWindowImGui::OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier)
 {
   float global_pos_x = x + viewport_offset_x + window_offset_x;
   float global_pos_y = y + viewport_offset_y + window_offset_y;
@@ -878,7 +904,7 @@ bool eWindowImGui::OnMousePress(int32_t x, int32_t y, bool left)
 }
 
 //---------------------------------------------------------------------
-bool eWindowImGui::OnMouseMove(int32_t _x, int32_t _y)
+bool eWindowImGui::OnMouseMove(int32_t _x, int32_t _y, KeyModifiers _modifier)
 {
   cursor_x = _x;
   cursor_y = _y;
@@ -889,7 +915,7 @@ bool eWindowImGui::OnMouseMove(int32_t _x, int32_t _y)
 }
 
 //-----------------------------------------------------------------
-bool eWindowImGui::OnMouseWheel(int32_t _x, int32_t _y)
+bool eWindowImGui::OnMouseWheel(int32_t _x, int32_t _y, KeyModifiers _modifier)
 {
   if (IsHovered())
     return true;
@@ -1045,4 +1071,26 @@ void eMainImGuiWindow::Add(TypeImGui _type, const std::string& _name, void* _dat
     lines.push_back(eItem(_name, _type, _data));
   else
     std::get<2>(*it) = _data;
+}
+
+//-------------------------------------------------------------------
+bool eMainImGuiWindow::OnMouseMove(int32_t _x, int32_t _y, KeyModifiers _modifier)
+{
+  cursor_x = _x;
+  cursor_y = _y;
+  if (IsHovered())
+    return true;
+  else
+    return false;
+}
+
+//-------------------------------------------------------------------
+bool eMainImGuiWindow::IsHovered()
+{
+  float global_pos_x = cursor_x + viewport_offset_x + window_offset_x;
+  float global_pos_y = cursor_y + viewport_offset_y + window_offset_y;
+  return global_pos_x > window_pos_x &&
+    global_pos_y > window_pos_y &&
+    global_pos_x < (window_pos_x + window_size_x) &&
+    global_pos_y < (window_pos_y + window_size_y + 20);
 }

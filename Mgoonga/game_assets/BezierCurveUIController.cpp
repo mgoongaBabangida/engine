@@ -84,7 +84,7 @@ void BezierCurveUIController::Update(float _tick)
 }
 
 //------------------------------------------------------
-bool BezierCurveUIController::OnMouseMove(int32_t _x, int32_t _y)
+bool BezierCurveUIController::OnMouseMove(int32_t _x, int32_t _y, KeyModifiers _modifiers)
 {
   m_cursor_x = (float)_x;
   m_cursor_y = (float)(m_game->Height() - _y);

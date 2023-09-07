@@ -26,7 +26,7 @@ public:
   Event<std::function<void(shObject)>> ToolFinished;
 
   virtual void	Update(float _tick) override;
-  virtual bool	OnMouseMove(int32_t x, int32_t y) override;
+  virtual bool	OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifiers) override;
 
 protected:
   eMainContextBase* m_game = nullptr;

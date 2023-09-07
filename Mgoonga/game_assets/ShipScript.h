@@ -30,8 +30,8 @@ public:
 	eShipScript(const eShipScript&)				= delete;
 	eShipScript& operator=(const eShipScript&)	= delete;
 
-	virtual bool	OnKeyPress(uint32_t asci)							override;
-	virtual bool	OnMousePress(int32_t x, int32_t y, bool left)		override;
+	virtual bool	OnKeyPress(uint32_t asci, KeyModifiers _modifier)												override;
+	virtual bool	OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier)		override;
 
 	virtual void	Update(float _tick) override;
 

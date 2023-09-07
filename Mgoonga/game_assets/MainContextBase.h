@@ -49,16 +49,16 @@ public:
 
 	virtual ~eMainContextBase();
 
-	Event<std::function<void(shObject)>>						ObjectPicked;
-	Event<std::function<void(shObject, shObject)>>	FocusChanged;
-	Event<std::function<void(shObject)>>						ObjectBeingAddedToScene;
-	Event<std::function<void(shObject)>>						ObjectBeingDeletedFromScene;
+	Event<std::function<void(shObject)>>											ObjectPicked;
+	Event<std::function<void(shObject _new, shObject _old)>>	FocusChanged;
+	Event<std::function<void(shObject)>>											ObjectBeingAddedToScene;
+	Event<std::function<void(shObject)>>											ObjectBeingDeletedFromScene;
 
 	//IInputObserver
-	virtual bool	OnKeyPress(uint32_t asci)					override;
-	virtual bool	OnMouseMove(int32_t x, int32_t y) override;
-	virtual bool	OnMousePress(int32_t x, int32_t y, bool left) override;
-	virtual bool	OnMouseRelease() override;
+	virtual bool	OnKeyPress(uint32_t asci, KeyModifiers _modifier)	override;
+	virtual bool	OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier) override;
+	virtual bool	OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier) override;
+	virtual bool	OnMouseRelease(KeyModifiers _modifier) override;
 
 	//IGame
 	void			InitializeGL() final;
