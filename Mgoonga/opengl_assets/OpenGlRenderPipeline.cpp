@@ -485,7 +485,8 @@ void eOpenGlRenderPipeline::RenderParticles(const Camera& _camera)
 	glDepthMask(GL_FALSE);
 	glCullFace(GL_TRUE);
 	renderManager->ParticleRender()->Render(_camera);
-	renderManager->ParticleRenderGPU()->Render(_camera);
+	if(renderManager->ParticleRenderGPU())
+		renderManager->ParticleRenderGPU()->Render(_camera);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_BLEND);
 	glDepthMask(GL_TRUE);
@@ -635,8 +636,8 @@ void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 	glBindTexture(GL_TEXTURE_2D, renderManager->IBLRender()->GetLUTTextureID());
 
 	glViewport(0, 0, width, height);
-	/*static Texture skybox = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP_IRR);
-	renderManager->SkyBoxRender()->SetSkyBoxTexture(&skybox);*/
+	/*static Texture skybox = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP_IRR);*/
+	//renderManager->SkyBoxRender()->SetSkyBoxTexture(&m_prefilter);
 	glEnable(GL_CULL_FACE);
 }
 

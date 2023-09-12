@@ -11,6 +11,7 @@
 #include <opengl_assets/RenderManager.h>
 #include <opengl_assets/TextureManager.h>
 #include <opengl_assets/SoundManager.h>
+
 #include <game_assets/ModelManagerYAML.h>
 #include <game_assets/AnimationManagerYAML.h>
 #include <game_assets/CameraFreeController.h>
@@ -27,86 +28,23 @@ eMgoongaGameContext::eMgoongaGameContext(eInputController*  _input,
 						                             const std::string& _assetsPath, 
 						                             const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
-{
-  FocusChanged.Subscribe([this](shObject _prev, shObject _new)->void { this->OnFocusedChanged(); });
-  
-  if (!m_objects.empty())
-  {
-    m_focused = m_objects[0];
-    FocusChanged.Occur(shObject{}, m_focused);
-  }
+{ 
+  ObjectPicked.Subscribe([this](shObject _new_focused)
+    {
+      if (_new_focused != m_focused)
+      {
+        FocusChanged.Occur(m_focused, _new_focused);
+        m_focused = _new_focused;
+        return true;
+      }
+    });
 }
 
 //--------------------------------------------------------------------------
 eMgoongaGameContext::~eMgoongaGameContext() {}
 
-//--------------------------------------------------------------------------
-void eMgoongaGameContext::InitializeExternalGui()
-{
-  eMainContextBase::InitializeExternalGui();
-}
-
-//*********************InputObserver*********************************
-//--------------------------------------------------------------------------
-bool eMgoongaGameContext::OnKeyPress(uint32_t asci, KeyModifiers _modifier)
-{
-  if (eMainContextBase::OnKeyPress(asci, _modifier))
-    return true;
-
-  switch (asci)
-  {
-     case ASCII_J: { if (m_focused)	m_focused->GetRigidBody()->MoveLeft(m_objects); }				return true;
-     case ASCII_L: { if (m_focused)	m_focused->GetRigidBody()->MoveRight(m_objects); }				return true;
-     case ASCII_K: { if (m_focused)	m_focused->GetRigidBody()->MoveBack(m_objects); }				return true;
-     case ASCII_I: { if (m_focused)	m_focused->GetRigidBody()->MoveForward(m_objects); }				return true;
-     case ASCII_Z: { if (m_focused)	m_focused->GetRigidBody()->MoveUp(m_objects); }					return true;
-     case ASCII_X: { if (m_focused)	m_focused->GetRigidBody()->MoveDown(m_objects); }				return true;
-     case ASCII_C: { if (m_focused)	m_focused->GetRigidBody()->TurnRight(m_objects); }				return true;
-     case ASCII_V: { if (m_focused)	m_focused->GetRigidBody()->TurnLeft(m_objects); }				return true;
-     case ASCII_B: { if (m_focused)	m_focused->GetRigidBody()->LeanRight(m_objects); }				return true;
-     case ASCII_N: { if (m_focused)	m_focused->GetRigidBody()->LeanLeft(m_objects); }				return true;
-     case ASCII_U: { if (m_focused)	m_focused->GetRigidBody()->LeanForward(m_objects); }				return true;
-     case ASCII_H: { if (m_focused)	m_focused->GetRigidBody()->LeanBack(m_objects); }				return true;
-     case 27: {} return false; //ESC @todo
-     //case ASCII_G:	{ if (m_focused)	m_focused->GetScript()->OnKeyPress(ASCII_G);}	return true;
-     default: return false;
-  }
-}
-
-//--------------------------------------------------------------------------
-bool eMgoongaGameContext::OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier)
-{
-  bool ret = eMainContextBase::OnMousePress(x,y,left, _modifier);
-
-  auto [new_focused, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
-  if (new_focused != m_focused)
-  {
-    FocusChanged.Occur(m_focused, new_focused);
-    m_focused = new_focused;
-    return true;
-  }
-	return ret;
-}
-
-//------------------------------------------------------------------------------
-void eMgoongaGameContext::OnFocusedChanged()
-{
-}
 
 //*********************Initialize**************************************
-//-------------------------------------------------------------------------------
-void eMgoongaGameContext::InitializeSounds()
-{
-	//sound->loadListner(GetMainCamera().getPosition().x, GetMainCamera().getPosition().y, GetMainCamera().getPosition().z); //!!!
-}
-
-//-------------------------------------------------------------------------------
-void eMgoongaGameContext::InitializePipline()
-{
-	pipeline.Initialize();
-	// call all the enable pipeline functions
-}
-
 //-----------------------------------------------------------------------------
 void eMgoongaGameContext::InitializeBuffers()
 {
@@ -120,15 +58,9 @@ void eMgoongaGameContext::InitializeModels()
 	eMainContextBase::InitializeModels();
 
 	//MODELS
-	modelManager->Add("nanosuit", (GLchar*)std::string(modelFolderPath + "nanosuit/nanosuit.obj").c_str());
-	modelManager->Add("boat", (GLchar*)std::string(modelFolderPath + "Medieval Boat/Medieval Boat.obj").c_str());
-	modelManager->Add("wolf", (GLchar*)std::string(modelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
-	modelManager->Add("guard", (GLchar*)std::string(modelFolderPath + "ogldev-master/Content/guard/boblampclean.md5mesh").c_str(), true);
-  modelManager->Add("zombie", (GLchar*)std::string(modelFolderPath + "Thriller Part 3/Thriller Part 3.dae").c_str());
   //modelManager->Add("vampire", (GLchar*)std::string(modelFolderPath + "vampire/dancing_vampire.dae").c_str());
 
-  modelManager->Add("Dying", (GLchar*)std::string(modelFolderPath + "Dying Soldier/Dying.dae").c_str());
-
+  //MATERIALS
   Material pbr1;
   pbr1.albedo_texture_id = texManager->Find("pbr1_basecolor")->id;
   pbr1.metalic_texture_id = texManager->Find("pbr1_metallic")->id;
@@ -159,8 +91,10 @@ void eMgoongaGameContext::InitializeModels()
   _InitMainTestSceane();
   _InitializeHexes();
 
+  //INPUT STRATEGY
   m_input_strategy.reset(new InputStrategyMoveAlongXZPlane(GetMainCamera(), GetObjectsWithChildren(m_objects)));
 
+  //GUI
   const Texture* tex = texManager->Find("TButton_red");
   const Texture* flag = texManager->Find("TSpanishFlag0_s");
   glm::ivec2 topLeft{ 160, 450 };
@@ -188,6 +122,7 @@ void eMgoongaGameContext::InitializeModels()
   m_guis[2]->SetTakeMouseEvents(true);
   m_guis[2]->SetMovable2D(true);
 
+  //INPUT CONTROLLER
   m_input_controller->AddObserver(this, WEAK);
   m_input_controller->AddObserver(m_guis[0].get(), MONOPOLY);//monopoly takes only mouse
   m_input_controller->AddObserver(m_guis[1].get(), WEAK);
@@ -197,22 +132,6 @@ void eMgoongaGameContext::InitializeModels()
   m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera()));
 
   m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
-}
-
-//-------------------------------------------------------------------------
-void eMgoongaGameContext::InitializeRenders()
-{
-  eMainContextBase::InitializeRenders();
-	/*pipeline.GetRenderManager().AddParticleSystem(new ParticleSystem(10, 0, 0, 10000, glm::vec3(0.0f, 4.0f, -0.5f),
-                                                                   texManager->Find("Tatlas2"),
-                                                                   soundManager->GetSound("shot_sound"),
-                                                                   texManager->Find("Tatlas2")->numberofRows));*/
-}
-
-//-------------------------------------------------------------------------------
-void eMgoongaGameContext::PaintGL()
-{
-	eMainContextBase::PaintGL();
 }
 
 //-------------------------------------------------------------------------------------------
@@ -263,11 +182,11 @@ void eMgoongaGameContext::_InitMainTestSceane()
   grassPlane->GetTransform()->setTranslation(vec3(0.0f, 1.2f, 0.0f));
   m_objects.push_back(grassPlane);
 
-  shObject terrain = factory.CreateObject(std::shared_ptr<IModel>(terrainModel.release()), eObject::RenderType::PHONG, "Terrain");
+  /*shObject terrain = factory.CreateObject(std::shared_ptr<IModel>(terrainModel.release()), eObject::RenderType::PHONG, "Terrain");
   terrain->SetName("Terrain");
   terrain->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
   terrain->GetTransform()->setTranslation(vec3(0.0f, 1.8f, 0.0f));
-  m_objects.push_back(terrain);
+  m_objects.push_back(terrain);*/
 
   shObject nanosuit = factory.CreateObject(modelManager->Find("nanosuit"), eObject::RenderType::PHONG, "Nanosuit");
   nanosuit->GetTransform()->setTranslation(vec3(0.0f, 2.0f, 0.0f));
@@ -328,11 +247,4 @@ void eMgoongaGameContext::_InitMainTestSceane()
   shObject goldsphere = factory.CreateObject(modelManager->Find("sphere_gold"), eObject::RenderType::PBR, "SpherePBRGold");
   goldsphere->GetTransform()->setTranslation(vec3(-7.0f, 3.5f, 2.0f));
   m_objects.push_back(goldsphere);
-
-  shObject dying = factory.CreateObject(modelManager->Find("Dying"), eObject::RenderType::PHONG, "Dying");
-  dying->GetTransform()->setTranslation(vec3(1.0f, 2.0f, -2.0f));
-  dying->GetTransform()->setScale(vec3(0.01f, 0.01f, 0.01f));
-  dying->SetRigger(new Rigger((Model*)modelManager->Find("Dying").get())); //@todo improve
-  dying->GetRigger()->ChangeName(std::string(), "Dying");//@todo improve
-  m_objects.push_back(dying);
 }

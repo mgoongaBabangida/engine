@@ -10,6 +10,7 @@
 #include "BezierCurveUIController.h"
 
 #include <base/InputController.h>
+
 #include <tcp_lib/Network.h>
 #include <tcp_lib/Server.h>
 #include <tcp_lib/Client.h>
@@ -26,6 +27,7 @@
 
 #include <thread>
 #include <sstream>
+#include <fstream>
 
 //-----------------------------------------------------------------
 eMainContextBase::eMainContextBase(eInputController* _input,
@@ -387,11 +389,62 @@ glm::vec3 eMainContextBase::GetMainCameraDirection() const
 void eMainContextBase::InitializePipline()
 {
 	pipeline.Initialize();
+
+	std::ifstream infile("pipeline.ini");
+	if (infile.is_open())
+	{
+		std::stringstream sstream;
+		std::copy(std::istreambuf_iterator<char>(infile),
+			std::istreambuf_iterator<char>(),
+			std::ostreambuf_iterator<char>(sstream));
+
+		std::string name, value, end;
+		while (!sstream.eof())
+		{
+			sstream >> name;
+			sstream >> value;
+			sstream >> end;
+
+			if (name == "SwitchSkyBox")
+				value == "true" ? pipeline.SwitchSkyBox(true) : pipeline.SwitchSkyBox(false);
+			else if (name == "SwitchWater")
+				value == "true" ? pipeline.SwitchWater(true) : pipeline.SwitchWater(false);
+			else if (name == "SkyNoiseOn")
+				value == "true" ? pipeline.GetSkyNoiseOnRef() = true : pipeline.GetSkyNoiseOnRef() = false;
+			else if (name == "KernelOn")
+				value == "true" ? pipeline.GetKernelOnRef() = true : pipeline.GetKernelOnRef() = false;
+			else if (name == "UseGuizmo")
+				value == "true" ? m_use_guizmo = true : m_use_guizmo = false;
+		}
+	}
 }
 
 //--------------------------------------------------------------------------------
 void eMainContextBase::InitializeModels()
 {
+	std::ifstream infile("models.ini");
+	if (infile.is_open())
+	{
+		std::stringstream sstream;
+		std::copy(std::istreambuf_iterator<char>(infile),
+			std::istreambuf_iterator<char>(),
+			std::ostreambuf_iterator<char>(sstream));
+
+		std::string file_name, name, end;
+		while (!sstream.eof())
+		{
+			sstream >> file_name;
+			sstream >> name;
+			sstream >> end;
+			if (end == "true")
+			{
+				modelManager->Add(name, (GLchar*)std::string(modelFolderPath + file_name).c_str(), true);
+				sstream >> end;
+			}
+			else
+				modelManager->Add(name, (GLchar*)std::string(modelFolderPath + file_name).c_str());
+		}
+	}
 }
 
 //--------------------------------------------------------------------------------
@@ -406,7 +459,7 @@ void eMainContextBase::InitializeRenders()
 void eMainContextBase::InitializeTextures()
 {
 	texManager->InitContext(assetsFolderPath);
-	texManager->LoadAllTextures();
+	texManager->Initialize();
 }
 
 //--------------------------------------------------------------------------------
@@ -654,7 +707,7 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[9]->Add(CONSOLE, "Console", reinterpret_cast<void*>(&console_plane_callbaack));
 
 	m_global_scripts.push_back(std::make_shared<ParticleSystemToolController>(externalGui[10], texManager.get(), soundManager.get(), pipeline));
-	m_global_scripts.push_back(std::make_shared<TerrainGeneratorTool>(this, modelManager.get(), texManager.get(), pipeline, externalGui[11]));
+	//m_global_scripts.push_back(std::make_shared<TerrainGeneratorTool>(this, modelManager.get(), texManager.get(), pipeline, externalGui[11]));
 }
 
 //------------------------------------------------------------
@@ -739,6 +792,30 @@ Camera& eMainContextBase::GetMainCamera()
 	return m_cameras[0];
 }
 
+//----------------------------------------------------------------
+void eMainContextBase::AddGUI(const std::shared_ptr<GUI>& _gui)
+{
+	m_guis.push_back(_gui);
+}
+
+//----------------------------------------------------------------
+void eMainContextBase::DeleteGUI(const std::shared_ptr<GUI>& _gui)
+{
+	m_guis.erase(std::remove(m_guis.begin(), m_guis.end(), (_gui)));
+}
+
+//----------------------------------------------------------------
+void eMainContextBase::AddText(std::shared_ptr<Text> _text)
+{
+	m_texts.push_back(_text);
+}
+
+//----------------------------------------------------------------
+std::vector<std::shared_ptr<Text>>& eMainContextBase::GetTexts()
+{
+	return m_texts;
+}
+
 //--------------------------------------------------------------------------------
 void eMainContextBase::InstallTcpServer()
 {
@@ -802,28 +879,3 @@ void eMainContextBase::InstallTcpClient()
 		}
 	}
 }
-
-//----------------------------------------------------------------
-void eMainContextBase::AddGUI(const std::shared_ptr<GUI>& _gui)
-{
-	m_guis.push_back(_gui);
-}
-
-//----------------------------------------------------------------
-void eMainContextBase::DeleteGUI(const std::shared_ptr<GUI>& _gui)
-{
-	m_guis.erase(std::remove(m_guis.begin(), m_guis.end(), (_gui)));
-}
-
-//----------------------------------------------------------------
-void eMainContextBase::AddText(std::shared_ptr<Text> _text)
-{
-	m_texts.push_back(_text);
-}
-
-//----------------------------------------------------------------
-std::vector<std::shared_ptr<Text>>& eMainContextBase::GetTexts()
-{
-	return m_texts;
-}
-

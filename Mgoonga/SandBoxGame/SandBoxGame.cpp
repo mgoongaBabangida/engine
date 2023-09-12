@@ -32,59 +32,23 @@ eSandBoxGame::eSandBoxGame(eInputController*  _input,
 						   const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
 {
-}
-
-//*********************InputObserver*********************************
-//------------------------------------------------------------------
-bool eSandBoxGame::OnKeyPress(uint32_t asci, KeyModifiers _modifier)
-{
-	if (eMainContextBase::OnKeyPress(asci, _modifier))
-		return true;
-
-	switch (asci)
-	{
-	case ASCII_G:
-	{
-		if (m_focused != nullptr && m_focused->GetScript())
-			m_focused->GetScript()->OnKeyPress(ASCII_G, _modifier); // change -> subscribe directly
-	}
-	return true;
-	default: return false;
-	}
-}
-
-//------------------------------------------------------------------
-bool eSandBoxGame::OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier)
-{
-	if (bool ret = eMainContextBase::OnMousePress(x, y, left, _modifier); !ret)
-	{
-		auto [new_focused, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
-		if (new_focused != m_focused)
+	ObjectPicked.Subscribe([this](shObject _new_focused)
 		{
-			FocusChanged.Occur(m_focused, new_focused);
-			m_focused = new_focused;
-			return true;
-		}
-		return ret;
-	}
-}
-
-//*********************Initialize**************************************
-void eSandBoxGame::InitializePipline()
-{
-	eMainContextBase::InitializePipline();
-	pipeline.SwitchSkyBox(false);
-	pipeline.SwitchWater(false);
-	pipeline.GetSkyNoiseOnRef() = false;
-	pipeline.GetKernelOnRef() = false;
-	this->m_use_guizmo = false;
-	// call all the enable pipeline functions
+			if (_new_focused != m_focused)
+			{
+				FocusChanged.Occur(m_focused, _new_focused);
+				m_focused = _new_focused;
+				return true;
+			}
+			return false;
+		});
 }
 
 //-------------------------------------------------------------------------
 void eSandBoxGame::InitializeBuffers()
 {
 	eMainContextBase::InitializeBuffers();
+
 	GetMainLight().type = eLightType::DIRECTION;
 	pipeline.InitializeBuffers(GetMainLight().type == eLightType::POINT); //@todo add possibility to choose buffers
 }
@@ -95,8 +59,6 @@ void eSandBoxGame::InitializeModels()
 	eMainContextBase::InitializeModels();
 	
 	//MODELS
-	modelManager->Add("wolf", (GLchar*)std::string(modelFolderPath + "Wolf Rigged and Game Ready/Wolf_dae.dae").c_str());
-	modelManager->Add("Dying", (GLchar*)std::string(modelFolderPath + "Dying Soldier/Dying.dae").c_str());
 	//modelManager->Add("MapleTree", (GLchar*)std::string(modelFolderPath + "MapleTree/MapleTree.obj").c_str());
 	//modelManager->Add("Cottage", (GLchar*)std::string(modelFolderPath + "85-cottage_obj/cottage_obj.obj").c_str());
 
@@ -178,6 +140,7 @@ void eSandBoxGame::InitializeModels()
 	m_light_object->GetTransform()->setTranslation(GetMainLight().light_position);
 	m_objects.push_back(m_light_object);
 
+	//GLOBAL SCRIPTS
 	m_global_scripts.push_back(std::make_shared<ShootScript>(this, modelManager.get()));
 	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
 
@@ -185,21 +148,5 @@ void eSandBoxGame::InitializeModels()
 	m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera()));
 
 	m_input_controller->AddObserver(this, WEAK);
-
 	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
-}
-
-//------------------------------------------------------------------------
-void eSandBoxGame::InitializeRenders()
-{
-	eMainContextBase::InitializeRenders();
-	// set uniforms
-	// exposure, shininess etc. @todo dont change every frame in render
-}
-
-//------------------------------------------------------------------------
-void eSandBoxGame::InitializeSounds()
-{
-	eMainContextBase::InitializeSounds();
-	//@todo transfer from inside the manager
 }

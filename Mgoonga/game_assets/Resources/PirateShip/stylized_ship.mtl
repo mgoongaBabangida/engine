@@ -1,0 +1,70 @@
+# Blender MTL File: 'stylized_ship.blend'
+# Material Count: 5
+
+newmtl Material
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump C:\\Users\\58sal\\Desktop\\stylized_ship\\skull_texture1k\\Skull_Normal_DirectX_1001.png
+map_Kd C:\\Users\\58sal\\Desktop\\stylized_ship\\skull_texture1k\\Skull_Base_color_1001.png
+map_Ns C:\\Users\\58sal\\Desktop\\stylized_ship\\skull_texture1k\\Skull_Roughness_1001.png
+refl C:\\Users\\58sal\\Desktop\\stylized_ship\\skull_texture1k\\Skull_Metallic_1001.png
+
+newmtl Material.010
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump C:\\Users\\58sal\\Desktop\\stylized_ship\\ship_texture4k\\ship_Normal_DirectX_1001.png
+map_Kd C:\\Users\\58sal\\Desktop\\stylized_ship\\ship_texture4k\\ship_Base_color_1001.png
+map_Ns C:\\Users\\58sal\\Desktop\\stylized_ship\\ship_texture4k\\ship_Roughness_1001.png
+refl C:\\Users\\58sal\\Desktop\\stylized_ship\\ship_texture4k\\ship_Metallic_1001.png
+
+newmtl Material.015
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:\\Users\\58sal\\Desktop\\blender+\\medieval Cannon\\DefaultMaterial_Base_color_1001.png
+map_Ns C:\\Users\\58sal\\Desktop\\blender+\\medieval Cannon\\DefaultMaterial_Roughness_1001.png
+refl C:\\Users\\58sal\\Desktop\\blender+\\medieval Cannon\\DefaultMaterial_Metallic_1001.png
+
+newmtl Material.017
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:\\Users\\58sal\\Desktop\\stylized_ship\\cannon_texture1k\\DefaultMaterial_Base_color_1001.png
+map_Ns C:\\Users\\58sal\\Desktop\\stylized_ship\\cannon_texture1k\\DefaultMaterial_Roughness_1001.png
+refl C:\\Users\\58sal\\Desktop\\stylized_ship\\cannon_texture1k\\DefaultMaterial_Metallic_1001.png
+
+newmtl Material.026
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump C:\\Users\\58sal\\Desktop\\stylized_ship\\barrel_texture1k\\DefaultMaterial_Normal_DirectX_1001.png
+map_Kd C:\\Users\\58sal\\Desktop\\stylized_ship\\barrel_texture1k\\DefaultMaterial_Base_color_1001.png
+map_Ns C:\\Users\\58sal\\Desktop\\stylized_ship\\barrel_texture1k\\DefaultMaterial_Roughness_1001.png
+refl C:\\Users\\58sal\\Desktop\\stylized_ship\\barrel_texture1k\\DefaultMaterial_Metallic_1001.png

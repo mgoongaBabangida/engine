@@ -114,17 +114,18 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 											   folderPath + "ParticleVertexShader.glsl",
 											   folderPath + "ParticleFragmentShader.glsl"));
 	shader_lambda(m_particleRender.get());
+
 	// Particle Renderer GPU
 	/*m_particleRenderGPU.reset(new eParticleSystemRenderGPU(folderPath + "ParticleGPUUpdateVertexShader.glsl",
 																												 folderPath + "ParticleGPURenderFragmentShader.glsl",
 																												 folderPath + "ParticleGPUUpdateGeometryShader.glsl",
 																												 folderPath + "ParticleGPURenderVertexShader.glsl",
 																												 folderPath + "ParticleGPURenderGeometryShader.glsl"));*/
-	m_particleRenderGPU.reset(new eParticleSystemRenderGPU_V2(folderPath + "transfeedbackVS.glsl",
+	/*m_particleRenderGPU.reset(new eParticleSystemRenderGPU_V2(folderPath + "transfeedbackVS.glsl",
 																														folderPath + "transfeedbackFS.glsl",
 																														folderPath + "ParticleGPURenderGeometryShader.glsl"));
+	shader_lambda(m_particleRenderGPU.get());*/
 
-	shader_lambda(m_particleRenderGPU.get());
 	//Lines
 	m_linesRender.reset(new eLinesRender(folderPath + "Vertex3DSimple.glsl",
 																			 folderPath + "StencilFragmentShader.glsl"));
@@ -184,7 +185,7 @@ void eRenderManager::UpdateShadersInfo()
 	shader_lambda(m_gaussianRender.get());
 	shader_lambda(m_brightRender.get());
 	shader_lambda(m_particleRender.get());
-	shader_lambda(m_particleRenderGPU.get());
+	//shader_lambda(m_particleRenderGPU.get());
 	shader_lambda(m_linesRender.get());
 	shader_lambda(m_textRender.get());
 	shader_lambda(m_pbrRender.get());
@@ -228,8 +229,8 @@ bool eRenderManager::SetUniformData(const std::string& _renderName, const std::s
 		return true;
 	if (shader_lambda(m_particleRender.get()))
 		return true;
-	if (shader_lambda(m_particleRenderGPU.get()))
-		return true;
+	/*if (shader_lambda(m_particleRenderGPU.get()))
+		return true;*/
 	if (shader_lambda(m_linesRender.get()))
 		return true;
 	if (shader_lambda(m_textRender.get()))

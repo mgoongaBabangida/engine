@@ -302,7 +302,7 @@ void dbGLWindowSDL::OnDockSpace()
 		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 	}
 
-		ImGui::Begin("Game");
+		ImGui::Begin("Game"); //@todo make gui window with will turn off cursor if hovered and turno on when not othwer then visa vers
 
 		ImVec2 viewport_pos = ImGui::GetWindowPos();
 		int window_x, window_y, border_x, border_y;

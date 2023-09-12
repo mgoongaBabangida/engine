@@ -31,47 +31,10 @@ AmericanTreasureGame::AmericanTreasureGame(eInputController* _input,
                                            const std::string& _shadersPath)
   : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
 {
-  FocusChanged.Subscribe([this](shObject _prev, shObject _new)->void { this->OnFocusedChanged(); });
-
-  if (!m_objects.empty())
-  {
-    m_focused = m_objects[0];
-    FocusChanged.Occur(shObject{}, m_focused);
-  }
 }
 
 //--------------------------------------------------------------------------
 AmericanTreasureGame::~AmericanTreasureGame() {}
-
-//--------------------------------------------------------------------------
-void AmericanTreasureGame::InitializeExternalGui()
-{
-  eMainContextBase::InitializeExternalGui();
-}
-
-//------------------------------------------------------------------------------
-void AmericanTreasureGame::OnFocusedChanged()
-{
-}
-
-//*********************Initialize**************************************
-//-------------------------------------------------------------------------------
-void AmericanTreasureGame::InitializeSounds()
-{
-  //sound->loadListner(GetMainCamera().getPosition().x, GetMainCamera().getPosition().y, GetMainCamera().getPosition().z); //!!!
-}
-
-//-------------------------------------------------------------------------------
-void AmericanTreasureGame::InitializePipline()
-{
-  eMainContextBase::InitializePipline();
-  pipeline.SwitchSkyBox(false);
-  pipeline.SwitchWater(true);
-  pipeline.GetSkyNoiseOnRef() = false;
-  pipeline.GetKernelOnRef() = false;
-  this->m_use_guizmo = false;
-  // call all the enable pipeline functions
-}
 
 //-----------------------------------------------------------------------------
 void AmericanTreasureGame::InitializeBuffers()
@@ -86,8 +49,6 @@ void AmericanTreasureGame::InitializeModels()
   eMainContextBase::InitializeModels();
   
   //MODELS
-  modelManager->Add("ship", (GLchar*)std::string(modelFolderPath + "Ship(low_poly)FBX.fbx").c_str());
-  modelManager->Add("pirate_ship", (GLchar*)std::string(modelFolderPath + "Pirate Ship/stylized_ship(low_poly).fbx").c_str());
 
   Material pbr1;
   pbr1.albedo_texture_id = texManager->Find("pbr1_basecolor")->id;
@@ -116,18 +77,6 @@ void AmericanTreasureGame::InitializeModels()
   m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera()));
 
   m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
-}
-
-//-------------------------------------------------------------------------
-void AmericanTreasureGame::InitializeRenders()
-{
-  eMainContextBase::InitializeRenders();
-}
-
-//-------------------------------------------------------------------------------
-void AmericanTreasureGame::PaintGL()
-{
-  eMainContextBase::PaintGL();
 }
 
 //----------------------------------------------------

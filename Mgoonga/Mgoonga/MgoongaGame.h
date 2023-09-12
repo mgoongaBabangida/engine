@@ -26,25 +26,12 @@ public:
 
   virtual ~eMgoongaGameContext();
 
-	virtual void			PaintGL()										    override;
-
-	virtual bool			OnKeyPress(uint32_t asci, KeyModifiers _modifier)	override;
-	virtual bool			OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier) override;
-
-  void OnFocusedChanged();
   void _InitializeHexes();
   void _InitMainTestSceane();
 
 protected:
-	virtual void			InitializePipline()								override;
 	virtual void			InitializeBuffers()								override;
 	virtual void			InitializeModels()								override;
-	virtual void			InitializeRenders()								override;
-	virtual void			InitializeSounds()								override;
-  virtual void      InitializeExternalGui()           override;
-
-protected:
-
 };
 
 #endif

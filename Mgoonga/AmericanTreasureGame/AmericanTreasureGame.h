@@ -27,21 +27,11 @@ public:
 
 	virtual ~AmericanTreasureGame();
 
-	virtual void			PaintGL()										    override;
-
-	void OnFocusedChanged();
 	void _InitMainTestSceane();
 
 protected:
-	virtual void			InitializePipline()								override;
 	virtual void			InitializeBuffers()								override;
 	virtual void			InitializeModels()								override;
-	virtual void			InitializeRenders()								override;
-	virtual void			InitializeSounds()								override;
-	virtual void      InitializeExternalGui()           override;
-
-protected:
-
 };
 #endif //AMERICAN_TREASURE_H
 
