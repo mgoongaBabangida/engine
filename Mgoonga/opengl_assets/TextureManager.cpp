@@ -66,6 +66,7 @@ void eTextureManager::Initialize()
 			if (faces.size() == 6 && type == "skybox")
 			{
 				text.loadCubemap(faces);
+				m_cubemap_ids.push_back(text.id);
 				faces.clear();
 			}
 			else if (type == "array_last")
@@ -119,6 +120,10 @@ void eTextureManager::InitContext(const std::string& _folderPath)
 void eTextureManager::_LoadHardcoded()
 {
 	Texture text;
+	text.loadTextureFromFile(folderPath + "empty.jpg");
+	m_Textures.insert(std::pair<std::string, Texture>("Tempty", text));
+	Texture::SetEmptyTextureId(text.id);
+
 	text.generatePerlin(600, 600, true); //HARDCODING!
 	m_Textures.insert(std::pair<std::string, Texture>("Tperlin_n", text));
 }
@@ -145,11 +150,20 @@ const Texture* eTextureManager::FindByID(unsigned int _id) const
 }
 
 //----------------------------------------------------
+void eTextureManager::AddExisting(const std::string& _name, Texture* _text)
+{
+	m_Textures.insert(std::pair<std::string, Texture>(_name, *_text));
+	if(_text->type == "skybox")
+		m_cubemap_ids.push_back(_text->id);
+}
+
+//----------------------------------------------------
 void eTextureManager::AddTextureBox(const Texture& _texture, const std::string& _name)
 {
 	Texture text;
 	text.makeCubemap(&(const_cast<Texture&>(_texture)));
 	m_Textures.insert(std::pair<std::string, Texture>(_name, text));
+	m_cubemap_ids.push_back(text.id);
 }
 
 //-----------------------------------------------------

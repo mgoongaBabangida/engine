@@ -61,7 +61,8 @@ enum TypeImGui
 	ADD_CALLBACK,
 	GAME,
 	SLIDER_FLOAT_LARGE,
-	SLIDER_INT_NERROW
+	SLIDER_INT_NERROW,
+	SPIN_BOX
 };
 
 //--------------------------------------------------

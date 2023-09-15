@@ -294,6 +294,16 @@ void eWindowImGui::Render()
         ImGui::Text(text.c_str()); break;
       }
       break;
+      case SPIN_BOX:
+      {
+        static int value = 0; //@todo should be unique for each spinbox
+        if (ImGui::InputInt(std::get<0>(item).c_str(), &value))
+        {
+          std::function<void(int)> callback = *(reinterpret_cast<std::function<void(int)>*>(std::get<2>(item)));
+          callback(value);
+        }
+      }
+      break;
       case COMBO_BOX:
       {
         eVectorStringsCallback* transfer_data = static_cast<eVectorStringsCallback*>(std::get<2>(item));
@@ -333,7 +343,6 @@ void eWindowImGui::Render()
       case OBJECT_REF_TRANSFORM:
       {
         shObject* p_object = static_cast<shObject*>(std::get<2>(item));
-
         if (p_object && *p_object)
         {
           if (*p_object != m_current_object)
@@ -429,19 +438,25 @@ void eWindowImGui::Render()
             material = *(obj->GetModel()->GetMeshes()[mesh_current]->GetMaterial());
           else if (obj->GetModel()->HasMaterial())
             material = *(obj->GetModel()->GetMaterial());
+
           //@todo terrain has to have material
           /*else
             assert(false && "Neither mesh nor model have material!");*/
 
-          ImGui::Text("Albedo texture(Diffuse)");
-          ImGui::Image((void*)(intptr_t)(material.albedo_texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
+          GLuint texture_id;
+
+          ImGui::Text("Albedo texture (Diffuse)");
+          texture_id = material.albedo_texture_id != Texture::GetDefaultTextureId() ? material.albedo_texture_id : Texture::GetEmptyTextureId();
+          ImGui::Image((void*)(intptr_t)(texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
+
           ImGui::Text(std::to_string(material.albedo[0]).c_str()); ImGui::SameLine();
           ImGui::Text(std::to_string(material.albedo[1]).c_str()); ImGui::SameLine();
           ImGui::Text(std::to_string(material.albedo[2]).c_str()); ImGui::SameLine();
           ImGui::Text(std::to_string(material.use_albedo).c_str());
 
           ImGui::Text("Metalic texture");
-          ImGui::Image((void*)(intptr_t)(material.metalic_texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
+          texture_id = material.metalic_texture_id != Texture::GetDefaultTextureId() ? material.metalic_texture_id : Texture::GetEmptyTextureId();
+          ImGui::Image((void*)(intptr_t)(texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
           ImGui::Text(std::to_string(material.metallic).c_str());
           ImGui::Text(std::to_string(material.use_metalic).c_str());
 
@@ -449,16 +464,19 @@ void eWindowImGui::Render()
           ImGui::Text(std::to_string(material.ao).c_str());
 
           ImGui::Text("Normal texture");
-          ImGui::Image((void*)(intptr_t)(material.normal_texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
+          texture_id = material.normal_texture_id != Texture::GetDefaultTextureId() ? material.normal_texture_id : Texture::GetEmptyTextureId();
+          ImGui::Image((void*)(intptr_t)(texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
           ImGui::Text(std::to_string(material.use_normal).c_str());
 
           ImGui::Text("Roughness texture");//contra glossiness
-          ImGui::Image((void*)(intptr_t)(material.roughness_texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
+          texture_id = material.roughness_texture_id != Texture::GetDefaultTextureId() ? material.roughness_texture_id : Texture::GetEmptyTextureId();
+          ImGui::Image((void*)(intptr_t)(texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
           ImGui::Text(std::to_string(material.roughness).c_str());
           ImGui::Text(std::to_string(material.use_roughness).c_str());
 
           ImGui::Text("Emissive texture");
-          ImGui::Image((void*)(intptr_t)(material.emissive_texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
+          texture_id = material.emissive_texture_id != Texture::GetDefaultTextureId() ? material.emissive_texture_id : Texture::GetEmptyTextureId();
+          ImGui::Image((void*)(intptr_t)(texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
 
           //@todo add displacement/ bump as separate slot
 

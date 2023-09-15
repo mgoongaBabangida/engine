@@ -67,7 +67,7 @@ public:
 	bool& GetOutlineFocusedRef() { return outline_focused; }
 	float& GetExposureRef() { return exposure; }
 	bool& GetSSAOEnabledRef() { return ssao; }
-	bool& GetRotateSkyBox();
+	bool& GetRotateSkyBoxRef();
 	float& GetSaoThresholdRef();
 	float& GetSaoStrengthRef();
 

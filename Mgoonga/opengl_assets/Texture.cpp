@@ -2,6 +2,7 @@
 #include "Texture.h"
 
 #include <glm/glm/gtc/noise.hpp>
+
 #include "TextureImplDevIl.h"
 #include "TextureImplSDL.h"
 
@@ -12,13 +13,28 @@
 
 unsigned int Texture::textures_in_use = 0;
 std::set<unsigned int> Texture::indexes_in_use = {};
+GLuint Texture::mg_default_texture_id = (GLuint)glm::pow(2, 32) - 1;
+GLuint Texture::mg_empty_texture_id = (GLuint)glm::pow(2, 32) - 1;
 
+//-----------------------------------------------
 GLuint Texture::GetDefaultTextureId()
 {
-	static const GLuint DEFAULT_TEXTURE_ID = (GLuint)glm::pow(2, 32) - 1;
-	return DEFAULT_TEXTURE_ID;
+	return mg_default_texture_id;
 }
 
+//-----------------------------------------------
+void Texture::SetEmptyTextureId(GLuint _default_id)
+{
+	mg_empty_texture_id = _default_id;
+}
+
+//-----------------------------------------------
+GLuint Texture::GetEmptyTextureId()
+{
+	return mg_empty_texture_id;
+}
+
+//-----------------------------------------------
 Texture Texture::GetTexture1x1(TColor color)
 {
 	static Texture white;
@@ -469,7 +485,7 @@ bool Texture::loadTexture2DArray(std::vector<std::string> _paths)
 	type = "";
 	mTextureWidth = 512; //?
 	mTextureHeight = 512;
-	GLsizei layers = _paths.size();
+	GLsizei layers = (GLsizei)_paths.size();
 	glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &id);
 	++textures_in_use;
 	indexes_in_use.insert(id);

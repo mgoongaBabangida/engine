@@ -21,6 +21,8 @@ ePBRRender::ePBRRender(const std::string& vS, const std::string& fS)
   aoLoc             = glGetUniformLocation(pbrShader.ID(), "ao");
   camPosLoc         = glGetUniformLocation(pbrShader.ID(), "camPos");
 
+  glUniform1f(aoLoc, 1.0f); //@todo take from material if textured too
+
   //vertex shader
   fullTransformationUniformLocation = glGetUniformLocation(pbrShader.ID(), "modelToProjectionMatrix");
   modelToWorldMatrixUniformLocation = glGetUniformLocation(pbrShader.ID(), "modelToWorldMatrix");
@@ -101,6 +103,7 @@ void ePBRRender::_SetMaterial(shObject _obj)
     if (material.use_albedo)
     {
       glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 1);
+      glUniform1f(aoLoc, material.ao);
     }
     else
     {
@@ -123,10 +126,12 @@ void ePBRRender::_SetMaterial(shObject _obj)
         if (material.use_albedo)
         {
           glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 1);
+          glUniform1f(aoLoc, material.ao);
         }
         else
         {
           glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 0);
+
           glUniform3f(albedoLoc, material.albedo[0], material.albedo[1], material.albedo[2]);
           glUniform1f(aoLoc, material.ao);
           glUniform1f(metallicLoc, material.metallic);

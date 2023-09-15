@@ -42,6 +42,8 @@ struct DLL_OPENGL_ASSETS Texture
 	}
 
 	static GLuint		GetDefaultTextureId();
+	static void 		SetEmptyTextureId(GLuint);
+	static GLuint		GetEmptyTextureId();
 	static Texture	GetTexture1x1(TColor color);
 	static bool			freeTexture(unsigned int _id);
 
@@ -102,6 +104,8 @@ protected:
 
 	static unsigned int textures_in_use;
 	static std::set<unsigned int> indexes_in_use;
+	static GLuint mg_default_texture_id;
+	static GLuint mg_empty_texture_id;
 };
 
 

@@ -636,13 +636,14 @@ void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 	glBindTexture(GL_TEXTURE_2D, renderManager->IBLRender()->GetLUTTextureID());
 
 	glViewport(0, 0, width, height);
-	/*static Texture skybox = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP_IRR);*/
-	//renderManager->SkyBoxRender()->SetSkyBoxTexture(&m_prefilter);
+	//@todo Add irr and prefilter to skybox list 
+	/*static Texture skybox = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP_IRR);
+	renderManager->SkyBoxRender()->SetSkyBoxTexture(&skybox);*/
 	glEnable(GL_CULL_FACE);
 }
 
 //-------------------------------------------------------
-bool& eOpenGlRenderPipeline::GetRotateSkyBox()
+bool& eOpenGlRenderPipeline::GetRotateSkyBoxRef()
 {
 	return renderManager->SkyBoxRender()->GetRotateSkyBoxRef();
 }

@@ -173,8 +173,6 @@ void eMainContextBase::InitializeGL()
 
 	InitializeTextures();
 
-	InitializePipline();
-
 	InitializeBuffers();
 
 	InitializeSounds();
@@ -182,6 +180,8 @@ void eMainContextBase::InitializeGL()
 	_PreInitModelManager();
 
 	InitializeRenders();
+
+	InitializePipline();
 
 	m_gameState = GameState::LOADING;
 
@@ -415,6 +415,8 @@ void eMainContextBase::InitializePipline()
 				value == "true" ? pipeline.GetKernelOnRef() = true : pipeline.GetKernelOnRef() = false;
 			else if (name == "UseGuizmo")
 				value == "true" ? m_use_guizmo = true : m_use_guizmo = false;
+			else if(name == "RotateSkyBox")
+				value == "true" ? pipeline.GetRotateSkyBoxRef() = true : pipeline.GetRotateSkyBoxRef() = false;
 		}
 	}
 }
@@ -509,7 +511,17 @@ void eMainContextBase::InitializeExternalGui()
 	//Pipeline
 	externalGui[1]->Add(CHECKBOX, "Show bounding boxes", &pipeline.GetBoundingBoxBoolRef());
 	externalGui[1]->Add(CHECKBOX, "Use Multi sampling", &pipeline.GetMultiSamplingBoolRef());
-	externalGui[1]->Add(CHECKBOX, "Sky box", &pipeline.GetSkyBoxOnRef());
+	externalGui[1]->Add(CHECKBOX, "Sky box on", &pipeline.GetSkyBoxOnRef());
+	externalGui[1]->Add(CHECKBOX, "Rotate Sky box", &pipeline.GetRotateSkyBoxRef());
+	static std::function<void(int)> change_skybox_callback = [this](int _skybox)
+	{
+		if (texManager->GetCubeMapIds().size() > _skybox)
+		{
+			const Texture* skybox = texManager->FindByID(texManager->GetCubeMapIds()[_skybox]);
+			pipeline.SetSkyBoxTexture(skybox);
+		}
+	};
+	externalGui[1]->Add(SPIN_BOX, "Sky box", (void*)&change_skybox_callback);
 	externalGui[1]->Add(CHECKBOX, "Water", &pipeline.GetWaterOnRef());
 	externalGui[1]->Add(CHECKBOX, "Hex", &pipeline.GetGeometryOnRef());
 	externalGui[1]->Add(CHECKBOX, "Kernel", &pipeline.GetKernelOnRef());

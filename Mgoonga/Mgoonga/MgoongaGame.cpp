@@ -179,7 +179,7 @@ void eMgoongaGameContext::_InitMainTestSceane()
   m_objects.push_back(containerCube);
 
   shObject grassPlane = factory.CreateObject(modelManager->Find("grass_plane"), eObject::RenderType::PHONG, "GrassPlane");
-  grassPlane->GetTransform()->setTranslation(vec3(0.0f, 1.2f, 0.0f));
+  grassPlane->GetTransform()->setTranslation(vec3(0.0f, 2.0f, 0.0f));
   m_objects.push_back(grassPlane);
 
   /*shObject terrain = factory.CreateObject(std::shared_ptr<IModel>(terrainModel.release()), eObject::RenderType::PHONG, "Terrain");
@@ -231,20 +231,23 @@ void eMgoongaGameContext::_InitMainTestSceane()
   //m_objects.push_back(vampire);
 
   //light
+  GetMainLight().light_position.y = 3.5f;
   m_light_object = factory.CreateObject(modelManager->Find("white_sphere"), eObject::RenderType::PHONG, "WhiteSphere");
   m_light_object->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
   m_light_object->GetTransform()->setTranslation(GetMainLight().light_position);
   m_objects.push_back(m_light_object);
 
-  shObject pbrCube = factory.CreateObject(modelManager->Find("pbr_cube"), eObject::RenderType::PBR, "CubePBR");
-  pbrCube->GetTransform()->setTranslation(vec3(-4.5f, 3.5f, 1.5f));
-  m_objects.push_back(pbrCube);
-
   shObject obj = factory.CreateObject(modelManager->Find("sphere_textured"), eObject::RenderType::PBR, "SpherePBR");
   obj->GetTransform()->setTranslation(glm::vec3(-2.0f, 3.5f, 1.5f));
   m_objects.push_back(obj);
+  Material mat = *obj->GetModel()->Get3DMeshes()[0]->GetMaterial();
+  mat.ao = 0.5f;
+  const_cast<I3DMesh*>(obj->GetModel()->Get3DMeshes()[0])->SetMaterial(mat);
 
   shObject goldsphere = factory.CreateObject(modelManager->Find("sphere_gold"), eObject::RenderType::PBR, "SpherePBRGold");
   goldsphere->GetTransform()->setTranslation(vec3(-7.0f, 3.5f, 2.0f));
   m_objects.push_back(goldsphere);
+  mat = *goldsphere->GetModel()->Get3DMeshes()[0]->GetMaterial();
+  mat.ao = 0.5f;
+  const_cast<I3DMesh*>(goldsphere->GetModel()->Get3DMeshes()[0])->SetMaterial(mat);
 }
