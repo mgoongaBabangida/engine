@@ -9,7 +9,7 @@
 class DLL_GAME_ASSETS CameraFreeController : public IScript
 {
 public:
-  explicit CameraFreeController(Camera&);
+  CameraFreeController(Camera& _camera, bool _strafe_shift = false);
   virtual ~CameraFreeController();
 
   virtual void		Update(float _tick) override;
@@ -20,4 +20,5 @@ public:
 
 protected:
   std::reference_wrapper<Camera> m_camera;
+  bool m_strafe_shift = false;
 };

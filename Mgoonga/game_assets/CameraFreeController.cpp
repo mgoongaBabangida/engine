@@ -3,8 +3,9 @@
 #include "CameraFreeController.h"
 
 //-----------------------------------------------------------
-CameraFreeController::CameraFreeController(Camera& _camera)
+CameraFreeController::CameraFreeController(Camera& _camera, bool _strafe_shift)
 : m_camera(_camera)
+, m_strafe_shift(_strafe_shift)
 {
 
 }
@@ -22,6 +23,11 @@ void	CameraFreeController::Update(float _tick)
 //-----------------------------------------------------------
 bool CameraFreeController::OnMouseMove(int32_t _x, int32_t _y, KeyModifiers _modifiers)
 {
+	if ((m_strafe_shift && _modifiers == KeyModifiers::SHIFT) || !m_strafe_shift)
+		m_camera.get().StrafeThresholdRef() = 5.0f;
+	else
+		m_camera.get().StrafeThresholdRef() = 0.0f;
+
 	m_camera.get().mouseUpdate(glm::vec2(_x, _y));
 	return true;
 }

@@ -72,6 +72,9 @@ protected:
   void OnObjectPicked(std::shared_ptr<eObject> _picked);
   void OnFrameMoved(std::shared_ptr<GUI> _frame);
 
+  void OnShoot(const eObject* _target);
+  void OnGetHit(const eObject* _target);
+
   void _OnConnectionEstablished(const dbb::TCPConnection& _connection);
   void _OnTCPMessageRecieved(const std::vector<uint32_t>);
 
@@ -89,9 +92,15 @@ protected:
   const Texture*  _GetDiceTexture() const;
   void            _UpdatePathVisual();
   void            _UpdateWarrning(const std::string& _message);
+  void            _SetDestinationFromCurrentPath();
+  void            _UpdateCurrentPath();
+  void            _UpdateTextPath();
+  void            _SendMoveMsg();
 
   std::vector<uint32_t> _GetCurPathIndices();
+  Hex* _GetCurHex();
   void _DebugHexes();
+  eShipScript* _GetShipScript(const eObject*) const;
 
   eMainContextBase* m_game = nullptr;
   eModelManager*    m_modelManager = nullptr;
@@ -108,9 +117,10 @@ protected:
   static const uint32_t              m_ship_quantity = 4;
   static const uint32_t              m_ship_quantity_pirate = 6;
 
-  std::vector<Hex>					         m_hexes;
+  std::vector<Hex>                   m_hexes;
   std::deque<Hex*>                   m_current_path;
-
+  bool                               m_right_button_pressed = false;
+  
   std::vector<eShipScript*>          m_ships;
   std::vector<eShipScript*>          m_ships_pirate;
   std::vector<std::shared_ptr<GUI>>  m_ship_icons;
@@ -140,6 +150,7 @@ protected:
   std::unique_ptr <ITcpAgent>				  m_tcpAgent;
   std::unique_ptr<math::Timer>			  m_tcpTimer;
 
+  float                               m_ship_height_level;
   //debug
   IWindowImGui*                      m_debug_window = nullptr;
   std::vector<float>                 m_texture_scales;

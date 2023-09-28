@@ -6,6 +6,7 @@
 #include <base/interfaces.h>
 #include <math/Camera.h>
 #include <math/CameraRay.h>
+#include <math/AnimationLeaner.h>
 
 class eObject;
 struct Flag;
@@ -16,6 +17,14 @@ class eOpenGlRenderPipeline;
 //----------------------------------------------------------------------------------
 class DLL_GAME_ASSETS eShipScript : public IScript
 {
+	enum State
+	{
+		ALIVE,
+		HIT,
+		DROWNING,
+		DROWNED,
+	};
+
 public:
 	eShipScript(IGame*									game,
 							const Texture*					flag_texture,
@@ -32,6 +41,7 @@ public:
 
 	virtual bool	OnKeyPress(uint32_t asci, KeyModifiers _modifier)												override;
 	virtual bool	OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier)		override;
+	virtual void	CollisionCallback(const eCollision&) override;
 
 	virtual void	Update(float _tick) override;
 
@@ -42,15 +52,21 @@ public:
 	void			SetShootAfterMove(bool shoot) { shoot_after_move = shoot;}
 	void			Shoot();
 
+	void SetDrowned(bool _drowned) { m_drowned = _drowned; }
 protected:
 	void _UpdateFlagPos();
 
 	IGame*			m_game = nullptr;
+	State				m_state = ALIVE;
 	float			  waterHeight;
 	float			  turn_speed;
 	float			  move_speed;
 	glm::vec3		destination		= NONE;
 	bool			  shoot_after_move  = false;
+
+	bool				m_drowned = false;
+	std::unique_ptr<math::AnimationLeaner<float>> m_drowning_animation;
+	glm::quat		m_drawn_rotation;
 
   const Texture*						flag_tex;
   glm::vec3									flag_scale = { 0.01f, 0.01f ,0.01f };
@@ -59,7 +75,7 @@ protected:
 	std::reference_wrapper<eOpenGlRenderPipeline> pipeline;
 	std::reference_wrapper<Camera> camera;
 	const Texture*						shoot_tex;
-	RemSnd*								   shoot_snd;
+	RemSnd*										shoot_snd;
 };
 
 #endif // SHIP_SCRIPT_H

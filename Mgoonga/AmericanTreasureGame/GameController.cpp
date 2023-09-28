@@ -4,6 +4,7 @@
 
 #include <math/Camera.h>
 #include <math/Random.h>
+#include <math/ParticleSystem.h>
 
 #include <tcp_lib/Network.h>
 #include <tcp_lib/Server.h>
@@ -15,6 +16,7 @@
 #include <opengl_assets/Sound.h>
 #include <opengl_assets/openglrenderpipeline.h>
 #include <opengl_assets/TerrainModel.h>
+#include <opengl_assets/Sound.h>
 
 #include <sdl_assets/ImGuiContext.h>
 
@@ -43,6 +45,7 @@ GameController::GameController(eMainContextBase* _game,
   , m_has_moved_pirate{ false, false ,false ,false, false, false }
   , m_texture_scales{ 10.0f, 10.0f , 5.0f}
 {
+  m_ship_height_level = m_pipeline.get().GetWaterHeight() - 0.05f;
 }
 
 //------------------------------------------------
@@ -151,16 +154,42 @@ bool GameController::OnKeyPress(uint32_t _asci, KeyModifiers _modifier)
   case ASCII_J:
   {
     m_dice_gui->Perssed();
+    break;
+  }
+  case ASCII_K:
+  {
+    const eObject* obj = m_game_state == GameState::SPANISH_TO_MOVE ? m_ships[m_focused_index]->GetScriptObject() :
+                                                                      m_ships_pirate[m_focused_index]->GetScriptObject();
+    OnShoot(obj);
+    break;
+  }
+  case ASCII_H:
+  {
+    const eObject* obj = m_game_state == GameState::SPANISH_TO_MOVE ? m_ships[m_focused_index]->GetScriptObject() :
+      m_ships_pirate[m_focused_index]->GetScriptObject();
+    OnGetHit(obj);
+    break;
   }
   return true;
   default: return false;
   }
+  return false;
 }
 
 //----------------------------------------------------------------
 bool GameController::OnMouseMove(int32_t _x, int32_t _y, KeyModifiers _modifier)
 {
   m_cursor_pos = { _x , _y };
+
+  if (m_right_button_pressed)
+  {
+    _UpdateCurrentPath();
+    if (!m_current_path.empty())
+    {
+      _UpdatePathVisual();
+      _UpdateTextPath();
+    }
+  }
   return false;
 }
 
@@ -169,107 +198,15 @@ bool GameController::OnMousePress(int32_t _x, int32_t _y, bool _left, KeyModifie
 {
   if (!_left) // right click
   {
-    if(m_has_gold_index == -1)
+    m_right_button_pressed = true;
+    m_game->EnableHovered(true);
+
+    _UpdateCurrentPath();
+    if (!m_current_path.empty())
     {
-      _UpdateWarrning("Choose a ship which will hold the treasures by moving golden frame");
+      _UpdatePathVisual();
+      _UpdateTextPath();
       return true;
-    }
-    else if (!m_game->GetFocusedObject())
-    {
-      _UpdateWarrning("Choose a ship to move");
-      return true;
-    }
-    else if (_CurrentShipHasMoved())
-    {
-      _UpdateWarrning("This ship has already moved");
-      return true;
-    }
-    else if (!m_dice_rolled)
-    {
-      _UpdateWarrning("Roll the dice before moving");
-      return true;
-    }
-    else if (!m_current_path.empty())
-    {
-      _UpdateWarrning("The ship can not move there");
-      return true;
-    }
-    else // player rolled dice and has not moved yet. so, lets calculate wheather and how they can move
-    {
-    auto focused = m_game->GetFocusedObject();
-    
-    // RIGHT CLICK ON WATER
-      float waterHeight = m_pipeline.get().GetWaterHeight();
-      dbb::plane pl(glm::vec3(1.0f, waterHeight, 1.0f),
-                    glm::vec3(0.0f, waterHeight, 0.0f),
-                    glm::vec3(0.0f, waterHeight, 1.0f)); // arbitrary triangle on waterHeight plane
-
-      glm::vec3 target = dbb::intersection(pl, m_camera.get().getCameraRay().getLine());
-      for (auto& hex : m_hexes)
-      {
-        if (hex.IsOn(target.x, target.z)  && hex.IsWater(m_terrain, waterHeight))
-        {
-          if (hex.IsTaken())
-          {
-            _UpdateWarrning("The ship can not move there");
-            m_current_path.clear();
-            return true;
-          }
-
-          auto cur_hex = std::find_if(m_hexes.begin(), m_hexes.end(), [this , focused, waterHeight](const Hex& hex)
-          {
-            return glm::length(focused->GetTransform()->getTranslation() - glm::vec3{ hex.x(), waterHeight, hex.z() }) < (0.5f * 0.57f); //radius
-          });
-
-          if (cur_hex != m_hexes.end())
-          {
-            m_current_path = cur_hex->MakePath(&hex, m_terrain, waterHeight);
-            if (m_current_path.size() > m_current_dice) // can move less or equal to dice
-            {
-              _UpdateWarrning("The ship can not move there");
-              m_current_path.clear();
-              return true;
-            }
-            if (!m_current_path.empty())
-            {
-              glm::vec3 destination = { m_current_path.front()->x(), waterHeight, m_current_path.front()->z() };
-              m_current_path.pop_front();
-
-              if (m_game_state == GameState::SPANISH_TO_MOVE && m_side != Side::PIRATE)
-                m_ships[m_focused_index]->SetDestination(destination);
-              else if (m_game_state == GameState::PIRATE_TO_MOVE && m_side != Side::SPANISH)
-                m_ships_pirate[m_focused_index]->SetDestination(destination);
-              else
-              {
-                m_current_path.clear();
-                return true;
-              }
-
-              if (m_side != Side::BOTH) // send tcp event
-              {
-                std::vector<uint32_t> content{ (uint32_t)(m_current_path.size() + 2),
-                                               (uint32_t)MessageType::MOVE,
-                                               m_focused_index };
-                std::vector<uint32_t> path(_GetCurPathIndices());
-                content.insert(content.end(), path.begin(), path.end());
-
-                if (m_tcpAgent)
-                  m_tcpAgent->SendMsg(std::move(content));
-              }
-
-              _UpdatePathVisual();
-              hex.SetTaken(true);
-              cur_hex->SetTaken(false);
-              _UpdateWarrning("");
-              return true;
-            }
-          }
-          else
-          {
-            assert("can not find current hex!");
-          }
-        }
-      }
     }
   }
   return false;
@@ -278,6 +215,21 @@ bool GameController::OnMousePress(int32_t _x, int32_t _y, bool _left, KeyModifie
 //----------------------------------------------------------------
 bool GameController::OnMouseRelease(KeyModifiers _modifier)
 {
+  if (m_right_button_pressed)
+  {
+    if (!m_current_path.empty())
+    {
+      m_current_path.back()->SetTaken(true);
+      if(auto cur_hex = _GetCurHex(); cur_hex)
+        cur_hex->SetTaken(false);
+      _UpdateWarrning("");
+    }
+    _SetDestinationFromCurrentPath();
+  }
+
+  m_right_button_pressed = false; // ? check if right
+  m_game->EnableHovered(false);
+
   if (m_game_state == GameState::SPANISH_TO_MOVE)
   {
     for (int i = 0; i < m_ships.size(); ++i)
@@ -308,34 +260,37 @@ bool GameController::OnMouseRelease(KeyModifiers _modifier)
 //-------------------------------------------------------------
 void GameController::Update(float _tick)
 {
-  for (int i = 0; i < m_ships.size(); ++i)
+  if (!m_right_button_pressed)
   {
-    if (m_ships[i]->GetScriptObject() == m_game->GetFocusedObject().get()
+    for (int i = 0; i < m_ships.size(); ++i)
+    {
+      if (m_ships[i]->GetScriptObject() == m_game->GetFocusedObject().get()
         && m_ships[i]->GetDestination() == NONE
         && !m_current_path.empty())
-    {
-      glm::vec3 destination = { m_current_path.front()->x(), m_pipeline.get().GetWaterHeight(), m_current_path.front()->z() };
-      m_current_path.pop_front();
-      m_ships[m_focused_index]->SetDestination(destination);
+      {
+        glm::vec3 destination = { m_current_path.front()->x(), m_ship_height_level, m_current_path.front()->z() };
+        m_current_path.pop_front();
+        m_ships[m_focused_index]->SetDestination(destination);
+      }
+
+      if (m_ships[i]->GetScriptObject() == m_game->GetFocusedObject().get())
+        m_choice_circle->SetDots({ m_ships[i]->GetScriptObject()->GetTransform()->getTranslation() + glm::vec3{0.0f,0.06f,0.0f} }); //@todo
     }
 
-    if (m_ships[i]->GetScriptObject() == m_game->GetFocusedObject().get())
-      m_choice_circle->SetDots({ m_ships[i]->GetScriptObject()->GetTransform()->getTranslation() + glm::vec3{0.0f,0.01f,0.0f} });
-  }
-
-  for (int i = 0; i < m_ships_pirate.size(); ++i)
-  {
-    if (m_ships_pirate[i]->GetScriptObject() == m_game->GetFocusedObject().get()
+    for (int i = 0; i < m_ships_pirate.size(); ++i)
+    {
+      if (m_ships_pirate[i]->GetScriptObject() == m_game->GetFocusedObject().get()
         && m_ships_pirate[i]->GetDestination() == NONE
         && !m_current_path.empty())
-    {
-      glm::vec3 destination = { m_current_path.front()->x(), m_pipeline.get().GetWaterHeight(), m_current_path.front()->z() };
-      m_current_path.pop_front();
-      m_ships_pirate[m_focused_index]->SetDestination(destination);
-    }
+      {
+        glm::vec3 destination = { m_current_path.front()->x(), m_ship_height_level, m_current_path.front()->z() };
+        m_current_path.pop_front();
+        m_ships_pirate[m_focused_index]->SetDestination(destination);
+      }
 
-    if (m_ships_pirate[i]->GetScriptObject() == m_game->GetFocusedObject().get())
-      m_choice_circle->SetDots({ m_ships_pirate[i]->GetScriptObject()->GetTransform()->getTranslation() + glm::vec3{0.0f,0.01f,0.0f} });
+      if (m_ships_pirate[i]->GetScriptObject() == m_game->GetFocusedObject().get())
+        m_choice_circle->SetDots({ m_ships_pirate[i]->GetScriptObject()->GetTransform()->getTranslation() + glm::vec3{0.0f,0.06f,0.0f} });//@todo
+    }
   }
 
   if (m_game_state == GameState::SPANISH_TO_MOVE)
@@ -353,6 +308,12 @@ void GameController::Update(float _tick)
       std::for_each(m_has_moved_pirate.begin(), m_has_moved_pirate.end(), [](bool& _val) { _val = false; });
       m_game_state = GameState::SPANISH_TO_MOVE;
     }
+  }
+  //clear text
+  if (!m_current_path.empty() && !m_right_button_pressed)
+  {
+    m_destination_text->content = "";
+    m_path_mesh->UpdateData({}, {}, glm::vec3{ 1.0f });
   }
 
   //update icons move status
@@ -375,22 +336,6 @@ void GameController::Update(float _tick)
       m_status_icons_pirate[i]->SetTexture(*red_tex, { 0,0 }, { red_tex->mTextureWidth, red_tex->mTextureHeight });
     else
       m_status_icons_pirate[i]->SetTexture(*green_tex, { 0,0 }, { green_tex->mTextureWidth, green_tex->mTextureHeight });
-  }
-
-  //update text
-  if (m_current_path.size() != 0)
-  {
-    Transform trans;
-    glm::vec2 offset{-0.2f, -0.25f};
-    trans.setTranslation({ m_current_path.back()->x() + offset.x, Hex::common_height + 0.01f, m_current_path.back()->z() + offset.y });
-    trans.setScale({ 0.013f, 0.013f, 0.013f });
-    trans.setRotation(-PI / 2, -PI / 2, 0.0f);
-    m_destination_text->mvp = m_camera.get().getProjectionMatrix() * m_camera.get().getWorldToViewMatrix() * trans.getModelMatrix();
-  }
-  else
-  {
-    m_destination_text->content = "";
-    m_path_mesh->UpdateData({}, {}, glm::vec3{ 1.0f });
   }
 
   // update base labels
@@ -482,6 +427,9 @@ void GameController::Update(float _tick)
 //---------------------------------------------------------------
 void GameController::OnObjectPicked(std::shared_ptr<eObject> _picked)
 {
+  if (!m_current_path.empty())
+    return;
+
   if (!m_dice_rolled)
   {
     if (m_game_state == GameState::SPANISH_TO_MOVE)
@@ -564,6 +512,54 @@ void GameController::OnFrameMoved(std::shared_ptr<GUI> _frame)
 }
 
 //------------------------------------------------------------
+void GameController::OnShoot(const eObject* _target)
+{
+  glm::vec4 modelCenter = _target->GetTransform()->getModelMatrix() * glm::vec4(_target->GetCollider()->GetCenter(), 1.0f);
+  std::shared_ptr<IParticleSystem> system = std::make_shared<ParticleSystem>(10, 0.1f, 0, 10'000,
+    modelCenter + _target->GetTransform()->getRotationVector() * 0.4f, // ask hexes
+    m_texManager->Find("Tatlas1"),
+    m_soundManager->GetSound("shot_sound"),
+    4,
+    2'500.f);
+  
+  //@todo no connection to rendering. Add pt sys in different way
+  system->Loop() = false;
+  system->ConeAngle() = 0.3f;
+  system->Speed() = 0.005f;
+  system->LifeLength() = 1.5f;
+  system->Scale() = { 0.04f,0.04f, 0.04f };
+  system->SystemType() = IParticleSystem::SPHERE;
+  system->BaseRadius() = 0.0f;
+  system->ParticlesPerSecond() = 20;
+  system->Start();
+  m_pipeline.get().AddParticleSystem(system);
+}
+
+//------------------------------------------------------------
+void GameController::OnGetHit(const eObject* _target)
+{
+  std::shared_ptr<IParticleSystem> system = std::make_shared<ParticleSystem>(40, 0.1f, 0, 4'000,
+    _target->GetTransform()->getTranslation(),
+    m_texManager->Find("Tatlas2"),
+    m_soundManager->GetSound("fire_sound"),
+    4,
+    8'000.f);
+
+  //@todo no connection to rendering. Add pt sys in different way
+  system->Loop() = false;
+  system->ConeAngle() = 0.3f;
+  system->Speed() = 0.01;
+  system->LifeLength() = 1.0f;
+  system->BaseRadius() = 0.1f;
+  system->Scale() = { 0.055f,0.055f, 0.055f };
+  system->Start();
+  m_pipeline.get().AddParticleSystem(system);
+
+  if (auto* target_script = _GetShipScript(_target); target_script)
+    target_script->SetDrowned(true);
+}
+
+//------------------------------------------------------------
 void GameController::_OnConnectionEstablished(const dbb::TCPConnection& _connection)
 {
   _connection.IntArrayMessageRecieved.Subscribe([this](const std::vector<uint32_t>& _content, const std::string& _endpoint){ _OnTCPMessageRecieved(_content); });
@@ -575,7 +571,7 @@ void GameController::_OnTCPMessageRecieved(const std::vector<uint32_t> _content)
   std::cout << "_OnTCPMessageRecieved" << std::endl;
   if(_content[0] == (uint32_t)MessageType::MOVE)
   {
-    glm::vec3 destination = { m_current_path.front()->x(), m_pipeline.get().GetWaterHeight(), m_current_path.front()->z() };
+    glm::vec3 destination = { m_current_path.front()->x(), m_ship_height_level, m_current_path.front()->z() };
     m_focused_index = _content[1];
     m_current_path.clear();
     for (int i = 2; i < _content.size(); ++i)
@@ -814,11 +810,12 @@ void GameController::_InitializeShips()
     shObject ship = factory.CreateObject(m_modelManager->Find("ship"), eObject::RenderType::PBR, "Ship" + std::to_string(i));
     //shObject ship = factory.CreateObject(m_modelManager->Find("wall_cube"), eObject::RenderType::PHONG, "Ship" + std::to_string(i));
     ship->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
-    ship->GetTransform()->setTranslation(vec3(m_hexes[90 + i*2].x(), m_pipeline.get().GetWaterHeight(), m_hexes[90 + i * 2].z()));
+    ship->GetTransform()->setTranslation(vec3(m_hexes[55 + i*40].x(), m_ship_height_level, m_hexes[55 + i * 40].z()));
     ship->GetTransform()->setUp(glm::vec3(0.0f, 0.0f, 1.0f));
     ship->GetTransform()->setForward(glm::vec3(-1.0f, 0.0f, 0.0f));
+    ship->GetTransform()->turnTo(vec3{ m_hexes[110].x(), m_ship_height_level, m_hexes[110].z() }, 0.05f);
 
-    m_hexes[90 + i * 2].SetTaken(true);
+    m_hexes[55 + i * 40].SetTaken(true);
 
     for (auto& mesh : ship->GetModel()->Get3DMeshes())
       const_cast<I3DMesh*>(mesh)->SetMaterial(material); //@todo
@@ -844,14 +841,14 @@ void GameController::_InitializeShips()
     //shObject ship = factory.CreateObject(m_modelManager->Find("brick_cube"), eObject::RenderType::PHONG, "Ship" + std::to_string(i));
     ship->GetTransform()->setScale(vec3(0.04f, 0.04f, 0.04f));
     //ship->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
-    ship->GetTransform()->setTranslation(vec3(m_hexes[26 + i * 20].x(), m_pipeline.get().GetWaterHeight(), m_hexes[26 + i * 20].z()));
+    ship->GetTransform()->setTranslation(vec3(m_hexes[26 + i * 40].x(), m_ship_height_level, m_hexes[26 + i * 40].z()));
     ship->GetTransform()->setUp(glm::vec3(0.0f, 0.0f, 1.0f));
     ship->GetTransform()->setRotation(0.0f, PI/2, 0.0f);
     ship->GetTransform()->setForward(glm::vec3(1.0f, 0.0f, 0.0f));
 
     ship->SetInstancingTag("pirate_ship");
     
-    m_hexes[26 + i * 20].SetTaken(true);
+    m_hexes[26 + i * 40].SetTaken(true);
 
     if(i == 0)
     {
@@ -862,43 +859,43 @@ void GameController::_InitializeShips()
         {
           if (textures[0].m_path.find("barrel_texture1k") != std::string::npos)
           {
-            t.loadTextureFromFile("../game_assets/Resources/Pirate Ship/barrel_texture1k/DefaultMaterial_Metallic_1001.png");
+            t.loadTextureFromFile("../game_assets/Resources/PirateShip/barrel_texture1k/DefaultMaterial_Metallic_1001.png");
             t.type = "texture_specular";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_metalic = true;
 
-            t.loadTextureFromFile("../game_assets/Resources/Pirate Ship/barrel_texture1k/DefaultMaterial_Normal_DirectX_1001.png");
+            t.loadTextureFromFile("../game_assets/Resources/PirateShip/barrel_texture1k/DefaultMaterial_Normal_DirectX_1001.png");
             t.type = "texture_normal";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_normal = true;
           }
           else if (textures[0].m_path.find("cannon_texture1k") != std::string::npos)
           {
-            t.loadTextureFromFile("../game_assets/Resources/Pirate Ship/cannon_texture1k/DefaultMaterial_Metallic_1001.png");
+            t.loadTextureFromFile("../game_assets/Resources/PirateShip/cannon_texture1k/DefaultMaterial_Metallic_1001.png");
             t.type = "texture_specular";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_metalic = true;
           }
           else if (textures[0].m_path.find("ship_texture4k") != std::string::npos)
           {
-            t.loadTextureFromFile("../game_assets/Resources/Pirate Ship/ship_texture4k/ship_Metallic_1001.png");
+            t.loadTextureFromFile("../game_assets/Resources/PirateShip/ship_texture4k/ship_Metallic_1001.png");
             t.type = "texture_specular";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_metalic = true;
 
-            t.loadTextureFromFile("../game_assets/Resources/Pirate Ship/ship_texture4k/ship_Normal_DirectX_1001.png");
+            t.loadTextureFromFile("../game_assets/Resources/PirateShip/ship_texture4k/ship_Normal_DirectX_1001.png");
             t.type = "texture_normal";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_normal = true;
           }
           else if (textures[0].m_path.find("skull_texture1k") != std::string::npos)
           {
-            t.loadTextureFromFile("../game_assets/Resources/Pirate Ship/skull_texture1k/Skull_Metallic_1001.png");
+            t.loadTextureFromFile("../game_assets/Resources/PirateShip/skull_texture1k/Skull_Metallic_1001.png");
             t.type = "texture_specular";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_metalic = true;
 
-            t.loadTextureFromFile("../game_assets/Resources/Pirate Ship/skull_texture1k/Skull_Normal_DirectX_1001.png");
+            t.loadTextureFromFile("../game_assets/Resources/PirateShip/skull_texture1k/Skull_Normal_DirectX_1001.png");
             t.type = "texture_normal";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_normal = true;
@@ -1114,7 +1111,7 @@ void GameController::_UpdatePathVisual()
   for (auto& hex : m_current_path)
     verices.push_back({ hex->x(), Hex::common_height + 0.01f, hex->z() });
 
-  for (unsigned int i = 0; i < m_current_path.size() + 1; ++i)
+  for (unsigned int i = 0; i < m_current_path.size(); ++i)
   {
     indices.push_back(i);
     if(i!=0)
@@ -1123,13 +1120,33 @@ void GameController::_UpdatePathVisual()
   m_path_mesh->UpdateData(verices, indices, { 1.0f, 1.0f ,1.0f });
 
   //text destination
-  m_destination_text->content = std::to_string(m_current_path.size() + 1);
+  m_destination_text->content = std::to_string(m_current_path.size());
 }
 
 //-------------------------------------------------------------
 void GameController::_UpdateWarrning(const std::string& _message)
 {
   m_warrining->content = _message;
+}
+
+//-------------------------------------------------------------
+void GameController::_SetDestinationFromCurrentPath()
+{
+  if (!m_current_path.empty())
+  {
+    glm::vec3 destination = { m_current_path.front()->x(), m_ship_height_level, m_current_path.front()->z() };
+    m_current_path.pop_front();
+
+    if (m_game_state == GameState::SPANISH_TO_MOVE && m_side != Side::PIRATE)
+      m_ships[m_focused_index]->SetDestination(destination);
+    else if (m_game_state == GameState::PIRATE_TO_MOVE && m_side != Side::SPANISH)
+      m_ships_pirate[m_focused_index]->SetDestination(destination);
+    else
+    {
+      m_current_path.clear();
+    }
+    _SendMoveMsg();
+  }
 }
 
 //-------------------------------------------------------------
@@ -1171,5 +1188,139 @@ void GameController::_DebugHexes()
 
     m_game->AddText(text);
     ++counter;
+  }
+}
+
+//-------------------------------------------------------------
+void GameController::_SendMoveMsg()
+{
+  // should be sent when we actually move
+  if (m_side != Side::BOTH) // send tcp event
+  {
+    std::vector<uint32_t> content{ (uint32_t)(m_current_path.size() + 2),
+                                   (uint32_t)MessageType::MOVE,
+                                   m_focused_index };
+    std::vector<uint32_t> path(_GetCurPathIndices());
+    content.insert(content.end(), path.begin(), path.end());
+
+    if (m_tcpAgent)
+      m_tcpAgent->SendMsg(std::move(content));
+  }
+}
+
+//-------------------------------------------------------------
+void GameController::_UpdateTextPath()
+{
+  if (!m_current_path.empty())
+  {
+    if (Hex* dest = m_current_path.back(); dest)
+    {
+      Transform trans;
+      glm::vec2 offset{ -0.2f, -0.25f };
+      trans.setTranslation({ dest->x() + offset.x, Hex::common_height + 0.01f, dest->z() + offset.y });
+      trans.setScale({ 0.013f, 0.013f, 0.013f });
+      trans.setRotation(-PI / 2, -PI / 2, 0.0f);
+      m_destination_text->mvp = m_camera.get().getProjectionMatrix() * m_camera.get().getWorldToViewMatrix() * trans.getModelMatrix();
+    }
+  }
+  else
+  {
+    m_destination_text->content = "";
+    m_path_mesh->UpdateData({}, {}, glm::vec3{ 1.0f });
+  }
+}
+
+//-----------------------------------------------------
+Hex* GameController::_GetCurHex()
+{
+  auto cur_hex = std::find_if(m_hexes.begin(), m_hexes.end(), [this](const Hex& hex)
+    {
+      return glm::length(m_game->GetFocusedObject()->GetTransform()->getTranslation() - glm::vec3{ hex.x(), m_pipeline.get().GetWaterHeight(), hex.z() }) < (0.5f * 0.57f); //radius
+    });
+  if (cur_hex != m_hexes.end())
+    return &*cur_hex;
+  else
+    return nullptr;
+}
+
+//-------------------------------------------------------------
+eShipScript* GameController::_GetShipScript(const eObject* _ship) const
+{
+  for (int i = 0; i < m_ships.size(); ++i)
+  {
+    if (m_ships[i]->GetScriptObject() == _ship)
+      return m_ships[i];
+  }
+  for (int i = 0; i < m_ships_pirate.size(); ++i)
+  {
+    if (m_ships_pirate[i]->GetScriptObject() == _ship)
+      return m_ships_pirate[i];
+  }
+  return nullptr;
+}
+
+//-------------------------------------------------------------
+void   GameController::_UpdateCurrentPath()
+{
+  if (m_has_gold_index == -1)
+  {
+    _UpdateWarrning("Choose a ship which will hold the treasures by moving golden frame");
+    return;
+  }
+  else if (!m_game->GetFocusedObject())
+  {
+    _UpdateWarrning("Choose a ship to move");
+    return;
+  }
+  else if (_CurrentShipHasMoved())
+  {
+    _UpdateWarrning("This ship has already moved");
+    return;
+  }
+  else if (!m_dice_rolled)
+  {
+    _UpdateWarrning("Roll the dice before moving");
+    return;
+  }
+  else // player rolled dice and has not moved yet. so, lets calculate wheather and how they can move
+  {
+    // RIGHT CLICK ON WATER
+    float waterHeight = m_pipeline.get().GetWaterHeight();
+    dbb::plane pl(glm::vec3(1.0f, waterHeight, 1.0f),
+      glm::vec3(0.0f, waterHeight, 0.0f),
+      glm::vec3(0.0f, waterHeight, 1.0f)); // arbitrary triangle on waterHeight plane
+
+    glm::vec3 target = dbb::intersection(pl, m_camera.get().getCameraRay().getLine());
+    for (auto& hex : m_hexes)
+    {
+      if (hex.IsOn(target.x, target.z) && hex.IsWater(m_terrain, waterHeight))
+      {
+        if (hex.IsTaken())
+        {
+          _UpdateWarrning("The ship can not move there(hex is taken)");
+          m_current_path.clear();
+          return;
+        }
+        if (auto cur_hex = _GetCurHex(); cur_hex)
+        {
+          m_current_path = cur_hex->MakePath(&hex, m_terrain, waterHeight);
+          if (m_current_path.size() > m_current_dice) // can move less or equal to dice
+          {
+            _UpdateWarrning("The ship can not move there");
+            m_current_path.clear();
+            return;
+          }
+          else
+          {
+            _UpdateWarrning("");
+            return;
+          }
+        }
+        else
+        {
+          assert("can not find current hex!");
+        }
+      }
+    }
   }
 }

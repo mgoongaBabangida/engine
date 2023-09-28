@@ -107,7 +107,7 @@ void eMgoongaGameContext::InitializeModels()
   m_guis[0]->GetChildren()[0]->SetTexture(*tex, topLeft, bottomRight);
   m_guis[0]->GetChildren()[0]->SetVisible(false);
   m_guis[0]->setCommand(std::make_shared<MenuBehaviorLeanerMove>(m_guis[0]->GetChildren()[0].get(),
-    math::AnimationLeaner{
+    math::AnimationLeaner<glm::vec3>{
       {glm::vec3(m_guis[0]->getTopLeft().x, m_guis[0]->getTopLeft().y, 0)},
       {glm::vec3(m_guis[0]->GetChildren()[0]->getTopLeft().x, m_guis[0]->GetChildren()[0]->getTopLeft().y, 0)},
       1000 }));
@@ -179,7 +179,8 @@ void eMgoongaGameContext::_InitMainTestSceane()
   m_objects.push_back(containerCube);
 
   shObject grassPlane = factory.CreateObject(modelManager->Find("grass_plane"), eObject::RenderType::PHONG, "GrassPlane");
-  grassPlane->GetTransform()->setTranslation(vec3(0.0f, 2.0f, 0.0f));
+  grassPlane->GetTransform()->setTranslation(vec3(0.0f, 1.5f, 0.0f));
+  grassPlane->GetTransform()->setScale({ 5.0f, 5.0f, 5.0f });
   m_objects.push_back(grassPlane);
 
   /*shObject terrain = factory.CreateObject(std::shared_ptr<IModel>(terrainModel.release()), eObject::RenderType::PHONG, "Terrain");

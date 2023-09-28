@@ -62,12 +62,13 @@ void eSandBoxGame::InitializeModels()
 	//modelManager->Add("MapleTree", (GLchar*)std::string(modelFolderPath + "MapleTree/MapleTree.obj").c_str());
 	//modelManager->Add("Cottage", (GLchar*)std::string(modelFolderPath + "85-cottage_obj/cottage_obj.obj").c_str());
 
-	Material red;
-	red.albedo = glm::vec3(0.9f, 0.0f, 0.0f);
-	red.ao = 1.0f;
-	red.roughness = 1.0f;
-	red.metallic = 0.0f;
-	modelManager->Add("sphere_red", Primitive::SPHERE, std::move(red));
+	Material material;
+	material.albedo = glm::vec3(0.8f, 0.0f, 0.0f);
+	material.ao = 1.0f;
+	material.roughness = 0.5;
+	material.metallic = 0.5;
+
+	modelManager->Add("sphere_red", Primitive::SPHERE, std::move(material));
 
 	//DESERIALIZE ANIMATIONS
 	animationManager->Deserialize("Animations.mgoongaAnimations");
@@ -106,6 +107,7 @@ void eSandBoxGame::InitializeModels()
 
 	shObject grassPlane = factory.CreateObject(modelManager->Find("grass_plane"), eObject::RenderType::PHONG, "GrassPlane");
 	grassPlane->GetTransform()->setTranslation(vec3(0.0f, -2.0f, 0.0f));
+	grassPlane->GetTransform()->setScale(vec3(2.0f, 2.0f, 2.0f));
 	m_objects.push_back(grassPlane);
 
 	shObject wolf = factory.CreateObject(modelManager->Find("wolf"), eObject::RenderType::PHONG, "Wolf", "Default", "");
@@ -125,14 +127,31 @@ void eSandBoxGame::InitializeModels()
 	soldier->SetScript(new AnimationSocketScript(this));
 
 	//Set textures manually
-	t.loadTextureFromFile("../game_assets/Resources/Dying Soldier/textures/Ch15_1001_Normal.png");
+	t.loadTextureFromFile("../game_assets/Resources/DyingSoldier/textures/Ch15_1001_Normal.png");
 	const_cast<I3DMesh*>(soldier->GetModel()->Get3DMeshes()[0])->AddTexture(&t);
-	t.loadTextureFromFile("../game_assets/Resources/Dying Soldier/textures/Ch15_1002_Normal.png");
+	t.loadTextureFromFile("../game_assets/Resources/DyingSoldier/textures/Ch15_1002_Normal.png");
 	const_cast<I3DMesh*>(soldier->GetModel()->Get3DMeshes()[1])->AddTexture(&t);
 
 	m_objects.push_back(soldier);
 	/*modelManager->Save(soldier->GetModel(), "Soldier.mgoongaObject3d");
 	modelManager->Add("Soldier", "Soldier.mgoongaObject3d");*/
+
+	if(true)
+	{
+		shObject gravestone = factory.CreateObject(modelManager->Find("Gravestone"), eObject::RenderType::PBR, "Gravestone");
+		gravestone->GetTransform()->setTranslation(vec3(0.5f, -2.0f, 4.0f));
+		gravestone->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
+		gravestone->GetTransform()->setScale(vec3(0.5f, 0.5f, 0.5f));
+		const_cast<I3DMesh*>(gravestone->GetModel()->Get3DMeshes()[0])->SetMaterial(material);
+		m_objects.push_back(gravestone);
+
+		shObject tombstone = factory.CreateObject(modelManager->Find("Tombstone"), eObject::RenderType::PBR, "Tombstone");
+		tombstone->GetTransform()->setTranslation(vec3(-1.5f, -2.0f, 4.0f));
+		tombstone->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
+		tombstone->GetTransform()->setScale(vec3(0.5f, 0.5f, 0.5f));
+		const_cast<I3DMesh*>(tombstone->GetModel()->Get3DMeshes()[0])->SetMaterial(material);
+		m_objects.push_back(tombstone);
+	}
 
 	//light
 	m_light_object = factory.CreateObject(modelManager->Find("white_sphere"), eObject::RenderType::PHONG, "WhiteSphere");

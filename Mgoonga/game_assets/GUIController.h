@@ -20,7 +20,7 @@ public:
 
   virtual void Initialize() override;
   virtual void	Update(float _tick) override;
-  virtual bool OnMouseMove(int32_t _x, int32_t _y, KeyModifiers _modifier) override;
+  virtual bool  OnMouseMove(int32_t _x, int32_t _y, KeyModifiers _modifier) override;
 
 protected:
   eMainContextBase* m_game = nullptr;

@@ -2,6 +2,8 @@
 
 #include "BezierCurveUIController.h"
 #include "MainContextBase.h"
+#include "InputStrategy.h"
+
 #include <opengl_assets/MyMesh.h>
 #include <opengl_assets/GUI.h>
 #include <math/Rect.h>
@@ -11,14 +13,15 @@ BezierCurveUIController::BezierCurveUIController(eMainContextBase* _game, shObje
 : m_game(_game),
   m_bezier_object(_bezier_object)
 {
-  auto bezier_objects = m_bezier_object->GetChildrenObjects();
+  std::shared_ptr<eObject> bezier_object =  m_bezier_object.lock();
+  auto bezier_objects = bezier_object->GetChildrenObjects();
 
   bezier_objects[0]->GetTransform()->setScale({ _control_point_size, _control_point_size, _control_point_size });
   bezier_objects[1]->GetTransform()->setScale({ _control_point_size, _control_point_size, _control_point_size });
   bezier_objects[2]->GetTransform()->setScale({ _control_point_size, _control_point_size, _control_point_size });
   bezier_objects[3]->GetTransform()->setScale({ _control_point_size, _control_point_size, _control_point_size });
 
-  m_bezier_mesh = dynamic_cast<const BezierCurveMesh*>(m_bezier_object->GetModel()->GetMeshes()[0]);
+  m_bezier_mesh = dynamic_cast<const BezierCurveMesh*>(bezier_object->GetModel()->GetMeshes()[0]);
   if (m_bezier_mesh)
     m_bezier = &const_cast<BezierCurveMesh*>(m_bezier_mesh)->GetBezier();
 
@@ -49,24 +52,28 @@ BezierCurveUIController::BezierCurveUIController(eMainContextBase* _game, shObje
         if (close_button_rect.IsInside({ m_cursor_x , m_cursor_y }))
         {
           //clean up
-          m_game->DeleteObject(m_bezier_object);
           m_game->DeleteInputObserver(m_window.get());
           m_game->DeleteGUI(m_window);
-          ToolFinished.Occur(m_bezier_object);
+          ToolFinished.Occur(*m_bezier);
+          m_game->SetInputStrategy(nullptr);
           m_game->DeleteInputObserver(this);
-          m_bezier_object.reset();
+          m_closed = true;
         }
       }));
 
     m_game->AddGUI(m_window);
     m_game->AddInputObserver(m_window.get(), STRONG);
     m_game->AddInputObserver(this, WEAK);
+    m_game->SetInputStrategy(new InputStrategy2DMove(m_game));
   }
+  else
+    m_game->SetInputStrategy(new InputStrategyMoveAlongXZPlane(m_game->GetMainCamera(), GetObjectsWithChildren(m_game->GetObjects()))); //3d
 }
 
 //------------------------------------------------------
 BezierCurveUIController::~BezierCurveUIController()
 {
+  m_game->SetInputStrategy(nullptr);
 }
 
 //------------------------------------------------------
@@ -74,12 +81,22 @@ void BezierCurveUIController::Update(float _tick)
 {
   if (m_bezier)
   {
-    auto bezier_objects = m_bezier_object->GetChildrenObjects();
-    m_bezier->p0 = bezier_objects[0]->GetTransform()->getTranslation();
-    m_bezier->p1 = bezier_objects[1]->GetTransform()->getTranslation();
-    m_bezier->p2 = bezier_objects[2]->GetTransform()->getTranslation();
-    m_bezier->p3 = bezier_objects[3]->GetTransform()->getTranslation();
-    const_cast<BezierCurveMesh*>(m_bezier_mesh)->Update();
+    if (auto obj = m_bezier_object.lock(); obj)
+    {
+      if (!m_closed)
+      {
+        auto bezier_objects = obj->GetChildrenObjects();
+        m_bezier->p0 = bezier_objects[0]->GetTransform()->getTranslation();
+        m_bezier->p1 = bezier_objects[1]->GetTransform()->getTranslation();
+        m_bezier->p2 = bezier_objects[2]->GetTransform()->getTranslation();
+        m_bezier->p3 = bezier_objects[3]->GetTransform()->getTranslation();
+        const_cast<BezierCurveMesh*>(m_bezier_mesh)->Update();
+      }
+      else
+      {
+        m_game->DeleteObject(obj);
+      }
+    }
   }
 }
 

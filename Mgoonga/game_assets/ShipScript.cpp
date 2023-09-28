@@ -10,6 +10,11 @@
 #include <opengl_assets/MyModel.h>
 #include <opengl_assets/openglrenderpipeline.h>
 
+#include <glm\glm\gtc\matrix_transform.hpp>
+#include <glm\glm\gtx\transform.hpp>
+#include <glm\glm\gtc\quaternion.hpp>
+#include <glm\glm\gtx\quaternion.hpp>
+
 //----------------------------------------------------------------
 eShipScript::eShipScript(IGame* _game,
 												const Texture*					_flagTexture,
@@ -40,6 +45,7 @@ eShipScript::eShipScript(IGame* _game,
 //-------------------------------------------------------------------
 eShipScript::~eShipScript()
 {
+	m_game->DeleteInputObserver(this);
 }
 
 //------------------------------------------------------------------------------------
@@ -58,30 +64,28 @@ bool eShipScript::OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _mo
 {
 	if(m_game->GetFocusedObject().get() == this->object)
 	{
-		//if (!left)
-		//{
-		//	dbb::plane pl(glm::vec3(1.0f, waterHeight, 1.0f),
-		//		glm::vec3(0.0f, waterHeight, 0.0f),
-		//		glm::vec3(0.0f, waterHeight, 1.0f)); // arbitrary triangle on waterHeight plane
-		//	glm::vec3 target = dbb::intersection(pl, camera.get().getCameraRay().getLine());
-		//	SetDestination(target);
-		//}
-
-	/*	if (hexes)
-		{
-			for (auto& hex : *hexes)
-			{
-				glm::vec4 hex_transformed = inverse_transform_terrain * glm::vec4{ hex.x(), waterHeight, hex.z(), 1.0f };
-				if (hex.IsOn(target.x, target.z)
-					&& terrain->GetHeight(hex_transformed.x, hex_transformed.z) < hex_transformed.y)
-				{
-					SetDestination(glm::vec3{ hex.x(), waterHeight, hex.z() });
-					return true;
-				}
-			}
-		}*/
 	}
 	return false;
+}
+
+//-------------------------------------------------------------------------
+void eShipScript::CollisionCallback(const eCollision& _collision)
+{
+	if (_collision.collider == object && destination == NONE)
+	{
+		auto objs = m_game->GetObjects();
+		std::vector<std::shared_ptr<eObject> > objsToCollide;
+		for (std::shared_ptr<eObject> obj : objs)
+		{
+			if (obj->Name() != "Terrain")
+				objsToCollide.push_back(obj);
+		}
+
+		//@todo test Upvector and rotationupvector (-5?)
+		auto rot = glm::toQuat(glm::rotate(UNIT_MATRIX, glm::radians(5.0f)/*(-5 ? )*/, glm::vec3(0.0f, 1.0f, 0.0f)));
+		object->GetTransform()->setRotation(rot * object->GetTransform()->getRotation());
+		object->GetRigidBody()->Move(objsToCollide);
+	}
 }
 
 //-------------------------------------------------------------------------
@@ -89,16 +93,16 @@ void eShipScript::Update(float _tick)
 {
 	_UpdateFlagPos();
 
-	/*auto objs = m_game->GetObjects();
-	std::vector<std::shared_ptr<eObject> > objsToCollide;
-	for (std::shared_ptr<eObject> obj : objs)
-	{
-		if(obj->Name() != "Terrain")
-			objsToCollide.push_back(obj);
-	}*/
-
 	if(object && destination != NONE)
 	{
+		auto objs = m_game->GetObjects();
+		std::vector<std::shared_ptr<eObject> > objsToCollide;
+		for (std::shared_ptr<eObject> obj : objs)
+		{
+			if (obj->Name() != "Terrain")
+				objsToCollide.push_back(obj);
+		}
+
 		if (!object->GetTransform()->turnTo(destination, turn_speed))
 		{
 			if (glm::length2(object->GetTransform()->getTranslation() - destination) > move_speed)
@@ -106,11 +110,52 @@ void eShipScript::Update(float _tick)
 				object->GetRigidBody()->MoveForward({});
 			}
 			else
-			{
+			{ //@todo if destionation is not final there might be bugs, test
 				object->GetTransform()->setTranslation(destination);
 				destination = NONE;
+				object->GetRigidBody()->Move(objsToCollide);
+
 				if (shoot_after_move)
 					Shoot();
+			}
+		}
+	}
+	else if (object && m_drowned && !m_drowning_animation && m_state == ALIVE)
+	{
+		m_state = HIT;
+		m_drowning_animation = std::make_unique<math::AnimationLeaner<float>>(std::vector<float>{0}, std::vector<float>{PI/4}, 5'000);
+		m_drowning_animation->Start();
+		m_drawn_rotation = object->GetTransform()->getRotation();
+	}
+	else if (object && m_drowning_animation && m_state == HIT && m_drowning_animation->IsOn())
+	{
+		float t = m_drowning_animation->getCurrentFrame()[0];
+		auto rot = glm::toQuat(glm::rotate(UNIT_MATRIX, t, -glm::vec3(object->GetTransform()->getRotationVector())));
+		object->GetTransform()->setRotation(rot * m_drawn_rotation);
+	}
+	else if (object && m_drowned && m_state == HIT)
+	{
+		m_state = DROWNING;
+		m_drowning_animation = std::make_unique<math::AnimationLeaner<float>>(std::vector<float>{ object->GetTransform()->getTranslation().y, },
+																																					std::vector<float>{ object->GetTransform()->getTranslation().y - 0.2f} ,
+																																					2'000);
+		m_drowning_animation->Start();
+	}
+	else if (object && m_drowned && m_state == DROWNING && m_drowning_animation->IsOn())
+	{
+		glm::vec3 translation = object->GetTransform()->getTranslation();
+		object->GetTransform()->setTranslation({ translation.x, m_drowning_animation->getCurrentFrame()[0], translation.z });
+	}
+	else if (object && m_drowned && m_state == DROWNING)
+	{
+		m_state = DROWNED;
+		auto objects = m_game->GetObjects();
+		for (int i = 0; i < objects.size(); ++i)
+		{
+			if (objects[i]->GetScript() == this)
+			{
+				objects[i]->SetVisible(false);
+				m_game->DeleteObject(objects[i]);
 			}
 		}
 	}
@@ -119,14 +164,15 @@ void eShipScript::Update(float _tick)
 //----------------------------------------------------------------------------------
 void eShipScript::Shoot()
 {
-	glm::vec4 modelCenter	=	object->GetTransform()->getModelMatrix() 
-								* glm::vec4(object->GetCollider()->GetCenter(), 1.0f);
+	glm::vec4 modelCenter	=	object->GetTransform()->getModelMatrix() * glm::vec4(object->GetCollider()->GetCenter(), 1.0f);
 	std::shared_ptr<IParticleSystem> system = std::make_shared<ParticleSystem>(10, 0, 0, 10'000,
 														modelCenter + object->GetTransform()->getRotationVector() * 0.2f, // ask hexes
 														shoot_tex,
 														shoot_snd,
-														10'000);
+														4,
+														10'000.f);
 	//@todo no connection to rendering. Add pt sys in different way
+	system->Loop() = false;
 	system->Start();
 	pipeline.get().AddParticleSystem(system);
 	shoot_after_move = false;
