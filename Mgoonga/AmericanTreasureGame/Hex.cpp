@@ -55,109 +55,49 @@ bool Hex::IsWater(shObject _terrain, float _waterHeight)
 //------------------------------------------------------------------------------------------
 std::deque<Hex*> Hex::MakePath(const Hex* _destination, shObject _terrain, float _waterHeight)
 {
-	std::deque<Hex*> path;
+	std::deque<Hex*> path1, path2;
 	if (_destination == this)
-		return path;
+		return path1;
 	Hex* cur = this;
+	Hex* prev = nullptr;
 	while (cur != _destination)
 	{
-		if (_destination->m_center.x > cur->m_center.x && _destination->m_center.y == cur->m_center.y)
+		Hex* temp = cur;
+		_PathRootOne(cur, prev, _destination, _terrain, _waterHeight);
+		prev = temp;
+
+		if (path1.size() > 20)
 		{
-			if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken())
-				cur = cur->up;
-			else if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken())
-				cur = cur->up_right;
-			else if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken())
-				cur = cur->up_left;
-			else if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken())
-				cur = cur->down_right;
-			else if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken())
-				cur = cur->down_left;
-			else if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken())
-				cur = cur->down;
-		}
-		else if (_destination->m_center.x < cur->m_center.x && _destination->m_center.y == cur->m_center.y)
-		{
-			if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken())
-				cur = cur->down;
-			else if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken())
-				cur = cur->down_right;
-			else if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken())
-				cur = cur->down_left;
-			else if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken())
-				cur = cur->up_right;
-			else if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken())
-				cur = cur->up_left;
-			else if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken())
-				cur = cur->up;
-		}
-		else if (_destination->m_center.x >= cur->m_center.x && _destination->m_center.y > cur->m_center.y)
-		{
-			if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken())
-				cur = cur->up_right;
-			else if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken())
-				cur = cur->up;
-			else if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken())
-				cur = cur->down_right;
-			else if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken())
-				cur = cur->up_left;
-			else if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken())
-				cur = cur->down;
-			else if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken())
-				cur = cur->down_left;
-		}
-		else if (_destination->m_center.x >= cur->m_center.x && _destination->m_center.y < cur->m_center.y)
-		{
-			if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken())
-				cur = cur->up_left;
-			else if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken())
-				cur = cur->up;
-			else if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken())
-				cur = cur->down_left;
-			else if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken())
-				cur = cur->down;
-			else if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken())
-				cur = cur->up_right;
-			else if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken())
-				cur = cur->down_right;
-		}
-		else if (_destination->m_center.x < cur->m_center.x && _destination->m_center.y > cur->m_center.y)
-		{
-			if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken())
-				cur = cur->down_right;
-			else if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken())
-				cur = cur->up_right;
-			else if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken())
-				cur = cur->down;
-			else if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken())
-				cur = cur->down_left;
-			else if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken())
-				cur = cur->up;
-			else if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken())
-				cur = cur->up_left;
-		}
-		else if (_destination->m_center.x < cur->m_center.x && _destination->m_center.y < cur->m_center.y)
-		{
-			if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken())
-				cur = cur->down_left;
-			else if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken())
-				cur = cur->down;
-			else if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken())
-				cur = cur->up_left;
-			else if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken())
-				cur = cur->down_right;
-			else if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken())
-				cur = cur->up;
-			else if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken())
-				cur = cur->up_right;
+			std::cout << "first path missed" << std::endl;
+			break;
 		}
 
 		if (cur)
-			path.push_back(cur);
+			path1.push_back(cur);
 		else
 			return{};// could not get path, got nowhere
 	}
-	return path;
+
+	cur = this;
+	while (cur != _destination)
+	{
+		Hex* temp = cur;
+		_PathRootTwo(cur, prev, _destination, _terrain, _waterHeight);
+		prev = temp;
+
+		if (path2.size() > 20)
+		{
+			std::cout << "second path missed" << std::endl;
+			break;
+		}
+
+		if (cur)
+			path2.push_back(cur);
+		else
+			return{};// could not get path, got nowhere
+	}
+
+	return path1.size() < path2.size() ? path1 : path2;
 }
 
 //------------------------------------------------------------------------------------------
@@ -211,4 +151,218 @@ void Hex::Debug()
 	if (down_right) std::cout << "down_right x= " << down_right->m_center.x << " down_right y = " << down_right->m_center.y << std::endl;
 	if (down_left)	std::cout << "down_left x= " << down_left->m_center.x << " down_left y = " << down_left->m_center.y << std::endl;
 	 std::cout << "----------------------------------------------" << std::endl;
+}
+
+//----------------------------------------------------------------
+void Hex::_PathRootOne(Hex*& cur, Hex* _prev, const Hex* _destination, shObject _terrain, float _waterHeight)
+{
+	if (_destination->m_center.x > cur->m_center.x && _destination->m_center.y == cur->m_center.y) //up
+	{
+		if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken() && cur->up != _prev)
+			cur = cur->up;
+		else if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken() && cur->up_right != _prev)
+			cur = cur->up_right;
+		else if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken() && cur->up_left != _prev)
+			cur = cur->up_left;
+		else if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken() && cur->down_right != _prev)
+			cur = cur->down_right;
+		else if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken() && cur->down_left != _prev)
+			cur = cur->down_left;
+		else if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken() && cur->down != _prev)
+			cur = cur->down;
+		else
+			cur = _prev;
+	}
+	else if (_destination->m_center.x < cur->m_center.x && _destination->m_center.y == cur->m_center.y) // down
+	{
+		if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken() && cur->down != _prev)
+			cur = cur->down;
+		else if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken() && cur->down_right != _prev)
+			cur = cur->down_right;
+		else if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken() && cur->down_left != _prev)
+			cur = cur->down_left;
+		else if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken() && cur->up_right != _prev)
+			cur = cur->up_right;
+		else if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken() && cur->up_left != _prev)
+			cur = cur->up_left;
+		else if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken() && cur->up != _prev)
+			cur = cur->up;
+		else
+			cur = _prev;
+	}
+	else if (_destination->m_center.x > cur->m_center.x && _destination->m_center.y > cur->m_center.y) // up right
+	{
+		if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken() && cur->up_right != _prev)
+			cur = cur->up_right;
+		else if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken() && cur->up != _prev)
+			cur = cur->up;
+		else if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken() && cur->down_right != _prev)
+			cur = cur->down_right;
+		else if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken() && cur->up_left != _prev)
+			cur = cur->up_left;
+		else if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken() && cur->down != _prev)
+			cur = cur->down;
+		else if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken() && cur->down_left != _prev)
+			cur = cur->down_left;
+		else
+			cur = _prev;
+	}
+	else if (_destination->m_center.x > cur->m_center.x && _destination->m_center.y < cur->m_center.y) // up left
+	{
+		if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken() && cur->up_left != _prev)
+			cur = cur->up_left;
+		else if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken() && cur->up != _prev)
+			cur = cur->up;
+		else if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken() && cur->down_left != _prev)
+			cur = cur->down_left;
+		else if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken() && cur->down != _prev)
+			cur = cur->down;
+		else if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken() && cur->up_right != _prev)
+			cur = cur->up_right;
+		else if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken() && cur->down_right != _prev)
+			cur = cur->down_right;
+		else
+			cur = _prev;
+	}
+	else if (_destination->m_center.x <= cur->m_center.x && _destination->m_center.y > cur->m_center.y) // down right / right
+	{
+		if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken() && cur->down_right != _prev)
+			cur = cur->down_right;
+		else if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken() && cur->up_right != _prev)
+			cur = cur->up_right;
+		else if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken() && cur->down != _prev)
+			cur = cur->down;
+		else if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken() && cur->up != _prev)
+			cur = cur->up;
+		else if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken() && cur->down_left != _prev)
+			cur = cur->down_left;
+		else if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken() && cur->up_left != _prev)
+			cur = cur->up_left;
+		else
+			cur = _prev;
+	}
+	else if (_destination->m_center.x <= cur->m_center.x && _destination->m_center.y < cur->m_center.y) // down left/ left
+	{
+		if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken() && cur->down_left != _prev)
+			cur = cur->down_left;
+		else if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken() && cur->up_left != _prev)
+			cur = cur->up_left;
+		else if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken() && cur->down != _prev)
+			cur = cur->down;
+		else if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken() && cur->up != _prev)
+			cur = cur->up;
+		else if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken() && cur->down_right != _prev)
+			cur = cur->down_right;
+		else if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken() && cur->up_right != _prev)
+			cur = cur->up_right;
+		else
+			cur = _prev;
+	}
+}
+
+//----------------------------------------------------------------
+void Hex::_PathRootTwo(Hex*& cur, Hex* _prev, const Hex* _destination, shObject _terrain, float _waterHeight)
+{
+	if (_destination->m_center.x > cur->m_center.x && _destination->m_center.y == cur->m_center.y) //up
+	{
+		if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken() && cur->up != _prev)
+			cur = cur->up;
+		else if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken() && cur->up_right != _prev)
+			cur = cur->up_right;
+		else if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken() && cur->up_left != _prev)
+			cur = cur->up_left;
+		else if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken() && cur->down_right != _prev)
+			cur = cur->down_right;
+		else if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken() && cur->down_left != _prev)
+			cur = cur->down_left;
+		else if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken() && cur->down != _prev)
+			cur = cur->down;
+		else
+			cur = _prev;
+	}
+	else if (_destination->m_center.x < cur->m_center.x && _destination->m_center.y == cur->m_center.y) // down
+	{
+		if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken() && cur->down != _prev)
+			cur = cur->down;
+		else if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken() && cur->down_right != _prev)
+			cur = cur->down_right;
+		else if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken() && cur->down_left != _prev)
+			cur = cur->down_left;
+		else if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken() && cur->up_right != _prev)
+			cur = cur->up_right;
+		else if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken() && cur->up_left != _prev)
+			cur = cur->up_left;
+		else if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken() && cur->up != _prev)
+			cur = cur->up;
+		else
+			cur = _prev;
+	}
+	else if (_destination->m_center.x > cur->m_center.x && _destination->m_center.y > cur->m_center.y) // up right
+	{
+		if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken() && cur->up_right != _prev)
+			cur = cur->up_right;
+		else if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken() && cur->down_right != _prev)
+			cur = cur->down_right;
+		else if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken() && cur->up != _prev)
+			cur = cur->up;
+		else if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken() && cur->up_left != _prev)
+			cur = cur->up_left;
+		else if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken() && cur->down != _prev)
+			cur = cur->down;
+		else if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken() && cur->down_left != _prev)
+			cur = cur->down_left;
+		else
+			cur = _prev;
+	}
+	else if (_destination->m_center.x > cur->m_center.x && _destination->m_center.y < cur->m_center.y) // up left
+	{
+		if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken() && cur->up_left != _prev)
+			cur = cur->up_left;
+		else if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken() && cur->down_left != _prev)
+			cur = cur->down_left;
+		else if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken() && cur->up != _prev)
+			cur = cur->up;
+		else if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken() && cur->down != _prev)
+			cur = cur->down;
+		else if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken() && cur->up_right != _prev)
+			cur = cur->up_right;
+		else if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken() && cur->down_right != _prev)
+			cur = cur->down_right;
+		else
+			cur = _prev;
+	}
+	else if (_destination->m_center.x <= cur->m_center.x && _destination->m_center.y > cur->m_center.y) // down right / right
+	{
+		if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken() && cur->down_right != _prev)
+			cur = cur->down_right;
+		else if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken() && cur->down != _prev)
+			cur = cur->down;
+		else if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken() && cur->up_right != _prev)
+			cur = cur->up_right;
+		else if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken() && cur->up != _prev)
+			cur = cur->up;
+		else if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken() && cur->down_left != _prev)
+			cur = cur->down_left;
+		else if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken() && cur->up_left != _prev)
+			cur = cur->up_left;
+		else
+			cur = _prev;
+	}
+	else if (_destination->m_center.x <= cur->m_center.x && _destination->m_center.y < cur->m_center.y) // down left/ left
+	{
+		if (cur->down_left->IsWater(_terrain, _waterHeight) && !cur->down_left->IsTaken() && cur->down_left != _prev)
+			cur = cur->down_left;
+		else if (cur->down->IsWater(_terrain, _waterHeight) && !cur->down->IsTaken() && cur->down != _prev)
+			cur = cur->down;
+		else if (cur->up_left->IsWater(_terrain, _waterHeight) && !cur->up_left->IsTaken() && cur->up_left != _prev)
+			cur = cur->up_left;
+		else if (cur->up->IsWater(_terrain, _waterHeight) && !cur->up->IsTaken() && cur->up != _prev)
+			cur = cur->up;
+		else if (cur->down_right->IsWater(_terrain, _waterHeight) && !cur->down_right->IsTaken() && cur->down_right != _prev)
+			cur = cur->down_right;
+		else if (cur->up_right->IsWater(_terrain, _waterHeight) && !cur->up_right->IsTaken() && cur->up_right != _prev)
+			cur = cur->up_right;
+		else
+			cur = _prev;
+	}
 }

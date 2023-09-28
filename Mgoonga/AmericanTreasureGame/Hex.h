@@ -31,6 +31,9 @@ public:
 	void Debug();
 
 protected:
+	static void _PathRootOne(Hex*& _cur, Hex* _prev, const Hex* _destination, shObject terrain, float waterHeight);
+	static void _PathRootTwo(Hex*& _cur, Hex* _prev, const Hex* _destination, shObject terrain, float waterHeight);
+
 	glm::vec2	m_center;
 	Hex*		up			= nullptr;
 	Hex*		up_right	= nullptr;
