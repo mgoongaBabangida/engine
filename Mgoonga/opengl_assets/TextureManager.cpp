@@ -120,7 +120,7 @@ void eTextureManager::InitContext(const std::string& _folderPath)
 void eTextureManager::_LoadHardcoded()
 {
 	Texture text;
-	text.loadTextureFromFile(folderPath + "empty.jpg");
+	text.loadTextureFromFile(folderPath + "empty.png");
 	m_Textures.insert(std::pair<std::string, Texture>("Tempty", text));
 	Texture::SetEmptyTextureId(text.id);
 

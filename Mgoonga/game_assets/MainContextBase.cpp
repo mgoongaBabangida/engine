@@ -101,7 +101,7 @@ bool eMainContextBase::OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier)
 
 	if (GetMainCamera().getCameraRay().IsPressed())
 	{
-		if (m_input_strategy && !m_input_strategy->OnMouseMove(x, y) && m_framed_choice_enabled)
+		if ((!m_input_strategy || (m_input_strategy && !m_input_strategy->OnMouseMove(x, y))) && m_framed_choice_enabled)
 		{
 			// input strategy has priority over frame, @todo frmae should be inside one of input strategies
 			m_framed.reset(new std::vector<shObject>(GetMainCamera().getCameraRay().onMove(GetMainCamera(), m_objects, static_cast<float>(x), static_cast<float>(y)))); 	//to draw a frame
@@ -216,34 +216,37 @@ void eMainContextBase::PaintGL()
 
 		for (shObject object : m_objects)
 		{
-			if (!object->IsVisible())
-				continue;
-
-			if (object->GetScript())
-				object->GetScript()->Update(msc);
-
-			for (auto& child : object->GetChildrenObjects())
+			if(object.get())
 			{
-				if (child->GetRenderType() == eObject::RenderType::PBR)
-					pbr.push_back(child);
-				else if (child->GetRenderType() == eObject::RenderType::PHONG)
-					phong.push_back(child);
-				else if (child->GetRenderType() == eObject::RenderType::FLAG)
-					flags.push_back(child);
-			}
+				if (!object->IsVisible())
+					continue;
 
-			if (object->GetRenderType() == eObject::RenderType::BEZIER_CURVE)
-				bezier.push_back(object);
-			else if (object->GetRenderType() == eObject::RenderType::GEOMETRY)
-				geometry.push_back(object);
-			else if (object->GetRenderType() == eObject::RenderType::PBR)
-				pbr.push_back(object);
-			else if (object->GetRenderType() == eObject::RenderType::PHONG)
-				phong.push_back(object);
-			else if (object->GetRenderType() == eObject::RenderType::FLAG)
-				flags.push_back(object);
-			else if (object->GetRenderType() == eObject::RenderType::LINES)
-				lines.push_back(object);
+				if (object->GetScript())
+					object->GetScript()->Update(msc);
+
+				for (auto& child : object->GetChildrenObjects())
+				{
+					if (child->GetRenderType() == eObject::RenderType::PBR)
+						pbr.push_back(child);
+					else if (child->GetRenderType() == eObject::RenderType::PHONG)
+						phong.push_back(child);
+					else if (child->GetRenderType() == eObject::RenderType::FLAG)
+						flags.push_back(child);
+				}
+
+				if (object->GetRenderType() == eObject::RenderType::BEZIER_CURVE)
+					bezier.push_back(object);
+				else if (object->GetRenderType() == eObject::RenderType::GEOMETRY)
+					geometry.push_back(object);
+				else if (object->GetRenderType() == eObject::RenderType::PBR)
+					pbr.push_back(object);
+				else if (object->GetRenderType() == eObject::RenderType::PHONG)
+					phong.push_back(object);
+				else if (object->GetRenderType() == eObject::RenderType::FLAG)
+					flags.push_back(object);
+				else if (object->GetRenderType() == eObject::RenderType::LINES)
+					lines.push_back(object);
+			}
 		}
 
 		if(m_input_strategy)
@@ -535,6 +538,7 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[1]->Add(CHECKBOX, "SSAO", &pipeline.GetSSAOEnabledRef());
 	externalGui[1]->Add(SLIDER_FLOAT, "SSAO Threshold", &pipeline.GetSaoThresholdRef());
 	externalGui[1]->Add(SLIDER_FLOAT, "SSAO Strength", &pipeline.GetSaoStrengthRef());
+	externalGui[1]->Add(CHECKBOX, "Shadows", &pipeline.ShadowingRef());
 
 	std::function<void()> emit_partilces_callback = [this]()
 	{
@@ -630,7 +634,8 @@ void eMainContextBase::InitializeExternalGui()
 	};
 	externalGui[5]->Add(BUTTON, "Plane", (void*)&create_plane_callbaack);
 
-	std::function<void()> create_bezier_callbaack = [this]()
+	//bezier 2d
+	std::function<void()> create_bezier_callback = [this]()
 	{
 		dbb::Bezier bezier;
 		bezier.p0 = { -0.85f, -0.75f, 0.0f };
@@ -649,10 +654,10 @@ void eMainContextBase::InitializeExternalGui()
 			pbr_sphere->Set2DScreenSpace(true);
 		}
 		bezier_model->SetScript(new BezierCurveUIController(this, bezier_model, 0.02f, texManager->Find("pseudo_imgui")));
-		m_input_strategy.reset(new InputStrategy2DMove(this));
 	};
-	externalGui[5]->Add(BUTTON, "Bezier Curve 2D", (void*)&create_bezier_callbaack);
+	externalGui[5]->Add(BUTTON, "Bezier Curve 2D", (void*)&create_bezier_callback);
 
+	//bezier 3d
 	std::function<void()> create_bezier_callbaack_3d = [this]()
 	{
 		dbb::Bezier bezier;
@@ -671,7 +676,6 @@ void eMainContextBase::InitializeExternalGui()
 			bezier_model->GetChildrenObjects().push_back(pbr_sphere);
 		}
 		bezier_model->SetScript(new BezierCurveUIController(this, bezier_model, 0.1f));
-		m_input_strategy.reset(new InputStrategyMoveAlongXZPlane(GetMainCamera(), GetObjectsWithChildren(m_objects)));
 	};
 	externalGui[5]->Add(BUTTON, "Bezier Curve 3D", (void*)&create_bezier_callbaack_3d);
 
@@ -718,7 +722,7 @@ void eMainContextBase::InitializeExternalGui()
 	};
 	externalGui[9]->Add(CONSOLE, "Console", reinterpret_cast<void*>(&console_plane_callbaack));
 
-	m_global_scripts.push_back(std::make_shared<ParticleSystemToolController>(externalGui[10], texManager.get(), soundManager.get(), pipeline));
+	m_global_scripts.push_back(std::make_shared<ParticleSystemToolController>(this, externalGui[10], modelManager.get(),texManager.get(), soundManager.get(), pipeline));
 	//m_global_scripts.push_back(std::make_shared<TerrainGeneratorTool>(this, modelManager.get(), texManager.get(), pipeline, externalGui[11]));
 }
 

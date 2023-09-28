@@ -24,7 +24,7 @@ public:
 		, scaleIncrement(m_scale.x * 0.015f)
 		{ UpdateModelMatrix();}
 
-	void				    setRotation(float x, float y, float z);
+	void				    setRotation(float x, float y, float z); //radians
 	void				    setRotation(glm::quat q)	 { q_rotation = q;		UpdateModelMatrix(); }
 	virtual void		setTranslation(glm::vec3 tr) { m_translation = tr;	UpdateModelMatrix(); }
 	virtual void		setScale(glm::vec3 sc) { m_scale = sc;	scaleIncrement = m_scale.x * 0.015f;	UpdateModelMatrix(); }

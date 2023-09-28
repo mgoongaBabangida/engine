@@ -325,31 +325,29 @@ void ParticleMesh::setupMesh()
 	glBufferData(GL_ARRAY_BUFFER, SIZEOF * MAXPARTICLES,
 		0, GL_DYNAMIC_DRAW);
 
-	for (int i = 0; i < 4; ++i) {
+	for (int i = 0; i < 4; ++i) 
+	{
 		glEnableVertexAttribArray(i+6);
-		glVertexAttribPointer(i+6, 4, GL_FLOAT, GL_FALSE, SIZEOF,
-			(const GLvoid*)((sizeof(float) * 4)*i));
+		glVertexAttribPointer(i+6, 4, GL_FLOAT, GL_FALSE, SIZEOF, (const GLvoid*)((sizeof(float) * 4)*i));
 		glVertexAttribDivisor(i+6, 1);
 	}
 
 	glEnableVertexAttribArray(10);
-	glVertexAttribPointer(10, 2, GL_FLOAT, GL_FALSE, SIZEOF,
-		(GLvoid*)(sizeof(float) * 16));
+	glVertexAttribPointer(10, 2, GL_FLOAT, GL_FALSE, SIZEOF, (GLvoid*)(sizeof(float) * 16));
 	glVertexAttribDivisor(10, 1);
 
 	glEnableVertexAttribArray(11);
-	glVertexAttribPointer(11, 2, GL_FLOAT, GL_FALSE, SIZEOF,
-		(GLvoid*)(sizeof(float) * 18));
+	glVertexAttribPointer(11, 2, GL_FLOAT, GL_FALSE, SIZEOF, (GLvoid*)(sizeof(float) * 18));
 	glVertexAttribDivisor(11, 1);
 
 	glEnableVertexAttribArray(12);
-	glVertexAttribPointer(12, 2, GL_FLOAT, GL_FALSE, SIZEOF,
-		(GLvoid*)(sizeof(float) * 20));
+	glVertexAttribPointer(12, 2, GL_FLOAT, GL_FALSE, SIZEOF, (GLvoid*)(sizeof(float) * 20));
 	glVertexAttribDivisor(12, 1);
 
 	glBindVertexArray(0);
 }
 
+//------------------------------------------------------------
 void ParticleMesh::updateInstancedData(std::vector<float>& buffer)
 {
 	//glBindVertexArray(this->VAO);

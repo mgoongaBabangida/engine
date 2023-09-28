@@ -10,9 +10,11 @@ eSoundManager::eSoundManager(const std::string& _path)
 	context->init();
 	context->LoadWavFile(assetsFolderPath + "Cannon+5.wav");
 	context->LoadWavFile(assetsFolderPath + "page-flip-01a.wav");
+	context->LoadWavFile(assetsFolderPath + "fire-1.wav");
 
 	sounds.push_back(std::unique_ptr<RemSnd>(new RemSnd(context->GetBuffers().find(assetsFolderPath + "Cannon+5.wav")->second, true, "shot_sound")));
 	sounds.push_back(std::unique_ptr<RemSnd>(new RemSnd(context->GetBuffers().find(assetsFolderPath + "page-flip-01a.wav")->second, false, "page_sound")));
+	sounds.push_back(std::unique_ptr<RemSnd>(new RemSnd(context->GetBuffers().find(assetsFolderPath + "fire-1.wav")->second, false, "fire_sound")));
 }
 
 SoundContext* eSoundManager::GetContext()

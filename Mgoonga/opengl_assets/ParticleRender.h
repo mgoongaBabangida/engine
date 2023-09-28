@@ -25,23 +25,16 @@ public:
 	void	Render(const Camera &camera);
 	void	AddParticleSystem(std::shared_ptr<IParticleSystem> sys);
 
-	Shader& GetShader() { return particleShader; }
+	Shader& GetShader() { return m_particleShader; }
 
 protected:
-	Shader											        particleShader;
-	std::unique_ptr<MyModel>						model;
-	std::unique_ptr<ParticleMesh>				mesh;
-	std::unique_ptr<eObject>						object;
+	Shader											        m_particleShader;
+	std::unique_ptr<MyModel>						m_model;
+	std::unique_ptr<ParticleMesh>				m_mesh;
+	std::unique_ptr<eObject>						m_object;
 	
-	std::vector<std::shared_ptr<IParticleSystem> >	systems;
-	std::vector<float>								              instancedBuffer;
+	std::vector<std::shared_ptr<IParticleSystem> >	m_systems;
+	std::vector<float>								              m_instancedBuffer;
 
-	GLuint	fullTransformationUniformLocation;
-	GLuint	modelToWorldMatrixUniformLocation;
-	GLuint	worldToProjectionMatrixUniformLocation;
-	GLuint	ProjectionMatrixUniformLocation;
-	GLuint	modelViewMatrixLocation;
-	GLuint	texOffset1Location;
-	GLuint	texOffset2Location;
-	GLuint	texCoordInfoLocation;
+	GLuint															projectionMatrixUniformLocation;
 };

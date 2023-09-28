@@ -8,33 +8,39 @@
 
 #include <base/base.h>
 
+//-----------------------------------------------------------------------------
 void Transform::setRotation(float x, float y, float z)
 {
 	q_rotation = glm::quat(glm::vec3(x, y, z)); // from euler angles (tutorial 17)
 	UpdateModelMatrix();
 }
 
+//-----------------------------------------------------------------------------
 glm::vec4 Transform::getRotationVector() const
 {
 	return  glm::toMat4(q_rotation) * glm::vec4(forward, 1.0f);
 }
 
+//-----------------------------------------------------------------------------
 glm::vec4 Transform::getRotationUpVector() const
 {
 	return  glm::toMat4(q_rotation) * glm::vec4(Up, 1.0f);
 }
 
+//-----------------------------------------------------------------------------
 void Transform::UpdateModelMatrix()
 {
 	glm::mat4 rotatM0 = glm::toMat4(q_rotation);
 	totalTransform = glm::translate(m_translation)* rotatM0* glm::scale(glm::vec3(m_scale.x, m_scale.y, m_scale.z));
 }
 
+//-----------------------------------------------------------------------------
 const glm::mat4& Transform::getModelMatrix() const
 {
 	return totalTransform;
 }
 
+//-----------------------------------------------------------------------------
 void Transform::setModelMatrix(const glm::mat4& _mat)
 {
 	totalTransform = _mat;
@@ -63,6 +69,7 @@ void Transform::setModelMatrix(const glm::mat4& _mat)
 	q_rotation = glm::quat(rotation);
 }
 
+//-----------------------------------------------------------------------------
 bool Transform::isRotationValid()
 {
 	return q_rotation.x > 0.0f || q_rotation.x < 1.0f 
@@ -70,6 +77,7 @@ bool Transform::isRotationValid()
 		&& q_rotation.z > 0.0f || q_rotation.z < 1.0f;
 }
 
+//-----------------------------------------------------------------------------
 glm::quat Transform::RotationBetweenVectors(glm::vec3 start, glm::vec3 dest)
 {
 	start = normalize(start);
@@ -103,6 +111,7 @@ glm::quat Transform::RotationBetweenVectors(glm::vec3 start, glm::vec3 dest)
 	);
 }
 
+//-----------------------------------------------------------------------------
 Transform Transform::interpolate(const Transform& first, const Transform& second, float progression)
 {
 	progression = glm::clamp(progression, 0.0f, 1.0f);
@@ -114,6 +123,7 @@ Transform Transform::interpolate(const Transform& first, const Transform& second
 	return ret;
 }
 
+//-----------------------------------------------------------------------------
 void Transform::billboard(glm::vec3 direction)
 {
 	// Rotation aroun Y
@@ -133,6 +143,7 @@ void Transform::billboard(glm::vec3 direction)
 	setRotation(Xrot, Yrot, 0);
 }
 
+//-----------------------------------------------------------------------------
 bool Transform::turnTo(glm::vec3 dest, float speed) //@todo speed is not used
 {	
 	if (dest == m_translation)

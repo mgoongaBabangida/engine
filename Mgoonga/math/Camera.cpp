@@ -95,7 +95,7 @@ const glm::mat4& Camera::getProjectionMatrix() const
 void Camera::mouseUpdate(const glm::vec2& newMousePosition)
 {
 	glm::vec2 mouseDelta = newMousePosition - oldMousePosition;
-	if(glm::length(mouseDelta) > 5.0f) //@todo magic number
+	if(glm::length(mouseDelta) > strafeThreshold)
 	{
 		oldMousePosition = newMousePosition;
 	}
@@ -105,11 +105,11 @@ void Camera::mouseUpdate(const glm::vec2& newMousePosition)
 		viewDirection = glm::mat3(
 			glm::rotate(-mouseDelta.x * MOVEMENT_SPEED * 0.1f , Up) * 
 			glm::rotate(mouseDelta.y * MOVEMENT_SPEED * 0.1f, strafeDirection)) * viewDirection;
+
 		oldMousePosition = newMousePosition;
-		//
-		rotationMatrix = rotationMatrix* glm::mat3(
-			glm::rotate(-mouseDelta.x * MOVEMENT_SPEED * 0.1f, Up) *
-			glm::rotate(mouseDelta.y * MOVEMENT_SPEED * 0.1f, strafeDirection));
+
+		rotationMatrix = rotationMatrix * glm::mat3(glm::rotate(-mouseDelta.x * MOVEMENT_SPEED * 0.1f, Up) *
+																								glm::rotate(mouseDelta.y * MOVEMENT_SPEED * 0.1f, strafeDirection));
 	}
 }
 

@@ -862,6 +862,7 @@ void eWindowImGui::Render()
         {
           ImGui::SliderFloat("Cone Angle", &p_psystem->get()->ConeAngle(), 0.0f, 2.0f);
           ImGui::SliderFloat("Speed", &p_psystem->get()->Speed(), 0.0f, 1.0f);
+          ImGui::SliderFloat("Random Magnitude", &p_psystem->get()->RandomizeMagnitude(), 0.0f, 1.0f);
           ImGui::SliderFloat("Base Radius", &p_psystem->get()->BaseRadius(), 0.0f, 1.0f);
           float scale = p_psystem->get()->Scale().x;
           if (ImGui::SliderFloat("Size", &scale, 0.0f, 1.0f))
@@ -870,8 +871,12 @@ void eWindowImGui::Render()
           }
           ImGui::SliderFloat("Life Length", &p_psystem->get()->LifeLength(), 1.0f, 100.0f);
           ImGui::SliderInt("Particles Per Second", &p_psystem->get()->ParticlesPerSecond(), 1, 100);
-          ImGui::SliderFloat("Gravity", &p_psystem->get()->Gravity(), 0.0f, 10.0f);
+          ImGui::SliderFloat("Gravity", &p_psystem->get()->Gravity(), 0.0f, 1.0f);
+          ImGui::SliderFloat("Position X", &p_psystem->get()->GetSystemCenter().x, -10.0f, 10.0f);
+          ImGui::SliderFloat("Position Y", &p_psystem->get()->GetSystemCenter().y, -10.0f, 10.0f);
+          ImGui::SliderFloat("Position Z", &p_psystem->get()->GetSystemCenter().z, -10.0f, 10.0f);
           ImGui::Checkbox("Loop", &p_psystem->get()->Loop());
+          ImGui::Image((void*)(intptr_t)(p_psystem->get()->GetTexture()->id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
         }
       }
       break;

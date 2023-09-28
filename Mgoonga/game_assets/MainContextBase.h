@@ -105,6 +105,9 @@ public:
 	virtual void AddText(std::shared_ptr<Text>);
 	virtual std::vector<std::shared_ptr<Text>>& GetTexts();
 
+	void EnableHovered(bool _hover) { m_update_hovered = _hover; }
+	void SetInputStrategy(InputStrategy* _input_strategy) { m_input_strategy.reset(_input_strategy); }
+
 protected:
 	virtual void		InitializePipline();
 	virtual void		InitializeBuffers() {}
@@ -165,7 +168,7 @@ protected:
 	float			farPlane	= 20.0f;
 
 	bool m_l_pressed = false;
-	bool m_framed_choice_enabled = true;
+	bool m_framed_choice_enabled = false;
 	bool m_update_hovered = false;
 
 	eOpenGlRenderPipeline							pipeline;

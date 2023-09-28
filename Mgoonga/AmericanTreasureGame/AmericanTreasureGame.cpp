@@ -74,7 +74,7 @@ void AmericanTreasureGame::InitializeModels()
   IWindowImGui* debug_window = this->externalGui.size() > 12 ? externalGui[12] : nullptr;
   m_global_scripts.push_back(std::make_shared<GameController>(this, modelManager.get(), texManager.get(), soundManager.get(), pipeline, GetMainCamera(), debug_window));
   m_global_scripts.push_back(std::make_shared<GUIController>(this, this->pipeline, soundManager->GetSound("page_sound")));
-  m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera()));
+  m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera(), true));
 
   m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
 }

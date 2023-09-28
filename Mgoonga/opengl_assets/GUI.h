@@ -166,7 +166,7 @@ protected:
 class DLL_OPENGL_ASSETS MenuBehaviorLeanerMove : public ICommand
 {
 public:
-	MenuBehaviorLeanerMove(GUI* _g, math::AnimationLeaner&& _anim) :gui(_g), anim(std::move(_anim)) {}
+	MenuBehaviorLeanerMove(GUI* _g, math::AnimationLeaner<glm::vec3>&& _anim) :gui(_g), anim(std::move(_anim)) {}
 	MenuBehaviorLeanerMove(const MenuBehaviorLeanerMove&) = delete;
 	virtual void Execute() override;
 	~MenuBehaviorLeanerMove();
@@ -174,7 +174,7 @@ public:
 protected:
 	GUI* gui = nullptr;
 	std::unique_ptr<math::Timer> timer;
-	math::AnimationLeaner anim;
+	math::AnimationLeaner<glm::vec3> anim;
 };
 
 //----------------------------------------------

@@ -70,6 +70,7 @@ public:
 	bool& GetRotateSkyBoxRef();
 	float& GetSaoThresholdRef();
 	float& GetSaoStrengthRef();
+	bool& ShadowingRef() { return shadows; }
 
 	glm::vec4 debug_float = {0.0f,0.0f,0.0f,0.0f};
 
