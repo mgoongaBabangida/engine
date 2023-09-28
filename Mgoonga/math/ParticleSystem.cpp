@@ -52,19 +52,27 @@ void ParticleSystem::Start()
 	if (sound)
 		sound->Play();
 
-	timer->start(40);
+	timer->start(30);
 	srand(time(0));
 }
 
 //-------------------------------------------------------------------------
-void ParticleSystem::GenerateParticles()
+void ParticleSystem::GenerateParticles(int64_t _tick)
 {
 	if(clock.timeEllapsedMsc() < m_duration || m_loop)
 	{
-		int64_t msc = clock.newFrame();
-		float new_particles = (float)msc / 1000.0f * (float)m_pps;
-		for (int i = 0; i < new_particles; ++i)
-			_emitParticles();
+		int64_t msc = _tick + m_time_wo_new_particles;
+		float new_particlesf = static_cast<float>(msc) / 1000.0f * static_cast<float>(m_pps);
+		if (size_t new_particles = static_cast<size_t>(new_particlesf); new_particles)
+		{
+			for (size_t i = 0; i < new_particles; ++i)
+				_emitParticles();
+			m_time_wo_new_particles = 0;
+		}
+		else
+			m_time_wo_new_particles = msc;
+
+		//std::cout << "Generate " << m_time_wo_new_particles << std::endl;
 	}
 	else
 	{
@@ -86,16 +94,16 @@ void ParticleSystem::_emitParticles()
 		origin.z = origin.z + math::Random::RandomFloat(-m_base_radius, m_base_radius);
 	}
 
-	if (cur_particles < MAX_PARTICLES)
+	if (m_cur_particles < MAX_PARTICLES)
 	{
-		m_particles[cur_particles].reset(origin, dir, m_gravity_complient, m_life_length * 1000, 0, 0, static_cast<uint32_t>(num_rows_in_texture));
-		++cur_particles;
+		m_particles[m_cur_particles].reset(origin, dir, m_gravity_complient, m_life_length * 1000, 0, m_scale.x, static_cast<uint32_t>(num_rows_in_texture));
+		++m_cur_particles;
 	}
 	else
 	{
-		auto prt = std::find_if(m_particles.begin(), m_particles.end(), [](Particle& pt) {return !pt.isAlive(); });
+		auto prt = std::find_if(m_particles.begin(), m_particles.end(), [](Particle& pt) { return !pt.isAlive(); });
 		if (prt != m_particles.end())
-			prt->reset(origin, dir, m_gravity_complient, m_life_length * 1000, 0, 0, static_cast<uint32_t>(num_rows_in_texture));
+			prt->reset(origin, dir, m_gravity_complient, m_life_length * 1'000, 0, m_scale.x, static_cast<uint32_t>(num_rows_in_texture));
 	}
 }
 
@@ -111,23 +119,23 @@ glm::vec3 ParticleSystem::_calculateParticles()
 		dir.x = (sinf(theta) * cosf(phi)) * m_speed;	// (30 + (1 + rand() % 20));
 		dir.y = (cosf(theta))							* m_speed;	// (30 + (1 + rand() % 20));
 		dir.z = (sinf(theta) * sinf(phi)) * m_speed;	// (30 + (1 + rand() % 20));
-		return dir;
+		return dir * math::Random::RandomFloat(1.0f - m_randomize_magnitude, 1.0f + m_randomize_magnitude);
 	}
 	else if (m_type == SPHERE) //@todo also use speed
 	{
 		glm::vec3 dir(
-			math::Random::RandomFloat(0.0f, 1.0f) * 2.0f - 1.0f,
-			math::Random::RandomFloat(0.0f, 1.0f) * 2.0f - 1.0f,
-			math::Random::RandomFloat(0.0f, 1.0f) * 2.0f - 1.0f
+			(math::Random::RandomFloat(0.0f, 1.0f) * 2.0f - 1.0f) * m_speed,
+			(math::Random::RandomFloat(0.0f, 1.0f) * 2.0f - 1.0f) * m_speed,
+			(math::Random::RandomFloat(0.0f, 1.0f) * 2.0f - 1.0f) * m_speed
 		);
-		return glm::normalize(dir) / math::Random::RandomFloat(300.0f, 600.0f);
+		return dir * math::Random::RandomFloat(1.0f - m_randomize_magnitude, 1.0f + m_randomize_magnitude);
 	}
 	assert("ParticleSystem::_calculateParticles");
 	return {};
 }
 
 //-----------------------------------------------------------------------------------
-std::vector<Particle>::iterator ParticleSystem::PrepareParticles(glm::vec3 _cameraPosition) 
+std::vector<Particle>::iterator ParticleSystem::PrepareParticles(const glm::vec3& _cameraPosition) 
 {
 	// sort alive or not
 	std::vector<Particle>::iterator n_end = m_particles.begin();
@@ -164,13 +172,25 @@ void ParticleSystem::Reset()
 }
 
 //-------------------------------------------------------------------------------------
+void ParticleSystem::SetSizeBezier(std::array<glm::vec3, 4> _bezier)
+{
+	m_particle_size_over_time.p0 = { (_bezier[0].x + 1.0f) / 2.0f, (_bezier[0].y + 1.0f) / 2.0f,0.0f }; // ( +1) /2 from -1 1 to 0 1
+	m_particle_size_over_time.p1 = { (_bezier[1].x + 1.0f) / 2.0f, (_bezier[1].y + 1.0f) / 2.0f,0.0f };
+	m_particle_size_over_time.p2 = { (_bezier[2].x + 1.0f) / 2.0f, (_bezier[2].y + 1.0f) / 2.0f,0.0f };
+	m_particle_size_over_time.p3 = { (_bezier[3].x + 1.0f) / 2.0f, (_bezier[3].y + 1.0f) / 2.0f,0.0f };
+	m_use_size_over_time = true;
+	for (auto& p : m_particles)
+		p.setScaleCurve(&m_particle_size_over_time);
+}
+
+//-------------------------------------------------------------------------------------
 void ParticleSystem::Update()
 {
-	GenerateParticles();
+	int64_t msc = clock.newFrame();
+	GenerateParticles(msc);
 	for (auto& prt : m_particles)
-	{
-		prt.Update();
-	}
+		prt.Update(static_cast<float>(msc));
+
 	std::sort(m_particles.begin(), m_particles.end(),
 			  [](Particle& prt1, Particle& prt2)
 			{ return prt1.isAlive() > prt2.isAlive(); });

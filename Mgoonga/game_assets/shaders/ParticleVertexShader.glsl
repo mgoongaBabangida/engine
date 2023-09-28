@@ -14,7 +14,8 @@ uniform mat4 ProjectionMatrix;
 
 void main()
 {
-	vec2 textureCoords = vec2((position.x +1.0f)/2.0f,(position.y+1.0f)/2.0f);// + vec2(0.5,0.5);
+	vec2 textureCoords = vec2( (position.x + 1.0f)/ 2.0f,(position.y+1.0f) /2.0f); // + vec2(0.5,0.5);
+	
 	textureCoords.y = 1.0f - textureCoords.y;
 	textureCoords /= texCoordInfo.x; //4
 	textureCoords1 = textureCoords + texOffset1;

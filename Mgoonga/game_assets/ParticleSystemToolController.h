@@ -1,7 +1,10 @@
 #pragma once
+
 #include <base/interfaces.h>
 
 class IWindowImGui;
+class eMainContextBase;
+class eModelManager;
 class eTextureManager;
 class eSoundManager;
 class eOpenGlRenderPipeline;
@@ -10,7 +13,9 @@ class eOpenGlRenderPipeline;
 class ParticleSystemToolController : public IScript
 {
 public:
-  ParticleSystemToolController(IWindowImGui* _imgui,
+  ParticleSystemToolController(eMainContextBase* _game,
+															 IWindowImGui* _imgui,
+															 eModelManager* _modelManager,
 															 eTextureManager* _texManager,
 															 eSoundManager* _soundManager,
 															 eOpenGlRenderPipeline& _pipeline);
