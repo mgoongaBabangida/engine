@@ -53,7 +53,7 @@ void ParticleSystem::Start()
 		sound->Play();
 
 	timer->start(30);
-	srand(time(0));
+	srand(static_cast<unsigned int>(time(0)));
 }
 
 //-------------------------------------------------------------------------

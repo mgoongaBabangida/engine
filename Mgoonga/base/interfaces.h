@@ -270,6 +270,8 @@ public:
 	virtual std::vector<glm::mat4>				GetMatrices(const std::string& _animationName, size_t _frame)														= 0;
 	virtual const std::string&						GetPath() const																																					= 0;
 	virtual void													SetPath(const std::string&)																															= 0;
+
+	virtual bool													UseFirstFrameAsIdle()																																		= 0;
 };
 
 //-----------------------------------------------------------------------------------------------

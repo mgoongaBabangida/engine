@@ -1,5 +1,4 @@
 #pragma once
-#include "stdafx.h"
 
 #include <glew-2.1.0\include\GL\glew.h>
 #include <glm\glm\glm.hpp>
@@ -25,6 +24,7 @@ struct DLL_OPENGL_ASSETS Texture
 	int32_t				numberofRows		= 1;
 	
 	Texture();
+	~Texture();
 	Texture(GLuint Width, GLuint Height);
 	Texture(GLuint ID, GLuint TextureWidth, GLuint TextureHeight, int32_t TextureChannels = 1);
 	

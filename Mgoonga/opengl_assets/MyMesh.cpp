@@ -232,6 +232,18 @@ bool MyMesh::SwitchLOD(GLuint _LOD) //starts from one
 }
 
 //--------------------------------------------------------------------------------------------------------------
+GLuint MyMesh::LODInUse() const
+{ return LOD_index__in_use + 1; }
+
+//--------------------------------------------------------------------------------------------------------------
+void MyMesh::SetRenderMode(RenderMode _mode)
+{ m_render_mode = _mode; }
+
+//--------------------------------------------------------------------------------------------------------------
+MyMesh::RenderMode MyMesh::GetRenderMode()
+{ return m_render_mode; }
+
+//--------------------------------------------------------------------------------------------------------------
 ParticleMesh::ParticleMesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture> textures)
 {
 	this->vertices = vertices;

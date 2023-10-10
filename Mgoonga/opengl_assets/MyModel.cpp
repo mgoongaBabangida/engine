@@ -134,3 +134,8 @@ std::vector<const IMesh*> MyModel::GetMeshes() const
 {
   return std::vector<const IMesh*> { mesh.get() };
 }
+
+SimpleModel::SimpleModel(IMesh* _m)
+:m_mesh(_m) {}
+
+SimpleModel::~SimpleModel() { delete m_mesh; }

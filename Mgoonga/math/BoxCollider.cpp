@@ -275,32 +275,32 @@ std::vector<dbb::line> BoxCollider::_getRays(const ITransform & trans, Side move
 //-------------------------------------------------------------------------------
 void BoxCollider::_getForwardRayLengths(const ITransform & trans, Side moveDirection, std::vector<float>& lengths) const
 {
-if (lengths.empty())
-lengths.push_back(float());
-glm::vec3 center = *m_center;
-glm::vec4 center4 = glm::vec4(*m_center, 1.0f);
-glm::mat4 scal_mat = trans.getScale();
-switch (moveDirection)
-{
-case FORWARD:
-	lengths[0] = glm::length2(scal_mat * (glm::vec4(center.x, center.y, m_dots.MaxZ, 1.0f) - center4)); // if direction is +Z !!!
-	break;
-case BACK:
-	lengths[0] = glm::length2(scal_mat * (glm::vec4(center.x, center.y, m_dots.MinZ, 1.0f) - center4)); // if direction is +Z !!!
-	break;
-case RIGHT:
-	lengths[0] = glm::length2(scal_mat * (glm::vec4(m_dots.MaxX, center.y, center.z, 1.0f) - center4)); // if direction is +Z !!!
-	break;
-case LEFT:
-	lengths[0] = glm::length2(scal_mat * (glm::vec4(m_dots.MinX, center.y, center.z, 1.0f) - center4)); // if direction is +Z !!!
-	break;
-case UP:
-	lengths[0] = glm::length2(scal_mat * (glm::vec4(center.x, m_dots.MaxY, center.z, 1.0f) - center4)); // if direction is +Z !!!
-	break;
-case DOWN:
-	lengths[0] = glm::length2(scal_mat * (glm::vec4(center.x, m_dots.MinY, center.z, 1.0f) - center4)); // if direction is +Z !!!
-	break;
-}
+		if (lengths.empty())
+			lengths.push_back(float());
+		glm::vec3 center = *m_center; //@todo optional check ?
+		glm::vec4 center4 = glm::vec4(*m_center, 1.0f);
+		glm::mat4 scal_mat = trans.getScale();
+		switch (moveDirection)
+		{
+		case FORWARD:
+			lengths[0] = glm::length2(scal_mat * (glm::vec4(center.x, center.y, m_dots.MaxZ, 1.0f) - center4)); // if direction is +Z !!!
+			break;
+		case BACK:
+			lengths[0] = glm::length2(scal_mat * (glm::vec4(center.x, center.y, m_dots.MinZ, 1.0f) - center4)); // if direction is +Z !!!
+			break;
+		case RIGHT:
+			lengths[0] = glm::length2(scal_mat * (glm::vec4(m_dots.MaxX, center.y, center.z, 1.0f) - center4)); // if direction is +Z !!!
+			break;
+		case LEFT:
+			lengths[0] = glm::length2(scal_mat * (glm::vec4(m_dots.MinX, center.y, center.z, 1.0f) - center4)); // if direction is +Z !!!
+			break;
+		case UP:
+			lengths[0] = glm::length2(scal_mat * (glm::vec4(center.x, m_dots.MaxY, center.z, 1.0f) - center4)); // if direction is +Z !!!
+			break;
+		case DOWN:
+			lengths[0] = glm::length2(scal_mat * (glm::vec4(center.x, m_dots.MinY, center.z, 1.0f) - center4)); // if direction is +Z !!!
+			break;
+		}
 }
 
 //--------------------------------------------------------------------------------------------

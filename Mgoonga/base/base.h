@@ -4,6 +4,8 @@
 #include <array>
 #include <variant>
 
+#include <glm\glm\glm.hpp>
+
 #pragma warning( disable : 4251) // vector & unique_ptr have to be exported or not used @todo
 #pragma warning( disable : 4275) // non-dll class I- used as base for dll-interface
 #pragma warning( disable : 4273) // inconsistent dll-linkage
@@ -15,10 +17,6 @@
 #endif
 
 class eObject;
-
-#include <glm\glm\glm.hpp>
-
-struct Texture;
 
 struct TextureInfo
 {

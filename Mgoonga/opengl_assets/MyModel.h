@@ -64,9 +64,9 @@ protected:
 class DLL_OPENGL_ASSETS SimpleModel : public IModel //@todo need to improve
 {
 public:
-	SimpleModel(IMesh* _m) :m_mesh(_m) {}
+	explicit SimpleModel(IMesh* _m);
 
-	virtual ~SimpleModel() { delete m_mesh; }
+	virtual ~SimpleModel();
 
 	virtual size_t														GetVertexCount() const override { return 0; }
 	virtual size_t														GetMeshCount() const override { return 1; }

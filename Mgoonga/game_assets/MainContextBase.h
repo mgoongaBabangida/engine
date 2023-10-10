@@ -49,7 +49,7 @@ public:
 
 	virtual ~eMainContextBase();
 
-	Event<std::function<void(shObject)>>											ObjectPicked;
+	Event<std::function<void(shObject, bool _left)>>					ObjectPicked;
 	Event<std::function<void(shObject _new, shObject _old)>>	FocusChanged;
 	Event<std::function<void(shObject)>>											ObjectBeingAddedToScene;
 	Event<std::function<void(shObject)>>											ObjectBeingDeletedFromScene;

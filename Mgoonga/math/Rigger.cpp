@@ -158,7 +158,7 @@ void Rigger::CreateSocket(const std::shared_ptr<eObject>& _socket_obj, const std
 	if (it != bones.end() && _socket_obj.get())
 	{
 		socket.m_bone_name = it->GetName();
-		socket.m_bone_id = it->GetID();
+		socket.m_bone_id = (unsigned int)it->GetID();
 		socket.m_pre_transform = _socket_obj.get()->GetTransform()->getModelMatrix();
 		m_sockets.push_back(std::move(socket));
 	}
@@ -385,4 +385,18 @@ void Rigger::_UpdateAnimation(Bone &bone, const Frame& frame, const glm::mat4 &P
 
 	for(int i = 0; i<bone.NumChildren(); ++i)
 		_UpdateAnimation(*(bone.getChildren()[i]), frame, globalTransform);
+}
+
+//----------------------------------------------------------------------------------------------
+bool Rigger::UseFirstFrameAsIdle()
+{
+	if (animations.empty())
+		return false;
+
+	if (currentAnim == nullptr)
+		currentAnim = &animations[0];
+
+	currentAnim->FreezeFrame(0);
+	currentAnim->Stop();
+	return true;
 }

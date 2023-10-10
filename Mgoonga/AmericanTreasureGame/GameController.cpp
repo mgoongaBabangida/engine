@@ -5,6 +5,7 @@
 #include <math/Camera.h>
 #include <math/Random.h>
 #include <math/ParticleSystem.h>
+#include <math/PlaneLine.h>
 
 #include <tcp_lib/Network.h>
 #include <tcp_lib/Server.h>
@@ -21,7 +22,6 @@
 #include <sdl_assets/ImGuiContext.h>
 
 #include <game_assets/MainContextBase.h>
-#include <game_assets/ShipScript.h>
 #include <game_assets/ObjectFactory.h>
 
 #include <deque>
@@ -43,7 +43,7 @@ GameController::GameController(eMainContextBase* _game,
   , m_debug_window(_debug_window)
   , m_has_moved{ false, false ,false ,false }
   , m_has_moved_pirate{ false, false ,false ,false, false, false }
-  , m_texture_scales{ 10.0f, 10.0f , 5.0f}
+  , m_texture_scales{ 10.0f, 7.0f , 4.0f}
 {
   m_ship_height_level = m_pipeline.get().GetWaterHeight() - 0.05f;
 }
@@ -59,19 +59,25 @@ GameController::~GameController()
 void GameController::Initialize()
 {
   m_game->GetMainLight().light_position = glm::vec4{ 0.0f, 4.0f,0.0f, 1.0f };
-  m_game->GetMainLight().intensity = glm::vec3{ 100.0f, 100.0f , 100.0f };
-  m_game->GetMainCamera().setPosition(glm::vec3{-4.0f, 4.0f, 0.0f});
-  m_game->GetMainCamera().setDirection(glm::normalize(glm::vec3{ 0.815, -0.588f, -0.018f }));
+  m_game->GetMainLight().intensity = glm::vec3{ 10.0f, 10.0f , 10.0f };
+  m_game->GetMainCamera().setPosition(glm::vec3{-3.496f, 5.984f, -1.160f});
+  m_game->GetMainCamera().setDirection(glm::normalize(glm::vec3{ 0.565f, -0.825f, -0.02f }));
   m_pipeline.get().GetOutlineFocusedRef() = false;
 
-  m_game->ObjectPicked.Subscribe([this](shObject _picked)->void { this->OnObjectPicked(_picked); });
+  m_game->ObjectPicked.Subscribe([this](shObject _picked, bool _left)->void
+    {
+      if(_left)
+        OnObjectPickedWithLeft(_picked);
+      else
+        OnObjectPickedWithRight(_picked);
+    });
 
   _InitializeDiceLogicAndVisual();
   _InitializeShipIcons();
+  _InitializeGoldenFrame();
   _InitializeHexes();
   _InitializeShips();
   _InitializeBases();
-  _InitializeGoldenFrame();
 
   ObjectFactoryBase factory;
   m_choice_circle = new SimpleGeometryMesh({ NONE }, 0.15f, SimpleGeometryMesh::GeometryType::Circle, { 5.0f, 5.0f, 0.0f });
@@ -128,6 +134,17 @@ void GameController::Initialize()
     }
   };
 
+  std::function<void()> switch_rendering_mode_callback = [this]()
+  {
+    if (TerrainModel* terrrain_model = dynamic_cast<TerrainModel*>(m_terrain->GetModel()); terrrain_model)
+    {
+      if (terrrain_model->getMeshes()[0]->GetRenderMode() == MyMesh::RenderMode::DEFAULT)
+        terrrain_model->getMeshes()[0]->SetRenderMode(MyMesh::RenderMode::WIREFRAME);
+      else
+        terrrain_model->getMeshes()[0]->SetRenderMode(MyMesh::RenderMode::DEFAULT);
+    }
+  };
+
   std::function<void()> send_msg_test__callback = [this]()
   {
     if(m_tcpAgent)
@@ -135,6 +152,7 @@ void GameController::Initialize()
   };
 
   m_debug_window->Add(BUTTON, "Terrain rendering", (void*)&switch_mode__callback);
+  m_debug_window->Add(BUTTON, "Rendering Mode", (void*)&switch_rendering_mode_callback);
   m_debug_window->Add(SLIDER_FLOAT, "Texture Scale under watter", &m_texture_scales[0]);
   m_debug_window->Add(SLIDER_FLOAT, "Texture Scale grass", &m_texture_scales[1]);
   m_debug_window->Add(SLIDER_FLOAT, "Texture Scale grass 2", &m_texture_scales[2]);
@@ -144,6 +162,17 @@ void GameController::Initialize()
   m_debug_window->Add(SLIDER_FLOAT, "Water Level Height", &m_water_level);
   m_debug_window->Add(BUTTON, "Switch LOD", (void*)&switch_lod__callback);
   m_debug_window->Add(BUTTON, "Send Test Msg", (void*)&send_msg_test__callback);
+  
+  m_debug_window->Add(TEXT, "Water debug", nullptr);
+  m_debug_window->Add(SLIDER_FLOAT, "WaveSpeedFactor", (void*)&m_pipeline.get().WaveSpeedFactor());
+  m_debug_window->Add(SLIDER_FLOAT, "Tiling", (void*)&m_pipeline.get().Tiling());
+  m_debug_window->Add(SLIDER_FLOAT, "WaveStrength", (void*)&m_pipeline.get().WaveStrength());
+  m_debug_window->Add(SLIDER_FLOAT, "ShineDumper", (void*)&m_pipeline.get().ShineDumper());
+  m_debug_window->Add(SLIDER_FLOAT, "Reflactivity", (void*)&m_pipeline.get().Reflactivity());
+  m_debug_window->Add(SLIDER_FLOAT_3, "WaterColor", (void*)&m_pipeline.get().WaterColor());
+  m_debug_window->Add(SLIDER_FLOAT, "ColorMix", (void*)&m_pipeline.get().ColorMix());
+  m_debug_window->Add(SLIDER_FLOAT, "RefrectionFactor", (void*)&m_pipeline.get().RefrectionFactor());
+  m_debug_window->Add(SLIDER_FLOAT, "DistortionStrength", (void*)&m_pipeline.get().DistortionStrength());
 }
 
 //--------------------------------------------------------------------------
@@ -196,7 +225,7 @@ bool GameController::OnMouseMove(int32_t _x, int32_t _y, KeyModifiers _modifier)
 //----------------------------------------------------------------
 bool GameController::OnMousePress(int32_t _x, int32_t _y, bool _left, KeyModifiers _modifier)
 {
-  if (!_left) // right click
+  if (!_left && !m_target) // right click and no target
   {
     m_right_button_pressed = true;
     m_game->EnableHovered(true);
@@ -223,10 +252,13 @@ bool GameController::OnMouseRelease(KeyModifiers _modifier)
       if(auto cur_hex = _GetCurHex(); cur_hex)
         cur_hex->SetTaken(false);
       _UpdateWarrning("");
+
+      m_destination_text->content = "";
+      m_path_mesh->UpdateData({}, {}, glm::vec3{ 1.0f });
     }
     _SetDestinationFromCurrentPath();
   }
-
+  
   m_right_button_pressed = false; // ? check if right
   m_game->EnableHovered(false);
 
@@ -254,12 +286,15 @@ bool GameController::OnMouseRelease(KeyModifiers _modifier)
       }
     }
   }
+  m_target = nullptr;
   return false;
 }
 
 //-------------------------------------------------------------
 void GameController::Update(float _tick)
 {
+  _UpdateLight(_tick);
+
   if (!m_right_button_pressed)
   {
     for (int i = 0; i < m_ships.size(); ++i)
@@ -298,6 +333,11 @@ void GameController::Update(float _tick)
     if (std::all_of(m_has_moved.begin(), m_has_moved.end(), [](bool _val) { return _val; }))
     {
       std::for_each(m_has_moved.begin(), m_has_moved.end(), [](bool& _val) { _val = false; });
+      for (int i = 0; i < m_ships.size(); ++i)
+      {
+        if (m_ships[i]->GetDrowned())
+          m_has_moved[i] = true;
+      }
       m_game_state = GameState::PIRATE_TO_MOVE;
     }
   }
@@ -306,14 +346,13 @@ void GameController::Update(float _tick)
     if (std::all_of(m_has_moved_pirate.begin(), m_has_moved_pirate.end(), [](bool _val) { return _val; }))
     {
       std::for_each(m_has_moved_pirate.begin(), m_has_moved_pirate.end(), [](bool& _val) { _val = false; });
+      for (int i = 0; i < m_ships.size(); ++i)
+      {
+        if (m_ships_pirate[i]->GetDrowned())
+          m_has_moved_pirate[i] = true;
+      }
       m_game_state = GameState::SPANISH_TO_MOVE;
     }
-  }
-  //clear text
-  if (!m_current_path.empty() && !m_right_button_pressed)
-  {
-    m_destination_text->content = "";
-    m_path_mesh->UpdateData({}, {}, glm::vec3{ 1.0f });
   }
 
   //update icons move status
@@ -425,7 +464,7 @@ void GameController::Update(float _tick)
 }
 
 //---------------------------------------------------------------
-void GameController::OnObjectPicked(std::shared_ptr<eObject> _picked)
+void GameController::OnObjectPickedWithLeft(std::shared_ptr<eObject> _picked)
 {
   if (!m_current_path.empty())
     return;
@@ -474,6 +513,65 @@ void GameController::OnObjectPicked(std::shared_ptr<eObject> _picked)
 }
 
 //------------------------------------------------------------
+void GameController::OnObjectPickedWithRight(std::shared_ptr<eObject> _picked)
+{
+  if (_picked)
+  {
+    if (size_t index = _GetPirateShipIndex(_picked); m_game_state == GameState::SPANISH_TO_MOVE && index < m_ships_pirate.size())
+    {
+      for (int i = 0; i < m_ships.size(); ++i)
+      {
+        if (m_ships[i]->GetScriptObject() == m_game->GetFocusedObject().get()
+          && m_has_moved[i] == true)
+        {
+          float distance = glm::length(m_ships[i]->GetScriptObject()->GetTransform()->getTranslation() -
+            _picked->GetTransform()->getTranslation());
+          if (dbb::round(distance, 2) <= Hex::radius * 2.0f)
+          {
+            m_target = _picked.get();
+            //calculate turn to point
+            glm::vec3 direction_shooter_to_targrt = glm::normalize(m_target->GetTransform()->getTranslation() - m_ships[i]->GetScriptObject()->GetTransform()->getTranslation());
+            glm::vec3 direction_turened = glm::cross(direction_shooter_to_targrt, YAXIS);
+            m_ships[i]->GetScriptObject()->GetTransform()->turnTo(m_ships[i]->GetScriptObject()->GetTransform()->getTranslation() + direction_turened, 0.0f);
+            OnShoot(m_ships[i]->GetScriptObject());
+            if (int32_t outcome = math::Random::RandomInt(1, 6); outcome <= 3)
+            {
+              OnGetHit(_picked.get());
+              m_has_moved_pirate[index] = true;
+            }
+          }
+        }
+      }
+    }
+    else if (size_t index = _GetSpanishShipIndex(_picked); m_game_state == GameState::PIRATE_TO_MOVE && index < m_ships.size())
+    {
+      for (int i = 0; i < m_ships_pirate.size(); ++i)
+      {
+        if (m_ships_pirate[i]->GetScriptObject() == m_game->GetFocusedObject().get()
+          && m_has_moved_pirate[i] == true)
+        {
+          float distance = glm::length(m_ships_pirate[i]->GetScriptObject()->GetTransform()->getTranslation() -
+                                      _picked->GetTransform()->getTranslation());
+          if (dbb::round(distance, 2) <= Hex::radius * 1.0f) // one hex
+          {
+            m_target = _picked.get();
+            glm::vec3 direction_shooter_to_targrt = glm::normalize(m_target->GetTransform()->getTranslation() - m_ships_pirate[i]->GetScriptObject()->GetTransform()->getTranslation());
+            glm::vec3 direction_turened = glm::cross(direction_shooter_to_targrt, YAXIS);
+            m_ships_pirate[i]->GetScriptObject()->GetTransform()->turnTo(m_ships_pirate[i]->GetScriptObject()->GetTransform()->getTranslation() + direction_turened, 0.0f);
+            OnShoot(m_ships_pirate[i]->GetScriptObject());
+            if (int32_t outcome = math::Random::RandomInt(1, 6); outcome <= 2)
+            {
+              OnGetHit(_picked.get());
+              m_has_moved[index] = true;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+//------------------------------------------------------------
 void GameController::OnFrameMoved(std::shared_ptr<GUI> _frame)
 {
   auto x = _frame->getTopLeft().x + ((_frame->getBottomRight().x - _frame->getTopLeft().x) / 2);
@@ -512,25 +610,42 @@ void GameController::OnFrameMoved(std::shared_ptr<GUI> _frame)
 }
 
 //------------------------------------------------------------
-void GameController::OnShoot(const eObject* _target)
+void GameController::OnShipCameToBase(std::shared_ptr<eObject> _ship, const std::string& _base_name)
 {
-  glm::vec4 modelCenter = _target->GetTransform()->getModelMatrix() * glm::vec4(_target->GetCollider()->GetCenter(), 1.0f);
-  std::shared_ptr<IParticleSystem> system = std::make_shared<ParticleSystem>(10, 0.1f, 0, 10'000,
-    modelCenter + _target->GetTransform()->getRotationVector() * 0.4f, // ask hexes
+  _ship->SetVisible(false);
+  if (m_ships[0] != _ship->GetScript())
+    m_game->SetFocused(m_ships[0]->GetScriptObject());
+  else
+    m_game->SetFocused(m_ships[1]->GetScriptObject()); //@todo check is visible or is alive
+
+  if(_ship->GetScript() == m_ships[m_has_gold_index] && (_base_name == "Base Casablanca" || _base_name == "Base Sevillia"))
+    _UpdateWarrning("Game Over! Spanish Won!");
+}
+
+//------------------------------------------------------------
+void GameController::OnShoot(const eObject* _shooter)
+{
+  glm::vec4 modelCenterShooter = _shooter->GetTransform()->getModelMatrix() * glm::vec4(_shooter->GetCollider()->GetCenter(), 1.0f);
+  glm::vec4 modelCenterTarget = m_target->GetTransform()->getModelMatrix() * glm::vec4(m_target->GetCollider()->GetCenter(), 1.0f);
+  glm::vec4 direction = modelCenterTarget - modelCenterShooter;
+  std::shared_ptr<IParticleSystem> system = std::make_shared<ParticleSystem>(10.0f, 0.1f, 0.0f, 10'000.f,
+    modelCenterShooter + glm::normalize(direction) * Hex::radius / 2.0f,
     m_texManager->Find("Tatlas1"),
     m_soundManager->GetSound("shot_sound"),
     4,
     2'500.f);
-  
+
   //@todo no connection to rendering. Add pt sys in different way
   system->Loop() = false;
   system->ConeAngle() = 0.3f;
-  system->Speed() = 0.005f;
+  system->Speed() = 0.003f;
   system->LifeLength() = 1.5f;
   system->Scale() = { 0.04f,0.04f, 0.04f };
   system->SystemType() = IParticleSystem::SPHERE;
   system->BaseRadius() = 0.0f;
   system->ParticlesPerSecond() = 20;
+  system->RandomizeMagnitude() = 0.7f;
+  system->SetSizeBezier({glm::vec3{ -0.88, 0.72, 0 }, glm::vec3{-0.51, 0.72, 0}, glm::vec3{-0.2, 0.58,0 }, glm::vec3{0.1, -0.69, 0}});
   system->Start();
   m_pipeline.get().AddParticleSystem(system);
 }
@@ -538,17 +653,17 @@ void GameController::OnShoot(const eObject* _target)
 //------------------------------------------------------------
 void GameController::OnGetHit(const eObject* _target)
 {
-  std::shared_ptr<IParticleSystem> system = std::make_shared<ParticleSystem>(40, 0.1f, 0, 4'000,
+  std::shared_ptr<IParticleSystem> system = std::make_shared<ParticleSystem>(40.0f, 0.1f, 0.0f, 4'000.0f,
     _target->GetTransform()->getTranslation(),
     m_texManager->Find("Tatlas2"),
     m_soundManager->GetSound("fire_sound"),
     4,
-    8'000.f);
+    7'000.f);
 
   //@todo no connection to rendering. Add pt sys in different way
   system->Loop() = false;
   system->ConeAngle() = 0.3f;
-  system->Speed() = 0.01;
+  system->Speed() = 0.01f;
   system->LifeLength() = 1.0f;
   system->BaseRadius() = 0.1f;
   system->Scale() = { 0.055f,0.055f, 0.055f };
@@ -557,6 +672,9 @@ void GameController::OnGetHit(const eObject* _target)
 
   if (auto* target_script = _GetShipScript(_target); target_script)
     target_script->SetDrowned(true);
+
+  if(_target->GetScript() == m_ships[m_has_gold_index])
+    _UpdateWarrning("Game Over! Pirate Won!");
 }
 
 //------------------------------------------------------------
@@ -640,7 +758,7 @@ void GameController::_InitializeShipIcons()
         {
           if (m_ship_icons[i]->isPressed((int)m_cursor_pos.x, (int)m_cursor_pos.y))
           {
-            if (!m_dice_rolled)
+            if (!m_dice_rolled && m_game_state == GameState::SPANISH_TO_MOVE)
             {
               m_game->SetFocused(m_ships[i]->GetScriptObject());
               m_ship_icons[i]->SetRenderingFunc(GUI::RenderFunc::Default);
@@ -673,7 +791,7 @@ void GameController::_InitializeShipIcons()
         {
           if (m_ship_icons_pirate[i]->isPressed((int)m_cursor_pos.x, (int)m_cursor_pos.y))
           {
-            if (!m_dice_rolled)
+            if (!m_dice_rolled && m_game_state == GameState::PIRATE_TO_MOVE)
             {
               m_game->SetFocused(m_ships_pirate[i]->GetScriptObject());
               m_ship_icons_pirate[i]->SetRenderingFunc(GUI::RenderFunc::Default);
@@ -752,7 +870,6 @@ void GameController::_InitializeShips()
                            m_max_height);
   terrainModel->setAlbedoTextureArray(m_game->GetTexture("terrain_albedo_array_2"));
   terrainModel->getMeshes()[0]->SwitchLOD(2);
-  //terrainModel->getMeshes()[0]->SetRenderMode(MyMesh::RenderMode::WIREFRAME);
 
   //OBJECTS
   ObjectFactoryBase factory;
@@ -822,7 +939,6 @@ void GameController::_InitializeShips()
 
     auto script = new eShipScript(m_game,
                                   m_texManager->Find("TSpanishFlag0_s"),
-                                  m_pipeline,
                                   m_camera,
                                   m_texManager->Find("Tatlas2"),
                                   m_soundManager->GetSound("shot_sound"),
@@ -838,9 +954,7 @@ void GameController::_InitializeShips()
   for (int i = 0; i < m_ship_quantity_pirate; ++i)
   {
     shObject ship = factory.CreateObject(m_modelManager->Find("pirate_ship"), eObject::RenderType::PBR, "Pirate" + std::to_string(i));
-    //shObject ship = factory.CreateObject(m_modelManager->Find("brick_cube"), eObject::RenderType::PHONG, "Ship" + std::to_string(i));
     ship->GetTransform()->setScale(vec3(0.04f, 0.04f, 0.04f));
-    //ship->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
     ship->GetTransform()->setTranslation(vec3(m_hexes[26 + i * 40].x(), m_ship_height_level, m_hexes[26 + i * 40].z()));
     ship->GetTransform()->setUp(glm::vec3(0.0f, 0.0f, 1.0f));
     ship->GetTransform()->setRotation(0.0f, PI/2, 0.0f);
@@ -864,7 +978,7 @@ void GameController::_InitializeShips()
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_metalic = true;
 
-            t.loadTextureFromFile("../game_assets/Resources/PirateShip/barrel_texture1k/DefaultMaterial_Normal_DirectX_1001.png");
+            t.loadTextureFromFile("../game_assets/Resources/PirateShip/barrel_texture1k/DefaultMaterial_Normal_OpenGL_1001.png");
             t.type = "texture_normal";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_normal = true;
@@ -883,7 +997,7 @@ void GameController::_InitializeShips()
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_metalic = true;
 
-            t.loadTextureFromFile("../game_assets/Resources/PirateShip/ship_texture4k/ship_Normal_DirectX_1001.png");
+            t.loadTextureFromFile("../game_assets/Resources/PirateShip/ship_texture4k/ship_Normal_OpenGL_1001.png");
             t.type = "texture_normal";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_normal = true;
@@ -895,7 +1009,7 @@ void GameController::_InitializeShips()
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_metalic = true;
 
-            t.loadTextureFromFile("../game_assets/Resources/PirateShip/skull_texture1k/Skull_Normal_DirectX_1001.png");
+            t.loadTextureFromFile("../game_assets/Resources/PirateShip/skull_texture1k/Skull_Normal_OpenGL_1001.png");
             t.type = "texture_normal";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_normal = true;
@@ -904,12 +1018,8 @@ void GameController::_InitializeShips()
       }
     }
 
-    //for (auto& mesh : ship->GetModel()->Get3DMeshes())
-    //  const_cast<I3DMesh*>(mesh)->SetMaterial(material); //@todo
-
     auto script = new eShipScript(m_game,
                                   m_texManager->Find("TPirate_flag0_s"),
-                                  m_pipeline,
                                   m_camera,
                                   m_texManager->Find("Tatlas2"),
                                   m_soundManager->GetSound("shot_sound"),
@@ -931,7 +1041,11 @@ void GameController::_InitializeBases()
   shObject base1 = factory.CreateObject(m_modelManager->Find("wall_cube"), eObject::RenderType::PHONG, "Base Veracruz");
   base1->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
   base1->GetTransform()->setTranslation(vec3(m_hexes[99].x(), m_pipeline.get().GetWaterHeight() + 0.15f, m_hexes[99].z()));
-  //@todo set own script with flag and may be some logic
+  m_hexes[99].SetBase(true);
+  auto* base_script1 = new eBaseScript(m_game, m_texManager->Find("TSpanishFlag0_s"));
+  base_script1->ObjectCameToBase.Subscribe(
+    [this](std::shared_ptr<eObject> _object, const std::string& _base_name) {OnShipCameToBase(_object, _base_name);});
+  base1->SetScript(base_script1);
   m_game->AddObject(base1);
   
   m_base_labels.push_back(std::make_shared<Text>());
@@ -947,7 +1061,11 @@ void GameController::_InitializeBases()
   shObject base2 = factory.CreateObject(m_modelManager->Find("wall_cube"), eObject::RenderType::PHONG, "Base Cartagena");
   base2->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
   base2->GetTransform()->setTranslation(vec3(m_hexes[38].x(), m_pipeline.get().GetWaterHeight() + 0.15f, m_hexes[38].z()));
-  //@todo set own script with flag and may be some logic
+  m_hexes[38].SetBase(true);
+  auto* base_script2 = new eBaseScript(m_game, m_texManager->Find("TSpanishFlag0_s"));
+  base_script2->ObjectCameToBase.Subscribe(
+    [this](std::shared_ptr<eObject> _object, const std::string& _base_name) {OnShipCameToBase(_object, _base_name); });
+  base2->SetScript(base_script2);
   m_game->AddObject(base2);
 
   m_base_labels.push_back(std::make_shared<Text>());
@@ -963,6 +1081,11 @@ void GameController::_InitializeBases()
   shObject base3 = factory.CreateObject(m_modelManager->Find("wall_cube"), eObject::RenderType::PHONG, "Base Casablanca");
   base3->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
   base3->GetTransform()->setTranslation(vec3(m_hexes[83].x(), m_pipeline.get().GetWaterHeight() + 0.15f, m_hexes[83].z()));
+  m_hexes[83].SetBase(true);
+  auto* base_script3 = new eBaseScript(m_game, m_texManager->Find("TSpanishFlag0_s"));
+  base_script3->ObjectCameToBase.Subscribe(
+    [this](std::shared_ptr<eObject> _object, const std::string& _base_name) {OnShipCameToBase(_object, _base_name); });
+  base3->SetScript(base_script3);
   m_game->AddObject(base3);
 
   m_base_labels.push_back(std::make_shared<Text>());
@@ -978,6 +1101,11 @@ void GameController::_InitializeBases()
   shObject base4 = factory.CreateObject(m_modelManager->Find("wall_cube"), eObject::RenderType::PHONG, "Base Sevillia");
   base4->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
   base4->GetTransform()->setTranslation(vec3(m_hexes[141].x(), m_pipeline.get().GetWaterHeight() + 0.15f, m_hexes[141].z()));
+  m_hexes[141].SetBase(true);
+  auto* base_script4 = new eBaseScript(m_game, m_texManager->Find("TSpanishFlag0_s"));
+  base_script4->ObjectCameToBase.Subscribe(
+    [this](std::shared_ptr<eObject> _object, const std::string& _base_name) {OnShipCameToBase(_object, _base_name); });
+  base4->SetScript(base_script4);
   m_game->AddObject(base4);
 
   m_base_labels.push_back(std::make_shared<Text>());
@@ -1007,7 +1135,7 @@ void GameController::_InitializeGoldenFrame()
      this->OnFrameMoved(frame_gui);
    }));
   m_game->AddGUI(frame_gui);
-  m_game->AddInputObserver(frame_gui.get(), MONOPOLY);
+  m_game->AddInputObserver(frame_gui.get(), ALWAYS);
 }
 
 //------------------------------------------------------------
@@ -1096,6 +1224,14 @@ const Texture* GameController::_GetDiceTexture() const
 }
 
 //-------------------------------------------------------------
+void GameController::_UpdateLight(float _tick)
+{
+  glm::vec3 rotation_axis = { glm::cos(glm::radians(45.0f)), 0, glm::sin(glm::radians(45.0f)) };
+  glm::mat4 pos = glm::rotate(UNIT_MATRIX, glm::radians(_tick/ 1'000.f), rotation_axis);
+  m_game->GetMainLight().light_position = pos * m_game->GetMainLight().light_position;
+}
+
+//-------------------------------------------------------------
 void GameController::_UpdatePathVisual()
 {
   std::vector<glm::vec3>	verices;
@@ -1111,7 +1247,11 @@ void GameController::_UpdatePathVisual()
   for (auto& hex : m_current_path)
     verices.push_back({ hex->x(), Hex::common_height + 0.01f, hex->z() });
 
-  for (unsigned int i = 0; i < m_current_path.size(); ++i)
+  // last should be half long
+  glm::vec3 last = (verices[verices.size() - 1] - verices[verices.size() - 2]) / 2.0f;
+  verices[verices.size() - 1] = verices[verices.size() - 2] + last;
+
+  for (unsigned int i = 0; i < verices.size(); ++i)
   {
     indices.push_back(i);
     if(i!=0)
@@ -1293,7 +1433,7 @@ void   GameController::_UpdateCurrentPath()
     glm::vec3 target = dbb::intersection(pl, m_camera.get().getCameraRay().getLine());
     for (auto& hex : m_hexes)
     {
-      if (hex.IsOn(target.x, target.z) && hex.IsWater(m_terrain, waterHeight))
+      if (hex.IsOn(target.x, target.z) && (hex.IsWater(m_terrain, waterHeight) || hex.IsBase()))
       {
         if (hex.IsTaken())
         {
@@ -1303,7 +1443,7 @@ void   GameController::_UpdateCurrentPath()
         }
         if (auto cur_hex = _GetCurHex(); cur_hex)
         {
-          m_current_path = cur_hex->MakePath(&hex, m_terrain, waterHeight);
+          m_current_path = cur_hex->MakePath(&hex, m_terrain, waterHeight, m_game_state == GameState::SPANISH_TO_MOVE);
           if (m_current_path.size() > m_current_dice) // can move less or equal to dice
           {
             _UpdateWarrning("The ship can not move there");
@@ -1323,4 +1463,26 @@ void   GameController::_UpdateCurrentPath()
       }
     }
   }
+}
+
+//-----------------------------------------------------------------------------
+size_t GameController::_GetPirateShipIndex(std::shared_ptr<eObject> _ship)
+{
+  for (size_t i = 0; i < m_ships_pirate.size(); ++i)
+  {
+    if (_ship->GetScript() == m_ships_pirate[i])
+      return i;
+  }
+  return -1;
+}
+
+//-----------------------------------------------------------------------------
+size_t GameController::_GetSpanishShipIndex(std::shared_ptr<eObject> _ship)
+{
+  for (size_t i = 0; i < m_ships.size(); ++i)
+  {
+    if (_ship->GetScript() == m_ships[i])
+      return i;
+  }
+  return -1;
 }

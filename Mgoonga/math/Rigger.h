@@ -40,6 +40,8 @@ public:
 	virtual const std::string&						GetPath() const { return m_path; }
 	virtual void													SetPath(const std::string& _path) { m_path = _path; }
 
+	virtual bool													UseFirstFrameAsIdle() override;
+
 	SceletalAnimation*										GetCurrentAnimation() const { return currentAnim; }
 	void																	SetCurrentAnimation(const std::string& _animationName);
 

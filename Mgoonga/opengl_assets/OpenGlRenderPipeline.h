@@ -72,6 +72,17 @@ public:
 	float& GetSaoStrengthRef();
 	bool& ShadowingRef() { return shadows; }
 
+	//Water Render
+	float& WaveSpeedFactor();
+	float& Tiling();
+	float& WaveStrength();
+	float& ShineDumper();
+	float& Reflactivity();
+	glm::vec4& WaterColor();
+	float& ColorMix();
+	float& RefrectionFactor();
+	float& DistortionStrength();
+
 	glm::vec4 debug_float = {0.0f,0.0f,0.0f,0.0f};
 
 	bool& GetDebugWhite() { return debug_white; }

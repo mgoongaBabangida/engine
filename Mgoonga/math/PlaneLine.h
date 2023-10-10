@@ -1,5 +1,7 @@
 #pragma once
 
+#include "math.h"
+
 #include <glm\glm\glm.hpp>
 #include <glm\glm\gtc\matrix_transform.hpp>
 #include <glm\glm\gtx\transform.hpp>
@@ -7,11 +9,16 @@
 #include <assert.h>
 #include <exception>
 
-#include "math.h"
-
 using glm::vec3;
 using glm::vec4;
 using glm::mat4;
+
+#include <cmath>
+
+namespace dbb { //@todo move to utils
+
+	DLL_MATH float round(float _x, int _num_decimal_precision_digits);
+}
 
 namespace dbb
 {

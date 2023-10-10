@@ -17,13 +17,6 @@ eWaterRender::eWaterRender(std::unique_ptr<MyModel> model,
 {
 	waterShader.installShaders(vertexShaderPath.c_str(), fragmentShaderPath.c_str());
 	
-	modelToWorldMatrixUniformLocation	= glGetUniformLocation(waterShader.ID(), "modelToWorldMatrix");
-	fullTransformationUniformLocation	= glGetUniformLocation(waterShader.ID(), "modelToProjectionMatrix");
-	WaterFactorLoc						= glGetUniformLocation(waterShader.ID(), "moveFactor");
-	CameraPosLoc						= glGetUniformLocation(waterShader.ID(), "cameraPosition");
-	lightPosLoc							= glGetUniformLocation(waterShader.ID(), "lightPosition");
-	lightColorLoc						= glGetUniformLocation(waterShader.ID(), "lightColor");
-
 	water_model = model.get();
 
 	model->setTextureBump(waves);
@@ -35,38 +28,66 @@ eWaterRender::eWaterRender(std::unique_ptr<MyModel> model,
 
 	object->GetTransform()->setTranslation(glm::vec3(0.0f, waterHeight, 0.0f));
 	object->GetTransform()->setRotation(PI / 2, 0.0f, 0.0f);
-	object->GetTransform()->setScale(glm::vec3(1.2f, 1.8f, 1.0f)); // the size of the pixture
+	object->GetTransform()->setScale(glm::vec3(1.25f, 1.8f, 1.0f)); // the size of the pixture
 
 	clock.start();
 }
 
-void eWaterRender::Render(const Camera& camera, const Light& light)
+//--------------------------------------------------------------------------------------------------
+void eWaterRender::Render(const Camera& _camera, const Light& _light)
 {
 	glUseProgram(waterShader.ID());
+	auto uniforms = waterShader.GetUniforms();
 
-	glm::mat4 worldToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
+	glm::mat4 worldToProjectionMatrix = _camera.getProjectionMatrix() * _camera.getWorldToViewMatrix();
 
 	Texture texture_reflection = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFLECTION);
 	Texture texture_refraction = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFRACTION);
 	water_model->setTextureDiffuse(&texture_reflection);
 	water_model->setTextureSpecular(&texture_refraction);
 	
-	glUniform1f(WaterFactorLoc, move_factor);
+	waterShader.SetUniformData("moveFactor", move_factor);
 
-	int msc = clock.newFrame();
+	int64_t msc = clock.newFrame();
 	move_factor += (float)msc / wave_speed_fator;
 
-	glUniform3f(CameraPosLoc,	camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
-	glUniform3f(lightPosLoc,	light.light_position.x,	light.light_position.y,	light.light_position.z);// , light.light_position.w);
-	glUniform3f(lightColorLoc,	light.diffuse.x,		light.diffuse.y,		light.diffuse.z);
+	waterShader.SetUniformData("cameraPosition", _camera.getPosition());
+	waterShader.SetUniformData("lightPosition", glm::vec3(_light.light_position));
+	waterShader.SetUniformData("lightColor", glm::vec3(_light.diffuse));
 	
 	glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * object->GetTransform()->getModelMatrix();
-	glUniformMatrix4fv(fullTransformationUniformLocation, 1, GL_FALSE, &modelToProjectionMatrix[0][0]);
-	glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &object->GetTransform()->getModelMatrix()[0][0]);
+	waterShader.SetUniformData("modelToProjectionMatrix", modelToProjectionMatrix);
+	waterShader.SetUniformData("modelToWorldMatrix", object->GetTransform()->getModelMatrix());
 	
+	if(auto it = std::find_if(uniforms.begin(), uniforms.end(), [](const Uniform& _u) { return _u.name == "tiling"; });
+		it != uniforms.end() && std::get<float>(it->data) != m_tiling)
+			waterShader.SetUniformData("tiling", m_tiling);
+	if (auto it = std::find_if(uniforms.begin(), uniforms.end(), [](const Uniform& _u) { return _u.name == "waveStrength"; });
+		it != uniforms.end() && std::get<float>(it->data) != m_waveStrength)
+			waterShader.SetUniformData("waveStrength", m_waveStrength);
+	if (auto it = std::find_if(uniforms.begin(), uniforms.end(), [](const Uniform& _u) { return _u.name == "shineDumper"; });
+		it != uniforms.end() && std::get<float>(it->data) != m_shineDumper)
+			waterShader.SetUniformData("shineDumper", m_shineDumper);
+	if (auto it = std::find_if(uniforms.begin(), uniforms.end(), [](const Uniform& _u) { return _u.name == "reflactivity"; });
+		it != uniforms.end() && std::get<float>(it->data) != m_reflactivity)
+			waterShader.SetUniformData("reflactivity", m_reflactivity);
+	if (auto it = std::find_if(uniforms.begin(), uniforms.end(), [](const Uniform& _u) { return _u.name == "water_color"; });
+		it != uniforms.end() && std::get<glm::vec4>(it->data) != m_water_color)
+			waterShader.SetUniformData("water_color", m_water_color);
+	if (auto it = std::find_if(uniforms.begin(), uniforms.end(), [](const Uniform& _u) { return _u.name == "color_mix"; });
+		it != uniforms.end() && std::get<float>(it->data) != m_color_mix)
+			waterShader.SetUniformData("color_mix", m_color_mix);
+	if (auto it = std::find_if(uniforms.begin(), uniforms.end(), [](const Uniform& _u) { return _u.name == "refrection_factor"; });
+		it != uniforms.end() && std::get<float>(it->data) != m_refrection_factor)
+			waterShader.SetUniformData("refrection_factor", m_refrection_factor);
+	if (auto it = std::find_if(uniforms.begin(), uniforms.end(), [](const Uniform& _u) { return _u.name == "distortion_strength"; });
+		it != uniforms.end() && std::get<float>(it->data) != m_distortion_strength)
+			waterShader.SetUniformData("distortion_strength", m_distortion_strength);
+
 	object->GetModel()->Draw();
 }
 
+//--------------------------------------------------------------------------------------------------
 eWaterRender::~eWaterRender()
 {
 }

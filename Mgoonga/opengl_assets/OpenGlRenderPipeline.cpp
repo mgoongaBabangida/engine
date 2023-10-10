@@ -102,6 +102,51 @@ Texture eOpenGlRenderPipeline::GetSkyNoiseTexture(const Camera& _camera)
 float& eOpenGlRenderPipeline::GetSaoThresholdRef() { return renderManager->GetSsaoThresholdRef(); }
 float& eOpenGlRenderPipeline::GetSaoStrengthRef() { return renderManager->GetSsaoStrengthRef(); }
 
+float& eOpenGlRenderPipeline::WaveSpeedFactor()
+{
+	return renderManager->WaterRender()->WaveSpeedFactor();
+}
+
+float& eOpenGlRenderPipeline::Tiling()
+{
+	return renderManager->WaterRender()->Tiling();
+}
+
+float& eOpenGlRenderPipeline::WaveStrength()
+{
+	return renderManager->WaterRender()->WaveStrength();
+}
+
+float& eOpenGlRenderPipeline::ShineDumper()
+{
+	return renderManager->WaterRender()->ShineDumper();
+}
+
+float& eOpenGlRenderPipeline::Reflactivity()
+{
+	return renderManager->WaterRender()->Reflactivity();
+}
+
+glm::vec4& eOpenGlRenderPipeline::WaterColor()
+{
+	return renderManager->WaterRender()->WaterColor();
+}
+
+float& eOpenGlRenderPipeline::ColorMix()
+{
+	return renderManager->WaterRender()->ColorMix();
+}
+
+float& eOpenGlRenderPipeline::RefrectionFactor()
+{
+	return renderManager->WaterRender()->RefrectionFactor();
+}
+
+float& eOpenGlRenderPipeline::DistortionStrength()
+{
+	return renderManager->WaterRender()->DistortionStrength();
+}
+
 //-----------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vector<shObject>> _objects,
 																				Camera& _camera,
@@ -368,7 +413,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 
   glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	renderManager->TextRender()->RenderText(_camera, _texts, width, height);
+	renderManager->TextRender()->RenderText(_camera, _texts, static_cast<float>(width), static_cast<float>(height));
 	glDisable(GL_BLEND);
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -529,7 +574,7 @@ void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, c
 			renderManager->ScreenRender()->SetRenderingFunction(gui->GetRenderingFunc());
 			renderManager->ScreenRender()->Render(gui->getTopLeft(),				gui->getBottomRight(),
 																						gui->getTopLeftTexture(), gui->getBottomRightTexture(),
-																						width, height);
+																						static_cast<float>(width), static_cast<float>(height));
 		}
 
 		gui->UpdateSync();
@@ -546,7 +591,7 @@ void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, c
 				renderManager->ScreenRender()->SetTextureMask(*(child->GetTextureMask()));
 				renderManager->ScreenRender()->Render(child->getTopLeft(), child->getBottomRight(), 
 																							child->getTopLeftTexture(), child->getBottomRightTexture(), 
-																							width, height);
+																							static_cast<float>(width), static_cast<float>(height));
 			}
 			child->UpdateSync();
 		}

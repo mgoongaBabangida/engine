@@ -18,7 +18,6 @@
 
 #include <sdl_assets/ImGuiContext.h>
 
-#include <game_assets/ShipScript.h>
 #include <game_assets/ObjectFactory.h>
 
 //---------------------------------------------------------------------------
@@ -29,14 +28,15 @@ eMgoongaGameContext::eMgoongaGameContext(eInputController*  _input,
 						                             const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
 { 
-  ObjectPicked.Subscribe([this](shObject _new_focused)
+  ObjectPicked.Subscribe([this](shObject _new_focused, bool _left)
     {
-      if (_new_focused != m_focused)
+      if (_new_focused != m_focused && _left)
       {
         FocusChanged.Occur(m_focused, _new_focused);
         m_focused = _new_focused;
         return true;
       }
+      return false;
     });
 }
 
@@ -194,14 +194,6 @@ void eMgoongaGameContext::_InitMainTestSceane()
   nanosuit->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
   nanosuit->GetTransform()->setScale(vec3(0.12f, 0.12f, 0.12f));
   m_objects.push_back(nanosuit);
-
-  nanosuit->SetScript(new eShipScript(this,
-                                      texManager->Find("TSpanishFlag0_s"),
-                                      pipeline,
-                                      GetMainCamera(),
-                                      texManager->Find("Tatlas2"),
-                                      soundManager->GetSound("shot_sound"),
-                                      pipeline.GetWaterHeight()));
 
   shObject wolf = factory.CreateObject(modelManager->Find("wolf"), eObject::RenderType::PHONG, "Wolf");
   wolf->GetTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);

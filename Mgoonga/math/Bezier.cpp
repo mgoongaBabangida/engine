@@ -10,12 +10,12 @@ glm::vec3 dbb::GetPoint(const Bezier& _bezier, float u)
     + _bezier.p3 * (_t * _t * _t);
   return out;*/
 
-  float u1 = (1.0 - u);
+  float u1 = (1.0f - u);
   float u2 = u * u;
 
   float b3 = u2 * u;
-  float b2 = 3.0 * u2 * u1;
-  float b1 = 3.0 * u * u1 * u1;
+  float b2 = 3.0f * u2 * u1;
+  float b1 = 3.0f * u * u1 * u1;
   float b0 = u1 * u1 * u1;
 
   return _bezier.p0 * b0 + _bezier.p1 * b1 + _bezier.p2 * b2 + _bezier.p3 * b3;

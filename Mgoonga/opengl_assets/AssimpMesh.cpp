@@ -46,6 +46,15 @@ void AssimpMesh::FreeTextures()
     t.freeTexture();
 }
 
+void AssimpMesh::ReloadVertexBuffer()
+{
+  glBindVertexArray(this->VAO);
+  glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+  glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex),
+    &this->vertices[0], GL_STATIC_DRAW);
+  glBindVertexArray(0);
+}
+
 void AssimpMesh::Draw()
 {
   _BindMaterialTextures(); // _BindRawTextures();
@@ -242,8 +251,8 @@ void AssimpMesh::setupMesh()
 	glGenBuffers(1, &this->EBO);
 
 	glBindVertexArray(this->VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
 
+	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
 	glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex),
 		&this->vertices[0], GL_STATIC_DRAW);
 

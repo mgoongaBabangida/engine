@@ -160,6 +160,8 @@ void Model::loadModel(const string& path)
   //Bones
 	this->loadNodesToBone(m_scene->mRootNode);
 	this->loadBoneChildren(m_scene->mRootNode);
+	if (m_no_real_bones)
+		this->mapMehsesToNodes();
 
 	if (m_scene->mRootNode->mNumMeshes)
 		root_bone = &m_bones[this->m_BoneMapping.find(m_scene->mRootNode->mName.C_Str())->second];
@@ -268,6 +270,8 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			}
 		}
 	}
+	else
+		m_no_real_bones = true;
 
 	if (mesh->HasBones())
 	{
@@ -381,6 +385,25 @@ AssimpMesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		}
 	}
 	return AssimpMesh { vertices, indices, textures, mat, mesh->mName.C_Str(), mesh->mTangents == NULL };
+}
+
+//-------------------------------------------------------------------------------------------
+void Model::mapMehsesToNodes()
+{
+	for (int32_t i = 0; i < meshes.size(); ++i)
+	{
+		std::vector<Bone>::iterator meshBoneIter = std::find_if(m_bones.begin(), m_bones.end(), [this, i](const Bone& bone)
+			{ return bone.GetName() == meshes[i].Name(); });
+		if (meshBoneIter != m_bones.end())
+		{
+			for (int32_t j = 0; j < meshes[i].vertices.size(); ++j)
+			{
+				meshes[i].vertices[j].boneIDs[0] = (glm::i32)meshBoneIter->GetID();
+				meshes[i].vertices[j].weights[0] = 1.0f;
+			}
+			meshes[i].ReloadVertexBuffer();
+		}
+	}
 }
 
 //-------------------------------------------------------------------------------------------
@@ -553,7 +576,8 @@ std::vector<std::string> Model::DumpAiNodes()
 	std::vector<std::string> BoneNames;
 	DumpAiNode(m_scene->mRootNode, BoneNames);
 	std::sort(BoneNames.begin(), BoneNames.end());
-	std::unique(BoneNames.begin(), BoneNames.end());
+	auto last = std::unique(BoneNames.begin(), BoneNames.end());
+	BoneNames.erase(last, BoneNames.end());
 	return BoneNames;
 }
 

@@ -929,8 +929,8 @@ bool eWindowImGui::OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _m
 //---------------------------------------------------------------------
 bool eWindowImGui::OnMouseMove(int32_t _x, int32_t _y, KeyModifiers _modifier)
 {
-  cursor_x = _x;
-  cursor_y = _y;
+  cursor_x = (float)_x;
+  cursor_y = (float)_y;
   if (IsHovered())
     return true;
   else

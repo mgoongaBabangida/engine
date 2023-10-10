@@ -21,9 +21,10 @@ public:
   AssimpMesh(AssimpMesh&&) = default;
 
   void FreeTextures();
+  void ReloadVertexBuffer();
 
 	void Draw() override;
-  void DrawInstanced(int32_t instances)override;
+  void DrawInstanced(int32_t instances) override;
 
   virtual const std::string& Name() const override { return name;}
 

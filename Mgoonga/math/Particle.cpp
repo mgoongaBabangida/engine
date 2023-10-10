@@ -15,7 +15,7 @@ void Particle::_updateTextureCoordInfo()
 			return;
 		int stagecount = numRowsInTexture * numRowsInTexture;
 		float atlasProgression = lifeFactor * stagecount;
-		int index1 = glm::floor(atlasProgression);
+		int index1 = (int)glm::floor(atlasProgression);
 		int index2 = index1 == stagecount - 1 ? index1 : index1 + 1;
 		blend = atlasProgression - index1;
 

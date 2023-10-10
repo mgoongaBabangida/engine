@@ -27,7 +27,10 @@ public:
 	virtual const std::string&	GetName() const			{ return name; }
 	virtual bool								IsRealBone() const	{ return realBone; }
 
-	void												setMTransform(glm::mat4 trans) { mTransform = trans; }
+	void												setMTransform(glm::mat4 trans) 
+	{ 
+		mTransform = trans; 
+	}
 
 	virtual const glm::mat4&		GetLocalBindTransform() const		{ return localBindTransform; }
 	virtual const glm::mat4&		GetMTransform() const					{ return mTransform; }

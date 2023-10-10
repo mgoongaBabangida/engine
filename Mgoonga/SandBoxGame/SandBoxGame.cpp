@@ -32,9 +32,9 @@ eSandBoxGame::eSandBoxGame(eInputController*  _input,
 						   const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
 {
-	ObjectPicked.Subscribe([this](shObject _new_focused)
+	ObjectPicked.Subscribe([this](shObject _new_focused, bool _left)
 		{
-			if (_new_focused != m_focused)
+			if (_new_focused != m_focused && _left)
 			{
 				FocusChanged.Occur(m_focused, _new_focused);
 				m_focused = _new_focused;
@@ -151,6 +151,14 @@ void eSandBoxGame::InitializeModels()
 		tombstone->GetTransform()->setScale(vec3(0.5f, 0.5f, 0.5f));
 		const_cast<I3DMesh*>(tombstone->GetModel()->Get3DMeshes()[0])->SetMaterial(material);
 		m_objects.push_back(tombstone);
+
+		//Chest
+		shObject chest = factory.CreateObject(modelManager->Find("Chest"), eObject::RenderType::PHONG, "Chest", "Default", "");
+		chest->GetTransform()->setTranslation(vec3(-1.5f, -2.0f, 0.0f));
+		chest->GetTransform()->setRotation(glm::radians(-90.0f), glm::radians(-90.0f), 0.0f);
+		chest->GetTransform()->setScale(vec3(0.5f, 0.5f, 0.5f));
+		m_objects.push_back(chest);
+		chest->GetRigger()->UseFirstFrameAsIdle();
 	}
 
 	//light

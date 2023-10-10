@@ -36,10 +36,10 @@ public:
 	virtual void												calculatedTangent();
 
 	bool SwitchLOD(GLuint _LOD);
-	GLuint LODInUse() const { return LOD_index__in_use + 1; }
+	GLuint LODInUse() const;
 
-	void SetRenderMode(RenderMode _mode) { m_render_mode = _mode; }
-	RenderMode GetRenderMode() { return m_render_mode; }
+	void SetRenderMode(RenderMode _mode);
+	RenderMode GetRenderMode();
 
 public: //@todo should be protected
 	/*  Mesh Data  */

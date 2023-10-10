@@ -99,6 +99,10 @@ Texture::Texture()
 	//loadTexture1x1(YELLOW);
 }
 
+Texture::~Texture()
+{
+}
+
 Texture::Texture(GLuint Width, GLuint Height)
 	:Texture()
 {

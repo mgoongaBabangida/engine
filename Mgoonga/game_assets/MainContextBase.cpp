@@ -112,7 +112,7 @@ bool eMainContextBase::OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier)
 }
 
 //--------------------------------------------------------------------------
-bool eMainContextBase::OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier)
+bool eMainContextBase::OnMousePress(int32_t x, int32_t y, bool _left, KeyModifiers _modifier)
 {
 	if (_modifier == KeyModifiers::SHIFT)
 		return true;
@@ -126,16 +126,13 @@ bool eMainContextBase::OnMousePress(int32_t x, int32_t y, bool left, KeyModifier
 	//should be inside input strategy which needs it(frame, moveXZ)
 	GetMainCamera().MovementSpeedRef() = 0.f;
 
-	if (left)
-	{
-		//Get Visible and Children
-		auto [picked, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
-		if (picked != m_focused)
-			ObjectPicked.Occur(picked);
-	}
+	//Get Visible and Children
+	auto [picked, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
+	if (picked != m_focused)
+		ObjectPicked.Occur(picked, _left);
 
 	if (m_input_strategy)
-		m_input_strategy->OnMousePress(x, y, left);
+		m_input_strategy->OnMousePress(x, y, _left);
 
 	return false;
 }

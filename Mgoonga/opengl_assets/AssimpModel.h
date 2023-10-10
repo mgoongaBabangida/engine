@@ -59,6 +59,7 @@ private:
   void							              loadModel(const std::string& path);
   void							              processNode(aiNode* node, const aiScene* scene);
 	AssimpMesh						          processMesh(aiMesh* mesh, const aiScene* scene);
+	void														mapMehsesToNodes();
 	std::vector<Texture>					  loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
 	
 	// VertexBoneData
@@ -118,6 +119,7 @@ private:
 	std::vector<SceletalAnimation>	m_animations;
 	glm::mat4						            m_GlobalInverseTransform;
   bool														m_invert_y_uv = false;
+	bool														m_no_real_bones = false;
 
 	void							loadNodesToBone(aiNode * node);
 	void							loadBoneChildren(aiNode* node);
