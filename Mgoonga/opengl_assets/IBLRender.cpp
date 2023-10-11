@@ -2,10 +2,11 @@
 #include "IBLRender.h"
 #include "CubeMesh.h"
 
+//-----------------------------------------------------------------------------------------------
 eIBLRender::eIBLRender(const std::string& _vS, const std::string& _fS,
                        const std::string& _irrfS, const std::string& _prefilterfS,
                        const std::string& _brdfvS, const std::string& _brdffS, 
-                       const Texture* _hdr)
+                       std::vector<unsigned int> _hdr)
 : m_hdr(_hdr)
 , m_cube(new CubeMesh)
 {
@@ -44,11 +45,13 @@ eIBLRender::eIBLRender(const std::string& _vS, const std::string& _fS,
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
+//-----------------------------------------------------------------------------------------------
 eIBLRender::~eIBLRender()
 {
   glDeleteTextures(1, &brdfLUTTexture);
 }
 
+//-----------------------------------------------------------------------------------------------
 void eIBLRender::RenderCubemap(const Camera& camera, GLuint _cubemap_id)
 {
   //glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
@@ -61,7 +64,7 @@ void eIBLRender::RenderCubemap(const Camera& camera, GLuint _cubemap_id)
   m_cubemap_shader.SetUniformData("projection", captureProjection);
 
   glActiveTexture(GL_TEXTURE2);
-  glBindTexture(GL_TEXTURE_2D, m_hdr->id);
+  glBindTexture(GL_TEXTURE_2D, m_hdr[m_cur_index]);
 
   for (unsigned int i = 0; i < 6; ++i)
   {
@@ -75,6 +78,7 @@ void eIBLRender::RenderCubemap(const Camera& camera, GLuint _cubemap_id)
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+//-----------------------------------------------------------------------------------------------
 void eIBLRender::RenderIBLMap(const Camera& camera, GLuint _irr_id)
 {
   //glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
@@ -97,6 +101,7 @@ void eIBLRender::RenderIBLMap(const Camera& camera, GLuint _irr_id)
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+//-----------------------------------------------------------------------------------------------
 void eIBLRender::RenderPrefilterMap(const Camera& camera, GLuint _prefilter_id, GLuint _rbo_id)
 {
   glUseProgram(m_prefilter_shader.ID());
@@ -112,6 +117,7 @@ void eIBLRender::RenderPrefilterMap(const Camera& camera, GLuint _prefilter_id, 
     // reisze framebuffer according to mip-level size.
     unsigned int mipWidth = 128 * std::pow(0.5, mip);
     unsigned int mipHeight = 128 * std::pow(0.5, mip);
+
     glBindRenderbuffer(GL_RENDERBUFFER, _rbo_id);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
     glViewport(0, 0, mipWidth, mipHeight);
@@ -129,8 +135,10 @@ void eIBLRender::RenderPrefilterMap(const Camera& camera, GLuint _prefilter_id, 
     }
   }
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  ++m_cur_index;
 }
 
+//----------------------------------------------------------------------------------
 void eIBLRender::RenderBrdf()
 {
   glUseProgram(m_brdf_shader.ID());

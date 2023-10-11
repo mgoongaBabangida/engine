@@ -296,11 +296,22 @@ void eWindowImGui::Render()
       break;
       case SPIN_BOX:
       {
-        static int value = 0; //@todo should be unique for each spinbox
-        if (ImGui::InputInt(std::get<0>(item).c_str(), &value))
+        int* value;
+        if (std::get<0>(item) == "Sky box")
+        {
+          static int skybox_spin_value = 0;
+          value = &skybox_spin_value;
+        }
+        else if (std::get<0>(item) == "IBL Map")
+        {
+          static int ibl_spin_value = 0;
+          value = &ibl_spin_value;
+        }
+
+        if (ImGui::InputInt(std::get<0>(item).c_str(), value))
         {
           std::function<void(int)> callback = *(reinterpret_cast<std::function<void(int)>*>(std::get<2>(item)));
-          callback(value);
+          callback(*value);
         }
       }
       break;

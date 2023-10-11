@@ -45,6 +45,7 @@ public:
 													 const UniformData& _data);
 
 	void			SetSkyBoxTexture(const Texture* _t);
+	void			SetSkyIBL(unsigned int _irr, unsigned int _prefilter);
 	
 	void AddParticleSystem(std::shared_ptr<IParticleSystem> system);
 	void AddParticleSystemGPU(glm::vec3 _startPos, const Texture* _texture);
@@ -101,8 +102,8 @@ public:
 	Texture GetSSAO() const;
 	Texture GetDefferedOne() const;
 	Texture GetDefferedTwo() const;
-	Texture GetHdrTexture() const;
 	Texture GetHdrCubeMap() const;
+	Texture GetLUT() const;
 
 protected:
 	void			RenderShadows(const Camera&, const Light&, std::vector<shObject>&);
@@ -151,7 +152,7 @@ protected:
 	bool			m_first_call = true;
 
 	std::unique_ptr<eRenderManager>	renderManager;
-	Texture m_prefilter; //@todo move to renderer
+	eTextureManager* m_texture_manager = nullptr;
 };
 
 #endif // PIPELINE_H

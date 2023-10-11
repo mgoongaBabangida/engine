@@ -103,11 +103,12 @@ Texture::~Texture()
 {
 }
 
-Texture::Texture(GLuint Width, GLuint Height)
+Texture::Texture(GLuint Width, GLuint Height, int32_t TextureChannels)
 	:Texture()
 {
 	mTextureWidth = Width;
 	mTextureHeight = Height;
+	mChannels = TextureChannels;
 }
 
 Texture::Texture(GLuint ID, GLuint TextureWidth, GLuint TextureHeight, int32_t TextureChannels)
@@ -267,49 +268,23 @@ bool Texture::loadCubemap(std::vector<std::string> faces)
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLuint*)ilGetData());
     //
     ilDeleteImages(1, &imgID);
-		// delete[] pixmap; @todo
-    //
+		delete[] pixmap;
   }
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
   glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-  mChannels = 4;
+  mChannels = 4; // 3?
 
   return true;
 }
 
-bool Texture::makeCubemap(Texture* _texture)
+//----------------------------------------------------------------------------------------------------------
+bool Texture::makeCubemap(size_t _size, bool _mipmap, GLenum _format, GLenum _internal_format, GLenum _type)
 {
-	mTextureWidth	= _texture->mTextureWidth;
-	mTextureHeight  = _texture->mTextureHeight;
-	mChannels		= 4;
-
-	_genTexture();
-	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
-	uint8_t* pixmap = (uint8_t*)malloc(mTextureWidth * mTextureHeight * sizeof(unsigned char) * mChannels);
-	for (GLuint i = 0; i < 6; ++i)
-	{
-		glBindTexture(GL_TEXTURE_2D, _texture->id);
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixmap);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLubyte*)pixmap);
-	}
-	free(pixmap);
-
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
-	return true;
-}
-
-bool Texture::makeCubemap(size_t _size, bool _mipmap)
-{
-	//@todo cistomize - channels, rgb16f etc.
+	//@todo customize - channels
 	mChannels = 3;
 	mTextureWidth = (int32_t)_size;
 	mTextureHeight = (int32_t)_size;
@@ -330,11 +305,10 @@ bool Texture::makeCubemap(size_t _size, bool _mipmap)
 
 	for (GLuint i = 0; i < 6; ++i)
 	{
-		std::vector<float> xData(buffer_size, 0.2f + i * 0.2f);
+		std::vector<float> xData(buffer_size, 0.2f + i * 0.2f); //for debug
 		glBindTexture(GL_TEXTURE_2D, id);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, mTextureWidth, mTextureHeight, 0, GL_RGB, GL_FLOAT, &xData[0]);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, _internal_format, mTextureWidth, mTextureHeight, 0, _format, _type, &xData[0]);
 	}
-
 	if(_mipmap)
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 

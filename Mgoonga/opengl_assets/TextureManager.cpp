@@ -81,8 +81,11 @@ void eTextureManager::Initialize()
 			}
 			else if (type == "skybox" || type == "array")
 				continue;
-			else if(type == "hdr")
+			else if (type == "hdr")
+			{
 				text.loadHdr(folderPath + file_name);
+				m_hdr_ids.push_back(text.id);
+			}
 			else
 				text.loadTextureFromFile(folderPath + file_name);
 
@@ -155,15 +158,6 @@ void eTextureManager::AddExisting(const std::string& _name, Texture* _text)
 	m_Textures.insert(std::pair<std::string, Texture>(_name, *_text));
 	if(_text->type == "skybox")
 		m_cubemap_ids.push_back(_text->id);
-}
-
-//----------------------------------------------------
-void eTextureManager::AddTextureBox(const Texture& _texture, const std::string& _name)
-{
-	Texture text;
-	text.makeCubemap(&(const_cast<Texture&>(_texture)));
-	m_Textures.insert(std::pair<std::string, Texture>(_name, text));
-	m_cubemap_ids.push_back(text.id);
 }
 
 //-----------------------------------------------------

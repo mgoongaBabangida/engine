@@ -177,5 +177,5 @@ void CubemapFBO::BindForReading(GLenum TextureUnit)
 
 Texture CubemapFBO::GetTexture()
 {
-	return Texture(m_texture, m_width, m_height, 4); //!
+	return Texture(m_texture, m_width, m_height, m_textureBuffer.mChannels); //!
 }

@@ -161,7 +161,7 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																		folderPath + "prefilterFs.glsl",
 																		folderPath + "SimpleVertexShader.glsl",
 																		folderPath + "BrdfFs.glsl",
-																		texManager.Find("hdr1")));
+																		texManager.GetHdrIds()));
 	shader_lambda(m_iblRender.get());
 }
 

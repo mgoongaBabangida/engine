@@ -25,7 +25,7 @@ struct DLL_OPENGL_ASSETS Texture
 	
 	Texture();
 	~Texture();
-	Texture(GLuint Width, GLuint Height);
+	Texture(GLuint Width, GLuint Height, int32_t TextureChannels);
 	Texture(GLuint ID, GLuint TextureWidth, GLuint TextureHeight, int32_t TextureChannels = 1);
 	
 	Texture(const Texture& t) { this->operator=(t);}
@@ -60,14 +60,13 @@ struct DLL_OPENGL_ASSETS Texture
 
 	bool generatePerlin(GLuint Width, GLuint Height, bool periodic);
 
-	bool makeCubemap(Texture*);
-	bool makeCubemap(size_t size, bool _mipmap = false);
+	bool makeCubemap(size_t size, bool _mipmap = false, GLenum _format = GL_RGB, GLenum _internal_format = GL_RGB16F, GLenum _type = GL_FLOAT);
 	bool makeDepthTexture();
 	bool makeDepthCubeMap();
 	bool makeRandom1DTexture(unsigned int _size);
 
 	template<class GLtype>
-	bool TextureFromBuffer(GLtype* buffer, GLuint Width, GLuint Height, GLuint format= GL_RGBA)
+	bool TextureFromBuffer(GLtype* buffer, GLuint Width, GLuint Height, GLuint format= GL_RGBA, GLenum wrap = GL_CLAMP_TO_EDGE)
 	{
 		GLenum type ;
 		if (std::is_same_v<GLtype, GLfloat> == true)
@@ -89,8 +88,8 @@ struct DLL_OPENGL_ASSETS Texture
 			mChannels = 4;
 		else if(GL_RED)
 			mChannels = 1;
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glBindTexture(GL_TEXTURE_2D, 0);

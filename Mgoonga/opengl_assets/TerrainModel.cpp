@@ -237,7 +237,7 @@ void TerrainModel::generateNormals(GLuint size)
 			buffer[i * 4 + 3] = 1.0f;
 		}
 
-		Texture normal = Texture(size, size); // free texture !!!
+		Texture normal = Texture(size, size, 4); // free texture !!!
 		normal.TextureFromBuffer(buffer, size, size);
 		m_material.normal_texture_id = normal.id;
 		delete[] buffer;
@@ -277,7 +277,7 @@ void TerrainModel::generateNormals(GLuint rows, GLuint columns)
 			buffer[i * 4 + 3] = 1.0f;
 		}
 
-		Texture normal = Texture(rows, columns);// free texture !!!
+		Texture normal = Texture(rows, columns, 4); // free texture !!!
 		normal.TextureFromBuffer(buffer, rows, columns);
 		m_material.normal_texture_id = normal.id;
 		delete[] buffer;

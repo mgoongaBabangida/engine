@@ -522,6 +522,15 @@ void eMainContextBase::InitializeExternalGui()
 		}
 	};
 	externalGui[1]->Add(SPIN_BOX, "Sky box", (void*)&change_skybox_callback);
+	static std::function<void(int)> change_ibl_callback = [this](int _ibl)
+	{
+		if (texManager->GetIBLIds().size() > _ibl)
+		{
+			auto[irr, prefilter] = texManager->GetIBLIds()[_ibl];
+			pipeline.SetSkyIBL(irr, prefilter);
+		}
+	};
+	externalGui[1]->Add(SPIN_BOX, "IBL Map", (void*)&change_ibl_callback);
 	externalGui[1]->Add(CHECKBOX, "Water", &pipeline.GetWaterOnRef());
 	externalGui[1]->Add(CHECKBOX, "Hex", &pipeline.GetGeometryOnRef());
 	externalGui[1]->Add(CHECKBOX, "Kernel", &pipeline.GetKernelOnRef());
@@ -576,6 +585,7 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[1]->Add(TEXTURE, "SSAO buffer", (void*)pipeline.GetSSAO().id);
 	externalGui[1]->Add(TEXTURE, "Deffered Pos", (void*)pipeline.GetDefferedOne().id);
 	externalGui[1]->Add(TEXTURE, "Deffered Norm", (void*)pipeline.GetDefferedTwo().id);
+	externalGui[1]->Add(TEXTURE, "LUT", (void*)pipeline.GetLUT().id);
 
 	//Objects transform
 	externalGui[2]->Add(OBJECT_REF_TRANSFORM, "Transform", (void*)&m_focused);
