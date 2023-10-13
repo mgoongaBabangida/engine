@@ -27,7 +27,6 @@ protected:
 	GLuint			ModelUniformLocationPoint;
 	GLuint			ProjectionTransformsUniformLocation;
 	GLuint			FarPlaneUniformLocation;
-	GLuint			LightPosUniformLocation;
 	GLuint			BonesMatLocationDir;
 	GLuint			BonesMatLocationPoint;
 

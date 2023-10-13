@@ -8,7 +8,7 @@ layout(binding=2) uniform sampler2D gPosition;
 layout(binding=3) uniform sampler2D gNormal;
 layout(binding=4) uniform sampler2D texNoise;
 
-uniform vec3 samples[64];
+uniform vec4 samples[64];
 
 // parameters (you'd probably want to use them as uniforms to more easily tweak the effect)
 int kernelSize = 64;
@@ -35,7 +35,7 @@ void main()
     for(int i = 0; i < kernelSize; ++i)
     {
         // get sample position
-        vec3 samplePos = TBN * samples[i]; // from tangent to view-space
+        vec3 samplePos = TBN * samples[i].xyz; // from tangent to view-space
         samplePos = fragPos + samplePos * radius; 
         
         // project sample position (to sample texture) (to get position on screen/texture)

@@ -12,11 +12,11 @@ struct Material {
 struct Light 
 {
     vec4 position;
-    vec3 direction;
+    vec4 direction;
     
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+    vec4 ambient;
+    vec4 diffuse;
+    vec4 specular;
 
     float constant;
     float linear;
@@ -55,7 +55,7 @@ layout(binding=7) uniform sampler2D        texture_ssao;
 
 layout(binding=12) uniform sampler2DArray  texture_array_albedo;
 
-uniform vec3 eyePositionWorld;
+uniform vec4 eyePositionWorld;
 uniform bool normalMapping = true;
 uniform bool shadow_directional = true;
 
@@ -157,11 +157,11 @@ vec3 CalculateAlbedo(vec3  lightVector, vec3 normal, vec3 diffuseTexture)
 	float Brightness   = clamp(dot(lightVector, normal), 0, 1);
 	if(!texture_blending)
 	{
-		return vec3(light.diffuse * Brightness * diffuseTexture);
+		return vec3(light.diffuse.xyz * Brightness * diffuseTexture);
 	}
 	else
 	{
-		return vec3(light.diffuse * Brightness * diffuseTexture);
+		return vec3(light.diffuse.xyz * Brightness * diffuseTexture);
 	}
 }
 
@@ -186,11 +186,11 @@ subroutine(LightingPtr) vec3 calculatePhongPointSpecDif(Light light, vec3 normal
 
   //Specular
   vec3 Reflaction = reflect(-lightVector,normal);
-  vec3 eyeVector  = normalize(eyePositionWorld-thePosition); 
+  vec3 eyeVector  = normalize(eyePositionWorld.xyz - thePosition); 
   float spec      = clamp(dot(Reflaction,eyeVector), 0, 1);
 
   spec = pow(spec, shininess);
-  vec3 specularLight = vec3(light.specular *spec * SampleSpecularTexture(Texcoords));//* material.specular
+  vec3 specularLight = vec3(light.specular.xyz *spec * SampleSpecularTexture(Texcoords));//* material.specular
   specularLight=clamp(specularLight,0,1);
 
   // Attenuation
@@ -212,11 +212,11 @@ subroutine(LightingPtr) vec3 calculatePhongDirectionalSpecDif(Light light, vec3 
 	
    // specular shading
     vec3 Reflaction = reflect(-lightVector, normal);
-    vec3 eyeVector = normalize(eyePositionWorld - thePosition);
+    vec3 eyeVector = normalize(eyePositionWorld.xyz - thePosition);
 	float spec      = clamp(dot(Reflaction,eyeVector), 0, 1);	
     
 	spec = pow(spec, shininess);   
-	vec3 specularLight = light.specular * spec * SampleSpecularTexture(Texcoords);
+	vec3 specularLight = light.specular.xyz * spec * SampleSpecularTexture(Texcoords);
 	specularLight=clamp(specularLight,0,1);
 	
     return diffuseLight + specularLight;
@@ -225,7 +225,7 @@ subroutine(LightingPtr) vec3 calculatePhongDirectionalSpecDif(Light light, vec3 
 subroutine(LightingPtr) vec3 calculatePhongFlashSpecDif(Light light, vec3 normal, vec3 thePosition, vec3 diffuseTexture, vec2 Texcoords)
 {
 	vec3 lightDir= normalize(vec3(light.position)-thePosition);
-	float theta     = dot(lightDir, normalize(-light.direction));
+	float theta     = dot(lightDir, normalize(-light.direction.xyz));
 	float epsilon   = light.cutOff - light.outerCutOff;
 	float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
 
@@ -246,11 +246,11 @@ subroutine(LightingPtr) vec3 calculateBlinnPhongPointSpecDif (Light light, vec3 
   vec3 diffuseLight = CalculateAlbedo(lightVector, normal, diffuseTexture);
   
   //Specular
-  vec3 eyeVector= normalize(eyePositionWorld-thePosition); 
+  vec3 eyeVector= normalize(eyePositionWorld.xyz - thePosition); 
   vec3 halfvector = normalize(eyeVector+lightVector);
   float spec=clamp(dot(normal, halfvector), 0, 1);
   spec=pow(spec, shininess);
-  vec3 specularLight=vec3(light.specular *spec * SampleSpecularTexture(Texcoords));//* material.specular
+  vec3 specularLight=vec3(light.specular.xyz *spec * SampleSpecularTexture(Texcoords));//* material.specular
   specularLight=clamp(specularLight,0,1);
 
   // Attenuation
@@ -271,11 +271,11 @@ subroutine(LightingPtr) vec3 calculateBlinnPhongDirectionalSpecDif(Light light, 
 	vec3 diffuseLight = CalculateAlbedo(lightVector, normal, diffuseTexture);
 	
    //Specular
-    vec3 eyeVector= normalize(eyePositionWorld-thePosition); 
+    vec3 eyeVector= normalize(eyePositionWorld.xyz - thePosition); 
     vec3 halfvector = normalize(eyeVector+lightVector);
     float spec = clamp(dot(normal, halfvector), 0, 1);
     spec=pow(spec, shininess);
-    vec3 specularLight = vec3(light.specular * spec * SampleSpecularTexture(Texcoords));//* material.specular
+    vec3 specularLight = vec3(light.specular.xyz * spec * SampleSpecularTexture(Texcoords));//* material.specular
     specularLight=clamp(specularLight,0,1);	
 	
     return diffuseLight + specularLight;
@@ -284,7 +284,7 @@ subroutine(LightingPtr) vec3 calculateBlinnPhongDirectionalSpecDif(Light light, 
 subroutine(LightingPtr) vec3 calculateBlinnPhongFlashSpecDif(Light light, vec3 normal, vec3 thePosition, vec3 diffuseTexture, vec2 Texcoords)
 {
 	vec3 lightDir   = normalize(vec3(light.position)-thePosition);
-	float theta     = dot(lightDir, normalize(-light.direction));
+	float theta     = dot(lightDir, normalize(-light.direction.xyz));
 	float epsilon   = light.cutOff - light.outerCutOff;
 	float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
 
@@ -295,7 +295,7 @@ subroutine(LightingPtr) vec3 calculateBlinnPhongFlashSpecDif(Light light, vec3 n
 void main()
 {   
 	// Paralax mapping
-	//vec3 tangetnViewDir   = normalize(TBN * eyePositionWorld - TBN * thePosition);
+	//vec3 tangetnViewDir   = normalize(TBN * eyePositionWorld.xyz - TBN * thePosition);
 	//vec2 fTexCoords = ParallaxMapping(Texcoord,  tangetnViewDir);
 	//if(fTexCoords.x > 1.0 || fTexCoords.y > 1.0 || fTexCoords.x < 0.0 || fTexCoords.y < 0.0)
 		//discard;
@@ -326,7 +326,7 @@ void main()
 	
   vec3 dif_texture = SampleAlbedoTexture(Texcoord);
 			
-  vec3 ambientLight = light.ambient * dif_texture * AmbientOcclusion; 
+  vec3 ambientLight = light.ambient.xyz * dif_texture * AmbientOcclusion; 
 
   float shadow;
 	 vec3 lightVector = -normalize(vec3(light.direction));	 

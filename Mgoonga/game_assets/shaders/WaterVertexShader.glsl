@@ -9,8 +9,8 @@ in layout(location=5) vec3 bitangent;
 
 uniform mat4 modelToProjectionMatrix;
 uniform mat4 modelToWorldMatrix;
-uniform vec3 cameraPosition;
-uniform vec3 lightPosition;
+uniform vec4 cameraPosition;
+uniform vec4 lightPosition;
 
 out vec4 ClipSpaceCoord;
 out vec2 TextureCoords;
@@ -29,6 +29,6 @@ void main()
   TextureCoords = vec2(texcoord.x/2 + 0.5,texcoord.y/2 + 0.5) * tiling;
   
   vec4 worldPositon   = modelToWorldMatrix * vec4(position ,1.0);
-  ToCameraVector      = cameraPosition - worldPositon.xyz;
-  FromLightVector     = worldPositon.xyz - lightPosition;
+  ToCameraVector      = cameraPosition.xyz - worldPositon.xyz;
+  FromLightVector     = worldPositon.xyz - lightPosition.xyz;
 };

@@ -2,11 +2,13 @@
 #include"SSAORender.h"
 #include <math/Random.h>
 
+//----------------------------------------------------
 float ourLerp(float a, float b, float f)
 {
   return a + f * (b - a);
 }
 
+//----------------------------------------------------
 eSSAORender::eSSAORender(const std::string& _vSG,
                          const std::string& _fSG,
                          const std::string& _vS,
@@ -38,7 +40,7 @@ eSSAORender::eSSAORender(const std::string& _vSG,
     // scale samples s.t. they're more aligned to center of kernel
     scale = ourLerp(0.1f, 1.0f, scale * scale);
     sample *= scale;
-    m_ssao_kernel.push_back(sample);
+    m_ssao_kernel.push_back(glm::vec4(sample, 1.0f));
   }
 
   // generate noise texture
@@ -96,7 +98,8 @@ void eSSAORender::RenderSSAO(const Camera& camera)
   for (unsigned int i = 0; i < 64; ++i)
   {
     GLuint loc = glGetUniformLocation(m_main_shader.ID(), std::string("samples[" + std::to_string(i) + "]").c_str());
-    glUniform3f(loc, m_ssao_kernel[i].x, m_ssao_kernel[i].y, m_ssao_kernel[i].z);
+    glUniform4f(loc, m_ssao_kernel[i].x, m_ssao_kernel[i].y, m_ssao_kernel[i].z, 1.0f);
+    //m_main_shader.SetUniformData("samples[" + std::to_string(i) + "]", m_ssao_kernel[i]); //@todo make it work
   }
   m_main_shader.SetUniformData("projection", camera.getProjectionMatrix());
 

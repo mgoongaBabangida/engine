@@ -46,7 +46,7 @@ void eTextRender::RenderText(const Camera& _camera, const std::vector<std::share
   glUseProgram(textShader.ID());
   for (auto _text : _texts)
   {
-    textShader.SetUniformData("textColor", _text->color);
+    textShader.SetUniformData("textColor", glm::vec4(_text->color,1.0f));
     textShader.SetUniformData("projection", _text->mvp);
 
     glActiveTexture(GL_TEXTURE0);

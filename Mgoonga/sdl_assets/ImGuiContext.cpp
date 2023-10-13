@@ -52,15 +52,6 @@ struct UniformDisplayVisitor
     ImGui::Text(std::to_string(v[1]).c_str());
   }
 
-  void operator()(const glm::vec3& v) const {
-    ImGui::SameLine();
-    ImGui::Text(std::to_string(v[0]).c_str());
-    ImGui::SameLine();
-    ImGui::Text(std::to_string(v[1]).c_str());
-    ImGui::SameLine();
-    ImGui::Text(std::to_string(v[2]).c_str());
-  }
-
   void operator()(const glm::vec4& v) const {
     ImGui::SameLine();
     ImGui::Text(std::to_string(v[0]).c_str());

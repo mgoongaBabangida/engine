@@ -15,7 +15,6 @@ eShadowRender::eShadowRender(const std::string& vS, const std::string& fS, const
 	ModelUniformLocationPoint = glGetUniformLocation(shaderPoint.ID(), "MVP");
 	ProjectionTransformsUniformLocation = glGetUniformLocation(shaderPoint.ID(), "shadowMatrices");
 	FarPlaneUniformLocation = glGetUniformLocation(shaderPoint.ID(), "far_plane");
-	LightPosUniformLocation = glGetUniformLocation(shaderPoint.ID(), "lightPosition");
 	BonesMatLocationPoint = glGetUniformLocation(shaderPoint.ID(), "gBones");
 }
 
@@ -46,7 +45,7 @@ void eShadowRender::Render(const Camera&					camera,
 		glUseProgram(shaderPoint.ID());
 		glUniformMatrix4fv(ProjectionTransformsUniformLocation, 6, GL_FALSE, &shadowTransforms[0][0][0]);
 		glUniform1f(FarPlaneUniformLocation, camera.getFarPlane());
-		glUniform3fv(LightPosUniformLocation, 1, &light.light_position[0]);
+		shaderPoint.SetUniformData("lightPosition", light.light_position);
 
 		//RENDER DEPTH
 		for (auto &object : objects)
@@ -80,7 +79,7 @@ void eShadowRender::Render(const Camera&					camera,
 		}
 		else
 		{
-			worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + light.light_direction,
+			worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + glm::vec3(light.light_direction),
 				glm::vec3(0.0f, 1.0f, 0.0f));
 			shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
 		}

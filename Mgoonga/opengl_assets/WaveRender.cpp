@@ -88,7 +88,7 @@ void eWaveRender::Render(const Camera&					camera,
 	glm::mat4 shadowMatrix;
 	if (light.type == eLightType::POINT || light.type == eLightType::SPOT)
 	{
-		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + light.light_direction,
+		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + glm::vec3(light.light_direction),
 			glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniform1f(glGetUniformLocation(wave_shader.ID(), "shininess"), 32.0f);
 		if (light.type == eLightType::POINT)

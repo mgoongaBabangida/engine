@@ -25,6 +25,6 @@ protected:
 
   std::vector<glm::mat4> matrices;
 
-  std::vector<glm::vec3> m_ssao_kernel;
+  std::vector<glm::vec4> m_ssao_kernel;
   unsigned int noiseTexture;
 };

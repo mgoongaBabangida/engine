@@ -127,6 +127,7 @@ void eSandBoxGame::InitializeModels()
 	soldier->SetScript(new AnimationSocketScript(this));
 
 	//Set textures manually
+	t.type = "texture_normal";
 	t.loadTextureFromFile("../game_assets/Resources/DyingSoldier/textures/Ch15_1001_Normal.png");
 	const_cast<I3DMesh*>(soldier->GetModel()->Get3DMeshes()[0])->AddTexture(&t);
 	t.loadTextureFromFile("../game_assets/Resources/DyingSoldier/textures/Ch15_1002_Normal.png");

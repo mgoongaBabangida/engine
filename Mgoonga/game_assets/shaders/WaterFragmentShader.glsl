@@ -14,12 +14,12 @@ layout(binding=4) uniform sampler2D normalTexture;
 layout(binding=5) uniform sampler2D DUDV;
 
 uniform float moveFactor;
-uniform vec3 lightColor;
+uniform vec4 lightColor;
 
 uniform float waveStrength = 2.2f;
 uniform float shineDumper = 20.0f;
 uniform float reflactivity = 0.6f;
-uniform vec4 water_color = vec4(0.0f, 0.2f,0.4f,1.0f);
+uniform vec4  water_color = vec4(0.0f, 0.2f,0.4f,1.0f);
 uniform float color_mix = 0.2f;
 uniform float refrection_factor = 0.5f;
 uniform float distortion_strength = 0.005f;
@@ -67,7 +67,7 @@ void main()
   vec3 Reflaction = normalize(reflect(FromLightVector,normal));
   float specular = max(dot(Reflaction,normalize(ToCameraVector) ) , 0.0f);
   specular = pow(specular, shineDumper);
-  vec3 specularLight = lightColor  * specular * reflactivity;
+  vec3 specularLight = lightColor.xyz  * specular * reflactivity;
   specularLight=clamp(specularLight, 0, 1);
 
 	out_Color =  mix(reflectColor, refractColor, refrectionFactor);

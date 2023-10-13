@@ -33,7 +33,7 @@ ePBRRender::ePBRRender(const std::string& vS, const std::string& fS)
 void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<shObject>& objects)
 {
   glUseProgram(pbrShader.ID());
-  glUniform3fv(camPosLoc, 1, &camera.getPosition()[0]);
+  pbrShader.SetUniformData("camPos", glm::vec4(camera.getPosition(), 1.0f));
 
   glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(_light.light_position), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0f, 1.0f, 0.0f));
   glm::mat4 shadowMatrix = camera.getProjectionBiasedMatrix() * worldToViewMatrix;
@@ -41,8 +41,8 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
   
   glm::mat4 worldToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix(); 
   {
-    std::vector<glm::vec3> lpositions;
-    std::vector<glm::vec3> lcolors;
+    std::vector<glm::vec4> lpositions;
+    std::vector<glm::vec4> lcolors;
 
     lpositions.push_back(_light.light_position);
     lcolors.push_back({ _light.intensity });
@@ -109,7 +109,7 @@ void ePBRRender::_SetMaterial(shObject _obj)
     {
       glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 0);
 
-      glUniform3f(albedoLoc, material.albedo[0], material.albedo[1], material.albedo[2]);
+      glUniform4f(albedoLoc, material.albedo[0], material.albedo[1], material.albedo[2], 1.0f);
       glUniform1f(aoLoc, material.ao);
       glUniform1f(metallicLoc, material.metallic);
       glUniform1f(roughnessLoc, material.roughness);
@@ -132,7 +132,7 @@ void ePBRRender::_SetMaterial(shObject _obj)
         {
           glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 0);
 
-          glUniform3f(albedoLoc, material.albedo[0], material.albedo[1], material.albedo[2]);
+          glUniform4f(albedoLoc, material.albedo[0], material.albedo[1], material.albedo[2], 1.0f);
           glUniform1f(aoLoc, material.ao);
           glUniform1f(metallicLoc, material.metallic);
           glUniform1f(roughnessLoc, material.roughness);

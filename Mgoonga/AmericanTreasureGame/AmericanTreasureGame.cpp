@@ -40,7 +40,7 @@ AmericanTreasureGame::~AmericanTreasureGame() {}
 void AmericanTreasureGame::InitializeBuffers()
 {
   GetMainLight().type = eLightType::DIRECTION;
-  pipeline.InitializeBuffers(GetMainLight().type == eLightType::POINT);
+  pipeline.InitializeBuffers();
 }
 
 //-----------------------------------------------------------------------------

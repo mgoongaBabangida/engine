@@ -58,8 +58,6 @@ protected:
   GLuint m_HLoc;
   GLuint m_timeLoc;
   GLuint m_lifeTimeLoc;
-  GLuint m_accelLoc;
-  GLuint m_startPosLoc;
   GLuint m_numRowsLoc;
   GLuint m_CameraPosLoc;
   GLuint m_BillboardSizeLoc;

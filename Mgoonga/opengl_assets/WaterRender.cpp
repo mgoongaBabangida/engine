@@ -51,9 +51,9 @@ void eWaterRender::Render(const Camera& _camera, const Light& _light)
 	int64_t msc = clock.newFrame();
 	move_factor += (float)msc / wave_speed_fator;
 
-	waterShader.SetUniformData("cameraPosition", _camera.getPosition());
-	waterShader.SetUniformData("lightPosition", glm::vec3(_light.light_position));
-	waterShader.SetUniformData("lightColor", glm::vec3(_light.diffuse));
+	waterShader.SetUniformData("cameraPosition", glm::vec4(_camera.getPosition(), 1.0f));
+	waterShader.SetUniformData("lightPosition", _light.light_position);
+	waterShader.SetUniformData("lightColor", _light.diffuse);
 	
 	glm::mat4 modelToProjectionMatrix = worldToProjectionMatrix * object->GetTransform()->getModelMatrix();
 	waterShader.SetUniformData("modelToProjectionMatrix", modelToProjectionMatrix);

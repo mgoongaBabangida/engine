@@ -8,7 +8,7 @@ in vec3 theNormal;   //theNormal
 in mat3 TBN;
 
 // material parameters
-uniform vec3  albedo;
+uniform vec4  albedo;
 uniform float metallic;
 uniform float roughness;
 uniform float ao;
@@ -25,10 +25,10 @@ layout(binding=10) uniform samplerCube prefilterMap;
 layout(binding=11) uniform sampler2D   brdfLUT;
  
 // lights
-uniform vec3 lightPositions[1];
-uniform vec3 lightColors[1];
+uniform vec4 lightPositions[1];
+uniform vec4 lightColors[1];
 
-uniform vec3 camPos;
+uniform vec4 camPos;
 
 const float PI = 3.14159265359;
   
@@ -57,14 +57,14 @@ void main()
    }
    else
    {
-	albedo_f = albedo;
+	albedo_f = albedo.xyz;
 	theNormal_f = theNormal;
 	metallic_f = metallic;
 	roughness_f = roughness;
    }
    
     vec3 N = normalize(theNormal_f);
-    vec3 V = normalize(camPos - thePosition);
+    vec3 V = normalize(camPos.xyz - thePosition);
 	vec3 R = reflect(-V, N);
 	
     vec3 F0 = vec3(0.04); 
@@ -75,11 +75,11 @@ void main()
     for(int i = 0; i < 1; ++i) 
     {
         // calculate per-light radiance
-        vec3 L = normalize(lightPositions[i] - thePosition);
+        vec3 L = normalize(lightPositions[i].xyz - thePosition);
         vec3 H = normalize(V + L);
-        float distance    = length(lightPositions[i] - thePosition);
+        float distance    = length(lightPositions[i].xyz - thePosition);
         float attenuation = 1.0 / (distance * distance);
-        vec3 radiance     = lightColors[i] * attenuation;        
+        vec3 radiance     = lightColors[i].xyz * attenuation;        
         
         // cook-torrance brdf
         float NDF = DistributionGGX(N, H, roughness_f);        

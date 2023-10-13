@@ -66,15 +66,19 @@ public:
   float& GetBlurCoefRef() { return blur_coef; }
 	bool& GetKernelOnRef() { return kernel; }
 	bool& GetSkyNoiseOnRef() { return sky_noise; }
-	bool& GetGammaCorrectionRef() { return gamma_correction; }
-	bool& GetToneMappingRef() { return tone_mapping; }
 	bool& GetOutlineFocusedRef() { return outline_focused; }
-	float& GetExposureRef() { return exposure; }
 	bool& GetSSAOEnabledRef() { return ssao; }
 	bool& GetRotateSkyBoxRef();
 	float& GetSaoThresholdRef();
 	float& GetSaoStrengthRef();
 	bool& ShadowingRef() { return shadows; }
+
+	//Phong Render
+	float& GetExposureRef();
+	bool& GetGammaCorrectionRef();
+	bool& GetToneMappingRef();
+	bool& GetDebugWhite();
+	bool& GetDebugTexCoords();
 
 	//Water Render
 	float& WaveSpeedFactor();
@@ -88,9 +92,6 @@ public:
 	float& DistortionStrength();
 
 	glm::vec4 debug_float = {0.0f,0.0f,0.0f,0.0f};
-
-	bool& GetDebugWhite() { return debug_white; }
-	bool& GetDebugTexCoords() { return debug_texcoords; }
 
 	Texture GetDefaultBufferTexture() const;
 	Texture GetSkyNoiseTexture(const Camera& _camera);
@@ -127,7 +128,6 @@ protected:
 	void			RenderSSAO(const Camera&, const Light&, std::vector<shObject>&);
 	void			RenderIBL(const Camera& _camera);
 
-	bool			mousepress	= true; //to draw framed objects
 	bool			mts			= true;
 	bool			skybox		= true;
 	bool			shadows		= true;
@@ -136,23 +136,19 @@ protected:
 	bool			geometry	= true;
 	bool			particles	= true;
 	bool			draw_bounding_boxes = false;
-	bool      debug_white = false;
-	bool      debug_texcoords = false;
 	bool			kernel = false;
 	bool			sky_noise = true;
 	bool			bezier_curve = true;
-	bool			gamma_correction = true;
-	bool			tone_mapping = true;
 	bool			outline_focused = true;
 	bool			ssao = false;
-	float			exposure = 1.0f;
+	float     blur_coef = 0.5f;
+
+	bool			mousepress = true; //to draw framed objects
+	float			waterHeight = 2.0f;
+	bool			m_first_call = true;
 
 	const uint32_t  width		  = 1200;
 	const uint32_t  height		= 600;
-
-	float			waterHeight = 2.0f;
-  float     blur_coef   = 0.5f;
-	bool			m_first_call = true;
 
 	std::unique_ptr<eRenderManager>	renderManager;
 	eTextureManager* m_texture_manager = nullptr;

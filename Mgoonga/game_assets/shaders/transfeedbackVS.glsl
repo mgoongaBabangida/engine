@@ -19,9 +19,9 @@ out float blend;			// To fragment shader
 
 uniform float Time;  // Simulation time
 uniform float H;     // Elapsed time between frames
-uniform vec3 Accel;  // Particle acceleration
+uniform vec4 Accel;  // Particle acceleration
 uniform float ParticleLifetime;  // Particle lifespan
-uniform vec3 StartPos;  // Starting position
+uniform vec4 StartPos;  // Starting position
 uniform int NumRowsInTexture; //Number of rows in texture atlas
 
 uniform mat4 MVP;
@@ -40,13 +40,13 @@ void update() {
 
         if( age > ParticleLifetime ) {
             // The particle is past it's lifetime, recycle.
-            Position = StartPos;
+            Position = StartPos.xyz;
             Velocity = VertexInitialVelocity;
             StartTime = Time;
         } else {
             // The particle is alive, update.
             Position += Velocity * H;
-            Velocity += Accel * H;
+            Velocity += Accel.xyz * H;
         }
     }
 }
@@ -60,7 +60,7 @@ void render() {
 	float atlasProgression = lifeFactor * stageCount;
 	
 	int index1 = int(floor(atlasProgression));
-	int index2 = stageCount - 1 ? index1 : index1 + 1;
+	int index2 = stageCount - 1 > 0 ? index1 : index1 + 1;
 	blend = atlasProgression - index1;
 	
 	int column1 = index1 % NumRowsInTexture;

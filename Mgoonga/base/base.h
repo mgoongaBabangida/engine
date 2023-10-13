@@ -57,10 +57,10 @@ struct Light
 {
 	eLightType type = eLightType::POINT;
 	glm::vec4  light_position;
-	glm::vec3  light_direction;
-	glm::vec3  ambient  = { 0.1f, 0.1f, 0.1f };
-	glm::vec3  diffuse  = { 0.45f, 0.45f, 0.45f };
-	glm::vec3  specular = { 0.45f, 0.45f, 0.45f };
+	glm::vec4  light_direction;
+	glm::vec4  ambient  = { 0.1f, 0.1f, 0.1f, 1.0f };
+	glm::vec4  diffuse  = { 0.45f, 0.45f, 0.45f, 1.0f };
+	glm::vec4  specular = { 0.45f, 0.45f, 0.45f, 1.0f };
 
 	float constant	= 1.0f;
 	float linear		= 0.09f;
@@ -68,13 +68,13 @@ struct Light
 	float cutOff		= 0.3f;
 	float outerCutOff = 0.0f;
 
-	glm::vec3  intensity = { 50, 50, 50 };
+	glm::vec4  intensity = { 50, 50, 50 , 1.0f };
 };
 
 //-------------------------------------------------------
 using UniformData = std::variant<bool, float, int32_t, size_t,
-																 glm::vec2, glm::vec3, glm::vec4,
-																 glm::mat2, glm::mat3, glm::mat4>;
+																 glm::vec2, glm::vec4,
+																 glm::mat2, glm::mat4>;
 
 //-------------------------------------------------------
 struct Uniform

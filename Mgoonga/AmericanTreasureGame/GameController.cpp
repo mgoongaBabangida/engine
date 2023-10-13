@@ -59,7 +59,7 @@ GameController::~GameController()
 void GameController::Initialize()
 {
   m_game->GetMainLight().light_position = glm::vec4{ 0.0f, 4.0f,0.0f, 1.0f };
-  m_game->GetMainLight().intensity = glm::vec3{ 10.0f, 10.0f , 10.0f };
+  m_game->GetMainLight().intensity = glm::vec4{ 10.0f, 10.0f , 10.0f, 1.0f };
   m_game->GetMainCamera().setPosition(glm::vec3{-3.496f, 5.984f, -1.160f});
   m_game->GetMainCamera().setDirection(glm::normalize(glm::vec3{ 0.565f, -0.825f, -0.02f }));
   m_pipeline.get().GetOutlineFocusedRef() = false;
@@ -402,7 +402,7 @@ void GameController::Update(float _tick)
   //update debug
   for (int i = 0; i < m_texture_scales.size(); ++i)
   {
-    m_pipeline.get().SetUniformData("class eMainRender",
+    m_pipeline.get().SetUniformData("class ePhongRender",
       "textureScale[" + std::to_string(i) + "]",
       m_texture_scales[i]);
   }
@@ -447,16 +447,16 @@ void GameController::Update(float _tick)
     int counter = 0;
     for (const auto& type : terrain_types)
     {
-      m_pipeline.get().SetUniformData("class eMainRender",
+      m_pipeline.get().SetUniformData("class ePhongRender",
         "base_start_heights[" + std::to_string(counter) + "]",
         type.threshold_start);
 
-      m_pipeline.get().SetUniformData("class eMainRender",
+      m_pipeline.get().SetUniformData("class ePhongRender",
         "textureScale[" + std::to_string(counter) + "]",
         m_texture_scales[counter]);
       ++counter;
     }
-    m_pipeline.get().SetUniformData("class eMainRender",
+    m_pipeline.get().SetUniformData("class ePhongRender",
       "base_start_heights[" + std::to_string(counter) + "]",
       1.0f);
     water_level = m_water_level;
@@ -883,9 +883,9 @@ void GameController::_InitializeShips()
   m_game->AddObject(m_terrain);
 
   //SET UNIFORMS
-  m_pipeline.get().SetUniformData("class eMainRender", "min_height", 0.0f);
-  m_pipeline.get().SetUniformData("class eMainRender", "max_height", 1.0f);
-  m_pipeline.get().SetUniformData("class eMainRender", "color_count", 2);
+  m_pipeline.get().SetUniformData("class ePhongRender", "min_height", 0.0f);
+  m_pipeline.get().SetUniformData("class ePhongRender", "max_height", 1.0f);
+  m_pipeline.get().SetUniformData("class ePhongRender", "color_count", 2);
 
   std::set<TerrainType> terrain_types;
   terrain_types.insert({ "mounten",		0.0f, m_water_level, {0.5f, 0.5f, 0.0f } });
@@ -895,16 +895,16 @@ void GameController::_InitializeShips()
   int counter = 0;
   for (const auto& type : terrain_types)
   {
-    m_pipeline.get().SetUniformData("class eMainRender",
+    m_pipeline.get().SetUniformData("class ePhongRender",
       "base_start_heights[" + std::to_string(counter) + "]",
       type.threshold_start);
 
-    m_pipeline.get().SetUniformData("class eMainRender",
+    m_pipeline.get().SetUniformData("class ePhongRender",
       "textureScale[" + std::to_string(counter) + "]",
       m_texture_scales[counter]);
     ++counter;
   }
-  m_pipeline.get().SetUniformData("class eMainRender",
+  m_pipeline.get().SetUniformData("class ePhongRender",
     "base_start_heights[" + std::to_string(counter) + "]",
     1.0f);
 

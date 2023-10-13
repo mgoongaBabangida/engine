@@ -11,7 +11,7 @@ eScreenRender*		 eRenderManager::ScreenRender() { return m_screenRender.get(); }
 eParticleRender*	 eRenderManager::ParticleRender() { return m_particleRender.get(); }
 eParticleSystemRenderGPU_V2* eRenderManager::ParticleRenderGPU(){ return m_particleRenderGPU.get();}
 eShadowRender*		 eRenderManager::ShadowRender() { return m_shadowRender.get(); }
-eMainRender*		 eRenderManager::MainRender() { return m_mainRender.get(); }
+ePhongRender*		 eRenderManager::PhongRender() { return m_phongRender.get(); }
 eOutlineRender*		 eRenderManager::OutlineRender() { return m_outlineRender.get(); }
 eSkyNoiseRender*	 eRenderManager::SkyNoiseRender() { return m_skynoiseRender.get(); }
 eWaveRender*		 eRenderManager::WaveRender() { return m_waverender.get(); }
@@ -69,8 +69,8 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																					folderPath + "PostProcessingFragmentShader.glsl"));
 	shader_lambda(m_screenRender.get());
 	//PhongRender
-	m_mainRender.reset(new eMainRender(folderPath + "PhongVertexShader.glsl", folderPath + "PhongFragmentShader.glsl"));
-	shader_lambda(m_mainRender.get());
+	m_phongRender.reset(new ePhongRender(folderPath + "PhongVertexShader.glsl", folderPath + "PhongFragmentShader.glsl"));
+	shader_lambda(m_phongRender.get());
 	//Shadow Render
 	m_shadowRender.reset(new eShadowRender(folderPath + "VertexShades.glsl", //@todo rendame
 																				 folderPath + "FragmentShades.glsl",
@@ -121,10 +121,10 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																												 folderPath + "ParticleGPUUpdateGeometryShader.glsl",
 																												 folderPath + "ParticleGPURenderVertexShader.glsl",
 																												 folderPath + "ParticleGPURenderGeometryShader.glsl"));*/
-	/*m_particleRenderGPU.reset(new eParticleSystemRenderGPU_V2(folderPath + "transfeedbackVS.glsl",
+	m_particleRenderGPU.reset(new eParticleSystemRenderGPU_V2(folderPath + "transfeedbackVS.glsl",
 																														folderPath + "transfeedbackFS.glsl",
 																														folderPath + "ParticleGPURenderGeometryShader.glsl"));
-	shader_lambda(m_particleRenderGPU.get());*/
+	shader_lambda(m_particleRenderGPU.get());
 
 	//Lines
 	m_linesRender.reset(new eLinesRender(folderPath + "Vertex3DSimple.glsl",
@@ -176,7 +176,7 @@ void eRenderManager::UpdateShadersInfo()
 	shader_lambda(m_waterRender.get());
 	shader_lambda(m_skyboxRender.get());
 	shader_lambda(m_screenRender.get());
-	shader_lambda(m_mainRender.get());
+	shader_lambda(m_phongRender.get());
 	shader_lambda(m_shadowRender.get());
 	shader_lambda(m_outlineRender.get());
 	shader_lambda(m_skynoiseRender.get());
@@ -185,7 +185,7 @@ void eRenderManager::UpdateShadersInfo()
 	shader_lambda(m_gaussianRender.get());
 	shader_lambda(m_brightRender.get());
 	shader_lambda(m_particleRender.get());
-	//shader_lambda(m_particleRenderGPU.get());
+	shader_lambda(m_particleRenderGPU.get());
 	shader_lambda(m_linesRender.get());
 	shader_lambda(m_textRender.get());
 	shader_lambda(m_pbrRender.get());
@@ -211,7 +211,7 @@ bool eRenderManager::SetUniformData(const std::string& _renderName, const std::s
 		return true;
 	if (shader_lambda(m_screenRender.get()))
 		return true;
-	if (shader_lambda(m_mainRender.get()))
+	if (shader_lambda(m_phongRender.get()))
 		return true;
 	if (shader_lambda(m_shadowRender.get()))
 		return true;
@@ -229,8 +229,8 @@ bool eRenderManager::SetUniformData(const std::string& _renderName, const std::s
 		return true;
 	if (shader_lambda(m_particleRender.get()))
 		return true;
-	/*if (shader_lambda(m_particleRenderGPU.get()))
-		return true;*/
+	if (shader_lambda(m_particleRenderGPU.get()))
+		return true;
 	if (shader_lambda(m_linesRender.get()))
 		return true;
 	if (shader_lambda(m_textRender.get()))

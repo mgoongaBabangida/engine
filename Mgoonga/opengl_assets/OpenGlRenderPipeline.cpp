@@ -112,6 +112,31 @@ Texture eOpenGlRenderPipeline::GetSkyNoiseTexture(const Camera& _camera)
 float& eOpenGlRenderPipeline::GetSaoThresholdRef() { return renderManager->GetSsaoThresholdRef(); }
 float& eOpenGlRenderPipeline::GetSaoStrengthRef() { return renderManager->GetSsaoStrengthRef(); }
 
+float& eOpenGlRenderPipeline::GetExposureRef()
+{
+	return renderManager->PhongRender()->GetExposure();
+}
+
+bool& eOpenGlRenderPipeline::GetGammaCorrectionRef()
+{
+	return renderManager->PhongRender()->GetGammaCorrection();
+}
+
+bool& eOpenGlRenderPipeline::GetToneMappingRef()
+{
+	return renderManager->PhongRender()->GetToneMapping();
+}
+
+bool& eOpenGlRenderPipeline::GetDebugWhite()
+{
+	return renderManager->PhongRender()->GetDebugWhite();
+}
+
+bool& eOpenGlRenderPipeline::GetDebugTexCoords()
+{
+	return renderManager->PhongRender()->GetDebugTextCoords();
+}
+
 float& eOpenGlRenderPipeline::WaveSpeedFactor()
 {
 	return renderManager->WaterRender()->WaveSpeedFactor();
@@ -477,23 +502,23 @@ void eOpenGlRenderPipeline::RenderSkybox(const Camera& _camera)
 
 void eOpenGlRenderPipeline::RenderReflection(Camera& _camera, const Light& _light, std::vector<shObject>& _phong_objects, std::vector<shObject>& _pbr_objects)
 {
-	renderManager->MainRender()->SetClipPlane(-waterHeight);
+	renderManager->PhongRender()->SetClipPlane(-waterHeight);
 
 	Camera temp_cam = _camera;
 	_camera.setPosition(glm::vec3(temp_cam.getPosition().x, waterHeight - (temp_cam.getPosition().y - waterHeight), temp_cam.getPosition().z));
 	_camera.setDirection(glm::reflect(_camera.getDirection(), glm::vec3(0, 1, 0))); //water normal
 
-	renderManager->MainRender()->Render(_camera, _light, _phong_objects, false, false, true, tone_mapping, exposure);
+	renderManager->PhongRender()->Render(_camera, _light, _phong_objects);
 	renderManager->PBRRender()->Render(_camera, _light, _pbr_objects);
 	_camera = temp_cam;
 }
 
 void eOpenGlRenderPipeline::RenderRefraction(Camera& _camera, const Light& _light, std::vector<shObject>& _phong_objects, std::vector<shObject>& _pbr_objects)
 {
-	renderManager->MainRender()->SetClipPlane(waterHeight);
-	renderManager->MainRender()->Render(_camera, _light, _phong_objects, false, false, true, tone_mapping, exposure);
+	renderManager->PhongRender()->SetClipPlane(waterHeight);
+	renderManager->PhongRender()->Render(_camera, _light, _phong_objects);
 	renderManager->PBRRender()->Render(_camera, _light, _pbr_objects);
-	renderManager->MainRender()->SetClipPlane(10);
+	renderManager->PhongRender()->SetClipPlane(10);
 
 	//glDisable(GL_CLIP_DISTANCE0);
 }
@@ -510,7 +535,7 @@ void eOpenGlRenderPipeline::RenderSkyNoise(const Camera& _camera)
 
 void eOpenGlRenderPipeline::RenderMain(const Camera& _camera, const Light& _light, const std::vector<shObject>& _objects)
 {
-	renderManager->MainRender()->Render(_camera, _light, _objects, debug_white, debug_texcoords, gamma_correction, tone_mapping, exposure);
+	renderManager->PhongRender()->Render(_camera, _light, _objects);
 }
 
 void eOpenGlRenderPipeline::RenderOutlineFocused(const Camera& _camera, const Light& _light, const std::vector<shObject>& focused)

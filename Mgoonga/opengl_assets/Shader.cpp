@@ -266,13 +266,6 @@ void	Shader::GetUniformDataFromShader()
 				uniform.data = res;
 			}
 			break;
-			case GL_FLOAT_VEC3:
-			{
-				glm::vec3 res;
-				glGetUniformfv(id, uniform.location, &res[0]);
-				uniform.data = res;
-			}
-			break;
 			case GL_FLOAT_VEC4:
 			{
 				glm::vec4 res;
@@ -283,13 +276,6 @@ void	Shader::GetUniformDataFromShader()
 			case GL_FLOAT_MAT2:
 			{
 				glm::mat2 res;
-				glGetUniformfv(id, uniform.location, &res[0][0]);
-				uniform.data = res;
-			}
-			break;
-			case GL_FLOAT_MAT3:
-			{
-				glm::mat3 res;
 				glGetUniformfv(id, uniform.location, &res[0][0]);
 				uniform.data = res;
 			}
@@ -331,7 +317,7 @@ void	Shader::GetUniformDataFromShader()
 			break;
 			default:
 			{
-				std::cout << "there is not uniform handler for type " << uniform.type << std::endl;
+				std::cout << "there is not uniform handler for type " << uniform.type << " "<< uniform.name << std::endl;
 			}
 		}
 	}
@@ -401,13 +387,6 @@ void Shader::_SetUniform(const Uniform& _uniform)
 			glUniform2f(_uniform.location, data[0], data[1]);
 		}
 		break;
-		case GL_FLOAT_VEC3:
-		{
-			glm::vec3 data = std::get<glm::vec3>(_uniform.data);
-			/*glUniform3f(_uniform.location,  data[0], data[1], data[2]);*/
-			glUniform3fv(_uniform.location, 1, &data[0]);
-		}
-		break;
 		case GL_FLOAT_VEC4:
 		{
 			glm::vec4 data = std::get<glm::vec4>(_uniform.data);
@@ -419,12 +398,6 @@ void Shader::_SetUniform(const Uniform& _uniform)
 		{
 			glm::mat2 data = std::get<glm::mat2>(_uniform.data);
 			glUniformMatrix2fv(_uniform.location, 1, GL_FALSE, &data[0][0]);
-		}
-		break;
-		case GL_FLOAT_MAT3:
-		{
-			glm::mat3 data = std::get<glm::mat3>(_uniform.data);
-			glUniformMatrix3fv(_uniform.location, 1, GL_FALSE, &data[0][0]);
 		}
 		break;
 		case GL_FLOAT_MAT4:
@@ -450,7 +423,7 @@ void Shader::_SetUniform(const Uniform& _uniform)
 		break;
 		default:
 		{
-			std::cout << "there is not uniform handler for type " << _uniform.type << std::endl;
+			std::cout << "there is not uniform handler for type " << _uniform.type << " " << _uniform.name << std::endl;
 		}
 	}
 }		

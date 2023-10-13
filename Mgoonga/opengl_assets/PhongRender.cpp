@@ -1,36 +1,21 @@
 #include "stdafx.h"
-#include "MainRender.h"
+#include "PhongRender.h"
 #include <math/Transform.h>
 #include <math/Rigger.h>
 
 //---------------------------------------------------------------------------------
-eMainRender::eMainRender(const std::string& vS, const std::string& fS)
+ePhongRender::ePhongRender(const std::string& vS, const std::string& fS)
 : matrices(MAX_BONES)
 {
 	mainShader.installShaders(vS.c_str(), fS.c_str()); //main pass
 
 	glUseProgram(mainShader.ID());
-	
-	//Light
-	lightAmbientLoc		= glGetUniformLocation(mainShader.ID(), "light.ambient");
-	lightDiffuseLoc		= glGetUniformLocation(mainShader.ID(), "light.diffuse");
-	lightSpecularLoc	= glGetUniformLocation(mainShader.ID(), "light.specular");
-	lightPosLoc			= glGetUniformLocation(mainShader.ID(), "light.position");
-	lightDirLoc			= glGetUniformLocation(mainShader.ID(), "light.direction");
-	lightTypeLoc		= glGetUniformLocation(mainShader.ID(), "shadow_directional");
-
-	//Debug
-	DebugWhiteLoc = glGetUniformLocation(mainShader.ID(), "debug_white_color");
-	DebugTexcoordsLoc = glGetUniformLocation(mainShader.ID(), "debug_white_texcoords");
-	GammaCorrectionLoc = glGetUniformLocation(mainShader.ID(), "gamma_correction");
-	ToneMappingLoc = glGetUniformLocation(mainShader.ID(), "tone_mapping");
-	HdrExposureLoc = glGetUniformLocation(mainShader.ID(), "hdr_exposure");
 
 	//Material
-	matAmbientLoc		= glGetUniformLocation(mainShader.ID(), "material.ambient");
-	matDiffuseLoc		= glGetUniformLocation(mainShader.ID(), "material.texture_diffuse1");
-	matSpecularLoc		= glGetUniformLocation(mainShader.ID(), "material.texture_specular1");
-	matShineLoc			= glGetUniformLocation(mainShader.ID(), "material.shininess");
+	GLuint matAmbientLoc		= glGetUniformLocation(mainShader.ID(), "material.ambient");
+	GLuint matDiffuseLoc		= glGetUniformLocation(mainShader.ID(), "material.texture_diffuse1");
+	GLuint matSpecularLoc		= glGetUniformLocation(mainShader.ID(), "material.texture_specular1");
+	GLuint matShineLoc			= glGetUniformLocation(mainShader.ID(), "material.shininess");
 
 	//@todo Need to delete this default and use it correctly
 	glUniform3f(matAmbientLoc, 0.5f, 0.5f, 0.5f); // 1.0f, 0.5f, 0.31f
@@ -43,7 +28,6 @@ eMainRender::eMainRender(const std::string& vS, const std::string& fS)
 	modelToWorldMatrixUniformLocation	= glGetUniformLocation(mainShader.ID(), "modelToWorldMatrix");
 	shadowMatrixUniformLocation			= glGetUniformLocation(mainShader.ID(), "shadowMatrix"); //shadow
 	eyePositionWorldUniformLocation		= glGetUniformLocation(mainShader.ID(), "eyePositionWorld");
-	FarPlaneUniformLocation				= glGetUniformLocation(mainShader.ID(), "far_plane");
 	BonesMatLocation = glGetUniformLocation(mainShader.ID(), "gBones");
 
 	LightingIndexDirectional = glGetSubroutineIndex(mainShader.ID(), GL_FRAGMENT_SHADER, "calculateBlinnPhongDirectionalSpecDif");
@@ -52,74 +36,69 @@ eMainRender::eMainRender(const std::string& vS, const std::string& fS)
 }
 
 //---------------------------------------------------------------------------------
-eMainRender::~eMainRender()
+ePhongRender::~ePhongRender()
 {
 }
 
 //-----------------------------------------------------------------------------------------------------
-void eMainRender::Render(const Camera&								camera,
+void ePhongRender::Render(const Camera&								camera,
 						             const Light&									light,
-						             const std::vector<shObject>&	objects,
-                         bool													debug_white,
-                         bool													debug_text_coords,
-												 bool													gamma_correction,
-												 bool													tone_mapping,
-												 float												exposure)
+						             const std::vector<shObject>&	objects)
 {
 	glUseProgram(mainShader.ID());
 
-	glUniform1i(DebugWhiteLoc, debug_white);
-	glUniform1i(DebugTexcoordsLoc, debug_text_coords);
-	glUniform1i(GammaCorrectionLoc, gamma_correction);
-	glUniform1i(ToneMappingLoc, tone_mapping);
-	glUniform1f(HdrExposureLoc, exposure);
-	mainShader.SetUniformData("ssao_threshold", ssao_threshold);
-	mainShader.SetUniformData("ssao_strength", ssao_strength);
+	mainShader.SetUniformData("debug_white_color", m_debug_white);
+	mainShader.SetUniformData("debug_white_texcoords", m_debug_text_coords);
+	mainShader.SetUniformData("gamma_correction", m_gamma_correction);
+	mainShader.SetUniformData("tone_mapping", m_tone_mapping);
+	mainShader.SetUniformData("hdr_exposure", m_exposure);
+	mainShader.SetUniformData("ssao_threshold", m_ssao_threshold);
+	mainShader.SetUniformData("ssao_strength", m_ssao_strength);
 
-	glUniform3f(lightAmbientLoc,  light.ambient.x,		   light.ambient.y,	        light.ambient.z);
-	glUniform3f(lightDiffuseLoc,  light.diffuse.x,		   light.diffuse.y,	        light.diffuse.z);
-	glUniform3f(lightSpecularLoc, light.specular.x,		   light.specular.y,	    light.specular.z);
-	glUniform4f(lightPosLoc,			light.light_position.x,  light.light_position.y,  light.light_position.z,  light.light_position.w);
-	glUniform3f(lightDirLoc,			light.light_direction.x, light.light_direction.y, light.light_direction.z);
-	
-	glUniform1f(glGetUniformLocation(mainShader.ID(), "light.constant"), light.constant);
-	glUniform1f(glGetUniformLocation(mainShader.ID(), "light.linear"), light.linear);
-	glUniform1f(glGetUniformLocation(mainShader.ID(), "light.quadratic"), light.quadratic);
-	glUniform1f(glGetUniformLocation(mainShader.ID(), "light.cutOff"), light.cutOff);
-	glUniform1f(glGetUniformLocation(mainShader.ID(), "light.outerCutOff"), light.outerCutOff);
+	mainShader.SetUniformData("light.ambient", light.ambient);
+	mainShader.SetUniformData("light.diffuse", light.diffuse);
+	mainShader.SetUniformData("light.specular", light.specular);
+	mainShader.SetUniformData("light.position", light.light_position);
+	mainShader.SetUniformData("light.direction", light.light_direction);
+
+	mainShader.SetUniformData("light.constant", light.constant);
+	mainShader.SetUniformData("light.linear", light.linear);
+	mainShader.SetUniformData("light.quadratic", light.quadratic);
+	mainShader.SetUniformData("light.cutOff", light.cutOff);
+	mainShader.SetUniformData("light.outerCutOff", light.outerCutOff);
 
 	if (light.type == eLightType::POINT)
 	{
-		glUniform1f(glGetUniformLocation(mainShader.ID(), "shininess"), 32.0f);
-		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + light.light_direction,
+		mainShader.SetUniformData("shininess", 32.0f);
+		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + glm::vec3(light.light_direction),
 																							glm::vec3(0.0f, 1.0f, 0.0f));
-		glUniform1i(lightTypeLoc, false);
+		mainShader.SetUniformData("shadow_directional", false);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexPoint);
 		shadowMatrix = camera.getProjectionBiasedMatrix() * worldToViewMatrix;
 	}
 	else if(light.type == eLightType::SPOT)
 	{
-		glUniform1f(glGetUniformLocation(mainShader.ID(), "shininess"), 32.0f);
-		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + light.light_direction,
+		mainShader.SetUniformData("shininess", 32.0f);
+		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + glm::vec3(light.light_direction),
 																							glm::vec3(0.0f, 1.0f, 0.0f));
-		glUniform1i(lightTypeLoc, true);
+		mainShader.SetUniformData("shadow_directional", true);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexSpot);
 		shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
 	}
 	else if (light.type == eLightType::DIRECTION)
 	{
-		glUniform1f(glGetUniformLocation(mainShader.ID(), "shininess"), 64.0f);
+		mainShader.SetUniformData("shininess", 64.0f);
 		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position),
 																							glm::vec3(0.0f, 0.0f, 0.0f), /*glm::vec3(light.light_position) + light.light_direction,*/
 																							glm::vec3(0.0f, 1.0f, 0.0f));
-		glUniform1i(lightTypeLoc, true);
+		mainShader.SetUniformData("shadow_directional", true);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
     shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
 	}
 
 	glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE, &shadowMatrix[0][0]);  //shadow
-	glUniform1f(FarPlaneUniformLocation, camera.getFarPlane());
 	glUniform3fv(eyePositionWorldUniformLocation, 1, &camera.getPosition()[0]);
+	mainShader.SetUniformData("far_plane", camera.getFarPlane());
 
 	glm ::mat4 worldToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
 	for (auto &object : objects)
@@ -142,13 +121,13 @@ void eMainRender::Render(const Camera&								camera,
 			for (auto& m : matrices)
 				m = UNIT_MATRIX;
 		}
-		glUniformMatrix4fv(BonesMatLocation, 300, GL_FALSE, &matrices[0][0][0]);
+		glUniformMatrix4fv(BonesMatLocation, MAX_BONES, GL_FALSE, &matrices[0][0][0]);
 		object->GetModel()->Draw();
 	}
 }
 
 //---------------------------------------------------------------------------
-void eMainRender::SetClipPlane(float Height)
+void ePhongRender::SetClipPlane(float Height)
 {
 	glUseProgram(mainShader.ID());
 	GLuint clipPlaneLoc = glGetUniformLocation(mainShader.ID(), "clip_plane");
@@ -156,7 +135,7 @@ void eMainRender::SetClipPlane(float Height)
 }
 
 //---------------------------------------------------------------------------
-void eMainRender::SetShadowMatrix(glm::mat4 shadow_matrix)
+void ePhongRender::SetShadowMatrix(glm::mat4 shadow_matrix)
 {
 	glUseProgram(mainShader.ID());
 	glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE,

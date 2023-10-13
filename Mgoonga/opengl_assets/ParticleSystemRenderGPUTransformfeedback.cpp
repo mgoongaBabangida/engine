@@ -171,8 +171,6 @@ eParticleSystemRenderGPU_V2::eParticleSystemRenderGPU_V2(const std::string& _ver
   m_HLoc = glGetUniformLocation(m_renderShader.ID(), "H");
   m_timeLoc = glGetUniformLocation(m_renderShader.ID(), "Time");
   m_lifeTimeLoc = glGetUniformLocation(m_renderShader.ID(), "ParticleLifetime");
-  m_accelLoc = glGetUniformLocation(m_renderShader.ID(), "Accel");
-  m_startPosLoc = glGetUniformLocation(m_renderShader.ID(), "StartPos");
   m_numRowsLoc = glGetUniformLocation(m_renderShader.ID(), "NumRowsInTexture");
   m_CameraPosLoc = glGetUniformLocation(m_renderShader.ID(), "gCameraPos");
   m_BillboardSizeLoc = glGetUniformLocation(m_renderShader.ID(), "gBillboardSize");
@@ -234,8 +232,8 @@ void eParticleSystemRenderGPU_V2::AddParticleSystem(glm::vec3 _startPos, const T
   m_start_pos = _startPos;
   glUseProgram(m_renderShader.ID());
   glUniform1f(m_lifeTimeLoc, 3.5f);
-  glUniform3f(m_accelLoc, 0.0f, -0.4f, 0.0f);
-  glUniform3f(m_startPosLoc,m_start_pos[0], m_start_pos[1], m_start_pos[2]);
+  m_renderShader.SetUniformData("Accel", glm::vec4(0.0f, -0.4f, 0.0f, 1.0f));
+  m_renderShader.SetUniformData("StartPos", glm::vec4(m_start_pos, 1.0f));
   glUniform1i(m_numRowsLoc, 4); //@todo change for variable
 
   m_particleTexture = _texture;
