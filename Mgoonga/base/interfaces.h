@@ -358,8 +358,8 @@ public:
 	virtual bool UseGizmo() = 0;
 	virtual uint32_t CurGizmoType() = 0;
 
-	virtual size_t			Width() const = 0 ;
-	virtual size_t			Height() const = 0 ;
+	virtual uint32_t	Width() const = 0 ;
+	virtual uint32_t	Height() const = 0 ;
 };
 
 #endif

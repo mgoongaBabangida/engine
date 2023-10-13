@@ -90,7 +90,7 @@ void eMainRender::Render(const Camera&								camera,
 
 	if (light.type == eLightType::POINT)
 	{
-		glUniform1f(glGetUniformLocation(mainShader.ID(), "shininess"), 16.0f);
+		glUniform1f(glGetUniformLocation(mainShader.ID(), "shininess"), 32.0f);
 		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + light.light_direction,
 																							glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniform1i(lightTypeLoc, false);
@@ -99,8 +99,8 @@ void eMainRender::Render(const Camera&								camera,
 	}
 	else if(light.type == eLightType::SPOT)
 	{
-		glUniform1f(glGetUniformLocation(mainShader.ID(), "shininess"), 16.0f);
-		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(0.0f, -1.0f, 0.0f),
+		glUniform1f(glGetUniformLocation(mainShader.ID(), "shininess"), 32.0f);
+		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + light.light_direction,
 																							glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniform1i(lightTypeLoc, true);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexSpot);

@@ -30,6 +30,7 @@ in vec3 theColor;
 in vec3 theNormal;
 in vec3 thePosition;
 in vec2 Texcoord;
+
 in vec4 LightSpacePos;
 in vec4 LocalSpacePos;
 in vec3 LocalSpaceNormal;
@@ -43,7 +44,7 @@ subroutine vec3 LightingPtr(Light light, vec3 normal, vec3 thePosition, vec3 dif
 subroutine uniform LightingPtr LightingFunction;
 
 layout(binding=0) uniform samplerCube 	   depth_cube_map;// Shadow point
-layout(binding=1) uniform sampler2D		   depth_texture; // Shadow dir
+layout(binding=1) uniform sampler2D	   depth_texture; // Shadow dir
 
 layout(binding=2) uniform sampler2D        texture_diffuse1;
 layout(binding=3) uniform sampler2D        texture_specular1;
@@ -282,18 +283,13 @@ subroutine(LightingPtr) vec3 calculateBlinnPhongDirectionalSpecDif(Light light, 
 
 subroutine(LightingPtr) vec3 calculateBlinnPhongFlashSpecDif(Light light, vec3 normal, vec3 thePosition, vec3 diffuseTexture, vec2 Texcoords)
 {
-	vec3 lightDir= normalize(vec3(light.position)-thePosition);
+	vec3 lightDir   = normalize(vec3(light.position)-thePosition);
 	float theta     = dot(lightDir, normalize(-light.direction));
 	float epsilon   = light.cutOff - light.outerCutOff;
 	float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
 
-	if(theta > light.cutOff) 
-	{
-		vec3 ret = calculateBlinnPhongPointSpecDif(light, normal, thePosition, diffuseTexture, Texcoords);
-		return ret *= intensity;
-	}
-	else
-	 return vec3(0.0f,0.0f,0.0f);
+	vec3 ret = calculateBlinnPhongPointSpecDif(light, normal, thePosition, diffuseTexture, Texcoords);
+	return ret *= intensity;
 }
 
 void main()
@@ -373,7 +369,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal )
   projCoords = projCoords * 0.5 + 0.5;
   float closestDepth = texture(depth_texture, projCoords.xy).r;
   float currentDepth = projCoords.z;
-  float bias = max(0.01 * (1.0 - dot(normal, lightDir)), 0.001);
+  float bias = max(0.005 * (1.0 - dot(normal, lightDir)), 0.0005);
   
   float shadow = 0.0;
   vec2 texelSize = 1.0 / textureSize(depth_texture, 0);
@@ -387,8 +383,8 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal )
   }
   shadow /= 25.0;
   
-  if(LightSpacePos.z > 1.0) //far plane issue!
-     shadow = 1.0;
+  if(fragPosLightSpace.z > 1.0) //far plane issue!
+     shadow = 0.0;
   return clamp((0.5f + (1.0f - shadow)), 0.0f, 1.0f);
 } 
 
@@ -406,7 +402,7 @@ float ShadowCalculationCubeMap(vec3 fragPos)
     float bias = 0.05; 
     float shadow = currentDepth -  bias > closestDepth ? 1.0 : 0.0;
 
-    return 1.0f - shadow;
+    return clamp((0.5f + (1.0f - shadow)), 0.0f, 1.0f);
 } 
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)

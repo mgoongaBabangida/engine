@@ -74,14 +74,15 @@ void eOpenGlRenderPipeline::Initialize()
 }
 
 //-------------------------------------------------------------------------------------------
-void eOpenGlRenderPipeline::InitializeBuffers(bool _needsShadowCubeMap)
+void eOpenGlRenderPipeline::InitializeBuffers()
 {
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFAULT, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SCREEN, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_MTS, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_REFLECTION, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_REFRACTION, width, height);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW, width*2, height*2, _needsShadowCubeMap);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW_DIR, width*2, height*2);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW_CUBE_MAP, width*2, height*2);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SQUERE, height, height); //squere
   eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_BRIGHT_FILTER, width, height);
   eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_ONE, 600, 300); //@todo numbers
@@ -163,6 +164,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 																				std::vector<std::shared_ptr<GUI>>& _guis,
 																				std::vector<std::shared_ptr<Text>>& _texts)
 {
+	//@todo sorting to camera ?
   /*std::sort(focused.begin(), focused.end(), [_camera](const shObject& obj1, const shObject& obj2)
     { return glm::length2(_camera.getPosition() - obj1->GetTransform()->getTranslation())
     > glm::length2(_camera.getPosition() - obj2->GetTransform()->getTranslation()); });*/
@@ -180,13 +182,18 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	phong_pbr_objects.insert(phong_pbr_objects.end(), pbr_objs.begin(), pbr_objs.end());
 
 	//Shadow Render Pass
-	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SHADOW);
-	if (shadows) { RenderShadows(_camera, _light, phong_pbr_objects); }
-
 	if (_light.type == eLightType::DIRECTION || _light.type == eLightType::SPOT)
-		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW, GL_TEXTURE1);
+	{
+		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SHADOW_DIR);
+		if (shadows) { RenderShadows(_camera, _light, phong_pbr_objects); }
+		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW_DIR, GL_TEXTURE1);
+	}
 	else if (_light.type == eLightType::POINT)
-		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW, GL_TEXTURE0);
+	{
+		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SHADOW_CUBE_MAP);
+		if (shadows) { RenderShadows(_camera, _light, phong_pbr_objects); }
+		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW_CUBE_MAP, GL_TEXTURE0);
+	}
 
 	//Rendering reflection and refraction to Textures
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_REFLECTION);
@@ -438,7 +445,8 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 void eOpenGlRenderPipeline::RenderShadows(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
 {
 	// Bind the "depth only" FBO and set the viewport to the size of the depth texture
-	glm::ivec2 size = eGlBufferContext::GetInstance().GetSize(eBuffer::BUFFER_SHADOW);
+	glm::ivec2 size = _light.type == eLightType::POINT ? eGlBufferContext::GetInstance().GetSize(eBuffer::BUFFER_SHADOW_CUBE_MAP)
+																										 : eGlBufferContext::GetInstance().GetSize(eBuffer::BUFFER_SHADOW_DIR);
 	glViewport(0, 0, size.x, size.y);
 	
 	glEnable(GL_CULL_FACE);
@@ -741,7 +749,7 @@ Texture eOpenGlRenderPipeline::GetRefractionBufferTexture() const
 //-------------------------------------------------------
 Texture eOpenGlRenderPipeline::GetShadowBufferTexture() const
 {
-	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SHADOW);
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SHADOW_DIR);
 }
 
 //-------------------------------------------------------

@@ -7,7 +7,8 @@
 enum class eBuffer
 {
 	BUFFER_DEFAULT,
-	BUFFER_SHADOW,
+	BUFFER_SHADOW_DIR,
+	BUFFER_SHADOW_CUBE_MAP,
 	BUFFER_BRIGHT_FILTER,
 	BUFFER_GAUSSIAN_ONE,
 	BUFFER_GAUSSIAN_TWO,
@@ -33,7 +34,7 @@ public:
 	eGlBufferContext(const eGlBufferContext&)		= delete;
 	eGlBufferContext& operator=(eGlBufferContext&)	= delete;
 	
-	void BufferInit(eBuffer, unsigned int, unsigned int, bool _param = false);
+	void BufferInit(eBuffer, unsigned int, unsigned int);
 	void EnableWrittingBuffer(eBuffer);
 	void EnableReadingBuffer(eBuffer, GLenum slot);
 
@@ -54,7 +55,8 @@ public:
 
 private:
 	eColorFBO		   defaultFBO;
-	ShadowMapFBO	 depthFBO;
+	ShadowMapFBO	 depthDirFBO;
+	ShadowMapFBO	 depthCubeFBO;
   eColorFBO		   screenFBO;
   eColorFBO		   mtsFBO;
   eColorFBO		   reflectionFBO;

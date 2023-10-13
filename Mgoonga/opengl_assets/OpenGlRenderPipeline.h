@@ -35,9 +35,12 @@ public:
 	//@todo gui should be const latter ?, and camera prob
 	
 	void			Initialize();
-	void			InitializeBuffers(bool _needsShadowCubeMap = false);
+	void			InitializeBuffers();
 	void			InitializeRenders(eModelManager&, eTextureManager&, const std::string& shadersFolderPath);
 	
+	uint32_t  Width() const { return width; }
+	uint32_t  Height() const { return height; }
+
 	const std::vector<ShaderInfo>& GetShaderInfos() const;
 	void			UpdateShadersInfo();
 	bool			SetUniformData(const std::string& _renderName,

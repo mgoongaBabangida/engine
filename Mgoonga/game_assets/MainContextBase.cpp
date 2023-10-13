@@ -44,7 +44,7 @@ eMainContextBase::eMainContextBase(eInputController* _input,
 , animationManager(new AnimationManagerYAML)
 , soundManager(new eSoundManager(_assetsPath))
 , externalGui(_externalGui)
-, pipeline(width, height)
+, pipeline(1200, 600) //@todo should get from outside
 {
 
 }
@@ -53,14 +53,12 @@ eMainContextBase::eMainContextBase(eInputController* _input,
 eMainContextBase::~eMainContextBase()
 {
 	m_global_scripts.clear();
-	if(tcpTimer)
-		tcpTimer->stop();
 }
 
 //-------------------------------------------------------------------------
-size_t eMainContextBase::Width() const { return width; }
+uint32_t eMainContextBase::Width() const { return pipeline.Width(); }
 //-------------------------------------------------------------------------
-size_t eMainContextBase::Height()  const { return height; }
+uint32_t eMainContextBase::Height()  const { return pipeline.Height(); }
 
 //*********************InputObserver*********************************
 //--------------------------------------------------------------------------
@@ -93,7 +91,7 @@ bool eMainContextBase::OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier)
 {
 	if (m_update_hovered)
 	{
-		GetMainCamera().getCameraRay().Update(GetMainCamera(), static_cast<float>(x), static_cast<float>(y), static_cast<float>(width), static_cast<float>(height));
+		GetMainCamera().getCameraRay().Update(GetMainCamera(), static_cast<float>(x), static_cast<float>(y), static_cast<float>(pipeline.Width()), static_cast<float>(pipeline.Height()));
 		GetMainCamera().getCameraRay().press((float)x, (float)y);
 		auto [picked, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
 		m_hovered = picked;
@@ -120,7 +118,7 @@ bool eMainContextBase::OnMousePress(int32_t x, int32_t y, bool _left, KeyModifie
 	if (m_framed)
 		m_framed->clear();
 
-	GetMainCamera().getCameraRay().Update(GetMainCamera(), static_cast<float>(x), static_cast<float>(y), static_cast<float>(width), static_cast<float>(height));
+	GetMainCamera().getCameraRay().Update(GetMainCamera(), static_cast<float>(x), static_cast<float>(y), static_cast<float>(pipeline.Width()), static_cast<float>(pipeline.Height()));
 	GetMainCamera().getCameraRay().press(x, y);
 
 	//should be inside input strategy which needs it(frame, moveXZ)
@@ -151,19 +149,21 @@ bool eMainContextBase::OnMouseRelease(KeyModifiers _modifier)
 //--------------------------------------------------------------------------
 void eMainContextBase::InitializeGL()
 {
-	//init main light
-	m_lights.push_back({});
-	//m_lights[0].light_position = vec4(0.0f, 4.0f, -1.0f, 1.0f);
-	m_lights[0].light_position = vec4(0.5f, 2.0f, -4.0f, 1.0f);
-	m_lights[0].light_direction = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	m_lights[0].type = eLightType::DIRECTION;
+	{
+		//init main light
+		m_lights.push_back({});
+		//m_lights[0].light_position = vec4(0.0f, 4.0f, -1.0f, 1.0f);
+		m_lights[0].light_position = vec4(0.5f, 2.0f, -4.0f, 1.0f);
+		m_lights[0].light_direction = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		m_lights[0].type = eLightType::DIRECTION;
 
-	//init main camera
-	m_cameras.push_back(Camera(width, height, nearPlane, farPlane));
-	m_cameras[0].setDirection(glm::vec3(0.6f, -0.10f, 0.8f));
-	m_cameras[0].setPosition(glm::vec3(0.0f, 4.0f, -4.0f));
-	//Camera Ray
-	GetMainCamera().getCameraRay().init(width, height, nearPlane, farPlane); //@todo direction of camera normalization
+		//init main camera
+		m_cameras.push_back(Camera(pipeline.Width(), pipeline.Height(), 0.1f, 20.0f));
+		m_cameras[0].setDirection(glm::vec3(0.6f, -0.10f, 0.8f));
+		m_cameras[0].setPosition(glm::vec3(0.0f, 4.0f, -4.0f));
+		//init camera ray
+		GetMainCamera().getCameraRay().init(pipeline.Width(), pipeline.Height(), 0.1f, 20.0f); //@todo direction of camera normalization
+	}
 
 	for (auto& gui : externalGui)
 		m_input_controller->AddObserver(gui, MONOPOLY);
@@ -202,7 +202,7 @@ void eMainContextBase::PaintGL()
 		std::map<eObject::RenderType, std::vector<shObject>> objects;
 		std::vector<shObject> phong, pbr, flags, bezier, geometry, lines;
 
-		if(!m_texts.empty())
+		if(!m_texts.empty() && m_show_fps)
 			m_texts[0]->content = { "FPS " + std::to_string(1000 / tick) };
 
 		float msc = static_cast<float>(tick);
@@ -211,6 +211,7 @@ void eMainContextBase::PaintGL()
 			script->Update(msc);
 		}
 
+		//@todo this will be slow when we have a lot of objects
 		for (shObject object : m_objects)
 		{
 			if(object.get())
@@ -249,10 +250,12 @@ void eMainContextBase::PaintGL()
 		if(m_input_strategy)
 			m_input_strategy->UpdateInRenderThread();
 
+		//@todo to be transfered to some other update
 		if (m_light_object)
 		{
 			m_light_object->GetTransform()->setTranslation(GetMainLight().light_position);
-			GetMainLight().light_direction = -GetMainLight().light_position;
+			if(GetMainLight().type ==  eLightType::DIRECTION)
+				GetMainLight().light_direction = -GetMainLight().light_position;
 			phong.push_back(m_light_object);
 		}
 
@@ -272,7 +275,7 @@ void eMainContextBase::PaintGL()
 
 		pipeline.RenderFrame(objects, GetMainCamera(), GetMainLight(), m_guis, m_texts);
 
-		if (m_l_pressed)
+		if (m_l_pressed) //@todo improve print screen
 		{
 			Texture t;
 			t = pipeline.GetDefaultBufferTexture();
@@ -473,7 +476,7 @@ void eMainContextBase::InitializeScripts()
 	t->pos_y = 25.0f;
 	t->scale = 1.0f;
 	t->color = glm::vec3(0.8, 0.8f, 0.0f);
-	t->mvp = glm::ortho(0.0f, (float)width, 0.0f, (float)height);
+	t->mvp = glm::ortho(0.0f, (float)pipeline.Width(), 0.0f, (float)pipeline.Height());
 	m_texts.push_back(t);
 
 	for (auto& script : m_global_scripts)
@@ -493,17 +496,34 @@ void eMainContextBase::InitializeExternalGui()
 {
 	// Lights & Cameras
 	externalGui[0]->Add(TEXT, "Light", nullptr);
+
+	std::function<void(size_t)> light_type_callback = [this](size_t _index) 
+	{
+		if(_index == 0)
+			GetMainLight().type = eLightType::DIRECTION;
+		else if(_index == 1)
+			GetMainLight().type = eLightType::POINT;
+		else if(_index == 2)
+			GetMainLight().type = eLightType::SPOT;
+	};
+	static eVectorStringsCallback light_types{ {"directional", "point", "cut-off" }, light_type_callback };
+	externalGui[0]->Add(COMBO_BOX, "Light type.", &light_types);
 	externalGui[0]->Add(SLIDER_FLOAT_3, "Light position.", &GetMainLight().light_position);
 	externalGui[0]->Add(SLIDER_FLOAT_3, "Light direction.", &GetMainLight().light_direction);
 	externalGui[0]->Add(SLIDER_FLOAT_3, "Light intensity.", &GetMainLight().intensity);
 	externalGui[0]->Add(SLIDER_FLOAT_3, "Light ambient.", &GetMainLight().ambient);
 	externalGui[0]->Add(SLIDER_FLOAT_3, "Light diffuse.", &GetMainLight().diffuse);
 	externalGui[0]->Add(SLIDER_FLOAT_3, "Light specular.", &GetMainLight().specular);
-	externalGui[0]->Add(SLIDER_FLOAT, "Light constant", &GetMainLight().constant);
-	externalGui[0]->Add(SLIDER_FLOAT, "Light linear", &GetMainLight().linear);
-	externalGui[0]->Add(SLIDER_FLOAT, "Light quadratic", &GetMainLight().quadratic);
-	externalGui[0]->Add(SLIDER_FLOAT, "Light cut off", &GetMainLight().cutOff);
-	externalGui[0]->Add(SLIDER_FLOAT, "Light outer cut off", &GetMainLight().outerCutOff);
+	externalGui[0]->Add(TEXT, "Light constant", nullptr);
+	externalGui[0]->Add(SLIDER_FLOAT_NERROW, "Constant", &GetMainLight().constant);
+	externalGui[0]->Add(TEXT, "Light linear", nullptr);
+	externalGui[0]->Add(SLIDER_FLOAT_NERROW, "Linear", &GetMainLight().linear);
+	externalGui[0]->Add(TEXT, "Light quadratic", nullptr);
+	externalGui[0]->Add(SLIDER_FLOAT_NERROW, "Quadratic", &GetMainLight().quadratic);
+	externalGui[0]->Add(TEXT, "Light cut off", nullptr);
+	externalGui[0]->Add(SLIDER_FLOAT_NERROW, "Cut off", &GetMainLight().cutOff);
+	externalGui[0]->Add(TEXT, "Light outer cut off", nullptr);
+	externalGui[0]->Add(SLIDER_FLOAT_NERROW, "Outer cut off", &GetMainLight().outerCutOff);
 	externalGui[0]->Add(TEXT, "Camera", nullptr);
 	externalGui[0]->Add(SLIDER_FLOAT_3, "position", &GetMainCamera().PositionRef());
 	externalGui[0]->Add(SLIDER_FLOAT_3, "direction", &GetMainCamera().ViewDirectionRef());
@@ -837,68 +857,4 @@ void eMainContextBase::AddText(std::shared_ptr<Text> _text)
 std::vector<std::shared_ptr<Text>>& eMainContextBase::GetTexts()
 {
 	return m_texts;
-}
-
-//--------------------------------------------------------------------------------
-void eMainContextBase::InstallTcpServer()
-{
-	if (!tcpAgent)
-	{
-		if (dbb::NetWork::Initialize())
-		{
-			tcpAgent = std::make_unique<Server>();
-			if (tcpAgent->Initialize(dbb::IPEndPoint{ "0.0.0.0", 8080 }))//134.238.94.205 //208.67.222.222
-			{
-				tcpTimer.reset(new math::Timer([this]()->bool
-					{
-						if (tcpAgent->IsConnected())
-							tcpAgent->Frame();
-						return true;
-					}));
-				tcpTimer->start(15); //~70 fps
-
-				//this is test
-				std::string msg;
-				while (msg != "exit")
-				{
-					std::getline(std::cin, msg);
-					//std::cout << "Me: " << msg << std::endl;
-					tcpAgent->SendMsg(std::move(msg));
-				}
-			}
-			dbb::NetWork::Shutdown();
-		}
-	}
-}
-
-//--------------------------------------------------------------------------------
-void eMainContextBase::InstallTcpClient()
-{
-	if (!tcpAgent)
-	{
-		if (dbb::NetWork::Initialize())
-		{
-			tcpAgent = std::make_unique<Client>();
-			if (tcpAgent->Initialize(dbb::IPEndPoint{ "127.0.0.1", 8080 })) //"109.95.50.27 // "192.168.2.102 //134.238.94.205 /208.67.222.222
-			{
-				tcpTimer.reset(new math::Timer([this]()->bool
-					{
-						if (tcpAgent->IsConnected())
-							tcpAgent->Frame();
-						return true;
-					}));
-				tcpTimer->start(15); //~70 fps
-
-				//this is test
-				std::string msg;
-				while (msg != "exit")
-				{
-					std::getline(std::cin, msg);
-					//std::cout << "Me: " << msg << std::endl;
-					tcpAgent->SendMsg(std::move(msg));
-				}
-			}
-			dbb::NetWork::Shutdown();
-		}
-	}
 }

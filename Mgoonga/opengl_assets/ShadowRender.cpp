@@ -72,13 +72,18 @@ void eShadowRender::Render(const Camera&					camera,
 	{
 		glUseProgram(shaderDir.ID());
 		glm::mat4 worldToViewMatrix;
-		if(light.type == eLightType::DIRECTION)
+		if (light.type == eLightType::DIRECTION)
+		{
 			worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(0.0f, 0.0f, 0.0f), /*glm::vec3(light.light_position) + light.light_direction,*/
-																							glm::vec3(0.0f, 1.0f, 0.0f));
+				glm::vec3(0.0f, 1.0f, 0.0f));
+			shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
+		}
 		else
-			worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(0.0f, -1.0f, 0.0f), /*glm::vec3(light.light_position) + light.light_direction,*/
-																			glm::vec3(0.0f, 1.0f, 0.0f));
-		shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
+		{
+			worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + light.light_direction,
+				glm::vec3(0.0f, 1.0f, 0.0f));
+			shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
+		}
 		//RENDER DEPTH
 		for (auto &object : objects)
 		{

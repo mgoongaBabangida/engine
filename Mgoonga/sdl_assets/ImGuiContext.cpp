@@ -258,7 +258,7 @@ void eWindowImGui::Render()
         }
 
       } break;
-
+      case SLIDER_FLOAT_NERROW:  ImGui::SliderFloat(std::get<0>(item).c_str(), static_cast<float*>(std::get<2>(item)), -1.0f, 1.0f); break;
       case SLIDER_FLOAT_LARGE:  ImGui::SliderFloat(std::get<0>(item).c_str(), static_cast<float*>(std::get<2>(item)), -250.0f, 250.0f); break;
       case SLIDER_INT:          ImGui::SliderInt(std::get<0>(item).c_str(), static_cast<int*>(std::get<2>(item)), 0, 1024); break; //@todo
       case SLIDER_INT_NERROW:   ImGui::SliderInt(std::get<0>(item).c_str(), static_cast<int*>(std::get<2>(item)), 0, 20); break;

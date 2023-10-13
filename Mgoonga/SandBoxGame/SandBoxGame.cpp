@@ -50,7 +50,7 @@ void eSandBoxGame::InitializeBuffers()
 	eMainContextBase::InitializeBuffers();
 
 	GetMainLight().type = eLightType::DIRECTION;
-	pipeline.InitializeBuffers(GetMainLight().type == eLightType::POINT); //@todo add possibility to choose buffers
+	pipeline.InitializeBuffers();
 }
 
 //-------------------------------------------------------------------------
@@ -107,7 +107,7 @@ void eSandBoxGame::InitializeModels()
 
 	shObject grassPlane = factory.CreateObject(modelManager->Find("grass_plane"), eObject::RenderType::PHONG, "GrassPlane");
 	grassPlane->GetTransform()->setTranslation(vec3(0.0f, -2.0f, 0.0f));
-	grassPlane->GetTransform()->setScale(vec3(2.0f, 2.0f, 2.0f));
+	grassPlane->GetTransform()->setScale(vec3(5.0f, 5.0f, 5.0f));
 	m_objects.push_back(grassPlane);
 
 	shObject wolf = factory.CreateObject(modelManager->Find("wolf"), eObject::RenderType::PHONG, "Wolf", "Default", "");
@@ -153,12 +153,29 @@ void eSandBoxGame::InitializeModels()
 		m_objects.push_back(tombstone);
 
 		//Chest
-		shObject chest = factory.CreateObject(modelManager->Find("Chest"), eObject::RenderType::PHONG, "Chest", "Default", "");
+		shObject chest = factory.CreateObject(modelManager->Find("Chest"), eObject::RenderType::PBR, "Chest", "Default", "");
 		chest->GetTransform()->setTranslation(vec3(-1.5f, -2.0f, 0.0f));
 		chest->GetTransform()->setRotation(glm::radians(-90.0f), glm::radians(-90.0f), 0.0f);
 		chest->GetTransform()->setScale(vec3(0.5f, 0.5f, 0.5f));
 		m_objects.push_back(chest);
 		chest->GetRigger()->UseFirstFrameAsIdle();
+
+		t.loadTextureFromFile("../game_assets/Resources/chest/chest-diffuse.png");
+		t.type = "texture_diffuse";
+		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[0])->AddTexture(&t);
+		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[1])->AddTexture(&t);
+		t.loadTextureFromFile("../game_assets/Resources/chest/chest-normal.png");
+		t.type = "texture_normal";
+		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[0])->AddTexture(&t);
+		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[1])->AddTexture(&t);
+		t.loadTextureFromFile("../game_assets/Resources/chest/chest-metallic.png");
+		t.type = "texture_specular";
+		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[0])->AddTexture(&t);
+		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[1])->AddTexture(&t);
+		t.loadTextureFromFile("../game_assets/Resources/chest/chest-roughness.png");
+		t.type = "texture_roughness";
+		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[0])->AddTexture(&t);
+		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[1])->AddTexture(&t);
 	}
 
 	//light

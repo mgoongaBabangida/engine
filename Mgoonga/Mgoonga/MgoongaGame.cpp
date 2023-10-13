@@ -49,7 +49,7 @@ eMgoongaGameContext::~eMgoongaGameContext() {}
 void eMgoongaGameContext::InitializeBuffers()
 {
   GetMainLight().type = eLightType::DIRECTION;
-	pipeline.InitializeBuffers(GetMainLight().type == eLightType::POINT);
+	pipeline.InitializeBuffers();
 }
 
 //-----------------------------------------------------------------------------
@@ -100,10 +100,10 @@ void eMgoongaGameContext::InitializeModels()
   glm::ivec2 topLeft{ 160, 450 };
   glm::ivec2 bottomRight{ 1030, 725 };
 
-  m_guis.emplace_back(new GUIWithAlpha(0, 0, (bottomRight.x - topLeft.x) / 4, (bottomRight.y - topLeft.y) / 4, width, height));
+  m_guis.emplace_back(new GUIWithAlpha(0, 0, (bottomRight.x - topLeft.x) / 4, (bottomRight.y - topLeft.y) / 4, Width(), Height()));
   m_guis[0]->SetTexture(*tex, topLeft, bottomRight);
   m_guis[0]->SetTransparent(true);
-  m_guis[0]->SetChild(std::make_shared<GUIWithAlpha>(0, (bottomRight.y - topLeft.y) / 4, (bottomRight.x - topLeft.x) / 4, (bottomRight.y - topLeft.y) / 4, width, height));
+  m_guis[0]->SetChild(std::make_shared<GUIWithAlpha>(0, (bottomRight.y - topLeft.y) / 4, (bottomRight.x - topLeft.x) / 4, (bottomRight.y - topLeft.y) / 4, Width(), Height()));
   m_guis[0]->GetChildren()[0]->SetTexture(*tex, topLeft, bottomRight);
   m_guis[0]->GetChildren()[0]->SetVisible(false);
   m_guis[0]->setCommand(std::make_shared<MenuBehaviorLeanerMove>(m_guis[0]->GetChildren()[0].get(),
@@ -115,9 +115,9 @@ void eMgoongaGameContext::InitializeModels()
  /* m_guis.emplace_back(new Cursor(0, 0, (bottomRight.x - topLeft.x) / 4, (bottomRight.y - topLeft.y) / 4, width, height));
   m_guis[1]->SetTexture(*tex, topLeft, bottomRight);*/
   const Texture* cursor = texManager->Find("cursor1");
-  m_guis.emplace_back(new Cursor(0, 0, 30, 30, width, height));
+  m_guis.emplace_back(new Cursor(0, 0, 30, 30, Width(), Height()));
   m_guis[1]->SetTexture(*cursor, { 0,0 }, { cursor->mTextureWidth, cursor->mTextureHeight });
-  m_guis.emplace_back(new GUI(400, 0, 60, 60, width, height));
+  m_guis.emplace_back(new GUI(400, 0, 60, 60, Width(), Height()));
   m_guis[2]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight });
   m_guis[2]->SetTakeMouseEvents(true);
   m_guis[2]->SetMovable2D(true);

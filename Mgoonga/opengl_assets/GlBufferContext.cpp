@@ -1,12 +1,13 @@
 #include "stdafx.h"
 #include "GlBufferContext.h"
 
-void eGlBufferContext::BufferInit(eBuffer _buffer, unsigned int _width, unsigned int _height, bool _param)
+void eGlBufferContext::BufferInit(eBuffer _buffer, unsigned int _width, unsigned int _height)
 {
 	switch (_buffer)
 	{
 		case eBuffer::BUFFER_DEFAULT:					defaultFBO.Init(_width, _height);				break;
-		case eBuffer::BUFFER_SHADOW:					depthFBO.Init(_width, _height, _param);	break;
+		case eBuffer::BUFFER_SHADOW_DIR:			depthDirFBO.Init(_width, _height, false);	break;
+		case eBuffer::BUFFER_SHADOW_CUBE_MAP:	depthCubeFBO.Init(_width, _height, true);	break;
 		case eBuffer::BUFFER_BRIGHT_FILTER:		brightFilterFBO.Init(_width, _height);	break;
 		case eBuffer::BUFFER_GAUSSIAN_ONE:		gausian1FBO.Init(_width, _height);			break;
 		case eBuffer::BUFFER_GAUSSIAN_TWO:		gausian2FBO.Init(_width, _height);			break;
@@ -28,7 +29,8 @@ void eGlBufferContext::EnableWrittingBuffer(eBuffer _buffer)
 	switch(_buffer)
 	{
 		case eBuffer::BUFFER_DEFAULT:						defaultFBO.BindForWriting();				break;
-		case eBuffer::BUFFER_SHADOW:						depthFBO.BindForWriting();					break;
+		case eBuffer::BUFFER_SHADOW_DIR:				depthDirFBO.BindForWriting();				break;
+		case eBuffer::BUFFER_SHADOW_CUBE_MAP:		depthCubeFBO.BindForWriting();			break;
 		case eBuffer::BUFFER_BRIGHT_FILTER:			brightFilterFBO.BindForWriting();		break;
 		case eBuffer::BUFFER_GAUSSIAN_ONE:			gausian1FBO.BindForWriting();				break;
 		case eBuffer::BUFFER_GAUSSIAN_TWO:			gausian2FBO.BindForWriting();				break;
@@ -50,7 +52,8 @@ void eGlBufferContext::EnableReadingBuffer(eBuffer _buffer, GLenum _slot)
 	switch (_buffer)
 	{
 		case eBuffer::BUFFER_DEFAULT:						defaultFBO.BindForReading(_slot);					break;
-		case eBuffer::BUFFER_SHADOW:						depthFBO.BindForReading(_slot);						break;
+		case eBuffer::BUFFER_SHADOW_DIR:				depthDirFBO.BindForReading(_slot);				break;
+		case eBuffer::BUFFER_SHADOW_CUBE_MAP:		depthCubeFBO.BindForReading(_slot);				break;
 		case eBuffer::BUFFER_BRIGHT_FILTER:			brightFilterFBO.BindForReading(_slot);		break;
 		case eBuffer::BUFFER_GAUSSIAN_ONE:			gausian1FBO.BindForReading(_slot);				break;
 		case eBuffer::BUFFER_GAUSSIAN_TWO:			gausian2FBO.BindForReading(_slot);				break;
@@ -83,7 +86,8 @@ Texture eGlBufferContext::GetTexture(eBuffer _buffer)
 	switch (_buffer)
 	{
 		case eBuffer::BUFFER_DEFAULT:						return defaultFBO.GetTexture();
-		case eBuffer::BUFFER_SHADOW:						return depthFBO.GetTexture();
+		case eBuffer::BUFFER_SHADOW_DIR:				return depthDirFBO.GetTexture();
+		case eBuffer::BUFFER_SHADOW_CUBE_MAP:		return depthCubeFBO.GetTexture();
 		case eBuffer::BUFFER_BRIGHT_FILTER:			return brightFilterFBO.GetTexture();
 		case eBuffer::BUFFER_GAUSSIAN_ONE:			return gausian1FBO.GetTexture();
 		case eBuffer::BUFFER_GAUSSIAN_TWO:			return gausian2FBO.GetTexture();
@@ -119,7 +123,8 @@ GLuint eGlBufferContext::GetId(eBuffer _buffer)
 	switch (_buffer)
 	{
 	case eBuffer::BUFFER_DEFAULT:						return defaultFBO.ID();
-	case eBuffer::BUFFER_SHADOW:						return depthFBO.ID();
+	case eBuffer::BUFFER_SHADOW_DIR:				return depthDirFBO.ID();
+	case eBuffer::BUFFER_SHADOW_CUBE_MAP:		return depthCubeFBO.ID();
 	case eBuffer::BUFFER_BRIGHT_FILTER:			return brightFilterFBO.ID();
 	case eBuffer::BUFFER_GAUSSIAN_ONE:			return gausian1FBO.ID();
 	case eBuffer::BUFFER_GAUSSIAN_TWO:			return gausian2FBO.ID();
@@ -146,7 +151,8 @@ glm::ivec2 eGlBufferContext::GetSize(eBuffer _buffer)
 	switch (_buffer)
 	{
 	case eBuffer::BUFFER_DEFAULT:						return defaultFBO.Size();
-	case eBuffer::BUFFER_SHADOW:						return depthFBO.Size();
+	case eBuffer::BUFFER_SHADOW_DIR:				return depthDirFBO.Size();
+	case eBuffer::BUFFER_SHADOW_CUBE_MAP:		return depthCubeFBO.Size();
 	case eBuffer::BUFFER_BRIGHT_FILTER:			return brightFilterFBO.Size();
 	case eBuffer::BUFFER_GAUSSIAN_ONE:			return gausian1FBO.Size();
 	case eBuffer::BUFFER_GAUSSIAN_TWO:			return gausian2FBO.Size();

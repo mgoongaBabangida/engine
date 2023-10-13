@@ -5,7 +5,7 @@
 #include <base/interfaces.h>
 #include <base/Event.h>
 
-#include <math/timer.h>
+#include <math/Clock.h>
 #include <math/Camera.h>
 
 #include <sdl_assets/sdl_assets.h>
@@ -63,7 +63,7 @@ public:
 	//IGame
 	void			InitializeGL() final;
 
-	virtual void			PaintGL() override;
+	virtual void	PaintGL() override;
 
 	virtual void	AddObject(std::shared_ptr<eObject> _object) override;
 	virtual void	DeleteObject(std::shared_ptr<eObject> _object) override;
@@ -93,11 +93,8 @@ public:
 	virtual bool			UseGizmo() override { return m_use_guizmo; }
 	virtual uint32_t	CurGizmoType() override { return (uint32_t)m_gizmo_type; }
 
-	virtual size_t			Width() const override;
-	virtual size_t			Height()  const override;
-
-	void InstallTcpServer();
-	void InstallTcpClient();
+	virtual uint32_t			Width() const override;
+	virtual uint32_t			Height()  const override;
 
 	virtual void AddGUI(const std::shared_ptr<GUI>&);
 	virtual void DeleteGUI(const std::shared_ptr<GUI>&);
@@ -121,13 +118,14 @@ protected:
 
 	void						_PreInitModelManager();
 
+	eOpenGlRenderPipeline		pipeline; //m_
 	GameState								m_gameState = GameState::UNINITIALIZED;
 
 	eInputController*				m_input_controller;
 	
-	std::string							modelFolderPath;
-	std::string							assetsFolderPath;
-	std::string							shadersFolderPath;
+	std::string							modelFolderPath;//m_
+	std::string							assetsFolderPath;//m_
+	std::string							shadersFolderPath;//m_
 
 	std::vector<Light>					m_lights;
 	std::vector<Camera>					m_cameras;
@@ -147,29 +145,18 @@ protected:
 	//debuging
 	shObject																m_light_object;
 
-	bool												m_use_guizmo = true;
-	GizmoType										m_gizmo_type = GizmoType::TRANSLATE;
+	bool																		m_use_guizmo = true;
+	GizmoType																m_gizmo_type = GizmoType::TRANSLATE;
 	
 	//managers
-	std::unique_ptr<eTextureManager>					texManager;
-	std::unique_ptr<ModelManagerYAML>					modelManager;
-	std::unique_ptr<AnimationManagerYAML>			animationManager;
-	std::unique_ptr<eSoundManager>						soundManager;
-  std::vector<IWindowImGui*>								externalGui;
-
-	//tcp
-	std::unique_ptr <ITcpAgent>				tcpAgent;
-	std::unique_ptr<math::Timer>			tcpTimer;
-
-	//@todo delete
-	uint32_t	width			= 1200;
-	uint32_t	height		= 600;
-	float			nearPlane	= 0.1f;
-	float			farPlane	= 20.0f;
+	std::unique_ptr<eTextureManager>					texManager;//m_
+	std::unique_ptr<ModelManagerYAML>					modelManager;//m_
+	std::unique_ptr<AnimationManagerYAML>			animationManager;//m_
+	std::unique_ptr<eSoundManager>						soundManager;//m_
+  std::vector<IWindowImGui*>								externalGui;//m_
 
 	bool m_l_pressed = false;
 	bool m_framed_choice_enabled = false;
 	bool m_update_hovered = false;
-
-	eOpenGlRenderPipeline							pipeline;
+	bool m_show_fps = true;
 };
