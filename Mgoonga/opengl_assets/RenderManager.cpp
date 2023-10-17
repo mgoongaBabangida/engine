@@ -25,6 +25,7 @@ eBezierRender* eRenderManager::BezierRender() { return m_bezierRender.get(); }
 eMeshLineRender* eRenderManager::MeshLineRender(){ return m_meshlineRender.get(); }
 eSSAORender* eRenderManager::SSAORender() { return m_SSAORender.get(); }
 eIBLRender* eRenderManager::IBLRender() { return  m_iblRender.get(); }
+eCSMRender* eRenderManager::CSMRender() {return m_csmRender.get();}
 
 //----------------------------------------------------------------------------------------------------------------
 void eRenderManager::AddParticleSystem(std::shared_ptr<IParticleSystem> system)
@@ -162,7 +163,11 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																		folderPath + "SimpleVertexShader.glsl",
 																		folderPath + "BrdfFs.glsl",
 																		texManager.GetHdrIds()));
-	shader_lambda(m_iblRender.get());
+	//CSM
+	m_csmRender.reset(new  eCSMRender(folderPath + "CSMVertexShader.glsl",
+																		folderPath + "FragmentShades.glsl",
+																		folderPath + "CSMGeometryShader.glsl"));
+	shader_lambda(m_csmRender.get());
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -192,6 +197,7 @@ void eRenderManager::UpdateShadersInfo()
 	shader_lambda(m_bezierRender.get());
 	shader_lambda(m_meshlineRender.get());
 	shader_lambda(m_SSAORender.get());
+	shader_lambda(m_csmRender.get());
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -243,6 +249,8 @@ bool eRenderManager::SetUniformData(const std::string& _renderName, const std::s
 	if(shader_lambda(m_meshlineRender.get()))
 		return true;
 	if (shader_lambda(m_SSAORender.get()))
+		return true;
+	if (shader_lambda(m_csmRender.get()))
 		return true;
 
 	return false;

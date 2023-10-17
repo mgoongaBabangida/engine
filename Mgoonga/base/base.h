@@ -50,25 +50,25 @@ struct Material
 	bool use_phong_shading = false;
 };
 
-enum class eLightType { POINT, DIRECTION, SPOT};
+enum class eLightType { POINT, DIRECTION, SPOT, CSM};
 
 //-------------------------------------------------------
 struct Light
 {
-	eLightType type = eLightType::POINT;
 	glm::vec4  light_position;
 	glm::vec4  light_direction;
 	glm::vec4  ambient  = { 0.1f, 0.1f, 0.1f, 1.0f };
 	glm::vec4  diffuse  = { 0.45f, 0.45f, 0.45f, 1.0f };
 	glm::vec4  specular = { 0.45f, 0.45f, 0.45f, 1.0f };
 
+	glm::vec4  intensity = { 50, 50, 50 , 1.0f };
+
+	eLightType type = eLightType::POINT;
 	float constant	= 1.0f;
 	float linear		= 0.09f;
 	float quadratic = 0.032f;
 	float cutOff		= 0.3f;
 	float outerCutOff = 0.0f;
-
-	glm::vec4  intensity = { 50, 50, 50 , 1.0f };
 };
 
 //-------------------------------------------------------

@@ -23,11 +23,11 @@ protected:
 	Shader			shaderPoint;
 
 	GLuint			MVPUniformLocationDir;
+	GLuint			BonesMatLocationDir;
 
 	GLuint			ModelUniformLocationPoint;
 	GLuint			ProjectionTransformsUniformLocation;
 	GLuint			FarPlaneUniformLocation;
-	GLuint			BonesMatLocationDir;
 	GLuint			BonesMatLocationPoint;
 
 	std::vector<glm::mat4> matrices;

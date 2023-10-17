@@ -21,20 +21,24 @@ public:
 	
 	void				mouseUpdate(const glm::vec2& newMousePosition);
 
-	glm::mat4					getWorldToViewMatrix() const;
-	glm::vec3					getPosition() const;
-	glm::vec3					getDirection() const;
-	glm::mat3					getRotationMatrix() const;
-	const glm::mat4&	getProjectionMatrix() const;
-	glm::mat4					getProjectionBiasedMatrix() const;
-	const glm::mat4&	getProjectionOrthoMatrix() const;
-	uint32_t					getWidth() const { return width;  }
-	uint32_t					getHeight() const { return height; }
-	float							getNearPlane() const { return nearPlane; }
-	float							getFarPlane() const;
+	std::vector<glm::vec4>	getFrustumCornersWorldSpace() const;
+	glm::mat4								getWorldToViewMatrix() const;
+	glm::vec3								getPosition() const;
+	glm::vec3								getDirection() const;
+	glm::mat3								getRotationMatrix() const;
+	const glm::mat4&				getProjectionMatrix() const;
+	glm::mat4								getProjectionBiasedMatrix() const;
+	const glm::mat4&				getProjectionOrthoMatrix() const;
+	uint32_t								getWidth() const { return width;  }
+	uint32_t								getHeight() const { return height; }
+	float										getNearPlane() const { return nearPlane; }
+	float										getFarPlane() const;
+	float										getZoom() const { return m_zoom; }
+	dbb::CameraRay&					getCameraRay() { return camRay; }
 
-	dbb::CameraRay&		getCameraRay() { return camRay; }
-
+	bool										VisualiseFrustum() const { return m_visualise_frustum; }
+	void										SetVisualiseFrustum(bool _v) { m_visualise_frustum = _v; }
+	
 	void				moveForward();
 	void				moveBackword();
 	void				strafeLeft();	
@@ -48,6 +52,16 @@ public:
 
 	void setDirection(glm::vec3 newDir) {
 		viewDirection = newDir;
+	}
+
+	void setNearPlane(float _near) {
+		nearPlane = _near;
+		projectionMatrix = glm::perspective(glm::radians(m_zoom), ((float)width) / height, nearPlane, farPlane);
+	}
+
+	void setFarPlane(float _far) {
+		farPlane = _far;
+		projectionMatrix = glm::perspective(glm::radians(m_zoom), ((float)width) / height, nearPlane, farPlane);
 	}
 
 	glm::vec3&			PositionRef()		{ return position; }
@@ -72,7 +86,9 @@ protected:
 	uint32_t		height;
 	float				nearPlane;
 	float				farPlane;
+	float				m_zoom = 60.0f;
 	uint32_t		strafeThreshold = 5;
+	bool				m_visualise_frustum = false;
 };
 
 

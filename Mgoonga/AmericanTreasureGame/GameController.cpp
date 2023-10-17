@@ -82,7 +82,7 @@ void GameController::Initialize()
   ObjectFactoryBase factory;
   m_choice_circle = new SimpleGeometryMesh({ NONE }, 0.15f, SimpleGeometryMesh::GeometryType::Circle, { 5.0f, 5.0f, 0.0f });
   m_game->AddObject(factory.CreateObject(std::make_shared<SimpleModel>(m_choice_circle), eObject::RenderType::GEOMETRY, "Choice circle"));
-  m_path_mesh = new LineMesh({}, {}, glm::vec3{1.0f,1.0f,1.0f});
+  m_path_mesh = new LineMesh({}, {}, glm::vec4{1.0f,1.0f,1.0f,1.0f});
   m_game->AddObject(factory.CreateObject(std::make_shared<SimpleModel>(m_path_mesh), eObject::RenderType::LINES, "Path mesh"));
 
   m_game->AddInputObserver(this, STRONG);
@@ -254,7 +254,7 @@ bool GameController::OnMouseRelease(KeyModifiers _modifier)
       _UpdateWarrning("");
 
       m_destination_text->content = "";
-      m_path_mesh->UpdateData({}, {}, glm::vec3{ 1.0f });
+      m_path_mesh->UpdateData({}, {}, glm::vec4{ 1.0f });
     }
     _SetDestinationFromCurrentPath();
   }
@@ -1257,7 +1257,7 @@ void GameController::_UpdatePathVisual()
     if(i!=0)
       indices.push_back(i);
   }
-  m_path_mesh->UpdateData(verices, indices, { 1.0f, 1.0f ,1.0f });
+  m_path_mesh->UpdateData(verices, indices, { 1.0f, 1.0f ,1.0f, 1.0f });
 
   //text destination
   m_destination_text->content = std::to_string(m_current_path.size());
@@ -1366,7 +1366,7 @@ void GameController::_UpdateTextPath()
   else
   {
     m_destination_text->content = "";
-    m_path_mesh->UpdateData({}, {}, glm::vec3{ 1.0f });
+    m_path_mesh->UpdateData({}, {}, glm::vec4{ 1.0f });
   }
 }
 

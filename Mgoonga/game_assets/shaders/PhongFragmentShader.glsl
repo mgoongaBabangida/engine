@@ -2,13 +2,6 @@
 
 out vec4 outColor;
 
-struct Material {
-    vec3  albedo;
-    float metallic;
-    float roughness;    
-    float ao;
-}; 
-
 struct Light 
 {
     vec4 position;
@@ -37,14 +30,13 @@ in vec3 LocalSpaceNormal;
 in mat3 TBN;
 in vec4 debug;
 
-uniform Material material;
 uniform Light light;
 
 subroutine vec3 LightingPtr(Light light, vec3 normal, vec3 thePosition, vec3 diffuseTexture, vec2 Texcoords);
 subroutine uniform LightingPtr LightingFunction;
 
 layout(binding=0) uniform samplerCube 	   depth_cube_map;// Shadow point
-layout(binding=1) uniform sampler2D	   depth_texture; // Shadow dir
+layout(binding=1) uniform sampler2D	   	   depth_texture; // Shadow dir
 
 layout(binding=2) uniform sampler2D        texture_diffuse1;
 layout(binding=3) uniform sampler2D        texture_specular1;
@@ -54,10 +46,12 @@ layout(binding=6) uniform sampler2D        texture_emissionl;
 layout(binding=7) uniform sampler2D        texture_ssao;
 
 layout(binding=12) uniform sampler2DArray  texture_array_albedo;
+layout(binding=13) uniform sampler2DArray  texture_array_csm;
 
 uniform vec4 eyePositionWorld;
 uniform bool normalMapping = true;
 uniform bool shadow_directional = true;
+uniform bool use_csm_shadows = false;
 
 uniform float far_plane;
 uniform float shininess = 32.0f;
@@ -81,9 +75,21 @@ uniform float base_start_heights[max_texture_array_size];
 uniform int color_count = 4;
 uniform float textureScale[max_texture_array_size];
 
+//csm
+uniform mat4 view;
+uniform float farPlane;
+uniform int cascadeCount;
+uniform float[10] cascadePlaneDistances;
+
+layout (std140, binding = 0) uniform LightSpaceMatrices
+{
+    mat4 lightSpaceMatrices[16];
+};
+
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal);
 float ShadowCalculationCubeMap(vec3 fragPos);
-vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir);
+float ShadowCalculationCSM(vec4 fragWorldPos, vec3 lightDir, vec3 normal);
+vec2  ParallaxMapping(vec2 texCoords, vec3 viewDir);
 
 float inverseLerp(float a, float b, float value)
 {
@@ -190,7 +196,7 @@ subroutine(LightingPtr) vec3 calculatePhongPointSpecDif(Light light, vec3 normal
   float spec      = clamp(dot(Reflaction,eyeVector), 0, 1);
 
   spec = pow(spec, shininess);
-  vec3 specularLight = vec3(light.specular.xyz *spec * SampleSpecularTexture(Texcoords));//* material.specular
+  vec3 specularLight = vec3(light.specular.xyz *spec * SampleSpecularTexture(Texcoords));
   specularLight=clamp(specularLight,0,1);
 
   // Attenuation
@@ -330,8 +336,10 @@ void main()
 
   float shadow;
 	 vec3 lightVector = -normalize(vec3(light.direction));	 
-     if(shadow_directional)
+     if(shadow_directional && !use_csm_shadows)
 		shadow =  ShadowCalculation(LightSpacePos, lightVector, bNormal);
+     else if(shadow_directional && use_csm_shadows)
+		shadow = ShadowCalculationCSM(vec4(thePosition, 1.0f), lightVector, bNormal);
      else
 		shadow =  ShadowCalculationCubeMap(thePosition);
 
@@ -404,6 +412,72 @@ float ShadowCalculationCubeMap(vec3 fragPos)
 
     return clamp((0.5f + (1.0f - shadow)), 0.0f, 1.0f);
 } 
+
+float ShadowCalculationCSM(vec4 fragPosWorldSpace, vec3 lightDir, vec3 normal)
+{
+	vec4 fragPosViewSpace = view * fragPosWorldSpace;
+	float depthValue = abs(fragPosViewSpace.z);		
+	int layer = -1;
+	for (int i = 0; i < cascadeCount; ++i)
+	{
+		if (depthValue < cascadePlaneDistances[i])
+		{
+			layer = i;
+			break;
+		}
+	}
+	if (layer == -1)
+	{
+		layer = cascadeCount;
+	}		
+	vec4 fragPosLightSpace = lightSpaceMatrices[layer] * fragPosWorldSpace;
+	
+	// perform perspective divide
+	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+	// transform to [0,1] range
+	projCoords = projCoords * 0.5 + 0.5;
+		
+	// get depth of current fragment from light's perspective
+	float currentDepth = projCoords.z;
+	if (currentDepth  > 1.0)
+	{
+		return 1.0;
+	}
+	// calculate bias (based on depth map resolution and slope)
+	float bias = max(0.005 * (1.0 - dot(normal, lightDir)), 0.0005);
+	if (layer == cascadeCount)
+	{
+		bias *= 1 / (farPlane * 0.5f);
+	}
+	else
+	{
+		bias *= 1 / (cascadePlaneDistances[layer] * 0.5f);
+	}
+	
+	// PCF
+	float shadow = 0.0;
+	vec2 texelSize = 1.0 / vec2(textureSize(texture_array_csm, 0));
+	for(int x = -1; x <= 1; ++x)
+	{
+		for(int y = -1; y <= 1; ++y)
+		{
+			float pcfDepth = texture(
+						texture_array_csm,
+						vec3(projCoords.xy + vec2(x, y) * texelSize,
+						layer)
+						).r; 
+			shadow += (currentDepth - bias) > pcfDepth ? 1.0 : 0.0;        
+		}    
+	}
+	shadow /= 9.0;
+		
+	// keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
+	if(projCoords.z > 1.0)
+	{
+		shadow = 0.0;
+	}			
+	return clamp((0.5f + (1.0f - shadow)), 0.0f, 1.0f);
+}
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 {

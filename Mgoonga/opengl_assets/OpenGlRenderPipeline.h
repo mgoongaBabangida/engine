@@ -28,7 +28,7 @@ public:
 	~eOpenGlRenderPipeline();
 
 	void			RenderFrame(std::map<eObject::RenderType, std::vector<shObject>> _objects,
-												Camera& _camera,
+												std::vector<Camera>& _cameras, //@todo const ?
 												const Light& _light,
 												std::vector<std::shared_ptr<GUI>>& _guis,
 												std::vector<std::shared_ptr<Text>>& _texts);
@@ -91,6 +91,9 @@ public:
 	float& RefrectionFactor();
 	float& DistortionStrength();
 
+	//CSM
+	float& ZMult();
+
 	glm::vec4 debug_float = {0.0f,0.0f,0.0f,0.0f};
 
 	Texture GetDefaultBufferTexture() const;
@@ -108,9 +111,17 @@ public:
 	Texture GetDefferedTwo() const;
 	Texture GetHdrCubeMap() const;
 	Texture GetLUT() const;
+	Texture GetCSMMapLayer1() const;
+	Texture GetCSMMapLayer2() const;
+	Texture GetCSMMapLayer3() const;
+	Texture GetCSMMapLayer4() const;
+	Texture GetCSMMapLayer5() const;
+
+	void DumpCSMTextures() const;
 
 protected:
 	void			RenderShadows(const Camera&, const Light&, std::vector<shObject>&);
+	void			RenderShadowsCSM(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects);
 	void			RenderSkybox(const Camera&);
 	void			RenderReflection(Camera&, const Light&, std::vector<shObject>&, std::vector<shObject>&);
 	void			RenderRefraction(Camera&, const Light&, std::vector<shObject>&, std::vector<shObject>&);
@@ -152,6 +163,12 @@ protected:
 
 	std::unique_ptr<eRenderManager>	renderManager;
 	eTextureManager* m_texture_manager = nullptr;
+
+	Texture csm_dump1;
+	Texture csm_dump2;
+	Texture csm_dump3;
+	Texture csm_dump4;
+	Texture csm_dump5;
 };
 
 #endif // PIPELINE_H

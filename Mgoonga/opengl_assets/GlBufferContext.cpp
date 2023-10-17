@@ -8,6 +8,7 @@ void eGlBufferContext::BufferInit(eBuffer _buffer, unsigned int _width, unsigned
 		case eBuffer::BUFFER_DEFAULT:					defaultFBO.Init(_width, _height);				break;
 		case eBuffer::BUFFER_SHADOW_DIR:			depthDirFBO.Init(_width, _height, false);	break;
 		case eBuffer::BUFFER_SHADOW_CUBE_MAP:	depthCubeFBO.Init(_width, _height, true);	break;
+		case eBuffer::BUFFER_SHADOW_CSM:			depthCSMFBO.InitCSM(_width, _height, 5);	break; //@todo layers
 		case eBuffer::BUFFER_BRIGHT_FILTER:		brightFilterFBO.Init(_width, _height);	break;
 		case eBuffer::BUFFER_GAUSSIAN_ONE:		gausian1FBO.Init(_width, _height);			break;
 		case eBuffer::BUFFER_GAUSSIAN_TWO:		gausian2FBO.Init(_width, _height);			break;
@@ -31,6 +32,7 @@ void eGlBufferContext::EnableWrittingBuffer(eBuffer _buffer)
 		case eBuffer::BUFFER_DEFAULT:						defaultFBO.BindForWriting();				break;
 		case eBuffer::BUFFER_SHADOW_DIR:				depthDirFBO.BindForWriting();				break;
 		case eBuffer::BUFFER_SHADOW_CUBE_MAP:		depthCubeFBO.BindForWriting();			break;
+		case eBuffer::BUFFER_SHADOW_CSM:				depthCSMFBO.BindForWriting();				break;
 		case eBuffer::BUFFER_BRIGHT_FILTER:			brightFilterFBO.BindForWriting();		break;
 		case eBuffer::BUFFER_GAUSSIAN_ONE:			gausian1FBO.BindForWriting();				break;
 		case eBuffer::BUFFER_GAUSSIAN_TWO:			gausian2FBO.BindForWriting();				break;
@@ -54,6 +56,7 @@ void eGlBufferContext::EnableReadingBuffer(eBuffer _buffer, GLenum _slot)
 		case eBuffer::BUFFER_DEFAULT:						defaultFBO.BindForReading(_slot);					break;
 		case eBuffer::BUFFER_SHADOW_DIR:				depthDirFBO.BindForReading(_slot);				break;
 		case eBuffer::BUFFER_SHADOW_CUBE_MAP:		depthCubeFBO.BindForReading(_slot);				break;
+		case eBuffer::BUFFER_SHADOW_CSM:				depthCSMFBO.BindForReading(_slot);				break;
 		case eBuffer::BUFFER_BRIGHT_FILTER:			brightFilterFBO.BindForReading(_slot);		break;
 		case eBuffer::BUFFER_GAUSSIAN_ONE:			gausian1FBO.BindForReading(_slot);				break;
 		case eBuffer::BUFFER_GAUSSIAN_TWO:			gausian2FBO.BindForReading(_slot);				break;
@@ -78,6 +81,7 @@ GLuint eGlBufferContext::GetRboID(eBuffer _buffer)
 	{
 		case eBuffer::BUFFER_IBL_CUBEMAP:				return iblCubemapFBO.RboID();
 			//@todo all other
+			throw;
 	}
 }
 
@@ -88,6 +92,7 @@ Texture eGlBufferContext::GetTexture(eBuffer _buffer)
 		case eBuffer::BUFFER_DEFAULT:						return defaultFBO.GetTexture();
 		case eBuffer::BUFFER_SHADOW_DIR:				return depthDirFBO.GetTexture();
 		case eBuffer::BUFFER_SHADOW_CUBE_MAP:		return depthCubeFBO.GetTexture();
+		case eBuffer::BUFFER_SHADOW_CSM:				return depthCSMFBO.GetTexture();
 		case eBuffer::BUFFER_BRIGHT_FILTER:			return brightFilterFBO.GetTexture();
 		case eBuffer::BUFFER_GAUSSIAN_ONE:			return gausian1FBO.GetTexture();
 		case eBuffer::BUFFER_GAUSSIAN_TWO:			return gausian2FBO.GetTexture();
@@ -125,6 +130,7 @@ GLuint eGlBufferContext::GetId(eBuffer _buffer)
 	case eBuffer::BUFFER_DEFAULT:						return defaultFBO.ID();
 	case eBuffer::BUFFER_SHADOW_DIR:				return depthDirFBO.ID();
 	case eBuffer::BUFFER_SHADOW_CUBE_MAP:		return depthCubeFBO.ID();
+	case eBuffer::BUFFER_SHADOW_CSM:				return depthCSMFBO.ID();
 	case eBuffer::BUFFER_BRIGHT_FILTER:			return brightFilterFBO.ID();
 	case eBuffer::BUFFER_GAUSSIAN_ONE:			return gausian1FBO.ID();
 	case eBuffer::BUFFER_GAUSSIAN_TWO:			return gausian2FBO.ID();
@@ -142,6 +148,7 @@ GLuint eGlBufferContext::GetId(eBuffer _buffer)
 	case eBuffer::BUFFER_IBL_CUBEMAP_IRR:		return iblCubemapIrrFBO.ID();
 	}
 	assert("buffer is not finished");
+	throw;
 }
 
 
@@ -153,6 +160,7 @@ glm::ivec2 eGlBufferContext::GetSize(eBuffer _buffer)
 	case eBuffer::BUFFER_DEFAULT:						return defaultFBO.Size();
 	case eBuffer::BUFFER_SHADOW_DIR:				return depthDirFBO.Size();
 	case eBuffer::BUFFER_SHADOW_CUBE_MAP:		return depthCubeFBO.Size();
+	case eBuffer::BUFFER_SHADOW_CSM:				return depthCSMFBO.Size();
 	case eBuffer::BUFFER_BRIGHT_FILTER:			return brightFilterFBO.Size();
 	case eBuffer::BUFFER_GAUSSIAN_ONE:			return gausian1FBO.Size();
 	case eBuffer::BUFFER_GAUSSIAN_TWO:			return gausian2FBO.Size();
@@ -170,4 +178,5 @@ glm::ivec2 eGlBufferContext::GetSize(eBuffer _buffer)
 	case eBuffer::BUFFER_IBL_CUBEMAP_IRR:		return iblCubemapIrrFBO.Size();
 	}
 	assert("buffer is not finished");
+	throw;
 }

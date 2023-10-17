@@ -39,7 +39,7 @@ namespace
                                       _collision.intersaction + glm::normalize((-object->GetRigidBody()->Velocity())),
                                       _collision.intersaction + glm::normalize(reflected_velocity) },
             { 0 , 1 , 0 , 2, 0, 3 },
-            { 1.0f, 1.0f ,0.0f });
+            { 1.0f, 1.0f ,0.0f, 1.0f });
         }
 
         object->GetRigidBody()->SetCurrentVelocity(m_normal_mesh == nullptr ? reflected_velocity : glm::vec3{0,0,0});
@@ -88,7 +88,7 @@ bool ShootScript::OnKeyPress(uint32_t _asci)
     if (!m_deubg_normals)
     {
       ObjectFactoryBase factory;
-      m_normal_mesh = new LineMesh({}, {}, glm::vec3{ 1.0f,1.0f, 0.0f });
+      m_normal_mesh = new LineMesh({}, {}, glm::vec4{ 1.0f, 1.0f, 0.0f, 1.0f });
       m_deubg_normals = true;
       m_game->AddObject(factory.CreateObject(std::make_shared<SimpleModel>(m_normal_mesh), eObject::RenderType::LINES, "Normal mesh"));
     }
@@ -144,7 +144,7 @@ void ShootScript::Update(float _tick)
 void ShootScript::Initialize()
 {
   ObjectFactoryBase factory;
-  m_normal_mesh = new LineMesh({}, {}, glm::vec3{ 1.0f,1.0f, 0.0f });
+  m_normal_mesh = new LineMesh({}, {}, glm::vec4{ 1.0f, 1.0f, 0.0f, 1.0f });
   if(m_deubg_normals)
    m_game->AddObject(factory.CreateObject(std::make_shared<SimpleModel>(m_normal_mesh), eObject::RenderType::LINES, "Normal mesh"));
 }

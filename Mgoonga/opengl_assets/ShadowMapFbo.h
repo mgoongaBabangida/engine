@@ -10,6 +10,8 @@
 	 ShadowMapFBO();
 	 ~ShadowMapFBO();
 	 bool Init(unsigned int WindowWidth, unsigned int WindowHeight, bool needsCubeMap = false);
+	 bool InitCSM(unsigned int WindowWidth, unsigned int WindowHeight, int32_t _layers);
+
 	 void BindForWriting();
 	 void BindForReading(GLenum TextureUnit);
 	 Texture GetTexture();
@@ -20,6 +22,7 @@
 	 GLuint m_fbo;
 	 Texture m_shadowMap;
 	 bool m_cubemap = false;
+	 bool m_array = false;
  };
 
 

@@ -9,6 +9,7 @@ enum class eBuffer
 	BUFFER_DEFAULT,
 	BUFFER_SHADOW_DIR,
 	BUFFER_SHADOW_CUBE_MAP,
+	BUFFER_SHADOW_CSM,
 	BUFFER_BRIGHT_FILTER,
 	BUFFER_GAUSSIAN_ONE,
 	BUFFER_GAUSSIAN_TWO,
@@ -57,6 +58,7 @@ private:
 	eColorFBO		   defaultFBO;
 	ShadowMapFBO	 depthDirFBO;
 	ShadowMapFBO	 depthCubeFBO;
+	ShadowMapFBO	 depthCSMFBO;
   eColorFBO		   screenFBO;
   eColorFBO		   mtsFBO;
   eColorFBO		   reflectionFBO;

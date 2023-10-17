@@ -451,7 +451,7 @@ void BezierCurveMesh::Update()
 }
 
 //-------------------------------------------
-LineMesh::LineMesh(const std::vector<glm::vec3>& _verices, const std::vector<GLuint>& _indices, glm::vec3 _color)
+LineMesh::LineMesh(const std::vector<glm::vec3>& _verices, const std::vector<GLuint>& _indices, glm::vec4 _color)
 	: m_verices(_verices)
 	, m_indices(_indices)
 	, m_color(_color)
@@ -476,7 +476,7 @@ LineMesh::~LineMesh()
 }
 
 //-------------------------------------------
-void LineMesh::UpdateData(const std::vector<glm::vec3>& _verices, const std::vector<GLuint>& _indices, glm::vec3 _color)
+void LineMesh::UpdateData(const std::vector<glm::vec3>& _verices, const std::vector<GLuint>& _indices, glm::vec4 _color)
 {
 	m_verices = _verices;
 	m_indices = _indices;

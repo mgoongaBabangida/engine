@@ -56,6 +56,34 @@
 	 }
 
  //-------------------------------------------------------------
+ bool ShadowMapFBO::InitCSM(unsigned int WindowWidth, unsigned int WindowHeight, int32_t _layers)
+ {
+	 m_shadowMap.mTextureWidth = WindowWidth;
+	 m_shadowMap.mTextureHeight = WindowHeight;
+
+	 glGenFramebuffers(1, &m_fbo);
+	 m_shadowMap.makeDepthTextureArray(_layers);
+	 glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo);
+	 glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
+		 m_shadowMap.id, 0);
+	 glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_shadowMap.id, 0);
+
+	 glDrawBuffer(GL_NONE);
+	 glReadBuffer(GL_NONE);
+
+	 GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+	 if (Status != GL_FRAMEBUFFER_COMPLETE) {
+		 printf("FB error, status: 0x%x\n", Status);
+		 return false;
+
+	 }
+	 glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	 m_array = true;
+	 return true;
+ }
+
+ //-------------------------------------------------------------
  void ShadowMapFBO::BindForWriting()
  {
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
@@ -68,6 +96,8 @@
 	 glActiveTexture(TextureUnit);
 	 if (m_cubemap)
 		 glBindTexture(GL_TEXTURE_CUBE_MAP, m_shadowMap.id);
+	 else if(m_array)
+		 glBindTexture(GL_TEXTURE_2D_ARRAY, m_shadowMap.id);
 	 else
 		 glBindTexture(GL_TEXTURE_2D, m_shadowMap.id);
 }

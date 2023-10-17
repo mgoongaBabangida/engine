@@ -83,6 +83,7 @@ void eOpenGlRenderPipeline::InitializeBuffers()
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_REFRACTION, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW_DIR, width*2, height*2);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW_CUBE_MAP, width*2, height*2);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW_CSM, width * 2, height * 2);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SQUERE, height, height); //squere
   eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_BRIGHT_FILTER, width, height);
   eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_ONE, 600, 300); //@todo numbers
@@ -182,13 +183,20 @@ float& eOpenGlRenderPipeline::DistortionStrength()
 	return renderManager->WaterRender()->DistortionStrength();
 }
 
+float& eOpenGlRenderPipeline::ZMult()
+{
+	return renderManager->CSMRender()->ZMult();
+}
+
 //-----------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vector<shObject>> _objects,
-																				Camera& _camera,
+																				std::vector<Camera>& _cameras,
 																				const Light& _light,
 																				std::vector<std::shared_ptr<GUI>>& _guis,
 																				std::vector<std::shared_ptr<Text>>& _texts)
 {
+	/*const */Camera& _camera = _cameras[0]; //@todo
+
 	//@todo sorting to camera ?
   /*std::sort(focused.begin(), focused.end(), [_camera](const shObject& obj1, const shObject& obj2)
     { return glm::length2(_camera.getPosition() - obj1->GetTransform()->getTranslation())
@@ -218,6 +226,13 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SHADOW_CUBE_MAP);
 		if (shadows) { RenderShadows(_camera, _light, phong_pbr_objects); }
 		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW_CUBE_MAP, GL_TEXTURE0);
+	}
+	else if(_light.type == eLightType::CSM)
+	{
+		renderManager->PhongRender()->SetShadowCascadeLevels(renderManager->CSMRender()->GetCascadeFlaneDistances());
+		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SHADOW_CSM);
+		if (shadows) { RenderShadowsCSM(_camera, _light, phong_pbr_objects); }
+		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW_CSM, GL_TEXTURE13);
 	}
 
 	//Rendering reflection and refraction to Textures
@@ -353,12 +368,57 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		if (mesh)
 			line_meshes.push_back(mesh);
 	}
+	// Visualize cameras
+	if (_cameras.size() > 1)
+	{
+		static LineMesh camera_frustum_mesh({}, {}, {});
+		std::vector<glm::vec3> extrems_total;
+		std::vector<GLuint> indices_total;
+		for (int i = 1; i < _cameras.size(); ++i)
+		{
+			if (_cameras[i].VisualiseFrustum())
+			{
+				std::vector<glm::vec4> cornders = _cameras[i].getFrustumCornersWorldSpace();
+				for (auto& c : cornders)
+					extrems_total.push_back(glm::vec3(c));
+				indices_total.push_back(2 + (i - 1) * 8);
+				indices_total.push_back(0 + (i - 1) * 8);
+				indices_total.push_back(0 + (i - 1) * 8);
+				indices_total.push_back(4 + (i - 1) * 8);
+				indices_total.push_back(4 + (i - 1) * 8);
+				indices_total.push_back(6 + (i - 1) * 8);
+				indices_total.push_back(6 + (i - 1) * 8);
+				indices_total.push_back(2 + (i - 1) * 8);
+
+				indices_total.push_back(0 + (i - 1) * 8);
+				indices_total.push_back(1 + (i - 1) * 8);
+				indices_total.push_back(2 + (i - 1) * 8);
+				indices_total.push_back(3 + (i - 1) * 8);
+				indices_total.push_back(4 + (i - 1) * 8);
+				indices_total.push_back(5 + (i - 1) * 8);
+				indices_total.push_back(6 + (i - 1) * 8);
+				indices_total.push_back(7 + (i - 1) * 8);
+
+				indices_total.push_back(1 + (i - 1) * 8);
+				indices_total.push_back(3 + (i - 1) * 8);
+				indices_total.push_back(3 + (i - 1) * 8);
+				indices_total.push_back(7 + (i - 1) * 8);
+				indices_total.push_back(7 + (i - 1) * 8);
+				indices_total.push_back(5 + (i - 1) * 8);
+				indices_total.push_back(5 + (i - 1) * 8);
+				indices_total.push_back(1 + (i - 1) * 8);
+			}
+		}
+		camera_frustum_mesh.UpdateData(extrems_total, indices_total, { 1.0f, 1.0f, 0.0f, 1.0f });
+		line_meshes.push_back(&camera_frustum_mesh);
+	}
 	// Bounding boxes
 	if (draw_bounding_boxes)
 	{
 		static LineMesh bounding_boxes_mesh({}, {}, {});
 		std::vector<glm::vec3> extrems_total;
 		std::vector<GLuint> indices_total;
+
 		for (GLuint i = 0; i < phong_pbr_objects.size(); ++i)
 		{
 			std::vector<glm::vec3> extrems = phong_pbr_objects[i]->GetCollider()->GetExtrems(*phong_pbr_objects[i]->GetTransform());
@@ -388,7 +448,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 			indices_total.push_back(3 + i * 8);
 			indices_total.push_back(7 + i * 8);
 		}
-		bounding_boxes_mesh.UpdateData(extrems_total, indices_total, { 1.0f, 1.0f, 0.0f});
+		bounding_boxes_mesh.UpdateData(extrems_total, indices_total, { 1.0f, 1.0f, 0.0f, 1.0f});
 		line_meshes.push_back(&bounding_boxes_mesh);
 	}
 	renderManager->LinesRender()->Render(_camera, line_meshes);
@@ -487,7 +547,33 @@ void eOpenGlRenderPipeline::RenderShadows(const Camera& _camera, const Light& _l
 
 	renderManager->ShadowRender()->Render(_camera, _light, _objects);
 
-	glDisable(GL_POLYGON_OFFSET_FILL);
+	//glDisable(GL_POLYGON_OFFSET_FILL);
+	glCullFace(GL_BACK);
+
+	glViewport(0, 0, width, height);
+}
+
+void eOpenGlRenderPipeline::RenderShadowsCSM(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
+{
+	glm::ivec2 size = eGlBufferContext::GetInstance().GetSize(eBuffer::BUFFER_SHADOW_CSM);
+	glViewport(0, 0, size.x, size.y);
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+	// Clear
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
+	//glClearDepth(1.0f);
+// Enable polygon offset to resolve depth-fighting isuses 
+//glEnable(GL_POLYGON_OFFSET_FILL);
+//glPolygonOffset(2.0f, -2000.0f);
+
+	glEnable(GL_DEPTH_CLAMP);
+	renderManager->CSMRender()->Render(_camera, _light, _objects);
+	glDisable(GL_DEPTH_CLAMP);
+
+	//glDisable(GL_POLYGON_OFFSET_FILL);
 	glCullFace(GL_BACK);
 
 	glViewport(0, 0, width, height);
@@ -837,3 +923,34 @@ Texture eOpenGlRenderPipeline::GetLUT() const
 	return Texture(renderManager->IBLRender()->GetLUTTextureID(), 512, 512, 3);
 }
 
+//----------------------------------------------------
+Texture eOpenGlRenderPipeline::GetCSMMapLayer1() const{return csm_dump1;}
+Texture eOpenGlRenderPipeline::GetCSMMapLayer2() const{return csm_dump2;}
+Texture eOpenGlRenderPipeline::GetCSMMapLayer3() const{return csm_dump3;}
+Texture eOpenGlRenderPipeline::GetCSMMapLayer4() const{return csm_dump4;}
+Texture eOpenGlRenderPipeline::GetCSMMapLayer5() const{return csm_dump5;}
+
+void eOpenGlRenderPipeline::DumpCSMTextures() const
+{
+	Texture t = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SHADOW_CSM);
+	//t.saveToFile("dump_csm.png", GL_TEXTURE_2D_ARRAY, GL_DEPTH_COMPONENT, GL_FLOAT);
+
+	static std::vector<GLfloat> buffer(2400 * 1200 * 5);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, t.id);
+	glGetTexImage(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, &buffer[0]);
+
+	Texture* csmp1 = const_cast<Texture*>(&csm_dump1);
+	csmp1->TextureFromBuffer<GLfloat>((GLfloat*)&buffer[0], 2400 ,1200, GL_RED);
+
+	Texture* csmp2 = const_cast<Texture*>(&csm_dump2);
+	csmp2->TextureFromBuffer<GLfloat>((GLfloat*)&buffer[2400 * 1200], 2400, 1200, GL_RED);
+
+	Texture* csmp3 = const_cast<Texture*>(&csm_dump3);
+	csmp3->TextureFromBuffer<GLfloat>((GLfloat*)&buffer[2400 * 1200 * 2], 2400, 1200, GL_RED);
+
+	Texture* csmp4 = const_cast<Texture*>(&csm_dump4);
+	csmp4->TextureFromBuffer<GLfloat>((GLfloat*)&buffer[2400 * 1200 * 3], 2400, 1200, GL_RED);
+
+	Texture* csmp5 = const_cast<Texture*>(&csm_dump5);
+	csmp5->TextureFromBuffer<GLfloat>((GLfloat*)&buffer[2400 * 1200 * 4], 2400, 1200, GL_RED);
+}

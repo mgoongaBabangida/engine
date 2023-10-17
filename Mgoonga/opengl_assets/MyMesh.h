@@ -171,15 +171,11 @@ protected:
 class DLL_OPENGL_ASSETS LineMesh : public IMesh
 {
 public:
-	LineMesh(const std::vector<glm::vec3>&, const std::vector<GLuint>&, glm::vec3);
-	glm::vec3 GetColor() const { return m_color; }
+	LineMesh(const std::vector<glm::vec3>&, const std::vector<GLuint>&, glm::vec4);
 	~LineMesh();
 
-	void UpdateData(const std::vector<glm::vec3>&, const std::vector<GLuint>&, glm::vec3);
-
-	GLuint VAO, VBO, EBO;
-	std::vector<glm::vec3>	m_verices;
-	std::vector<GLuint>			m_indices;
+	glm::vec4 GetColor() const { return m_color; }
+	void UpdateData(const std::vector<glm::vec3>&, const std::vector<GLuint>&, glm::vec4 _color);
 
 	virtual void								Draw();
 	virtual const std::string&	Name() const { return m_name; }
@@ -189,8 +185,10 @@ public:
 	virtual void SetMaterial(const Material&) {}
 	virtual std::optional<Material> GetMaterial() const { return std::nullopt; }
 
+	GLuint VAO, VBO, EBO;
+	std::vector<glm::vec3>	m_verices;
+	std::vector<GLuint>			m_indices;
 protected:
 	std::string m_name = "LineMesh";
-
-	glm::vec3								m_color;
+	glm::vec4								m_color;
 };

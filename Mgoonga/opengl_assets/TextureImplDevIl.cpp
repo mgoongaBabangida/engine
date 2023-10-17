@@ -60,25 +60,30 @@ void eTextureImplDevIl::DeleteImage(uint32_t id)
 	delete[] pixmap;
 }
 
-void eTextureImplDevIl::SaveToFile(const uint8_t * buffer, const std::string & path, int32_t width, int32_t height, int32_t channels)
+void eTextureImplDevIl::SaveToFile(const uint8_t * buffer, const std::string & _path, int32_t _width, int32_t _height, int32_t _layers, int32_t _channels, GLenum _data_type)
 {
+	auto il_format = IL_RGBA;
+	if (_channels == 1)
+		il_format = IL_ALPHA;
+	else if (_channels == 3)
+		il_format = IL_RGB;
+
 	ILuint imageID = ilGenImage();
 	ilBindImage(imageID);
 	ilTexImage(
-		width,
-		height,
-		1,  // OpenIL supports 3d textures!  but we don't want it to be 3d.  so
-			// we just set this to be 1
-		channels,  // 3 channels:  one for R , one for G, one for B
-		IL_RGBA,  // duh, yeah use rgb!  coulda been rgba if we wanted trans
-		IL_UNSIGNED_BYTE,  // the type of data the imData array contains (next)
+		_width,
+		_height,
+		1, // OpenIL supports 3d textures!  but we don't want it to be 3d.
+		_channels, 
+		il_format,
+		_data_type,  // the type of data the imData array contains (next)
 		(void*)buffer  // and the array of bytes represneting the actual image data
 	);
 
 	ilEnable(IL_FILE_OVERWRITE);
 
 	// actually save out as png
-	ilSave(IL_PNG, (const wchar_t*)path.c_str());
+	ilSave(IL_PNG, (const wchar_t*)_path.c_str());
 	// now try saving as jpg
 	//ilSave(IL_JPG, (const wchar_t*)"output.jpg");
 	// now save as bmp

@@ -159,4 +159,5 @@ protected:
 	bool m_framed_choice_enabled = false;
 	bool m_update_hovered = false;
 	bool m_show_fps = true;
+	bool m_debug_csm = false;
 };

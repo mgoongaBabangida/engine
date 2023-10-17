@@ -11,18 +11,6 @@ ePhongRender::ePhongRender(const std::string& vS, const std::string& fS)
 
 	glUseProgram(mainShader.ID());
 
-	//Material
-	GLuint matAmbientLoc		= glGetUniformLocation(mainShader.ID(), "material.ambient");
-	GLuint matDiffuseLoc		= glGetUniformLocation(mainShader.ID(), "material.texture_diffuse1");
-	GLuint matSpecularLoc		= glGetUniformLocation(mainShader.ID(), "material.texture_specular1");
-	GLuint matShineLoc			= glGetUniformLocation(mainShader.ID(), "material.shininess");
-
-	//@todo Need to delete this default and use it correctly
-	glUniform3f(matAmbientLoc, 0.5f, 0.5f, 0.5f); // 1.0f, 0.5f, 0.31f
-	glUniform3f(matDiffuseLoc, 1.0f, 1.0f, 1.0f); // 1.0f, 0.5f, 0.31f
-	glUniform3f(matSpecularLoc, 1.0f, 1.0f, 1.0f); //0.5f, 0.5f, 0.5f
-	glUniform1f(matShineLoc, 32.0f); //32.0f
-
 	//Matrix
 	fullTransformationUniformLocation	= glGetUniformLocation(mainShader.ID(), "modelToProjectionMatrix");
 	modelToWorldMatrixUniformLocation	= glGetUniformLocation(mainShader.ID(), "modelToWorldMatrix");
@@ -92,8 +80,23 @@ void ePhongRender::Render(const Camera&								camera,
 																							glm::vec3(0.0f, 0.0f, 0.0f), /*glm::vec3(light.light_position) + light.light_direction,*/
 																							glm::vec3(0.0f, 1.0f, 0.0f));
 		mainShader.SetUniformData("shadow_directional", true);
+		mainShader.SetUniformData("use_csm_shadows", false);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
     shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
+	}
+	else if (light.type == eLightType::CSM)
+	{
+		mainShader.SetUniformData("shininess", 64.0f);
+		mainShader.SetUniformData("shadow_directional", true);
+		mainShader.SetUniformData("use_csm_shadows", true);
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
+		mainShader.SetUniformData("view", camera.getWorldToViewMatrix());
+		mainShader.SetUniformData("farPlane", camera.getFarPlane());
+		mainShader.SetUniformData("cascadeCount", m_shadowCascadeLevels.size());
+		for (size_t i = 0; i < m_shadowCascadeLevels.size(); ++i)
+		{
+			mainShader.SetUniformData("cascadePlaneDistances[" + std::to_string(i) + "]", m_shadowCascadeLevels[i]);
+		}
 	}
 
 	glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE, &shadowMatrix[0][0]);  //shadow
@@ -133,12 +136,3 @@ void ePhongRender::SetClipPlane(float Height)
 	GLuint clipPlaneLoc = glGetUniformLocation(mainShader.ID(), "clip_plane");
 	glUniform4f(clipPlaneLoc, 0, 1, 0, Height);
 }
-
-//---------------------------------------------------------------------------
-void ePhongRender::SetShadowMatrix(glm::mat4 shadow_matrix)
-{
-	glUseProgram(mainShader.ID());
-	glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE,
-		&shadow_matrix[0][0]);  //shadow
-}
-

@@ -150,21 +150,22 @@ bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenu
 
 uint8_t* Texture::getPixelBuffer(GLenum _target, GLenum _format, GLenum _type)
 { 
-	int sizeOfByte = /*_format == GL_FLOAT ? sizeof(float) :*/ sizeof(unsigned char);
+	int sizeOfByte = _type == GL_FLOAT ? sizeof(float) : sizeof(unsigned char);
 	int bytesToUsePerPixel = mChannels;
-	int theSize = mTextureWidth * mTextureHeight * sizeOfByte * bytesToUsePerPixel;
+	int theSize = mTextureWidth * mTextureHeight * sizeOfByte * bytesToUsePerPixel * layers;
 	uint8_t* imData = (uint8_t*)malloc(theSize);
 
-	glBindTexture(GL_TEXTURE_2D, this->id);
+	glBindTexture(_target, this->id);
 	glGetTexImage(_target, 0, _format, _type, (void*)imData); //generic
-	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glBindTexture(_target, 0);
 	return imData;
 }
 
 bool Texture::saveToFile(const std::string &path, GLenum _target, GLenum _format, GLenum _type)
 {
 	uint8_t* imData = getPixelBuffer(_target, _format, _type);
-	eTextureImplDevIl::SaveToFile(imData, path, mTextureWidth, mTextureHeight, mChannels); //rgb/rgba byte/float ?
+	eTextureImplDevIl::SaveToFile(imData, path, mTextureWidth, mTextureHeight, layers, mChannels, _type); //rgb/rgba byte/float ?
 	free(imData);
 	return true;
 }
@@ -305,7 +306,7 @@ bool Texture::makeCubemap(size_t _size, bool _mipmap, GLenum _format, GLenum _in
 
 	for (GLuint i = 0; i < 6; ++i)
 	{
-		std::vector<float> xData(buffer_size, 0.2f + i * 0.2f); //for debug
+		std::vector<float> xData(buffer_size, 0.2f + i * 0.3f); //for debug
 		glBindTexture(GL_TEXTURE_2D, id);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, _internal_format, mTextureWidth, mTextureHeight, 0, _format, _type, &xData[0]);
 	}
@@ -332,6 +333,42 @@ bool Texture::makeDepthTexture()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+
+	return true;
+}
+
+//----------------------------------------------------------------------------
+bool Texture::makeDepthTextureArray(int32_t _layers)
+{
+	assert(mTextureHeight);
+	assert(mTextureWidth);
+	layers = _layers;
+	mChannels = 1;
+
+	_genTexture();
+	glBindTexture(GL_TEXTURE_2D_ARRAY, id);
+
+	std::vector<float> xData(mTextureHeight* mTextureWidth* _layers, 0.2f); //for debug
+
+	glTexImage3D(
+		GL_TEXTURE_2D_ARRAY,
+		0,
+		GL_DEPTH_COMPONENT32F,
+		mTextureWidth,
+		mTextureHeight,
+		_layers,
+		0,
+		GL_DEPTH_COMPONENT,
+		GL_FLOAT,
+		&xData[0]);
+
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	constexpr float bordercolor[] = { 0.0,  0.0,  0.0,  1.0 };
+	glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, bordercolor);
 
 	return true;
 }
@@ -464,9 +501,11 @@ bool Texture::loadTexture2DArray(std::vector<std::string> _paths)
 	mTextureWidth = 512; //?
 	mTextureHeight = 512;
 	GLsizei layers = (GLsizei)_paths.size();
+
 	glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &id);
 	++textures_in_use;
 	indexes_in_use.insert(id);
+
 	glTextureStorage3D(id, 1, GL_RGBA8, mTextureWidth, mTextureHeight, layers);
 
 	uint32_t ilId;
@@ -478,7 +517,6 @@ bool Texture::loadTexture2DArray(std::vector<std::string> _paths)
 		glTextureSubImage3D(id, 0/*mipmap_level*/, 0/*offset.x*/, 0/*offset.y*/, layer/*offset.z*/, mTextureWidth, mTextureHeight, 1 /*layer*/, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		eTextureImplDevIl::DeleteImage(ilId);
 	}
-
 	glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

@@ -180,10 +180,10 @@ void eSandBoxGame::InitializeModels()
 	}
 
 	//light
-	m_light_object = factory.CreateObject(modelManager->Find("white_sphere"), eObject::RenderType::PHONG, "WhiteSphere");
-	m_light_object->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
-	m_light_object->GetTransform()->setTranslation(GetMainLight().light_position);
-	m_objects.push_back(m_light_object);
+	//m_light_object = factory.CreateObject(modelManager->Find("white_sphere"), eObject::RenderType::PHONG, "WhiteSphere");
+	//m_light_object->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
+	//m_light_object->GetTransform()->setTranslation(GetMainLight().light_position);
+	//m_objects.push_back(m_light_object);
 
 	//GLOBAL SCRIPTS
 	m_global_scripts.push_back(std::make_shared<ShootScript>(this, modelManager.get()));

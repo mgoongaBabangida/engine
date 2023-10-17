@@ -21,6 +21,7 @@ struct DLL_OPENGL_ASSETS Texture
 	int32_t				mTextureWidth;
 	int32_t				mTextureHeight;
 	int32_t				mChannels			=		1;
+	int32_t				layers				= 1;
 	int32_t				numberofRows		= 1;
 	
 	Texture();
@@ -37,6 +38,7 @@ struct DLL_OPENGL_ASSETS Texture
 		type			= t.type,
 		path			= t.path;
 		mChannels		= t.mChannels;
+		layers = t.layers;
 		numberofRows	= t.numberofRows;
 		return *this; 
 	}
@@ -62,6 +64,7 @@ struct DLL_OPENGL_ASSETS Texture
 
 	bool makeCubemap(size_t size, bool _mipmap = false, GLenum _format = GL_RGB, GLenum _internal_format = GL_RGB16F, GLenum _type = GL_FLOAT);
 	bool makeDepthTexture();
+	bool makeDepthTextureArray(int32_t _layers);
 	bool makeDepthCubeMap();
 	bool makeRandom1DTexture(unsigned int _size);
 
@@ -86,8 +89,10 @@ struct DLL_OPENGL_ASSETS Texture
 		glTexImage2D(GL_TEXTURE_2D, 0, format, mTextureWidth, mTextureHeight, 0, format, type, buffer);
 		if(format == GL_RGBA)
 			mChannels = 4;
-		else if(GL_RED)
+		else if(format == GL_RED)
 			mChannels = 1;
+		else if(format == GL_RGB)
+			mChannels = 3;
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

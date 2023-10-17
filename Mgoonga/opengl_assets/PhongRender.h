@@ -19,7 +19,7 @@ public:
 							const std::vector<shObject>&	objects);
 
 	void	SetClipPlane(float Height);
-	void	SetShadowMatrix(glm::mat4 shadow_matrix);
+	void SetShadowCascadeLevels(const std::vector<float>& _scl) { m_shadowCascadeLevels = _scl; }
 
 	Shader& GetShader() { return mainShader; }
 
@@ -53,6 +53,7 @@ protected:
 	bool	m_gamma_correction = true;
 	bool	m_tone_mapping = true;
 	float	m_exposure = 1.0f;
+	std::vector<float> m_shadowCascadeLevels;
 
 	std::vector<glm::mat4> matrices;
 	glm::mat4			         shadowMatrix;

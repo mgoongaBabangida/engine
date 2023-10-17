@@ -46,7 +46,7 @@ eMainContextBase::eMainContextBase(eInputController* _input,
 , externalGui(_externalGui)
 , pipeline(1200, 600) //@todo should get from outside
 {
-
+	m_cameras.reserve(8); //@todo redesign
 }
 
 //-------------------------------------------------------------------------
@@ -158,7 +158,7 @@ void eMainContextBase::InitializeGL()
 		m_lights[0].type = eLightType::DIRECTION;
 
 		//init main camera
-		m_cameras.push_back(Camera(pipeline.Width(), pipeline.Height(), 0.1f, 20.0f));
+		m_cameras.emplace_back(pipeline.Width(), pipeline.Height(), 0.1f, 20.0f);
 		m_cameras[0].setDirection(glm::vec3(0.6f, -0.10f, 0.8f));
 		m_cameras[0].setPosition(glm::vec3(0.0f, 4.0f, -4.0f));
 		//init camera ray
@@ -254,10 +254,11 @@ void eMainContextBase::PaintGL()
 		if (m_light_object)
 		{
 			m_light_object->GetTransform()->setTranslation(GetMainLight().light_position);
-			if(GetMainLight().type ==  eLightType::DIRECTION)
-				GetMainLight().light_direction = -GetMainLight().light_position;
 			phong.push_back(m_light_object);
 		}
+
+		if (GetMainLight().type == eLightType::DIRECTION || GetMainLight().type == eLightType::CSM)
+			GetMainLight().light_direction = -GetMainLight().light_position;
 
 		//@todo need better design less copying
 		std::shared_ptr<std::vector<shObject>> focused_output = m_framed;
@@ -273,14 +274,18 @@ void eMainContextBase::PaintGL()
 		objects.insert({ eObject::RenderType::GEOMETRY, geometry });
 		objects.insert({ eObject::RenderType::LINES, lines });
 
-		pipeline.RenderFrame(objects, GetMainCamera(), GetMainLight(), m_guis, m_texts);
+		pipeline.RenderFrame(objects, m_cameras, GetMainLight(), m_guis, m_texts);
 
-		if (m_l_pressed) //@todo improve print screen
+		if (m_debug_csm)
 		{
-			Texture t;
-			t = pipeline.GetDefaultBufferTexture();
-			t.saveToFile("PrintScreen.png");
-			m_l_pressed = false;
+			pipeline.DumpCSMTextures();
+			if (m_l_pressed) //@todo improve print screen
+			{
+				Texture t;
+				t = pipeline.GetDefaultBufferTexture();
+				t.saveToFile("PrintScreen.png");
+				m_l_pressed = false;
+			}
 		}
 	}
 	else if (m_gameState == GameState::LOADING)
@@ -505,8 +510,10 @@ void eMainContextBase::InitializeExternalGui()
 			GetMainLight().type = eLightType::POINT;
 		else if(_index == 2)
 			GetMainLight().type = eLightType::SPOT;
+		else if (_index == 3)
+			GetMainLight().type = eLightType::CSM;
 	};
-	static eVectorStringsCallback light_types{ {"directional", "point", "cut-off" }, light_type_callback };
+	static eVectorStringsCallback light_types{ {"directional", "point", "cut-off", "csm"}, light_type_callback};
 	externalGui[0]->Add(COMBO_BOX, "Light type.", &light_types);
 	externalGui[0]->Add(SLIDER_FLOAT_3, "Light position.", &GetMainLight().light_position);
 	externalGui[0]->Add(SLIDER_FLOAT_3, "Light direction.", &GetMainLight().light_direction);
@@ -527,6 +534,13 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[0]->Add(TEXT, "Camera", nullptr);
 	externalGui[0]->Add(SLIDER_FLOAT_3, "position", &GetMainCamera().PositionRef());
 	externalGui[0]->Add(SLIDER_FLOAT_3, "direction", &GetMainCamera().ViewDirectionRef());
+	std::function<void()> add_camera_callback = [this]()
+	{
+		m_cameras.push_back(Camera(pipeline.Width(), pipeline.Height(),
+															 0.1f, 10.0f));
+		m_cameras.back().SetVisualiseFrustum(true);
+	};
+	externalGui[0]->Add(BUTTON, "Add camera", &add_camera_callback);
 
 	//Pipeline
 	externalGui[1]->Add(CHECKBOX, "Show bounding boxes", &pipeline.GetBoundingBoxBoolRef());
@@ -596,16 +610,26 @@ void eMainContextBase::InitializeExternalGui()
 
 	externalGui[1]->Add(TEXTURE, "Reflection buffer", (void*)pipeline.GetReflectionBufferTexture().id);
 	externalGui[1]->Add(TEXTURE, "Refraction buffer", (void*)pipeline.GetRefractionBufferTexture().id);
-	if (GetMainLight().type == eLightType::DIRECTION)
-		externalGui[1]->Add(TEXTURE, "Shadow buffer directional", (void*)pipeline.GetShadowBufferTexture().id);
-	else
-		externalGui[1]->Add(TEXTURE, "Shadow buffer point", (void*)pipeline.GetShadowBufferTexture().id);
 	externalGui[1]->Add(TEXTURE, "Gaussian buffer", (void*)pipeline.GetGausian2BufferTexture().id);
 	externalGui[1]->Add(TEXTURE, "Bright filter buffer", (void*)pipeline.GetBrightFilter().id);
 	externalGui[1]->Add(TEXTURE, "SSAO buffer", (void*)pipeline.GetSSAO().id);
 	externalGui[1]->Add(TEXTURE, "Deffered Pos", (void*)pipeline.GetDefferedOne().id);
 	externalGui[1]->Add(TEXTURE, "Deffered Norm", (void*)pipeline.GetDefferedTwo().id);
 	externalGui[1]->Add(TEXTURE, "LUT", (void*)pipeline.GetLUT().id);
+	if (GetMainLight().type == eLightType::DIRECTION)
+		externalGui[1]->Add(TEXTURE, "Shadow buffer directional", (void*)pipeline.GetShadowBufferTexture().id);
+	else
+		externalGui[1]->Add(TEXTURE, "Shadow buffer point", (void*)pipeline.GetShadowBufferTexture().id);
+	if (m_debug_csm)
+	{
+		pipeline.DumpCSMTextures();
+		externalGui[1]->Add(TEXTURE, "CSM 1", (void*)pipeline.GetCSMMapLayer1().id);
+		externalGui[1]->Add(TEXTURE, "CSM 2", (void*)pipeline.GetCSMMapLayer2().id);
+		externalGui[1]->Add(TEXTURE, "CSM 3", (void*)pipeline.GetCSMMapLayer3().id);
+		externalGui[1]->Add(TEXTURE, "CSM 4", (void*)pipeline.GetCSMMapLayer4().id);
+		externalGui[1]->Add(TEXTURE, "CSM 5", (void*)pipeline.GetCSMMapLayer5().id);
+		externalGui[1]->Add(SLIDER_FLOAT, "Z mult", (void*)&pipeline.ZMult());
+	}
 
 	//Objects transform
 	externalGui[2]->Add(OBJECT_REF_TRANSFORM, "Transform", (void*)&m_focused);

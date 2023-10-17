@@ -34,17 +34,6 @@ eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model,
 	lightDirLoc = glGetUniformLocation(wave_shader.ID(), "light.direction");
 	lightTypeLoc = glGetUniformLocation(wave_shader.ID(), "shadow_directional");
 
-	//Material
-	matAmbientLoc	= glGetUniformLocation(wave_shader.ID(), "material.ambient");
-	matDiffuseLoc	= glGetUniformLocation(wave_shader.ID(), "material.texture_diffuse1");
-	matSpecularLoc	= glGetUniformLocation(wave_shader.ID(), "material.texture_specular1");
-	matShineLoc		= glGetUniformLocation(wave_shader.ID(), "material.shininess");
-
-	glUniform3f(matAmbientLoc, 1.0f, 1.0f, 1.0f); // 1.0f, 0.5f, 0.31f
-	glUniform3f(matDiffuseLoc, 1.0f, 1.0f, 1.0f); // 1.0f, 0.5f, 0.31f
-	glUniform3f(matSpecularLoc, 1.0f, 1.0f, 1.0f); //0.5f, 0.5f, 0.5f
-	glUniform1f(matShineLoc, 32.0f); //32.0f
-
 	LightingIndexDirectional = glGetSubroutineIndex(wave_shader.ID(), GL_FRAGMENT_SHADER, "calculateBlinnPhongDirectionalSpecDif");
 	LightingIndexPoint = glGetSubroutineIndex(wave_shader.ID(), GL_FRAGMENT_SHADER, "calculateBlinnPhongPointSpecDif");
 	LightingIndexSpot = glGetSubroutineIndex(wave_shader.ID(), GL_FRAGMENT_SHADER, "calculateBlinnPhongFlashSpecDif");
@@ -78,12 +67,11 @@ void eWaveRender::Render(const Camera&					camera,
 	glUniform4f(lightPosLoc, light.light_position.x, light.light_position.y, light.light_position.z, light.light_position.w);
 	glUniform3f(lightDirLoc, light.light_direction.x, light.light_direction.y, light.light_direction.z);
 
-	glUniform1f(glGetUniformLocation(wave_shader.ID(), "light.constant"), light.constant);
-	glUniform1f(glGetUniformLocation(wave_shader.ID(), "light.linear"), light.linear);
-	glUniform1f(glGetUniformLocation(wave_shader.ID(), "light.quadratic"), light.quadratic);
-	glUniform1f(glGetUniformLocation(wave_shader.ID(), "light.cutOff"), light.cutOff);
-	glUniform1f(glGetUniformLocation(wave_shader.ID(), "light.outerCutOff"), light.outerCutOff);
-	//light end
+	wave_shader.SetUniformData("light.constant", light.constant);
+	wave_shader.SetUniformData("light.linear", light.linear);
+	wave_shader.SetUniformData("light.quadratic", light.quadratic);
+	wave_shader.SetUniformData("light.cutOff", light.cutOff);
+	wave_shader.SetUniformData("light.outerCutOff", light.outerCutOff);
 
 	glm::mat4 shadowMatrix;
 	if (light.type == eLightType::POINT || light.type == eLightType::SPOT)

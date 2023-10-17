@@ -25,6 +25,7 @@
 #include "MeshLineRender.h"
 #include "SSAORender.h"
 #include "IBLRender.h"
+#include "CSMRender.h"
 
 //----------------------------------------------------------------------------------------------
 class eRenderManager
@@ -73,6 +74,7 @@ private:
 	eMeshLineRender* MeshLineRender();
 	eSSAORender* SSAORender();
 	eIBLRender* IBLRender();
+	eCSMRender* CSMRender();
 
 private:
 	std::unique_ptr<eWaterRender>									m_waterRender;
@@ -95,6 +97,7 @@ private:
 	std::unique_ptr<eMeshLineRender>							m_meshlineRender;
 	std::unique_ptr<eSSAORender>									m_SSAORender;
 	std::unique_ptr<eIBLRender>										m_iblRender;
+	std::unique_ptr<eCSMRender>										m_csmRender;
 
 	std::string							folderPath;
 	std::vector<ShaderInfo>	shaders;
