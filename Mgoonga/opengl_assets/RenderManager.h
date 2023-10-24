@@ -26,6 +26,7 @@
 #include "SSAORender.h"
 #include "IBLRender.h"
 #include "CSMRender.h"
+#include "BloomRender.h"
 
 //----------------------------------------------------------------------------------------------
 class eRenderManager
@@ -75,6 +76,7 @@ private:
 	eSSAORender* SSAORender();
 	eIBLRender* IBLRender();
 	eCSMRender* CSMRender();
+	eBloomRenderer* BloomRenderer();
 
 private:
 	std::unique_ptr<eWaterRender>									m_waterRender;
@@ -98,6 +100,7 @@ private:
 	std::unique_ptr<eSSAORender>									m_SSAORender;
 	std::unique_ptr<eIBLRender>										m_iblRender;
 	std::unique_ptr<eCSMRender>										m_csmRender;
+	std::unique_ptr<eBloomRenderer>								m_blomRender;
 
 	std::string							folderPath;
 	std::vector<ShaderInfo>	shaders;

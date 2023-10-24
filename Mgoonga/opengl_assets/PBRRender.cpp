@@ -24,6 +24,7 @@ ePBRRender::ePBRRender(const std::string& vS, const std::string& fS)
   glUniform1f(aoLoc, 1.0f); //@todo take from material if textured too
 
   //vertex shader
+  BonesMatLocation = glGetUniformLocation(pbrShader.ID(), "gBones");
   fullTransformationUniformLocation = glGetUniformLocation(pbrShader.ID(), "modelToProjectionMatrix");
   modelToWorldMatrixUniformLocation = glGetUniformLocation(pbrShader.ID(), "modelToWorldMatrix");
   shadowMatrixUniformLocation       = glGetUniformLocation(pbrShader.ID(), "shadowMatrix"); //shadow
@@ -67,6 +68,16 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
       glUniformMatrix4fv(modelToWorldMatrixUniformLocation, 1, GL_FALSE, &object->GetTransform()->getModelMatrix()[0][0]);
 
       _SetMaterial(object);
+      if (object->GetRigger() != nullptr)
+      {
+        matrices = object->GetRigger()->GetMatrices();
+      }
+      else
+      {
+        for (auto& m : matrices)
+          m = UNIT_MATRIX;
+      }
+      glUniformMatrix4fv(BonesMatLocation, MAX_BONES, GL_FALSE, &matrices[0][0][0]);
       object->GetModel()->Draw();
     }
     else
@@ -90,6 +101,11 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
       glUniformMatrix4fv(modelToWorldMatrix, 1, GL_FALSE, &node.second[i]->GetTransform()->getModelMatrix()[0][0]);
     }
     _SetMaterial(node.second[0]);
+
+    //Instancing does not support bone matrices !!!
+      for (auto& m : matrices)
+        m = UNIT_MATRIX;
+    glUniformMatrix4fv(BonesMatLocation, MAX_BONES, GL_FALSE, &matrices[0][0][0]);
     node.second[0]->GetModel()->DrawInstanced(node.second.size());
   }
 }

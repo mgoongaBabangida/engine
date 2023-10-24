@@ -15,9 +15,14 @@ public:
 							glm::vec2 _tex_top_left, glm::vec2 _tex_right_botom,
 							float viewport_width, float viewport_height);
 	void RenderContrast(const Camera& camera, float blur_coef);
-	void RenderFrame(glm::vec2 _top_left, glm::vec2 _right_botom, float viewport_width, float viewport_height);
+	void RenderFrame(glm::vec2 _top_left, glm::vec2 _right_botom,
+									 float viewport_width, float viewport_height);
 	void RenderKernel();
 	
+	float& GetExposure() { return m_exposure; }
+	bool& GetToneMapping() { return m_tone_mapping; }
+	bool& GetGammaCorrection() { return m_gamma_correction; }
+
 	void SetRenderingFunction(int32_t);
 	void SetTexture(Texture t)			    { screenMesh->SetTextureOne(t); }
 	void SetTextureContrast(Texture t)	{ screenMesh->SetTextureTwo(t); }
@@ -34,6 +39,10 @@ protected:
 	GLuint							blendLoc;
 	GLuint							kernelLoc;
   GLuint							blurCoefLoc;
+
+	float m_exposure = 1.0f;
+	bool m_tone_mapping = true;
+	bool m_gamma_correction = true; // @connect with hdr shaders 
 }; 
 
 

@@ -18,6 +18,7 @@ layout(binding=2) uniform sampler2D albedoMap;
 layout(binding=3) uniform sampler2D metallicMap;
 layout(binding=4) uniform sampler2D normalMap;
 layout(binding=5) uniform sampler2D roughnessMap;
+layout(binding=6) uniform sampler2D texture_emissionl;
 
 // IBL
 layout(binding=9)  uniform samplerCube irradianceMap;
@@ -29,6 +30,8 @@ uniform vec4 lightPositions[1];
 uniform vec4 lightColors[1];
 
 uniform vec4 camPos;
+uniform bool gamma_correction = true;
+uniform float emission_strength = 1.0f;
 
 const float PI = 3.14159265359;
   
@@ -47,7 +50,11 @@ void main()
    
    if(textured)	
    {
+   if(gamma_correction)
      albedo_f    = pow(texture(albedoMap, Texcoord).rgb, vec3(2.2));
+   else
+	 albedo_f    = texture(albedoMap, Texcoord).rgb;
+	 
      theNormal_f = texture(normalMap, Texcoord).rgb;
 	 // Transform normal vector to range [-1,1]
 	 theNormal_f = normalize(theNormal_f * 2.0 - 1.0);
@@ -118,11 +125,13 @@ void main()
 	
     vec3 color = ambient + Lo;
 	
-    // HDR tonemapping
-    color = color / (color + vec3(1.0));
-    // gamma correct
-    color = pow(color, vec3(1.0/2.2));  
-   
+	vec3 emissive_color;
+	  if(gamma_correction)
+		emissive_color = vec3(pow(texture(texture_emissionl, Texcoord).rgb, vec3(2.2f)));
+	  else
+		emissive_color = vec3(texture(texture_emissionl, Texcoord));
+	color.rgb += (emissive_color * emission_strength);
+	
     FragColor = vec4(color, 1.0);
 }
 

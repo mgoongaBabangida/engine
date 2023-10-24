@@ -72,13 +72,17 @@ public:
 	float& GetSaoThresholdRef();
 	float& GetSaoStrengthRef();
 	bool& ShadowingRef() { return shadows; }
+	bool& PBBloomRef() { return m_pb_bloom; }
 
 	//Phong Render
+	bool& GetDebugWhite();
+	bool& GetDebugTexCoords();
+	float& GetEmissionStrengthRef();
+
+	//HDR -> LDR blending
 	float& GetExposureRef();
 	bool& GetGammaCorrectionRef();
 	bool& GetToneMappingRef();
-	bool& GetDebugWhite();
-	bool& GetDebugTexCoords();
 
 	//Water Render
 	float& WaveSpeedFactor();
@@ -116,6 +120,7 @@ public:
 	Texture GetCSMMapLayer3() const;
 	Texture GetCSMMapLayer4() const;
 	Texture GetCSMMapLayer5() const;
+	Texture GetBloomTexture() const;
 
 	void DumpCSMTextures() const;
 
@@ -133,11 +138,12 @@ protected:
 	void			RenderGeometry(const Camera&, const SimpleGeometryMesh& _mesh);
 	void			RenderParticles(const Camera&);
 	void			RenderBlur(const Camera&);
-	void			RenderContrast(const Camera& _camera);
+	void			RenderContrast(const Camera& _camera, const Texture& _contrast);
 	void			RenderGui(std::vector<std::shared_ptr<GUI>>&, const Camera&);
 	void			RenderPBR(const Camera&, const Light& _light, std::vector<shObject> _objs);
 	void			RenderSSAO(const Camera&, const Light&, std::vector<shObject>&);
 	void			RenderIBL(const Camera& _camera);
+	void			RenderBloom();
 
 	bool			mts			= true;
 	bool			skybox		= true;
@@ -152,6 +158,7 @@ protected:
 	bool			bezier_curve = true;
 	bool			outline_focused = true;
 	bool			ssao = false;
+	bool			m_pb_bloom = false;
 	float     blur_coef = 0.5f;
 
 	bool			mousepress = true; //to draw framed objects

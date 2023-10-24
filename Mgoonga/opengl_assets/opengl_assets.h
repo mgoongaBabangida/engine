@@ -7,3 +7,12 @@
 #endif
 
 #pragma warning( disable : 4251)
+
+#include <glm\glm\glm.hpp>
+
+struct bloomMip
+{
+  glm::vec2 size;
+  glm::ivec2 intSize;
+  unsigned int texture_id;
+};

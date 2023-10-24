@@ -52,5 +52,4 @@ void eBrightFilterRender::Render()
 	//glUniform1f(TexWidthLoc, FBO->Width());
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
-
 }

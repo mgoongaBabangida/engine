@@ -30,7 +30,6 @@ public:
   void _InitMainTestSceane();
 
 protected:
-	virtual void			InitializeBuffers()								override;
 	virtual void			InitializeModels()								override;
 };
 

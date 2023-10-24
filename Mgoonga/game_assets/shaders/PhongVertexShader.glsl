@@ -69,7 +69,6 @@ else
 
   if (dot(cross(N, T), B) < 0.0)
      T = T * -1.0;
-
   TBN = mat3(T,B,N);
   
   float t = weights[0] + weights[1] + weights[2] + weights[3];

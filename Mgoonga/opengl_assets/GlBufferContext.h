@@ -3,6 +3,7 @@
 #include "colorFBO.h"
 #include "ShadowMapFbo.h"
 #include "GFBO.h"
+#include "bloomFBO.h"
 
 enum class eBuffer
 {
@@ -24,7 +25,8 @@ enum class eBuffer
 	BUFFER_SSAO,
 	BUFFER_SSAO_BLUR,
 	BUFFER_IBL_CUBEMAP,
-	BUFFER_IBL_CUBEMAP_IRR
+	BUFFER_IBL_CUBEMAP_IRR,
+	BUFFER_BLOOM
 };
 
 //---------------------------------------------------------------------------
@@ -47,6 +49,10 @@ public:
 
 	GLuint GetId(eBuffer);
 	glm::ivec2 eGlBufferContext::GetSize(eBuffer _buffer);
+
+	const std::vector<bloomMip>& MipChain() const {
+		return bloomFBO.MipChain();
+	}
 
 	static eGlBufferContext& GetInstance() 
 	{
@@ -72,4 +78,5 @@ private:
 	SimpleColorFBO ssaoBlurFBO;
 	CubemapFBO		 iblCubemapFBO;
 	CubemapFBO		 iblCubemapIrrFBO;
+	BloomFBO			 bloomFBO;
 };

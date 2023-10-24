@@ -31,6 +31,7 @@ public:
 	bool& GetGammaCorrection() { return m_gamma_correction; }
 	bool& GetToneMapping() { return m_tone_mapping; }
 	float& GetExposure() { return m_exposure; }
+	float& GetEmissionStrength() { return m_emission_strength; }
 
 protected:
 	Shader mainShader;
@@ -48,6 +49,7 @@ protected:
 	float m_ssao_threshold = 0.9f;
 	float m_ssao_strength = 0.6f;
 
+	float m_emission_strength = 1.0f;
 	bool	m_debug_white = false;
 	bool	m_debug_text_coords = false;
 	bool	m_gamma_correction = true;

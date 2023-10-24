@@ -38,6 +38,9 @@ void eScreenRender::RenderContrast(const Camera& camera, float blur_coef)
   glUniform1f(blurCoefLoc, blur_coef);
 	glUniform1i(frameLoc, GL_FALSE);
 	glUniform1i(blendLoc, GL_TRUE);
+	screenShader.SetUniformData("hdr_exposure", m_exposure);
+	screenShader.SetUniformData("tone_mapping", m_tone_mapping);
+	screenShader.SetUniformData("gamma_correction", m_gamma_correction);
 	screenMesh->SetViewPortToDefault();
 	screenMesh->Draw();
 	glUniform1i(blendLoc, GL_FALSE);

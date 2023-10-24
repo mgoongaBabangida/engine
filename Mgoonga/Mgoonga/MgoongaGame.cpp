@@ -46,13 +46,6 @@ eMgoongaGameContext::~eMgoongaGameContext() {}
 
 //*********************Initialize**************************************
 //-----------------------------------------------------------------------------
-void eMgoongaGameContext::InitializeBuffers()
-{
-  GetMainLight().type = eLightType::DIRECTION;
-	pipeline.InitializeBuffers();
-}
-
-//-----------------------------------------------------------------------------
 void eMgoongaGameContext::InitializeModels()
 {
 	eMainContextBase::InitializeModels();

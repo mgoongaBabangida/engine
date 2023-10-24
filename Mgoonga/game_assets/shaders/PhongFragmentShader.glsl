@@ -59,15 +59,14 @@ uniform float ssao_threshold = 0.9f;
 uniform float ssao_strength = 0.6f;
 
 uniform bool gamma_correction = true;
+uniform float emission_strength = 1.0f;
+
 uniform bool debug_white_color = false;
 uniform bool debug_white_texcoords = false;
 
-uniform bool tone_mapping = true;
-uniform float hdr_exposure = 1.0f;
-
+//terrain
 const int max_texture_array_size = 8;
 const float epsilon = 0.001f;
-
 uniform bool texture_blending = false;
 uniform float min_height = 0.0f;
 uniform float max_height = 1.0f;
@@ -347,11 +346,13 @@ void main()
   vec3 difspec = LightingFunction(light, bNormal, thePosition, dif_texture, Texcoord);
 
   if(debug_white_texcoords)
-	outColor = vec4(1.0f,1.0f,1.0f,1.0f); 
+	outColor = vec4(emission_strength,emission_strength,emission_strength,emission_strength); 
   else if(debug_white_color)
-	outColor = vec4(CalculateAlbedo(lightVector, bNormal, dif_texture), 1.0f);
+  {
+	outColor = vec4(ambientLight + difspec * shadow, 1.0);
+  }
   else
-	{
+  {
 	outColor = vec4(ambientLight + difspec * shadow, 1.0);
   
 	vec3 emissive_color;
@@ -360,14 +361,8 @@ void main()
 		else
 			emissive_color = vec3(texture(texture_emissionl, Texcoord));
 
-		outColor.rgb += emissive_color;
-  
-		if(tone_mapping)
-			outColor.rgb = vec3(1.0) - exp(-outColor.rgb * hdr_exposure);
-	 
-		if(gamma_correction)
-			outColor.rgb = pow(outColor.rgb, vec3(1.0/2.2f));
-	}
+		outColor.rgb += (emissive_color * emission_strength);
+  }
 };
 
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal )

@@ -6,26 +6,47 @@ in layout(location=2) vec3 normal;
 in layout(location=3) vec2 texcoord;
 in layout(location=4) vec3 tangent;
 in layout(location=5) vec3 bitangent;
+in layout(location=6) ivec4 boneIDs;
+in layout(location=7) vec4 weights;
+
+const int MAX_BONES = 100;
 
 uniform mat4 modelToProjectionMatrix[10];
 uniform mat4 modelToWorldMatrix[10];
 
 uniform mat4 shadowMatrix;
+uniform mat4 gBones[MAX_BONES];
 
 out vec3 thePosition;
 out vec3 theNormal;
 out vec2 Texcoord;
+out vec4 LocalSpacePos;
 out vec4 LightSpacePos;
+out vec3 LocalSpaceNormal;
 out mat3 TBN;
 
 void main()
 {	
-  vec4 v = vec4(position ,1.0);
+  mat4 matrix = mat4(vec4(1,0,0,0),vec4(0,1,0,0),vec4(0,0,1,0),vec4(0,0,0,1));
+
+  mat4 BoneTransform      = gBones[boneIDs[0]] * weights[0];
+       BoneTransform     += gBones[boneIDs[1]] * weights[1];
+       BoneTransform     += gBones[boneIDs[2]] * weights[2];
+       BoneTransform     += gBones[boneIDs[3]] * weights[3];
+
+  vec4 v =  BoneTransform * vec4(position ,1.0); // BoneTransform *
  
   gl_Position	= modelToProjectionMatrix[gl_InstanceID] * v;
   LightSpacePos = shadowMatrix * modelToWorldMatrix[gl_InstanceID] * v;
-
+  LocalSpacePos = v;
+  LocalSpaceNormal = normal; // BoneTransform * ?
+  
   Texcoord = texcoord;
+  
+  vec3 ntangent		= mat3(BoneTransform) * tangent;
+  vec3 nbitangent	= mat3(BoneTransform) * bitangent;
+  vec3 nnormal		= mat3(BoneTransform) * normal;
+  
   theNormal	= normalize(mat3(modelToWorldMatrix[gl_InstanceID])* normalize(normal));
   thePosition	= vec3(modelToWorldMatrix[gl_InstanceID] * v);// vec4(position ,1.0) 
 

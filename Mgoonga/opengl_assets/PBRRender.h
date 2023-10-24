@@ -29,6 +29,7 @@ protected:
   GLuint aoLoc;
   GLuint camPosLoc;
 
+  GLuint BonesMatLocation;
   GLuint fullTransformationUniformLocation;
   GLuint modelToWorldMatrixUniformLocation;
   GLuint shadowMatrixUniformLocation;

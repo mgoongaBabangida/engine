@@ -430,6 +430,12 @@ void eMainContextBase::InitializePipline()
 }
 
 //--------------------------------------------------------------------------------
+void eMainContextBase::InitializeBuffers()
+{
+	pipeline.InitializeBuffers();
+}
+
+//--------------------------------------------------------------------------------
 void eMainContextBase::InitializeModels()
 {
 	std::ifstream infile("models.ini");
@@ -574,7 +580,8 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[1]->Add(CHECKBOX, "Gamma Correction", &pipeline.GetGammaCorrectionRef());
 	externalGui[1]->Add(CHECKBOX, "Gamma Tone Mapping", &pipeline.GetToneMappingRef());
 	externalGui[1]->Add(SLIDER_FLOAT, "Gamma Exposure", &pipeline.GetExposureRef());
-	externalGui[1]->Add(SLIDER_FLOAT, "Blur coefficients", &pipeline.GetBlurCoefRef());
+	externalGui[1]->Add(SLIDER_FLOAT_NERROW, "Blur coefficients", &pipeline.GetBlurCoefRef());
+	externalGui[1]->Add(SLIDER_FLOAT, "Emission Strength", &pipeline.GetEmissionStrengthRef());
 	externalGui[1]->Add(CHECKBOX, "SSAO", &pipeline.GetSSAOEnabledRef());
 	externalGui[1]->Add(SLIDER_FLOAT, "SSAO Threshold", &pipeline.GetSaoThresholdRef());
 	externalGui[1]->Add(SLIDER_FLOAT, "SSAO Strength", &pipeline.GetSaoStrengthRef());
@@ -630,6 +637,8 @@ void eMainContextBase::InitializeExternalGui()
 		externalGui[1]->Add(TEXTURE, "CSM 5", (void*)pipeline.GetCSMMapLayer5().id);
 		externalGui[1]->Add(SLIDER_FLOAT, "Z mult", (void*)&pipeline.ZMult());
 	}
+	externalGui[1]->Add(CHECKBOX, "Physicly Based Bloom", &pipeline.PBBloomRef());
+	externalGui[1]->Add(TEXTURE, "Bloom", (void*)pipeline.GetBloomTexture().id);
 
 	//Objects transform
 	externalGui[2]->Add(OBJECT_REF_TRANSFORM, "Transform", (void*)&m_focused);

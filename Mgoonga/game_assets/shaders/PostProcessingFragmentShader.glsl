@@ -9,6 +9,10 @@ uniform bool blend = false;
 uniform bool kernel = false;
 
 uniform float blurCoef = 1.0f;
+uniform bool tone_mapping = true;
+uniform bool gamma_correction = true;
+uniform float hdr_exposure = 1.0f;
+
 uniform vec2 CursorPos;
 
 layout(binding=1) uniform sampler2D screenTexture;
@@ -51,6 +55,10 @@ void main()
 	   col = texture(screenTexture, TexCoords);
 	   contr = texture(contrastTexture, TexCoords);
 	   col = col + (contr * clamp(blurCoef,0,1));
+	   if(tone_mapping)
+		col.rgb = vec3(1.0) - exp(-col.rgb * hdr_exposure);	 
+	   if(gamma_correction)
+		col.rgb = pow(col.rgb, vec3(1.0/2.2f));
 	}
 	else if( kernel )
 	{

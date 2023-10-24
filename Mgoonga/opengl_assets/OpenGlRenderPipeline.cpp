@@ -93,6 +93,7 @@ void eOpenGlRenderPipeline::InitializeBuffers()
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SSAO_BLUR, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_IBL_CUBEMAP, 512, 512);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_IBL_CUBEMAP_IRR, 32, 32);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_BLOOM, width, height);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -115,17 +116,18 @@ float& eOpenGlRenderPipeline::GetSaoStrengthRef() { return renderManager->GetSsa
 
 float& eOpenGlRenderPipeline::GetExposureRef()
 {
-	return renderManager->PhongRender()->GetExposure();
+	return renderManager->ScreenRender()->GetExposure();
 }
 
 bool& eOpenGlRenderPipeline::GetGammaCorrectionRef()
 {
+	//@todo screen render as well
 	return renderManager->PhongRender()->GetGammaCorrection();
 }
 
 bool& eOpenGlRenderPipeline::GetToneMappingRef()
 {
-	return renderManager->PhongRender()->GetToneMapping();
+	return renderManager->ScreenRender()->GetToneMapping();
 }
 
 bool& eOpenGlRenderPipeline::GetDebugWhite()
@@ -136,6 +138,11 @@ bool& eOpenGlRenderPipeline::GetDebugWhite()
 bool& eOpenGlRenderPipeline::GetDebugTexCoords()
 {
 	return renderManager->PhongRender()->GetDebugTextCoords();
+}
+
+float& eOpenGlRenderPipeline::GetEmissionStrengthRef()
+{
+	return renderManager->PhongRender()->GetEmissionStrength();
 }
 
 float& eOpenGlRenderPipeline::WaveSpeedFactor()
@@ -460,10 +467,10 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	}
 	glDepthFunc(GL_LEQUAL);
 
-	//7  Particles
 	mts ? eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS)
 		: eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 
+	//7  Particles
 	if (particles) { RenderParticles(_camera); }
 
 	if (mts) // resolving mts to default
@@ -471,12 +478,24 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SCREEN);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		eGlBufferContext::GetInstance().ResolveMtsToScreen();
-		RenderBlur(_camera);
+		Texture contrast;
+		if (m_pb_bloom)//Physicly Based Bloom
+		{
+			RenderBloom();
+			glViewport(0, 0, width, height);
+			contrast = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_BLOOM);
+		}
+		else
+		{
+			RenderBlur(_camera); // gaussian
+			contrast = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_GAUSSIAN_TWO);
+		}
+
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 		glViewport(0, 0, width, height);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glDisable(GL_DEPTH_TEST);
-		RenderContrast(_camera);
+		RenderContrast(_camera, contrast); // blend screen with gaussian (or pb bloom) -> to default
 	}
 	
 	//Post-processing, need stencil
@@ -665,6 +684,27 @@ void eOpenGlRenderPipeline::RenderParticles(const Camera& _camera)
 	glDepthMask(GL_TRUE);
 }
 
+//-------------------------------------------------------
+void eOpenGlRenderPipeline::RenderBloom()
+{
+	// Bind srcTexture (HDR color buffer) as initial texture input
+	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_BLOOM);
+	//glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // ?
+	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SCREEN, GL_TEXTURE0);
+	renderManager->BloomRenderer()->RenderDownsamples(eGlBufferContext::GetInstance().MipChain(), glm::vec2{ (float)width , (float)height });
+
+	// Enable additive blending !!!
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+	glBlendEquation(GL_FUNC_ADD);
+	renderManager->BloomRenderer()->RenderUpsamples(eGlBufferContext::GetInstance().MipChain());
+	// Disable additive blending !!!!!
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // Restore if this was default
+	glDisable(GL_BLEND);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void eOpenGlRenderPipeline::RenderBlur(const Camera& _camera)
 {
 	renderManager->BrightFilterRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));
@@ -676,10 +716,10 @@ void eOpenGlRenderPipeline::RenderBlur(const Camera& _camera)
 	renderManager->GaussianBlurRender()->Render();
 }
 
-void eOpenGlRenderPipeline::RenderContrast(const Camera& _camera)
+void eOpenGlRenderPipeline::RenderContrast(const Camera& _camera, const Texture& _contrast)
 {
 	renderManager->ScreenRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));
-	renderManager->ScreenRender()->SetTextureContrast(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_GAUSSIAN_TWO));
+	renderManager->ScreenRender()->SetTextureContrast( _contrast);
 	renderManager->ScreenRender()->RenderContrast(_camera, blur_coef);
 }
 
@@ -929,6 +969,11 @@ Texture eOpenGlRenderPipeline::GetCSMMapLayer2() const{return csm_dump2;}
 Texture eOpenGlRenderPipeline::GetCSMMapLayer3() const{return csm_dump3;}
 Texture eOpenGlRenderPipeline::GetCSMMapLayer4() const{return csm_dump4;}
 Texture eOpenGlRenderPipeline::GetCSMMapLayer5() const{return csm_dump5;}
+
+Texture eOpenGlRenderPipeline::GetBloomTexture() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_BLOOM);
+}
 
 void eOpenGlRenderPipeline::DumpCSMTextures() const
 {

@@ -42,6 +42,7 @@ void ePhongRender::Render(const Camera&								camera,
 	mainShader.SetUniformData("hdr_exposure", m_exposure);
 	mainShader.SetUniformData("ssao_threshold", m_ssao_threshold);
 	mainShader.SetUniformData("ssao_strength", m_ssao_strength);
+	mainShader.SetUniformData("emission_strength", m_emission_strength);
 
 	mainShader.SetUniformData("light.ambient", light.ambient);
 	mainShader.SetUniformData("light.diffuse", light.diffuse);

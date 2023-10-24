@@ -37,13 +37,6 @@ AmericanTreasureGame::AmericanTreasureGame(eInputController* _input,
 AmericanTreasureGame::~AmericanTreasureGame() {}
 
 //-----------------------------------------------------------------------------
-void AmericanTreasureGame::InitializeBuffers()
-{
-  GetMainLight().type = eLightType::DIRECTION;
-  pipeline.InitializeBuffers();
-}
-
-//-----------------------------------------------------------------------------
 void AmericanTreasureGame::InitializeModels()
 {
   eMainContextBase::InitializeModels();

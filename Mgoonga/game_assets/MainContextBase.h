@@ -107,7 +107,7 @@ public:
 
 protected:
 	virtual void		InitializePipline();
-	virtual void		InitializeBuffers() {}
+	virtual void		InitializeBuffers();
 	virtual void		InitializeModels();
 	virtual void		InitializeRenders();
 	virtual void		InitializeTextures();

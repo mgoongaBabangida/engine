@@ -27,11 +27,10 @@ public:
 
 	virtual ~AmericanTreasureGame();
 
-	void _InitMainTestSceane();
-
 protected:
-	virtual void			InitializeBuffers()								override;
 	virtual void			InitializeModels()								override;
+
+	void _InitMainTestSceane();
 };
 #endif //AMERICAN_TREASURE_H
 
