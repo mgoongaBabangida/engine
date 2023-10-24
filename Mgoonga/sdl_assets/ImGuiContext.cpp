@@ -602,7 +602,7 @@ void eWindowImGui::Render()
                 ImGui::EndCombo();
               }
 
-              static bool is_frame_freez = false;
+              static bool is_frame_freez = obj->GetRigger()->UseFirstFrameAsIdle();
               ImGui::Checkbox("FreezeFrame frame", &is_frame_freez);
               if (is_frame_freez)
                 rigger->GetCurrentAnimation()->FreezeFrame(std::stoi(current_frame_item));

@@ -27,6 +27,9 @@ public:
   virtual std::optional<Material> GetMaterial() const override;
   virtual bool HasMaterial() const override { return true; }
 
+  virtual void												calculatedTangent() override;
+  virtual void												ReloadVertexBuffer() override;
+
 protected:
   std::string name = "SphereTexturedMesh";
   Material m_material;

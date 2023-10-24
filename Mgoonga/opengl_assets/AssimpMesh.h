@@ -21,7 +21,7 @@ public:
   AssimpMesh(AssimpMesh&&) = default;
 
   void FreeTextures();
-  void ReloadVertexBuffer();
+  virtual void ReloadVertexBuffer() override;
 
 	void Draw() override;
   void DrawInstanced(int32_t instances) override;
@@ -41,7 +41,7 @@ public:
   virtual void											SetMaterial(const Material&) override;
   virtual std::optional<Material>		GetMaterial() const override { return m_material; }
 
-  virtual void												calculatedTangent();
+  virtual void												calculatedTangent() override;
 
 protected:
   void _BindRawTextures();

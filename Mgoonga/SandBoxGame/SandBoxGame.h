@@ -22,7 +22,6 @@ public:
 	virtual ~eSandBoxGame() = default;
 
 protected:
-	virtual void		InitializeBuffers()			override;
 	virtual void		InitializeModels()			override;
 };
 

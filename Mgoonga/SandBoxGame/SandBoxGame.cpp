@@ -45,15 +45,6 @@ eSandBoxGame::eSandBoxGame(eInputController*  _input,
 }
 
 //-------------------------------------------------------------------------
-void eSandBoxGame::InitializeBuffers()
-{
-	eMainContextBase::InitializeBuffers();
-
-	GetMainLight().type = eLightType::DIRECTION;
-	pipeline.InitializeBuffers();
-}
-
-//-------------------------------------------------------------------------
 void eSandBoxGame::InitializeModels()
 {
 	eMainContextBase::InitializeModels();
@@ -67,7 +58,7 @@ void eSandBoxGame::InitializeModels()
 	material.ao = 1.0f;
 	material.roughness = 0.5;
 	material.metallic = 0.5;
-
+	material.emissive_texture_id = Texture::GetTexture1x1(TColor::BLACK).id;
 	modelManager->Add("sphere_red", Primitive::SPHERE, std::move(material));
 
 	//DESERIALIZE ANIMATIONS
@@ -77,8 +68,8 @@ void eSandBoxGame::InitializeModels()
 	ObjectFactoryBase factory(animationManager.get());
 
 	shObject wallCube = factory.CreateObject(modelManager->Find("wall_cube"), eObject::RenderType::PHONG, "WallCube");
-	wallCube->GetTransform()->setTranslation(vec3(3.0f, 3.0f, 3.0f));
-	wallCube->SetScript(new eSandBoxScript(this));
+	wallCube->GetTransform()->setTranslation(vec3(3.0f, -1.5f, 3.0f));
+	//wallCube->SetScript(new eSandBoxScript(this));
 	m_objects.push_back(wallCube);
 	
 	if (false) // mapleTree
@@ -122,7 +113,7 @@ void eSandBoxGame::InitializeModels()
 																					"Default", //"MixamoFireWalkDie.mgoongaRigger",
 																					"" //"Soldier3Anim.mgoongaBoxColliderDynamic",
 																					/*true*/); // dynamic collider
-	soldier->GetTransform()->setTranslation(vec3(1.0f, -2.0f, 0.0f));
+	soldier->GetTransform()->setTranslation(vec3(0.0f, -2.0f, 0.0f));
 	soldier->GetTransform()->setScale(vec3(0.01f, 0.01f, 0.01f));
 	soldier->SetScript(new AnimationSocketScript(this));
 
@@ -177,13 +168,41 @@ void eSandBoxGame::InitializeModels()
 		t.type = "texture_roughness";
 		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[0])->AddTexture(&t);
 		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[1])->AddTexture(&t);
+
+		//castle
+		shObject castle = factory.CreateObject(modelManager->Find("Castle"), eObject::RenderType::PHONG, "Castle");
+		castle->GetTransform()->setTranslation(vec3(1.0f, -2.0f, 2.0f));
+		castle->GetTransform()->setScale(vec3(0.2f, 0.2f, 0.2f));
+		m_objects.push_back(castle);
+		for (auto& mesh : castle->GetModel()->Get3DMeshes())
+		{
+			t.loadTextureFromFile("../game_assets/assets/brickwall.jpg");
+			t.type = "texture_diffuse";
+			const_cast<I3DMesh*>(mesh)->AddTexture(&t);
+			t.loadTextureFromFile("../game_assets/assets/brickwall_normal.jpg");
+			t.type = "texture_normal";
+			const_cast<I3DMesh*>(mesh)->AddTexture(&t);
+			mesh->GetMaterial()->use_normal = true;
+			const_cast<I3DMesh*>(mesh)->calculatedTangent();
+			const_cast<I3DMesh*>(mesh)->ReloadVertexBuffer();
+		}
 	}
 
 	//light
-	//m_light_object = factory.CreateObject(modelManager->Find("white_sphere"), eObject::RenderType::PHONG, "WhiteSphere");
-	//m_light_object->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
-	//m_light_object->GetTransform()->setTranslation(GetMainLight().light_position);
-	//m_objects.push_back(m_light_object);
+	pipeline.SetUniformData("class ePhongRender","emission_strength", 5.0f);
+	shObject hdr_object = factory.CreateObject(modelManager->Find("white_sphere"), eObject::RenderType::PHONG, "WhiteSphere");
+	hdr_object->GetTransform()->setScale(vec3(0.2f, 0.2f, 0.2f));
+	hdr_object->GetTransform()->setTranslation(GetMainLight().light_position);
+	Material m;
+	m.albedo_texture_id = Texture::GetTexture1x1(TColor::YELLOW).id;
+	m.use_albedo = true;
+	m.metalic_texture_id = Texture::GetTexture1x1(TColor::WHITE).id;
+	m.use_metalic = true;
+	m.normal_texture_id = Texture::GetTexture1x1(TColor::BLUE).id;
+	m.use_normal = true;
+	m.emissive_texture_id = Texture::GetTexture1x1(TColor::YELLOW).id;
+	hdr_object->GetModel()->SetMaterial(m);
+	m_objects.push_back(hdr_object);
 
 	//GLOBAL SCRIPTS
 	m_global_scripts.push_back(std::make_shared<ShootScript>(this, modelManager.get()));

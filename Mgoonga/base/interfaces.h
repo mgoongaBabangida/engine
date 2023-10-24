@@ -123,14 +123,16 @@ class I3DMesh : public IMesh
 {
 public:
 	virtual ~I3DMesh() = default;
-	virtual size_t														GetVertexCount() const	= 0;
-	virtual const std::vector<Vertex>&				GetVertexs() const			= 0;
-	virtual const std::vector<unsigned int>&	GetIndices() const			= 0;
-	virtual std::vector<TextureInfo>					GetTextures() const			= 0;
-	virtual void AddTexture(Texture*)																	= 0;
-	virtual void BindVAO()	const																			= 0;
-	virtual void UnbindVAO() const																		= 0;
-	virtual void DrawInstanced(int32_t) {}
+	virtual size_t														GetVertexCount() const		= 0;
+	virtual const std::vector<Vertex>&				GetVertexs() const				= 0;
+	virtual const std::vector<unsigned int>&	GetIndices() const				= 0;
+	virtual std::vector<TextureInfo>					GetTextures() const				= 0;
+	virtual void															AddTexture(Texture*)			= 0;
+	virtual void															BindVAO()	const						= 0;
+	virtual void															UnbindVAO() const					= 0;
+	virtual void															DrawInstanced(int32_t) {}
+	virtual void															calculatedTangent()				= 0;
+	virtual void															ReloadVertexBuffer()			= 0;
 };
 
 //----------------------------------------------------------------------------------------------

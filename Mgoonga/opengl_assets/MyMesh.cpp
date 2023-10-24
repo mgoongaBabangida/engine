@@ -207,6 +207,16 @@ void MyMesh::calculatedTangent()
 }
 
 //--------------------------------------------------------------------------------------------------------------
+void MyMesh::ReloadVertexBuffer()
+{
+	glBindVertexArray(this->VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+	glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex),
+		&this->vertices[0], GL_STATIC_DRAW);
+	glBindVertexArray(0);
+}
+
+//--------------------------------------------------------------------------------------------------------------
 bool MyMesh::SwitchLOD(GLuint _LOD) //starts from one
 {
 	if (LOD_index__in_use + 1 == _LOD)

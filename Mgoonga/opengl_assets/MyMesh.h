@@ -26,14 +26,17 @@ public:
   virtual size_t														GetVertexCount() const override { return vertices.size(); }
 	virtual const std::vector<Vertex>&				GetVertexs() const override { return vertices; }
 	virtual const std::vector<unsigned int>&	GetIndices() const override { return indicesLods[0]; }
+
 	virtual void                              BindVAO() const override { glBindVertexArray(this->VAO); }
 	virtual void                              UnbindVAO() const override { glBindVertexArray(0); }
 
   virtual std::vector<TextureInfo>		GetTextures() const;
 	virtual void												AddTexture(Texture* _t) override { textures.push_back(_t); }
+
   virtual void												setTextures(std::vector<Texture*>);
 	virtual void												setupMesh();
-	virtual void												calculatedTangent();
+	virtual void												calculatedTangent() override;
+	virtual void												ReloadVertexBuffer() override;
 
 	bool SwitchLOD(GLuint _LOD);
 	GLuint LODInUse() const;
@@ -82,6 +85,9 @@ public:
 
 	virtual std::vector<TextureInfo>	GetTextures() const;
 	virtual void											AddTexture(Texture* _t) override { textures.push_back(*_t); }
+
+	virtual void											calculatedTangent()  override {} //@todo ?
+	virtual void											ReloadVertexBuffer() override {}//@todo ?
 
   void				SetUpInstances(GLuint _instances) { instances = _instances; }
 	void				updateInstancedData(std::vector<float>& buffer);

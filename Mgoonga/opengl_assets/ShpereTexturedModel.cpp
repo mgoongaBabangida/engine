@@ -180,6 +180,18 @@ std::optional<Material> SphereTexturedMesh::GetMaterial() const
 }
 
 //-------------------------------------------------------------------
+void SphereTexturedMesh::calculatedTangent()
+{
+  //@todo make my mesh!
+}
+
+//-------------------------------------------------------------------
+void SphereTexturedMesh::ReloadVertexBuffer()
+{
+  //@todo make my mesh!
+}
+
+//-------------------------------------------------------------------
 void SphereTexturedModel::Draw()
 {
   m_mesh->Draw();
