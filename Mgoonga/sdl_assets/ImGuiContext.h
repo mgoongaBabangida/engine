@@ -63,7 +63,8 @@ enum TypeImGui
 	SLIDER_FLOAT_LARGE,
 	SLIDER_FLOAT_NERROW,
 	SLIDER_INT_NERROW,
-	SPIN_BOX
+	SPIN_BOX,
+	CAMERA
 };
 
 //--------------------------------------------------

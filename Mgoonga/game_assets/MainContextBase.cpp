@@ -8,7 +8,7 @@
 #include "ParticleSystemToolController.h"
 #include "TerrainGeneratorTool.h"
 #include "BezierCurveUIController.h"
-
+#include "CameraSecondScript.h"
 #include <base/InputController.h>
 
 #include <tcp_lib/Network.h>
@@ -91,7 +91,7 @@ bool eMainContextBase::OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier)
 {
 	if (m_update_hovered)
 	{
-		GetMainCamera().getCameraRay().Update(GetMainCamera(), static_cast<float>(x), static_cast<float>(y), static_cast<float>(pipeline.Width()), static_cast<float>(pipeline.Height()));
+		GetMainCamera().getCameraRay().Update(static_cast<float>(x), static_cast<float>(y));
 		GetMainCamera().getCameraRay().press((float)x, (float)y);
 		auto [picked, intersaction] = GetMainCamera().getCameraRay().calculateIntersaction(m_objects);
 		m_hovered = picked;
@@ -102,7 +102,7 @@ bool eMainContextBase::OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier)
 		if ((!m_input_strategy || (m_input_strategy && !m_input_strategy->OnMouseMove(x, y))) && m_framed_choice_enabled)
 		{
 			// input strategy has priority over frame, @todo frmae should be inside one of input strategies
-			m_framed.reset(new std::vector<shObject>(GetMainCamera().getCameraRay().onMove(GetMainCamera(), m_objects, static_cast<float>(x), static_cast<float>(y)))); 	//to draw a frame
+			m_framed = std::make_shared<std::vector<shObject>>(GetMainCamera().getCameraRay().onMove(m_objects, static_cast<float>(x), static_cast<float>(y))); 	//to draw a frame
 			return true;
 		}
 	}
@@ -118,7 +118,7 @@ bool eMainContextBase::OnMousePress(int32_t x, int32_t y, bool _left, KeyModifie
 	if (m_framed)
 		m_framed->clear();
 
-	GetMainCamera().getCameraRay().Update(GetMainCamera(), static_cast<float>(x), static_cast<float>(y), static_cast<float>(pipeline.Width()), static_cast<float>(pipeline.Height()));
+	GetMainCamera().getCameraRay().Update(static_cast<float>(x), static_cast<float>(y));
 	GetMainCamera().getCameraRay().press(x, y);
 
 	//should be inside input strategy which needs it(frame, moveXZ)
@@ -161,8 +161,6 @@ void eMainContextBase::InitializeGL()
 		m_cameras.emplace_back(pipeline.Width(), pipeline.Height(), 0.1f, 20.0f);
 		m_cameras[0].setDirection(glm::vec3(0.6f, -0.10f, 0.8f));
 		m_cameras[0].setPosition(glm::vec3(0.0f, 4.0f, -4.0f));
-		//init camera ray
-		GetMainCamera().getCameraRay().init(pipeline.Width(), pipeline.Height(), 0.1f, 20.0f); //@todo direction of camera normalization
 	}
 
 	for (auto& gui : externalGui)
@@ -262,7 +260,7 @@ void eMainContextBase::PaintGL()
 
 		//@todo need better design less copying
 		std::shared_ptr<std::vector<shObject>> focused_output = m_framed;
-		if (!focused_output || !(focused_output->size() > 1))
+		if (!focused_output)
 			focused_output = m_focused ? std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{ m_focused })
 			: std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{});
 
@@ -352,6 +350,12 @@ void eMainContextBase::SetFocused(const eObject* _newFocused)
 }
 
 //--------------------------------------------------------------------------------
+void eMainContextBase::SetFramed(const std::vector<shObject>& _framed)
+{
+	m_framed = std::make_shared<std::vector<shObject>>(_framed);
+}
+
+//--------------------------------------------------------------------------------
 void eMainContextBase::AddInputObserver(IInputObserver* _observer, ePriority _priority)
 {
 	m_input_controller->AddObserver(_observer, _priority);
@@ -372,25 +376,25 @@ const Texture* eMainContextBase::GetTexture(const std::string& _name) const
 //--------------------------------------------------------------------------------
 glm::mat4 eMainContextBase::GetMainCameraViewMatrix()
 {
-	return m_cameras[0].getWorldToViewMatrix();
+	return m_cameras[m_cur_camera].getWorldToViewMatrix();
 }
 
 //--------------------------------------------------------------------------------
 glm::mat4 eMainContextBase::GetMainCameraProjectionMatrix()
 {
-	return m_cameras[0].getProjectionMatrix();
+	return m_cameras[m_cur_camera].getProjectionMatrix();
 }
 
 //--------------------------------------------------------------------------------
 glm::vec3 eMainContextBase::GetMainCameraPosition() const
 {
-	return m_cameras[0].getPosition();
+	return m_cameras[m_cur_camera].getPosition();
 }
 
 //-------------------------------------------------------------------------------
 glm::vec3 eMainContextBase::GetMainCameraDirection() const
 {
-	return m_cameras[0].getDirection();
+	return m_cameras[m_cur_camera].getDirection();
 }
 
 //--------------------------------------------------------------------------------
@@ -438,6 +442,9 @@ void eMainContextBase::InitializeBuffers()
 //--------------------------------------------------------------------------------
 void eMainContextBase::InitializeModels()
 {
+	// Camera should be here in editor mode @todo ifdef EDITOR
+	modelManager->Add("Camera", (GLchar*)std::string(modelFolderPath + "Camera_v2/Camera_v2.obj").c_str());
+
 	std::ifstream infile("models.ini");
 	if (infile.is_open())
 	{
@@ -542,9 +549,35 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[0]->Add(SLIDER_FLOAT_3, "direction", &GetMainCamera().ViewDirectionRef());
 	std::function<void()> add_camera_callback = [this]()
 	{
-		m_cameras.push_back(Camera(pipeline.Width(), pipeline.Height(),
-															 0.1f, 10.0f));
+		m_cameras.emplace_back(pipeline.Width(), pipeline.Height(), 0.1f, 10.0f);
 		m_cameras.back().SetVisualiseFrustum(true);
+		externalGui[0]->Add(GAME, "Game", (void*)&(*this));
+		externalGui[0]->Add(CAMERA, "Camera second", &m_cameras.back());
+		std::function<void()> switch_camera_callback = [this]()
+		{
+			if (m_cur_camera == 0)
+				m_cur_camera = 1;
+			else
+				m_cur_camera = 0;
+		};
+		externalGui[0]->Add(BUTTON, "Switch Camera", &switch_camera_callback);
+		Material material;
+		material.albedo = glm::vec3(0.8f, 0.0f, 0.0f);
+		material.ao = 1.0f;
+		material.roughness = 0.5;
+		material.metallic = 0.5;
+		material.emissive_texture_id = Texture::GetTexture1x1(TColor::BLACK).id;
+		material.use_albedo = false;
+		material.use_metalic = false;
+		material.use_roughness = false;
+		material.use_normal = true;
+		ObjectFactoryBase factory(animationManager.get());
+		m_camera_obj = factory.CreateObject(modelManager->Find("Camera"), eObject::RenderType::PBR, "Camera1");
+		m_camera_obj->SetScript(new CameraSecondScript(&m_cameras.back(), this));
+		m_camera_obj->GetTransform()->setScale(glm::vec3{ 0.01f, 0.01f, 0.01f });
+		for (auto& mesh : m_camera_obj->GetModel()->Get3DMeshes())
+			const_cast<I3DMesh*>(mesh)->SetMaterial(material);
+		m_objects.push_back(m_camera_obj);
 	};
 	externalGui[0]->Add(BUTTON, "Add camera", &add_camera_callback);
 
@@ -865,7 +898,7 @@ Camera& eMainContextBase::GetMainCamera()
 	if (m_cameras.empty())
 		throw std::logic_error("main camera was deleted!");
 
-	return m_cameras[0];
+	return m_cameras[m_cur_camera];
 }
 
 //----------------------------------------------------------------

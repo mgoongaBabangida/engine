@@ -13,50 +13,38 @@ namespace dbb
 {
 
 	//-------------------------------------------------------------------------------
-	CameraRay::CameraRay(float w, float h, float n, float f, float pers_angle)
-		: width(w),
-		  height(h),
-		  near_plane(n),
-		  far_plane(f),
-		  perspective_angle_degrees(pers_angle)
+	CameraRay::CameraRay(Camera& _camera)
+		: m_camera(_camera)
 	{}
 
 	//------------------------------------------------------------------------------------------------
-	void CameraRay::init(float _width, float _height, float _near, float _far, float _pers_angle)
-	{
-		width = _width;
-		height = _height;
-		near_plane = _near;
-		far_plane = _far;
-		perspective_angle_degrees = _pers_angle;
-	}
-
-	//------------------------------------------------------------------------------------------------
-	void CameraRay::Update(Camera& camera, float click_x, float click_y, float w, float h)
+	void CameraRay::Update(float click_x, float click_y)
 	{
 		//glm::quat rot = Transform::RotationBetweenVectors(glm::vec3(0.0f, 0.0f, 1.0f), camera.getDirection()); //?
 		//this->transform.setRotation(rot);
-		this->transform.billboard(camera.getDirection());
-		this->transform.setTranslation(camera.getPosition());
-		this->width = w;
-		this->height = h;
+		const Camera& camera = m_camera.get();
+		this->m_transform.billboard(camera.getDirection());
+		this->m_transform.setTranslation(camera.getPosition());
+		float w = camera.getWidth();
+		float h = camera.getHeight();
 
-		float XOffsetCoef = click_x / width;
-		float YOffsetCoef = click_y / height;
-		float heightN = 2 * tan(glm::radians(perspective_angle_degrees / 2)) * near_plane;  //? glm::radians?
-		float heightF = 2 * tan(glm::radians(perspective_angle_degrees / 2)) * far_plane;   //?
-		float widthN = heightN* (width / height);
-		float widthF = heightF* (width / height);
+		float XOffsetCoef = click_x / w;
+		float YOffsetCoef = click_y / h;
 
-		glm::vec3 dot1 = glm::vec3(widthN / 2 - XOffsetCoef * widthN, heightN / 2 - YOffsetCoef * heightN, near_plane);
-		glm::vec3 dot2 = glm::vec3(widthF / 2 - XOffsetCoef * widthF, heightF / 2 - YOffsetCoef * heightF, far_plane);  // plus or minus Z ?
+		float heightN = 2 * tan(glm::radians(camera.getZoom() / 2)) * camera.getNearPlane();  //? glm::radians?
+		float heightF = 2 * tan(glm::radians(camera.getZoom() / 2)) * camera.getFarPlane();   //?
+		float widthN = heightN * (camera.getWidth() / camera.getHeight());
+		float widthF = heightF * (camera.getWidth() / camera.getHeight());
+
+		glm::vec3 dot1 = glm::vec3(widthN / 2 - XOffsetCoef * widthN, heightN / 2 - YOffsetCoef * heightN, camera.getNearPlane());
+		glm::vec3 dot2 = glm::vec3(widthF / 2 - XOffsetCoef * widthF, heightF / 2 - YOffsetCoef * heightF, camera.getFarPlane());  // plus or minus Z ?
 
 		glm::vec3 dir = dot2 - dot1;
-		m_line.M = transform.getModelMatrix() * glm::vec4(dot1, 1.0f); //origin
-		m_line.p = glm::mat3(transform.getRotation()) * dir;  //direction
+		m_line.M = m_transform.getModelMatrix() * glm::vec4(dot1, 1.0f); //origin
+		m_line.p = glm::mat3(m_transform.getRotation()) * dir;  //direction
 
-		dot1 = transform.getModelMatrix()* glm::vec4(dot1, 1.0f);
-		dot2 = transform.getModelMatrix()* glm::vec4(dot2, 1.0f);
+		dot1 = m_transform.getModelMatrix()* glm::vec4(dot1, 1.0f);
+		dot2 = m_transform.getModelMatrix()* glm::vec4(dot2, 1.0f);
 	}
 
 	//------------------------------------------------------------------------------------------------
@@ -106,16 +94,18 @@ namespace dbb
 	}
 
 	//------------------------------------------------------------------------------------------------
-	std::vector<shObject> CameraRay::onMove(Camera& camera, std::vector<shObject> objects, float click_x, float click_y)
+	std::vector<shObject> CameraRay::onMove(std::vector<shObject> objects, float click_x, float click_y)
 	{
+		const Camera& camera = m_camera.get();
 		press_curr = glm::vec2(click_x, click_y);
 		std::vector<shObject> ret;
 		if (pressed)
 		{
-			line  line1 = getLine(camera, press_start);
-			line  line2 = getLine(camera, press_curr);
-			line  line3 = getLine(camera, glm::vec2(press_start.x, press_curr.y));
-			line  line4 = getLine(camera, glm::vec2(press_curr.x, press_start.y));
+			line  line1 = _getLine(press_start);
+			line  line2 = _getLine(press_curr);
+			line  line3 = _getLine(glm::vec2(press_start.x, press_curr.y));
+			line  line4 = _getLine(glm::vec2(press_curr.x, press_start.y));
+
 			plane left(line1.M, line3.M, line1.M + line1.p);
 			plane right(line2.M, line4.M, line2.M + line2.p);
 			plane top(line1.M, line4.M, line1.M + line1.p);
@@ -130,9 +120,9 @@ namespace dbb
 				for (auto &extrem : extrems)
 				{
 					if (!isOpSign(left.A * extrem.x + left.B * extrem.y + left.C * extrem.z + left.D,
-						right.A * extrem.x + right.B * extrem.y + right.C * extrem.z + right.D) &&
-						!isOpSign(top.A * extrem.x + top.B * extrem.y + top.C * extrem.z + top.D,
-							bottom.A * extrem.x + bottom.B * extrem.y + bottom.C * extrem.z + bottom.D))
+											  right.A * extrem.x + right.B * extrem.y + right.C * extrem.z + right.D) &&
+						  !isOpSign(top.A * extrem.x + top.B * extrem.y + top.C * extrem.z + top.D,
+												bottom.A * extrem.x + bottom.B * extrem.y + bottom.C * extrem.z + bottom.D))
 					{
 						ret.push_back(obj);
 						break;
@@ -140,6 +130,50 @@ namespace dbb
 				}
 			}
 			//std::cout << "Grabed " << ret.size() << " Objects" << std::endl;
+		}
+		return ret;
+	}
+
+	//------------------------------------------------------------------------------------------------
+	std::vector<shObject> CameraRay::FrustumCull(std::vector<shObject> _objects)
+	{
+		const Camera& camera = m_camera.get();
+		std::vector<shObject> ret;
+
+		line  line1 = _getLine({0, 0});
+		line  line2 = _getLine({camera.getWidth(), camera.getHeight()});
+		line  line3 = _getLine(glm::vec2(0, camera.getHeight()));
+		line  line4 = _getLine(glm::vec2(camera.getWidth(), 0));
+
+		plane left(line1.M, line3.M, line1.M + line1.p);
+		plane right(line2.M, line4.M, line2.M + line2.p);
+		plane top(line1.M, line4.M, line1.M + line1.p);
+		plane bottom(line2.M, line3.M, line2.M + line2.p);
+		plane back(line1.M, line2.M, line3.M);
+		plane front(line1.M + line1.p, line2.M + line2.p, line3.M + line3.p);
+
+		for (auto& obj : _objects)
+		{
+			if (!obj->GetCollider())
+				continue;
+
+			if(obj->Name() == "GrassPlane") //@todo temp degub
+				continue;
+
+			std::vector<glm::vec3> extrems = obj->GetCollider()->GetExtrems(*(obj->GetTransform()));
+			for (auto& extrem : extrems)
+			{
+				if (!isOpSign(left.A * extrem.x + left.B * extrem.y + left.C * extrem.z + left.D,
+											right.A * extrem.x + right.B * extrem.y + right.C * extrem.z + right.D) &&
+					  !isOpSign(top.A * extrem.x + top.B * extrem.y + top.C * extrem.z + top.D,
+											bottom.A * extrem.x + bottom.B * extrem.y + bottom.C * extrem.z + bottom.D) &&
+						 isOpSign(back.A * extrem.x + back.B * extrem.y + back.C * extrem.z + back.D,
+											front.A * extrem.x + front.B * extrem.y + front.C * extrem.z + front.D))
+				{
+					ret.push_back(obj);
+					break;
+				}
+			}
 		}
 		return ret;
 	}
@@ -159,25 +193,26 @@ namespace dbb
 	}
 
 	//------------------------------------------------------------------------------------------------
-	line CameraRay::getLine(Camera& camera, glm::vec2 click)
+	line CameraRay::_getLine(glm::vec2 click)
 	{
+		const Camera& camera = m_camera.get();
 		line line;
-		this->transform.billboard(camera.getDirection());
-		this->transform.setTranslation(camera.getPosition());
+		m_transform.billboard(camera.getDirection());
+		m_transform.setTranslation(camera.getPosition());
 
-		float XOffsetCoef = click.x / width;
-		float YOffsetCoef = click.y / height;
-		float heightN = 2 * tan(glm::radians(perspective_angle_degrees / 2)) * near_plane;  //? glm::radians?
-		float heightF = 2 * tan(glm::radians(perspective_angle_degrees / 2)) * far_plane;   //?
-		float widthN = heightN* (width / height);
-		float widthF = heightF* (width / height);
+		float XOffsetCoef = click.x / camera.getWidth();
+		float YOffsetCoef = click.y / camera.getHeight();
+		float heightN = 2 * tan(glm::radians(camera.getZoom() / 2)) * camera.getNearPlane();  //? glm::radians?
+		float heightF = 2 * tan(glm::radians(camera.getZoom() / 2)) * camera.getFarPlane();   //?
+		float widthN = heightN* (camera.getWidth() / camera.getHeight());
+		float widthF = heightF* (camera.getWidth() / camera.getHeight());
 
-		glm::vec3 dot1 = glm::vec3(widthN / 2 - XOffsetCoef * widthN, heightN / 2 - YOffsetCoef * heightN, near_plane);
-		glm::vec3 dot2 = glm::vec3(widthF / 2 - XOffsetCoef * widthF, heightF / 2 - YOffsetCoef * heightF, far_plane);  // plus or minus Z ?
+		glm::vec3 dot1 = glm::vec3(widthN / 2 - XOffsetCoef * widthN, heightN / 2 - YOffsetCoef * heightN, camera.getNearPlane());
+		glm::vec3 dot2 = glm::vec3(widthF / 2 - XOffsetCoef * widthF, heightF / 2 - YOffsetCoef * heightF, camera.getFarPlane());  // plus or minus Z ?
 
 		glm::vec3 dir = dot2 - dot1;
-		line.M = transform.getModelMatrix() * glm::vec4(dot1, 1.0f); //origin
-		line.p = glm::mat3(transform.getRotation()) * dir;  //direction
+		line.M = m_transform.getModelMatrix() * glm::vec4(dot1, 1.0f); //origin
+		line.p = glm::mat3(m_transform.getRotation()) * dir;  //direction (should not be normalized to use it to find dot on far plane)
 
 		return line;
 	}

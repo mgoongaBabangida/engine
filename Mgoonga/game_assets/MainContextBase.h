@@ -70,6 +70,7 @@ public:
 
 	virtual void	SetFocused(std::shared_ptr<eObject>) override;
 	void					SetFocused(const eObject* _newFocused);
+	virtual void	SetFramed(const std::vector<shObject>&) override;
 
 	virtual void AddInputObserver(IInputObserver* _observer, ePriority _priority) override;
 	virtual void DeleteInputObserver(IInputObserver* _observer) override;
@@ -129,6 +130,7 @@ protected:
 
 	std::vector<Light>					m_lights;
 	std::vector<Camera>					m_cameras;
+	size_t											m_cur_camera = 0;
 
 	math::eClock								m_global_clock;
 
@@ -144,6 +146,7 @@ protected:
 	std::unique_ptr<InputStrategy>					m_input_strategy;
 	//debuging
 	shObject																m_light_object;
+	shObject																m_camera_obj;
 
 	bool																		m_use_guizmo = true;
 	GizmoType																m_gizmo_type = GizmoType::TRANSLATE;
@@ -156,7 +159,7 @@ protected:
   std::vector<IWindowImGui*>								externalGui;//m_
 
 	bool m_l_pressed = false;
-	bool m_framed_choice_enabled = false;
+	bool m_framed_choice_enabled = true;
 	bool m_update_hovered = false;
 	bool m_show_fps = true;
 	bool m_debug_csm = false;

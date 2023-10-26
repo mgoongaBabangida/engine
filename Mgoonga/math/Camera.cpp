@@ -4,12 +4,12 @@
 
 //---------------------------------------------------------------------
 Camera::Camera(float      _width,
-			   float	  _height,
-			   float	  _nearPlane,
-			   float	  _farPlane,
-			   float	  _perspective_ratio, 
-			   glm::vec3 _position, 
-			   glm::vec3 _viewDirection)
+							 float	  _height,
+							 float	  _nearPlane,
+							 float	  _farPlane,
+							 float	  _perspective_ratio, 
+							 glm::vec3 _position, 
+							 glm::vec3 _viewDirection)
 	: Up(0.0f, 1.0f, 0.0f)
 	, strafeDirection(1.0f, 0.0f, 0.0f)
 	, projectionOrthoMatrix(glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, _nearPlane, _farPlane))
@@ -20,12 +20,14 @@ Camera::Camera(float      _width,
 	, m_zoom(_perspective_ratio)
 	, position(_position)
 	, viewDirection(_viewDirection)
+	, camRay(*this)
 {
 	#define GLM_FORCE_RADIANS
 	projectionMatrix = glm::perspective(glm::radians(m_zoom), ((float)width) / height, nearPlane, farPlane);
 }
 
 Camera::Camera(const Camera & other)
+	: camRay(*this)
 {
 	*this = other;
 }
@@ -167,4 +169,9 @@ void Camera::moveUp()
 void Camera::moveDown() 
 {
 	position += -MOVEMENT_SPEED * Up;
+}
+
+void Camera::UpdateProjectionMatrix()
+{
+	projectionMatrix = glm::perspective(glm::radians(m_zoom), ((float)width) / height, nearPlane, farPlane);
 }

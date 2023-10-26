@@ -14,6 +14,7 @@
 
 #include <base/base.h>
 #include <math/Rigger.h>
+#include <math/Camera.h>
 #include <opengl_assets/Texture.h>
 
 #include <glm/glm/gtc/quaternion.hpp>
@@ -879,6 +880,19 @@ void eWindowImGui::Render()
           ImGui::SliderFloat("Position Z", &p_psystem->get()->GetSystemCenter().z, -10.0f, 10.0f);
           ImGui::Checkbox("Loop", &p_psystem->get()->Loop());
           ImGui::Image((void*)(intptr_t)(p_psystem->get()->GetTexture()->id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
+        }
+      }
+      break;
+      case CAMERA:
+      {
+        Camera* p_camera = static_cast<Camera*>(std::get<2>(item));
+        ImGui::Text(std::get<0>(item).c_str());
+        ImGui::SliderFloat("Near Plane", &p_camera->NearPlaneRef(), 0, 10);
+        ImGui::SliderFloat("Far Plane", &p_camera->FarPlaneRef(), 0, 50);
+        p_camera->UpdateProjectionMatrix();
+        if (ImGui::Button("Frustm Cull Debug"))
+        {
+          mp_game->SetFramed(p_camera->getCameraRay().FrustumCull(mp_game->GetObjects()));
         }
       }
       break;

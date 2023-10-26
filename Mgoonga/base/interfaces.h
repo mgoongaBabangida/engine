@@ -343,7 +343,8 @@ public:
 	virtual void AddObject(std::shared_ptr<eObject>) = 0;
 	virtual void DeleteObject(std::shared_ptr<eObject>) = 0;
 
-	virtual void SetFocused(std::shared_ptr<eObject>) = 0;
+	virtual void	SetFocused(std::shared_ptr<eObject>) = 0;
+	virtual void	SetFramed(const std::vector<std::shared_ptr<eObject>>&) = 0;
 
 	virtual const Texture* GetTexture(const std::string& _name) const = 0;
 	virtual Light& GetMainLight() = 0;

@@ -38,7 +38,8 @@ public:
 
 	bool										VisualiseFrustum() const { return m_visualise_frustum; }
 	void										SetVisualiseFrustum(bool _v) { m_visualise_frustum = _v; }
-	
+	void										UpdateProjectionMatrix();
+
 	void				moveForward();
 	void				moveBackword();
 	void				strafeLeft();	
@@ -64,10 +65,12 @@ public:
 		projectionMatrix = glm::perspective(glm::radians(m_zoom), ((float)width) / height, nearPlane, farPlane);
 	}
 
-	glm::vec3&			PositionRef()		{ return position; }
-	glm::vec3&			ViewDirectionRef()  { return viewDirection; }
-	uint32_t&				StrafeThresholdRef() { return strafeThreshold; }
-	float&					MovementSpeedRef() { return MOVEMENT_SPEED; }
+	glm::vec3&	PositionRef()		{ return position; }
+	glm::vec3&	ViewDirectionRef()  { return viewDirection; }
+	float&			NearPlaneRef() { return nearPlane; }
+	float&			FarPlaneRef() { return farPlane; }
+	uint32_t&		StrafeThresholdRef() { return strafeThreshold; }
+	float&			MovementSpeedRef() { return MOVEMENT_SPEED; }
 
 protected:
 	glm::vec3			position;
@@ -78,15 +81,17 @@ protected:
 	glm::mat3			rotationMatrix;
 	float					MOVEMENT_SPEED = 0.05f;
 
-	dbb::CameraRay camRay;
-
 	glm::mat4		projectionMatrix;
 	glm::mat4		projectionOrthoMatrix;
+
 	uint32_t		width;
 	uint32_t		height;
 	float				nearPlane;
 	float				farPlane;
 	float				m_zoom = 60.0f;
+
+	dbb::CameraRay camRay;
+
 	uint32_t		strafeThreshold = 5;
 	bool				m_visualise_frustum = false;
 };
