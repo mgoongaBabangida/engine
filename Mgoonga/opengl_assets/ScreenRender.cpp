@@ -24,6 +24,7 @@ void eScreenRender::Render(glm::vec2 _top_left, glm::vec2 _right_botom,
 	glUseProgram(screenShader.ID());
 	glUniform1i(frameLoc, GL_FALSE);
   glUniform1i(blendLoc, GL_FALSE);
+	glUniform1i(kernelLoc, GL_FALSE);
 	screenMesh->UpdateFrame(_top_left.x,			_top_left.y,				_right_botom.x,			_right_botom.y,
 													_tex_top_left.x, _tex_right_botom.y,	_tex_right_botom.x,	_tex_top_left.y,
 													viewport_width, viewport_height);
@@ -38,9 +39,11 @@ void eScreenRender::RenderContrast(const Camera& camera, float blur_coef)
   glUniform1f(blurCoefLoc, blur_coef);
 	glUniform1i(frameLoc, GL_FALSE);
 	glUniform1i(blendLoc, GL_TRUE);
+
 	screenShader.SetUniformData("hdr_exposure", m_exposure);
 	screenShader.SetUniformData("tone_mapping", m_tone_mapping);
 	screenShader.SetUniformData("gamma_correction", m_gamma_correction);
+
 	screenMesh->SetViewPortToDefault();
 	screenMesh->Draw();
 	glUniform1i(blendLoc, GL_FALSE);
@@ -70,6 +73,7 @@ void eScreenRender::RenderKernel()
 //---------------------------------------------------------------
 void eScreenRender::SetRenderingFunction(int32_t _function)
 {
+	glUseProgram(screenShader.ID());
 	if(_function == 0)
 	{
 		GLuint DefaultRendering = glGetSubroutineIndex(screenShader.ID(), GL_FRAGMENT_SHADER, "DefaultColor");
@@ -84,5 +88,10 @@ void eScreenRender::SetRenderingFunction(int32_t _function)
 	{
 		GLuint GreyKernelRendering = glGetSubroutineIndex(screenShader.ID(), GL_FRAGMENT_SHADER, "GreyKernelColor");
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &GreyKernelRendering);
+	}
+	else if (_function == 3)
+	{
+		GLuint BlendOnMaskRendering = glGetSubroutineIndex(screenShader.ID(), GL_FRAGMENT_SHADER, "MaskBlendColor");
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &BlendOnMaskRendering);
 	}
 }

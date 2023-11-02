@@ -34,7 +34,7 @@ void GUIController::Initialize()
 	m_game->AddGUI(menu);
 	m_game->AddInputObserver(menu.get(), MONOPOLY);
 
-	//inverted logic for y-axis makes it confusing
+	//@todo inverted logic for y-axis makes it confusing
 	m_buttons.push_back(dbb::Rect{ glm::vec2{260 + pos_x, 510 - pos_y}, glm::vec2{90, 35} });
 	m_buttons.push_back(dbb::Rect{ glm::vec2{260 + pos_x, 450 - pos_y}, glm::vec2{95, 40} });
 	m_buttons.push_back(dbb::Rect{ glm::vec2{260 + pos_x, 380 - pos_y}, glm::vec2{90, 35} });

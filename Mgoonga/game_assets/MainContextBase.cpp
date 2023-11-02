@@ -618,6 +618,13 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[1]->Add(CHECKBOX, "SSAO", &pipeline.GetSSAOEnabledRef());
 	externalGui[1]->Add(SLIDER_FLOAT, "SSAO Threshold", &pipeline.GetSaoThresholdRef());
 	externalGui[1]->Add(SLIDER_FLOAT, "SSAO Strength", &pipeline.GetSaoStrengthRef());
+	externalGui[1]->Add(CHECKBOX, "SSR", &pipeline.GetSSREnabledRef());
+	externalGui[1]->Add(SLIDER_FLOAT, "Step", &pipeline.Step());
+	externalGui[1]->Add(SLIDER_FLOAT, "MinRayStep", &pipeline.MinRayStep());
+	externalGui[1]->Add(SLIDER_FLOAT, "Metallic", &pipeline.Metallic());
+	externalGui[1]->Add(SLIDER_INT_NERROW, "NumBinarySearchSteps", &pipeline.NumBinarySearchSteps());
+	externalGui[1]->Add(SLIDER_FLOAT, "ReflectionSpecularFalloffExponent", &pipeline.ReflectionSpecularFalloffExponent());
+	externalGui[1]->Add(SLIDER_FLOAT_LARGE, "K", &pipeline.K());
 	externalGui[1]->Add(CHECKBOX, "Shadows", &pipeline.ShadowingRef());
 
 	std::function<void()> emit_partilces_callback = [this]()
@@ -653,6 +660,9 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[1]->Add(TEXTURE, "Gaussian buffer", (void*)pipeline.GetGausian2BufferTexture().id);
 	externalGui[1]->Add(TEXTURE, "Bright filter buffer", (void*)pipeline.GetBrightFilter().id);
 	externalGui[1]->Add(TEXTURE, "SSAO buffer", (void*)pipeline.GetSSAO().id);
+	externalGui[1]->Add(TEXTURE, "SSR buffer", (void*)pipeline.GetSSRTexture().id);
+	externalGui[1]->Add(TEXTURE, "SSR buffer blur", (void*)pipeline.GetSSRWithScreenTexture().id);
+	externalGui[1]->Add(TEXTURE, "SSR Mask", (void*)pipeline.GetSSRTextureScreenMask().id);
 	externalGui[1]->Add(TEXTURE, "Deffered Pos", (void*)pipeline.GetDefferedOne().id);
 	externalGui[1]->Add(TEXTURE, "Deffered Norm", (void*)pipeline.GetDefferedTwo().id);
 	externalGui[1]->Add(TEXTURE, "LUT", (void*)pipeline.GetLUT().id);

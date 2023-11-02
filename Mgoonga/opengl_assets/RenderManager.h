@@ -27,6 +27,7 @@
 #include "IBLRender.h"
 #include "CSMRender.h"
 #include "BloomRender.h"
+#include "ScreenSpaceReflectionRender.h"
 
 //----------------------------------------------------------------------------------------------
 class eRenderManager
@@ -77,6 +78,7 @@ private:
 	eIBLRender* IBLRender();
 	eCSMRender* CSMRender();
 	eBloomRenderer* BloomRenderer();
+	eScreenSpaceReflectionRender* SSRRenderer();
 
 private:
 	std::unique_ptr<eWaterRender>									m_waterRender;
@@ -101,6 +103,7 @@ private:
 	std::unique_ptr<eIBLRender>										m_iblRender;
 	std::unique_ptr<eCSMRender>										m_csmRender;
 	std::unique_ptr<eBloomRenderer>								m_blomRender;
+	std::unique_ptr<eScreenSpaceReflectionRender>	m_ssrRender;;
 
 	std::string							folderPath;
 	std::vector<ShaderInfo>	shaders;

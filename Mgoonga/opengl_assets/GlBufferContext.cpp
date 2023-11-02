@@ -5,24 +5,27 @@ void eGlBufferContext::BufferInit(eBuffer _buffer, unsigned int _width, unsigned
 {
 	switch (_buffer)
 	{
-		case eBuffer::BUFFER_DEFAULT:					defaultFBO.Init(_width, _height);					break;
-		case eBuffer::BUFFER_SHADOW_DIR:			depthDirFBO.Init(_width, _height, false);	break;
-		case eBuffer::BUFFER_SHADOW_CUBE_MAP:	depthCubeFBO.Init(_width, _height, true);	break;
-		case eBuffer::BUFFER_SHADOW_CSM:			depthCSMFBO.InitCSM(_width, _height, 5);	break; //@todo layers
-		case eBuffer::BUFFER_BRIGHT_FILTER:		brightFilterFBO.Init(_width, _height);		break;
-		case eBuffer::BUFFER_GAUSSIAN_ONE:		gausian1FBO.Init(_width, _height);				break;
-		case eBuffer::BUFFER_GAUSSIAN_TWO:		gausian2FBO.Init(_width, _height);				break;
-		case eBuffer::BUFFER_REFLECTION:			reflectionFBO.Init(_width, _height);			break;
-		case eBuffer::BUFFER_REFRACTION:			refractionFBO.Init(_width, _height);			break;
-		case eBuffer::BUFFER_SCREEN:					screenFBO.Init(_width, _height);					break;
-		case eBuffer::BUFFER_MTS:							mtsFBO.Init(_width, _height, true);				break;
-		case eBuffer::BUFFER_DEFFERED:				gFBO.Init(_width, _height);								break;
-		case eBuffer::BUFFER_SQUERE:					squereFBO.Init(_width, _height);					break; // assert width == height
-		case eBuffer::BUFFER_SSAO:						ssaoFBO.Init(_width, _height);						break;
-		case eBuffer::BUFFER_SSAO_BLUR:				ssaoBlurFBO.Init(_width, _height);				break;
-		case eBuffer::BUFFER_IBL_CUBEMAP:			iblCubemapFBO.Init(_width);								break;
-		case eBuffer::BUFFER_IBL_CUBEMAP_IRR: iblCubemapIrrFBO.Init(_width);						break;
-		case eBuffer::BUFFER_BLOOM:						bloomFBO.Init(_width, _height, 5);				break; //@todo magic number
+		case eBuffer::BUFFER_DEFAULT:					defaultFBO.Init(_width, _height);							break;
+		case eBuffer::BUFFER_SHADOW_DIR:			depthDirFBO.Init(_width, _height, false);			break;
+		case eBuffer::BUFFER_SHADOW_CUBE_MAP:	depthCubeFBO.Init(_width, _height, true);			break;
+		case eBuffer::BUFFER_SHADOW_CSM:			depthCSMFBO.InitCSM(_width, _height, 5);			break; //@todo layers
+		case eBuffer::BUFFER_BRIGHT_FILTER:		brightFilterFBO.Init(_width, _height);				break;
+		case eBuffer::BUFFER_GAUSSIAN_ONE:		gausian1FBO.Init(_width, _height);						break;
+		case eBuffer::BUFFER_GAUSSIAN_TWO:		gausian2FBO.Init(_width, _height);						break;
+		case eBuffer::BUFFER_REFLECTION:			reflectionFBO.Init(_width, _height);					break;
+		case eBuffer::BUFFER_REFRACTION:			refractionFBO.Init(_width, _height);					break;
+		case eBuffer::BUFFER_SSR:							ssrFBO.Init(_width, _height);									break;
+		case eBuffer::BUFFER_SSR_BLUR:				ssrblurFBO.Init(_width, _height);							break;
+		case eBuffer::BUFFER_SCREEN:					screenFBO.Init(_width, _height, false, true);	break;
+		case eBuffer::BUFFER_MTS:							mtsFBO.Init(_width, _height, true);						break;
+		case eBuffer::BUFFER_DEFFERED:				gFBO.Init(_width, _height);										break;
+		case eBuffer::BUFFER_SQUERE:					squereFBO.Init(_width, _height);							break; // assert width == height
+		case eBuffer::BUFFER_SSAO:						ssaoFBO.Init(_width, _height);								break;
+		case eBuffer::BUFFER_SSAO_BLUR:				ssaoBlurFBO.Init(_width, _height);						break;
+		case eBuffer::BUFFER_IBL_CUBEMAP:			iblCubemapFBO.Init(_width);										break;
+		case eBuffer::BUFFER_IBL_CUBEMAP_IRR: iblCubemapIrrFBO.Init(_width);								break;
+		case eBuffer::BUFFER_BLOOM:						bloomFBO.Init(_width, _height, 5);						break; //@todo magic number
+		case eBuffer::BUFFER_SCREEN_WITH_SSR: screenSsrFBO.Init(_width, _height);						break;
 	}
 }
 
@@ -48,6 +51,9 @@ void eGlBufferContext::EnableWrittingBuffer(eBuffer _buffer)
 		case eBuffer::BUFFER_IBL_CUBEMAP:				iblCubemapFBO.BindForWriting();			break;
 		case eBuffer::BUFFER_IBL_CUBEMAP_IRR:		iblCubemapIrrFBO.BindForWriting();	break;
 		case eBuffer::BUFFER_BLOOM:							bloomFBO.BindForWriting();					break;
+		case eBuffer::BUFFER_SSR:								ssrFBO.BindForWriting();						break;
+		case eBuffer::BUFFER_SSR_BLUR:					ssrblurFBO.BindForWriting();				break;
+		case eBuffer::BUFFER_SCREEN_WITH_SSR:		screenSsrFBO.BindForWriting();			break;
 	}
 }
 
@@ -75,6 +81,10 @@ void eGlBufferContext::EnableReadingBuffer(eBuffer _buffer, GLenum _slot)
 		case eBuffer::BUFFER_IBL_CUBEMAP:				iblCubemapFBO.BindForReading(_slot);			break;
 		case eBuffer::BUFFER_IBL_CUBEMAP_IRR:		iblCubemapIrrFBO.BindForReading(_slot);		break;
 		case eBuffer::BUFFER_BLOOM:							bloomFBO.BindForReading(_slot);						break;
+		case eBuffer::BUFFER_SSR:								ssrFBO.BindForReading(_slot);							break;
+		case eBuffer::BUFFER_SSR_BLUR:					ssrblurFBO.BindForReading(_slot);					break;
+		case eBuffer::BUFFER_SCREEN_MASK:				screenFBO.BindForReadingMask(_slot);			break;
+		case eBuffer::BUFFER_SCREEN_WITH_SSR:		screenSsrFBO.BindForReading(_slot);				break;
 	}
 }
 
@@ -85,6 +95,7 @@ GLuint eGlBufferContext::GetRboID(eBuffer _buffer)
 		case eBuffer::BUFFER_IBL_CUBEMAP:				return iblCubemapFBO.RboID();
 			//@todo all other
 			throw;
+			return -1;
 	}
 }
 
@@ -112,6 +123,10 @@ Texture eGlBufferContext::GetTexture(eBuffer _buffer)
 		case eBuffer::BUFFER_IBL_CUBEMAP:				return iblCubemapFBO.GetTexture();
 		case eBuffer::BUFFER_IBL_CUBEMAP_IRR:		return iblCubemapIrrFBO.GetTexture();
 		case eBuffer::BUFFER_BLOOM:							return bloomFBO.GetTexture();
+		case eBuffer::BUFFER_SSR:								return ssrFBO.GetTexture();
+		case eBuffer::BUFFER_SSR_BLUR:					return ssrblurFBO.GetTexture();
+		case eBuffer::BUFFER_SCREEN_MASK:				return screenFBO.GetTextureMask();
+		case eBuffer::BUFFER_SCREEN_WITH_SSR:		return screenSsrFBO.GetTexture();
 	}
 	return Texture();/*?*/
 }
@@ -151,6 +166,10 @@ GLuint eGlBufferContext::GetId(eBuffer _buffer)
 	case eBuffer::BUFFER_IBL_CUBEMAP:				return iblCubemapFBO.ID();
 	case eBuffer::BUFFER_IBL_CUBEMAP_IRR:		return iblCubemapIrrFBO.ID();
 	case eBuffer::BUFFER_BLOOM:							return bloomFBO.ID();
+	case eBuffer::BUFFER_SSR:								return ssrFBO.ID();
+	case eBuffer::BUFFER_SSR_BLUR:					return ssrblurFBO.ID();
+	case eBuffer::BUFFER_SCREEN_WITH_SSR:		return screenSsrFBO.ID();
+	case eBuffer::BUFFER_SCREEN_MASK:				return screenFBO.ID();
 	}
 	assert("buffer is not finished");
 	throw;
@@ -182,6 +201,10 @@ glm::ivec2 eGlBufferContext::GetSize(eBuffer _buffer)
 	case eBuffer::BUFFER_IBL_CUBEMAP:				return iblCubemapFBO.Size();
 	case eBuffer::BUFFER_IBL_CUBEMAP_IRR:		return iblCubemapIrrFBO.Size();
 	case eBuffer::BUFFER_BLOOM:							return bloomFBO.Size();
+	case eBuffer::BUFFER_SSR:								return ssrFBO.Size();
+	case eBuffer::BUFFER_SSR_BLUR:					return ssrblurFBO.Size();
+	case eBuffer::BUFFER_SCREEN_WITH_SSR:		return screenSsrFBO.Size();
+	case eBuffer::BUFFER_SCREEN_MASK:				return screenFBO.Size();
 	}
 	assert("buffer is not finished");
 	throw;

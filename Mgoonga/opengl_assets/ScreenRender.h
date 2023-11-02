@@ -24,6 +24,7 @@ public:
 	bool& GetGammaCorrection() { return m_gamma_correction; }
 
 	void SetRenderingFunction(int32_t);
+
 	void SetTexture(Texture t)			    { screenMesh->SetTextureOne(t); }
 	void SetTextureContrast(Texture t)	{ screenMesh->SetTextureTwo(t); }
 	void SetTextureMask(Texture t)			{ screenMesh->SetTextureThree(t); }

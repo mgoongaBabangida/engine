@@ -68,6 +68,7 @@ public:
 	bool& GetSkyNoiseOnRef() { return sky_noise; }
 	bool& GetOutlineFocusedRef() { return outline_focused; }
 	bool& GetSSAOEnabledRef() { return ssao; }
+	bool& GetSSREnabledRef() { return ssr; }
 	bool& GetRotateSkyBoxRef();
 	float& GetSaoThresholdRef();
 	float& GetSaoStrengthRef();
@@ -98,6 +99,18 @@ public:
 	//CSM
 	float& ZMult();
 
+	//SSR
+	float& Step();
+	float& MinRayStep();
+	float& MaxSteps();
+	int& NumBinarySearchSteps();
+	float& ReflectionSpecularFalloffExponent();
+
+	float& Metallic();
+	float& Spec();
+	glm::vec4& Scale();
+	float& K();
+
 	glm::vec4 debug_float = {0.0f,0.0f,0.0f,0.0f};
 
 	Texture GetDefaultBufferTexture() const;
@@ -121,6 +134,9 @@ public:
 	Texture GetCSMMapLayer4() const;
 	Texture GetCSMMapLayer5() const;
 	Texture GetBloomTexture() const;
+	Texture GetSSRTexture() const;
+	Texture GetSSRWithScreenTexture() const;
+	Texture GetSSRTextureScreenMask() const;
 
 	void DumpCSMTextures() const;
 
@@ -142,6 +158,7 @@ protected:
 	void			RenderGui(std::vector<std::shared_ptr<GUI>>&, const Camera&);
 	void			RenderPBR(const Camera&, const Light& _light, std::vector<shObject> _objs);
 	void			RenderSSAO(const Camera&, const Light&, std::vector<shObject>&);
+	void			RenderSSR(const Camera& _camera);
 	void			RenderIBL(const Camera& _camera);
 	void			RenderBloom();
 
@@ -158,6 +175,7 @@ protected:
 	bool			bezier_curve = true;
 	bool			outline_focused = true;
 	bool			ssao = false;
+	bool			ssr = false;
 	bool			m_pb_bloom = false;
 	float     blur_coef = 0.5f;
 

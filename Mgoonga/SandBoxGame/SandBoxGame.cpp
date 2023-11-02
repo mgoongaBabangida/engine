@@ -183,8 +183,8 @@ void eSandBoxGame::InitializeModels()
 			t.type = "texture_normal";
 			const_cast<I3DMesh*>(mesh)->AddTexture(&t);
 			mesh->GetMaterial()->use_normal = true;
-			const_cast<I3DMesh*>(mesh)->calculatedTangent();
-			const_cast<I3DMesh*>(mesh)->ReloadVertexBuffer();
+			/*const_cast<I3DMesh*>(mesh)->calculatedTangent();
+			const_cast<I3DMesh*>(mesh)->ReloadVertexBuffer();*/
 		}
 	}
 

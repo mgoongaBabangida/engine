@@ -26,7 +26,11 @@ enum class eBuffer
 	BUFFER_SSAO_BLUR,
 	BUFFER_IBL_CUBEMAP,
 	BUFFER_IBL_CUBEMAP_IRR,
-	BUFFER_BLOOM
+	BUFFER_BLOOM,
+	BUFFER_SSR,
+	BUFFER_SSR_BLUR,
+	BUFFER_SCREEN_MASK,
+	BUFFER_SCREEN_WITH_SSR
 };
 
 //---------------------------------------------------------------------------
@@ -79,4 +83,7 @@ private:
 	CubemapFBO		 iblCubemapFBO;
 	CubemapFBO		 iblCubemapIrrFBO;
 	BloomFBO			 bloomFBO;
+	eColorFBO			 ssrFBO;
+	eColorFBO			 ssrblurFBO;
+	eColorFBO		   screenSsrFBO;
 };

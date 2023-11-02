@@ -44,6 +44,14 @@ subroutine(ColorCalculationPtr) vec4 DefaultColor()
  return texture(screenTexture, TexCoords);
 }
 
+subroutine(ColorCalculationPtr) vec4 MaskBlendColor()
+{
+	vec4 maincol = texture(screenTexture, TexCoords);
+	vec4 contrastcol = texture(contrastTexture, TexCoords);
+	float maskcol = texture(alphaMask, TexCoords).r;
+	return contrastcol * maskcol + maincol * (1 - maskcol);
+}
+
 void main()
 {
 	vec4 col;

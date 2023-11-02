@@ -1,6 +1,7 @@
 #version 430 core
 
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
+layout(location = 1) out float mask;
 
 in vec2 Texcoord;
 in vec3 thePosition; //WorldPos
@@ -133,6 +134,7 @@ void main()
 	color.rgb += (emissive_color * emission_strength);
 	
     FragColor = vec4(color, 1.0);
+    mask = 1.0f - roughness_f;
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)

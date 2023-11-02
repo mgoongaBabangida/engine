@@ -78,9 +78,12 @@ void eOpenGlRenderPipeline::InitializeBuffers()
 {
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFAULT, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SCREEN, width, height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SCREEN_WITH_SSR, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_MTS, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_REFLECTION, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_REFRACTION, width, height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SSR, width, height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SSR_BLUR, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW_DIR, width*2, height*2);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW_CUBE_MAP, width*2, height*2);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW_CSM, width * 2, height * 2);
@@ -195,6 +198,51 @@ float& eOpenGlRenderPipeline::ZMult()
 	return renderManager->CSMRender()->ZMult();
 }
 
+float& eOpenGlRenderPipeline::Step()
+{
+	return renderManager->SSRRenderer()->Step();
+}
+
+float& eOpenGlRenderPipeline::MinRayStep()
+{
+	return renderManager->SSRRenderer()->MinRayStep();
+}
+
+float& eOpenGlRenderPipeline::MaxSteps()
+{
+	return renderManager->SSRRenderer()->MaxSteps();
+}
+
+int& eOpenGlRenderPipeline::NumBinarySearchSteps()
+{
+	return renderManager->SSRRenderer()->NumBinarySearchSteps();
+}
+
+float& eOpenGlRenderPipeline::ReflectionSpecularFalloffExponent()
+{
+	return renderManager->SSRRenderer()->ReflectionSpecularFalloffExponent();
+}
+
+float& eOpenGlRenderPipeline::Metallic()
+{
+	return renderManager->SSRRenderer()->Metallic();
+}
+
+float& eOpenGlRenderPipeline::Spec()
+{
+	return renderManager->SSRRenderer()->Spec();
+}
+
+glm::vec4& eOpenGlRenderPipeline::Scale()
+{
+	return renderManager->SSRRenderer()->Scale();
+}
+
+float& eOpenGlRenderPipeline::K()
+{
+	return renderManager->SSRRenderer()->K();
+}
+
 //-----------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vector<shObject>> _objects,
 																				std::vector<Camera>& _cameras,
@@ -261,13 +309,21 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
   glDisable(GL_CLIP_DISTANCE0);
 
 	// SSAO
-	if (ssao)
+	if (ssao || ssr)
 	{
-		RenderSSAO(_camera, _light, phong_pbr_objects);
-		glActiveTexture(GL_TEXTURE7);
-		glBindTexture(GL_TEXTURE_2D, eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SSAO_BLUR).id);
+		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFFERED);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		renderManager->SSAORender()->RenderGeometry(_camera, _light, phong_pbr_objects);
+
+		if (ssao)
+		{
+			RenderSSAO(_camera, _light, phong_pbr_objects);
+			glActiveTexture(GL_TEXTURE7);
+			glBindTexture(GL_TEXTURE_2D, eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SSAO_BLUR).id);
+		}
 	}
-	else
+
+	if(!ssao)
 	{
 		glActiveTexture(GL_TEXTURE7);
 		glBindTexture(GL_TEXTURE_2D, Texture::GetTexture1x1(WHITE).id);
@@ -328,7 +384,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	}
 
 	//Mesh Line
-	renderManager->MeshLineRender()->Render(_camera, _light, phong_pbr_objects);
+	renderManager->MeshLineRender()->Render(_camera, _light, phong_pbr_objects); //!!!!
 
 	//Flags
 	if (flags_on) { RenderFlags(_camera, _light, flags); }
@@ -478,6 +534,32 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SCREEN);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		eGlBufferContext::GetInstance().ResolveMtsToScreen();
+
+		// screen + ssr
+		if (ssr)
+		{
+			RenderSSR(_camera);
+
+			//blur @todo blur
+			eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SSR_BLUR);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+			eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SSR, GL_TEXTURE2);
+			renderManager->SSRRenderer()->RenderSSRBlur(_camera);//@todo separate render
+
+			//@todo mix ssr with ssr blured based on roughness mask and use mixed texture
+
+			// mix ssr with screen buffer
+			eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SCREEN_WITH_SSR);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			renderManager->ScreenRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));
+			renderManager->ScreenRender()->SetTextureContrast(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SSR_BLUR));
+			renderManager->ScreenRender()->SetTextureMask(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN_MASK));
+			renderManager->ScreenRender()->SetRenderingFunction(GUI::RenderFunc::MaskBlend);
+			renderManager->ScreenRender()->Render({ 0,0 }, { width, height },
+																						{ 0,height }, { width, 0 }, //@todo y is inverted
+																						(float)width, (float)height);
+		}
+
 		Texture contrast;
 		if (m_pb_bloom)//Physicly Based Bloom
 		{
@@ -718,7 +800,10 @@ void eOpenGlRenderPipeline::RenderBlur(const Camera& _camera)
 
 void eOpenGlRenderPipeline::RenderContrast(const Camera& _camera, const Texture& _contrast)
 {
-	renderManager->ScreenRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));
+	if(ssr)
+		renderManager->ScreenRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN_WITH_SSR));
+	else
+		renderManager->ScreenRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));
 	renderManager->ScreenRender()->SetTextureContrast( _contrast);
 	renderManager->ScreenRender()->RenderContrast(_camera, blur_coef);
 }
@@ -779,9 +864,6 @@ void eOpenGlRenderPipeline::RenderPBR(const Camera& _camera, const Light& _light
 //-------------------------------------------------------
 void eOpenGlRenderPipeline::RenderSSAO(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
 {
-	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFFERED);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	renderManager->SSAORender()->RenderGeometry(_camera, _light, _objects);
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SSAO);
 	glClear(GL_COLOR_BUFFER_BIT);
 	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_DEFFERED, GL_TEXTURE2);
@@ -790,7 +872,19 @@ void eOpenGlRenderPipeline::RenderSSAO(const Camera& _camera, const Light& _ligh
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SSAO_BLUR);
 	glClear(GL_COLOR_BUFFER_BIT);
 	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SSAO, GL_TEXTURE2);
-	renderManager->SSAORender()->RenderSSAOBlur(_camera);
+	renderManager->SSAORender()->RenderSSAOBlur(_camera);//@to separate render
+}
+
+//-------------------------------------------------------
+void eOpenGlRenderPipeline::RenderSSR(const Camera& _camera)
+{
+	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SSR);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_DEFFERED, GL_TEXTURE2);
+	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_DEFFERED1, GL_TEXTURE3);
+	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SCREEN_MASK, GL_TEXTURE4);
+	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SCREEN, GL_TEXTURE5);
+	renderManager->SSRRenderer()->Render(_camera);
 }
 
 //-------------------------------------------------------
@@ -936,7 +1030,7 @@ Texture eOpenGlRenderPipeline::GetBrightFilter() const
 //----------------------------------------------------
 Texture eOpenGlRenderPipeline::GetSSAO() const
 {
-	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SSAO);
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SSAO_BLUR);
 }
 
 //----------------------------------------------------
@@ -971,8 +1065,23 @@ Texture eOpenGlRenderPipeline::GetCSMMapLayer4() const{return csm_dump4;}
 Texture eOpenGlRenderPipeline::GetCSMMapLayer5() const{return csm_dump5;}
 
 Texture eOpenGlRenderPipeline::GetBloomTexture() const
-{
+{ 
 	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_BLOOM);
+}
+
+Texture eOpenGlRenderPipeline::GetSSRTexture() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SSR);
+}
+
+Texture eOpenGlRenderPipeline::GetSSRWithScreenTexture() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN_WITH_SSR);
+}
+
+Texture eOpenGlRenderPipeline::GetSSRTextureScreenMask() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN_MASK);
 }
 
 void eOpenGlRenderPipeline::DumpCSMTextures() const

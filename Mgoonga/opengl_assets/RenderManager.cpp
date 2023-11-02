@@ -27,6 +27,7 @@ eSSAORender* eRenderManager::SSAORender() { return m_SSAORender.get(); }
 eIBLRender* eRenderManager::IBLRender() { return  m_iblRender.get(); }
 eCSMRender* eRenderManager::CSMRender() {return m_csmRender.get();}
 eBloomRenderer* eRenderManager::BloomRenderer(){ return m_blomRender.get();}
+eScreenSpaceReflectionRender* eRenderManager::SSRRenderer(){return m_ssrRender.get();}
 
 //----------------------------------------------------------------------------------------------------------------
 void eRenderManager::AddParticleSystem(std::shared_ptr<IParticleSystem> system)
@@ -170,11 +171,17 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																		folderPath + "CSMGeometryShader.glsl"));
 	shader_lambda(m_csmRender.get());
 
-	//Physicly Based Bloom
+	//Physically Based Bloom
 	m_blomRender.reset(new  eBloomRenderer(folderPath + "PostProcessingVertexShader.glsl",
 																				 folderPath + "BloomFragmentDownSampling.glsl",
 																				 folderPath + "BloomFragmentUpSampling.glsl"));
 	shader_lambda(m_blomRender.get());
+
+	// Screen Space Reflection
+	m_ssrRender.reset(new  eScreenSpaceReflectionRender(folderPath + "PostProcessingVertexShader.glsl",
+																											folderPath + "SSR.glsl",
+																											folderPath + "ScreenSpaceReflactionBlur.glsl"));
+	shader_lambda(m_ssrRender.get());
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -206,6 +213,7 @@ void eRenderManager::UpdateShadersInfo()
 	shader_lambda(m_SSAORender.get());
 	shader_lambda(m_csmRender.get());
 	shader_lambda(m_blomRender.get());
+	shader_lambda(m_ssrRender.get());
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -261,6 +269,8 @@ bool eRenderManager::SetUniformData(const std::string& _renderName, const std::s
 	if (shader_lambda(m_csmRender.get()))
 		return true;
 	if (shader_lambda(m_blomRender.get()))
+		return true;
+	if (shader_lambda(m_ssrRender.get()))
 		return true;
 	return false;
 }

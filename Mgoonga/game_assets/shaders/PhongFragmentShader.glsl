@@ -1,6 +1,7 @@
 #version 460 core
 
-out vec4 outColor;
+layout (location = 0) out vec4 outColor;
+layout (location = 1) out float mask;
 
 struct Light 
 {
@@ -363,6 +364,7 @@ void main()
 
 		outColor.rgb += (emissive_color * emission_strength);
   }
+  mask = 0.0f;
 };
 
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal )

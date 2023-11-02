@@ -19,8 +19,8 @@ public:
   float& FilterRadius() { return m_filterRadius; }
 
   Shader& GetShader() { return mDownsampleShader; }
-protected:
 
+protected:
   Shader mDownsampleShader;
   Shader mUpsampleShader;
 

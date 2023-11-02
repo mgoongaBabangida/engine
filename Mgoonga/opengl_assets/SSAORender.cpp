@@ -64,6 +64,7 @@ eSSAORender::eSSAORender(const std::string& _vSG,
 
 eSSAORender::~eSSAORender()
 {
+  glDeleteTextures(1, &noiseTexture);
 }
 
 void eSSAORender::RenderGeometry(const Camera& camera, const Light& light, const std::vector<shObject>& objects)

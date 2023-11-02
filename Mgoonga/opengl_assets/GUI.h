@@ -20,7 +20,8 @@ public:
 	{
 		Default = 0,
 		CursorFollow = 1,
-		GreyKernel = 2
+		GreyKernel = 2,
+		MaskBlend = 3
 	};
 
 	GUI();
