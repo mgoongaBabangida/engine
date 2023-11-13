@@ -67,6 +67,8 @@ Texture Texture::GetTexture1x1(TColor color)
 		case GREY: return grey;
 	}
 	assert("unknown color in Texture!");
+	throw;
+	return {};
 }
 
 bool Texture::freeTexture(unsigned int _id)

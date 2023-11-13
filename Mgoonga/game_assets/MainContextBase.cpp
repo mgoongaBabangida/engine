@@ -198,7 +198,7 @@ void eMainContextBase::PaintGL()
 	{
 		int64_t tick = m_global_clock.newFrame();
 		std::map<eObject::RenderType, std::vector<shObject>> objects;
-		std::vector<shObject> phong, pbr, flags, bezier, geometry, lines;
+		std::vector<shObject> phong, pbr, flags, bezier, geometry, lines, arealighted;
 
 		if(!m_texts.empty() && m_show_fps)
 			m_texts[0]->content = { "FPS " + std::to_string(1000 / tick) };
@@ -242,6 +242,8 @@ void eMainContextBase::PaintGL()
 					flags.push_back(object);
 				else if (object->GetRenderType() == eObject::RenderType::LINES)
 					lines.push_back(object);
+				else if(object->GetRenderType() == eObject::RenderType::AREA_LIGHT_ONLY)
+					arealighted.push_back(object);
 			}
 		}
 
@@ -271,6 +273,7 @@ void eMainContextBase::PaintGL()
 		objects.insert({ eObject::RenderType::BEZIER_CURVE, bezier });
 		objects.insert({ eObject::RenderType::GEOMETRY, geometry });
 		objects.insert({ eObject::RenderType::LINES, lines });
+		objects.insert({ eObject::RenderType::AREA_LIGHT_ONLY, arealighted });
 
 		pipeline.RenderFrame(objects, m_cameras, GetMainLight(), m_guis, m_texts);
 
@@ -891,6 +894,10 @@ void eMainContextBase::_PreInitModelManager()
 		std::make_shared<MyModel>(modelManager->FindMesh("sphere"),
 														"white_sphere",
 														&Texture::GetTexture1x1(WHITE)));
+	modelManager->AddPrimitive("white_quad",
+		std::make_shared<MyModel>(modelManager->FindMesh("quad"),
+															"white_quad",
+															&Texture::GetTexture1x1(WHITE)));
 }
 
 //------------------------------------------------------------

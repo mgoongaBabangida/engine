@@ -97,6 +97,7 @@ void eSandBoxGame::InitializeModels()
 	}
 
 	shObject grassPlane = factory.CreateObject(modelManager->Find("grass_plane"), eObject::RenderType::PHONG, "GrassPlane");
+	//grassPlane->GetModel()->SetMaterial(material);
 	grassPlane->GetTransform()->setTranslation(vec3(0.0f, -2.0f, 0.0f));
 	grassPlane->GetTransform()->setScale(vec3(5.0f, 5.0f, 5.0f));
 	m_objects.push_back(grassPlane);
@@ -190,9 +191,17 @@ void eSandBoxGame::InitializeModels()
 
 	//light
 	pipeline.SetUniformData("class ePhongRender","emission_strength", 5.0f);
-	shObject hdr_object = factory.CreateObject(modelManager->Find("white_sphere"), eObject::RenderType::PHONG, "WhiteSphere");
-	hdr_object->GetTransform()->setScale(vec3(0.2f, 0.2f, 0.2f));
+	shObject hdr_object = factory.CreateObject(modelManager->Find("white_sphere"), eObject::RenderType::PHONG, "WhiteSphere"); // or "white_quad"
+	//hdr_object->GetTransform()->setScale(vec3(0.2f, 0.2f, 0.2f));
 	hdr_object->GetTransform()->setTranslation(GetMainLight().light_position);
+	m_light_object = hdr_object;
+	std::array<glm::vec4, 4> points = { // for area light
+		glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f),
+		glm::vec4(1.0f, -1.0f, 0.0f, 1.0f),
+		glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
+	GetMainLight().points = points;
+
 	Material m;
 	m.albedo_texture_id = Texture::GetTexture1x1(TColor::YELLOW).id;
 	m.use_albedo = true;

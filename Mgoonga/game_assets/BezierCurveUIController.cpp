@@ -73,7 +73,7 @@ BezierCurveUIController::BezierCurveUIController(eMainContextBase* _game, shObje
 //------------------------------------------------------
 BezierCurveUIController::~BezierCurveUIController()
 {
-  m_game->SetInputStrategy(nullptr);
+  m_game->SetInputStrategy(nullptr); //@todo bug falls while closing if exists
 }
 
 //------------------------------------------------------

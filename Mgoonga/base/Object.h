@@ -15,7 +15,8 @@ public:
 		OUTLINED,
 		GEOMETRY,
 		BEZIER_CURVE,
-		LINES
+		LINES,
+		AREA_LIGHT_ONLY
 	};
 
 	explicit eObject() {} //@todo

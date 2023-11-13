@@ -28,6 +28,7 @@
 #include "CSMRender.h"
 #include "BloomRender.h"
 #include "ScreenSpaceReflectionRender.h"
+#include "AreaLightsOnlyRender.h"
 
 //----------------------------------------------------------------------------------------------
 class eRenderManager
@@ -79,6 +80,7 @@ private:
 	eCSMRender* CSMRender();
 	eBloomRenderer* BloomRenderer();
 	eScreenSpaceReflectionRender* SSRRenderer();
+	eAreaLightsOnlyRender* AreaLightsRender();
 
 private:
 	std::unique_ptr<eWaterRender>									m_waterRender;
@@ -103,7 +105,8 @@ private:
 	std::unique_ptr<eIBLRender>										m_iblRender;
 	std::unique_ptr<eCSMRender>										m_csmRender;
 	std::unique_ptr<eBloomRenderer>								m_blomRender;
-	std::unique_ptr<eScreenSpaceReflectionRender>	m_ssrRender;;
+	std::unique_ptr<eScreenSpaceReflectionRender>	m_ssrRender;
+	std::unique_ptr<eAreaLightsOnlyRender>				m_area_lights;
 
 	std::string							folderPath;
 	std::vector<ShaderInfo>	shaders;

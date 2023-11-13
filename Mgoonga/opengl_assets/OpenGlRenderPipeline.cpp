@@ -266,8 +266,11 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	std::vector<shObject> geometry_objs = _objects.find(eObject::RenderType::GEOMETRY)->second;
 	std::vector<shObject> bezier_objs = _objects.find(eObject::RenderType::BEZIER_CURVE)->second;
 	std::vector<shObject> lines_objs = _objects.find(eObject::RenderType::LINES)->second;
+	std::vector<shObject> arealighted_objs = _objects.find(eObject::RenderType::AREA_LIGHT_ONLY)->second;
+
 	auto phong_pbr_objects = phong_objs;
 	phong_pbr_objects.insert(phong_pbr_objects.end(), pbr_objs.begin(), pbr_objs.end());
+	phong_pbr_objects.insert(phong_pbr_objects.end(), arealighted_objs.begin(), arealighted_objs.end());
 
 	//Shadow Render Pass
 	if (_light.type == eLightType::DIRECTION || _light.type == eLightType::SPOT)
@@ -381,6 +384,8 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 			[](auto& a, auto& b) { return &a < &b; });
 
 		RenderPBR(_camera, _light, not_outlined);
+
+		RenderAreaLightsOnly(_camera, _light, arealighted_objs);
 	}
 
 	//Mesh Line
@@ -723,6 +728,11 @@ void eOpenGlRenderPipeline::RenderSkyNoise(const Camera& _camera)
 void eOpenGlRenderPipeline::RenderMain(const Camera& _camera, const Light& _light, const std::vector<shObject>& _objects)
 {
 	renderManager->PhongRender()->Render(_camera, _light, _objects);
+}
+
+void eOpenGlRenderPipeline::RenderAreaLightsOnly(const Camera& _camera, const Light& _light, const std::vector<shObject>& _objects)
+{
+	renderManager->AreaLightsRender()->Render(_camera, _light, _objects);
 }
 
 void eOpenGlRenderPipeline::RenderOutlineFocused(const Camera& _camera, const Light& _light, const std::vector<shObject>& focused)

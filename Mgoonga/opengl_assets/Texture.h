@@ -69,7 +69,7 @@ struct DLL_OPENGL_ASSETS Texture
 	bool makeRandom1DTexture(unsigned int _size);
 
 	template<class GLtype>
-	bool TextureFromBuffer(GLtype* buffer, GLuint Width, GLuint Height, GLuint format= GL_RGBA, GLenum wrap = GL_CLAMP_TO_EDGE)
+	bool TextureFromBuffer(const GLtype* buffer, GLuint Width, GLuint Height, GLuint format= GL_RGBA, GLenum wrap = GL_CLAMP_TO_EDGE, GLenum minFilter = GL_LINEAR)
 	{
 		GLenum type ;
 		if (std::is_same_v<GLtype, GLfloat> == true)
@@ -95,7 +95,7 @@ struct DLL_OPENGL_ASSETS Texture
 			mChannels = 3;
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glBindTexture(GL_TEXTURE_2D, 0);
 

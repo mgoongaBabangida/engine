@@ -148,6 +148,7 @@ protected:
 	void			RenderRefraction(Camera&, const Light&, std::vector<shObject>&, std::vector<shObject>&);
 	void			RenderSkyNoise(const Camera&);
 	void			RenderMain(const Camera&, const Light&, const std::vector<shObject>&);
+	void RenderAreaLightsOnly(const Camera& _camera, const Light& _light, const std::vector<shObject>& _objects);
 	void			RenderOutlineFocused(const Camera&, const Light&, const std::vector<shObject>&);
 	void			RenderFlags(const Camera&, const Light&, std::vector<shObject>);
 	void			RenderWater(const Camera&, const Light&);
