@@ -119,14 +119,14 @@ SphereTexturedMesh::SphereTexturedMesh()
   glEnableVertexAttribArray(5);
   glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
     (GLvoid*)offsetof(Vertex, bitangent));
-  //// Vertex BoneIDs
-  //glEnableVertexAttribArray(6);
-  //glVertexAttribIPointer(6, 4, GL_INT, sizeof(Vertex),
-  //  (GLvoid*)offsetof(Vertex, boneIDs));
-  //// Vertex Weights
-  //glEnableVertexAttribArray(7);
-  //glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-  //  (GLvoid*)offsetof(Vertex, weights));
+  // Vertex BoneIDs
+  glEnableVertexAttribArray(6);
+  glVertexAttribIPointer(6, 4, GL_INT, sizeof(Vertex),
+    (GLvoid*)offsetof(Vertex, boneIDs));
+  // Vertex Weights
+  glEnableVertexAttribArray(7);
+  glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+    (GLvoid*)offsetof(Vertex, weights));
   glBindVertexArray(0);
 }
 
