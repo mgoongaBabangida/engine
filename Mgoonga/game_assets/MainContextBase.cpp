@@ -262,7 +262,7 @@ void eMainContextBase::PaintGL()
 
 		//@todo need better design less copying
 		std::shared_ptr<std::vector<shObject>> focused_output = m_framed;
-		if (!focused_output)
+		if (!focused_output || focused_output->empty())
 			focused_output = m_focused ? std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{ m_focused })
 			: std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{});
 
