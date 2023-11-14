@@ -65,7 +65,7 @@ ShootScript::~ShootScript()
 }
 
 //---------------------------------------
-bool ShootScript::OnKeyPress(uint32_t _asci)
+bool ShootScript::OnKeyPress(uint32_t _asci, KeyModifiers _modifier)
 {
   switch (_asci)
   {
@@ -132,7 +132,7 @@ void ShootScript::Update(float _tick)
 
   for (auto& bullet : m_bullets)
   {
-    if (glm::length2(m_game->GetMainCameraPosition() - bullet->GetTransform()->getTranslation()) > 100.0f) // @todo camera far plane ^ 2
+    if (glm::length2(m_game->GetMainCameraPosition() - bullet->GetTransform()->getTranslation()) > 1'000.0f) // @todo camera far plane ^ 2
     {
       m_game->DeleteObject(bullet);
       //remove erase from bullets;

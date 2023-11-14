@@ -217,7 +217,7 @@ void eSandBoxGame::InitializeModels()
 	m_global_scripts.push_back(std::make_shared<ShootScript>(this, modelManager.get()));
 	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
 
-	m_global_scripts.push_back(std::make_shared<GUIController>(this, this->pipeline, soundManager->GetSound("page_sound")));
+	m_global_scripts.push_back(std::make_shared<GUIControllerBase>(this, this->pipeline, soundManager->GetSound("page_sound")));
 	m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera()));
 
 	m_input_controller->AddObserver(this, WEAK);

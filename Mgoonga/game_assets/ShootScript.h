@@ -11,8 +11,8 @@ class DLL_GAME_ASSETS ShootScript : public IScript
 public:
   ShootScript(IGame* _game, eModelManager* _modelManager);
   virtual ~ShootScript();
-  virtual bool  OnKeyPress(uint32_t _asci);
-  virtual void	Update(float _tick);
+  virtual bool  OnKeyPress(uint32_t _asci, KeyModifiers _modifier) override;
+  virtual void	Update(float _tick) override;
   virtual void Initialize() override;
 
 protected:

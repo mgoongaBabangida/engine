@@ -10,11 +10,24 @@
 #include <opengl_assets/openglrenderpipeline.h>
 
 //-------------------------------------------------------------
-GUIController::GUIController(eMainContextBase* _game, eOpenGlRenderPipeline& _pipeline, RemSnd* _pageg_sound)
+GUIControllerBase::GUIControllerBase(eMainContextBase* _game, eOpenGlRenderPipeline& _pipeline, RemSnd* _pageg_sound)
 	: m_game(_game)
 	, m_pipeline(_pipeline)
 	, m_page_sound(_pageg_sound)
 {
+}
+
+//-------------------------------------------------------------
+void GUIControllerBase::Initialize()
+{
+	const Texture* cursor_tex = m_game->GetTexture("cursor1");
+	std::shared_ptr<GUI> cursor = std::make_shared<Cursor>(0, 0, 30, 30, m_game->Width(), m_game->Height());
+	cursor->SetTexture(*cursor_tex, { 0,0 }, { cursor_tex->mTextureWidth, cursor_tex->mTextureHeight });
+	cursor->SetTransparent(true);
+	m_game->AddGUI(cursor);
+	m_game->AddInputObserver(cursor.get(), ALWAYS);
+
+	m_game->AddInputObserver(this, ALWAYS);
 }
 
 //-------------------------------------------------------------
@@ -52,14 +65,13 @@ void GUIController::Initialize()
 			}
 		}));
 
-	const Texture* cursor_tex = m_game->GetTexture("cursor1");
-	std::shared_ptr<GUI> cursor = std::make_shared<Cursor>(0, 0, 30, 30, m_game->Width(), m_game->Height());
-	cursor->SetTexture(*cursor_tex, { 0,0 }, { cursor_tex->mTextureWidth, cursor_tex->mTextureHeight });
-	cursor->SetTransparent(true);
-	m_game->AddGUI(cursor);
-	m_game->AddInputObserver(cursor.get(), ALWAYS);
+	GUIControllerBase::Initialize();
+}
 
-	m_game->AddInputObserver(this, ALWAYS);
+//-------------------------------------------------------------
+GUIController::GUIController(eMainContextBase* _game, eOpenGlRenderPipeline& _pipeline, RemSnd* _page_sound)
+	: GUIControllerBase(_game, _pipeline, _page_sound)
+{
 }
 
 //-------------------------------------------------------------
