@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "AssimpMesh.h"
+#include "GlDrawContext.h"
 
 #include <sstream>
 
@@ -60,7 +61,7 @@ void AssimpMesh::Draw()
   _BindMaterialTextures(); // _BindRawTextures();
 	// Draw mesh
 	glBindVertexArray(this->VAO);
-	glDrawElements(GL_TRIANGLES, (GLsizei)this->indices.size(), GL_UNSIGNED_INT, 0);
+  eGlDrawContext::GetInstance().DrawElements(GL_TRIANGLES, (GLsizei)this->indices.size(), GL_UNSIGNED_INT, 0, this->name);
 	glBindVertexArray(0);
 }
 
@@ -69,7 +70,7 @@ void AssimpMesh::DrawInstanced(int32_t instances)
   _BindMaterialTextures(); // _BindRawTextures();
   // Draw mesh
   glBindVertexArray(this->VAO);
-  glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)this->indices.size(), GL_UNSIGNED_INT, (GLvoid*)(0), instances);
+  eGlDrawContext::GetInstance().DrawElementsInstanced(GL_TRIANGLES, (GLsizei)this->indices.size(), GL_UNSIGNED_INT, (GLvoid*)(0), instances, this->name);
   glBindVertexArray(0);
 }
 

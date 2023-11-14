@@ -74,6 +74,7 @@ public:
 	float& GetSaoStrengthRef();
 	bool& ShadowingRef() { return shadows; }
 	bool& PBBloomRef() { return m_pb_bloom; }
+	bool& GetMeshLineOn() { return m_mesh_line_on; }
 
 	//Phong Render
 	bool& GetDebugWhite();
@@ -110,6 +111,9 @@ public:
 	float& Spec();
 	glm::vec4& Scale();
 	float& K();
+
+	//statistic
+	uint32_t& GetDrawCalls() { return m_draw_calls; }
 
 	glm::vec4 debug_float = {0.0f,0.0f,0.0f,0.0f};
 
@@ -178,11 +182,15 @@ protected:
 	bool			ssao = false;
 	bool			ssr = false;
 	bool			m_pb_bloom = false;
-	float     blur_coef = 0.5f;
+	float			blur_coef = 0.5f;
+	bool			m_mesh_line_on = true;
 
 	bool			mousepress = true; //to draw framed objects
 	float			waterHeight = 2.0f;
 	bool			m_first_call = true;
+
+	//statistic
+	uint32_t m_draw_calls = 0;
 
 	const uint32_t  width		  = 1200;
 	const uint32_t  height		= 600;

@@ -300,6 +300,14 @@ subroutine(LightingPtr) vec3 calculateBlinnPhongFlashSpecDif(Light light, vec3 n
 
 void main()
 {   
+  if(debug_white_texcoords)
+	outColor = vec4(emission_strength,emission_strength,emission_strength,emission_strength); 
+  else if(debug_white_color)
+  {
+	outColor = vec4(1.0f,1.0f,1.0f, 1.0f);
+  }
+  else
+  {
 	// Paralax mapping
 	//vec3 tangetnViewDir   = normalize(TBN * eyePositionWorld.xyz - TBN * thePosition);
 	//vec2 fTexCoords = ParallaxMapping(Texcoord,  tangetnViewDir);
@@ -346,14 +354,6 @@ void main()
   //Diffuse and Specular
   vec3 difspec = LightingFunction(light, bNormal, thePosition, dif_texture, Texcoord);
 
-  if(debug_white_texcoords)
-	outColor = vec4(emission_strength,emission_strength,emission_strength,emission_strength); 
-  else if(debug_white_color)
-  {
-	outColor = vec4(ambientLight + difspec * shadow, 1.0);
-  }
-  else
-  {
 	outColor = vec4(ambientLight + difspec * shadow, 1.0);
   
 	vec3 emissive_color;

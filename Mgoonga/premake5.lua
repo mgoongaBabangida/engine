@@ -104,11 +104,8 @@ project "tcp_lib"
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
    
    includedirs { "./"; "../../third_party" }
-	
-   links
-   {  
-   "base" 
-   }
+
+   links { "base" }
    
    filter "configurations:Debug"
       defines { "DEBUG;_DEBUG;_WINDOWS;_USRDLL;BASE_EXPORTS" }
@@ -162,7 +159,7 @@ project "opengl_assets"
    "ILU", 
    "ILUT", 
    "OpenAl32", 
-   "SDL2_image", 
+   -------------------"SDL2_image", 
    "SDL2", 
    "SDL2main",  
    "freetype.lib",
@@ -217,7 +214,7 @@ project "sdl_assets"
    "ILU", 
    "ILUT", 
    "OpenAl32", 
-   "SDL2_image", 
+   -------------------------"SDL2_image", 
    "SDL2", 
    "SDL2main",
    "freetype.lib",
@@ -280,7 +277,7 @@ project "game_assets"
    "ILU", 
    "ILUT", 
    "OpenAl32", 
-   "SDL2_image", 
+   ---------------------------------"SDL2_image", 
    "SDL2", 
    "SDL2main",
    "freetype.lib",
@@ -332,7 +329,7 @@ project "Mgoonga"
    "ILU", 
    "ILUT", 
    "OpenAl32", 
-   "SDL2_image", 
+   -----------------------------------"SDL2_image", 
    "SDL2", 
    "SDL2main",  
    "freetype.lib",
@@ -385,7 +382,7 @@ project "AmericanTreasureGame"
    "ILU", 
    "ILUT", 
    "OpenAl32", 
-   "SDL2_image", 
+   ------------------------------------------"SDL2_image", 
    "SDL2", 
    "SDL2main",  
    "freetype.lib",
@@ -437,7 +434,7 @@ project "SandBoxGame"
    "ILU", 
    "ILUT", 
    "OpenAl32", 
-   "SDL2_image", 
+   -----------------------------------------"SDL2_image", 
    "SDL2", 
    "SDL2main",  
    "freetype.lib",

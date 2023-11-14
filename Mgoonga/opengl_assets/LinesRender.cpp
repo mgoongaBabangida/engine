@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "LinesRender.h"
+#include "GlDrawContext.h"
 
 //-----------------------------------------------------------------------------------------------------
 eLinesRender::eLinesRender(const std::string & vertexShaderPath, const std::string & fragmentShaderPath)
@@ -51,7 +52,7 @@ void eLinesRender::Render(const Camera& _camera, std::vector<const LineMesh*>& _
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 
-    glDrawElements(GL_LINES, mesh->m_indices.size(), GL_UNSIGNED_INT, 0);
+    eGlDrawContext::GetInstance().DrawElements(GL_LINES, (GLsizei)mesh->m_indices.size(), GL_UNSIGNED_INT, 0, "eLinesRender");
     glBindVertexArray(0);
   }
 }

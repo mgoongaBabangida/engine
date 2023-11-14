@@ -585,6 +585,7 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[0]->Add(BUTTON, "Add camera", &add_camera_callback);
 
 	//Pipeline
+	externalGui[1]->Add(TEXT_INT32, "Draw calls ", &pipeline.GetDrawCalls());
 	externalGui[1]->Add(CHECKBOX, "Show bounding boxes", &pipeline.GetBoundingBoxBoolRef());
 	externalGui[1]->Add(CHECKBOX, "Use Multi sampling", &pipeline.GetMultiSamplingBoolRef());
 	externalGui[1]->Add(CHECKBOX, "Sky box on", &pipeline.GetSkyBoxOnRef());
@@ -609,6 +610,7 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[1]->Add(SPIN_BOX, "IBL Map", (void*)&change_ibl_callback);
 	externalGui[1]->Add(CHECKBOX, "Water", &pipeline.GetWaterOnRef());
 	externalGui[1]->Add(CHECKBOX, "Hex", &pipeline.GetGeometryOnRef());
+	externalGui[1]->Add(CHECKBOX, "Mesh line draw", &pipeline.GetMeshLineOn());
 	externalGui[1]->Add(CHECKBOX, "Kernel", &pipeline.GetKernelOnRef());
 	externalGui[1]->Add(CHECKBOX, "Sky noise", &pipeline.GetSkyNoiseOnRef());
 	externalGui[1]->Add(CHECKBOX, "Use gizmo", &m_use_guizmo);

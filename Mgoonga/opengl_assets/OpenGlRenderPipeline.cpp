@@ -5,6 +5,7 @@
 #include "GUI.h"
 
 #include "GlBufferContext.h"
+#include "GlDrawContext.h"
 
 #include "RenderManager.h"
 #include "TextureManager.h"
@@ -389,7 +390,8 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	}
 
 	//Mesh Line
-	renderManager->MeshLineRender()->Render(_camera, _light, phong_pbr_objects); //!!!!
+	if(m_mesh_line_on)
+		renderManager->MeshLineRender()->Render(_camera, _light, phong_pbr_objects); //!!!!
 
 	//Flags
 	if (flags_on) { RenderFlags(_camera, _light, flags); }
@@ -622,6 +624,9 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	renderManager->TextRender()->RenderText(_camera, _texts, static_cast<float>(width), static_cast<float>(height));
 	glDisable(GL_BLEND);
+
+	m_draw_calls = eGlDrawContext::GetInstance().GetDrawCallsCount();
+	eGlDrawContext::GetInstance().Flush();
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 

@@ -11,6 +11,8 @@ out vec3 thePosition;
 out vec3 theNormal; 
 out vec2 Texcoord;
 out vec4 LightSpacePos;
+out vec4 LocalSpacePos;
+out vec3 LocalSpaceNormal;
 out mat3 TBN;
  
 uniform float Time;
@@ -37,6 +39,7 @@ void main()
 	 theNormal = normalize(mat3(modelToWorldMatrix)* n);
 	 Texcoord = texcoord;
 	 LightSpacePos = shadowMatrix * modelToWorldMatrix* pos;
+	 LocalSpacePos = vec4(position, 1.0f);
+	 LocalSpaceNormal = normal;
      gl_Position = MVP * pos;
- 
 } 

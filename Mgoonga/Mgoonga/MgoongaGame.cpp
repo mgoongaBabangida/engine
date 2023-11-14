@@ -4,7 +4,7 @@
 #include <base/InputController.h>
 
 #include <math/Rigger.h>
-#include <math/RigidBdy.h>
+#include <math/RigidBody.h>
 #include <math/BoxCollider.h>
 
 #include <opengl_assets/Texture.h>

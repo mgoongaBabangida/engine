@@ -17,6 +17,8 @@ eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model,
 {
 	wave_shader.installShaders(vS.c_str(), fS.c_str());
 
+	glUseProgram(wave_shader.ID());
+
 	modelToWorldMatrixUniformLocation	= glGetUniformLocation(wave_shader.ID(), "modelToWorldMatrix");
 	fullTransformationUniformLocation	= glGetUniformLocation(wave_shader.ID(), "MVP");
 	modelViewMatrixLocation						= glGetUniformLocation(wave_shader.ID(), "ModelViewMatrix");
@@ -25,7 +27,6 @@ eWaveRender::eWaveRender(std::unique_ptr<TerrainModel> model,
 	eyePositionWorldUniformLocation		= glGetUniformLocation(wave_shader.ID(), "eyePositionWorld");
 	FarPlaneUniformLocation						= glGetUniformLocation(wave_shader.ID(), "far_plane");
 
-	glUseProgram(wave_shader.ID());
 	//Light
 	lightAmbientLoc = glGetUniformLocation(wave_shader.ID(), "light.ambient");
 	lightDiffuseLoc = glGetUniformLocation(wave_shader.ID(), "light.diffuse");

@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "ShpereTexturedModel.h"
 
-#include <glew-2.1.0\include\GL\glew.h>
 #include <opengl_assets\Texture.h>
+#include "GlDrawContext.h"
 #include "MyMesh.h"
 
 //--------------------------------------------
@@ -155,7 +155,7 @@ void SphereTexturedMesh::Draw()
   glBindTexture(GL_TEXTURE_2D, m_material.emissive_texture_id);
 
   glBindVertexArray(sphereVAO);
-  glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
+  eGlDrawContext::GetInstance().DrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0, "SphereTexturedMesh");
   glBindVertexArray(0);
 }
 

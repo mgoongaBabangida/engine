@@ -2,10 +2,14 @@
  
 layout (isolines) in;
 
+out vec2 toDiscard;
+
  uniform mat4 MVP;
  
  void main()
  {
+ toDiscard = vec2(0.f,0.f);
+
  float u = gl_TessCoord.x;
  
  vec3 p0 = gl_in[0].gl_Position.xyz;

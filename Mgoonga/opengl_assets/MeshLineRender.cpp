@@ -1,9 +1,10 @@
 #include "MeshLineRender.h"
+#include "GlDrawContext.h"
 #include <math/Rigger.h>
 
 //---------------------------------------------------------------
 eMeshLineRender::eMeshLineRender(const std::string& _vS, const std::string& _fS)
-  : matrices(300)
+  : matrices(MAX_BONES)
 {
   m_shader.installShaders(_vS.c_str(), _fS.c_str());
   m_shader.GetUniformInfoFromShader();
@@ -45,7 +46,7 @@ void eMeshLineRender::Render(const Camera& _camera, const Light& _light, const s
 		for (auto& mesh : object->GetModel()->Get3DMeshes())
 		{
 			mesh->BindVAO();
-			glDrawElements(GL_LINES, (GLsizei)mesh->GetIndices().size(), GL_UNSIGNED_INT, 0);
+			eGlDrawContext::GetInstance().DrawElements(GL_LINES, (GLsizei)mesh->GetIndices().size(), GL_UNSIGNED_INT, 0, "eMeshLineRender");
 			mesh->UnbindVAO();
 		}
 	}

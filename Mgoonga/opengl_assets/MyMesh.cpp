@@ -1,6 +1,8 @@
 #include "stdafx.h"
 
 #include "MyMesh.h"
+#include "GlDrawContext.h"
+
 #include <sstream>
 
 //----------------------------------------------------------------------------
@@ -97,13 +99,13 @@ void MyMesh::Draw()
 	if (m_render_mode == RenderMode::DEFAULT)
 	{
 		glBindVertexArray(this->VAO);
-		glDrawElements(GL_TRIANGLES, this->indicesLods[LOD_index__in_use].size(), GL_UNSIGNED_INT, 0);
+		eGlDrawContext::GetInstance().DrawElements(GL_TRIANGLES, (GLsizei)this->indicesLods[LOD_index__in_use].size(), GL_UNSIGNED_INT, 0, this->name);
 		glBindVertexArray(0);
 	}
 	else if (m_render_mode == RenderMode::WIREFRAME)
 	{
 		glBindVertexArray(this->VAO);
-		glDrawElements(GL_LINES, this->indicesLods[LOD_index__in_use].size(), GL_UNSIGNED_INT, 0);
+		eGlDrawContext::GetInstance().DrawElements(GL_LINES, (GLsizei)this->indicesLods[LOD_index__in_use].size(), GL_UNSIGNED_INT, 0, this->name);
 		glBindVertexArray(0);
 	}
 }
@@ -307,7 +309,7 @@ ParticleMesh::ParticleMesh(const ShapeData& data)
 void ParticleMesh::Draw()
 {
 	glBindVertexArray(this->VAO);
-	glDrawElementsInstanced(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0, instances);
+	eGlDrawContext::GetInstance().DrawElementsInstanced(GL_TRIANGLES, (GLsizei)this->indices.size(), GL_UNSIGNED_INT, 0, instances, "ParticleMesh");
 	glBindVertexArray(0);
 }
 
@@ -418,7 +420,7 @@ void SimpleGeometryMesh::SetDots(const std::vector<glm::vec3>& _dots)
 void SimpleGeometryMesh::Draw()
 {
 	glBindVertexArray(hexVAO);
-	glDrawArrays(GL_POINTS, 0, m_dots.size());
+	eGlDrawContext::GetInstance().DrawArrays(GL_POINTS, 0, (GLsizei)m_dots.size(), "SimpleGeometryMesh");
 	glBindVertexArray(0);
 }
 
@@ -449,7 +451,7 @@ void BezierCurveMesh::Draw()
 {
 	glPatchParameteri(GL_PATCH_VERTICES, 4);
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_PATCHES, 0, 4);
+	eGlDrawContext::GetInstance().DrawArrays(GL_PATCHES, 0, 4, "BezierCurveMesh");
 	glBindVertexArray(0);
 }
 
@@ -505,6 +507,6 @@ void LineMesh::Draw()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 
-	glDrawElements(GL_LINES, m_indices.size(), GL_UNSIGNED_INT, 0);
+	eGlDrawContext::GetInstance().DrawElements(GL_LINES, (GLsizei)m_indices.size(), GL_UNSIGNED_INT, 0, "LineMesh");
 	glBindVertexArray(0);
 }

@@ -7,6 +7,8 @@ uniform mat4 MVP;
 uniform float radius;
 uniform int type = 0;
 
+out vec2 toDiscard;
+
 void build_hex(vec4 position)
 {    
     gl_Position = position +  MVP * vec4(0.866, 0.0, 0.5, 0.0) * radius ;    // 1:bottom-left
@@ -110,6 +112,7 @@ void build_circle(vec4 position)
 
 void main() 
 {    
+	toDiscard = vec2(0.f,0.f);
 	if(type == 0)
 		build_hex(gl_in[0].gl_Position);
 	else if(type == 1)

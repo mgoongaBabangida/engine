@@ -6,7 +6,7 @@
 #include <sstream>
 
 #define DEVIL_IMAGE
-#define SDL_IMAGE
+//#define SDL_IMAGE
 
 #ifdef DEVIL_IMAGE
 	#include "TextureImplDevIl.h"

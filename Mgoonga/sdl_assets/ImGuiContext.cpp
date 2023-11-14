@@ -285,6 +285,12 @@ void eWindowImGui::Render()
         std::string text = std::get<0>(item) + std::to_string(*data);
         ImGui::Text(text.c_str()); break;
       }
+      case TEXT_INT32:
+      {
+        uint32_t* data = static_cast<uint32_t*>(std::get<2>(item));
+        std::string text = std::get<0>(item) + std::to_string(*data);
+        ImGui::Text(text.c_str()); break;
+      }
       break;
       case SPIN_BOX:
       {

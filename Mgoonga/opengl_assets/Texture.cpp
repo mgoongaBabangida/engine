@@ -4,7 +4,7 @@
 #include <glm/glm/gtc/noise.hpp>
 
 #include "TextureImplDevIl.h"
-#include "TextureImplSDL.h"
+//#include "TextureImplSDL.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
