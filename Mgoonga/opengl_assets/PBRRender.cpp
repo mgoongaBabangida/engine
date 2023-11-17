@@ -28,32 +28,86 @@ ePBRRender::ePBRRender(const std::string& vS, const std::string& fS)
   fullTransformationUniformLocation = glGetUniformLocation(pbrShader.ID(), "modelToProjectionMatrix");
   modelToWorldMatrixUniformLocation = glGetUniformLocation(pbrShader.ID(), "modelToWorldMatrix");
   shadowMatrixUniformLocation       = glGetUniformLocation(pbrShader.ID(), "shadowMatrix"); //shadow
+
+  LightingIndexDirectional = glGetSubroutineIndex(pbrShader.ID(), GL_FRAGMENT_SHADER, "calculateDirectional");
+  LightingIndexPoint = glGetSubroutineIndex(pbrShader.ID(), GL_FRAGMENT_SHADER, "calculatePoint");
+  LightingIndexSpot = glGetSubroutineIndex(pbrShader.ID(), GL_FRAGMENT_SHADER, "calculateFlash");
 }
 
 //-----------------------------------------------------------------------------------------------------------
 void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<shObject>& objects)
 {
   glUseProgram(pbrShader.ID());
-  pbrShader.SetUniformData("camPos", glm::vec4(camera.getPosition(), 1.0f));
 
-  glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(_light.light_position), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0f, 1.0f, 0.0f));
-  glm::mat4 shadowMatrix = camera.getProjectionBiasedMatrix() * worldToViewMatrix;
-  glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE, &shadowMatrix[0][0]);
-  
-  glm::mat4 worldToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix(); 
   {
     std::vector<glm::vec4> lpositions;
+    std::vector<glm::vec4> ldirections;
     std::vector<glm::vec4> lcolors;
 
     lpositions.push_back(_light.light_position);
+    ldirections.push_back(_light.light_direction);
     lcolors.push_back({ _light.intensity });
 
     GLuint loc_pos = glGetUniformLocation(pbrShader.ID(), "lightPositions");
     glUniform3fv(loc_pos, 1, &lpositions[0][0]);
 
+    GLuint loc_dir = glGetUniformLocation(pbrShader.ID(), "lightDirections");
+    glUniform3fv(loc_dir, 1, &ldirections[0][0]);
+
     GLuint loc_col = glGetUniformLocation(pbrShader.ID(), "lightColors");
     glUniform3fv(loc_col, 1, &lcolors[0][0]);
   }
+
+  if (_light.type == eLightType::POINT)
+  {
+    pbrShader.SetUniformData("shininess", 32.0f);
+    glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(_light.light_position), glm::vec3(_light.light_position) + glm::vec3(_light.light_direction),
+      glm::vec3(0.0f, 1.0f, 0.0f));
+    pbrShader.SetUniformData("shadow_directional", false);
+    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexPoint);
+    shadowMatrix = camera.getProjectionBiasedMatrix() * worldToViewMatrix;
+  }
+  else if (_light.type == eLightType::SPOT)
+  {
+    pbrShader.SetUniformData("shininess", 32.0f);
+    glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(_light.light_position), glm::vec3(_light.light_position) + glm::vec3(_light.light_direction),
+      glm::vec3(0.0f, 1.0f, 0.0f));
+    pbrShader.SetUniformData("shadow_directional", true); //?
+    pbrShader.SetUniformData("use_csm_shadows", false);
+    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexSpot);
+    shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
+  }
+  else if (_light.type == eLightType::DIRECTION)
+  {
+    pbrShader.SetUniformData("shininess", 64.0f);
+    glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(_light.light_position),
+      glm::vec3(0.0f, 0.0f, 0.0f), /*glm::vec3(light.light_position) + light.light_direction,*/
+      glm::vec3(0.0f, 1.0f, 0.0f));
+    pbrShader.SetUniformData("shadow_directional", true);
+    pbrShader.SetUniformData("use_csm_shadows", false);
+    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
+    shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
+  }
+  else if (_light.type == eLightType::CSM)
+  {
+    pbrShader.SetUniformData("shininess", 64.0f);
+    pbrShader.SetUniformData("shadow_directional", true);
+    pbrShader.SetUniformData("use_csm_shadows", true);
+    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
+    pbrShader.SetUniformData("view", camera.getWorldToViewMatrix());
+    pbrShader.SetUniformData("farPlane", camera.getFarPlane());
+    pbrShader.SetUniformData("cascadeCount", m_shadowCascadeLevels.size());
+    for (size_t i = 0; i < m_shadowCascadeLevels.size(); ++i)
+    {
+      pbrShader.SetUniformData("cascadePlaneDistances[" + std::to_string(i) + "]", m_shadowCascadeLevels[i]);
+    }
+  }
+  glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE, &shadowMatrix[0][0]);
+  pbrShader.SetUniformData("camPos", glm::vec4(camera.getPosition(), 1.0f));
+  pbrShader.SetUniformData("far_plane", camera.getFarPlane());
+
+  glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(_light.light_position), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0f, 1.0f, 0.0f));
+  glm::mat4 worldToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
 
   std::map<std::string, std::vector<shObject>> instanced;
   for (auto& object : objects)

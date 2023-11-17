@@ -54,7 +54,6 @@ uniform bool normalMapping = true;
 uniform bool shadow_directional = true;
 uniform bool use_csm_shadows = false;
 
-uniform float far_plane;
 uniform float shininess = 32.0f;
 uniform float ssao_threshold = 0.9f;
 uniform float ssao_strength = 0.6f;
@@ -77,6 +76,7 @@ uniform float textureScale[max_texture_array_size];
 
 //csm
 uniform mat4 view;
+uniform float far_plane;
 uniform float farPlane;
 uniform int cascadeCount;
 uniform float[10] cascadePlaneDistances;

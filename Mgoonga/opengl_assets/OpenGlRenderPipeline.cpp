@@ -253,11 +253,6 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 {
 	/*const */Camera& _camera = _cameras[0]; //@todo
 
-	//@todo sorting to camera ?
-  /*std::sort(focused.begin(), focused.end(), [_camera](const shObject& obj1, const shObject& obj2)
-    { return glm::length2(_camera.getPosition() - obj1->GetTransform()->getTranslation())
-    > glm::length2(_camera.getPosition() - obj2->GetTransform()->getTranslation()); });*/
-
 	if (m_first_call) { RenderIBL(_camera); m_first_call = false; }
 
 	std::vector<shObject> phong_objs = _objects.find(eObject::RenderType::PHONG)->second;
@@ -268,6 +263,21 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	std::vector<shObject> bezier_objs = _objects.find(eObject::RenderType::BEZIER_CURVE)->second;
 	std::vector<shObject> lines_objs = _objects.find(eObject::RenderType::LINES)->second;
 	std::vector<shObject> arealighted_objs = _objects.find(eObject::RenderType::AREA_LIGHT_ONLY)->second;
+
+	auto comparator = [_camera](const shObject& obj1, const shObject& obj2)
+	{ 
+		if (float dist = glm::length2(_camera.getPosition() - obj1->GetTransform()->getTranslation()) - glm::length2(_camera.getPosition() - obj2->GetTransform()->getTranslation()); dist < 0)
+			return true;
+		else if (dist > 0)
+			return false;
+		else
+			return obj1->Name() < obj2->Name();
+	};
+
+	//@todo should be sorted beforhead, stored in set not vector
+	std::sort(focused.begin(), focused.end(), comparator);
+	std::sort(phong_objs.begin(), phong_objs.end(), comparator);
+	std::sort(pbr_objs.begin(), pbr_objs.end(), comparator);
 
 	auto phong_pbr_objects = phong_objs;
 	phong_pbr_objects.insert(phong_pbr_objects.end(), pbr_objs.begin(), pbr_objs.end());
@@ -289,6 +299,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	else if(_light.type == eLightType::CSM)
 	{
 		renderManager->PhongRender()->SetShadowCascadeLevels(renderManager->CSMRender()->GetCascadeFlaneDistances());
+		renderManager->PBRRender()->SetShadowCascadeLevels(renderManager->CSMRender()->GetCascadeFlaneDistances());
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_SHADOW_CSM);
 		if (shadows) { RenderShadowsCSM(_camera, _light, phong_pbr_objects); }
 		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SHADOW_CSM, GL_TEXTURE13);
@@ -372,17 +383,15 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	{
 		std::vector<shObject> not_outlined;
 		std::set_difference(phong_objs.begin(), phong_objs.end(),
-			focused.begin(), focused.end(),
-			std::back_inserter(not_outlined),
-			[](auto& a, auto& b) { return &a < &b; });
+												focused.begin(), focused.end(),
+												std::back_inserter(not_outlined), comparator);
 
 		RenderMain(_camera, _light, not_outlined);
 
 		not_outlined.clear();
 		std::set_difference(pbr_objs.begin(), pbr_objs.end(),
-			focused.begin(), focused.end(),
-			std::back_inserter(not_outlined),
-			[](auto& a, auto& b) { return &a < &b; });
+												focused.begin(), focused.end(),
+												std::back_inserter(not_outlined), comparator);
 
 		RenderPBR(_camera, _light, not_outlined);
 

@@ -70,7 +70,8 @@ void ePhongRender::Render(const Camera&								camera,
 		mainShader.SetUniformData("shininess", 32.0f);
 		glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(light.light_position), glm::vec3(light.light_position) + glm::vec3(light.light_direction),
 																							glm::vec3(0.0f, 1.0f, 0.0f));
-		mainShader.SetUniformData("shadow_directional", true);
+		mainShader.SetUniformData("shadow_directional", true); // ?
+		mainShader.SetUniformData("use_csm_shadows", false);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexSpot);
 		shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
 	}

@@ -183,7 +183,7 @@ protected:
 	bool			ssr = false;
 	bool			m_pb_bloom = false;
 	float			blur_coef = 0.5f;
-	bool			m_mesh_line_on = true;
+	bool			m_mesh_line_on = false;
 
 	bool			mousepress = true; //to draw framed objects
 	float			waterHeight = 2.0f;

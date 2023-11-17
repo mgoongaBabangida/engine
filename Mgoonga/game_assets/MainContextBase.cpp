@@ -254,7 +254,6 @@ void eMainContextBase::PaintGL()
 		if (m_light_object)
 		{
 			m_light_object->GetTransform()->setTranslation(GetMainLight().light_position);
-			phong.push_back(m_light_object);
 		}
 
 		if (GetMainLight().type == eLightType::DIRECTION || GetMainLight().type == eLightType::CSM)
