@@ -815,21 +815,50 @@ ShapeData ShapeGenerator::makeQuad() {
 		glm::vec3(-1.0f,  1.0f, 0.0f),//position
 		glm::vec3(1.0f,  1.0f, 1.0f),//color
 		glm::vec3(0.0f,  0.0f, 1.0f),//normal
+
 		glm::vec3(1.0f, -1.0f,0.0f),//position
 		glm::vec3(1.0f,  1.0f, 1.0f),//color
 		glm::vec3(0.0f,  0.0f, 1.0f),//normal
+
 		glm::vec3(-1.0f, -1.0f, 0.0f),//position
 		glm::vec3(1.0f,  1.0f, 1.0f),//color
 		glm::vec3(0.0f,  0.0f, 1.0f),//normal
+
 		glm::vec3(1.0f, 1.0f,0.0f),//position
 		glm::vec3(1.0f,  1.0f, 1.0f),//color
 		glm::vec3(0.0f,  0.0f, 1.0f),//normal
+
 		glm::vec3(1.0f, -1.0f,0.0f),//position
 		glm::vec3(1.0f,  1.0f, 1.0f),//color
 		glm::vec3(0.0f,  0.0f, 1.0f),//normal
+
 		glm::vec3(-1.0f, 1.0f,0.0f),//position
 		glm::vec3(1.0f,  1.0f, 1.0f),//color
 		glm::vec3(0.0f,  0.0f, 1.0f),//normal
+
+		glm::vec3(-1.0f, -1.0f, 0.0f),//position
+		glm::vec3(1.0f,  1.0f, 1.0f),//color
+		glm::vec3(0.0f,  0.0f, -1.0f),//normal
+
+		glm::vec3(1.0f, -1.0f,0.0f),//position
+		glm::vec3(1.0f,  1.0f, 1.0f),//color
+		glm::vec3(0.0f,  0.0f, -1.0f),//normal
+
+		glm::vec3(-1.0f,  1.0f, 0.0f),//position
+		glm::vec3(1.0f,  1.0f, 1.0f),//color
+		glm::vec3(0.0f,  0.0f, -1.0f),//normal
+
+		glm::vec3(-1.0f, 1.0f,0.0f),//position
+		glm::vec3(1.0f,  1.0f, 1.0f),//color
+		glm::vec3(0.0f,  0.0f, -1.0f),//normal
+
+		glm::vec3(1.0f, -1.0f,0.0f),//position
+		glm::vec3(1.0f,  1.0f, 1.0f),//color
+		glm::vec3(0.0f,  0.0f, -1.0f),//normal
+
+		glm::vec3(1.0f, 1.0f,0.0f),//position
+		glm::vec3(1.0f,  1.0f, 1.0f),//color
+		glm::vec3(0.0f,  0.0f, -1.0f),//normal
 	};
 
 	ShapeData ret;
@@ -840,6 +869,9 @@ ShapeData ShapeGenerator::makeQuad() {
 	unsigned short stackIndices[] = {
 		0, 1, 2,
 		3, 4, 5,
+		6, 7, 8,
+		9, 10, 11
+
 	};
 
 	ret.numIndices = NUM_ARRAY_ELEMENTS(stackIndices);

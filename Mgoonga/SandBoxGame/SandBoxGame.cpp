@@ -53,12 +53,9 @@ void eSandBoxGame::InitializeModels()
 	//modelManager->Add("MapleTree", (GLchar*)std::string(modelFolderPath + "MapleTree/MapleTree.obj").c_str());
 	//modelManager->Add("Cottage", (GLchar*)std::string(modelFolderPath + "85-cottage_obj/cottage_obj.obj").c_str());
 
-	Material material;
-	material.albedo = glm::vec3(0.8f, 0.0f, 0.0f);
-	material.ao = 1.0f;
-	material.roughness = 0.5;
-	material.metallic = 0.5;
+	Material material{ glm::vec3(0.8f, 0.0f, 0.0f), 0.5f , 0.5f };
 	material.emissive_texture_id = Texture::GetTexture1x1(TColor::BLACK).id;
+
 	modelManager->Add("sphere_red", Primitive::SPHERE, std::move(material));
 
 	//DESERIALIZE ANIMATIONS
@@ -152,6 +149,11 @@ void eSandBoxGame::InitializeModels()
 		chest->GetTransform()->setScale(vec3(0.5f, 0.5f, 0.5f));
 		m_objects.push_back(chest);
 		chest->GetRigger()->UseFirstFrameAsIdle();
+		Material chest_material = *(chest->GetModel()->GetMeshes()[0]->GetMaterial());
+		chest_material.use_normal = true;
+		chest_material.use_metalic = true;
+		chest_material.use_roughness = true;
+		const_cast<IMesh*>(chest->GetModel()->GetMeshes()[0])->SetMaterial(chest_material);
 
 		t.loadTextureFromFile("../game_assets/Resources/chest/chest-diffuse.png");
 		t.type = "texture_diffuse";
@@ -191,8 +193,9 @@ void eSandBoxGame::InitializeModels()
 
 	//light
 	pipeline.SetUniformData("class ePhongRender","emission_strength", 5.0f);
-	shObject hdr_object = factory.CreateObject(modelManager->Find("white_sphere"), eObject::RenderType::PHONG, "WhiteSphere"); // or "white_quad"
-	//hdr_object->GetTransform()->setScale(vec3(0.2f, 0.2f, 0.2f));
+	shObject hdr_object = factory.CreateObject(modelManager->Find("white_quad"), eObject::RenderType::PHONG, "LightObject"); // or "white_quad"
+	if(hdr_object->GetModel()->GetName() == "white_sphere")
+		hdr_object->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
 	hdr_object->GetTransform()->setTranslation(GetMainLight().light_position);
 	m_light_object = hdr_object;
 	std::array<glm::vec4, 4> points = { // for area light
@@ -202,14 +205,11 @@ void eSandBoxGame::InitializeModels()
 		glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
 	GetMainLight().points = points;
 
-	Material m;
-	m.albedo_texture_id = Texture::GetTexture1x1(TColor::YELLOW).id;
-	m.use_albedo = true;
-	m.metalic_texture_id = Texture::GetTexture1x1(TColor::WHITE).id;
-	m.use_metalic = true;
-	m.normal_texture_id = Texture::GetTexture1x1(TColor::BLUE).id;
-	m.use_normal = true;
-	m.emissive_texture_id = Texture::GetTexture1x1(TColor::YELLOW).id;
+	Material m { vec3{}, 0.0f, 0.0f, 1.0f, 
+		Texture::GetTexture1x1(TColor::YELLOW).id, Texture::GetTexture1x1(TColor::WHITE).id, 
+		Texture::GetTexture1x1(TColor::BLUE).id, Texture::GetTexture1x1(TColor::WHITE).id, Texture::GetTexture1x1(TColor::YELLOW).id,
+	true, true, true, true};
+
 	hdr_object->GetModel()->SetMaterial(m);
 	m_objects.push_back(hdr_object);
 

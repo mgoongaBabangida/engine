@@ -14,7 +14,11 @@ uniform vec4  albedo;
 uniform float metallic;
 uniform float roughness;
 uniform float ao;
+
 uniform bool textured = true;
+uniform bool use_metalic_texture = true;
+uniform bool use_normalmap_texture = true;
+uniform bool use_roughness_texture = true;
 
 layout(binding=0) uniform samplerCube 	   depth_cube_map;// Shadow point
 layout(binding=1) uniform sampler2D	   	   depth_texture; // Shadow dir
@@ -79,23 +83,31 @@ void main()
    if(gamma_correction)
      albedo_f    = pow(texture(albedoMap, Texcoord).rgb, vec3(2.2));
    else
-	 albedo_f    = texture(albedoMap, Texcoord).rgb;
-	 
-     theNormal_f = texture(normalMap, Texcoord).rgb;
-	 // Transform normal vector to range [-1,1]
-	 theNormal_f = normalize(theNormal_f * 2.0 - 1.0);
-	 theNormal_f = normalize(TBN * theNormal_f);
-     metallic_f  = texture(metallicMap, Texcoord).r;
-     roughness_f = texture(roughnessMap, Texcoord).r;
+	   albedo_f    = texture(albedoMap, Texcoord).rgb;
    }
    else
-   {
-	albedo_f = albedo.xyz;
-	theNormal_f = theNormal;
-	metallic_f = metallic;
-	roughness_f = roughness;
-   }
+	  albedo_f = albedo.xyz;
    
+   if(use_metalic_texture)
+    metallic_f  = texture(metallicMap, Texcoord).r;
+   else
+    metallic_f = metallic;
+
+    if(use_normalmap_texture)
+    {
+    theNormal_f = texture(normalMap, Texcoord).rgb;
+	  // Transform normal vector to range [-1,1]
+	  theNormal_f = normalize(theNormal_f * 2.0 - 1.0);
+	  theNormal_f = normalize(TBN * theNormal_f);
+    }
+    else
+      theNormal_f = theNormal;
+
+   if(use_roughness_texture)
+    roughness_f  =  texture(roughnessMap, Texcoord).r;
+   else
+    roughness_f = roughness;
+
     vec3 N = normalize(theNormal_f);
     vec3 V = normalize(camPos.xyz - thePosition);
 	vec3 R = reflect(-V, N);

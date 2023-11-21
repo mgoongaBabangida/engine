@@ -16,6 +16,7 @@
 #include <math/Rigger.h>
 #include <math/Camera.h>
 #include <opengl_assets/Texture.h>
+#include <game_assets/ModelManagerYAML.h>
 
 #include <glm/glm/gtc/quaternion.hpp>
 
@@ -294,7 +295,7 @@ void eWindowImGui::Render()
       break;
       case SPIN_BOX:
       {
-        int* value;
+        int* value = nullptr;
         if (std::get<0>(item) == "Sky box")
         {
           static int skybox_spin_value = 0;
@@ -414,6 +415,70 @@ void eWindowImGui::Render()
         }
       }
       break;
+      case LIGHT_TYPE_VISUAL:
+      {
+        eModelManager* modelManager = static_cast<eModelManager*>(std::get<2>(item));
+        shObject lightObj;
+        for (auto& obj : mp_game->GetObjects())
+        {
+          if (obj->Name() == "LightObject")
+            lightObj = obj;
+        }
+        static std::vector<std::string> types{ "Sphere", "Plane" };
+        static const char* current_type_item = NULL;
+        if (current_type_item == NULL)
+        {
+          if (lightObj->GetModel()->GetName() == "white_sphere")
+            current_type_item = types[0].c_str();
+          else if (lightObj->GetModel()->GetName() == "white_quad")
+            current_type_item = types[1].c_str();
+          else
+            current_type_item = "Unknown";
+        }
+
+        if (ImGui::BeginCombo("Light Object", current_type_item)) // The second parameter is the label previewed before opening the combo.
+        {
+          for (int n = 0; n < types.size(); n++)
+          {
+            bool is_selected = (current_type_item == types[n].c_str()); // You can store your selection however you want, outside or inside your objects
+            if (ImGui::Selectable(types[n].c_str(), is_selected))
+              current_type_item = types[n].c_str();
+            if (is_selected)
+              ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+          }
+          ImGui::EndCombo();
+        }
+
+        if (current_type_item == types[0].c_str())
+        {
+          if (std::shared_ptr<IModel> model = modelManager->Find("white_sphere"); model.get() != nullptr)
+          {
+            lightObj->SetModel(model);
+            lightObj->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
+
+            Material m{ vec3{}, 0.0f, 0.0f, 1.0f,
+              Texture::GetTexture1x1(TColor::YELLOW).id, Texture::GetTexture1x1(TColor::WHITE).id,
+              Texture::GetTexture1x1(TColor::BLUE).id, Texture::GetTexture1x1(TColor::WHITE).id, Texture::GetTexture1x1(TColor::YELLOW).id,
+            true, true, true, true };
+            lightObj->GetModel()->SetMaterial(m);
+          }
+        }
+        else if (current_type_item == types[1].c_str())
+        {
+          if (std::shared_ptr<IModel> model = modelManager->Find("white_quad"); model.get() != nullptr)
+          {
+            lightObj->SetModel(model);
+            lightObj->GetTransform()->setScale(vec3(1.0f, 1.0f, 1.0f));
+            std::array<glm::vec4, 4> points = { // for area light
+            glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f),
+            glm::vec4(1.0f, -1.0f, 0.0f, 1.0f),
+            glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f),
+            glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
+            mp_game->GetMainLight().points = points;
+          }
+        }
+      }
+      break;
       case OBJECT_REF_MATERIAL:
       {
         shObject* p_object = static_cast<shObject*>(std::get<2>(item));
@@ -422,29 +487,67 @@ void eWindowImGui::Render()
           shObject obj = *p_object;
           ImGui::Text(obj->Name().c_str());
 
-          //Meshes transfer to rigger later
-          m_combo_list.clear();
+          static const char* current_mesh_item = NULL;
+          mesh_names.clear();
+          current_mesh_item = obj->GetModel()->GetMeshes()[0]->Name().c_str();
           for (size_t i = 0; i < obj->GetModel()->GetMeshCount(); ++i)
+            mesh_names.push_back(obj->GetModel()->GetMeshes()[i]->Name() + " " + std::to_string(i));
+
+          //Meshes
+          int mesh_index = 0;
+          if (ImGui::BeginCombo("Object Meshes", current_mesh_item)) // The second parameter is the label previewed before opening the combo.
           {
-            std::string name = obj->GetModel()->GetMeshes()[i]->Name();
-            for (int j = 0; j < name.size(); ++j)
-              m_combo_list.push_back(name[j]);
-            if (i != obj->GetModel()->GetMeshCount() - 1)
-              m_combo_list.push_back('\0');
+            for (int n = 0; n < mesh_names.size(); n++)
+            {
+              bool is_selected = (current_mesh_item == mesh_names[n].c_str()); // You can store your selection however you want, outside or inside your objects
+              if (ImGui::Selectable(mesh_names[n].c_str(), is_selected))
+              {
+                current_mesh_item = mesh_names[n].c_str();
+                mesh_index = n;
+              }
+              if (is_selected)
+                ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+            }
+            ImGui::EndCombo();
           }
 
-          static int mesh_current = 0;
-          if (!m_combo_list.empty())
+
+          // Shader
+          static std::vector<std::string> renderers{ "Phong", "PBR" , "Area lights only"};
+          static const char* current_shader_item = NULL;
+          if (obj->GetRenderType() == eObject::RenderType::PHONG)
+            current_shader_item = renderers[0].c_str();
+          else if(obj->GetRenderType() == eObject::RenderType::PBR)
+            current_shader_item = renderers[1].c_str();
+          else if (obj->GetRenderType() == eObject::RenderType::AREA_LIGHT_ONLY)
+            current_shader_item = renderers[2].c_str();
+          else
+            current_shader_item = "Unknown";
+
+          if (ImGui::BeginCombo("Renderer", current_shader_item)) // The second parameter is the label previewed before opening the combo.
           {
-            if (ImGui::Combo("Object Meshes", &mesh_current, &m_combo_list[0]))
+            for (int n = 0; n < renderers.size(); n++)
             {
+              bool is_selected = (current_shader_item == renderers[n].c_str()); // You can store your selection however you want, outside or inside your objects
+              if (ImGui::Selectable(renderers[n].c_str(), is_selected))
+                current_shader_item = renderers[n].c_str();
+              if (is_selected)
+                ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
             }
+            ImGui::EndCombo();
           }
+
+          if (current_shader_item == renderers[0].c_str())
+            obj->SetRenderType(eObject::RenderType::PHONG);
+          else if (current_shader_item == renderers[1].c_str())
+            obj->SetRenderType(eObject::RenderType::PBR);
+          else if (current_shader_item == renderers[2].c_str())
+            obj->SetRenderType(eObject::RenderType::AREA_LIGHT_ONLY);
 
           // Material
           Material material;
-          if (obj->GetModel()->GetMeshes()[mesh_current]->HasMaterial())
-            material = *(obj->GetModel()->GetMeshes()[mesh_current]->GetMaterial());
+          if (obj->GetModel()->GetMeshes()[mesh_index]->HasMaterial())
+            material = *(obj->GetModel()->GetMeshes()[mesh_index]->GetMaterial());
           else if (obj->GetModel()->HasMaterial())
             material = *(obj->GetModel()->GetMaterial());
 
@@ -458,38 +561,40 @@ void eWindowImGui::Render()
           texture_id = material.albedo_texture_id != Texture::GetDefaultTextureId() ? material.albedo_texture_id : Texture::GetEmptyTextureId();
           ImGui::Image((void*)(intptr_t)(texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
 
-          ImGui::Text(std::to_string(material.albedo[0]).c_str()); ImGui::SameLine();
-          ImGui::Text(std::to_string(material.albedo[1]).c_str()); ImGui::SameLine();
-          ImGui::Text(std::to_string(material.albedo[2]).c_str()); ImGui::SameLine();
-          ImGui::Text(std::to_string(material.use_albedo).c_str());
+          ImGui::SliderFloat3("Albedo color (Diffuse)", &material.albedo[0], 0.0f, 1.0f);
+          ImGui::Checkbox("Use albedo texture", &material.use_albedo);
 
           ImGui::Text("Metalic texture");
           texture_id = material.metalic_texture_id != Texture::GetDefaultTextureId() ? material.metalic_texture_id : Texture::GetEmptyTextureId();
           ImGui::Image((void*)(intptr_t)(texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
-          ImGui::Text(std::to_string(material.metallic).c_str());
-          ImGui::Text(std::to_string(material.use_metalic).c_str());
-
-          ImGui::Text("AO"); ImGui::SameLine();
-          ImGui::Text(std::to_string(material.ao).c_str());
+          ImGui::SliderFloat("Metalic", &material.metallic, 0.0f, 1.0f);
+          ImGui::Checkbox("Use metalic texture", &material.use_metalic);
 
           ImGui::Text("Normal texture");
           texture_id = material.normal_texture_id != Texture::GetDefaultTextureId() ? material.normal_texture_id : Texture::GetEmptyTextureId();
           ImGui::Image((void*)(intptr_t)(texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
-          ImGui::Text(std::to_string(material.use_normal).c_str());
+          ImGui::Checkbox("Use normal map texture", &material.use_normal);
 
           ImGui::Text("Roughness texture");//contra glossiness
           texture_id = material.roughness_texture_id != Texture::GetDefaultTextureId() ? material.roughness_texture_id : Texture::GetEmptyTextureId();
           ImGui::Image((void*)(intptr_t)(texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
-          ImGui::Text(std::to_string(material.roughness).c_str());
-          ImGui::Text(std::to_string(material.use_roughness).c_str());
+          ImGui::SliderFloat("Roughness", &material.roughness, 0.0f, 1.0f);
+          ImGui::Checkbox("Use roughness texture", &material.use_roughness);
+
+          //@todo should be ao texture as well
+          ImGui::SliderFloat("AO", &material.ao, 0.0f, 1.0f);
 
           ImGui::Text("Emissive texture");
           texture_id = material.emissive_texture_id != Texture::GetDefaultTextureId() ? material.emissive_texture_id : Texture::GetEmptyTextureId();
           ImGui::Image((void*)(intptr_t)(texture_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
+          //@todo emissive coef 
 
           //@todo add displacement/ bump as separate slot
 
-          m_combo_list.clear();
+          if (obj->GetModel()->GetMeshes()[mesh_index]->HasMaterial())
+            const_cast<IMesh*>(obj->GetModel()->GetMeshes()[mesh_index])->SetMaterial(material);
+          else if (obj->GetModel()->HasMaterial())
+            const_cast<IModel*>(obj->GetModel())->SetMaterial(material);
         }
       }
       break;
@@ -678,8 +783,6 @@ void eWindowImGui::Render()
               rigger->SetActiveBoneIndex(bone_current);
             else
               rigger->SetActiveBoneIndex(MAX_BONES);
-
-            m_combo_list.clear();
 
             ImGui::Text("Bone animated transform Matrix");
             ImGui::Text(std::to_string(boneMatrix[0][0]).c_str()); ImGui::SameLine();
@@ -1121,8 +1224,8 @@ void eMainImGuiWindow::Add(TypeImGui _type, const std::string& _name, void* _dat
 //-------------------------------------------------------------------
 bool eMainImGuiWindow::OnMouseMove(int32_t _x, int32_t _y, KeyModifiers _modifier)
 {
-  cursor_x = _x;
-  cursor_y = _y;
+  cursor_x = (float)_x;
+  cursor_y = (float)_y;
   if (IsHovered())
     return true;
   else

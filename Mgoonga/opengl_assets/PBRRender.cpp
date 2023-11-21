@@ -170,44 +170,40 @@ void ePBRRender::_SetMaterial(shObject _obj)
   if (_obj->GetModel()->HasMaterial())
   {
     Material material = _obj->GetModel()->GetMaterial().value();
-    if (material.use_albedo)
-    {
-      glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 1);
-      glUniform1f(aoLoc, material.ao);
-    }
-    else
-    {
-      glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 0);
 
-      glUniform4f(albedoLoc, material.albedo[0], material.albedo[1], material.albedo[2], 1.0f);
-      glUniform1f(aoLoc, material.ao);
-      glUniform1f(metallicLoc, material.metallic);
-      glUniform1f(roughnessLoc, material.roughness);
-    }
+    glUniform4f(albedoLoc, material.albedo[0], material.albedo[1], material.albedo[2], 1.0f);
+    glUniform1f(metallicLoc,  material.metallic);
+    glUniform1f(roughnessLoc, material.roughness);
+    glUniform1f(aoLoc,        material.ao);
+
+    glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), material.use_albedo);
+    glUniform1i(glGetUniformLocation(pbrShader.ID(), "use_metalic_texture"), material.use_metalic);
+    glUniform1i(glGetUniformLocation(pbrShader.ID(), "use_normalmap_texture"), material.use_normal);
+    glUniform1i(glGetUniformLocation(pbrShader.ID(), "use_roughness_texture"), material.use_roughness);
+
     // draw object and return
   }
   else
   {
-    for (const IMesh* mesh : _obj->GetModel()->GetMeshes())
+    auto meshes = _obj->GetModel()->GetMeshes();
+    auto it = meshes.rbegin();
+    while (it != meshes.rend()) //first mesh gets the data @todo every mesh should get it
     {
-      if (mesh->HasMaterial())
+      if ((*it)->HasMaterial())
       {
-        Material material = mesh->GetMaterial().value();
-        if (material.use_albedo)
-        {
-          glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 1);
-          glUniform1f(aoLoc, material.ao);
-        }
-        else
-        {
-          glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), 0);
+        Material material = (*it)->GetMaterial().value();
 
-          glUniform4f(albedoLoc, material.albedo[0], material.albedo[1], material.albedo[2], 1.0f);
-          glUniform1f(aoLoc, material.ao);
-          glUniform1f(metallicLoc, material.metallic);
-          glUniform1f(roughnessLoc, material.roughness);
-        }
+        glUniform4f(albedoLoc, material.albedo[0], material.albedo[1], material.albedo[2], 1.0f);
+        glUniform1f(metallicLoc, material.metallic);
+        glUniform1f(roughnessLoc, material.roughness);
+        glUniform1f(aoLoc, material.ao);
+
+        glUniform1i(glGetUniformLocation(pbrShader.ID(), "textured"), material.use_albedo);
+        glUniform1i(glGetUniformLocation(pbrShader.ID(), "use_metalic_texture"), material.use_metalic);
+        glUniform1i(glGetUniformLocation(pbrShader.ID(), "use_normalmap_texture"), material.use_normal);
+        glUniform1i(glGetUniformLocation(pbrShader.ID(), "use_roughness_texture"), material.use_roughness);
       }
+      ++it;
       // draw mesh ? //set matterial and draw for each mesh
     }
   }

@@ -516,6 +516,7 @@ void eMainContextBase::InitializeExternalGui()
 {
 	// Lights & Cameras
 	externalGui[0]->Add(TEXT, "Light", nullptr);
+	externalGui[0]->Add(GAME, "Game", (void*)&(*this));
 
 	std::function<void(size_t)> light_type_callback = [this](size_t _index) 
 	{
@@ -530,6 +531,7 @@ void eMainContextBase::InitializeExternalGui()
 	};
 	static eVectorStringsCallback light_types{ {"directional", "point", "cut-off", "csm"}, light_type_callback};
 	externalGui[0]->Add(COMBO_BOX, "Light type.", &light_types);
+	externalGui[0]->Add(LIGHT_TYPE_VISUAL, "Light object.", modelManager.get());
 	externalGui[0]->Add(SLIDER_FLOAT_3, "Light position.", &GetMainLight().light_position);
 	externalGui[0]->Add(SLIDER_FLOAT_3, "Light direction.", &GetMainLight().light_direction);
 	externalGui[0]->Add(SLIDER_FLOAT_3, "Light intensity.", &GetMainLight().intensity);
@@ -553,7 +555,6 @@ void eMainContextBase::InitializeExternalGui()
 	{
 		m_cameras.emplace_back(pipeline.Width(), pipeline.Height(), 0.1f, 10.0f);
 		m_cameras.back().SetVisualiseFrustum(true);
-		externalGui[0]->Add(GAME, "Game", (void*)&(*this));
 		externalGui[0]->Add(CAMERA, "Camera second", &m_cameras.back());
 		std::function<void()> switch_camera_callback = [this]()
 		{
