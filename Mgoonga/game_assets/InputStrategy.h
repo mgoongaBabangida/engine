@@ -22,15 +22,24 @@ class InputStrategyMoveAlongXZPlane : public InputStrategy
 {
 public:
 	InputStrategyMoveAlongXZPlane(Camera& _camera, std::vector<shObject> _objs)
-		:m_camera(_camera)
-		,m_objects(_objs) // @todo need to subscribe on update objects !!!
+		: m_camera(_camera)
+	{
+		for (auto obj : _objs)
+			m_objects.push_back(obj);
+	}
+	~InputStrategyMoveAlongXZPlane()
 	{
 
 	}
 
 	virtual bool OnMousePress(uint32_t _x, uint32_t _y, bool _left)
 	{
-		auto [new_focused, intersaction] = m_camera.get().getCameraRay().calculateIntersaction(m_objects);
+		std::vector<shObject> objects;
+		for (auto obj : m_objects)
+			if (!obj.expired())
+				objects.push_back(obj.lock());
+
+		auto [new_focused, intersaction] = m_camera.get().getCameraRay().calculateIntersaction(objects);
 		if (!_left && new_focused) // grab if left is pressed
 		{
 			m_grab_translation = new_focused->GetTransform()->getTranslation();
@@ -71,18 +80,18 @@ public:
 
 	virtual void UpdateInRenderThread()
 	{
-		if (m_grab_camera_line != std::nullopt && m_translation_vector != glm::vec3{ 0.f,0.f,0.0f })
-			m_dragged->GetTransform()->setTranslation(m_grab_translation + m_translation_vector);
+		if (shObject obj = m_dragged.lock(); obj && m_grab_camera_line != std::nullopt && m_translation_vector != glm::vec3{ 0.f,0.f,0.0f })
+			obj->GetTransform()->setTranslation(m_grab_translation + m_translation_vector);
 	}
 
 protected:
-	std::reference_wrapper<Camera>	m_camera;
-	std::vector<shObject>						m_objects;
-	shObject												m_dragged;
-	std::optional<dbb::line>				m_grab_camera_line = std::nullopt;
-	glm::vec3												m_intersaction;
-	glm::vec3												m_grab_translation;
-	glm::vec3												m_translation_vector = glm::vec3{ 0.f,0.f,0.0f };
+	std::reference_wrapper<Camera>				m_camera;
+	std::vector<std::weak_ptr<eObject>>		m_objects;
+	std::weak_ptr<eObject>								m_dragged;
+	std::optional<dbb::line>							m_grab_camera_line = std::nullopt;
+	glm::vec3															m_intersaction;
+	glm::vec3															m_grab_translation;
+	glm::vec3															m_translation_vector = glm::vec3{ 0.f,0.f,0.0f };
 };
 
 
@@ -97,6 +106,10 @@ public:
 		// should come in constructor
 		x_restriction = { -0.9f, 0.56f };
 		y_restriction = { -0.8f, 0.73f };
+	}
+	~InputStrategy2DMove()
+	{
+
 	}
 
 	virtual bool OnMouseMove(uint32_t _x, uint32_t _y) 

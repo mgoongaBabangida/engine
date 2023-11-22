@@ -48,6 +48,13 @@ struct Material
 	bool use_roughness = false;
 
 	bool use_phong_shading = false;
+
+	Material(glm::vec3 _albedo = {}, float _metallic = 0.0f, float _roughness = 0.0f, float _ao = 1.0f,
+		uint32_t _albedo_texture_id = -1, uint32_t _metalic_texture_id = -1, uint32_t _normal_texture_id = -1, uint32_t _roughness_texture_id = -1, uint32_t _emissive_texture_id = -1,
+		bool _use_albedo = false, bool _use_metalic = false, bool _use_normal = false, bool _use_roughness = false, bool _use_phong_shading = false)
+		: albedo(_albedo), metallic(_metallic), roughness(_roughness), ao(_ao),
+		  albedo_texture_id(_albedo_texture_id), metalic_texture_id(_metalic_texture_id), normal_texture_id(_normal_texture_id), roughness_texture_id(_roughness_texture_id), emissive_texture_id(_emissive_texture_id),
+		  use_albedo(_use_albedo), use_metalic(_use_metalic), use_normal(_use_normal), use_roughness(_use_roughness) {}
 };
 
 enum class eLightType { POINT, DIRECTION, SPOT, CSM, AREA_LIGHT};

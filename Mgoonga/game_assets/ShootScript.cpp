@@ -13,37 +13,41 @@ namespace
     BulletScript(IGame* _game, LineMesh* _normal_mesh) : m_game(_game), m_normal_mesh(_normal_mesh) {}
     void Update(float _tick)
     {
+     if( shObject object = m_object.lock(); object)
       object->GetRigidBody()->Update(_tick, m_game->GetObjects());
     }
 
     virtual void	CollisionCallback(const eCollision& _collision)
     {
-      if (_collision.collider == object)
+      if (shObject object = m_object.lock(); object)
       {
-        glm::vec3 p1(_collision.triangle[0][0], _collision.triangle[0][1], _collision.triangle[0][2]);
-        glm::vec3 p2(_collision.triangle[1][0], _collision.triangle[1][1], _collision.triangle[1][2]);
-        glm::vec3 p3(_collision.triangle[2][0], _collision.triangle[2][1], _collision.triangle[2][2]);
-        
-        glm::vec3 v1 = glm::normalize(p1 - p2);
-        glm::vec3 v2 = glm::normalize(p3 - p2);
-        glm::vec3 normal = glm::normalize(glm::cross(v1, v2));
-
-        if (glm::dot(normal, object->GetRigidBody()->Velocity()) > 0.0f)
-          normal = -normal;
-
-        glm::vec3 reflected_velocity = glm::reflect(object->GetRigidBody()->Velocity(), normal); //incident - 2.0f * glm::dot(incident, normal) * normal;
-        if (m_normal_mesh)
+        if (_collision.collider == object.get())
         {
-          m_normal_mesh->UpdateData({ _collision.intersaction,
-                                      _collision.intersaction + normal,
-                                      _collision.intersaction + glm::normalize((-object->GetRigidBody()->Velocity())),
-                                      _collision.intersaction + glm::normalize(reflected_velocity) },
-            { 0 , 1 , 0 , 2, 0, 3 },
-            { 1.0f, 1.0f ,0.0f, 1.0f });
-        }
+          glm::vec3 p1(_collision.triangle[0][0], _collision.triangle[0][1], _collision.triangle[0][2]);
+          glm::vec3 p2(_collision.triangle[1][0], _collision.triangle[1][1], _collision.triangle[1][2]);
+          glm::vec3 p3(_collision.triangle[2][0], _collision.triangle[2][1], _collision.triangle[2][2]);
 
-        object->GetRigidBody()->SetCurrentVelocity(m_normal_mesh == nullptr ? reflected_velocity : glm::vec3{0,0,0});
-        //object->GetTransform()->setTranslation(object->GetTransform()->getTranslation() += (reflected_velocity) );
+          glm::vec3 v1 = glm::normalize(p1 - p2);
+          glm::vec3 v2 = glm::normalize(p3 - p2);
+          glm::vec3 normal = glm::normalize(glm::cross(v1, v2));
+
+          if (glm::dot(normal, object->GetRigidBody()->Velocity()) > 0.0f)
+            normal = -normal;
+
+          glm::vec3 reflected_velocity = glm::reflect(object->GetRigidBody()->Velocity(), normal); //incident - 2.0f * glm::dot(incident, normal) * normal;
+          if (m_normal_mesh)
+          {
+            m_normal_mesh->UpdateData({ _collision.intersaction,
+                                        _collision.intersaction + normal,
+                                        _collision.intersaction + glm::normalize((-object->GetRigidBody()->Velocity())),
+                                        _collision.intersaction + glm::normalize(reflected_velocity) },
+              { 0 , 1 , 0 , 2, 0, 3 },
+              { 1.0f, 1.0f ,0.0f, 1.0f });
+          }
+
+          object->GetRigidBody()->SetCurrentVelocity(m_normal_mesh == nullptr ? reflected_velocity : glm::vec3{ 0,0,0 });
+          //object->GetTransform()->setTranslation(object->GetTransform()->getTranslation() += (reflected_velocity) );
+        }
       }
     }
   protected:

@@ -25,15 +25,18 @@ eBaseScript::~eBaseScript()
 //---------------------------------------------------------------------------
 void eBaseScript::Update(float _tick)
 {
-	for (std::shared_ptr<eObject> other : m_game->GetObjects())
+	if (shObject object = m_object.lock(); object)
 	{
-		if (other->Name() != "Terrain"
-			&& other->GetScript() != this
-			&& std::find(m_objects_on_base.begin(), m_objects_on_base.end(), other) == m_objects_on_base.end()
-			&& glm::length(object->GetTransform()->getTranslation() - other->GetTransform()->getTranslation()) < (Hex::radius))
+		for (std::shared_ptr<eObject> other : m_game->GetObjects())
 		{
-			m_objects_on_base.push_back(other);
-			ObjectCameToBase.Occur(other, this->object->Name());
+			if (other->Name() != "Terrain"
+				&& other->GetScript() != this
+				&& std::find(m_objects_on_base.begin(), m_objects_on_base.end(), other) == m_objects_on_base.end()
+				&& glm::length(object->GetTransform()->getTranslation() - other->GetTransform()->getTranslation()) < (Hex::radius))
+			{
+				m_objects_on_base.push_back(other);
+				ObjectCameToBase.Occur(other, object->Name());
+			}
 		}
 	}
 }

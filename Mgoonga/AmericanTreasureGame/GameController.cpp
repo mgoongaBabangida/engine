@@ -178,29 +178,32 @@ void GameController::Initialize()
 //--------------------------------------------------------------------------
 bool GameController::OnKeyPress(uint32_t _asci, KeyModifiers _modifier)
 {
-  switch (_asci)
+  shObject object_pirate = m_ships_pirate[m_focused_index]->GetScriptObject().lock();
+  shObject object_spanish = m_ships[m_focused_index]->GetScriptObject().lock();
+  if (object_pirate && object_spanish)
   {
-  case ASCII_J:
-  {
-    m_dice_gui->Perssed();
-    break;
-  }
-  case ASCII_K:
-  {
-    const eObject* obj = m_game_state == GameState::SPANISH_TO_MOVE ? m_ships[m_focused_index]->GetScriptObject() :
-                                                                      m_ships_pirate[m_focused_index]->GetScriptObject();
-    OnShoot(obj);
-    break;
-  }
-  case ASCII_H:
-  {
-    const eObject* obj = m_game_state == GameState::SPANISH_TO_MOVE ? m_ships[m_focused_index]->GetScriptObject() :
-      m_ships_pirate[m_focused_index]->GetScriptObject();
-    OnGetHit(obj);
-    break;
-  }
-  return true;
-  default: return false;
+    switch (_asci)
+    {
+    case ASCII_J:
+    {
+      m_dice_gui->Perssed();
+      break;
+    }
+    case ASCII_K:
+    {
+      const eObject* obj = m_game_state == GameState::SPANISH_TO_MOVE ? object_spanish.get() : object_pirate.get();
+      OnShoot(obj);
+      break;
+    }
+    case ASCII_H:
+    {
+      const eObject* obj = m_game_state == GameState::SPANISH_TO_MOVE ? object_spanish.get() : object_pirate.get();
+      OnGetHit(obj);
+      break;
+    }
+    return true;
+    default: return false;
+    }
   }
   return false;
 }
@@ -266,7 +269,7 @@ bool GameController::OnMouseRelease(KeyModifiers _modifier)
   {
     for (int i = 0; i < m_ships.size(); ++i)
     {
-      if (m_ships[i]->GetScriptObject() == m_game->GetFocusedObject().get()
+      if (m_ships[i]->GetScriptObject().lock().get() == m_game->GetFocusedObject().get()
         && m_ships[i]->GetDestination() != NONE)
       {
         m_dice_rolled = false;
@@ -278,7 +281,7 @@ bool GameController::OnMouseRelease(KeyModifiers _modifier)
   {
     for (int i = 0; i < m_ships_pirate.size(); ++i)
     {
-      if (m_ships_pirate[i]->GetScriptObject() == m_game->GetFocusedObject().get()
+      if (m_ships_pirate[i]->GetScriptObject().lock().get() == m_game->GetFocusedObject().get()
           && m_ships_pirate[i]->GetDestination() != NONE)
       {
         m_dice_rolled = false;
@@ -299,7 +302,7 @@ void GameController::Update(float _tick)
   {
     for (int i = 0; i < m_ships.size(); ++i)
     {
-      if (m_ships[i]->GetScriptObject() == m_game->GetFocusedObject().get()
+      if (m_ships[i]->GetScriptObject().lock().get() == m_game->GetFocusedObject().get()
         && m_ships[i]->GetDestination() == NONE
         && !m_current_path.empty())
       {
@@ -308,13 +311,13 @@ void GameController::Update(float _tick)
         m_ships[m_focused_index]->SetDestination(destination);
       }
 
-      if (m_ships[i]->GetScriptObject() == m_game->GetFocusedObject().get())
-        m_choice_circle->SetDots({ m_ships[i]->GetScriptObject()->GetTransform()->getTranslation() + glm::vec3{0.0f,0.06f,0.0f} }); //@todo
+      if (shObject obj = m_ships[i]->GetScriptObject().lock(); obj.get() == m_game->GetFocusedObject().get())
+        m_choice_circle->SetDots({ obj->GetTransform()->getTranslation() + glm::vec3{0.0f,0.06f,0.0f} }); //@todo
     }
 
     for (int i = 0; i < m_ships_pirate.size(); ++i)
     {
-      if (m_ships_pirate[i]->GetScriptObject() == m_game->GetFocusedObject().get()
+      if (m_ships_pirate[i]->GetScriptObject().lock().get() == m_game->GetFocusedObject().get()
         && m_ships_pirate[i]->GetDestination() == NONE
         && !m_current_path.empty())
       {
@@ -323,8 +326,8 @@ void GameController::Update(float _tick)
         m_ships_pirate[m_focused_index]->SetDestination(destination);
       }
 
-      if (m_ships_pirate[i]->GetScriptObject() == m_game->GetFocusedObject().get())
-        m_choice_circle->SetDots({ m_ships_pirate[i]->GetScriptObject()->GetTransform()->getTranslation() + glm::vec3{0.0f,0.06f,0.0f} });//@todo
+      if (shObject obj = m_ships_pirate[i]->GetScriptObject().lock(); obj.get() == m_game->GetFocusedObject().get())
+        m_choice_circle->SetDots({ obj->GetTransform()->getTranslation() + glm::vec3{0.0f,0.06f,0.0f} });//@todo
     }
   }
 
@@ -476,7 +479,7 @@ void GameController::OnObjectPickedWithLeft(std::shared_ptr<eObject> _picked)
       unsigned int index_picked = -1;
       for (unsigned int i = 0; i < m_ships.size(); ++i)
       {
-        if (m_ships[i]->GetScriptObject() == _picked.get())
+        if (m_ships[i]->GetScriptObject().lock().get() == _picked.get())
         {
           index_picked = i;
           m_ship_icons[index_picked]->SetRenderingFunc(GUI::RenderFunc::Default);
@@ -493,7 +496,7 @@ void GameController::OnObjectPickedWithLeft(std::shared_ptr<eObject> _picked)
       unsigned int index_picked = -1;
       for (unsigned int i = 0; i < m_ships_pirate.size(); ++i)
       {
-        if (m_ships_pirate[i]->GetScriptObject() == _picked.get())
+        if (m_ships_pirate[i]->GetScriptObject().lock().get() == _picked.get())
         {
           index_picked = i;
           m_ship_icons_pirate[index_picked]->SetRenderingFunc(GUI::RenderFunc::Default);
@@ -521,19 +524,19 @@ void GameController::OnObjectPickedWithRight(std::shared_ptr<eObject> _picked)
     {
       for (int i = 0; i < m_ships.size(); ++i)
       {
-        if (m_ships[i]->GetScriptObject() == m_game->GetFocusedObject().get()
+        if (m_ships[i]->GetScriptObject().lock().get() == m_game->GetFocusedObject().get()
           && m_has_moved[i] == true)
         {
-          float distance = glm::length(m_ships[i]->GetScriptObject()->GetTransform()->getTranslation() -
+          float distance = glm::length(m_ships[i]->GetScriptObject().lock()->GetTransform()->getTranslation() -
             _picked->GetTransform()->getTranslation());
           if (dbb::round(distance, 2) <= Hex::radius * 2.0f)
           {
             m_target = _picked.get();
             //calculate turn to point
-            glm::vec3 direction_shooter_to_targrt = glm::normalize(m_target->GetTransform()->getTranslation() - m_ships[i]->GetScriptObject()->GetTransform()->getTranslation());
+            glm::vec3 direction_shooter_to_targrt = glm::normalize(m_target->GetTransform()->getTranslation() - m_ships[i]->GetScriptObject().lock()->GetTransform()->getTranslation());
             glm::vec3 direction_turened = glm::cross(direction_shooter_to_targrt, YAXIS);
-            m_ships[i]->GetScriptObject()->GetTransform()->turnTo(m_ships[i]->GetScriptObject()->GetTransform()->getTranslation() + direction_turened, 0.0f);
-            OnShoot(m_ships[i]->GetScriptObject());
+            m_ships[i]->GetScriptObject().lock()->GetTransform()->turnTo(m_ships[i]->GetScriptObject().lock()->GetTransform()->getTranslation() + direction_turened, 0.0f);
+            OnShoot(m_ships[i]->GetScriptObject().lock().get());
             if (int32_t outcome = math::Random::RandomInt(1, 6); outcome <= 3)
             {
               OnGetHit(_picked.get());
@@ -547,18 +550,18 @@ void GameController::OnObjectPickedWithRight(std::shared_ptr<eObject> _picked)
     {
       for (int i = 0; i < m_ships_pirate.size(); ++i)
       {
-        if (m_ships_pirate[i]->GetScriptObject() == m_game->GetFocusedObject().get()
+        if (m_ships_pirate[i]->GetScriptObject().lock().get() == m_game->GetFocusedObject().get()
           && m_has_moved_pirate[i] == true)
         {
-          float distance = glm::length(m_ships_pirate[i]->GetScriptObject()->GetTransform()->getTranslation() -
+          float distance = glm::length(m_ships_pirate[i]->GetScriptObject().lock()->GetTransform()->getTranslation() -
                                       _picked->GetTransform()->getTranslation());
           if (dbb::round(distance, 2) <= Hex::radius * 1.0f) // one hex
           {
             m_target = _picked.get();
-            glm::vec3 direction_shooter_to_targrt = glm::normalize(m_target->GetTransform()->getTranslation() - m_ships_pirate[i]->GetScriptObject()->GetTransform()->getTranslation());
+            glm::vec3 direction_shooter_to_targrt = glm::normalize(m_target->GetTransform()->getTranslation() - m_ships_pirate[i]->GetScriptObject().lock()->GetTransform()->getTranslation());
             glm::vec3 direction_turened = glm::cross(direction_shooter_to_targrt, YAXIS);
-            m_ships_pirate[i]->GetScriptObject()->GetTransform()->turnTo(m_ships_pirate[i]->GetScriptObject()->GetTransform()->getTranslation() + direction_turened, 0.0f);
-            OnShoot(m_ships_pirate[i]->GetScriptObject());
+            m_ships_pirate[i]->GetScriptObject().lock()->GetTransform()->turnTo(m_ships_pirate[i]->GetScriptObject().lock()->GetTransform()->getTranslation() + direction_turened, 0.0f);
+            OnShoot(m_ships_pirate[i]->GetScriptObject().lock().get());
             if (int32_t outcome = math::Random::RandomInt(1, 6); outcome <= 2)
             {
               OnGetHit(_picked.get());
@@ -614,9 +617,9 @@ void GameController::OnShipCameToBase(std::shared_ptr<eObject> _ship, const std:
 {
   _ship->SetVisible(false);
   if (m_ships[0] != _ship->GetScript())
-    m_game->SetFocused(m_ships[0]->GetScriptObject());
+    m_game->SetFocused(m_ships[0]->GetScriptObject().lock());
   else
-    m_game->SetFocused(m_ships[1]->GetScriptObject()); //@todo check is visible or is alive
+    m_game->SetFocused(m_ships[1]->GetScriptObject().lock()); //@todo check is visible or is alive
 
   if(_ship->GetScript() == m_ships[m_has_gold_index] && (_base_name == "Base Casablanca" || _base_name == "Base Sevillia"))
     _UpdateWarrning("Game Over! Spanish Won!");
@@ -760,7 +763,7 @@ void GameController::_InitializeShipIcons()
           {
             if (!m_dice_rolled && m_game_state == GameState::SPANISH_TO_MOVE)
             {
-              m_game->SetFocused(m_ships[i]->GetScriptObject());
+              m_game->SetFocused(m_ships[i]->GetScriptObject().lock());
               m_ship_icons[i]->SetRenderingFunc(GUI::RenderFunc::Default);
               m_focused_index = i;
             }
@@ -793,7 +796,7 @@ void GameController::_InitializeShipIcons()
           {
             if (!m_dice_rolled && m_game_state == GameState::PIRATE_TO_MOVE)
             {
-              m_game->SetFocused(m_ships_pirate[i]->GetScriptObject());
+              m_game->SetFocused(m_ships_pirate[i]->GetScriptObject().lock());
               m_ship_icons_pirate[i]->SetRenderingFunc(GUI::RenderFunc::Default);
               m_focused_index = i;
             }
@@ -1191,7 +1194,7 @@ bool GameController::_CurrentShipHasMoved() const
   {
     for (int i = 0; i < m_ships.size(); ++i)
     {
-      if (m_ships[i]->GetScriptObject() == m_game->GetFocusedObject().get()
+      if (m_ships[i]->GetScriptObject().lock().get() == m_game->GetFocusedObject().get()
         && m_has_moved[i] == true)
         return true;
     }
@@ -1200,7 +1203,7 @@ bool GameController::_CurrentShipHasMoved() const
   {
     for (int i = 0; i < m_ships_pirate.size(); ++i)
     {
-      if (m_ships_pirate[i]->GetScriptObject() == m_game->GetFocusedObject().get()
+      if (m_ships_pirate[i]->GetScriptObject().lock().get() == m_game->GetFocusedObject().get()
           && m_has_moved_pirate[i] == true)
         return true;
     }
@@ -1238,9 +1241,9 @@ void GameController::_UpdatePathVisual()
   std::vector<GLuint>			indices;
   glm::vec3 pos;
   if(m_game_state == GameState::SPANISH_TO_MOVE)
-    pos = m_ships[m_focused_index]->GetScriptObject()->GetTransform()->getTranslation();
+    pos = m_ships[m_focused_index]->GetScriptObject().lock()->GetTransform()->getTranslation();
   else if(m_game_state == GameState::PIRATE_TO_MOVE)
-    pos = m_ships_pirate[m_focused_index]->GetScriptObject()->GetTransform()->getTranslation();
+    pos = m_ships_pirate[m_focused_index]->GetScriptObject().lock()->GetTransform()->getTranslation();
 
   pos.y += 0.01f;
   verices.push_back(pos);
@@ -1388,12 +1391,12 @@ eShipScript* GameController::_GetShipScript(const eObject* _ship) const
 {
   for (int i = 0; i < m_ships.size(); ++i)
   {
-    if (m_ships[i]->GetScriptObject() == _ship)
+    if (m_ships[i]->GetScriptObject().lock().get() == _ship)
       return m_ships[i];
   }
   for (int i = 0; i < m_ships_pirate.size(); ++i)
   {
-    if (m_ships_pirate[i]->GetScriptObject() == _ship)
+    if (m_ships_pirate[i]->GetScriptObject().lock().get() == _ship)
       return m_ships_pirate[i];
   }
   return nullptr;

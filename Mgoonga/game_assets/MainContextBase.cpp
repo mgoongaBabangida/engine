@@ -53,6 +53,7 @@ eMainContextBase::eMainContextBase(eInputController* _input,
 eMainContextBase::~eMainContextBase()
 {
 	m_global_scripts.clear();
+	m_objects.clear();
 }
 
 //-------------------------------------------------------------------------
@@ -68,12 +69,17 @@ bool eMainContextBase::OnKeyPress(uint32_t _asci, KeyModifiers _modifier)
 	{
 		case ASCII_Q:
 		{
-			if (m_gizmo_type == GizmoType::TRANSLATE)
+			if (m_use_guizmo == false)
+			{
+				m_use_guizmo = true;
+				m_gizmo_type = GizmoType::TRANSLATE;
+			}
+			else if (m_gizmo_type == GizmoType::TRANSLATE)
 				m_gizmo_type = GizmoType::ROTATE;
 			else if (m_gizmo_type == GizmoType::ROTATE)
 				m_gizmo_type = GizmoType::SCALE;
 			else if (m_gizmo_type == GizmoType::SCALE)
-				m_gizmo_type = GizmoType::TRANSLATE;
+				m_use_guizmo = false;
 			return true;
 		}
 		case ASCII_L:
@@ -141,7 +147,7 @@ bool eMainContextBase::OnMouseRelease(KeyModifiers _modifier)
 	GetMainCamera().getCameraRay().release();
 	if (m_input_strategy)
 		m_input_strategy->OnMouseRelease();
-	//should be inside input strategy which needs it(frame, moveXZ)
+	//@todo should be inside input strategy which needs it(frame, moveXZ)
 	GetMainCamera().MovementSpeedRef() = 0.05f;
 	return true;
 }
@@ -158,7 +164,7 @@ void eMainContextBase::InitializeGL()
 		m_lights[0].type = eLightType::DIRECTION;
 
 		//init main camera
-		m_cameras.emplace_back(pipeline.Width(), pipeline.Height(), 0.1f, 20.0f);
+		m_cameras.emplace_back(pipeline.Width(), pipeline.Height(), 0.1f, 40.0f);
 		m_cameras[0].setDirection(glm::vec3(0.6f, -0.10f, 0.8f));
 		m_cameras[0].setPosition(glm::vec3(0.0f, 4.0f, -4.0f));
 	}

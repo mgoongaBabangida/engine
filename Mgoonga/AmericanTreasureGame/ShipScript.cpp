@@ -48,8 +48,11 @@ eShipScript::~eShipScript()
 //------------------------------------------------------------------------------------
 bool eShipScript::OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier)
 {
-	if(m_game->GetFocusedObject().get() == this->object)
+	if (shObject object = m_object.lock(); object)
 	{
+		if (m_game->GetFocusedObject().get() == object.get())
+		{
+		}
 	}
 	return false;
 }
@@ -57,27 +60,30 @@ bool eShipScript::OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _mo
 //-------------------------------------------------------------------------
 void eShipScript::CollisionCallback(const eCollision& _collision)
 {
-	if (_collision.collider == object && destination == NONE)
+	if (shObject object = m_object.lock(); object)
 	{
-		auto objs = m_game->GetObjects();
-		std::vector<std::shared_ptr<eObject> > objsToCollide;
-		for (std::shared_ptr<eObject> obj : objs)
+		if (_collision.collider == object.get() && destination == NONE)
 		{
-			if (obj->Name() != "Terrain")
-				objsToCollide.push_back(obj);
-		}
+			auto objs = m_game->GetObjects();
+			std::vector<std::shared_ptr<eObject> > objsToCollide;
+			for (std::shared_ptr<eObject> obj : objs)
+			{
+				if (obj->Name() != "Terrain")
+					objsToCollide.push_back(obj);
+			}
 
-		//@todo test Upvector and rotationupvector (-5?)
-		static float collision_rotation = 0.0f;
-		if (collision_rotation == 360.0f)
-		{
-			collision_rotation = 0.0f;
-			return;
+			//@todo test Upvector and rotationupvector (-5?)
+			static float collision_rotation = 0.0f;
+			if (collision_rotation == 360.0f)
+			{
+				collision_rotation = 0.0f;
+				return;
+			}
+			auto rot = glm::toQuat(glm::rotate(UNIT_MATRIX, glm::radians(5.0f)/*(-5 ? )*/, glm::vec3(0.0f, 1.0f, 0.0f)));
+			collision_rotation += 5.0f;
+			object->GetTransform()->setRotation(rot * object->GetTransform()->getRotation());
+			object->GetRigidBody()->Move(objsToCollide);
 		}
-		auto rot = glm::toQuat(glm::rotate(UNIT_MATRIX, glm::radians(5.0f)/*(-5 ? )*/, glm::vec3(0.0f, 1.0f, 0.0f)));
-		collision_rotation += 5.0f;
-		object->GetTransform()->setRotation(rot * object->GetTransform()->getRotation());
-		object->GetRigidBody()->Move(objsToCollide);
 	}
 }
 
@@ -85,67 +91,69 @@ void eShipScript::CollisionCallback(const eCollision& _collision)
 void eShipScript::Update(float _tick)
 {
 	_UpdateFlagPos();
-
-	if(object && destination != NONE)
+	if (shObject object = m_object.lock(); object)
 	{
-		auto objs = m_game->GetObjects();
-		std::vector<std::shared_ptr<eObject> > objsToCollide;
-		for (std::shared_ptr<eObject> obj : objs)
+		if (object && destination != NONE)
 		{
-			if (obj->Name() != "Terrain")
-				objsToCollide.push_back(obj);
-		}
-
-		if (!object->GetTransform()->turnTo(destination, turn_speed))
-		{
-			if (glm::length2(object->GetTransform()->getTranslation() - destination) > move_speed)
+			auto objs = m_game->GetObjects();
+			std::vector<std::shared_ptr<eObject> > objsToCollide;
+			for (std::shared_ptr<eObject> obj : objs)
 			{
-				object->GetRigidBody()->MoveForward({});
+				if (obj->Name() != "Terrain")
+					objsToCollide.push_back(obj);
 			}
-			else
-			{ //@todo if destionation is not final there might be bugs, test
-				object->GetTransform()->setTranslation(destination);
-				destination = NONE;
-				object->GetRigidBody()->Move(objsToCollide);
+
+			if (!object->GetTransform()->turnTo(destination, turn_speed))
+			{
+				if (glm::length2(object->GetTransform()->getTranslation() - destination) > move_speed)
+				{
+					object->GetRigidBody()->MoveForward({});
+				}
+				else
+				{ //@todo if destionation is not final there might be bugs, test
+					object->GetTransform()->setTranslation(destination);
+					destination = NONE;
+					object->GetRigidBody()->Move(objsToCollide);
+				}
 			}
 		}
-	}
-	else if (object && m_drowned && !m_drowning_animation && m_state == ALIVE)
-	{
-		m_state = HIT;
-		m_drowning_animation = std::make_unique<math::AnimationLeaner<float>>(std::vector<float>{0}, std::vector<float>{PI/4}, 5'000);
-		m_drowning_animation->Start();
-		m_drawn_rotation = object->GetTransform()->getRotation();
-	}
-	else if (object && m_drowning_animation && m_state == HIT && m_drowning_animation->IsOn())
-	{
-		float t = m_drowning_animation->getCurrentFrame()[0];
-		auto rot = glm::toQuat(glm::rotate(UNIT_MATRIX, t, -glm::vec3(object->GetTransform()->getRotationVector())));
-		object->GetTransform()->setRotation(rot * m_drawn_rotation);
-	}
-	else if (object && m_drowned && m_state == HIT)
-	{
-		m_state = DROWNING;
-		m_drowning_animation = std::make_unique<math::AnimationLeaner<float>>(std::vector<float>{ object->GetTransform()->getTranslation().y, },
-																																					std::vector<float>{ object->GetTransform()->getTranslation().y - 0.2f} ,
-																																					2'000);
-		m_drowning_animation->Start();
-	}
-	else if (object && m_drowned && m_state == DROWNING && m_drowning_animation->IsOn())
-	{
-		glm::vec3 translation = object->GetTransform()->getTranslation();
-		object->GetTransform()->setTranslation({ translation.x, m_drowning_animation->getCurrentFrame()[0], translation.z });
-	}
-	else if (object && m_drowned && m_state == DROWNING)
-	{
-		m_state = DROWNED;
-		auto objects = m_game->GetObjects();
-		for (int i = 0; i < objects.size(); ++i)
+		else if (object && m_drowned && !m_drowning_animation && m_state == ALIVE)
 		{
-			if (objects[i]->GetScript() == this)
+			m_state = HIT;
+			m_drowning_animation = std::make_unique<math::AnimationLeaner<float>>(std::vector<float>{0}, std::vector<float>{PI / 4}, 5'000);
+			m_drowning_animation->Start();
+			m_drawn_rotation = object->GetTransform()->getRotation();
+		}
+		else if (object && m_drowning_animation && m_state == HIT && m_drowning_animation->IsOn())
+		{
+			float t = m_drowning_animation->getCurrentFrame()[0];
+			auto rot = glm::toQuat(glm::rotate(UNIT_MATRIX, t, -glm::vec3(object->GetTransform()->getRotationVector())));
+			object->GetTransform()->setRotation(rot * m_drawn_rotation);
+		}
+		else if (object && m_drowned && m_state == HIT)
+		{
+			m_state = DROWNING;
+			m_drowning_animation = std::make_unique<math::AnimationLeaner<float>>(std::vector<float>{ object->GetTransform()->getTranslation().y, },
+				std::vector<float>{ object->GetTransform()->getTranslation().y - 0.2f},
+				2'000);
+			m_drowning_animation->Start();
+		}
+		else if (object && m_drowned && m_state == DROWNING && m_drowning_animation->IsOn())
+		{
+			glm::vec3 translation = object->GetTransform()->getTranslation();
+			object->GetTransform()->setTranslation({ translation.x, m_drowning_animation->getCurrentFrame()[0], translation.z });
+		}
+		else if (object && m_drowned && m_state == DROWNING)
+		{
+			m_state = DROWNED;
+			auto objects = m_game->GetObjects();
+			for (int i = 0; i < objects.size(); ++i)
 			{
-				objects[i]->SetVisible(false);
-				m_game->DeleteObject(objects[i]);
+				if (objects[i]->GetScript() == this)
+				{
+					objects[i]->SetVisible(false);
+					m_game->DeleteObject(objects[i]);
+				}
 			}
 		}
 	}
@@ -154,10 +162,12 @@ void eShipScript::Update(float _tick)
 //----------------------------------------------------------------------------------
 void eShipScript::_UpdateFlagPos()
 {
-	if (object->GetChildrenObjects().empty())
-		object->GetChildrenObjects().push_back(m_flag);
+	if (shObject object = m_object.lock(); object)
+	{
+		if (object->GetChildrenObjects().empty())
+			object->GetChildrenObjects().push_back(m_flag);
 
-	std::shared_ptr<eObject>	flag = object->GetChildrenObjects()[0];
+		std::shared_ptr<eObject>	flag = object->GetChildrenObjects()[0];
 
 		//getting top 4 corners of the model
 		glm::vec4 top_corners[4]; //@todo improve
@@ -176,4 +186,5 @@ void eShipScript::_UpdateFlagPos()
 
 		flag->GetTransform()->setTranslation(position);
 		flag->GetTransform()->setScale(flag_scale);
+	}
 }

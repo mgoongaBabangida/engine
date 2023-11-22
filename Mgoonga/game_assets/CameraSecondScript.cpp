@@ -12,8 +12,11 @@ CameraSecondScript::CameraSecondScript(Camera* _camera, IGame* _game)
 //----------------------------------------------------
 void	CameraSecondScript::Update(float _tick)
 {
-  m_camera->setPosition(object->GetTransform()->getTranslation());
-  m_camera->setDirection(object->GetTransform()->getRotationVector());
-  m_camera->UpdateProjectionMatrix();
-  m_game->SetFramed(m_camera->getCameraRay().FrustumCull(m_game->GetObjects()));
+  if (shObject object = m_object.lock(); object)
+  {
+    m_camera->setPosition(object->GetTransform()->getTranslation());
+    m_camera->setDirection(object->GetTransform()->getRotationVector());
+    m_camera->UpdateProjectionMatrix();
+    m_game->SetFramed(m_camera->getCameraRay().FrustumCull(m_game->GetObjects()));
+  }
 }

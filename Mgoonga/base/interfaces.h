@@ -82,14 +82,14 @@ public:
 class IScript : public IInputObserver
 {
 protected:
-	eObject* object = nullptr;
+	std::weak_ptr<eObject> m_object;
 public:
 	virtual ~IScript() = default;
 	virtual void																			Initialize() {}
 	virtual void																			Update(float _tick) = 0;
 	virtual void																			CollisionCallback(const eCollision&)	{}
-	void																							SetObject(eObject* obj) { object = obj; }
-	const eObject*																		GetScriptObject() const { return object; }
+	void																							SetObject(std::shared_ptr<eObject> obj) { m_object = obj; }
+	std::weak_ptr<eObject>														GetScriptObject() const { return m_object; }
 };
 
 //-----------------------------------------------------------------------------

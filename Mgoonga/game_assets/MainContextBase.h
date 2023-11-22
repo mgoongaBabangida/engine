@@ -104,7 +104,10 @@ public:
 	virtual std::vector<std::shared_ptr<Text>>& GetTexts();
 
 	void EnableHovered(bool _hover) { m_update_hovered = _hover; }
-	void SetInputStrategy(InputStrategy* _input_strategy) { m_input_strategy.reset(_input_strategy); }
+	void SetInputStrategy(InputStrategy* _input_strategy) 
+	{
+		m_input_strategy.reset(_input_strategy);
+	}
 
 protected:
 	virtual void		InitializePipline();
@@ -134,6 +137,8 @@ protected:
 
 	math::eClock								m_global_clock;
 
+	std::unique_ptr<InputStrategy>					m_input_strategy;
+
 	shObject																m_focused;
 	shObject																m_hovered;
 	std::vector<shObject>										m_objects;
@@ -143,7 +148,6 @@ protected:
 
 	std::vector <std::shared_ptr<IScript>>	m_global_scripts;
 
-	std::unique_ptr<InputStrategy>					m_input_strategy;
 	//debuging
 	shObject																m_light_object;
 	shObject																m_camera_obj;

@@ -27,7 +27,7 @@ void eObject::SetRigger(IRigger * _r)
 void eObject::SetScript(IScript* _scr)
 {
 	 script.reset(_scr); 
-	 _scr->SetObject(this);
+	 _scr->SetObject(shared_from_this());
 }
 
 //-----------------------------------------------------------------------------

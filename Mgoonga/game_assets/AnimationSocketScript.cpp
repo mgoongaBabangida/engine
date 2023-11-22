@@ -19,7 +19,7 @@ void AnimationSocketScript::Initialize()
 //---------------------------------------------------
 void AnimationSocketScript::Update(float _tick)
 {
-  if (object != nullptr && object->GetRigger() != nullptr)
+  if (shObject object = m_object.lock(); object && object->GetRigger() != nullptr)
   {
     const auto& sockets = object->GetRigger()->GetSockets();
     if (object->GetRigger()->GetSockets().size() != sockets_count) //socket added

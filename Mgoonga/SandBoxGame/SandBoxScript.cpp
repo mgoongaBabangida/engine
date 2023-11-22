@@ -14,9 +14,12 @@ void eSandBoxScript::Update(float _tick)
 	if(!clock.isActive())
 		clock.start();
 
-	glm::vec3 velocity = -YAXIS * (g * clock.newFrame());
-	object->GetRigidBody()->SetCurrentVelocity(velocity);	//@todo need to improve design with RigidBody
-	object->GetRigidBody()->Move(objs);
+	if (shObject object = m_object.lock(); object)
+	{
+		glm::vec3 velocity = -YAXIS * (g * clock.newFrame());
+		object->GetRigidBody()->SetCurrentVelocity(velocity);	//@todo need to improve design with RigidBody
+		object->GetRigidBody()->Move(objs);
+	}
 }
 
 void eSandBoxScript::CollisionCallback(const eCollision&)

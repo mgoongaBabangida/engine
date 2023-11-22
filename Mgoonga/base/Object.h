@@ -3,7 +3,7 @@
 #include "interfaces.h"
 
 //---------------------------------------------------------------------------------
-class DLL_BASE eObject
+class DLL_BASE eObject: public std::enable_shared_from_this<eObject>
 {
 public:
 

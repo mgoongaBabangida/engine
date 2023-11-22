@@ -33,7 +33,6 @@ protected:
   eMainContextBase* m_game = nullptr;
   std::shared_ptr<GUI> m_window;
 
-  std::weak_ptr<eObject> m_bezier_object;
   dbb::Bezier* m_bezier;
   const BezierCurveMesh* m_bezier_mesh;
   float m_cursor_x;

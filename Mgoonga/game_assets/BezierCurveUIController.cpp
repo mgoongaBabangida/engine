@@ -10,18 +10,16 @@
 
 //------------------------------------------------------
 BezierCurveUIController::BezierCurveUIController(eMainContextBase* _game, shObject _bezier_object, float _control_point_size, const Texture* _window_texture)
-: m_game(_game),
-  m_bezier_object(_bezier_object)
+: m_game(_game)
 {
-  std::shared_ptr<eObject> bezier_object =  m_bezier_object.lock();
-  auto bezier_objects = bezier_object->GetChildrenObjects();
+  auto bezier_objects = _bezier_object->GetChildrenObjects();
 
   bezier_objects[0]->GetTransform()->setScale({ _control_point_size, _control_point_size, _control_point_size });
   bezier_objects[1]->GetTransform()->setScale({ _control_point_size, _control_point_size, _control_point_size });
   bezier_objects[2]->GetTransform()->setScale({ _control_point_size, _control_point_size, _control_point_size });
   bezier_objects[3]->GetTransform()->setScale({ _control_point_size, _control_point_size, _control_point_size });
 
-  m_bezier_mesh = dynamic_cast<const BezierCurveMesh*>(bezier_object->GetModel()->GetMeshes()[0]);
+  m_bezier_mesh = dynamic_cast<const BezierCurveMesh*>(_bezier_object->GetModel()->GetMeshes()[0]);
   if (m_bezier_mesh)
     m_bezier = &const_cast<BezierCurveMesh*>(m_bezier_mesh)->GetBezier();
 
@@ -73,7 +71,7 @@ BezierCurveUIController::BezierCurveUIController(eMainContextBase* _game, shObje
 //------------------------------------------------------
 BezierCurveUIController::~BezierCurveUIController()
 {
-  m_game->SetInputStrategy(nullptr); //@todo bug falls while closing if exists
+  m_game->SetInputStrategy(nullptr);
 }
 
 //------------------------------------------------------
@@ -81,7 +79,7 @@ void BezierCurveUIController::Update(float _tick)
 {
   if (m_bezier)
   {
-    if (auto obj = m_bezier_object.lock(); obj)
+    if (auto obj = m_object.lock(); obj)
     {
       if (!m_closed)
       {
