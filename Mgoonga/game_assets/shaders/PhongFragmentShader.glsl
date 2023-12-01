@@ -154,7 +154,7 @@ vec3 SampleAlbedoTexture(vec2 TexCoords)
 					colorAlbedo = colorMain;
 			}
 		}
-		return colorAlbedo;		
+		return colorAlbedo;
 	}
 }
 
@@ -192,21 +192,21 @@ subroutine(LightingPtr) vec3 calculatePhongPointSpecDif(Light light, vec3 normal
 
   //Specular
   vec3 Reflaction = reflect(-lightVector,normal);
-  vec3 eyeVector  = normalize(eyePositionWorld.xyz - thePosition); 
+  vec3 eyeVector  = normalize(eyePositionWorld.xyz - thePosition);
   float spec      = clamp(dot(Reflaction,eyeVector), 0, 1);
 
   spec = pow(spec, shininess);
-  vec3 specularLight = vec3(light.specular.xyz *spec * SampleSpecularTexture(Texcoords));
+  vec3 specularLight = vec3(light.specular.xyz * spec * SampleSpecularTexture(Texcoords));
   specularLight=clamp(specularLight,0,1);
 
   // Attenuation
-    float distance    = length(vec3(light.position) - thePosition);
-    float attenuation = 1.0f /(light.constant + light.linear * distance + light.quadratic * (distance * distance));    
+  float distance    = length(vec3(light.position) - thePosition);
+  float attenuation = 1.0f /(light.constant + light.linear * distance + light.quadratic * (distance * distance));
  
-    diffuseLight  *= attenuation;
-    specularLight *= attenuation;
+  diffuseLight  *= attenuation;
+  specularLight *= attenuation;
 
-    return diffuseLight + specularLight;
+  return diffuseLight + specularLight;
 }
 
 subroutine(LightingPtr) vec3 calculatePhongDirectionalSpecDif(Light light, vec3 normal, vec3 thePosition, vec3 diffuseTexture, vec2 Texcoords)
@@ -252,7 +252,7 @@ subroutine(LightingPtr) vec3 calculateBlinnPhongPointSpecDif (Light light, vec3 
   vec3 diffuseLight = CalculateAlbedo(lightVector, normal, diffuseTexture);
   
   //Specular
-  vec3 eyeVector= normalize(eyePositionWorld.xyz - thePosition); 
+  vec3 eyeVector= normalize(eyePositionWorld.xyz - thePosition);
   vec3 halfvector = normalize(eyeVector+lightVector);
   float spec=clamp(dot(normal, halfvector), 0, 1);
   spec=pow(spec, shininess);
@@ -260,13 +260,13 @@ subroutine(LightingPtr) vec3 calculateBlinnPhongPointSpecDif (Light light, vec3 
   specularLight=clamp(specularLight,0,1);
 
   // Attenuation
-    float distance    = length(vec3(light.position) - thePosition);
-    float attenuation = 1.0f /(light.constant + light.linear * distance + light.quadratic * (distance * distance));    
+  float distance    = length(vec3(light.position) - thePosition);
+  float attenuation = 1.0f /(light.constant + light.linear * distance + light.quadratic * (distance * distance));
  
-    diffuseLight  *= attenuation;
-    specularLight *= attenuation;
+  diffuseLight  *= attenuation;
+  specularLight *= attenuation;
 
-    return diffuseLight + specularLight;
+  return diffuseLight + specularLight;
 }
 
 subroutine(LightingPtr) vec3 calculateBlinnPhongDirectionalSpecDif(Light light, vec3 normal, vec3 thePosition, vec3 diffuseTexture, vec2 Texcoords)
@@ -355,14 +355,8 @@ void main()
   vec3 difspec = LightingFunction(light, bNormal, thePosition, dif_texture, Texcoord);
 
 	outColor = vec4(ambientLight + difspec * shadow, 1.0);
-  
-	vec3 emissive_color;
-		if(gamma_correction)
-			emissive_color = vec3(pow(texture(texture_emissionl, Texcoord).rgb, vec3(2.2f)));
-		else
-			emissive_color = vec3(texture(texture_emissionl, Texcoord));
-
-		outColor.rgb += (emissive_color * emission_strength);
+	vec3 emissive_color = vec3(texture(texture_emissionl, Texcoord));
+	outColor.rgb += (emissive_color * emission_strength);
   }
   mask = 0.0f;
 };

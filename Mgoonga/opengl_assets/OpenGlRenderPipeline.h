@@ -182,7 +182,7 @@ protected:
 	bool			ssao = false;
 	bool			ssr = false;
 	bool			m_pb_bloom = false;
-	float			blur_coef = 0.5f;
+	float			blur_coef = 0.2f;
 	bool			m_mesh_line_on = false;
 
 	bool			mousepress = true; //to draw framed objects

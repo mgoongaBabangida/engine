@@ -38,33 +38,55 @@ ePBRRender::ePBRRender(const std::string& vS, const std::string& fS)
 void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<shObject>& objects)
 {
   glUseProgram(pbrShader.ID());
-
   {
     std::vector<glm::vec4> lpositions;
     std::vector<glm::vec4> ldirections;
     std::vector<glm::vec4> lcolors;
 
+    std::vector <float> lconstant;
+    std::vector <float> llinear;
+    std::vector <float> lquadratic;
+
+    std::vector <float> lcutoffs;
+    std::vector <float> louterCutoffs;
+    std::vector <bool> flashs;
+
     lpositions.push_back(_light.light_position);
     ldirections.push_back(_light.light_direction);
     lcolors.push_back({ _light.intensity });
+    lconstant.push_back(_light.constant);
+    llinear.push_back(_light.linear);
+    lquadratic.push_back(_light.quadratic);
+    lcutoffs.push_back(_light.cutOff);
+    louterCutoffs.push_back(_light.outerCutOff);
+    flashs.push_back(_light.type == eLightType::SPOT);
 
     GLuint loc_pos = glGetUniformLocation(pbrShader.ID(), "lightPositions");
-    glUniform3fv(loc_pos, 1, &lpositions[0][0]);
+    glUniform4fv(loc_pos, 1, &lpositions[0][0]);
 
     GLuint loc_dir = glGetUniformLocation(pbrShader.ID(), "lightDirections");
-    glUniform3fv(loc_dir, 1, &ldirections[0][0]);
+    glUniform4fv(loc_dir, 1, &ldirections[0][0]);
 
     GLuint loc_col = glGetUniformLocation(pbrShader.ID(), "lightColors");
-    glUniform3fv(loc_col, 1, &lcolors[0][0]);
+    glUniform4fv(loc_col, 1, &lcolors[0][0]);
+
+    pbrShader.SetUniformData("constant[0]", lconstant[0]);
+    pbrShader.SetUniformData("linear[0]", llinear[0]);
+    pbrShader.SetUniformData("quadratic[0]", lquadratic[0]);
+
+    pbrShader.SetUniformData("cutOff[0]", lcutoffs[0]);
+    pbrShader.SetUniformData("outerCutOff[0]", louterCutoffs[0]);
+    pbrShader.SetUniformData("flash[0]", flashs[0]);
   }
 
   if (_light.type == eLightType::POINT)
   {
-    pbrShader.SetUniformData("shininess", 32.0f);
-    glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(_light.light_position), glm::vec3(_light.light_position) + glm::vec3(_light.light_direction),
-      glm::vec3(0.0f, 1.0f, 0.0f));
+    //pbrShader.SetUniformData("shininess", 32.0f);
+    glm::mat4 worldToViewMatrix = glm::lookAt(glm::vec3(_light.light_position),
+                                              glm::vec3(_light.light_position) + glm::vec3(_light.light_direction),
+                                              glm::vec3(0.0f, 1.0f, 0.0f));
     pbrShader.SetUniformData("shadow_directional", false);
-    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexPoint);
+    //glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexPoint);
     shadowMatrix = camera.getProjectionBiasedMatrix() * worldToViewMatrix;
   }
   else if (_light.type == eLightType::SPOT)

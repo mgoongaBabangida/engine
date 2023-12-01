@@ -161,7 +161,11 @@ void eMainContextBase::InitializeGL()
 		//m_lights[0].light_position = vec4(0.0f, 4.0f, -1.0f, 1.0f);
 		m_lights[0].light_position = vec4(0.5f, 2.0f, -4.0f, 1.0f);
 		m_lights[0].light_direction = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		m_lights[0].intensity = vec4{ 10.0f,10.0f ,10.0f, 1.0f };
 		m_lights[0].type = eLightType::DIRECTION;
+		m_lights[0].constant = 0.9f;
+		m_lights[0].linear = 0.5f;
+		m_lights[0].quadratic = 0.03f;
 
 		//init main camera
 		m_cameras.emplace_back(pipeline.Width(), pipeline.Height(), 0.1f, 40.0f);
@@ -540,7 +544,7 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[0]->Add(LIGHT_TYPE_VISUAL, "Light object.", modelManager.get());
 	externalGui[0]->Add(SLIDER_FLOAT_3, "Light position.", &GetMainLight().light_position);
 	externalGui[0]->Add(SLIDER_FLOAT_3, "Light direction.", &GetMainLight().light_direction);
-	externalGui[0]->Add(SLIDER_FLOAT_3, "Light intensity.", &GetMainLight().intensity);
+	externalGui[0]->Add(SLIDER_FLOAT_3_LARGE, "Light intensity.", &GetMainLight().intensity);
 	externalGui[0]->Add(SLIDER_FLOAT_3, "Light ambient.", &GetMainLight().ambient);
 	externalGui[0]->Add(SLIDER_FLOAT_3, "Light diffuse.", &GetMainLight().diffuse);
 	externalGui[0]->Add(SLIDER_FLOAT_3, "Light specular.", &GetMainLight().specular);

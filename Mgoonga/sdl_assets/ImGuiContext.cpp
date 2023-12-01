@@ -271,6 +271,14 @@ void eWindowImGui::Render()
         ImGui::SliderFloat3(std::get<0>(item).c_str(), &transfer_data->data[0],-10, 10); //@todo
       }
       break;
+      case SLIDER_FLOAT_3_LARGE:
+      {
+        eThreeFloat* transfer_data = static_cast<eThreeFloat*>(std::get<2>(item));
+        ImGui::Text(std::get<0>(item).c_str());
+        ImGui::PushItemWidth(ImGui::GetWindowWidth());
+        ImGui::SliderFloat3(std::get<0>(item).c_str(), &transfer_data->data[0], 0, 100); //@todo
+      }
+      break;
       case SLIDER_FLOAT_3_CALLBACK:
       {
         eThreeFloatCallback* transfer_data = static_cast<eThreeFloatCallback*>(std::get<2>(item));

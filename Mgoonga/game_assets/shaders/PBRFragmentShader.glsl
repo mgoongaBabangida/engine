@@ -36,10 +36,20 @@ layout(binding=11) uniform sampler2D   brdfLUT;
 
 layout(binding=13) uniform sampler2DArray  texture_array_csm;
 
-// lights
+// lights - > to structs ///////////////
 uniform vec4 lightPositions[1];
 uniform vec4 lightDirections[1];
 uniform vec4 lightColors[1];
+
+uniform float constant[1];
+uniform float linear[1];
+uniform float quadratic[1];
+
+uniform float cutOff[1];
+uniform float outerCutOff[1];
+
+uniform bool flash[1];
+///////////////////////////////////////
 
 uniform vec4 camPos;
 uniform bool gamma_correction = true;
@@ -78,7 +88,7 @@ void main()
    float metallic_f;
    float roughness_f;
    
-   if(textured)	
+   if(textured)
    {
    if(gamma_correction)
      albedo_f    = pow(texture(albedoMap, Texcoord).rgb, vec3(2.2));
@@ -95,10 +105,10 @@ void main()
 
     if(use_normalmap_texture)
     {
-    theNormal_f = texture(normalMap, Texcoord).rgb;
-	  // Transform normal vector to range [-1,1]
-	  theNormal_f = normalize(theNormal_f * 2.0 - 1.0);
-	  theNormal_f = normalize(TBN * theNormal_f);
+      theNormal_f = texture(normalMap, Texcoord).rgb;
+	    // Transform normal vector to range [-1,1]
+	    theNormal_f = normalize(theNormal_f * 2.0 - 1.0);
+	    theNormal_f = normalize(TBN * theNormal_f);
     }
     else
       theNormal_f = theNormal;
@@ -108,8 +118,8 @@ void main()
    else
     roughness_f = roughness;
 
-    vec3 N = normalize(theNormal_f);
-    vec3 V = normalize(camPos.xyz - thePosition);
+  vec3 N = normalize(theNormal_f);
+  vec3 V = normalize(camPos.xyz - thePosition);
 	vec3 R = reflect(-V, N);
 	
     vec3 F0 = vec3(0.04); 
@@ -117,70 +127,74 @@ void main()
 	           
     // reflectance equation
     vec3 Lo = vec3(0.0);
-    for(int i = 0; i < 1; ++i) 
+    for(int i = 0; i < 1; ++i)
     {
-        // calculate per-light radiance
-        vec3 L = normalize(lightPositions[i].xyz - thePosition);
-        vec3 H = normalize(V + L);
-        float distance    = length(lightPositions[i].xyz - thePosition);
-        float attenuation = 1.0 / (distance * distance);
-        vec3 radiance     = lightColors[i].xyz * attenuation;        
-        
-        // cook-torrance brdf
-        float NDF = DistributionGGX(N, H, roughness_f);        
-        float G   = GeometrySmith(N, V, L, roughness_f);      
-        vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);       
-        
-		vec3 numerator    = NDF * G * F;
-        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-        vec3 specular     = numerator / max(denominator, 0.001); 
-		
-        vec3 kS = F;
-        vec3 kD = vec3(1.0) - kS;
-        kD *= 1.0 - metallic_f;	   
-            
-        // add to outgoing radiance Lo
-        float NdotL = max(dot(N, L), 0.0);                
-        Lo += (kD * albedo_f / PI + specular) * radiance * NdotL; 
+      // calculate per-light radiance
+      vec3 L = normalize(lightPositions[i].xyz - thePosition);
+      vec3 H = normalize(V + L);
+      float distance    = length(lightPositions[i].xyz - thePosition);
+      float attenuation = 1.0f /(constant[i] + linear[i] * distance + quadratic[i] * (distance * distance));
+      vec3 radiance     = lightColors[i].xyz * attenuation;
+      
+      // cook-torrance brdf
+      float NDF = DistributionGGX(N, H, roughness_f);
+      float G   = GeometrySmith(N, V, L, roughness_f);
+      vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
+
+		  vec3 numerator    = NDF * G * F;
+      float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+      vec3 specular     = numerator / max(denominator, 0.001); 
+
+      vec3 kS = F;
+      vec3 kD = vec3(1.0) - kS;
+      kD *= 1.0 - metallic_f;
+          
+      // add to outgoing radiance Lo
+      float NdotL = max(dot(N, L), 0.0);
+      vec3 outgoing_radiance = (kD * albedo_f / PI + specular) * radiance * NdotL;
+      if(flash[i])
+      {
+      float theta     = dot(L, normalize(-lightDirections[i].xyz));
+	    float epsilon   = cutOff[i] - outerCutOff[i];
+	    float intensity = clamp((theta - outerCutOff[i]) / epsilon, 0.0, 1.0);
+      outgoing_radiance *= intensity;
+      }
+      Lo += outgoing_radiance;
     }
 
 	// ambient lighting (we now use IBL as the ambient term)
-    vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness_f);
+  vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness_f);
 	vec3 kS = F;
 	vec3 kD = 1.0 - kS;
 	kD *= 1.0 - metallic_f;
 	
 	vec3 irradiance = texture(irradianceMap, N).rgb;
-	vec3 diffuse      = irradiance * albedo_f;
+	vec3 diffuse    = irradiance * albedo_f;
 	
 	// sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
-    const float MAX_REFLECTION_LOD = 4.0;
-    vec3 prefilteredColor = textureLod(prefilterMap, R,  roughness_f * MAX_REFLECTION_LOD).rgb;    
-    vec2 brdf  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness_f)).rg;
-    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+  const float MAX_REFLECTION_LOD = 4.0;
+  vec3 prefilteredColor = textureLod(prefilterMap, R,  roughness_f * MAX_REFLECTION_LOD).rgb;
+  vec2 brdf  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness_f)).rg;
+  vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 	
 	vec3 ambient = (kD * diffuse + specular) * ao;
-	
-    vec3 color = ambient + Lo;
+  vec3 color = ambient + Lo;
 	
 	vec3 emissive_color;
-	  if(gamma_correction)
-		emissive_color = vec3(pow(texture(texture_emissionl, Texcoord).rgb, vec3(2.2f)));
-	  else
 		emissive_color = vec3(texture(texture_emissionl, Texcoord));
 	color.rgb += (emissive_color * emission_strength);
 	
-	 float shadow;
-	 vec3 lightVector = -normalize(vec3(lightDirections[0]));	 // should be for every light
-     if(shadow_directional && !use_csm_shadows)
-		shadow =  ShadowCalculation(LightSpacePos, lightVector, N);
-     else if(shadow_directional && use_csm_shadows)
-		shadow = ShadowCalculationCSM(vec4(thePosition, 1.0f), lightVector, N);
-     else
-		shadow =  ShadowCalculationCubeMap(thePosition);
-		
-    FragColor = vec4(color * shadow, 1.0);
-    mask = 1.0f - roughness_f;
+ float shadow;
+ vec3 lightVector = -normalize(vec3(lightDirections[0]));	 // @should be for every light
+  if(shadow_directional && !use_csm_shadows)
+	 shadow =  ShadowCalculation(LightSpacePos, lightVector, N);
+  else if(shadow_directional && use_csm_shadows)
+	 shadow = ShadowCalculationCSM(vec4(thePosition, 1.0f), lightVector, N);
+  else
+	 shadow =  ShadowCalculationCubeMap(thePosition);
+	
+  FragColor = vec4(color * shadow, 1.0);
+  mask = 1.0f - roughness_f;
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
