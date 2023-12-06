@@ -34,6 +34,8 @@ public:
 												std::vector<std::shared_ptr<Text>>& _texts);
 	//@todo gui should be const latter ?, and camera prob
 	
+	void			UpdateSharedUniforms();
+
 	void			Initialize();
 	void			InitializeBuffers();
 	void			InitializeRenders(eModelManager&, eTextureManager&, const std::string& shadersFolderPath);
@@ -56,6 +58,7 @@ public:
 	void			SwitchSkyBox(bool on) { skybox = on; }
 	void			SwitchWater(bool on)  { water = on; }
 
+	// Getters
 	float			GetWaterHeight() const { return waterHeight; }
 
   bool& GetBoundingBoxBoolRef() { return draw_bounding_boxes; }
@@ -107,6 +110,19 @@ public:
 	int& NumBinarySearchSteps();
 	float& ReflectionSpecularFalloffExponent();
 
+	// Fog
+	struct FogInfo
+	{
+		float maxDist = 40.0f;
+		float minDist = 10.0f;
+		vec4 color = vec4{0.5f,0.5f ,0.5f ,1.0f};
+		bool fog_on = true;
+		float density = 0.03f;
+		float gradient = 4.0f;
+	};
+
+	FogInfo& GetFogInfo() { return m_foginfo; }
+
 	float& Metallic();
 	float& Spec();
 	glm::vec4& Scale();
@@ -152,7 +168,7 @@ protected:
 	void			RenderRefraction(Camera&, const Light&, std::vector<shObject>&, std::vector<shObject>&);
 	void			RenderSkyNoise(const Camera&);
 	void			RenderMain(const Camera&, const Light&, const std::vector<shObject>&);
-	void RenderAreaLightsOnly(const Camera& _camera, const Light& _light, const std::vector<shObject>& _objects);
+	void			RenderAreaLightsOnly(const Camera& _camera, const Light& _light, const std::vector<shObject>& _objects);
 	void			RenderOutlineFocused(const Camera&, const Light&, const std::vector<shObject>&);
 	void			RenderFlags(const Camera&, const Light&, std::vector<shObject>);
 	void			RenderWater(const Camera&, const Light&);
@@ -185,6 +201,8 @@ protected:
 	float			blur_coef = 0.2f;
 	bool			m_mesh_line_on = false;
 
+	FogInfo		m_foginfo;
+
 	bool			mousepress = true; //to draw framed objects
 	float			waterHeight = 2.0f;
 	bool			m_first_call = true;
@@ -192,7 +210,7 @@ protected:
 	//statistic
 	uint32_t m_draw_calls = 0;
 
-	const uint32_t  width		  = 1200;
+	const uint32_t  width		  = 1200; //@todo make resizable
 	const uint32_t  height		= 600;
 
 	std::unique_ptr<eRenderManager>	renderManager;

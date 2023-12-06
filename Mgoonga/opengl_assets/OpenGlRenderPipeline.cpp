@@ -13,9 +13,11 @@
 
 #include <algorithm>
 
+//---------------------------------------------------------------------------------------------
 void	eOpenGlRenderPipeline::SetSkyBoxTexture(const Texture* _t)
 { renderManager->SkyBoxRender()->SetSkyBoxTexture(_t); }
 
+//---------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::SetSkyIBL(unsigned int _irr, unsigned int _prefilter)
 {
 	glActiveTexture(GL_TEXTURE9);
@@ -25,19 +27,23 @@ void eOpenGlRenderPipeline::SetSkyIBL(unsigned int _irr, unsigned int _prefilter
 	glBindTexture(GL_TEXTURE_CUBE_MAP, _prefilter);
 }
 
+//---------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::AddParticleSystem(std::shared_ptr<IParticleSystem> _system)
 {
 	renderManager->AddParticleSystem(_system);
 }
 
+//---------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::AddParticleSystemGPU(glm::vec3 _startPos, const Texture* _texture)
 {
 	renderManager->AddParticleSystemGPU(_startPos, _texture);
 }
 
+//---------------------------------------------------------------------------------------------
 const std::vector<ShaderInfo>& eOpenGlRenderPipeline::GetShaderInfos() const
 { return renderManager->GetShaderInfos(); }
 
+//---------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::UpdateShadersInfo()
 {
 	renderManager->UpdateShadersInfo();
@@ -60,6 +66,24 @@ eOpenGlRenderPipeline::eOpenGlRenderPipeline(uint32_t _width, uint32_t _height)
 //-------------------------------------------------------------------------------------------
 eOpenGlRenderPipeline::~eOpenGlRenderPipeline()
 {
+}
+
+//-------------------------------------------------------------------------------------------
+void eOpenGlRenderPipeline::UpdateSharedUniforms()
+{
+	//SetUniformData("class ePBRRender", "Fog.maxDist", m_foginfo.maxDist);
+	//SetUniformData("class ePBRRender", "Fog.minDist", m_foginfo.minDist);
+	SetUniformData("class ePBRRender", "Fog.color", m_foginfo.color);
+	SetUniformData("class ePBRRender", "Fog.fog_on", m_foginfo.fog_on);
+	SetUniformData("class ePBRRender", "Fog.density", m_foginfo.density);
+	SetUniformData("class ePBRRender", "Fog.gradient", m_foginfo.gradient);
+
+	//SetUniformData("class ePhongRender", "Fog.maxDist", m_foginfo.maxDist);
+	//SetUniformData("class ePhongRender", "Fog.minDist", m_foginfo.minDist);
+	SetUniformData("class ePhongRender", "Fog.color", m_foginfo.color);
+	SetUniformData("class ePhongRender", "Fog.fog_on", m_foginfo.fog_on);
+	SetUniformData("class ePhongRender", "Fog.density", m_foginfo.density);
+	SetUniformData("class ePhongRender", "Fog.gradient", m_foginfo.gradient);
 }
 
 //-------------------------------------------------------------------------------------------

@@ -51,6 +51,17 @@ uniform float outerCutOff[1];
 uniform bool flash[1];
 ///////////////////////////////////////
 
+struct FogInfo
+{
+  float maxDist;
+  float minDist;
+  vec4 color;
+	bool fog_on;
+	float density;
+	float gradient;
+};
+uniform FogInfo Fog;
+
 uniform vec4 camPos;
 uniform bool gamma_correction = true;
 uniform float emission_strength = 1.0f;
@@ -194,6 +205,15 @@ void main()
 	 shadow =  ShadowCalculationCubeMap(thePosition);
 	
   FragColor = vec4(color * shadow, 1.0);
+
+  if(Fog.fog_on)
+	{
+	 float dist = abs(vec4(view * vec4(thePosition, 1.0f)).z);
+	 float fogFactor = exp(-pow(dist * Fog.density, Fog.gradient));
+	 fogFactor = clamp( fogFactor, 0.0f, 1.0f );
+	 FragColor.rgb = mix(Fog.color.rgb, FragColor.rgb, fogFactor);
+	}
+
   mask = 1.0f - roughness_f;
 }
 

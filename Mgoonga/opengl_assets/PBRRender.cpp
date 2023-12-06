@@ -1,6 +1,7 @@
 #include "PBRRender.h"
 
 #include <math/Camera.h>
+
 #include <glm\glm\gtc\matrix_transform.hpp>
 #include <glm\glm\gtx\transform.hpp>
 #include <glm\glm\gtc\quaternion.hpp>
@@ -22,6 +23,13 @@ ePBRRender::ePBRRender(const std::string& vS, const std::string& fS)
   camPosLoc         = glGetUniformLocation(pbrShader.ID(), "camPos");
 
   glUniform1f(aoLoc, 1.0f); //@todo take from material if textured too
+
+  pbrShader.SetUniformData("Fog.maxDist", 40.0f);
+  pbrShader.SetUniformData("Fog.minDist", 20.0f);
+  pbrShader.SetUniformData("Fog.color", glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+  pbrShader.SetUniformData("Fog.fog_on", true);
+  pbrShader.SetUniformData("Fog.density", 0.007f);
+  pbrShader.SetUniformData("Fog.gradient", 1.5f);
 
   //vertex shader
   BonesMatLocation = glGetUniformLocation(pbrShader.ID(), "gBones");
@@ -79,6 +87,8 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
     pbrShader.SetUniformData("flash[0]", flashs[0]);
   }
 
+  pbrShader.SetUniformData("view", camera.getWorldToViewMatrix());
+
   if (_light.type == eLightType::POINT)
   {
     //pbrShader.SetUniformData("shininess", 32.0f);
@@ -116,7 +126,6 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
     pbrShader.SetUniformData("shadow_directional", true);
     pbrShader.SetUniformData("use_csm_shadows", true);
     glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
-    pbrShader.SetUniformData("view", camera.getWorldToViewMatrix());
     pbrShader.SetUniformData("farPlane", camera.getFarPlane());
     pbrShader.SetUniformData("cascadeCount", m_shadowCascadeLevels.size());
     for (size_t i = 0; i < m_shadowCascadeLevels.size(); ++i)

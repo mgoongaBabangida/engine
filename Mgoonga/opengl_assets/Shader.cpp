@@ -343,6 +343,9 @@ bool Shader::SetUniformData(const std::string& _name, const UniformData& _data)
 			glUniform1i(glGetUniformLocation(id, _name.c_str()), *pval);
 		else if (const float* pval = std::get_if<float>(&_data))
 			glUniform1f(glGetUniformLocation(id, _name.c_str()), *pval);
+		else if (const glm::vec4* pval = std::get_if<glm::vec4>(&_data))
+			glUniform4f(glGetUniformLocation(id, _name.c_str()), (*pval)[0], (*pval)[1], (*pval)[2], (*pval)[3]);
+		//@todo other types
 	}
 	return false;
 }

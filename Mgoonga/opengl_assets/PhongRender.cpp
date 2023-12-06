@@ -8,7 +8,6 @@ ePhongRender::ePhongRender(const std::string& vS, const std::string& fS)
 : matrices(MAX_BONES)
 {
 	mainShader.installShaders(vS.c_str(), fS.c_str()); //main pass
-
 	glUseProgram(mainShader.ID());
 
 	//Matrix
@@ -21,6 +20,13 @@ ePhongRender::ePhongRender(const std::string& vS, const std::string& fS)
 	LightingIndexDirectional = glGetSubroutineIndex(mainShader.ID(), GL_FRAGMENT_SHADER, "calculateBlinnPhongDirectionalSpecDif");
 	LightingIndexPoint = glGetSubroutineIndex(mainShader.ID(), GL_FRAGMENT_SHADER, "calculateBlinnPhongPointSpecDif");
 	LightingIndexSpot = glGetSubroutineIndex(mainShader.ID(), GL_FRAGMENT_SHADER, "calculateBlinnPhongFlashSpecDif");
+
+	mainShader.SetUniformData("Fog.maxDist", 40.0f);
+	mainShader.SetUniformData("Fog.minDist", 20.0f);
+	mainShader.SetUniformData("Fog.color", glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+	mainShader.SetUniformData("Fog.fog_on", true);
+	mainShader.SetUniformData("Fog.density", 0.007f);
+	mainShader.SetUniformData("Fog.gradient", 1.5f);
 }
 
 //---------------------------------------------------------------------------------
@@ -55,6 +61,8 @@ void ePhongRender::Render(const Camera&								camera,
 	mainShader.SetUniformData("light.quadratic", light.quadratic);
 	mainShader.SetUniformData("light.cutOff", light.cutOff);
 	mainShader.SetUniformData("light.outerCutOff", light.outerCutOff);
+
+	mainShader.SetUniformData("view", camera.getWorldToViewMatrix());
 
 	if (light.type == eLightType::POINT)
 	{
@@ -92,7 +100,6 @@ void ePhongRender::Render(const Camera&								camera,
 		mainShader.SetUniformData("shadow_directional", true);
 		mainShader.SetUniformData("use_csm_shadows", true);
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
-		mainShader.SetUniformData("view", camera.getWorldToViewMatrix());
 		mainShader.SetUniformData("farPlane", camera.getFarPlane());
 		mainShader.SetUniformData("cascadeCount", m_shadowCascadeLevels.size());
 		for (size_t i = 0; i < m_shadowCascadeLevels.size(); ++i)

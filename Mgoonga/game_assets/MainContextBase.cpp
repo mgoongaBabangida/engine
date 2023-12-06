@@ -284,6 +284,7 @@ void eMainContextBase::PaintGL()
 		objects.insert({ eObject::RenderType::LINES, lines });
 		objects.insert({ eObject::RenderType::AREA_LIGHT_ONLY, arealighted });
 
+		pipeline.UpdateSharedUniforms();
 		pipeline.RenderFrame(objects, m_cameras, GetMainLight(), m_guis, m_texts);
 
 		if (m_debug_csm)
@@ -633,6 +634,12 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[1]->Add(CHECKBOX, "SSAO", &pipeline.GetSSAOEnabledRef());
 	externalGui[1]->Add(SLIDER_FLOAT, "SSAO Threshold", &pipeline.GetSaoThresholdRef());
 	externalGui[1]->Add(SLIDER_FLOAT, "SSAO Strength", &pipeline.GetSaoStrengthRef());
+	//Fog
+	externalGui[1]->Add(CHECKBOX, "Fog", &pipeline.GetFogInfo().fog_on);
+	externalGui[1]->Add(SLIDER_FLOAT_3, "Fog color.", &pipeline.GetFogInfo().color);
+	externalGui[1]->Add(SLIDER_FLOAT_NERROW, "Fog density", &pipeline.GetFogInfo().density);
+	externalGui[1]->Add(SLIDER_FLOAT, "Fog gradient", &pipeline.GetFogInfo().gradient);
+	//SSR
 	externalGui[1]->Add(CHECKBOX, "SSR", &pipeline.GetSSREnabledRef());
 	externalGui[1]->Add(SLIDER_FLOAT, "Step", &pipeline.Step());
 	externalGui[1]->Add(SLIDER_FLOAT, "MinRayStep", &pipeline.MinRayStep());
@@ -640,6 +647,7 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[1]->Add(SLIDER_INT_NERROW, "NumBinarySearchSteps", &pipeline.NumBinarySearchSteps());
 	externalGui[1]->Add(SLIDER_FLOAT, "ReflectionSpecularFalloffExponent", &pipeline.ReflectionSpecularFalloffExponent());
 	externalGui[1]->Add(SLIDER_FLOAT_LARGE, "K", &pipeline.K());
+
 	externalGui[1]->Add(CHECKBOX, "Shadows", &pipeline.ShadowingRef());
 
 	std::function<void()> emit_partilces_callback = [this]()

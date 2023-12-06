@@ -33,6 +33,17 @@ in vec4 debug;
 
 uniform Light light;
 
+struct FogInfo
+{
+  float maxDist;
+  float minDist;
+  vec4 color;
+	bool fog_on;
+	float density;
+	float gradient;
+};
+uniform FogInfo Fog;
+
 subroutine vec3 LightingPtr(Light light, vec3 normal, vec3 thePosition, vec3 diffuseTexture, vec2 Texcoords);
 subroutine uniform LightingPtr LightingFunction;
 
@@ -343,7 +354,7 @@ void main()
   vec3 ambientLight = light.ambient.xyz * dif_texture * AmbientOcclusion; 
 
   float shadow;
-	 vec3 lightVector = -normalize(vec3(light.direction));	 
+	 vec3 lightVector = -normalize(vec3(light.direction));
      if(shadow_directional && !use_csm_shadows)
 		shadow =  ShadowCalculation(LightSpacePos, lightVector, bNormal);
      else if(shadow_directional && use_csm_shadows)
@@ -357,6 +368,14 @@ void main()
 	outColor = vec4(ambientLight + difspec * shadow, 1.0);
 	vec3 emissive_color = vec3(texture(texture_emissionl, Texcoord));
 	outColor.rgb += (emissive_color * emission_strength);
+
+	if(Fog.fog_on)
+	{
+		float dist = abs(vec4(view * vec4(thePosition, 1.0f)).z);
+		float fogFactor = exp(-pow(dist * Fog.density, Fog.gradient));
+		fogFactor = clamp( fogFactor, 0.0f, 1.0f );
+		outColor.rgb = mix(Fog.color.rgb, outColor.rgb, fogFactor);
+	}
   }
   mask = 0.0f;
 };
@@ -407,7 +426,7 @@ float ShadowCalculationCubeMap(vec3 fragPos)
 float ShadowCalculationCSM(vec4 fragPosWorldSpace, vec3 lightDir, vec3 normal)
 {
 	vec4 fragPosViewSpace = view * fragPosWorldSpace;
-	float depthValue = abs(fragPosViewSpace.z);		
+	float depthValue = abs(fragPosViewSpace.z);
 	int layer = -1;
 	for (int i = 0; i < cascadeCount; ++i)
 	{
@@ -420,7 +439,7 @@ float ShadowCalculationCSM(vec4 fragPosWorldSpace, vec3 lightDir, vec3 normal)
 	if (layer == -1)
 	{
 		layer = cascadeCount;
-	}		
+	}
 	vec4 fragPosLightSpace = lightSpaceMatrices[layer] * fragPosWorldSpace;
 	
 	// perform perspective divide
@@ -452,13 +471,9 @@ float ShadowCalculationCSM(vec4 fragPosWorldSpace, vec3 lightDir, vec3 normal)
 	{
 		for(int y = -1; y <= 1; ++y)
 		{
-			float pcfDepth = texture(
-						texture_array_csm,
-						vec3(projCoords.xy + vec2(x, y) * texelSize,
-						layer)
-						).r; 
-			shadow += (currentDepth - bias) > pcfDepth ? 1.0 : 0.0;        
-		}    
+			float pcfDepth = texture(texture_array_csm, vec3(projCoords.xy + vec2(x, y) * texelSize,layer)).r; 
+			shadow += (currentDepth - bias) > pcfDepth ? 1.0 : 0.0;
+		}
 	}
 	shadow /= 9.0;
 		

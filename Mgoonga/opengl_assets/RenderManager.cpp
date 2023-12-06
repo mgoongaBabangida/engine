@@ -263,7 +263,6 @@ bool eRenderManager::SetUniformData(const std::string& _renderName, const std::s
 		return true;
 	if (shader_lambda(m_textRender.get()))
 		return true;
-	return true;
 	if (shader_lambda(m_pbrRender.get()))
 		return true;
 	if (shader_lambda(m_bezierRender.get()))
