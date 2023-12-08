@@ -78,6 +78,8 @@ void eOpenGlRenderPipeline::UpdateSharedUniforms()
 	SetUniformData("class ePBRRender", "Fog.density", m_foginfo.density);
 	SetUniformData("class ePBRRender", "Fog.gradient", m_foginfo.gradient);
 
+	SetUniformData("class ePBRRender", "ibl_on", ibl_on);
+
 	//SetUniformData("class ePhongRender", "Fog.maxDist", m_foginfo.maxDist);
 	//SetUniformData("class ePhongRender", "Fog.minDist", m_foginfo.minDist);
 	SetUniformData("class ePhongRender", "Fog.color", m_foginfo.color);

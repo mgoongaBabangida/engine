@@ -618,6 +618,7 @@ void eMainContextBase::InitializeExternalGui()
 			pipeline.SetSkyIBL(irr, prefilter);
 		}
 	};
+	externalGui[1]->Add(CHECKBOX, "Use IBL", &pipeline.IBL());
 	externalGui[1]->Add(SPIN_BOX, "IBL Map", (void*)&change_ibl_callback);
 	externalGui[1]->Add(CHECKBOX, "Water", &pipeline.GetWaterOnRef());
 	externalGui[1]->Add(CHECKBOX, "Hex", &pipeline.GetGeometryOnRef());

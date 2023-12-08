@@ -89,6 +89,8 @@ public:
 	bool& GetGammaCorrectionRef();
 	bool& GetToneMappingRef();
 
+	bool& IBL() { return ibl_on; }
+
 	//Water Render
 	float& WaveSpeedFactor();
 	float& Tiling();
@@ -200,6 +202,7 @@ protected:
 	bool			m_pb_bloom = false;
 	float			blur_coef = 0.2f;
 	bool			m_mesh_line_on = false;
+	bool			ibl_on = true;
 
 	FogInfo		m_foginfo;
 
