@@ -394,10 +394,8 @@ bool Rigger::UseFirstFrameAsIdle()
 		return false;
 
 	if (currentAnim == nullptr)
-		currentAnim = &animations[0];
+		Apply(0, false);
 
-	currentAnim->Start();
 	currentAnim->FreezeFrame(0);
-	//currentAnim->Stop();
 	return true;
 }
