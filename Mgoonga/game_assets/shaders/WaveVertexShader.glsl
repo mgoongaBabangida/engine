@@ -25,7 +25,6 @@ uniform mat4 ModelViewMatrix;
 uniform mat4 MVP;
 uniform mat4 shadowMatrix;
 
- 
 void main()
 {
      vec4 pos = vec4(position,1.0);

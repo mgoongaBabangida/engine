@@ -178,9 +178,16 @@ void GameController::Initialize()
 //--------------------------------------------------------------------------
 bool GameController::OnKeyPress(uint32_t _asci, KeyModifiers _modifier)
 {
-  shObject object_pirate = m_ships_pirate[m_focused_index]->GetScriptObject().lock();
-  shObject object_spanish = m_ships[m_focused_index]->GetScriptObject().lock();
-  if (object_pirate && object_spanish)
+  shObject focused_obj;
+  if(m_focused_index == -1)
+    return false;
+
+  if(m_game_state == GameState::SPANISH_TO_MOVE)
+    focused_obj = m_ships[m_focused_index]->GetScriptObject().lock();
+  else
+    focused_obj = m_ships_pirate[m_focused_index]->GetScriptObject().lock();
+
+  if (focused_obj.get())
   {
     switch (_asci)
     {
@@ -191,14 +198,12 @@ bool GameController::OnKeyPress(uint32_t _asci, KeyModifiers _modifier)
     }
     case ASCII_K:
     {
-      const eObject* obj = m_game_state == GameState::SPANISH_TO_MOVE ? object_spanish.get() : object_pirate.get();
-      OnShoot(obj);
+      OnShoot(focused_obj.get());
       break;
     }
     case ASCII_H:
     {
-      const eObject* obj = m_game_state == GameState::SPANISH_TO_MOVE ? object_spanish.get() : object_pirate.get();
-      OnGetHit(obj);
+      OnGetHit(focused_obj.get());
       break;
     }
     return true;

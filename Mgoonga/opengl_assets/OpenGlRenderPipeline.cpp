@@ -786,7 +786,7 @@ void eOpenGlRenderPipeline::RenderOutlineFocused(const Camera& _camera, const Li
 
 void eOpenGlRenderPipeline::RenderFlags(const Camera& _camera, const Light& _light, std::vector<shObject> flags)
 {
-	renderManager->WaveRender()->Render(_camera, _light, flags);
+	renderManager->PhongRender()->RenderWaves(_camera, _light, flags);
 }
 
 void eOpenGlRenderPipeline::RenderWater(const Camera& _camera, const Light& _light)

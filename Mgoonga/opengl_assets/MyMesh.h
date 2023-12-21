@@ -123,7 +123,7 @@ public:
 	virtual ~SimpleGeometryMesh();
 
 	float GetRadius() const { return m_radius; }
-	glm::vec3 GetColor() const { return m_color; }
+	glm::vec4 GetColor() const { return m_color; }
 	GeometryType GetGeometryType() const { return m_type; }
 	void SetDots(const std::vector<glm::vec3>&);
 
@@ -139,7 +139,7 @@ protected:
 	std::string m_name = "SimpleGeometryMesh";
 	std::vector<glm::vec3> m_dots;
 	float									 m_radius;
-	glm::vec3							 m_color;
+	glm::vec4							 m_color;
 	GeometryType					 m_type;
 
 	GLuint hexVAO;
@@ -178,9 +178,9 @@ class DLL_OPENGL_ASSETS LineMesh : public IMesh
 {
 public:
 	LineMesh(const std::vector<glm::vec3>&, const std::vector<GLuint>&, glm::vec4);
+	glm::vec4 GetColor() const { return m_color; }
 	~LineMesh();
 
-	glm::vec4 GetColor() const { return m_color; }
 	void UpdateData(const std::vector<glm::vec3>&, const std::vector<GLuint>&, glm::vec4 _color);
 
 	virtual void								Draw();

@@ -38,9 +38,9 @@ struct FogInfo
   float maxDist;
   float minDist;
   vec4 color;
-	bool fog_on;
-	float density;
-	float gradient;
+  bool fog_on;
+  float density;
+  float gradient;
 };
 uniform FogInfo Fog;
 

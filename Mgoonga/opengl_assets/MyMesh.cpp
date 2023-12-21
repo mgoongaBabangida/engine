@@ -385,7 +385,7 @@ SimpleGeometryMesh::SimpleGeometryMesh(const std::vector<glm::vec3>& _dots, floa
 	: m_dots(_dots)
 	, m_radius(_radius)
 	, m_type(_type)
-	, m_color(_color)
+	, m_color(_color, 1.0f)
 {
 	// Setup hex VAO
 	if (!m_dots.empty())

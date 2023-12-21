@@ -12,7 +12,6 @@
 #include "PhongRender.h"
 #include "OutlinRender.h"
 #include "SkyNoiseRender.h"
-#include "WaveRender.h"
 #include "GeometryRender.h"
 #include "GaussianBlurRender.h"
 #include "BrightFilterrender.h"
@@ -66,7 +65,6 @@ private:
 	ePhongRender*		PhongRender();
 	eOutlineRender*		OutlineRender();
 	eSkyNoiseRender*	SkyNoiseRender();
-	eWaveRender*		WaveRender();
 	eGeometryRender*			HexRender();
 	eGaussianBlurRender*GaussianBlurRender();
 	eBrightFilterRender*BrightFilterRender();
@@ -92,7 +90,6 @@ private:
 	std::unique_ptr<ePhongRender>									m_phongRender;
 	std::unique_ptr<eOutlineRender>								m_outlineRender;
 	std::unique_ptr<eSkyNoiseRender>							m_skynoiseRender;
-	std::unique_ptr<eWaveRender>									m_waverender;
 	std::unique_ptr<eGeometryRender>							m_hexrender;
 	std::unique_ptr<eGaussianBlurRender>					m_gaussianRender;
 	std::unique_ptr<eBrightFilterRender>					m_brightRender;

@@ -434,7 +434,7 @@ void eWindowImGui::Render()
         }
         static std::vector<std::string> types{ "Sphere", "Plane" };
         static const char* current_type_item = NULL;
-        if (current_type_item == NULL)
+        if (current_type_item == NULL && lightObj.get())
         {
           if (lightObj->GetModel()->GetName() == "white_sphere")
             current_type_item = types[0].c_str();

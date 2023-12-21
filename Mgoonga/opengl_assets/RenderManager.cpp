@@ -14,7 +14,6 @@ eShadowRender*		 eRenderManager::ShadowRender() { return m_shadowRender.get(); }
 ePhongRender*		 eRenderManager::PhongRender() { return m_phongRender.get(); }
 eOutlineRender*		 eRenderManager::OutlineRender() { return m_outlineRender.get(); }
 eSkyNoiseRender*	 eRenderManager::SkyNoiseRender() { return m_skynoiseRender.get(); }
-eWaveRender*		 eRenderManager::WaveRender() { return m_waverender.get(); }
 eGeometryRender*			 eRenderManager::HexRender() { return m_hexrender.get(); }
 eGaussianBlurRender* eRenderManager::GaussianBlurRender() { return m_gaussianRender.get(); }
 eBrightFilterRender* eRenderManager::BrightFilterRender() { return m_brightRender.get(); }
@@ -73,7 +72,8 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																					folderPath + "PostProcessingFragmentShader.glsl"));
 	shader_lambda(m_screenRender.get());
 	//PhongRender
-	m_phongRender.reset(new ePhongRender(folderPath + "PhongVertexShader.glsl", folderPath + "PhongFragmentShader.glsl"));
+	m_phongRender.reset(new ePhongRender(folderPath + "PhongVertexShader.glsl", folderPath + "WaveVertexShader.glsl", folderPath + "PhongFragmentShader.glsl",
+																			 modelManager.CloneTerrain("simple"), texManager.Find("TSpanishFlag0_s")));
 	shader_lambda(m_phongRender.get());
 	//Shadow Render
 	m_shadowRender.reset(new eShadowRender(folderPath + "VertexShades.glsl", //@todo rendame
@@ -90,14 +90,6 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																						folderPath + "SkyNoiseVertexShader.glsl", 
 																						folderPath + "SkyNoiseFragmentShader.glsl"));
 	shader_lambda(m_skynoiseRender.get());
-
-	m_waverender.reset(new eWaveRender(modelManager.CloneTerrain("simple"),
-																		texManager.Find("TSpanishFlag0_s"),
-																		&Texture::GetTexture1x1(BLUE),
-																		&Texture::GetTexture1x1(BLACK),
-																		folderPath + "WaveVertexShader.glsl",
-																		folderPath + "PhongFragmentShader.glsl"));
-	shader_lambda(m_waverender.get());
 
 	m_hexrender.reset(new eGeometryRender(folderPath + "Vertex3DSimple.glsl",
 																				folderPath + "StencilFragmentShader.glsl",
@@ -204,7 +196,6 @@ void eRenderManager::UpdateShadersInfo()
 	shader_lambda(m_shadowRender.get());
 	shader_lambda(m_outlineRender.get());
 	shader_lambda(m_skynoiseRender.get());
-	shader_lambda(m_waverender.get());
 	shader_lambda(m_hexrender.get());
 	shader_lambda(m_gaussianRender.get());
 	shader_lambda(m_brightRender.get());
@@ -246,8 +237,6 @@ bool eRenderManager::SetUniformData(const std::string& _renderName, const std::s
 	if (shader_lambda(m_outlineRender.get()))
 		return true;
 	if (shader_lambda(m_skynoiseRender.get()))
-		return true;
-	if (shader_lambda(m_waverender.get()))
 		return true;
 	if (shader_lambda(m_hexrender.get()))
 		return true;
