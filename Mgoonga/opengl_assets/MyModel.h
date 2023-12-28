@@ -20,7 +20,10 @@ public:
 					const Texture* t2 = nullptr,
 					const Texture* t3 = nullptr,
 					const Texture* t4 = nullptr);
+
 	MyModel(const MyModel& _other);
+
+	MyModel& operator=(const MyModel&) = delete;
 
 	virtual ~MyModel();
 
@@ -38,7 +41,7 @@ public:
 	virtual std::vector<const IBone*>				GetBones() const { return {}; }
 
 	virtual bool											HasMaterial() const { return true; }
-	virtual void											SetMaterial(const Material& _material) { m_material = _material; }
+	virtual void											SetMaterial(const Material& _material);
 	virtual std::optional<Material>		GetMaterial() const { return m_material; }
 
 	virtual void								Draw()					override;
@@ -46,14 +49,10 @@ public:
 	virtual const std::string&	GetPath() const override { return m_path; }
 
 	void												Debug();
-	
-	void SetTexture(const Texture* t);
-	void setTextureDiffuse(const Texture* t);
-	void setTextureSpecular(const Texture* t);
-	void setTextureBump(const Texture* t);
-	void setTextureFourth(const Texture* t);
 
 protected:
+	void _InitMaterialWithDefaults();
+
 	std::shared_ptr<MyMesh> mesh;
 	Material								m_material;
 	std::string							m_name;

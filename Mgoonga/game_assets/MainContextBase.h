@@ -104,6 +104,8 @@ public:
 	virtual std::vector<std::shared_ptr<Text>>& GetTexts();
 
 	void EnableHovered(bool _hover) { m_update_hovered = _hover; }
+	void EnableFrameChoice(bool _enable, bool _with_left = true);
+
 	void SetInputStrategy(InputStrategy* _input_strategy) 
 	{
 		m_input_strategy.reset(_input_strategy);
@@ -162,8 +164,15 @@ protected:
 	std::unique_ptr<eSoundManager>						soundManager;//m_
   std::vector<IWindowImGui*>								externalGui;//m_
 
+	enum class FramedChoice
+	{
+		WITH_LEFT,
+		WITH_RIGHT,
+		DISABLED
+	};
+
 	bool m_l_pressed = false;
-	bool m_framed_choice_enabled = true;
+	FramedChoice m_framed_choice_enabled = FramedChoice::WITH_LEFT;
 	bool m_update_hovered = false;
 	bool m_show_fps = true;
 	bool m_debug_csm = false;

@@ -42,14 +42,14 @@ public:
 	virtual ~RemSnd();
 
 	// Functions
-	bool				Open(const std::string &Filename, bool Looped, bool Streamed);
-	bool				IsStreamed();
-	void				Play();
-	void				Close();
-	void				Update();
-	void				Move(float X, float Y, float Z);
-	void				Stop();
-	bool				isPlaying() { return playing; }
+	bool								Open(const std::string &Filename, bool Looped, bool Streamed);
+	bool								IsStreamed();
+	void								Play();
+	void								Close();
+	void								Update();
+	void								Move(float X, float Y, float Z);
+	void								Stop();
+	bool								isPlaying() { return playing; }
 	const std::string&	Name() const { return mName; }
 
 	void		    connectToBuffer(ALuint buffer);

@@ -72,28 +72,10 @@ std::vector<MyMesh*> MyModel::getMeshes() const
   return meshes;
 }
 
-void MyModel::SetTexture(const Texture* t)
-{ 
-  m_material.albedo_texture_id = t->id;
-  m_material.metalic_texture_id = t->id;
-  m_material.normal_texture_id = t->id;
-}
-
-void MyModel::setTextureDiffuse(const Texture* t)
-{ 
-  m_material.albedo_texture_id = t->id;
-}
-void MyModel::setTextureSpecular(const Texture* t)
-{ 
-  m_material.metalic_texture_id = t->id;
-}
-void MyModel::setTextureBump(const Texture* t)
-{ 
-  m_material.normal_texture_id = t->id;
-}
-void MyModel::setTextureFourth(const Texture* t)
-{ 
-  m_material.roughness_texture_id = t->id;
+void MyModel::SetMaterial(const Material& _material)
+{
+  m_material = _material;
+  _InitMaterialWithDefaults();
 }
 
 void MyModel::Draw()
@@ -120,6 +102,24 @@ void MyModel::Draw()
 void MyModel::Debug()
 {}
 
+void MyModel::_InitMaterialWithDefaults()
+{
+  if (m_material.albedo_texture_id == -1)
+    m_material.albedo_texture_id = Texture::GetTexture1x1(GREY).id;
+
+  if (m_material.metalic_texture_id == -1)
+    m_material.metalic_texture_id = Texture::GetTexture1x1(BLACK).id;
+
+  if (m_material.normal_texture_id == -1)
+    m_material.normal_texture_id = Texture::GetTexture1x1(BLUE).id;
+
+  if (m_material.roughness_texture_id == -1)
+    m_material.roughness_texture_id = Texture::GetTexture1x1(WHITE).id;
+
+  if (m_material.emissive_texture_id == -1)
+    m_material.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
+}
+
 size_t MyModel::GetVertexCount() const
 {
   return mesh->GetVertexCount();
@@ -135,6 +135,7 @@ std::vector<const IMesh*> MyModel::GetMeshes() const
   return std::vector<const IMesh*> { mesh.get() };
 }
 
+//---------------------------------------------------------------------------------
 SimpleModel::SimpleModel(IMesh* _m)
 :m_mesh(_m) {}
 

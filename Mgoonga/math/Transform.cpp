@@ -31,7 +31,7 @@ glm::vec4 Transform::getRotationUpVector() const
 void Transform::UpdateModelMatrix()
 {
 	glm::mat4 rotatM0 = glm::toMat4(q_rotation);
-	totalTransform = glm::translate(m_translation)* rotatM0* glm::scale(glm::vec3(m_scale.x, m_scale.y, m_scale.z));
+	totalTransform = glm::translate(m_translation) * rotatM0 * glm::scale(glm::vec3(m_scale.x, m_scale.y, m_scale.z));
 }
 
 //-----------------------------------------------------------------------------

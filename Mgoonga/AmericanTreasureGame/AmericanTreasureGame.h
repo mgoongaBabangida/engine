@@ -29,8 +29,6 @@ public:
 
 protected:
 	virtual void			InitializeModels()								override;
-
-	void _InitMainTestSceane();
 };
 #endif //AMERICAN_TREASURE_H
 

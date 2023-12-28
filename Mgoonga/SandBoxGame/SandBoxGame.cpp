@@ -250,13 +250,13 @@ void eSandBoxGame::InitializeModels()
 		shObject fence = factory.CreateObject(modelManager->Find("Fence"), eObject::RenderType::PBR, "Fence");
 		fence->GetTransform()->setTranslation(vec3(-5.f, -2.0f, -0.70f));
 		fence->GetTransform()->setScale(vec3(0.75f, 0.75f, 0.75f));
-		fence->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
+		fence->GetTransform()->setRotation(0.0f, glm::radians(90.0f), 0.0f);
 		const_cast<I3DMesh*>(fence->GetModel()->Get3DMeshes()[0])->SetMaterial(material);
 		m_objects.push_back(fence);
 
 		// Crate
 		shObject crate = factory.CreateObject(modelManager->Find("Crate"), eObject::RenderType::PBR, "Crate");
-		crate->GetTransform()->setTranslation(vec3(-15.f, -2.0f, -15.00f));
+		crate->GetTransform()->setTranslation(vec3(-15.f, -1.5f, -15.00f));
 		crate->GetTransform()->setScale(vec3(1.f, 1.f, 1.f));
 		crate->GetTransform()->setRotation(0.0f, 0.0f, 0.0f);
 		const_cast<I3DMesh*>(crate->GetModel()->Get3DMeshes()[0])->SetMaterial(material);
@@ -278,62 +278,65 @@ void eSandBoxGame::InitializeModels()
 		const_cast<I3DMesh*>(bridge->GetModel()->Get3DMeshes()[0])->SetMaterial(material);
 		m_objects.push_back(bridge);
 
-		//Ship
-		shObject ship = factory.CreateObject(modelManager->Find("PirateShip"), eObject::RenderType::PBR, "Pirate");
-		ship->GetTransform()->setScale(vec3(0.04f, 0.04f, 0.04f));
-		ship->GetTransform()->setTranslation(vec3(0.0f, 0.0f, 0.0f));
-		ship->GetTransform()->setUp(glm::vec3(0.0f, 0.0f, 1.0f));
-		ship->GetTransform()->setRotation(0.0f, PI / 2, 0.0f);
-		ship->GetTransform()->setForward(glm::vec3(1.0f, 0.0f, 0.0f));
-		m_objects.push_back(ship);
-
-		for (auto& mesh : ship->GetModel()->Get3DMeshes())
+		if (false)
 		{
-			Texture t;
-			if (auto& textures = mesh->GetTextures(); !textures.empty())
+			//Ship
+			shObject ship = factory.CreateObject(modelManager->Find("PirateShip"), eObject::RenderType::PBR, "Pirate");
+			ship->GetTransform()->setScale(vec3(0.04f, 0.04f, 0.04f));
+			ship->GetTransform()->setTranslation(vec3(0.0f, 0.0f, 0.0f));
+			ship->GetTransform()->setUp(glm::vec3(0.0f, 0.0f, 1.0f));
+			ship->GetTransform()->setRotation(0.0f, PI / 2, 0.0f);
+			ship->GetTransform()->setForward(glm::vec3(1.0f, 0.0f, 0.0f));
+			m_objects.push_back(ship);
+
+			for (auto& mesh : ship->GetModel()->Get3DMeshes())
 			{
-				if (textures[0].m_path.find("barrel_texture1k") != std::string::npos)
+				Texture t;
+				if (auto& textures = mesh->GetTextures(); !textures.empty())
 				{
-					t.loadTextureFromFile("../game_assets/Resources/PirateShip/barrel_texture1k/DefaultMaterial_Metallic_1001.png");
-					t.type = "texture_specular";
-					const_cast<I3DMesh*>(mesh)->AddTexture(&t);
-					mesh->GetMaterial()->use_metalic = true;
+					if (textures[0].m_path.find("barrel_texture1k") != std::string::npos)
+					{
+						t.loadTextureFromFile("../game_assets/Resources/PirateShip/barrel_texture1k/DefaultMaterial_Metallic_1001.png");
+						t.type = "texture_specular";
+						const_cast<I3DMesh*>(mesh)->AddTexture(&t);
+						mesh->GetMaterial()->use_metalic = true;
 
-					t.loadTextureFromFile("../game_assets/Resources/PirateShip/barrel_texture1k/DefaultMaterial_Normal_OpenGL_1001.png");
-					t.type = "texture_normal";
-					const_cast<I3DMesh*>(mesh)->AddTexture(&t);
-					mesh->GetMaterial()->use_normal = true;
-				}
-				else if (textures[0].m_path.find("cannon_texture1k") != std::string::npos)
-				{
-					t.loadTextureFromFile("../game_assets/Resources/PirateShip/cannon_texture1k/DefaultMaterial_Metallic_1001.png");
-					t.type = "texture_specular";
-					const_cast<I3DMesh*>(mesh)->AddTexture(&t);
-					mesh->GetMaterial()->use_metalic = true;
-				}
-				else if (textures[0].m_path.find("ship_texture4k") != std::string::npos)
-				{
-					t.loadTextureFromFile("../game_assets/Resources/PirateShip/ship_texture4k/ship_Metallic_1001.png");
-					t.type = "texture_specular";
-					const_cast<I3DMesh*>(mesh)->AddTexture(&t);
-					mesh->GetMaterial()->use_metalic = true;
+						t.loadTextureFromFile("../game_assets/Resources/PirateShip/barrel_texture1k/DefaultMaterial_Normal_OpenGL_1001.png");
+						t.type = "texture_normal";
+						const_cast<I3DMesh*>(mesh)->AddTexture(&t);
+						mesh->GetMaterial()->use_normal = true;
+					}
+					else if (textures[0].m_path.find("cannon_texture1k") != std::string::npos)
+					{
+						t.loadTextureFromFile("../game_assets/Resources/PirateShip/cannon_texture1k/DefaultMaterial_Metallic_1001.png");
+						t.type = "texture_specular";
+						const_cast<I3DMesh*>(mesh)->AddTexture(&t);
+						mesh->GetMaterial()->use_metalic = true;
+					}
+					else if (textures[0].m_path.find("ship_texture4k") != std::string::npos)
+					{
+						t.loadTextureFromFile("../game_assets/Resources/PirateShip/ship_texture4k/ship_Metallic_1001.png");
+						t.type = "texture_specular";
+						const_cast<I3DMesh*>(mesh)->AddTexture(&t);
+						mesh->GetMaterial()->use_metalic = true;
 
-					t.loadTextureFromFile("../game_assets/Resources/PirateShip/ship_texture4k/ship_Normal_OpenGL_1001.png");
-					t.type = "texture_normal";
-					const_cast<I3DMesh*>(mesh)->AddTexture(&t);
-					mesh->GetMaterial()->use_normal = true;
-				}
-				else if (textures[0].m_path.find("skull_texture1k") != std::string::npos)
-				{
-					t.loadTextureFromFile("../game_assets/Resources/PirateShip/skull_texture1k/Skull_Metallic_1001.png");
-					t.type = "texture_specular";
-					const_cast<I3DMesh*>(mesh)->AddTexture(&t);
-					mesh->GetMaterial()->use_metalic = true;
+						t.loadTextureFromFile("../game_assets/Resources/PirateShip/ship_texture4k/ship_Normal_OpenGL_1001.png");
+						t.type = "texture_normal";
+						const_cast<I3DMesh*>(mesh)->AddTexture(&t);
+						mesh->GetMaterial()->use_normal = true;
+					}
+					else if (textures[0].m_path.find("skull_texture1k") != std::string::npos)
+					{
+						t.loadTextureFromFile("../game_assets/Resources/PirateShip/skull_texture1k/Skull_Metallic_1001.png");
+						t.type = "texture_specular";
+						const_cast<I3DMesh*>(mesh)->AddTexture(&t);
+						mesh->GetMaterial()->use_metalic = true;
 
-					t.loadTextureFromFile("../game_assets/Resources/PirateShip/skull_texture1k/Skull_Normal_OpenGL_1001.png");
-					t.type = "texture_normal";
-					const_cast<I3DMesh*>(mesh)->AddTexture(&t);
-					mesh->GetMaterial()->use_normal = true;
+						t.loadTextureFromFile("../game_assets/Resources/PirateShip/skull_texture1k/Skull_Normal_OpenGL_1001.png");
+						t.type = "texture_normal";
+						const_cast<I3DMesh*>(mesh)->AddTexture(&t);
+						mesh->GetMaterial()->use_normal = true;
+					}
 				}
 			}
 		}

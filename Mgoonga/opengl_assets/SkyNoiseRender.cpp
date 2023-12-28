@@ -16,8 +16,11 @@ eSkyNoiseRender::eSkyNoiseRender(std::unique_ptr<MyModel>	_model,
 	moveFactorLocation = glGetUniformLocation(skynoise_shader.ID(), "moveFactor");
 	//@todo object not used , model &transform
 	model.swap(_model);
-	model->setTextureBump(_noise);
-	model->setTextureFourth(_noise);
+	Material m;
+	m.normal_texture_id = _noise->id;
+	m.roughness_texture_id = _noise->id;
+	model->SetMaterial(m);
+
 	object.reset(new eObject);
 	object->SetModel(model.get());
 	object->SetTransform(new Transform);

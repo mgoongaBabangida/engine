@@ -81,6 +81,7 @@ protected:
 
   void _OnConnectionEstablished(const dbb::TCPConnection& _connection);
   void _OnTCPMessageRecieved(const std::vector<uint32_t>);
+  void _OnShipDeleted(shObject);
 
   void _InitializeDiceLogicAndVisual();
   void _InitializeShipIcons();
@@ -88,6 +89,7 @@ protected:
   void _InitializeShips();
   void _InitializeBases();
   void _InitializeGoldenFrame();
+  void _InitializeSounds();
 
   void _InstallTcpServer();
   void _InstallTcpClient();
@@ -150,10 +152,14 @@ protected:
   bool                               m_dice_rolled = false;
 
   SimpleGeometryMesh*                m_choice_circle;
+  float                              m_hdr_strangth = 8.0f;
   LineMesh*                          m_path_mesh;
+  //Text
   std::shared_ptr<Text>              m_warrining;
   std::shared_ptr<Text>              m_destination_text;
   std::vector<std::shared_ptr<Text>> m_base_labels;
+  //Sound
+  RemSnd*                             m_seagull_sound;
 
   //tcp
   Mode                                m_mode = Mode::LOCAL;

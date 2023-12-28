@@ -40,7 +40,7 @@ public:
 	virtual std::vector<const I3DMesh*>			Get3DMeshes() const;
 
 	virtual bool											HasMaterial() const { return true; }
-	virtual void											SetMaterial(const Material& _m) { m_material = _m; }
+	virtual void											SetMaterial(const Material& _m);
 	virtual std::optional<Material>		GetMaterial() const { return m_material; }
 
 	float							GetHeight(float x , float z)	override;
@@ -79,6 +79,9 @@ protected:
 	void			generateNormals(GLuint rows, GLuint columns);
 	Vertex		findVertex(float x, float z);
 
+	void _InitMaterialWithDefaults();
+
+	//@todo
 	virtual bool														HasBones() const { return false; }
 	virtual std::vector<const IBone*>				GetBones() const { return {}; }
 

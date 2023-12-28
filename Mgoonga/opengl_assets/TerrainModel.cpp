@@ -11,7 +11,7 @@
 TerrainModel::TerrainModel()
 	: mesh(nullptr)
 {
-	m_material.roughness_texture_id = m_material.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
+	_InitMaterialWithDefaults();
 }
 
 //----------------------------------------------------------------
@@ -29,7 +29,7 @@ TerrainModel::TerrainModel(Texture* diffuse,
 	if (normal != nullptr)
 		m_material.normal_texture_id = normal->id;
 
-	m_material.roughness_texture_id = m_material.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
+	_InitMaterialWithDefaults();
 
 	mesh = new MyMesh("terrain");
 	m_size = heightMap->mTextureHeight;
@@ -53,7 +53,7 @@ TerrainModel::TerrainModel(Texture* color)
 	if (color != nullptr)
 		m_material.metalic_texture_id = color->id;
 
-	m_material.roughness_texture_id = m_material.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
+	_InitMaterialWithDefaults();
 
 	mesh = new MyMesh("terrain");
 	m_size = 10;
@@ -68,7 +68,9 @@ TerrainModel::TerrainModel(Texture* color)
 TerrainModel::TerrainModel(const TerrainModel& _other)
   : mesh(_other.mesh)
   , m_material(_other.m_material)
-{}
+{
+	_InitMaterialWithDefaults();
+}
 
 //----------------------------------------------------------------
 void TerrainModel::initialize(const Texture* _diffuse,
@@ -87,6 +89,8 @@ void TerrainModel::initialize(const Texture* _diffuse,
 
 	if (_normal != nullptr)
 		m_material.normal_texture_id = _normal->id;
+
+	_InitMaterialWithDefaults();
 
 	if (mesh == nullptr)
 		mesh = new MyMesh("terrain");
@@ -456,6 +460,32 @@ std::vector<const IMesh*> TerrainModel::GetMeshes() const
 std::vector<const I3DMesh*> TerrainModel::Get3DMeshes() const
 {
 	return std::vector<const I3DMesh*>{mesh};
+}
+
+//----------------------------------------------------------------
+void TerrainModel::SetMaterial(const Material& _m)
+{
+	m_material = _m;
+	_InitMaterialWithDefaults();
+}
+
+//----------------------------------------------------------------
+void TerrainModel::_InitMaterialWithDefaults()
+{
+	if (m_material.albedo_texture_id == -1)
+		m_material.albedo_texture_id = Texture::GetTexture1x1(GREY).id;
+
+	if (m_material.metalic_texture_id == -1)
+		m_material.metalic_texture_id = Texture::GetTexture1x1(BLACK).id;
+
+	if (m_material.normal_texture_id == -1)
+		m_material.normal_texture_id = Texture::GetTexture1x1(BLUE).id;
+
+	if (m_material.roughness_texture_id == -1)
+		m_material.roughness_texture_id = Texture::GetTexture1x1(BLACK).id;
+
+	if (m_material.emissive_texture_id == -1)
+		m_material.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
 }
 
 //----------------------------------------------------------------

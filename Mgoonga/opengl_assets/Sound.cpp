@@ -60,7 +60,8 @@ void RemSnd::Play()
 void RemSnd::Close()
 {
 	alSourceStop(mSourceID);
-	if (alIsSource(mSourceID)) alDeleteSources(1, &mSourceID);
+	if (alIsSource(mSourceID))
+		alDeleteSources(1, &mSourceID);
 }
 
 void RemSnd::Update()

@@ -19,8 +19,10 @@ eWaterRender::eWaterRender(std::unique_ptr<MyModel> model,
 	
 	water_model = model.get();
 
-	model->setTextureBump(waves);
-	model->setTextureFourth(DUDV);
+	Material m = model->GetMaterial().value();
+	m.normal_texture_id = waves->id;
+	m.roughness_texture_id = DUDV->id;
+	model->SetMaterial(m);
 
 	object.reset(new eObject);
 	object->SetModel(model.release());
@@ -43,9 +45,12 @@ void eWaterRender::Render(const Camera& _camera, const Light& _light)
 
 	Texture texture_reflection = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFLECTION);
 	Texture texture_refraction = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_REFRACTION);
-	water_model->setTextureDiffuse(&texture_reflection);
-	water_model->setTextureSpecular(&texture_refraction);
 	
+	Material m = water_model->GetMaterial().value();
+	m.albedo_texture_id = texture_reflection.id;
+	m.metalic_texture_id = texture_refraction.id;
+	water_model->SetMaterial(m);
+
 	waterShader.SetUniformData("moveFactor", move_factor);
 
 	int64_t msc = clock.newFrame();

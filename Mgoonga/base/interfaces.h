@@ -89,7 +89,7 @@ public:
 	virtual void																			Update(float _tick) = 0;
 	virtual void																			CollisionCallback(const eCollision&)	{}
 	void																							SetObject(std::shared_ptr<eObject> obj) { m_object = obj; }
-	std::weak_ptr<eObject>														GetScriptObject() const { return m_object; }
+	const std::weak_ptr<eObject>&											GetScriptObject() const { return m_object; }
 };
 
 //-----------------------------------------------------------------------------

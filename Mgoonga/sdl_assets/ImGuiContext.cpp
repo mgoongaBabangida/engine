@@ -461,28 +461,34 @@ void eWindowImGui::Render()
         {
           if (std::shared_ptr<IModel> model = modelManager->Find("white_sphere"); model.get() != nullptr)
           {
-            lightObj->SetModel(model);
-            lightObj->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
+            if (lightObj->GetModel() != model.get())
+            {
+              lightObj->SetModel(model);
+              lightObj->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
 
-            Material m{ vec3{}, 0.0f, 0.0f, 1.0f,
-              Texture::GetTexture1x1(TColor::YELLOW).id, Texture::GetTexture1x1(TColor::WHITE).id,
-              Texture::GetTexture1x1(TColor::BLUE).id, Texture::GetTexture1x1(TColor::WHITE).id, Texture::GetTexture1x1(TColor::YELLOW).id,
-            true, true, true, true };
-            lightObj->GetModel()->SetMaterial(m);
+              Material m{ vec3{}, 0.0f, 0.0f, 1.0f,
+                Texture::GetTexture1x1(TColor::BLUE).id, Texture::GetTexture1x1(TColor::WHITE).id,
+                Texture::GetTexture1x1(TColor::BLUE).id, Texture::GetTexture1x1(TColor::WHITE).id, Texture::GetTexture1x1(TColor::BLUE).id,
+              true, true, true, true };
+              lightObj->GetModel()->SetMaterial(m);
+            }
           }
         }
         else if (current_type_item == types[1].c_str())
         {
           if (std::shared_ptr<IModel> model = modelManager->Find("white_quad"); model.get() != nullptr)
           {
-            lightObj->SetModel(model);
-            lightObj->GetTransform()->setScale(vec3(1.0f, 1.0f, 1.0f));
-            std::array<glm::vec4, 4> points = { // for area light
-            glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f),
-            glm::vec4(1.0f, -1.0f, 0.0f, 1.0f),
-            glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f),
-            glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
-            mp_game->GetMainLight().points = points;
+            if (lightObj->GetModel() != model.get())
+            {
+              lightObj->SetModel(model);
+              lightObj->GetTransform()->setScale(vec3(1.0f, 1.0f, 1.0f));
+              std::array<glm::vec4, 4> points = { // for area light
+              glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f),
+              glm::vec4(1.0f, -1.0f, 0.0f, 1.0f),
+              glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f),
+              glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
+              mp_game->GetMainLight().points = points;
+            }
           }
         }
       }

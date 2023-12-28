@@ -14,7 +14,9 @@ public:
 	enum class RenderMode { DEFAULT, WIREFRAME };
 
 	explicit MyMesh(const std::string& _name);
+
 	MyMesh(const MyMesh&) = delete;
+
 	virtual ~MyMesh();
 
 	MyMesh(const std::string& _name, std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture*> textures);
@@ -32,8 +34,8 @@ public:
 
   virtual std::vector<TextureInfo>		GetTextures() const;
 	virtual void												AddTexture(Texture* _t) override { textures.push_back(_t); }
-
   virtual void												setTextures(std::vector<Texture*>);
+
 	virtual void												setupMesh();
 	virtual void												calculatedTangent() override;
 	virtual void												ReloadVertexBuffer() override;
@@ -46,16 +48,18 @@ public:
 
 public: //@todo should be protected
 	/*  Mesh Data  */
-	std::vector<Vertex>		vertices;
+	std::vector<Vertex>								vertices;
 	std::vector<std::vector<GLuint>>	indicesLods;
-	std::vector<Texture*>	textures;
+	std::vector<Texture*>							textures;
 
 protected:
 	/*  Render data  */
 	GLuint VAO;
 	GLuint VBO;
 	std::vector<GLuint> EBO;
+
 	std::string name;
+
 	GLuint LOD_index__in_use = 0;
 	RenderMode m_render_mode = RenderMode::DEFAULT;
 };
@@ -124,6 +128,7 @@ public:
 
 	float GetRadius() const { return m_radius; }
 	glm::vec4 GetColor() const { return m_color; }
+	void SetColor(glm::vec4 _c);
 	GeometryType GetGeometryType() const { return m_type; }
 	void SetDots(const std::vector<glm::vec3>&);
 

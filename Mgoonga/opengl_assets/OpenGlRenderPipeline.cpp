@@ -653,12 +653,12 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 																							 static_cast<float>(height));
 	}
 
-	RenderGui(_guis, _camera);
-
-  glEnable(GL_BLEND);
+	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	renderManager->TextRender()->RenderText(_camera, _texts, static_cast<float>(width), static_cast<float>(height));
 	glDisable(GL_BLEND);
+
+	RenderGui(_guis, _camera);
 
 	m_draw_calls = eGlDrawContext::GetInstance().GetDrawCallsCount();
 	eGlDrawContext::GetInstance().Flush();

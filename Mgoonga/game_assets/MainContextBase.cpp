@@ -105,7 +105,7 @@ bool eMainContextBase::OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier)
 
 	if (GetMainCamera().getCameraRay().IsPressed())
 	{
-		if ((!m_input_strategy || (m_input_strategy && !m_input_strategy->OnMouseMove(x, y))) && m_framed_choice_enabled)
+		if ((!m_input_strategy || (m_input_strategy && !m_input_strategy->OnMouseMove(x, y))) && m_framed_choice_enabled != FramedChoice::DISABLED)
 		{
 			// input strategy has priority over frame, @todo frmae should be inside one of input strategies
 			m_framed = std::make_shared<std::vector<shObject>>(GetMainCamera().getCameraRay().onMove(m_objects, static_cast<float>(x), static_cast<float>(y))); 	//to draw a frame
@@ -125,7 +125,9 @@ bool eMainContextBase::OnMousePress(int32_t x, int32_t y, bool _left, KeyModifie
 		m_framed->clear();
 
 	GetMainCamera().getCameraRay().Update(static_cast<float>(x), static_cast<float>(y));
-	GetMainCamera().getCameraRay().press(x, y);
+	if((_left && m_framed_choice_enabled == FramedChoice::WITH_LEFT) ||
+		 (!_left && m_framed_choice_enabled == FramedChoice::WITH_RIGHT))
+		GetMainCamera().getCameraRay().press(x, y);
 
 	//should be inside input strategy which needs it(frame, moveXZ)
 	GetMainCamera().MovementSpeedRef() = 0.f;
@@ -326,6 +328,9 @@ std::shared_ptr<eObject> eMainContextBase::GetHoveredObject()
 //--------------------------------------------------------------------------------
 void eMainContextBase::AddObject(std::shared_ptr<eObject> _object)
 {
+	if(_object->Name() == "LightObject")
+		m_light_object = _object;
+
 	ObjectBeingAddedToScene.Occur(_object);
 	m_objects.push_back(_object);
 }
@@ -442,6 +447,8 @@ void eMainContextBase::InitializePipline()
 				value == "true" ? m_use_guizmo = true : m_use_guizmo = false;
 			else if(name == "RotateSkyBox")
 				value == "true" ? pipeline.GetRotateSkyBoxRef() = true : pipeline.GetRotateSkyBoxRef() = false;
+			else if (name == "ShowFPS")
+				value == "true" ? m_show_fps = true : m_show_fps = false;
 		}
 	}
 }
@@ -961,4 +968,15 @@ void eMainContextBase::AddText(std::shared_ptr<Text> _text)
 std::vector<std::shared_ptr<Text>>& eMainContextBase::GetTexts()
 {
 	return m_texts;
+}
+
+//-----------------------------------------------------------------------------
+void eMainContextBase::EnableFrameChoice(bool _enable, bool _with_left)
+{
+	if (!_enable)
+		m_framed_choice_enabled = FramedChoice::DISABLED;
+	else if(_with_left)
+		m_framed_choice_enabled = FramedChoice::WITH_LEFT;
+	else
+		m_framed_choice_enabled = FramedChoice::WITH_RIGHT;
 }

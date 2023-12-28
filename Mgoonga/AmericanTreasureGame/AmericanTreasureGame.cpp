@@ -60,9 +60,6 @@ void AmericanTreasureGame::InitializeModels()
   modelManager->Add("sphere_textured", Primitive::SPHERE, std::move(pbr1));
   modelManager->Add("sphere_red", Primitive::SPHERE, std::move(red));
 
-  //@todo separate init scene member func
-  _InitMainTestSceane();
-
   //GLOBAL CONTROLLERS 
   IWindowImGui* debug_window = this->externalGui.size() > 12 ? externalGui[12] : nullptr;
   m_global_scripts.push_back(std::make_shared<GameController>(this, modelManager.get(), texManager.get(), soundManager.get(), pipeline, GetMainCamera(), debug_window));
@@ -70,15 +67,4 @@ void AmericanTreasureGame::InitializeModels()
   m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera(), true));
 
   m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
-}
-
-//----------------------------------------------------
-void AmericanTreasureGame::_InitMainTestSceane()
-{
-  ObjectFactoryBase factory;
-  //light
-  m_light_object = factory.CreateObject(modelManager->Find("white_sphere"), eObject::RenderType::PHONG, "WhiteSphere");
-  m_light_object->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
-  m_light_object->GetTransform()->setTranslation(GetMainLight().light_position);
-  m_objects.push_back(m_light_object);
 }

@@ -409,6 +409,12 @@ SimpleGeometryMesh::~SimpleGeometryMesh()
 }
 
 //-------------------------------------------------------------------------------------
+void SimpleGeometryMesh::SetColor(glm::vec4 _c)
+{
+	m_color = _c;
+}
+
+//-------------------------------------------------------------------------------------
 void SimpleGeometryMesh::SetDots(const std::vector<glm::vec3>& _dots)
 {
 	m_dots = _dots;
