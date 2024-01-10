@@ -24,12 +24,14 @@
 
 #include "SandBoxScript.h"
 
+//#include <sdl_assets/ImGuiWindowInternal.h>
+
 //-------------------------------------------------------------------------
 eSandBoxGame::eSandBoxGame(eInputController*  _input,
-  std::vector<IWindowImGui*> _externalGui,
-						   const std::string& _modelsPath,
-						   const std::string& _assetsPath,
-						   const std::string& _shadersPath)
+													 std::vector<IWindowImGui*>& _externalGui,
+													 const std::string& _modelsPath,
+													 const std::string& _assetsPath,
+													 const std::string& _shadersPath)
 : eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
 {
 	ObjectPicked.Subscribe([this](shObject _new_focused, bool _left)
@@ -42,6 +44,15 @@ eSandBoxGame::eSandBoxGame(eInputController*  _input,
 			}
 			return false;
 		});
+}
+
+//-------------------------------------------------------------------------
+void eSandBoxGame::InitializeExternalGui()
+{
+	eMainContextBase::InitializeExternalGui();
+	//@todo temp experiment with imgui internal menues
+	/*externalGui.push_back(new eImGuiWindowInternal(this->texManager->Find("golden_frame")->id));
+	m_input_controller->AddObserver(externalGui.back(), MONOPOLY);*/
 }
 
 //-------------------------------------------------------------------------
@@ -66,7 +77,6 @@ void eSandBoxGame::InitializeModels()
 
 	shObject wallCube = factory.CreateObject(modelManager->Find("wall_cube"), eObject::RenderType::PHONG, "WallCube");
 	wallCube->GetTransform()->setTranslation(vec3(3.0f, -1.0f, 3.0f));
-	//wallCube->SetScript(new eSandBoxScript(this));
 	m_objects.push_back(wallCube);
 
 	Texture t;
@@ -408,6 +418,7 @@ void eSandBoxGame::InitializeModels()
 	hdr_object->GetModel()->SetMaterial(m);
 	m_objects.push_back(hdr_object);
 
+	//@todo make it dynamic, make clear order
 	//GLOBAL SCRIPTS
 	m_global_scripts.push_back(std::make_shared<ShootScript>(this, modelManager.get()));
 	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);

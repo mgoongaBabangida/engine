@@ -2,6 +2,8 @@
 #include "GLWindowSDL.h"
 
 #include "ImGuiContext.h"
+#include "ImGuiWindowExternal.h"
+
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
 
@@ -22,25 +24,27 @@ ImVec2								viewport_offset;
 const unsigned int ENGINE_CONTROLS_SPACE_X = 575;
 const unsigned int ENGINE_CONTROLS_SPACE_Y = 125;
 
+const int mysterious_y_border_offset = 20; //@todo 
+
 //***************************************
 //dbGLWindowSDL::~dbGLWindowSDL
 //---------------------------------------
 dbGLWindowSDL::dbGLWindowSDL(const IGameFactory& _factory)
 : inputController()
 {
-  guiWnd.push_back(new eWindowImGui("Lights & Cameras"));//0
-  guiWnd.push_back(new eWindowImGui("Pipeline"));//1
-  guiWnd.push_back(new eWindowImGui("Object Transform"));//2
-	guiWnd.push_back(new eWindowImGui("Shader"));//3
+  guiWnd.push_back(new eWindowImGuiExternal("Lights & Cameras"));//0
+  guiWnd.push_back(new eWindowImGuiExternal("Pipeline"));//1
+  guiWnd.push_back(new eWindowImGuiExternal("Object Transform"));//2
+	guiWnd.push_back(new eWindowImGuiExternal("Shader"));//3
 	guiWnd.push_back(new eMainImGuiWindow());//4
-	guiWnd.push_back(new eWindowImGui("Create"));//5
-	guiWnd.push_back(new eWindowImGui("Objects list"));//6
-	guiWnd.push_back(new eWindowImGui("Object Material"));//7
-	guiWnd.push_back(new eWindowImGui("Object Rigger"));//8
-	guiWnd.push_back(new eWindowImGui("Console"));//9
-	guiWnd.push_back(new eWindowImGui("Particle System Tool"));//10
-	guiWnd.push_back(new eWindowImGui("Terrain Generation Tool"));//11
-	guiWnd.push_back(new eWindowImGui("Game Debug"));//12
+	guiWnd.push_back(new eWindowImGuiExternal("Create"));//5
+	guiWnd.push_back(new eWindowImGuiExternal("Objects list"));//6
+	guiWnd.push_back(new eWindowImGuiExternal("Object Material"));//7
+	guiWnd.push_back(new eWindowImGuiExternal("Object Rigger"));//8
+	guiWnd.push_back(new eWindowImGuiExternal("Console"));//9
+	guiWnd.push_back(new eWindowImGuiExternal("Particle System Tool"));//10
+	guiWnd.push_back(new eWindowImGuiExternal("Terrain Generation Tool"));//11
+	guiWnd.push_back(new eWindowImGuiExternal("Game Debug"));//12
 
   on_close = std::function<void()>{ [this](){this->Close(); } };
   guiWnd[4]->Add(MENU, "Close", reinterpret_cast<void*>(&on_close));
@@ -308,7 +312,7 @@ void dbGLWindowSDL::OnDockSpace()
 		int window_x, window_y, border_x, border_y;
 		SDL_GetWindowPosition(window, &window_x, &window_y);
 		SDL_GetWindowBordersSize(window, &border_y, &border_x, nullptr, nullptr);
-		border_y -= 5;
+		border_y -= mysterious_y_border_offset;
 		viewport_offset = { viewport_pos.x - window_x + border_x,
 												viewport_pos.y - window_y + border_y };
 		ImGui::Image((void*)(intptr_t)(mainContext->GetFinalImageId()), ImVec2(WIDTH, HEIGHT), ImVec2(0, 1), ImVec2(1, 0));

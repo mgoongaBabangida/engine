@@ -42,7 +42,7 @@ public:
 	};
 
 	eMainContextBase(eInputController* _input,
-									 std::vector<IWindowImGui*> _externalGui,
+									 std::vector<IWindowImGui*>& _externalGui,
 									 const std::string& _modelsPath,
 									 const std::string& _assetsPath,
 									 const std::string& _shadersPath);
@@ -162,7 +162,7 @@ protected:
 	std::unique_ptr<ModelManagerYAML>					modelManager;//m_
 	std::unique_ptr<AnimationManagerYAML>			animationManager;//m_
 	std::unique_ptr<eSoundManager>						soundManager;//m_
-  std::vector<IWindowImGui*>								externalGui;//m_
+  std::vector<IWindowImGui*>&								externalGui;//m_
 
 	enum class FramedChoice
 	{

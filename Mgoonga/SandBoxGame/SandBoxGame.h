@@ -15,13 +15,16 @@ class eSandBoxGame : public eMainContextBase
 {
 public:
 	eSandBoxGame(eInputController*,
-    std::vector<IWindowImGui*> _externalGui,
-				const std::string& modelsPath,
-				const std::string& assetsPath,
-				const std::string& shadersPath);
+							 std::vector<IWindowImGui*>& _externalGui,
+							 const std::string& modelsPath,
+							 const std::string& assetsPath,
+							 const std::string& shadersPath);
+
+
 	virtual ~eSandBoxGame() = default;
 
 protected:
+	virtual void		InitializeExternalGui() override;
 	virtual void		InitializeModels()			override;
 };
 

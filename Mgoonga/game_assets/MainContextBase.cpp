@@ -31,7 +31,7 @@
 
 //-----------------------------------------------------------------
 eMainContextBase::eMainContextBase(eInputController* _input,
-	                               std::vector<IWindowImGui*> _externalGui,
+	                               std::vector<IWindowImGui*>& _externalGui,
 	                               const std::string& _modelsPath,
 	                               const std::string& _assetsPath,
 	                               const std::string& _shadersPath)

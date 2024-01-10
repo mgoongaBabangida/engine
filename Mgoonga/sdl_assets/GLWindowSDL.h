@@ -50,7 +50,7 @@ class IGameFactory
 {
 public:
 	virtual IGame* CreateGame(eInputController*						_input,
-														std::vector<IWindowImGui*>	_imgui_windows) const = 0;
+														std::vector<IWindowImGui*>&	_imgui_windows) const = 0;
 };
 
 #endif
