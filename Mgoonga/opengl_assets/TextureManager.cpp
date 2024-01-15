@@ -129,6 +129,9 @@ void eTextureManager::_LoadHardcoded()
 
 	text.generatePerlin(600, 600, true); //HARDCODING!
 	m_Textures.insert(std::pair<std::string, Texture>("Tperlin_n", text));
+
+	text.makeImage(1000, 1000);
+	m_Textures.insert(std::pair<std::string, Texture>("computeImageRW", text));
 }
 
 //----------------------------------------------------

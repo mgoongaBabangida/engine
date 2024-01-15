@@ -72,12 +72,14 @@ public:
 	bool& GetOutlineFocusedRef() { return outline_focused; }
 	bool& GetSSAOEnabledRef() { return ssao; }
 	bool& GetSSREnabledRef() { return ssr; }
+	bool& GetEnabledCameraInterpolationRef() { return camera_interpolation; }
 	bool& GetRotateSkyBoxRef();
 	float& GetSaoThresholdRef();
 	float& GetSaoStrengthRef();
 	bool& ShadowingRef() { return shadows; }
 	bool& PBBloomRef() { return m_pb_bloom; }
 	bool& GetMeshLineOn() { return m_mesh_line_on; }
+	bool& GetComputeShaderRef() { return m_compute_shader; }
 
 	//Phong Render
 	bool& GetDebugWhite();
@@ -123,6 +125,10 @@ public:
 		float gradient = 4.0f;
 	};
 
+	//CameraInterpolation Debug
+	glm::vec3& GetSecondCameraPositionRef();
+	float& GetDisplacementRef();
+
 	FogInfo& GetFogInfo() { return m_foginfo; }
 
 	float& Metallic();
@@ -159,6 +165,7 @@ public:
 	Texture GetSSRTexture() const;
 	Texture GetSSRWithScreenTexture() const;
 	Texture GetSSRTextureScreenMask() const;
+	Texture GetCameraInterpolationCoords() const;
 
 	void DumpCSMTextures() const;
 
@@ -177,11 +184,12 @@ protected:
 	void			RenderGeometry(const Camera&, const SimpleGeometryMesh& _mesh);
 	void			RenderParticles(const Camera&);
 	void			RenderBlur(const Camera&);
-	void			RenderContrast(const Camera& _camera, const Texture& _contrast);
+	void			RenderContrast(const Camera& _camera, const Texture& _screen, const Texture& _contrast);
 	void			RenderGui(std::vector<std::shared_ptr<GUI>>&, const Camera&);
 	void			RenderPBR(const Camera&, const Light& _light, std::vector<shObject> _objs);
 	void			RenderSSAO(const Camera&, const Light&, std::vector<shObject>&);
 	void			RenderSSR(const Camera& _camera);
+	Texture*  RenderCameraInterpolation(const Camera& _camera);
 	void			RenderIBL(const Camera& _camera);
 	void			RenderBloom();
 
@@ -199,10 +207,12 @@ protected:
 	bool			outline_focused = true;
 	bool			ssao = false;
 	bool			ssr = false;
+	bool			camera_interpolation = false;
 	bool			m_pb_bloom = false;
 	float			blur_coef = 0.2f;
 	bool			m_mesh_line_on = false;
 	bool			ibl_on = true;
+	bool			m_compute_shader = false;
 
 	FogInfo		m_foginfo;
 

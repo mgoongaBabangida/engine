@@ -418,6 +418,25 @@ bool Texture::makeRandom1DTexture(unsigned int _size)
 	return true;
 }
 
+bool Texture::makeImage(GLuint _width, GLuint _height)
+{
+	path = "";
+	type = "";
+	mTextureWidth = _width;
+	mTextureHeight = _height;
+	_genTexture();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+
+	glBindImageTexture(0, id, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+	return true;
+}
+
 bool Texture::generatePerlin(GLuint _width, GLuint _height, bool periodic)
 {
 	this->mTextureWidth = _width;

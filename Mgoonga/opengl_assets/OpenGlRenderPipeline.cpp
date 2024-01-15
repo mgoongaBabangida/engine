@@ -124,6 +124,8 @@ void eOpenGlRenderPipeline::InitializeBuffers()
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_IBL_CUBEMAP, 512, 512);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_IBL_CUBEMAP_IRR, 32, 32);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_BLOOM, width, height);
+	eGlBufferContext::GetInstance().BufferCustomInit("CameraInterpolationCoordsBuffer", width, height);
+	eGlBufferContext::GetInstance().BufferCustomInit("CamerInterpolationImageBuffer", width, height);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -250,6 +252,16 @@ float& eOpenGlRenderPipeline::ReflectionSpecularFalloffExponent()
 	return renderManager->SSRRenderer()->ReflectionSpecularFalloffExponent();
 }
 
+glm::vec3& eOpenGlRenderPipeline::GetSecondCameraPositionRef()
+{
+	return renderManager->CameraInterpolationRender()->GetSecondCameraPositionRef();
+}
+
+float& eOpenGlRenderPipeline::GetDisplacementRef()
+{
+	return renderManager->CameraInterpolationRender()->GetDisplacementRef();
+}
+
 float& eOpenGlRenderPipeline::Metallic()
 {
 	return renderManager->SSRRenderer()->Metallic();
@@ -350,7 +362,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
   glDisable(GL_CLIP_DISTANCE0);
 
 	// SSAO
-	if (ssao || ssr)
+	if (ssao || ssr || camera_interpolation) // need g - buffer
 	{
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFFERED);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -602,6 +614,9 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 																						(float)width, (float)height);
 		}
 
+		Texture screen = ssr ? eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN_WITH_SSR)
+												 : eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN);
+
 		Texture contrast;
 		if (m_pb_bloom)//Physicly Based Bloom
 		{
@@ -615,11 +630,17 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 			contrast = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_GAUSSIAN_TWO);
 		}
 
+		if (camera_interpolation)
+		{
+			glViewport(0, 0, width, height);
+			screen = *RenderCameraInterpolation(_camera);
+		}
+
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 		glViewport(0, 0, width, height);
-		glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glDisable(GL_DEPTH_TEST);
-		RenderContrast(_camera, contrast); // blend screen with gaussian (or pb bloom) -> to default
+		RenderContrast(_camera, screen, contrast); // blend screen with gaussian (or pb bloom) -> to default
 	}
 	
 	//Post-processing, need stencil
@@ -664,6 +685,9 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	eGlDrawContext::GetInstance().Flush();
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	if(m_compute_shader)
+		renderManager->ComputeShaderRender()->Render(_camera);
 
 	//render final texture to screen
 	/*Texture total_screen = GetDefaultBufferTexture();
@@ -848,16 +872,15 @@ void eOpenGlRenderPipeline::RenderBlur(const Camera& _camera)
 	renderManager->GaussianBlurRender()->Render();
 }
 
-void eOpenGlRenderPipeline::RenderContrast(const Camera& _camera, const Texture& _contrast)
+//------------------------------------------------
+void eOpenGlRenderPipeline::RenderContrast(const Camera& _camera, const Texture& _screen, const Texture& _contrast)
 {
-	if(ssr)
-		renderManager->ScreenRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN_WITH_SSR));
-	else
-		renderManager->ScreenRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));
+	renderManager->ScreenRender()->SetTexture(_screen);
 	renderManager->ScreenRender()->SetTextureContrast( _contrast);
 	renderManager->ScreenRender()->RenderContrast(_camera, blur_coef);
 }
 
+//------------------------------------------------
 void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, const Camera& _camera)
 {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -1134,6 +1157,11 @@ Texture eOpenGlRenderPipeline::GetSSRTextureScreenMask() const
 	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN_MASK);
 }
 
+Texture eOpenGlRenderPipeline::GetCameraInterpolationCoords() const
+{
+	return eGlBufferContext::GetInstance().GetTexture("CameraInterpolationCoordsBuffer");
+}
+
 void eOpenGlRenderPipeline::DumpCSMTextures() const
 {
 	Texture t = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SHADOW_CSM);
@@ -1157,4 +1185,74 @@ void eOpenGlRenderPipeline::DumpCSMTextures() const
 
 	Texture* csmp5 = const_cast<Texture*>(&csm_dump5);
 	csmp5->TextureFromBuffer<GLfloat>((GLfloat*)&buffer[2400 * 1200 * 4], 2400, 1200, GL_RED);
+}
+
+#include <cmath>
+
+float Lerp(int start, int end, float t)
+{
+	// Clamp t to the range [0, 1]
+	t = std::max(0.0f, std::min(1.0f, t));
+
+	// Perform linear interpolation
+	return static_cast<float>(start) + t * (static_cast<float>(end) - static_cast<float>(start));
+}
+
+//-------------------------------------------------------
+Texture* eOpenGlRenderPipeline::RenderCameraInterpolation(const Camera& _camera)
+{
+	static std::vector<GLfloat> buffer_image(width * height * 4);
+	static std::vector<GLfloat> buffer_coords(width * height * 4);
+	static std::vector<GLfloat> buffer_new_image(width * height * 4);
+	static Texture new_image_texture;
+
+	eGlBufferContext::GetInstance().EnableCustomWrittingBuffer("CameraInterpolationCoordsBuffer");
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_DEFFERED, GL_TEXTURE2);
+	renderManager->CameraInterpolationRender()->Render(_camera);
+
+	/*eGlBufferContext::GetInstance().EnableCustomWrittingBuffer("CamerInterpolationImageBuffer");
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);*/
+	if (ssr)
+		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SCREEN_WITH_SSR, GL_TEXTURE2);
+	else
+		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SCREEN, GL_TEXTURE2);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, &buffer_image[0]);
+
+	eGlBufferContext::GetInstance().EnableCustomReadingBuffer("CameraInterpolationCoordsBuffer", GL_TEXTURE3);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, &buffer_coords[0]);
+
+	for (uint32_t row = 0; row < height; ++row)
+	{
+		for (uint32_t column = 0; column < width; ++column)
+		{
+			float r = buffer_image[row * width * 4 + column*4];
+			float g = buffer_image[row * width * 4 + column*4 +1];
+			float b = buffer_image[row * width * 4 + column*4 +2];
+			float a = 1.f;
+
+			float new_coord_x = buffer_coords[row * width * 4 + column * 4];
+			float new_coord_y = buffer_coords[row * width * 4 + column * 4 + 1];
+			float new_coord_z = buffer_coords[row * width * 4 + column * 4 + 2];
+			float new_coord_a = buffer_coords[row * width * 4 + column * 4 + 3];
+
+			int new_coord_x_int = static_cast<int>(std::round(Lerp(0, width, new_coord_x)));
+			int new_coord_y_int = static_cast<int>(std::round(Lerp(0, height, new_coord_y)));
+
+			//float new_coord_x = column;
+			//float new_coord_y = row;
+
+			int index = new_coord_y_int * width * 4 + new_coord_x_int * 4;
+			if (index < buffer_new_image.size()-3 && index >= 0)
+			{
+				buffer_new_image[new_coord_y_int * width * 4 + new_coord_x_int *4] = r;
+				buffer_new_image[new_coord_y_int * width * 4 + new_coord_x_int *4 + 1] = g;
+				buffer_new_image[new_coord_y_int * width * 4 + new_coord_x_int *4 + 2] = b;
+				buffer_new_image[new_coord_y_int * width * 4 + new_coord_x_int *4 + 3] = a;
+			}
+		}
+	}
+	new_image_texture.TextureFromBuffer<GLfloat>((GLfloat*)&buffer_new_image[0], width, height, GL_RGBA);
+	return &new_image_texture;
+	//renderManager->CameraInterpolationRender()->RenderApply(_camera, width, height);
 }

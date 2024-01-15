@@ -429,3 +429,9 @@ void eSandBoxGame::InitializeModels()
 	m_input_controller->AddObserver(this, WEAK);
 	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
 }
+
+void eSandBoxGame::InitializePipline()
+{
+	eMainContextBase::InitializePipline();
+	pipeline.GetBlurCoefRef() = 0.0f;
+}

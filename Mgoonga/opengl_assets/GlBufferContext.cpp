@@ -29,6 +29,18 @@ void eGlBufferContext::BufferInit(eBuffer _buffer, unsigned int _width, unsigned
 	}
 }
 
+GLuint eGlBufferContext::BufferCustomInit(const std::string& _name, unsigned int _width, unsigned int _height, bool _multisample, bool _mask_attachement)
+{
+	if (auto it = customBuffers.find(_name); it != customBuffers.end())
+		return it->second.ID();
+
+	eColorFBO buffer;
+	buffer.Init(_width, _height);
+	GLuint id = buffer.ID();
+	customBuffers.insert({ _name, std::move(buffer) });
+	return id;
+}
+
 void eGlBufferContext::EnableWrittingBuffer(eBuffer _buffer)
 {
 	switch(_buffer)
@@ -88,6 +100,18 @@ void eGlBufferContext::EnableReadingBuffer(eBuffer _buffer, GLenum _slot)
 	}
 }
 
+void eGlBufferContext::EnableCustomWrittingBuffer(const std::string& _name)
+{
+	if (auto it = customBuffers.find(_name); it != customBuffers.end())
+		it->second.BindForWriting();
+}
+
+void eGlBufferContext::EnableCustomReadingBuffer(const std::string& _name, GLenum slot)
+{
+	if (auto it = customBuffers.find(_name); it != customBuffers.end())
+		it->second.BindForReading(slot);
+}
+
 GLuint eGlBufferContext::GetRboID(eBuffer _buffer)
 {
 	switch (_buffer)
@@ -129,6 +153,14 @@ Texture eGlBufferContext::GetTexture(eBuffer _buffer)
 		case eBuffer::BUFFER_SCREEN_WITH_SSR:		return screenSsrFBO.GetTexture();
 	}
 	return Texture();/*?*/
+}
+
+Texture eGlBufferContext::GetTexture(const std::string& _name)
+{
+	if (auto it = customBuffers.find(_name); it != customBuffers.end())
+		return it->second.GetTexture();
+	else
+		return Texture();/*?*/
 }
 
 //----------------------------------------------------------------

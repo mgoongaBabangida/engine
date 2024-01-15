@@ -26,6 +26,7 @@ public:
 protected:
 	virtual void		InitializeExternalGui() override;
 	virtual void		InitializeModels()			override;
+	virtual void		InitializePipline()			override;
 };
 
 #endif //SAND_BOX_GAME_H

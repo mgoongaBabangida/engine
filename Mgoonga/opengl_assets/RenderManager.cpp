@@ -28,6 +28,8 @@ eCSMRender* eRenderManager::CSMRender() {return m_csmRender.get();}
 eBloomRenderer* eRenderManager::BloomRenderer(){ return m_blomRender.get();}
 eScreenSpaceReflectionRender* eRenderManager::SSRRenderer(){return m_ssrRender.get();}
 eAreaLightsOnlyRender* eRenderManager::AreaLightsRender(){return m_area_lights.get();}
+eCameraInterpolationRender* eRenderManager::CameraInterpolationRender(){return m_cameraInrepolationRender.get();}
+eComputeShaderRender* eRenderManager::ComputeShaderRender() {return m_computeRender.get();}
 
 //----------------------------------------------------------------------------------------------------------------
 void eRenderManager::AddParticleSystem(std::shared_ptr<IParticleSystem> system)
@@ -179,6 +181,16 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 	//Area lights
 	m_area_lights.reset(new eAreaLightsOnlyRender(folderPath + "PBRVertexShaderCode.glsl", folderPath + "AreaLightOnlyFS.glsl"));
 	shader_lambda(m_area_lights.get());
+
+	//Camera Interpolation
+	m_cameraInrepolationRender.reset(new  eCameraInterpolationRender(folderPath + "PostProcessingVertexShader.glsl",
+																																	 folderPath + "CameraInterpolationNewCoords.glsl",
+																																	 folderPath + "CameraInterpolationApplyNewCoords.glsl"));
+	shader_lambda(m_cameraInrepolationRender.get());
+
+	//Compute
+	m_computeRender.reset(new  eComputeShaderRender(folderPath + "ComputeShader.glsl", texManager.Find("computeImageRW")));
+	shader_lambda(m_cameraInrepolationRender.get());
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -211,6 +223,8 @@ void eRenderManager::UpdateShadersInfo()
 	shader_lambda(m_blomRender.get());
 	shader_lambda(m_ssrRender.get());
 	shader_lambda(m_area_lights.get());
+	shader_lambda(m_cameraInrepolationRender.get());
+	shader_lambda(m_computeRender.get());
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -267,6 +281,10 @@ bool eRenderManager::SetUniformData(const std::string& _renderName, const std::s
 	if (shader_lambda(m_ssrRender.get()))
 		return true;
 	if (shader_lambda(m_area_lights.get()))
+		return true;
+	if (shader_lambda(m_cameraInrepolationRender.get()))
+		return true;
+	if (shader_lambda(m_computeRender.get()))
 		return true;
 	return false;
 }

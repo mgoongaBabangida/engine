@@ -6,6 +6,23 @@
 //@todo make one function installShaders//
 
 //------------------------------------------------------------------------------------
+void Shader::installShaders(const char* ComputeShaderName)
+{
+	computeShaderID = glCreateShader(GL_COMPUTE_SHADER);
+	const char* adapter[1];
+	std::string temp = readShaderCode(ComputeShaderName);
+	adapter[0] = temp.c_str();
+	glShaderSource(computeShaderID, 1, adapter, NULL);
+	glCompileShader(computeShaderID);
+	id = glCreateProgram();
+	if (checkShaderStatus(computeShaderID))
+	{
+		glAttachShader(id, computeShaderID);
+		glLinkProgram(id);
+	}
+}
+
+//------------------------------------------------------------------------------------
 void Shader::installShaders(const char* VertexShaderName, const char* FragmentShaderName, bool _transformFeedback)
 {
 	vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -15,6 +32,7 @@ void Shader::installShaders(const char* VertexShaderName, const char* FragmentSh
 	std::string temp = readShaderCode(VertexShaderName);
 	adapter[0] = temp.c_str();
 	glShaderSource(vertexShaderID, 1, adapter, NULL);
+
 	temp = readShaderCode(FragmentShaderName);
 	adapter[0] = temp.c_str();
 	glShaderSource(fragmentShaderID, 1, adapter, NULL);
@@ -195,6 +213,7 @@ Shader::~Shader()
 	glDeleteShader(tessellation1ShaderID);
 	glDeleteShader(tessellation2ShaderID);
 	glDeleteShader(fragmentShaderID);
+	glDeleteShader(computeShaderID);
 	glDeleteProgram(id);
 }
 

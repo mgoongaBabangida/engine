@@ -655,6 +655,19 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[1]->Add(SLIDER_INT_NERROW, "NumBinarySearchSteps", &pipeline.NumBinarySearchSteps());
 	externalGui[1]->Add(SLIDER_FLOAT, "ReflectionSpecularFalloffExponent", &pipeline.ReflectionSpecularFalloffExponent());
 	externalGui[1]->Add(SLIDER_FLOAT_LARGE, "K", &pipeline.K());
+	//Camera Interpolation
+	externalGui[1]->Add(CHECKBOX, "CameraInterpolation", &pipeline.GetEnabledCameraInterpolationRef());
+	externalGui[1]->Add(TEXTURE, "Camera Interpolation Coords", (void*)pipeline.GetCameraInterpolationCoords().id);
+	
+	if (auto* image = texManager->Find("computeImageRW"); image != nullptr)
+	{
+		externalGui[1]->Add(CHECKBOX, "Compute shader", &pipeline.GetComputeShaderRef());
+		uint32_t id = image->id;
+		externalGui[1]->Add(TEXTURE, "Compute image", (void*)(id));
+	}
+
+	externalGui[12]->Add(SLIDER_FLOAT_3, "Second Camera Position", &pipeline.GetSecondCameraPositionRef());
+	externalGui[12]->Add(SLIDER_FLOAT, "Displacement", &pipeline.GetDisplacementRef());
 
 	externalGui[1]->Add(CHECKBOX, "Shadows", &pipeline.ShadowingRef());
 

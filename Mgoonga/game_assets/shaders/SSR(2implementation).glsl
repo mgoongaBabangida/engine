@@ -8,6 +8,7 @@ uniform sampler2D depthMap;
 
 uniform float SCR_WIDTH;
 uniform float SCR_HEIGHT;
+
 uniform mat4 invProjection;
 uniform mat4 projection;
 

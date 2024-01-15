@@ -5,6 +5,8 @@
 #include "GFBO.h"
 #include "bloomFBO.h"
 
+#include <map>
+
 enum class eBuffer
 {
 	BUFFER_DEFAULT,
@@ -37,15 +39,22 @@ enum class eBuffer
 class eGlBufferContext
 {
 public:
-	eGlBufferContext()								{}
 	eGlBufferContext(const eGlBufferContext&)		= delete;
 	eGlBufferContext& operator=(eGlBufferContext&)	= delete;
 	
 	void BufferInit(eBuffer, unsigned int, unsigned int);
+
+	GLuint BufferCustomInit(const std::string& _name, unsigned int, unsigned int, bool = false, bool = false);
+
 	void EnableWrittingBuffer(eBuffer);
 	void EnableReadingBuffer(eBuffer, GLenum slot);
 
+	void EnableCustomWrittingBuffer(const std::string& _name);
+	void EnableCustomReadingBuffer(const std::string& _name, GLenum slot);
+
 	Texture GetTexture(eBuffer);
+	Texture GetTexture(const std::string& _name);
+
 	GLuint GetRboID(eBuffer _buffer);
 
 	void ResolveMtsToScreen() { mtsFBO.ResolveToFBO(&screenFBO); }
@@ -65,6 +74,8 @@ public:
 	}
 
 private:
+	eGlBufferContext(){}
+
 	eColorFBO		   defaultFBO;
 	ShadowMapFBO	 depthDirFBO;
 	ShadowMapFBO	 depthCubeFBO;
@@ -86,4 +97,6 @@ private:
 	eColorFBO			 ssrFBO;
 	eColorFBO			 ssrblurFBO;
 	eColorFBO		   screenSsrFBO;
+
+	std::map<std::string, eColorFBO> customBuffers;
 };

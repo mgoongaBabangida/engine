@@ -21,6 +21,7 @@ public:
 	
 	bool SetUniformData(const std::string& _name, const UniformData& _data);
 
+	void					installShaders(const char* ComputeShaderName);
 	void					installShaders(const char* VertexShaderName,
 															 const char* FragmentShaderName,
 															 bool _transformFeedback = false);
@@ -47,6 +48,7 @@ protected:
 	GLuint geometryShaderID;
 	GLuint tessellation1ShaderID;
 	GLuint tessellation2ShaderID;
+	GLuint computeShaderID;
 
 	std::vector<Uniform> m_uniforms;
 };

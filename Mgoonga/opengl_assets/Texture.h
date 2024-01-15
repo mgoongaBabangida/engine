@@ -67,6 +67,7 @@ struct DLL_OPENGL_ASSETS Texture
 	bool makeDepthTextureArray(int32_t _layers);
 	bool makeDepthCubeMap();
 	bool makeRandom1DTexture(unsigned int _size);
+	bool makeImage(GLuint Width, GLuint Height);
 
 	template<class GLtype>
 	bool TextureFromBuffer(const GLtype* buffer, GLuint Width, GLuint Height, GLuint format= GL_RGBA, GLenum wrap = GL_CLAMP_TO_EDGE, GLenum minFilter = GL_LINEAR)

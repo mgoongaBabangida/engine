@@ -2,8 +2,8 @@
 #include "opengl_assets.h"
 
 #include "Shader.h"
-#include <math/Camera.h>
 #include <base/base.h>
+#include <math/Camera.h>
 #include "ScreenMesh.h"
 
 //---------------------------------------------------------------------------

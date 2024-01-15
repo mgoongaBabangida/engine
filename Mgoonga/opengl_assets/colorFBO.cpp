@@ -6,6 +6,19 @@ eColorFBO::~eColorFBO()
 {
 }
 
+eColorFBO::eColorFBO(eColorFBO&& _other)
+{
+	m_fbo = _other.m_fbo;
+	m_height = _other.m_height;
+	m_rbo = _other.m_rbo;
+	m_rbo_mask = _other.m_rbo_mask;
+	m_texture = _other.m_texture;
+	m_texture_mask = _other.m_texture_mask;
+	m_width = _other.m_width;
+
+	_other.m_fbo = 0;
+}
+
 bool eColorFBO::Init(unsigned int WindowWidth, unsigned int WindowHeight, bool multisample, bool mask_attachment)
 {
 	m_width = WindowWidth;

@@ -28,6 +28,8 @@
 #include "BloomRender.h"
 #include "ScreenSpaceReflectionRender.h"
 #include "AreaLightsOnlyRender.h"
+#include "CameraInterpolationRender.h"
+#include "ComputeShaderRender.h"
 
 //----------------------------------------------------------------------------------------------
 class eRenderManager
@@ -79,6 +81,8 @@ private:
 	eBloomRenderer* BloomRenderer();
 	eScreenSpaceReflectionRender* SSRRenderer();
 	eAreaLightsOnlyRender* AreaLightsRender();
+	eCameraInterpolationRender* CameraInterpolationRender();
+	eComputeShaderRender* ComputeShaderRender();
 
 private:
 	std::unique_ptr<eWaterRender>									m_waterRender;
@@ -104,6 +108,8 @@ private:
 	std::unique_ptr<eBloomRenderer>								m_blomRender;
 	std::unique_ptr<eScreenSpaceReflectionRender>	m_ssrRender;
 	std::unique_ptr<eAreaLightsOnlyRender>				m_area_lights;
+	std::unique_ptr<eCameraInterpolationRender>		m_cameraInrepolationRender;
+	std::unique_ptr<eComputeShaderRender>					m_computeRender;
 
 	std::string							folderPath;
 	std::vector<ShaderInfo>	shaders;

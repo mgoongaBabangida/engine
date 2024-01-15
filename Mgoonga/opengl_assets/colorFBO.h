@@ -17,10 +17,10 @@ public:
 	Texture		GetTexture();
 	Texture		GetTextureMask();
 
-	GLuint  ID() { return m_fbo; }
-	GLuint		Width() { return  m_width; }
-	GLuint		Height() { return  m_height; }
-	glm::ivec2 Size() { return { m_width , m_height }; }
+	GLuint			ID()		 { return m_fbo; }
+	GLuint			Width()  { return  m_width; }
+	GLuint			Height() { return  m_height; }
+	glm::ivec2	Size()	 { return { m_width , m_height }; }
 
 	virtual bool		Init(unsigned int WindowWidth, unsigned int WindowHeight, bool multisample = false, bool mask_attachment = false);
 protected:
@@ -37,6 +37,10 @@ class eColorFBO : public SimpleColorFBO
 public:
 	eColorFBO() = default;
 	~eColorFBO();
+	eColorFBO(const eColorFBO&) = delete;
+	const eColorFBO& operator=(const eColorFBO&) = delete;
+
+	eColorFBO(eColorFBO&&);
 
 	virtual bool		Init(unsigned int WindowWidth, unsigned int WindowHeight, bool multisample = false, bool mask_attachment = false) override;
 
@@ -62,10 +66,10 @@ public:
 	 void		BindForReading(GLenum TextureUnit);
 
 	 Texture		GetTexture();
-	 GLuint  ID() { return m_fbo; }
-	 GLuint  RboID() { return m_rbo; }
-	 GLuint		Width() { return  m_width; }
-	 GLuint		Height() { return  m_height; }
+	 GLuint			ID() { return m_fbo; }
+	 GLuint			RboID() { return m_rbo; }
+	 GLuint			Width() { return  m_width; }
+	 GLuint			Height() { return  m_height; }
 	 glm::ivec2 Size() { return { m_width , m_height }; }
 
 protected:
