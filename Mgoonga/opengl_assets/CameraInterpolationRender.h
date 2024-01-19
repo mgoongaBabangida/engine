@@ -10,21 +10,26 @@
 class eCameraInterpolationRender
 {
 public:
-  eCameraInterpolationRender(const std::string& vS, const std::string& fS, const std::string& fS2);
+  eCameraInterpolationRender(const std::string& vS, const std::string& fS,
+    const std::string& cS, const Texture* _computeShaderImage);
   void Render(const Camera& _camera);
-  void RenderApply(const Camera& _camera, float _textureWidth, float _textureHeight);
+  void DispatchCompute(const Camera& _camera);
 
-  Shader& GetShader() { return mShaderCoords; }
+  Shader& GetShader() { return mComputeShader; }
 
-  glm::vec3& GetSecondCameraPositionRef() { return seconCameraPosition; }
+  glm::vec3& GetSecondCameraPositionRef() { return secondCameraPosition; }
   float& GetDisplacementRef() { return displacement; }
 
 protected:
   Shader mShaderCoords;
-  Shader mShaderApplyCoords;
+
+  Shader mComputeShader;
+  GLuint mImageId;
+  GLuint mImageWidth;
+  GLuint mImageHeight;
 
   std::unique_ptr<eScreenMesh>	screenMesh;
 
-  glm::vec3 seconCameraPosition;
+  glm::vec3 secondCameraPosition;
   float displacement = 1.0f;
 };

@@ -185,11 +185,18 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 	//Camera Interpolation
 	m_cameraInrepolationRender.reset(new  eCameraInterpolationRender(folderPath + "PostProcessingVertexShader.glsl",
 																																	 folderPath + "CameraInterpolationNewCoords.glsl",
-																																	 folderPath + "CameraInterpolationApplyNewCoords.glsl"));
+																																	 folderPath + "CameraInterpolationCompute.glsl",
+																																	 texManager.Find("computeImageRWCameraInterpolation")));
 	shader_lambda(m_cameraInrepolationRender.get());
 
 	//Compute
-	m_computeRender.reset(new  eComputeShaderRender(folderPath + "ComputeShader.glsl", texManager.Find("computeImageRW")));
+	m_computeRender.reset(new  eComputeShaderRender(folderPath + "ComputeShader.glsl", folderPath + "ComputePSShader.glsl",
+																									folderPath + "PassThroughVertex.glsl", folderPath + "PassThroughFragment.glsl",
+																									folderPath + "ClothSimulationVertex.glsl", folderPath + "ClothSimulationFragment.glsl", 
+																									folderPath + "ClothSimulationCompute.glsl", folderPath + "ClothSimulationNormalsCompute.glsl",
+																									folderPath + "EdgeFindingCompute.glsl",
+																									texManager.Find("TSpanishFlag0_s"),
+																									texManager.Find("computeImageRW")));
 	shader_lambda(m_cameraInrepolationRender.get());
 }
 

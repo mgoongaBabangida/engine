@@ -61,21 +61,4 @@ void main()
 	
 	// Convert from range (-1, 1) to (0, 1)
 	newCoords = vec4(ProjectedPosition.xyz * 0.5f + 0.5f, 1.0f);
-	
-	
-	
-	//vec3 pos = texture(tPos, TexCoords).xyz;
-	//vec4 projectedPos = proj * vec4(pos, 1.0f);
-	//projectedPos /= projectedPos.w;
-	
-	//vec3 viewSpacePos =  PositionFromDepth(projectedPos.z); 	
-	//vec3 worldPos = vec3(invView * vec4(viewSpacePos, 1.0));
-	
-	//newCoords = proj * view * vec4(worldPos, 1.0);
-	//newCoords /= newCoords.w;
-	
-	// Convert from range (-1, 1) to (0, 1)
-    // newCoords = vec4(newCoords.xyz * 0.5 + 0.5, 1.0f);
-	
-	//newCoords = vec4(TexCoords, 1.0f, 1.0f);
 }

@@ -1,15 +1,20 @@
 #include "CameraInterpolationRender.h"
 
 //---------------------------------------------------------------
-eCameraInterpolationRender::eCameraInterpolationRender(const std::string& vS, const std::string& fS, const std::string& fS2)
+eCameraInterpolationRender::eCameraInterpolationRender(const std::string& vS, const std::string& fS,
+  const std::string& cS, const Texture* _computeShaderImage)
 {
   mShaderCoords.installShaders(vS.c_str(), fS.c_str());
-
-  mShaderApplyCoords.installShaders(vS.c_str(), fS2.c_str());
-  mShaderApplyCoords.GetUniformInfoFromShader();
-
+  mShaderCoords.GetUniformInfoFromShader();
   screenMesh.reset(new eScreenMesh({}, {}));
   screenMesh->SetViewPortToDefault();
+
+  mComputeShader.installShaders(cS.c_str());
+  mComputeShader.GetUniformInfoFromShader();
+
+  mImageId = _computeShaderImage->id;
+  mImageWidth = _computeShaderImage->mTextureWidth;
+  mImageHeight = _computeShaderImage->mTextureHeight;
 }
 
 //---------------------------------------------------------------
@@ -21,8 +26,8 @@ void eCameraInterpolationRender::Render(const Camera& _camera)
   glm::vec3 focusPoint = _camera.getPosition() + (glm::normalize(_camera.getDirection()) * 3.f);
   glm::vec3 right = glm::cross(glm::normalize(_camera.getDirection()) , glm::vec3(0.f, 1.f, 0.f));
   right = right * displacement;
-  seconCameraPosition = _camera.getPosition() + right;
-  secondCamera.setPosition(seconCameraPosition);
+  secondCameraPosition = _camera.getPosition() + right;
+  secondCamera.setPosition(secondCameraPosition);
   secondCamera.setDirection(focusPoint - secondCamera.getPosition());
 
   mShaderCoords.SetUniformData("proj", secondCamera.getProjectionMatrix());
@@ -34,9 +39,30 @@ void eCameraInterpolationRender::Render(const Camera& _camera)
   screenMesh->DrawUnTextured();
 }
 
-//---------------------------------------------------------------
-void eCameraInterpolationRender::RenderApply(const Camera& _camera, float _textureWidth, float _textureHeight)
+//-------------------------------------------------------------------
+void eCameraInterpolationRender::DispatchCompute(const Camera& _camera)
 {
-  glUseProgram(mShaderApplyCoords.ID());
-  screenMesh->DrawUnTextured();
+  glUseProgram(mComputeShader.ID());
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindImageTexture(0, mImageId, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
+  Camera secondCamera(_camera);
+  glm::vec3 focusPoint = _camera.getPosition() + (glm::normalize(_camera.getDirection()) * 3.f);
+  glm::vec3 right = glm::cross(glm::normalize(_camera.getDirection()), glm::vec3(0.f, 1.f, 0.f));
+  right = right * displacement;
+  secondCameraPosition = _camera.getPosition() + right;
+  secondCamera.setPosition(secondCameraPosition);
+  secondCamera.setDirection(focusPoint - secondCamera.getPosition());
+
+  mComputeShader.SetUniformData("proj", secondCamera.getProjectionMatrix());
+  mComputeShader.SetUniformData("view", secondCamera.getWorldToViewMatrix());
+
+  mComputeShader.SetUniformData("invProj", glm::inverse(_camera.getProjectionMatrix()));
+  mComputeShader.SetUniformData("invView", glm::inverse(_camera.getWorldToViewMatrix()));
+
+  glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
+  glDispatchCompute((unsigned int)mImageWidth, (unsigned int)mImageHeight, 1);
+  // make sure writing to image has finished before read
+  glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
 }

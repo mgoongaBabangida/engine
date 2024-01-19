@@ -310,7 +310,10 @@ void eMainContextBase::PaintGL()
 //--------------------------------------------------------------------------------
 uint32_t eMainContextBase::GetFinalImageId()
 {
-	return pipeline.GetDefaultBufferTexture().id;
+	if (pipeline.GetEnabledCameraInterpolationRef())
+		return texManager->Find("computeImageRWCameraInterpolation")->id;
+	else
+		return pipeline.GetDefaultBufferTexture().id;
 }
 
 //---------------------------------------------------------------------------------
@@ -657,7 +660,7 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[1]->Add(SLIDER_FLOAT_LARGE, "K", &pipeline.K());
 	//Camera Interpolation
 	externalGui[1]->Add(CHECKBOX, "CameraInterpolation", &pipeline.GetEnabledCameraInterpolationRef());
-	externalGui[1]->Add(TEXTURE, "Camera Interpolation Coords", (void*)pipeline.GetCameraInterpolationCoords().id);
+	externalGui[1]->Add(TEXTURE, "Compute Shader buffer", (void*)pipeline.GetComputeParticleSystem().id);
 	
 	if (auto* image = texManager->Find("computeImageRW"); image != nullptr)
 	{
@@ -668,6 +671,11 @@ void eMainContextBase::InitializeExternalGui()
 
 	externalGui[12]->Add(SLIDER_FLOAT_3, "Second Camera Position", &pipeline.GetSecondCameraPositionRef());
 	externalGui[12]->Add(SLIDER_FLOAT, "Displacement", &pipeline.GetDisplacementRef());
+	if (auto* image = texManager->Find("computeImageRWCameraInterpolation"); image != nullptr)
+	{
+		uint32_t id = image->id;
+		externalGui[12]->Add(TEXTURE, "Camera Interpolation image", (void*)(id));
+	}
 
 	externalGui[1]->Add(CHECKBOX, "Shadows", &pipeline.ShadowingRef());
 

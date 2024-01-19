@@ -166,6 +166,7 @@ public:
 	Texture GetSSRWithScreenTexture() const;
 	Texture GetSSRTextureScreenMask() const;
 	Texture GetCameraInterpolationCoords() const;
+	Texture GetComputeParticleSystem() const;
 
 	void DumpCSMTextures() const;
 
@@ -189,6 +190,7 @@ protected:
 	void			RenderPBR(const Camera&, const Light& _light, std::vector<shObject> _objs);
 	void			RenderSSAO(const Camera&, const Light&, std::vector<shObject>&);
 	void			RenderSSR(const Camera& _camera);
+	void			RenderCameraInterpolationCompute(const Camera& _camera);
 	Texture*  RenderCameraInterpolation(const Camera& _camera);
 	void			RenderIBL(const Camera& _camera);
 	void			RenderBloom();

@@ -127,11 +127,14 @@ void eTextureManager::_LoadHardcoded()
 	m_Textures.insert(std::pair<std::string, Texture>("Tempty", text));
 	Texture::SetEmptyTextureId(text.id);
 
-	text.generatePerlin(600, 600, true); //HARDCODING!
+	text.generatePerlin(600, 600, true); //@todo HARDCODING!
 	m_Textures.insert(std::pair<std::string, Texture>("Tperlin_n", text));
 
-	text.makeImage(1000, 1000);
+	text.makeImage(1000, 1000); //@todo temp HARDCODING!
 	m_Textures.insert(std::pair<std::string, Texture>("computeImageRW", text));
+
+	text.makeImage(1200, 600); //@todo!!! screen with & height
+	m_Textures.insert(std::pair<std::string, Texture>("computeImageRWCameraInterpolation", text));
 }
 
 //----------------------------------------------------
