@@ -86,6 +86,7 @@ void TerrainGeneratorTool::Initialize()
 			m_texture_scale[counter]);
 		++counter;
 	}
+
 	m_pipeline.get().SetUniformData("class eMainRender",
 		"base_start_heights[" + std::to_string(counter) + "]",
 		1.0f);
@@ -133,6 +134,8 @@ void TerrainGeneratorTool::Initialize()
 	m_imgui->Add(BUTTON, "Render mode", (void*)&render_mode__callback);
 	m_imgui->Add(BUTTON, "Texturing", (void*)&texturing__callback);
 	m_imgui->Add(TEXTURE, "Color texture", (void*)m_color_texture.id);
+
+	m_initialized = true;
 }
 
 //-----------------------------------------------------------------------------
@@ -145,80 +148,86 @@ TerrainGeneratorTool::~TerrainGeneratorTool()
 //-----------------------------------------------------------------------------
 void TerrainGeneratorTool::Update(float _tick)
 {
-	static float last_scale = m_scale;
-	static float last_persistance = m_persistance;
-	static float last_lacunarirty = m_lacunarity;
-	static glm::vec2 noise_offset = { 0.0f, 0.0f };
-	static GLuint octaves = 4;
-	static GLuint seed = 1;
-	static float last_height_scale = m_height_scale;
-
-	static float last_texture_scales0 = m_texture_scale[0];
-	static float last_texture_scales1 = m_texture_scale[1];
-	static float last_texture_scales2 = m_texture_scale[2];
-	static float last_texture_scales3 = m_texture_scale[3];
-
-	if (last_texture_scales0 != m_texture_scale[0] ||
-		  last_texture_scales1 != m_texture_scale[1] ||
-		  last_texture_scales2 != m_texture_scale[2] ||
-		  last_texture_scales3 != m_texture_scale[3] )
+	if (m_initialized)
 	{
-		m_pipeline.get().SetUniformData("class eMainRender", "textureScale[0]", m_texture_scale[0]);
-		m_pipeline.get().SetUniformData("class eMainRender", "textureScale[1]", m_texture_scale[1]);
-		m_pipeline.get().SetUniformData("class eMainRender", "textureScale[2]", m_texture_scale[2]);
-		m_pipeline.get().SetUniformData("class eMainRender", "textureScale[3]", m_texture_scale[3]);
+		static float last_scale = m_scale;
+		static float last_persistance = m_persistance;
+		static float last_lacunarirty = m_lacunarity;
+		static glm::vec2 noise_offset = { 0.0f, 0.0f };
+		static GLuint octaves = 4;
+		static GLuint seed = 1;
+		static float last_height_scale = m_height_scale;
+
+		static float last_texture_scales0 = m_texture_scale[0];
+		static float last_texture_scales1 = m_texture_scale[1];
+		static float last_texture_scales2 = m_texture_scale[2];
+		static float last_texture_scales3 = m_texture_scale[3];
+
+		if (last_texture_scales0 != m_texture_scale[0] ||
+			last_texture_scales1 != m_texture_scale[1] ||
+			last_texture_scales2 != m_texture_scale[2] ||
+			last_texture_scales3 != m_texture_scale[3])
+		{
+			m_pipeline.get().SetUniformData("class eMainRender", "textureScale[0]", m_texture_scale[0]);
+			m_pipeline.get().SetUniformData("class eMainRender", "textureScale[1]", m_texture_scale[1]);
+			m_pipeline.get().SetUniformData("class eMainRender", "textureScale[2]", m_texture_scale[2]);
+			m_pipeline.get().SetUniformData("class eMainRender", "textureScale[3]", m_texture_scale[3]);
+		}
+
+		if (m_noise_texture.mTextureWidth != m_width ||
+			m_noise_texture.mTextureHeight != m_height ||
+			last_scale != m_scale ||
+			last_persistance != m_persistance ||
+			last_lacunarirty != m_lacunarity ||
+			noise_offset != m_noise_offset ||
+			octaves != m_octaves ||
+			seed != m_seed ||
+			last_height_scale != m_height_scale)
+		{
+			m_noise_map.resize(m_width * m_height);
+			_GenerateNoiseMap(m_width, m_height, m_scale, m_octaves, m_persistance, m_lacunarity, m_noise_offset, m_seed);
+
+			//update noise texture
+			m_noise_texture.mTextureWidth = m_width;
+			m_noise_texture.mTextureHeight = m_height;
+			glBindTexture(GL_TEXTURE_2D, m_noise_texture.id);
+			glTexStorage2D(GL_TEXTURE_2D, 1, GL_RED, m_width, m_height);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_FLOAT, &m_noise_map[0]);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			//update color texture
+			_GenerateColorMap();
+			m_color_texture.TextureFromBuffer<GLfloat>(&m_color_map[0].x, m_width, m_height, GL_RGBA);
+
+			//reset the mesh
+			if (m_terrain_pointer)
+			{
+				m_terrain_pointer->initialize(&m_color_texture,
+					&m_color_texture,
+					&Texture::GetTexture1x1(BLUE),
+					&m_noise_texture,
+					true,
+					m_height_scale,
+					m_height_scale * m_max_height_coef);
+			}
+
+			//update uniforms
+			m_pipeline.get().SetUniformData("class eMainRender", "max_height", m_height_scale);
+			m_pipeline.get().SetUniformData("class eMainRender", "textureScale[0]", m_texture_scale[0]);
+		}
+
+		last_scale = m_scale;
+		last_persistance = m_persistance;
+		last_lacunarirty = m_lacunarity;
+		noise_offset = m_noise_offset;
+		octaves = m_octaves;
+		seed = m_seed;
+		last_height_scale = m_height_scale;
+		last_texture_scales0 = m_texture_scale[0];
+		last_texture_scales1 = m_texture_scale[1];
+		last_texture_scales2 = m_texture_scale[2];
+		last_texture_scales3 = m_texture_scale[3];
 	}
-
-	if (m_noise_texture.mTextureWidth		!= m_width ||
-			m_noise_texture.mTextureHeight	!= m_height ||
-			last_scale											!= m_scale ||
-			last_persistance								!= m_persistance ||
-			last_lacunarirty								!= m_lacunarity ||
-			noise_offset										!= m_noise_offset ||
-			octaves													!= m_octaves ||
-			seed														!= m_seed ||
-			last_height_scale								!= m_height_scale)
-	{
-		m_noise_map.resize(m_width * m_height);
-		_GenerateNoiseMap(m_width, m_height, m_scale, m_octaves, m_persistance, m_lacunarity, m_noise_offset, m_seed);
-
-		//update noise texture
-		m_noise_texture.mTextureWidth = m_width;
-		m_noise_texture.mTextureHeight = m_height;
-		glBindTexture(GL_TEXTURE_2D, m_noise_texture.id);
-		glTexStorage2D(GL_TEXTURE_2D, 1, GL_RED, m_width, m_height);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_FLOAT, &m_noise_map[0]);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		//update color texture
-		_GenerateColorMap();
-		m_color_texture.TextureFromBuffer<GLfloat>(&m_color_map[0].x, m_width, m_height, GL_RGBA);
-
-		//reset the mesh
-		m_terrain_pointer->initialize(&m_color_texture,
-																	&m_color_texture,
-																	&Texture::GetTexture1x1(BLUE),
-																	&m_noise_texture,
-																	true,
-																	m_height_scale,
-																	m_height_scale * m_max_height_coef);
-
-		//update uniforms
-		m_pipeline.get().SetUniformData("class eMainRender", "max_height", m_height_scale);
-		m_pipeline.get().SetUniformData("class eMainRender", "textureScale[0]", m_texture_scale[0]);
-	}
-
-	last_scale = m_scale;
-	last_persistance = m_persistance;
-	last_lacunarirty = m_lacunarity;
-	noise_offset = m_noise_offset;
-	octaves = m_octaves;
-	seed = m_seed;
-	last_height_scale = m_height_scale;
-	last_texture_scales0 = m_texture_scale[0];
-	last_texture_scales1 = m_texture_scale[1];
-	last_texture_scales2 = m_texture_scale[2];
-	last_texture_scales3 = m_texture_scale[3];
 }
 
 //-----------------------------------------------------------------------------

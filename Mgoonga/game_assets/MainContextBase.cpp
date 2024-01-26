@@ -769,6 +769,14 @@ void eMainContextBase::InitializeExternalGui()
 	};
 	externalGui[4]->Add(MENU_OPEN_SCENE, "Deserealize scene", reinterpret_cast<void*>(&deserealize_scene_callback));
 
+	// Tools Menu
+	static std::function<void()> terrain_tool_callback = [this]()
+	{
+		m_global_scripts.push_back(std::make_shared<TerrainGeneratorTool>(this, modelManager.get(), texManager.get(), pipeline, externalGui[11]));
+		m_global_scripts.back()->Initialize();
+	};
+	externalGui[4]->Add(MENU, "Terrain Tool", reinterpret_cast<void*>(&terrain_tool_callback));
+
 	//Create
 	std::function<void()> create_cube_callbaack = [this]()
 	{
@@ -883,7 +891,6 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[9]->Add(CONSOLE, "Console", reinterpret_cast<void*>(&console_plane_callbaack));
 
 	m_global_scripts.push_back(std::make_shared<ParticleSystemToolController>(this, externalGui[10], modelManager.get(),texManager.get(), soundManager.get(), pipeline));
-	//m_global_scripts.push_back(std::make_shared<TerrainGeneratorTool>(this, modelManager.get(), texManager.get(), pipeline, externalGui[11]));
 }
 
 //------------------------------------------------------------

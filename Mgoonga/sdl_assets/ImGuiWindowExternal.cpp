@@ -74,6 +74,9 @@ eWindowImGuiExternal::eWindowImGuiExternal(const std::string& _name)
 //-----------------------------------------------------------------------
 void eWindowImGuiExternal::Render()
 {
+  if (lines.empty())
+    return;
+
   ImGui::Begin(name.c_str(), &visible);
 
   ImVec2 pos = ImGui::GetWindowPos();
@@ -1008,6 +1011,26 @@ void eMainImGuiWindow::Render()
     ImGui::EndMenu();
   }
 
+  if (ImGui::BeginMenu("Tools"))
+  {
+    for (auto& item : tool_items)
+    {
+      switch (std::get<1>(item))
+      {
+      case MENU:
+      {
+        if (ImGui::MenuItem(std::get<0>(item).c_str()))
+        {
+          auto callback = reinterpret_cast<std::function<void()>*>(std::get<2>(item));
+          (*callback)();
+        }
+      }
+      break;
+      }
+    }
+    ImGui::EndMenu();
+  }
+
   ImGui::EndMainMenuBar();
 
   if (open)
@@ -1065,12 +1088,24 @@ void eMainImGuiWindow::Render()
 //-------------------------------------------------------------------
 void eMainImGuiWindow::Add(TypeImGui _type, const std::string& _name, void* _data)
 {
-  auto it = std::find_if(lines.begin(), lines.end(), [&_name](const eItem& _item)
-    { return std::get<0>(_item) == _name; });
-  if (it == lines.end())
-    lines.push_back(eItem(_name, _type, _data));
+  if (_name.find("Tool") != std::string::npos)
+  {
+    auto it = std::find_if(tool_items.begin(), tool_items.end(), [&_name](const eItem& _item)
+      { return std::get<0>(_item) == _name; });
+    if (it == tool_items.end())
+      tool_items.push_back(eItem(_name, _type, _data));
+    else
+      std::get<2>(*it) = _data;
+  }
   else
-    std::get<2>(*it) = _data;
+  {
+    auto it = std::find_if(lines.begin(), lines.end(), [&_name](const eItem& _item)
+      { return std::get<0>(_item) == _name; });
+    if (it == lines.end())
+      lines.push_back(eItem(_name, _type, _data));
+    else
+      std::get<2>(*it) = _data;
+  }
 }
 
 //-------------------------------------------------------------------

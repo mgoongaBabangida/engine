@@ -43,6 +43,8 @@ public:
 
 protected:
 	std::vector<eItem>	lines;
+	std::vector<eItem>	tool_items;
+
 	std::string open_file_menu_name;
 	std::function<void(const std::string&)> open_file_callback;
 

@@ -60,6 +60,55 @@ void eSandBoxGame::InitializeModels()
 {
 	eMainContextBase::InitializeModels();
 	
+	//_InitializeScene();
+
+	//light
+	ObjectFactoryBase factory(animationManager.get());
+	pipeline.SetUniformData("class ePhongRender", "emission_strength", 5.0f);
+	shObject hdr_object = factory.CreateObject(modelManager->Find("white_quad"), eObject::RenderType::PHONG, "LightObject"); // or "white_quad"
+	if (hdr_object->GetModel()->GetName() == "white_sphere")
+		hdr_object->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
+	hdr_object->GetTransform()->setTranslation(GetMainLight().light_position);
+	m_light_object = hdr_object;
+	std::array<glm::vec4, 4> points = { // for area light
+		glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f),
+		glm::vec4(1.0f, -1.0f, 0.0f, 1.0f),
+		glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
+	GetMainLight().points = points;
+
+	Material m{ vec3{}, 0.0f, 0.0f, 1.0f,
+		Texture::GetTexture1x1(TColor::YELLOW).id, Texture::GetTexture1x1(TColor::WHITE).id,
+		Texture::GetTexture1x1(TColor::BLUE).id,   Texture::GetTexture1x1(TColor::WHITE).id, Texture::GetTexture1x1(TColor::YELLOW).id,
+	true, true, true, true };
+
+	hdr_object->GetModel()->SetMaterial(m);
+	m_objects.push_back(hdr_object);
+
+	//@todo make it dynamic, make clear order
+	//GLOBAL SCRIPTS
+	m_global_scripts.push_back(std::make_shared<ShootScript>(this, modelManager.get()));
+	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
+
+	m_global_scripts.push_back(std::make_shared<GUIControllerBase>(this, this->pipeline, soundManager->GetSound("page_sound")));
+	m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera()));
+
+	m_input_controller->AddObserver(this, WEAK);
+	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
+}
+
+//-------------------------------------------------------------------------
+void eSandBoxGame::InitializePipline()
+{
+	eMainContextBase::InitializePipline();
+	pipeline.GetBlurCoefRef() = 0.05f;
+
+	pipeline.GetSkyBoxOnRef() = false;
+}
+
+//-------------------------------------------------------------------------
+void eSandBoxGame::_InitializeScene()
+{
 	//MODELS
 	//modelManager->Add("MapleTree", (GLchar*)std::string(modelFolderPath + "MapleTree/MapleTree.obj").c_str());
 	//modelManager->Add("Cottage", (GLchar*)std::string(modelFolderPath + "85-cottage_obj/cottage_obj.obj").c_str());
@@ -77,7 +126,7 @@ void eSandBoxGame::InitializeModels()
 	pbr1.roughness_texture_id = texManager->Find("pbr1_roughness")->id;
 	pbr1.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
 	pbr1.use_albedo = pbr1.use_metalic = pbr1.use_normal = pbr1.use_roughness = true;
-	pbr1.ao = 0.2f;
+	pbr1.ao = 0.5f;
 
 	Material gold;
 	gold.albedo_texture_id = texManager->Find("pbr_gold_basecolor")->id;
@@ -125,11 +174,11 @@ void eSandBoxGame::InitializeModels()
 	m_objects.push_back(wolf);
 
 	shObject soldier = factory.CreateObject(modelManager->Find("Dying"),
-																					eObject::RenderType::PHONG,
-																					"Soldier",
-																					"Default", //"MixamoFireWalkDie.mgoongaRigger",
-																					"" //"Soldier3Anim.mgoongaBoxColliderDynamic",
-																					/*true*/); // dynamic collider
+		eObject::RenderType::PHONG,
+		"Soldier",
+		"Default", //"MixamoFireWalkDie.mgoongaRigger",
+		"" //"Soldier3Anim.mgoongaBoxColliderDynamic",
+	/*true*/); // dynamic collider
 	soldier->GetTransform()->setTranslation(vec3(0.0f, -2.0f, 0.0f));
 	soldier->GetTransform()->setScale(vec3(0.01f, 0.01f, 0.01f));
 	soldier->SetScript(new AnimationSocketScript(this));
@@ -145,7 +194,7 @@ void eSandBoxGame::InitializeModels()
 	/*modelManager->Save(soldier->GetModel(), "Soldier.mgoongaObject3d");
 	modelManager->Add("Soldier", "Soldier.mgoongaObject3d");*/
 
-	if(true)
+	if (true)
 	{
 		// GraveStone
 		shObject gravestone = factory.CreateObject(modelManager->Find("Gravestone"), eObject::RenderType::PBR, "Gravestone");
@@ -164,7 +213,7 @@ void eSandBoxGame::InitializeModels()
 		m_objects.push_back(tombstone);
 
 		//Chest
-		shObject chest = factory.CreateObject(modelManager->Find("Chest"), eObject::RenderType::PBR, "Chest", "Default", "" , true);
+		shObject chest = factory.CreateObject(modelManager->Find("Chest"), eObject::RenderType::PBR, "Chest", "Default", "", true);
 		chest->GetTransform()->setTranslation(vec3(-1.5f, -2.0f, 0.0f));
 		chest->GetTransform()->setRotation(glm::radians(-90.0f), glm::radians(-90.0f), 0.0f);
 		chest->GetTransform()->setScale(vec3(0.5f, 0.5f, 0.5f));
@@ -426,43 +475,4 @@ void eSandBoxGame::InitializeModels()
 		mapleTree->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
 		m_objects.push_back(mapleTree);
 	}
-
-	//light
-	pipeline.SetUniformData("class ePhongRender","emission_strength", 5.0f);
-	shObject hdr_object = factory.CreateObject(modelManager->Find("white_quad"), eObject::RenderType::PHONG, "LightObject"); // or "white_quad"
-	if(hdr_object->GetModel()->GetName() == "white_sphere")
-		hdr_object->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
-	hdr_object->GetTransform()->setTranslation(GetMainLight().light_position);
-	m_light_object = hdr_object;
-	std::array<glm::vec4, 4> points = { // for area light
-		glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f),
-		glm::vec4(1.0f, -1.0f, 0.0f, 1.0f),
-		glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f),
-		glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
-	GetMainLight().points = points;
-
-	Material m { vec3{}, 0.0f, 0.0f, 1.0f, 
-		Texture::GetTexture1x1(TColor::YELLOW).id, Texture::GetTexture1x1(TColor::WHITE).id,
-		Texture::GetTexture1x1(TColor::BLUE).id,   Texture::GetTexture1x1(TColor::WHITE).id, Texture::GetTexture1x1(TColor::YELLOW).id,
-	true, true, true, true};
-
-	hdr_object->GetModel()->SetMaterial(m);
-	m_objects.push_back(hdr_object);
-
-	//@todo make it dynamic, make clear order
-	//GLOBAL SCRIPTS
-	m_global_scripts.push_back(std::make_shared<ShootScript>(this, modelManager.get()));
-	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
-
-	m_global_scripts.push_back(std::make_shared<GUIControllerBase>(this, this->pipeline, soundManager->GetSound("page_sound")));
-	m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera()));
-
-	m_input_controller->AddObserver(this, WEAK);
-	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
-}
-
-void eSandBoxGame::InitializePipline()
-{
-	eMainContextBase::InitializePipline();
-	pipeline.GetBlurCoefRef() = 0.0f;
 }

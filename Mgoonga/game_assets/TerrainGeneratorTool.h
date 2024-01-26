@@ -41,7 +41,7 @@ protected:
   Texture                  m_color_texture;
   std::set<TerrainType>    m_terrain_types;
   std::shared_ptr<eObject> m_terrain;
-  TerrainModel*            m_terrain_pointer;
+  TerrainModel*            m_terrain_pointer = nullptr;
 
   GLuint    m_width = 241;
   GLuint    m_height = 241;
@@ -55,6 +55,7 @@ protected:
   float     m_texture_scale[8];
   float     m_max_height_coef = 1.0f;
   float     m_min_height_coef = 0.0f;
+  bool      m_initialized = false;
 
   eMainContextBase* m_game = nullptr;
   eModelManager*    m_modelManager = nullptr;
