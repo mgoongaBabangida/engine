@@ -69,11 +69,42 @@ void eSandBoxGame::InitializeModels()
 
 	modelManager->Add("sphere_red", Primitive::SPHERE, std::move(material));
 
+	//MATERIALS
+	Material pbr1;
+	pbr1.albedo_texture_id = texManager->Find("pbr1_basecolor")->id;
+	pbr1.metalic_texture_id = texManager->Find("pbr1_metallic")->id;
+	pbr1.normal_texture_id = texManager->Find("pbr1_normal")->id;
+	pbr1.roughness_texture_id = texManager->Find("pbr1_roughness")->id;
+	pbr1.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
+	pbr1.use_albedo = pbr1.use_metalic = pbr1.use_normal = pbr1.use_roughness = true;
+	pbr1.ao = 0.2f;
+
+	Material gold;
+	gold.albedo_texture_id = texManager->Find("pbr_gold_basecolor")->id;
+	gold.metalic_texture_id = texManager->Find("pbr_gold_metallic")->id;
+	gold.normal_texture_id = texManager->Find("pbr_gold_normal")->id;
+	gold.roughness_texture_id = texManager->Find("pbr_gold_roughness")->id;
+	gold.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
+	gold.use_albedo = gold.use_metalic = gold.use_normal = gold.use_roughness = true;
+	gold.ao = 0.9f;
+
+	modelManager->Add("sphere_textured", Primitive::SPHERE, std::move(pbr1));
+	modelManager->Add("sphere_gold", Primitive::SPHERE, std::move(gold));
+
+
 	//DESERIALIZE ANIMATIONS
 	animationManager->Deserialize("Animations.mgoongaAnimations");
-	
+
 	//OBJECTS
 	ObjectFactoryBase factory(animationManager.get());
+
+	shObject obj = factory.CreateObject(modelManager->Find("sphere_textured"), eObject::RenderType::PBR, "SpherePBR");
+	obj->GetTransform()->setTranslation(glm::vec3(-2.0f, 3.5f, 1.5f));
+	m_objects.push_back(obj);
+
+	shObject goldsphere = factory.CreateObject(modelManager->Find("sphere_gold"), eObject::RenderType::PBR, "SpherePBRGold");
+	goldsphere->GetTransform()->setTranslation(vec3(-7.0f, 3.5f, 2.0f));
+	m_objects.push_back(goldsphere);
 
 	shObject wallCube = factory.CreateObject(modelManager->Find("wall_cube"), eObject::RenderType::PHONG, "WallCube");
 	wallCube->GetTransform()->setTranslation(vec3(3.0f, -1.0f, 3.0f));

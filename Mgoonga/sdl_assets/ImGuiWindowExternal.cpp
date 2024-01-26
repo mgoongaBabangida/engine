@@ -880,6 +880,31 @@ void eWindowImGuiExternal::Render()
       }
     }
     break;
+    case MATRIX:
+    {
+      const glm::mat4& matrix = *(static_cast<const glm::mat4*>(std::get<2>(item)));
+      ImGui::Text(std::get<0>(item).c_str());
+      ImGui::Text(std::to_string(matrix[0][0]).c_str()); ImGui::SameLine();
+      ImGui::Text(std::to_string(matrix[0][1]).c_str()); ImGui::SameLine();
+      ImGui::Text(std::to_string(matrix[0][2]).c_str()); ImGui::SameLine();
+      ImGui::Text(std::to_string(matrix[0][3]).c_str());
+
+      ImGui::Text(std::to_string(matrix[1][0]).c_str()); ImGui::SameLine();
+      ImGui::Text(std::to_string(matrix[1][1]).c_str()); ImGui::SameLine();
+      ImGui::Text(std::to_string(matrix[1][2]).c_str()); ImGui::SameLine();
+      ImGui::Text(std::to_string(matrix[1][3]).c_str());
+
+      ImGui::Text(std::to_string(matrix[2][0]).c_str()); ImGui::SameLine();
+      ImGui::Text(std::to_string(matrix[2][1]).c_str()); ImGui::SameLine();
+      ImGui::Text(std::to_string(matrix[2][2]).c_str()); ImGui::SameLine();
+      ImGui::Text(std::to_string(matrix[2][3]).c_str());
+
+      ImGui::Text(std::to_string(matrix[3][0]).c_str()); ImGui::SameLine();
+      ImGui::Text(std::to_string(matrix[3][1]).c_str()); ImGui::SameLine();
+      ImGui::Text(std::to_string(matrix[3][2]).c_str()); ImGui::SameLine();
+      ImGui::Text(std::to_string(matrix[3][3]).c_str());
+    }
+    break;
     case ADD_CALLBACK:
     {
       std::function<void(shObject, const std::string&)> callback = *(reinterpret_cast<std::function<void(shObject, const std::string&)>*>(std::get<2>(item)));

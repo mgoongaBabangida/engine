@@ -262,6 +262,21 @@ float& eOpenGlRenderPipeline::GetDisplacementRef()
 	return renderManager->CameraInterpolationRender()->GetDisplacementRef();
 }
 
+glm::mat4& eOpenGlRenderPipeline::GetLookAtMatrix()
+{
+	return renderManager->CameraInterpolationRender()->GetLookAtMatrix();
+}
+
+glm::mat4& eOpenGlRenderPipeline::GetProjectionMatrix()
+{
+	return renderManager->CameraInterpolationRender()->GetProjectionMatrix();
+}
+
+glm::mat4& eOpenGlRenderPipeline::GetLookAtProjectedMatrix()
+{
+	return renderManager->CameraInterpolationRender()->GetLookAtProjectedMatrix();
+}
+
 float& eOpenGlRenderPipeline::Metallic()
 {
 	return renderManager->SSRRenderer()->Metallic();

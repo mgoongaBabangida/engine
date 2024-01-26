@@ -20,6 +20,9 @@ public:
   glm::vec3& GetSecondCameraPositionRef() { return secondCameraPosition; }
   float& GetDisplacementRef() { return displacement; }
 
+  glm::mat4& GetLookAtMatrix() { return lookAt_matrix; }
+  glm::mat4& GetProjectionMatrix() { return projection_matrix; }
+  glm::mat4& GetLookAtProjectedMatrix() { return lookAt_matrix_projected; }
 protected:
   Shader mShaderCoords;
 
@@ -32,4 +35,8 @@ protected:
 
   glm::vec3 secondCameraPosition;
   float displacement = 1.0f;
+
+  glm::mat4 lookAt_matrix;
+  glm::mat4 projection_matrix;
+  glm::mat4 lookAt_matrix_projected;
 };

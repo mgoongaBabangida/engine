@@ -128,6 +128,9 @@ public:
 	//CameraInterpolation Debug
 	glm::vec3& GetSecondCameraPositionRef();
 	float& GetDisplacementRef();
+	glm::mat4& GetLookAtMatrix();
+	glm::mat4& GetProjectionMatrix();
+	glm::mat4& GetLookAtProjectedMatrix();
 
 	FogInfo& GetFogInfo() { return m_foginfo; }
 

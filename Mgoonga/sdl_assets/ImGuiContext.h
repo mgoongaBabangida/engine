@@ -69,7 +69,8 @@ enum TypeImGui
 	SLIDER_INT_NERROW,
 	SPIN_BOX,
 	CAMERA,
-	LIGHT_TYPE_VISUAL
+	LIGHT_TYPE_VISUAL,
+	MATRIX
 };
 
 //--------------------------------------------------

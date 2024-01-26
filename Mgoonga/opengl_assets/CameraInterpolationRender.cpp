@@ -36,6 +36,10 @@ void eCameraInterpolationRender::Render(const Camera& _camera)
   mShaderCoords.SetUniformData("invProj", glm::inverse(_camera.getProjectionMatrix()));
   mShaderCoords.SetUniformData("invView", glm::inverse(_camera.getWorldToViewMatrix()));
 
+  lookAt_matrix = _camera.getWorldToViewMatrix();
+  lookAt_matrix_projected = secondCamera.getWorldToViewMatrix();
+  projection_matrix = _camera.getProjectionMatrix();
+
   screenMesh->DrawUnTextured();
 }
 
@@ -60,6 +64,10 @@ void eCameraInterpolationRender::DispatchCompute(const Camera& _camera)
 
   mComputeShader.SetUniformData("invProj", glm::inverse(_camera.getProjectionMatrix()));
   mComputeShader.SetUniformData("invView", glm::inverse(_camera.getWorldToViewMatrix()));
+
+  lookAt_matrix = _camera.getWorldToViewMatrix();
+  lookAt_matrix_projected = secondCamera.getWorldToViewMatrix();
+  projection_matrix = _camera.getProjectionMatrix();
 
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
   glDispatchCompute((unsigned int)mImageWidth, (unsigned int)mImageHeight, 1);

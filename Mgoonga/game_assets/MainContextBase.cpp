@@ -671,17 +671,22 @@ void eMainContextBase::InitializeExternalGui()
 
 	externalGui[12]->Add(SLIDER_FLOAT_3, "Second Camera Position", &pipeline.GetSecondCameraPositionRef());
 	externalGui[12]->Add(SLIDER_FLOAT, "Displacement", &pipeline.GetDisplacementRef());
+
 	if (auto* image = texManager->Find("computeImageRWCameraInterpolation"); image != nullptr)
 	{
 		uint32_t id = image->id;
 		externalGui[12]->Add(TEXTURE, "Camera Interpolation image", (void*)(id));
+
+		externalGui[12]->Add(MATRIX, "Look At Matrix", (void*)&pipeline.GetLookAtMatrix());
+		externalGui[12]->Add(MATRIX, "Projection Matrix", (void*)&pipeline.GetProjectionMatrix());
+		externalGui[12]->Add(MATRIX, "Look At Projected Matrix", (void*)&pipeline.GetLookAtProjectedMatrix());
 	}
 
 	externalGui[1]->Add(CHECKBOX, "Shadows", &pipeline.ShadowingRef());
 
 	std::function<void()> emit_partilces_callback = [this]()
 	{
-		auto sys = std::make_shared<ParticleSystem>(50, 0, 0, 10000, glm::vec3(0.0f, 3.0f, -2.5f),
+		auto sys = std::make_shared<ParticleSystem>(50, 0, 0, 10'000, glm::vec3(0.0f, 3.0f, -2.5f),
 																								texManager->Find("Tatlas2"),
 																								soundManager->GetSound("shot_sound"),
 																								texManager->Find("Tatlas2")->numberofRows);
