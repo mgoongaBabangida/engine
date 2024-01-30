@@ -70,24 +70,24 @@ void TerrainGeneratorTool::Initialize()
 	m_game->AddObject(m_terrain);
 
 	//SET UNIFORMS
-	m_pipeline.get().SetUniformData("class eMainRender", "min_height", 0.0f);
-	m_pipeline.get().SetUniformData("class eMainRender", "max_height", m_height_scale);
-	m_pipeline.get().SetUniformData("class eMainRender", "color_count", m_terrain_types.size());
+	m_pipeline.get().SetUniformData("class ePhongRender", "min_height", 0.0f);
+	m_pipeline.get().SetUniformData("class ePhongRender", "max_height", m_height_scale);
+	m_pipeline.get().SetUniformData("class ePhongRender", "color_count", m_terrain_types.size());
 
 	int counter = 0;
 	for (const auto& type : m_terrain_types)
 	{
-		m_pipeline.get().SetUniformData("class eMainRender",
+		m_pipeline.get().SetUniformData("class ePhongRender",
 																	  "base_start_heights["+ std::to_string(counter) +"]",
 																		type.threshold_start);
 
-		m_pipeline.get().SetUniformData("class eMainRender",
+		m_pipeline.get().SetUniformData("class ePhongRender",
 			"textureScale[" + std::to_string(counter) + "]",
 			m_texture_scale[counter]);
 		++counter;
 	}
 
-	m_pipeline.get().SetUniformData("class eMainRender",
+	m_pipeline.get().SetUniformData("class ePhongRender",
 		"base_start_heights[" + std::to_string(counter) + "]",
 		1.0f);
 
@@ -114,7 +114,13 @@ void TerrainGeneratorTool::Initialize()
 		m_terrain->SetTextureBlending(!m_terrain->IsTextureBlending());
 	};
 
+	std::function<void()> update__callback = [this]()
+	{
+		_UpdateCurrentMesh();
+	};
+
 	m_imgui->Add(TEXTURE, "Noise texture", (void*)m_noise_texture.id);
+	m_imgui->Add(BUTTON, "Update", (void*)&update__callback);
 	m_imgui->Add(SLIDER_INT, "Noise width", &m_width);
 	m_imgui->Add(SLIDER_INT, "Noise height", &m_height);
 	m_imgui->Add(SLIDER_FLOAT_LARGE, "Scale", &m_scale);
@@ -129,7 +135,6 @@ void TerrainGeneratorTool::Initialize()
 	m_imgui->Add(SLIDER_FLOAT, "Texture Scale 1", &m_texture_scale[1]);
 	m_imgui->Add(SLIDER_FLOAT, "Texture Scale 2", &m_texture_scale[2]);
 	m_imgui->Add(SLIDER_FLOAT, "Texture Scale 3", &m_texture_scale[3]);
-	// @todo add update button alternative to auto update
 	m_imgui->Add(BUTTON, "Switch LOD", (void*)&switch_lod__callback);
 	m_imgui->Add(BUTTON, "Render mode", (void*)&render_mode__callback);
 	m_imgui->Add(BUTTON, "Texturing", (void*)&texturing__callback);
@@ -168,21 +173,21 @@ void TerrainGeneratorTool::Update(float _tick)
 			last_texture_scales2 != m_texture_scale[2] ||
 			last_texture_scales3 != m_texture_scale[3])
 		{
-			m_pipeline.get().SetUniformData("class eMainRender", "textureScale[0]", m_texture_scale[0]);
-			m_pipeline.get().SetUniformData("class eMainRender", "textureScale[1]", m_texture_scale[1]);
-			m_pipeline.get().SetUniformData("class eMainRender", "textureScale[2]", m_texture_scale[2]);
-			m_pipeline.get().SetUniformData("class eMainRender", "textureScale[3]", m_texture_scale[3]);
+			m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[0]", m_texture_scale[0]);
+			m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[1]", m_texture_scale[1]);
+			m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[2]", m_texture_scale[2]);
+			m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[3]", m_texture_scale[3]);
 		}
 
 		if (m_noise_texture.mTextureWidth != m_width ||
-			m_noise_texture.mTextureHeight != m_height ||
-			last_scale != m_scale ||
-			last_persistance != m_persistance ||
-			last_lacunarirty != m_lacunarity ||
-			noise_offset != m_noise_offset ||
-			octaves != m_octaves ||
-			seed != m_seed ||
-			last_height_scale != m_height_scale)
+				m_noise_texture.mTextureHeight != m_height ||
+				last_scale != m_scale ||
+				last_persistance != m_persistance ||
+				last_lacunarirty != m_lacunarity ||
+				noise_offset != m_noise_offset ||
+				octaves != m_octaves ||
+				seed != m_seed ||
+				last_height_scale != m_height_scale)
 		{
 			m_noise_map.resize(m_width * m_height);
 			_GenerateNoiseMap(m_width, m_height, m_scale, m_octaves, m_persistance, m_lacunarity, m_noise_offset, m_seed);
@@ -200,20 +205,8 @@ void TerrainGeneratorTool::Update(float _tick)
 			m_color_texture.TextureFromBuffer<GLfloat>(&m_color_map[0].x, m_width, m_height, GL_RGBA);
 
 			//reset the mesh
-			if (m_terrain_pointer)
-			{
-				m_terrain_pointer->initialize(&m_color_texture,
-					&m_color_texture,
-					&Texture::GetTexture1x1(BLUE),
-					&m_noise_texture,
-					true,
-					m_height_scale,
-					m_height_scale * m_max_height_coef);
-			}
-
-			//update uniforms
-			m_pipeline.get().SetUniformData("class eMainRender", "max_height", m_height_scale);
-			m_pipeline.get().SetUniformData("class eMainRender", "textureScale[0]", m_texture_scale[0]);
+			if (m_auto_update)
+				_UpdateCurrentMesh();
 		}
 
 		last_scale = m_scale;
@@ -308,5 +301,24 @@ void TerrainGeneratorTool::_GenerateColorMap()
 				}
 			}
 		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+void TerrainGeneratorTool::_UpdateCurrentMesh()
+{
+	if (m_terrain_pointer)
+	{
+		m_terrain_pointer->initialize(&m_color_texture,
+																	&m_color_texture,
+																	&Texture::GetTexture1x1(BLUE),
+																	&m_noise_texture,
+																	true,
+																	m_height_scale,
+																	m_height_scale * m_max_height_coef);
+
+		//update uniforms
+		m_pipeline.get().SetUniformData("class ePhongRender", "max_height", m_height_scale);
+		m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[0]", m_texture_scale[0]);
 	}
 }

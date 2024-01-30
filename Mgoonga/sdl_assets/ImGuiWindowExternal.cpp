@@ -86,7 +86,7 @@ void eWindowImGuiExternal::Render()
   window_size_x = size.x;
   window_size_y = size.y;
   //ImGui::SetNextWindowPos(ImVec2{ window_pos_x , window_pos_y + window_size_y });
-  ImGui::SetWindowSize({ 400, 300 }); //@todo why this size?
+  ImGui::SetWindowSize({ 400, 600 }); //@todo why this size?
 
   for (auto& item : lines)
   {

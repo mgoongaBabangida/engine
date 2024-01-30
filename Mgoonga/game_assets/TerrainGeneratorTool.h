@@ -35,6 +35,8 @@ protected:
 
   void _GenerateColorMap();
 
+  void _UpdateCurrentMesh();
+
   std::vector<GLfloat>     m_noise_map;
   std::vector<glm::vec4>   m_color_map;
   Texture                  m_noise_texture;
@@ -56,6 +58,7 @@ protected:
   float     m_max_height_coef = 1.0f;
   float     m_min_height_coef = 0.0f;
   bool      m_initialized = false;
+  bool      m_auto_update = false;
 
   eMainContextBase* m_game = nullptr;
   eModelManager*    m_modelManager = nullptr;

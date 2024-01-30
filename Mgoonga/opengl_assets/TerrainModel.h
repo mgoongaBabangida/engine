@@ -5,6 +5,7 @@
 #include "MyModel.h"
 
 struct Texture;
+class TerrainMesh;
 
 struct TerrainType
 {
@@ -22,16 +23,17 @@ class DLL_OPENGL_ASSETS TerrainModel : public ITerrainModel
 public:
 	TerrainModel();
 	explicit TerrainModel(Texture* heightMap); //@todo copy generation in private !!!
+	
 	TerrainModel(Texture* diffuse, Texture* specular, Texture* m_normal, Texture* heightMap);
 	TerrainModel(const TerrainModel& other);
 
 	virtual ~TerrainModel();
 
 	void initialize(const Texture* diffuse, const Texture* specular, const Texture* normal = nullptr, const Texture* heightMap = nullptr,
-		bool spreed_texture = true, float _height_scale = 1.0f, float _max_height = 1.0f);
+									bool spreed_texture = true, float _height_scale = 1.0f, float _max_height = 1.0f);
 	
 	virtual void														Draw()					override;
-	virtual const std::string&							GetName() const override { return mesh->Name(); }
+	virtual const std::string&							GetName() const override;
 	virtual const std::string&							GetPath() const override { return m_path; }
 
   virtual size_t													GetVertexCount() const;
@@ -43,14 +45,12 @@ public:
 	virtual void											SetMaterial(const Material& _m);
 	virtual std::optional<Material>		GetMaterial() const { return m_material; }
 
+	//ITerrainModel
 	float							GetHeight(float x , float z)	override;
 	glm::vec3					GetNormal(float x, float z)		override;
-
-	void							makePlaneIndices(unsigned int rows, unsigned int columns, unsigned int _lod = 1);
 	
 	std::vector<glm::vec3>	GetPositions()			const;
 	std::vector<GLuint>		  GetIndeces()			const;
-
 	std::vector<MyMesh*>	  getMeshes()				const;
 
 	void setDiffuse(uint32_t _id);
@@ -58,28 +58,15 @@ public:
 	void setAlbedoTextureArray(const Texture*);
 
 protected:
-	MyMesh*					mesh; // generate ourself inside constructor
+	TerrainMesh*		mesh; // generate ourselfs inside constructor
 	Material				m_material;
 	std::string			m_path;
 
 	Texture					m_height;
 	const Texture*	m_albedo_texture_array = nullptr;
 
-	GLuint		m_size;
-	GLuint		m_rows;
-	GLuint		m_columns;
-
-	unsigned int	devisor = 10;
-
-	void			makePlaneVerts(unsigned int dimensions, bool spreed_texture = true);
-	void			makePlaneVerts(unsigned int rows, unsigned int columns, bool spreed_texture = true);
-	void			makePlaneIndices(unsigned int dimensions);
-	void			assignHeights(const Texture& heightMap, float _height_scale = 1.0f, float _max_height = 1.0f);
-	void			generateNormals(GLuint size);
-	void			generateNormals(GLuint rows, GLuint columns);
-	Vertex		findVertex(float x, float z);
-
-	void _InitMaterialWithDefaults();
+	//---------------------------------------------------------------------------
+	void			_InitMaterialWithDefaults();
 
 	//@todo
 	virtual bool														HasBones() const { return false; }

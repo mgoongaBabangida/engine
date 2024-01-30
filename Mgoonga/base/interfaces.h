@@ -182,7 +182,7 @@ class ITerrainModel : public IModel
 {
 public:
 	virtual ~ITerrainModel() = default;
-	virtual float		GetHeight(float, float) = 0;
+	virtual float			GetHeight(float, float) = 0;
 	virtual glm::vec3	GetNormal(float, float) = 0;
 };
 
