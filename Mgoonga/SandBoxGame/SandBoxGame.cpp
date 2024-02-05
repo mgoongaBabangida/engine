@@ -60,6 +60,10 @@ void eSandBoxGame::InitializeModels()
 {
 	eMainContextBase::InitializeModels();
 	
+	Material material{ glm::vec3(0.8f, 0.0f, 0.0f), 0.5f , 0.5f }; // -> move to base
+	material.emissive_texture_id = Texture::GetTexture1x1(TColor::BLACK).id;
+	modelManager->Add("sphere_red", Primitive::SPHERE, std::move(material));
+
 	//_InitializeScene();
 
 	//light
@@ -113,10 +117,8 @@ void eSandBoxGame::_InitializeScene()
 	//modelManager->Add("MapleTree", (GLchar*)std::string(modelFolderPath + "MapleTree/MapleTree.obj").c_str());
 	//modelManager->Add("Cottage", (GLchar*)std::string(modelFolderPath + "85-cottage_obj/cottage_obj.obj").c_str());
 
-	Material material{ glm::vec3(0.8f, 0.0f, 0.0f), 0.5f , 0.5f };
+	Material material{ glm::vec3(0.8f, 0.0f, 0.0f), 0.5f , 0.5f }; // -> move to base
 	material.emissive_texture_id = Texture::GetTexture1x1(TColor::BLACK).id;
-
-	modelManager->Add("sphere_red", Primitive::SPHERE, std::move(material));
 
 	//MATERIALS
 	Material pbr1;

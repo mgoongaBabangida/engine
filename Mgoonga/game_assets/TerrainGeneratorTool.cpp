@@ -10,11 +10,14 @@
 #include <opengl_assets/openglrenderpipeline.h>
 #include <math/Random.h>
 
+#include "BezierCurveUIController.h"
+
 float InverseLerp(float xx, float yy, float value)
 {
 	return (value - xx) / (yy - xx);
 }
 
+//------------------------------------------------------------------------------------------------
 TerrainGeneratorTool::TerrainGeneratorTool(eMainContextBase* _game,
 																					 eModelManager* _modelManager,
 																					 eTextureManager* _texManager,
@@ -38,6 +41,10 @@ void TerrainGeneratorTool::Initialize()
 	m_terrain_types.insert({ "mounten", 0.6f, 0.8f, {0.5f, 0.5f, 0.0f} });
 	m_terrain_types.insert({ "snow",		0.8f, 1.0f, {1.0f, 1.0f, 1.0f} });
 
+	//@todo needs to be regenerated when resized
+	m_falloff_map.resize(m_width * m_height);
+	_GenerateFallOffMap();
+
 	m_noise_map.resize(m_width * m_height);
 	_GenerateNoiseMap(m_width, m_height, m_scale, m_octaves, m_persistance, m_lacunarity, m_noise_offset, m_seed);
 	m_noise_texture.TextureFromBuffer<GLfloat>(&m_noise_map[0], m_width, m_height, GL_RED);
@@ -48,13 +55,6 @@ void TerrainGeneratorTool::Initialize()
 
 	//TERRAIN
 	std::unique_ptr<TerrainModel> terrainModel = m_modelManager->CloneTerrain("simple");
-	terrainModel->initialize(&m_color_texture,
-													 &m_color_texture,
-													 &Texture::GetTexture1x1(BLUE),
-													 &m_noise_texture,
-													 true,
-													 m_height_scale,
-													 m_height_scale * m_max_height_coef);
 
 	//OBJECTS
 	ObjectFactoryBase factory;
@@ -68,11 +68,6 @@ void TerrainGeneratorTool::Initialize()
 	m_terrain_pointer->setAlbedoTextureArray(m_texture_manager->Find("terrain_albedo_array_lague"));
 	//m_terrain->SetPickable(false);
 	m_game->AddObject(m_terrain);
-
-	//SET UNIFORMS
-	m_pipeline.get().SetUniformData("class ePhongRender", "min_height", 0.0f);
-	m_pipeline.get().SetUniformData("class ePhongRender", "max_height", m_height_scale);
-	m_pipeline.get().SetUniformData("class ePhongRender", "color_count", m_terrain_types.size());
 
 	int counter = 0;
 	for (const auto& type : m_terrain_types)
@@ -93,20 +88,26 @@ void TerrainGeneratorTool::Initialize()
 
 	std::function<void()> switch_lod__callback = [this]()
 	{
-		if (m_terrain_pointer->getMeshes()[0]->LODInUse() == 1)
-			m_terrain_pointer->getMeshes()[0]->SwitchLOD(2);
-		else if (m_terrain_pointer->getMeshes()[0]->LODInUse() == 2)
-			m_terrain_pointer->getMeshes()[0]->SwitchLOD(3);
-		else
-			m_terrain_pointer->getMeshes()[0]->SwitchLOD(1);
+		for (auto& mesh : m_terrain_pointer->getMeshes())
+		{
+			if (mesh->LODInUse() == 1)
+				mesh->SwitchLOD(2);
+			else if (mesh->LODInUse() == 2)
+				mesh->SwitchLOD(3);
+			else
+				mesh->SwitchLOD(1);
+		}
 	};
 
 	std::function<void()> render_mode__callback = [this]()
 	{
-		if (m_terrain_pointer->getMeshes()[0]->GetRenderMode() == MyMesh::RenderMode::DEFAULT)
-			m_terrain_pointer->getMeshes()[0]->SetRenderMode(MyMesh::RenderMode::WIREFRAME);
-		else
-			m_terrain_pointer->getMeshes()[0]->SetRenderMode(MyMesh::RenderMode::DEFAULT);
+		for (auto& mesh : m_terrain_pointer->getMeshes())
+		{
+			if (mesh->GetRenderMode() == MyMesh::RenderMode::DEFAULT)
+				mesh->SetRenderMode(MyMesh::RenderMode::WIREFRAME);
+			else
+				mesh->SetRenderMode(MyMesh::RenderMode::DEFAULT);
+		}
 	};
 
 	std::function<void()> texturing__callback = [this]()
@@ -116,11 +117,29 @@ void TerrainGeneratorTool::Initialize()
 
 	std::function<void()> update__callback = [this]()
 	{
-		_UpdateCurrentMesh();
+		_AddCurrentMesh();
+	};
+
+	static std::function<void(int, int*&)> posX__callback = [this](int _new_value, int*& _data)
+	{
+		if (_data == nullptr)
+			_data = &m_cur_pos_X;
+		else
+			m_cur_pos_X = _new_value;
+	};
+
+	static std::function<void(int, int*&)> posY__callback = [this](int _new_value, int*& _data)
+	{
+		if (_data == nullptr)
+			_data = &m_cur_pos_Y;
+		else
+			m_cur_pos_Y = _new_value;
 	};
 
 	m_imgui->Add(TEXTURE, "Noise texture", (void*)m_noise_texture.id);
-	m_imgui->Add(BUTTON, "Update", (void*)&update__callback);
+	m_imgui->Add(SPIN_BOX, "Position X", (void*)&posX__callback);
+	m_imgui->Add(SPIN_BOX, "Position Y", (void*)&posY__callback);
+	m_imgui->Add(BUTTON, "Add or Update", (void*)&update__callback);
 	m_imgui->Add(SLIDER_INT, "Noise width", &m_width);
 	m_imgui->Add(SLIDER_INT, "Noise height", &m_height);
 	m_imgui->Add(SLIDER_FLOAT_LARGE, "Scale", &m_scale);
@@ -135,12 +154,59 @@ void TerrainGeneratorTool::Initialize()
 	m_imgui->Add(SLIDER_FLOAT, "Texture Scale 1", &m_texture_scale[1]);
 	m_imgui->Add(SLIDER_FLOAT, "Texture Scale 2", &m_texture_scale[2]);
 	m_imgui->Add(SLIDER_FLOAT, "Texture Scale 3", &m_texture_scale[3]);
+	m_imgui->Add(CHECKBOX, "Use Fall Off", (void*)&m_apply_falloff);
 	m_imgui->Add(BUTTON, "Switch LOD", (void*)&switch_lod__callback);
 	m_imgui->Add(BUTTON, "Render mode", (void*)&render_mode__callback);
 	m_imgui->Add(BUTTON, "Texturing", (void*)&texturing__callback);
 	m_imgui->Add(TEXTURE, "Color texture", (void*)m_color_texture.id);
 
+	dbb::Bezier bezier;
+	bezier.p0 = { -0.85f, -0.75f, 0.0f };
+	bezier.p1 = { -0.45f, -0.33f, 0.0f };
+	bezier.p2 = { 0.17f,  0.31f, 0.0f };
+	bezier.p3 = { 0.55f,  0.71f, 0.0f };
+	m_interpolation_curve = bezier;
+
+	std::function<void()> create_bezier_callback = [this]()
+	{
+		ObjectFactoryBase factory;
+		shObject bezier_model = factory.CreateObject(std::make_shared<BezierCurveModel>(new BezierCurveMesh(m_interpolation_curve, /*2d*/true)), eObject::RenderType::BEZIER_CURVE);
+		m_game->AddObject(bezier_model);
+
+		for (int i = 0; i < 4; ++i)
+		{
+			shObject pbr_sphere = factory.CreateObject(m_modelManager->Find("sphere_red"), eObject::RenderType::PBR, "SphereBezierPBR " + std::to_string(i));
+			bezier_model->GetChildrenObjects().push_back(pbr_sphere);
+			pbr_sphere->Set2DScreenSpace(true);
+		}
+		auto* script = new BezierCurveUIController(m_game, bezier_model, 0.02f, m_texture_manager->Find("pseudo_imgui"));
+		script->ToolFinished.Subscribe([this](const dbb::Bezier& _bezier) { m_interpolation_curve = _bezier; Update(0); });
+		bezier_model->SetScript(script);
+	};
+
+	m_imgui->Add(CHECKBOX, "Use Curve", (void*)&m_use_curve);
+	m_imgui->Add(BUTTON, "Interpolation Curve", (void*)&create_bezier_callback);
+
 	m_initialized = true;
+
+	if (false)
+	{
+		_UpdateCurrentMesh();
+	}
+	else
+	{
+		m_auto_update = true;
+		for (int x = -1; x <= 1; ++x)
+			for (int y = -1; y <= 1; ++y)
+		{
+				m_cur_pos_X = x;
+				m_cur_pos_Y = y;
+				m_noise_offset.x = x * ((int)m_width);
+				m_noise_offset.y = y * ((int)m_height);
+				Update(0);
+		}
+		m_auto_update = false;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -162,6 +228,8 @@ void TerrainGeneratorTool::Update(float _tick)
 		static GLuint octaves = 4;
 		static GLuint seed = 1;
 		static float last_height_scale = m_height_scale;
+		static bool use_falloff = false;
+		static bool use_curve = false;
 
 		static float last_texture_scales0 = m_texture_scale[0];
 		static float last_texture_scales1 = m_texture_scale[1];
@@ -187,7 +255,9 @@ void TerrainGeneratorTool::Update(float _tick)
 				noise_offset != m_noise_offset ||
 				octaves != m_octaves ||
 				seed != m_seed ||
-				last_height_scale != m_height_scale)
+				last_height_scale != m_height_scale ||
+				use_falloff != m_apply_falloff ||
+				use_curve != m_use_curve)
 		{
 			m_noise_map.resize(m_width * m_height);
 			_GenerateNoiseMap(m_width, m_height, m_scale, m_octaves, m_persistance, m_lacunarity, m_noise_offset, m_seed);
@@ -206,7 +276,7 @@ void TerrainGeneratorTool::Update(float _tick)
 
 			//reset the mesh
 			if (m_auto_update)
-				_UpdateCurrentMesh();
+				_AddCurrentMesh();
 		}
 
 		last_scale = m_scale;
@@ -220,6 +290,8 @@ void TerrainGeneratorTool::Update(float _tick)
 		last_texture_scales1 = m_texture_scale[1];
 		last_texture_scales2 = m_texture_scale[2];
 		last_texture_scales3 = m_texture_scale[3];
+		use_falloff = m_apply_falloff;
+		use_curve = m_use_curve;
 	}
 }
 
@@ -227,12 +299,18 @@ void TerrainGeneratorTool::Update(float _tick)
 void TerrainGeneratorTool::_GenerateNoiseMap(GLuint _width, GLuint _height, float _scale, GLuint _octaves,
 																						 float _persistance, float _lacunarity, glm::vec2 _offset, GLuint _seed)
 {
+	float maxPossibleHeight = 0;
+
 	std::vector<glm::vec2> octaveOffsets(_octaves);
+	float gamplitude = 1.f;
 	for (uint32_t i = 0; i < _octaves; ++i)
 	{
 		float offsetX = math::Random::RandomFloat(-10'000.0f, 10'000.0f, _seed) + _offset.x;
 		float offsetY = math::Random::RandomFloat(-10'000.0f, 10'000.0f, _seed) + _offset.y;
 		octaveOffsets[i] = { offsetX , offsetY };
+
+		maxPossibleHeight += gamplitude;
+		gamplitude *= _persistance;
 	}
 
 	if (_scale <= 0.0f)
@@ -246,8 +324,10 @@ void TerrainGeneratorTool::_GenerateNoiseMap(GLuint _width, GLuint _height, floa
 	if (_octaves < 1)
 		_octaves = 1;
 
-	float minHeight = 100'000.0f; // float max
-	float maxHeight = -100'000.0f; // float min
+	// for seemless tiles need the same max min height interpretation
+	static float minHeight = 100'000.0f; // float max
+	static float maxHeight = -100'000.0f; // float min
+	static bool update_max_heights = true;
 
 	float halfWidth = _width / 2;
 	float halfHeight = _height / 2;
@@ -271,16 +351,38 @@ void TerrainGeneratorTool::_GenerateNoiseMap(GLuint _width, GLuint _height, floa
 				frequency *= _lacunarity;
 			}
 
-			if (noiseHeight > maxHeight)
-				maxHeight = noiseHeight;
-			if (noiseHeight < minHeight)
-				minHeight = noiseHeight;
+			if (update_max_heights)
+			{
+				if (noiseHeight > maxHeight)
+					maxHeight = noiseHeight;
+				if (noiseHeight < minHeight)
+					minHeight = noiseHeight;
+			}
+
 			m_noise_map[row * _width + col] = noiseHeight;
 		}
 	}
 
+	dbb::Bezier interpolation_curve_normalized;
+	interpolation_curve_normalized.p0 = { (m_interpolation_curve.p0.x + 1.0f) / 2.0f, (m_interpolation_curve.p0.y + 1.0f) / 2.0f, 0.0f }; // ( +1) /2 from -1 1 to 0 1
+	interpolation_curve_normalized.p1 = { (m_interpolation_curve.p1.x + 1.0f) / 2.0f, (m_interpolation_curve.p1.y + 1.0f) / 2.0f, 0.0f };
+	interpolation_curve_normalized.p2 = { (m_interpolation_curve.p2.x + 1.0f) / 2.0f, (m_interpolation_curve.p2.y + 1.0f) / 2.0f, 0.0f };
+	interpolation_curve_normalized.p3 = { (m_interpolation_curve.p3.x + 1.0f) / 2.0f, (m_interpolation_curve.p3.y + 1.0f) / 2.0f, 0.0f };
+	//noise values should be normalized
 	for (auto& val : m_noise_map)
+	{
 		val = InverseLerp(maxHeight, minHeight, val);
+		if (m_use_curve)
+		{
+			val = dbb::GetPoint(interpolation_curve_normalized, val).y;
+		}
+	}
+
+	if (m_apply_falloff)
+		for (int i = 0; i < m_noise_map.size(); ++i)
+			m_noise_map[i] = glm::clamp(m_noise_map[i] - m_falloff_map[i], 0.f, 1.f);
+
+	update_max_heights = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -309,7 +411,7 @@ void TerrainGeneratorTool::_UpdateCurrentMesh()
 {
 	if (m_terrain_pointer)
 	{
-		m_terrain_pointer->initialize(&m_color_texture,
+		m_terrain_pointer->Initialize(&m_color_texture,
 																	&m_color_texture,
 																	&Texture::GetTexture1x1(BLUE),
 																	&m_noise_texture,
@@ -318,7 +420,46 @@ void TerrainGeneratorTool::_UpdateCurrentMesh()
 																	m_height_scale * m_max_height_coef);
 
 		//update uniforms
+		m_pipeline.get().SetUniformData("class ePhongRender", "min_height", 0.0f);
 		m_pipeline.get().SetUniformData("class ePhongRender", "max_height", m_height_scale);
 		m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[0]", m_texture_scale[0]);
+	}
+}
+
+//-----------------------------------------------------------------------------
+void TerrainGeneratorTool::_AddCurrentMesh()
+{
+	if (m_terrain_pointer)
+	{
+		m_terrain_pointer->AddOrUpdate(glm::ivec2(m_cur_pos_X, m_cur_pos_Y),
+																	 m_noise_offset,
+																	 &m_color_texture,
+																	 &m_noise_texture,
+																	 true,
+																	 m_height_scale,
+																	 m_height_scale * m_max_height_coef);
+
+		//update uniforms
+		m_pipeline.get().SetUniformData("class ePhongRender", "min_height", 0.0f);
+		m_pipeline.get().SetUniformData("class ePhongRender", "max_height", m_height_scale);
+		m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[0]", m_texture_scale[0]);
+	}
+}
+
+//-----------------------------------------------------------------------------
+void TerrainGeneratorTool::_GenerateFallOffMap()
+{
+	for (uint32_t row = 0; row < m_height; ++row)
+	{
+		for (uint32_t col = 0; col < m_width; ++col)
+		{
+			float x = row / (float)m_height * 2 - 1;
+			float y = col / (float)m_width * 2 - 1;
+			float value = glm::max(glm::abs(x), glm::abs(y));
+			// function adjustment
+			float a = 3.f, b = 2.2f;
+			value = glm::pow(value, a) / (glm::pow(value, a) + glm::pow(b - b * value, a) );
+			m_falloff_map[row * m_width + col] = value;
+		}
 	}
 }

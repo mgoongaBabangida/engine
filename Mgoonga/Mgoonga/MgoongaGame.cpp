@@ -154,7 +154,7 @@ void eMgoongaGameContext::_InitMainTestSceane()
 {
   //TERRAIN
   std::unique_ptr<TerrainModel> terrainModel = modelManager->CloneTerrain("simple");
-  terrainModel->initialize(texManager->Find("Tgrass0_d"),
+  terrainModel->Initialize(texManager->Find("Tgrass0_d"),
                            texManager->Find("Tgrass0_d"),
                            &Texture::GetTexture1x1(BLUE),
                            texManager->Find("TOcean0_s"),

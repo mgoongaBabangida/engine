@@ -4,7 +4,7 @@
 
 //---------------------------------------------------
 TerrainMesh::TerrainMesh(const std::string& _name)
-  : MyMesh(_name)
+  : MyMesh(_name) , m_position(0, 0), m_world_offset(0, 0)
 {
 	m_normalMap = Texture::GetTexture1x1(TColor::BLUE);
 }
@@ -19,8 +19,8 @@ void TerrainMesh::MakePlaneVerts(unsigned int _dimensions, bool _spreed_texture)
 		for (int j = 0; j < _dimensions; j++)
 		{
 			Vertex& thisVert = this->vertices[i * _dimensions + j];
-			thisVert.Position.x = (float)(j - half) / m_devisor;
-			thisVert.Position.z = (float)(i - half) / m_devisor;
+			thisVert.Position.x = (float)(j - half + (static_cast<int>(_dimensions - 1) * m_position.x)) / m_devisor;
+			thisVert.Position.z = (float)(i - half + (static_cast<int>(_dimensions - 1) * m_position.x)) / m_devisor;
 			thisVert.Position.y = 0;
 			thisVert.Normal = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -42,17 +42,16 @@ void TerrainMesh::MakePlaneVerts(unsigned int _dimensions, bool _spreed_texture)
 void TerrainMesh::MakePlaneVerts(unsigned int _rows, unsigned int _columns, bool _spreed_texture)
 {
 	this->vertices.resize(_rows * _columns);
-	int half_r = _rows / 2;
-	int half_c = _columns / 2;
+	int half_r = (_rows) / 2;
+	int half_c = (_columns) / 2;
 	int counter = 0;
-	float MinX = 0, MinZ = 0, MaxX = 0, MaxZ = 0; //debug only
 	for (int i = 0; i < _columns; i++)
 	{
 		for (int j = 0; j < _rows; j++)
 		{
 			Vertex& thisVert = this->vertices[i * _rows + j];
-			thisVert.Position.x = static_cast<float>(j - half_r) / static_cast<float>(m_devisor);
-			thisVert.Position.z = static_cast<float>(i - half_c) / static_cast<float>(m_devisor);
+			thisVert.Position.x = static_cast<float>(j - half_r + (static_cast<int>(_rows-1) * m_position.x)) / static_cast<float>(m_devisor);
+			thisVert.Position.z = static_cast<float>(i - half_c + (static_cast<int>(_columns-1) * m_position.y)) / static_cast<float>(m_devisor);
 			thisVert.Position.y = 0;
 			thisVert.Normal = glm::vec3(0.0f, 1.0f, 0.0f);
 			if (_spreed_texture)
@@ -65,14 +64,14 @@ void TerrainMesh::MakePlaneVerts(unsigned int _rows, unsigned int _columns, bool
 				thisVert.TexCoords.x = j % 2 ? 0.0f : 1.0f;
 				thisVert.TexCoords.y = i % 2 ? 1.0f : 0.0f;
 			}
-			if (thisVert.Position.x < MinX)  //debug only
-				MinX = thisVert.Position.x;
-			if (thisVert.Position.x > MaxX)
-				MaxX = thisVert.Position.x;
-			if (thisVert.Position.z < MinZ)
-				MinZ = thisVert.Position.z;
-			if (thisVert.Position.z > MaxZ)
-				MaxZ = thisVert.Position.z;
+			if (thisVert.Position.x < m_minX)
+				m_minX = thisVert.Position.x;
+			if (thisVert.Position.x > m_maxX)
+				m_maxX = thisVert.Position.x;
+			if (thisVert.Position.z < m_minZ)
+				m_minZ = thisVert.Position.z;
+			if (thisVert.Position.z > m_maxZ)
+				m_maxZ = thisVert.Position.z;
 			counter++;
 		}
 	}

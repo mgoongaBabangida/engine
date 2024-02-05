@@ -31,7 +31,7 @@ ePhongRender::ePhongRender(const std::string& vS, const std::string& wave_vS, co
 
 	clock.start();
 
-	model->initialize(tex, tex);
+	model->Initialize(tex, tex);
 	m_wave_object.reset(new eObject);
 	m_wave_object->SetModel(model.release());
 	m_wave_object->SetTransform(new Transform);

@@ -112,6 +112,11 @@ bool eMainContextBase::OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier)
 			return true;
 		}
 	}
+	else
+	{
+		if (m_input_strategy)
+			m_input_strategy->OnMouseMove(x, y);
+	}
 	return false;
 }
 

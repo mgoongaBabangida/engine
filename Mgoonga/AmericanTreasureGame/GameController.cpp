@@ -486,7 +486,7 @@ void GameController::Update(float _tick)
   {
     if (auto* terrainModel = dynamic_cast<TerrainModel*>(m_terrain->GetModel()))
     {
-      terrainModel->initialize(m_texManager->Find("Tgrass0_d"),
+      terrainModel->Initialize(m_texManager->Find("Tgrass0_d"),
                                m_texManager->Find("Tgrass0_d"),
                                &Texture::GetTexture1x1(BLUE),
                                m_texManager->Find("TOcean0_s"),
@@ -945,7 +945,7 @@ void GameController::_InitializeShips()
 {
   //TERRAIN
   std::unique_ptr<TerrainModel> terrainModel = m_modelManager->CloneTerrain("simple");
-  terrainModel->initialize(m_texManager->Find("Tgrass0_d"),
+  terrainModel->Initialize(m_texManager->Find("Tgrass0_d"),
                            m_texManager->Find("Tgrass0_d"),
                            &Texture::GetTexture1x1(BLUE),
                            m_texManager->Find("TOcean0_s"),

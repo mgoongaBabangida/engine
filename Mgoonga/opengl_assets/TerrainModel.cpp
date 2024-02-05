@@ -10,7 +10,6 @@
 //@todo improve constructor - initialization
 //----------------------------------------------------------------
 TerrainModel::TerrainModel()
-	: mesh(nullptr)
 {
 	_InitMaterialWithDefaults();
 }
@@ -32,7 +31,8 @@ TerrainModel::TerrainModel(Texture* diffuse,
 
 	_InitMaterialWithDefaults();
 
-	mesh = new TerrainMesh("terrain");
+	m_meshes.push_back(new TerrainMesh("terrain0 0"));
+	TerrainMesh* mesh = m_meshes.back();
 	mesh->m_size = heightMap->mTextureHeight;
 	mesh->m_rows = heightMap->mTextureWidth;
 	mesh->m_columns = heightMap->mTextureHeight;
@@ -56,7 +56,8 @@ TerrainModel::TerrainModel(Texture* color)
 
 	_InitMaterialWithDefaults();
 
-	mesh = new TerrainMesh("terrain");
+	m_meshes.push_back(new TerrainMesh("terrain0 0"));
+	TerrainMesh* mesh = m_meshes.back();
 	mesh->m_size = 10;
 	mesh->MakePlaneVerts(10);
 	mesh->MakePlaneIndices(10);
@@ -67,14 +68,15 @@ TerrainModel::TerrainModel(Texture* color)
 
 //----------------------------------------------------------------
 TerrainModel::TerrainModel(const TerrainModel& _other)
-  : mesh(_other.mesh)
-  , m_material(_other.m_material)
+  : m_material(_other.m_material)
 {
+	for (auto& mesh : _other.m_meshes)
+		m_meshes.push_back(mesh);
 	_InitMaterialWithDefaults();
 }
 
 //----------------------------------------------------------------
-void TerrainModel::initialize(const Texture* _diffuse,
+void TerrainModel::Initialize(const Texture* _diffuse,
 														  const Texture* _specular,
 														  const Texture* _normal,
 														  const Texture* _heightMap,
@@ -93,9 +95,57 @@ void TerrainModel::initialize(const Texture* _diffuse,
 
 	_InitMaterialWithDefaults();
 
-	if (mesh == nullptr)
-		mesh = new TerrainMesh("terrain");
+	if (m_meshes.empty())
+		m_meshes.push_back(new TerrainMesh("terrain0 0"));
 
+	TerrainMesh* mesh = m_meshes.back();
+	if (_heightMap != nullptr)
+	{
+		m_height = *_heightMap;
+
+		mesh->m_size = _heightMap->mTextureHeight;
+		mesh->m_rows = _heightMap->mTextureWidth;
+		mesh->m_columns = _heightMap->mTextureHeight;
+
+		mesh->MakePlaneVerts(_heightMap->mTextureWidth, _heightMap->mTextureHeight, spreed_texture);
+		//@todo make lod number outside
+		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 1);
+		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 2);
+		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 3);
+		mesh->AssignHeights(*_heightMap, _height_scale, _max_height);
+		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth, _heightMap->mTextureHeight)->id;
+	}
+	else
+	{
+		mesh->m_size = _diffuse->mTextureHeight;
+		mesh->MakePlaneVerts(_diffuse->mTextureHeight, _diffuse->mTextureHeight, spreed_texture);
+		mesh->MakePlaneIndices(_diffuse->mTextureHeight);
+		m_material.normal_texture_id = mesh->GenerateNormals(mesh->m_size)->id;
+	}
+
+	mesh->calculatedTangent();
+	mesh->setupMesh();
+}
+
+//----------------------------------------------------------------
+void TerrainModel::AddOrUpdate(glm::ivec2 _pos, glm::vec2 _offset, const Texture* _diffuse, const Texture* _heightMap, bool spreed_texture, float _height_scale, float _max_height)
+{
+	TerrainMesh* mesh = nullptr;
+	for (auto* m : m_meshes)
+	{
+		if (m->GetPosition() == _pos)
+		{
+			mesh = m;
+			break;
+		}
+	}
+	if (mesh == nullptr)
+	{
+		m_meshes.push_back(new TerrainMesh("terrain" + std::to_string(_pos.x) + " " + std::to_string(_pos.y)));
+		mesh = m_meshes.back();
+	}
+	mesh->SetPosition(_pos);
+	mesh->SetWorldOffset(_offset);
 	if (_heightMap != nullptr)
 	{
 		m_height = *_heightMap;
@@ -150,13 +200,17 @@ void TerrainModel::Draw()
 		glBindTextureUnit(12, m_albedo_texture_array->id);
 	}
 
-	mesh->Draw();
+	for(auto* mesh : m_meshes)
+		mesh->Draw();
 }
 
 //----------------------------------------------------------------
 std::vector<MyMesh*>	TerrainModel::getMeshes()	const
 { 
-  return std::vector<MyMesh*>{mesh};
+	std::vector<MyMesh*> meshes;
+	for (auto& mesh : m_meshes)
+		meshes.push_back(mesh);
+  return meshes;
 }
 
 //------------------------------------------------------------
@@ -181,45 +235,71 @@ void TerrainModel::setAlbedoTextureArray(const Texture* _t)
  //----------------------------------------------------------------
 float TerrainModel::GetHeight(float x, float z)
 {
-	std::optional<Vertex> vert = mesh->FindVertex(x, z);
-	if (vert != std::nullopt)
-		return vert->Position.y;
-	else
-		return -1.f;
+	for (auto* mesh : m_meshes)
+	{
+		std::optional<Vertex> vert = mesh->FindVertex(x, z);
+		if (vert != std::nullopt)
+			return vert->Position.y;
+	}
+	return -1.f;
 }
 
 //----------------------------------------------------------------
 glm::vec3 TerrainModel::GetNormal(float x, float z)
 {
-	std::optional<Vertex> vert = mesh->FindVertex(x, z);
-	if (vert != std::nullopt)
-		return vert->Normal;
-	else
-		return glm::vec3();
+	for (auto* mesh : m_meshes)
+	{
+		std::optional<Vertex> vert = mesh->FindVertex(x, z);
+		if (vert != std::nullopt)
+			return vert->Normal;
+	}
+	return glm::vec3();
 }
 
 //----------------------------------------------------------------
 const std::string& TerrainModel::GetName() const
 {
-	return mesh->Name();
+	return m_path;
 }
 
 //----------------------------------------------------------------
 size_t TerrainModel::GetVertexCount() const
 {
-  return mesh->vertices.size();
+	size_t vertexCount = 0;
+	if (!m_meshes.empty())
+	{
+		for (auto* mesh : m_meshes)
+			vertexCount += mesh->vertices.size();
+	}
+  return vertexCount;
 }
 
 //----------------------------------------------------------------
 std::vector<const IMesh*> TerrainModel::GetMeshes() const
 {
-  return std::vector<const IMesh*>{mesh};
+	if (!m_meshes.empty())
+	{
+		std::vector<const IMesh*> meshes;
+		for (auto* mesh : m_meshes)
+			meshes.push_back(mesh);
+		return meshes;
+	}
+	else
+		return {};
 }
 
 //----------------------------------------------------------------
 std::vector<const I3DMesh*> TerrainModel::Get3DMeshes() const
 {
-	return std::vector<const I3DMesh*>{mesh};
+	if (!m_meshes.empty())
+	{
+		std::vector<const I3DMesh*> meshes;
+		for (auto* mesh : m_meshes)
+			meshes.push_back(mesh);
+		return meshes;
+	}
+	else
+		return {};
 }
 
 //----------------------------------------------------------------
@@ -252,7 +332,10 @@ void TerrainModel::_InitMaterialWithDefaults()
 std::vector<glm::vec3> TerrainModel::GetPositions() const
 {
 	std::vector<glm::vec3> ret;
-	for (auto& vert : mesh->vertices)
+	if (m_meshes.empty())
+		return ret;
+
+	for (auto& vert : m_meshes[0]->vertices)
 		ret.push_back(vert.Position);
 	return ret; // @todo to improve
 }
@@ -260,13 +343,13 @@ std::vector<glm::vec3> TerrainModel::GetPositions() const
 //----------------------------------------------------------------
 std::vector<GLuint> TerrainModel::GetIndeces() const
 {
-	return mesh->indicesLods[0];
+	return m_meshes[0]->indicesLods[0];
 }
 
 //----------------------------------------------------------------
 TerrainModel::~TerrainModel()
 {
-	if (mesh != nullptr)
+	for (auto* mesh : m_meshes)
 		delete mesh;
 	//custom normals
  /* normal.freeTexture(); !!!*/

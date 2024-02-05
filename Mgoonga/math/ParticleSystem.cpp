@@ -174,10 +174,10 @@ void ParticleSystem::Reset()
 //-------------------------------------------------------------------------------------
 void ParticleSystem::SetSizeBezier(std::array<glm::vec3, 4> _bezier)
 {
-	m_particle_size_over_time.p0 = { (_bezier[0].x + 1.0f) / 2.0f, (_bezier[0].y + 1.0f) / 2.0f,0.0f }; // ( +1) /2 from -1 1 to 0 1
-	m_particle_size_over_time.p1 = { (_bezier[1].x + 1.0f) / 2.0f, (_bezier[1].y + 1.0f) / 2.0f,0.0f };
-	m_particle_size_over_time.p2 = { (_bezier[2].x + 1.0f) / 2.0f, (_bezier[2].y + 1.0f) / 2.0f,0.0f };
-	m_particle_size_over_time.p3 = { (_bezier[3].x + 1.0f) / 2.0f, (_bezier[3].y + 1.0f) / 2.0f,0.0f };
+	m_particle_size_over_time.p0 = { (_bezier[0].x + 1.0f) / 2.0f, (_bezier[0].y + 1.0f) / 2.0f, 0.0f }; // ( +1) /2 from -1 1 to 0 1
+	m_particle_size_over_time.p1 = { (_bezier[1].x + 1.0f) / 2.0f, (_bezier[1].y + 1.0f) / 2.0f, 0.0f };
+	m_particle_size_over_time.p2 = { (_bezier[2].x + 1.0f) / 2.0f, (_bezier[2].y + 1.0f) / 2.0f, 0.0f };
+	m_particle_size_over_time.p3 = { (_bezier[3].x + 1.0f) / 2.0f, (_bezier[3].y + 1.0f) / 2.0f, 0.0f };
 	m_use_size_over_time = true;
 	for (auto& p : m_particles)
 		p.setScaleCurve(&m_particle_size_over_time);

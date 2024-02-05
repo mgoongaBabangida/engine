@@ -168,6 +168,7 @@ void eWindowImGuiExternal::Render()
     case SPIN_BOX:
     {
       int* value = nullptr;
+      std::function<void(int, int*&)> callback = *(reinterpret_cast<std::function<void(int, int*&)>*>(std::get<2>(item)));
       if (std::get<0>(item) == "Sky box")
       {
         static int skybox_spin_value = 0;
@@ -178,11 +179,14 @@ void eWindowImGuiExternal::Render()
         static int ibl_spin_value = 0;
         value = &ibl_spin_value;
       }
+      else
+      {
+        callback(0, value);
+      }
 
       if (ImGui::InputInt(std::get<0>(item).c_str(), value))
       {
-        std::function<void(int)> callback = *(reinterpret_cast<std::function<void(int)>*>(std::get<2>(item)));
-        callback(*value);
+        callback(*value, value);
       }
     }
     break;

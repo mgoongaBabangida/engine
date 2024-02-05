@@ -14,7 +14,7 @@ namespace dbb
     glm::vec3 p3;
   };
 
-  glm::vec3 GetPoint(const Bezier& _bezier, float _t); // t is [0 -1]
+  glm::vec3 DLL_MATH GetPoint(const Bezier& _bezier, float _t); // t is [0 -1]
 
   //float GetArcLength(const Bezier& _bezier)
   //{
