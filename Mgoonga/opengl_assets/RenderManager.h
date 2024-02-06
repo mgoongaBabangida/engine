@@ -30,6 +30,7 @@
 #include "AreaLightsOnlyRender.h"
 #include "CameraInterpolationRender.h"
 #include "ComputeShaderRender.h"
+#include "TerrainTessellatedRender.h"
 
 //----------------------------------------------------------------------------------------------
 class eRenderManager
@@ -57,7 +58,6 @@ public:
 	float& GetSsaoStrengthRef() { return m_phongRender->GetSaoStrengthRef(); }
 
 private:
-
 	eWaterRender*		WaterRender();
 	eSkyBoxRender*		SkyBoxRender();
 	eScreenRender*		ScreenRender();
@@ -83,6 +83,7 @@ private:
 	eAreaLightsOnlyRender* AreaLightsRender();
 	eCameraInterpolationRender* CameraInterpolationRender();
 	eComputeShaderRender* ComputeShaderRender();
+	eTerrainTessellatedRender* TerrainTessellatedRender();
 
 private:
 	std::unique_ptr<eWaterRender>									m_waterRender;
@@ -110,6 +111,7 @@ private:
 	std::unique_ptr<eAreaLightsOnlyRender>				m_area_lights;
 	std::unique_ptr<eCameraInterpolationRender>		m_cameraInrepolationRender;
 	std::unique_ptr<eComputeShaderRender>					m_computeRender;
+	std::unique_ptr <eTerrainTessellatedRender>		m_terrainTesRender;
 
 	std::string							folderPath;
 	std::vector<ShaderInfo>	shaders;

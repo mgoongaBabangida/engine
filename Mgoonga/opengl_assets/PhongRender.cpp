@@ -12,10 +12,10 @@ ePhongRender::ePhongRender(const std::string& vS, const std::string& wave_vS, co
 	glUseProgram(mainShader.ID());
 
 	//Uniform Locs
-	BonesMatLocation = glGetUniformLocation(mainShader.ID(), "gBones");
-	LightingIndexDirectional = glGetSubroutineIndex(mainShader.ID(), GL_FRAGMENT_SHADER, "calculateBlinnPhongDirectionalSpecDif");
-	LightingIndexPoint = glGetSubroutineIndex(mainShader.ID(), GL_FRAGMENT_SHADER, "calculateBlinnPhongPointSpecDif");
-	LightingIndexSpot = glGetSubroutineIndex(mainShader.ID(), GL_FRAGMENT_SHADER, "calculateBlinnPhongFlashSpecDif");
+	BonesMatLocation					= glGetUniformLocation(mainShader.ID(), "gBones");
+	LightingIndexDirectional	= glGetSubroutineIndex(mainShader.ID(), GL_FRAGMENT_SHADER, "calculateBlinnPhongDirectionalSpecDif");
+	LightingIndexPoint				= glGetSubroutineIndex(mainShader.ID(), GL_FRAGMENT_SHADER, "calculateBlinnPhongPointSpecDif");
+	LightingIndexSpot					= glGetSubroutineIndex(mainShader.ID(), GL_FRAGMENT_SHADER, "calculateBlinnPhongFlashSpecDif");
 
 	mainShader.SetUniformData("Fog.maxDist", 40.0f);
 	mainShader.SetUniformData("Fog.minDist", 20.0f);

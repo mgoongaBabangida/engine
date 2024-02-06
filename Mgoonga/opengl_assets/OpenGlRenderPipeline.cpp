@@ -309,6 +309,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	if (m_first_call) { RenderIBL(_camera); m_first_call = false; }
 
 	std::vector<shObject> phong_objs = _objects.find(eObject::RenderType::PHONG)->second;
+	std::vector<shObject> terrain_tes_objs = _objects.find(eObject::RenderType::TERRAIN_TESSELLATION)->second;
 	std::vector<shObject> focused = _objects.find(eObject::RenderType::OUTLINED)->second;
 	std::vector<shObject> pbr_objs = _objects.find(eObject::RenderType::PBR)->second;
 	std::vector<shObject> flags = _objects.find(eObject::RenderType::FLAG)->second;
@@ -336,6 +337,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	auto phong_pbr_objects = phong_objs;
 	phong_pbr_objects.insert(phong_pbr_objects.end(), pbr_objs.begin(), pbr_objs.end());
 	phong_pbr_objects.insert(phong_pbr_objects.end(), arealighted_objs.begin(), arealighted_objs.end());
+	phong_pbr_objects.insert(phong_pbr_objects.end(), terrain_tes_objs.begin(), terrain_tes_objs.end());
 
 	//Shadow Render Pass
 	if (_light.type == eLightType::DIRECTION || _light.type == eLightType::SPOT)
@@ -450,11 +452,13 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		RenderPBR(_camera, _light, not_outlined);
 
 		RenderAreaLightsOnly(_camera, _light, arealighted_objs);
+
+		RenderTerrainTessellated(_camera, _light, terrain_tes_objs);
 	}
 
 	//Mesh Line
 	if(m_mesh_line_on)
-		renderManager->MeshLineRender()->Render(_camera, _light, phong_pbr_objects); //!!!!
+		renderManager->MeshLineRender()->Render(_camera, _light, phong_pbr_objects); //@todo !!!!
 
 	//Flags
 	if (flags_on) { RenderFlags(_camera, _light, flags); }
@@ -545,6 +549,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		camera_frustum_mesh.UpdateData(extrems_total, indices_total, { 1.0f, 1.0f, 0.0f, 1.0f });
 		line_meshes.push_back(&camera_frustum_mesh);
 	}
+
 	// Bounding boxes
 	if (draw_bounding_boxes)
 	{
@@ -879,6 +884,11 @@ void eOpenGlRenderPipeline::RenderBloom()
 	glDisable(GL_BLEND);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void eOpenGlRenderPipeline::RenderTerrainTessellated(const Camera& _camera, const Light& _light, std::vector<shObject> _objs)
+{
+	renderManager->TerrainTessellatedRender()->Render(_camera, _light, _objs);
 }
 
 void eOpenGlRenderPipeline::RenderBlur(const Camera& _camera)

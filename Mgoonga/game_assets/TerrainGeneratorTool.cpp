@@ -115,6 +115,13 @@ void TerrainGeneratorTool::Initialize()
 		m_terrain->SetTextureBlending(!m_terrain->IsTextureBlending());
 	};
 
+	std::function<void()> tessellation__callback = [this]()
+	{
+		m_terrain_pointer->EnableTessellation(true);
+		if (true)
+			m_terrain->SetRenderType(eObject::RenderType::TERRAIN_TESSELLATION);
+	};
+
 	std::function<void()> update__callback = [this]()
 	{
 		_AddCurrentMesh();
@@ -158,6 +165,7 @@ void TerrainGeneratorTool::Initialize()
 	m_imgui->Add(BUTTON, "Switch LOD", (void*)&switch_lod__callback);
 	m_imgui->Add(BUTTON, "Render mode", (void*)&render_mode__callback);
 	m_imgui->Add(BUTTON, "Texturing", (void*)&texturing__callback);
+	m_imgui->Add(BUTTON, "Tessellation", (void*)&tessellation__callback);
 	m_imgui->Add(TEXTURE, "Color texture", (void*)m_color_texture.id);
 
 	dbb::Bezier bezier;

@@ -35,6 +35,8 @@ public:
 	void AddOrUpdate(glm::ivec2 _pos, glm::vec2 _offset, const Texture* _diffuse, const Texture* heightMap = nullptr,
 									 bool spreed_texture = true, float _height_scale = 1.0f, float _max_height = 1.0f);
 
+	void EnableTessellation(bool _enable);
+
 	virtual void														Draw()					override;
 	virtual const std::string&							GetName() const override;
 	virtual const std::string&							GetPath() const override { return m_path; }
@@ -61,12 +63,13 @@ public:
 	void setAlbedoTextureArray(const Texture*);
 
 protected:
+	std::string									m_path;
 	std::vector<TerrainMesh*>		m_meshes;
 	Material										m_material;
-	std::string									m_path;
 
-	Texture					m_height;
-	const Texture*	m_albedo_texture_array = nullptr;
+	Texture											m_height;
+	const Texture*							m_albedo_texture_array = nullptr;
+	bool												m_tessellation_enabled = false;
 
 	//---------------------------------------------------------------------------
 	void			_InitMaterialWithDefaults();

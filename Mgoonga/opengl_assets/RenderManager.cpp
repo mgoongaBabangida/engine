@@ -29,7 +29,8 @@ eBloomRenderer* eRenderManager::BloomRenderer(){ return m_blomRender.get();}
 eScreenSpaceReflectionRender* eRenderManager::SSRRenderer(){return m_ssrRender.get();}
 eAreaLightsOnlyRender* eRenderManager::AreaLightsRender(){return m_area_lights.get();}
 eCameraInterpolationRender* eRenderManager::CameraInterpolationRender(){return m_cameraInrepolationRender.get();}
-eComputeShaderRender* eRenderManager::ComputeShaderRender() {return m_computeRender.get();}
+eComputeShaderRender* eRenderManager::ComputeShaderRender() { return m_computeRender.get();}
+eTerrainTessellatedRender* eRenderManager::TerrainTessellatedRender() { return m_terrainTesRender.get(); }
 
 //----------------------------------------------------------------------------------------------------------------
 void eRenderManager::AddParticleSystem(std::shared_ptr<IParticleSystem> system)
@@ -198,6 +199,13 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																									texManager.Find("TSpanishFlag0_s"),
 																									texManager.Find("computeImageRW")));
 	shader_lambda(m_cameraInrepolationRender.get());
+
+	//Terrain Tessellation
+	m_terrainTesRender.reset(new eTerrainTessellatedRender(folderPath + "TerrainTessellationVertex.glsl",
+																												 folderPath + "TerrainTessellationFragment.glsl",
+																												 folderPath + "TerrainTessellationTes1.glsl",
+																												 folderPath + "TerrainTessellationTes2.glsl"));
+	shader_lambda(m_terrainTesRender.get());
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -232,6 +240,7 @@ void eRenderManager::UpdateShadersInfo()
 	shader_lambda(m_area_lights.get());
 	shader_lambda(m_cameraInrepolationRender.get());
 	shader_lambda(m_computeRender.get());
+	shader_lambda(m_terrainTesRender.get());
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -292,6 +301,8 @@ bool eRenderManager::SetUniformData(const std::string& _renderName, const std::s
 	if (shader_lambda(m_cameraInrepolationRender.get()))
 		return true;
 	if (shader_lambda(m_computeRender.get()))
+		return true;
+	if (shader_lambda(m_terrainTesRender.get()))
 		return true;
 	return false;
 }

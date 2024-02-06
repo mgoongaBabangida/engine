@@ -215,7 +215,7 @@ void eMainContextBase::PaintGL()
 	{
 		int64_t tick = m_global_clock.newFrame();
 		std::map<eObject::RenderType, std::vector<shObject>> objects;
-		std::vector<shObject> phong, pbr, flags, bezier, geometry, lines, arealighted;
+		std::vector<shObject> phong, pbr, flags, bezier, geometry, lines, arealighted, terrain;
 
 		if(!m_texts.empty() && m_show_fps)
 			m_texts[0]->content = { "FPS " + std::to_string(1000 / tick) };
@@ -259,8 +259,10 @@ void eMainContextBase::PaintGL()
 					flags.push_back(object);
 				else if (object->GetRenderType() == eObject::RenderType::LINES)
 					lines.push_back(object);
-				else if(object->GetRenderType() == eObject::RenderType::AREA_LIGHT_ONLY)
+				else if (object->GetRenderType() == eObject::RenderType::AREA_LIGHT_ONLY)
 					arealighted.push_back(object);
+				else if (object->GetRenderType() == eObject::RenderType::TERRAIN_TESSELLATION)
+					terrain.push_back(object);
 			}
 		}
 
@@ -283,6 +285,7 @@ void eMainContextBase::PaintGL()
 			: std::shared_ptr<std::vector<shObject>>(new std::vector<shObject>{});
 
 		objects.insert({ eObject::RenderType::PHONG, phong });
+		objects.insert({ eObject::RenderType::TERRAIN_TESSELLATION, terrain });
 		objects.insert({ eObject::RenderType::OUTLINED, *focused_output });
 		objects.insert({ eObject::RenderType::FLAG, flags });
 		objects.insert({ eObject::RenderType::PBR, pbr });

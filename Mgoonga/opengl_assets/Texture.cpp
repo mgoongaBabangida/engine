@@ -150,7 +150,7 @@ bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenu
 	return true;
 }
 
-uint8_t* Texture::getPixelBuffer(GLenum _target, GLenum _format, GLenum _type)
+uint8_t* Texture::getPixelBuffer(GLenum _target, GLenum _format, GLenum _type) const
 { 
 	int sizeOfByte = _type == GL_FLOAT ? sizeof(float) : sizeof(unsigned char);
 	int bytesToUsePerPixel = mChannels;

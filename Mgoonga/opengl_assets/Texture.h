@@ -52,7 +52,7 @@ struct DLL_OPENGL_ASSETS Texture
 	void setNumRows(GLuint nrows) { numberofRows = nrows; }
 	void freeTexture();
 
-	uint8_t*	getPixelBuffer(GLenum _target = GL_TEXTURE_2D, GLenum format = GL_RGBA, GLenum _type = GL_UNSIGNED_BYTE);
+	uint8_t*	getPixelBuffer(GLenum _target = GL_TEXTURE_2D, GLenum format = GL_RGBA, GLenum _type = GL_UNSIGNED_BYTE) const;
 	bool			saveToFile(const std::string &path, GLenum _target = GL_TEXTURE_2D, GLenum format = GL_RGBA, GLenum _type = GL_UNSIGNED_BYTE);
 
 	bool loadTextureFromFile(const std::string& path, GLenum format = GL_RGBA, GLenum wrap = GL_CLAMP_TO_EDGE);

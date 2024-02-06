@@ -197,6 +197,7 @@ protected:
 	Texture*  RenderCameraInterpolation(const Camera& _camera);
 	void			RenderIBL(const Camera& _camera);
 	void			RenderBloom();
+	void			RenderTerrainTessellated(const Camera&, const Light& _light, std::vector<shObject> _objs);
 
 	bool			mts			= true;
 	bool			skybox		= true;

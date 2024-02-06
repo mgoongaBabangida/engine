@@ -114,6 +114,7 @@ void TerrainModel::Initialize(const Texture* _diffuse,
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 3);
 		mesh->AssignHeights(*_heightMap, _height_scale, _max_height);
 		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth, _heightMap->mTextureHeight)->id;
+		mesh->GenerateTessellationData();
 	}
 	else
 	{
@@ -161,6 +162,7 @@ void TerrainModel::AddOrUpdate(glm::ivec2 _pos, glm::vec2 _offset, const Texture
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 3);
 		mesh->AssignHeights(*_heightMap, _height_scale, _max_height);
 		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth, _heightMap->mTextureHeight)->id;
+		mesh->GenerateTessellationData();
 	}
 	else
 	{
@@ -172,6 +174,12 @@ void TerrainModel::AddOrUpdate(glm::ivec2 _pos, glm::vec2 _offset, const Texture
 
 	mesh->calculatedTangent();
 	mesh->setupMesh();
+}
+
+//----------------------------------------------------------------
+void TerrainModel::EnableTessellation(bool _enable)
+{
+	m_tessellation_enabled = _enable;
 }
 
 //----------------------------------------------------------------
@@ -200,8 +208,16 @@ void TerrainModel::Draw()
 		glBindTextureUnit(12, m_albedo_texture_array->id);
 	}
 
-	for(auto* mesh : m_meshes)
-		mesh->Draw();
+	if (!m_tessellation_enabled)
+	{
+		for (auto* mesh : m_meshes)
+			mesh->Draw();
+	}
+	else
+	{
+		for (auto* mesh : m_meshes)
+			mesh->DrawTessellated();
+	}
 }
 
 //----------------------------------------------------------------

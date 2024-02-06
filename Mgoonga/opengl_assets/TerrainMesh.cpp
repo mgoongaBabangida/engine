@@ -106,6 +106,7 @@ void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, 
 		GLfloat* buffer = new GLfloat[_heightMap.mTextureHeight * _heightMap.mTextureWidth * 4];
 
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buffer);
+		m_heightMap.TextureFromBuffer((GLfloat*)buffer, _heightMap.mTextureWidth, _heightMap.mTextureHeight, GL_RGBA, GL_REPEAT, GL_LINEAR);
 		int counter = 0;
 		for (int i = 0; i < _heightMap.mTextureHeight * _heightMap.mTextureWidth * 4; i += 4)
 		{
@@ -119,6 +120,7 @@ void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, 
 		GLfloat* buffer = new GLfloat[_heightMap.mTextureHeight * _heightMap.mTextureWidth];
 
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, buffer);
+		m_heightMap.TextureFromBuffer((GLfloat*)buffer, _heightMap.mTextureWidth, _heightMap.mTextureHeight, GL_RED, GL_REPEAT, GL_LINEAR);
 		int counter = 0;
 		for (int i = 0; i < _heightMap.mTextureHeight * _heightMap.mTextureWidth; ++i)
 		{
@@ -242,6 +244,65 @@ Texture* TerrainMesh::GenerateNormals(GLuint rows, GLuint columns)
 		delete[] buffer;
 	}
 	return &m_normalMap;
+}
+
+//---------------------------------------------------------------------------
+void TerrainMesh::GenerateTessellationData()
+{
+	if (this->indicesLods.empty())
+		return;
+
+	for (unsigned int i = 0; i < indicesLods.back().size(); i += 6) // take the lowest detailed mesh
+	{
+		// indices in patch quad -> 0, 1, 2, 5
+		m_tessellation_data.m_vertices.push_back(this->vertices[this->indicesLods.back()[i]].Position.x); // v.x
+		m_tessellation_data.m_vertices.push_back(0.0f); // v.y
+		m_tessellation_data.m_vertices.push_back(this->vertices[this->indicesLods.back()[i]].Position.z); // v.z
+		m_tessellation_data.m_vertices.push_back(this->vertices[this->indicesLods.back()[i]].TexCoords.x); // u
+		m_tessellation_data.m_vertices.push_back(this->vertices[this->indicesLods.back()[i]].TexCoords.y); // v
+
+		m_tessellation_data.m_vertices.push_back(this->vertices[this->indicesLods.back()[i + 5]].Position.x); // v.x
+		m_tessellation_data.m_vertices.push_back(0.0f); // v.y
+		m_tessellation_data.m_vertices.push_back(this->vertices[this->indicesLods.back()[i + 5]].Position.z); // v.z
+		m_tessellation_data.m_vertices.push_back(this->vertices[this->indicesLods.back()[i + 5]].TexCoords.x); // u
+		m_tessellation_data.m_vertices.push_back(this->vertices[this->indicesLods.back()[i + 5]].TexCoords.y); // v
+
+		m_tessellation_data.m_vertices.push_back(this->vertices[this->indicesLods.back()[i + 1]].Position.x); // v.x
+		m_tessellation_data.m_vertices.push_back(0.0f); // v.y
+		m_tessellation_data.m_vertices.push_back(this->vertices[this->indicesLods.back()[i + 1]].Position.z); // v.z
+		m_tessellation_data.m_vertices.push_back(this->vertices[this->indicesLods.back()[i + 1]].TexCoords.x); // u
+		m_tessellation_data.m_vertices.push_back(this->vertices[this->indicesLods.back()[i + 1]].TexCoords.y); // v
+
+		m_tessellation_data.m_vertices.push_back(this->vertices[this->indicesLods.back()[i + 2]].Position.x); // v.x
+		m_tessellation_data.m_vertices.push_back(0.0f); // v.y
+		m_tessellation_data.m_vertices.push_back(this->vertices[this->indicesLods.back()[i + 2]].Position.z); // v.z
+		m_tessellation_data.m_vertices.push_back(this->vertices[this->indicesLods.back()[i + 2]].TexCoords.x); // u
+		m_tessellation_data.m_vertices.push_back(this->vertices[this->indicesLods.back()[i + 2]].TexCoords.y); // v
+	}
+
+	glGenVertexArrays(1, &m_tessellation_data.m_terrainVAO);
+	glBindVertexArray(m_tessellation_data.m_terrainVAO);
+
+	glGenBuffers(1, &m_tessellation_data.m_terrainVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_tessellation_data.m_terrainVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_tessellation_data.m_vertices.size(), &m_tessellation_data.m_vertices[0], GL_STATIC_DRAW);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// texCoord attribute
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(sizeof(float) * 3));
+	glEnableVertexAttribArray(1);
+}
+
+//---------------------------------------------------------------------------
+void TerrainMesh::DrawTessellated()
+{
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_heightMap.id);
+	glPatchParameteri(GL_PATCH_VERTICES, 4/* num pointsin patch*/);
+	glBindVertexArray(m_tessellation_data.m_terrainVAO);
+	glDrawArrays(GL_PATCHES, 0, 4/* num pointsin patch*/ * (m_tessellation_data.m_vertices.size()/5));
 }
 
 //---------------------------------------------------------------------------
