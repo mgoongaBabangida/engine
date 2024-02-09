@@ -24,6 +24,7 @@ namespace dbb
 		std::pair<glm::vec2, glm::vec2>  GetFrame() const { return std::pair<glm::vec2, glm::vec2>{ press_start, press_curr }; }
 		std::vector<shObject>            onMove(std::vector<shObject> objects, float click_x, float click_y);
 		std::vector<shObject>						 FrustumCull(std::vector<shObject> _objects);
+		bool														 IsInFrustum(const std::vector<glm::vec3>&);
 
 		dbb::line				      getLine() const { return m_line; }
 		void					        press(float click_x, float click_y);

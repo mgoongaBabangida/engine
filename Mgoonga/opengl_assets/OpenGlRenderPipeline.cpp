@@ -559,32 +559,70 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 
 		for (GLuint i = 0; i < phong_pbr_objects.size(); ++i)
 		{
-			std::vector<glm::vec3> extrems = phong_pbr_objects[i]->GetCollider()->GetExtrems(*phong_pbr_objects[i]->GetTransform());
-			extrems_total.insert(extrems_total.end(), extrems.begin(), extrems.end());
-			indices_total.push_back(0 + i * 8);
-			indices_total.push_back(1 + i * 8);
-			indices_total.push_back(1 + i * 8);
-			indices_total.push_back(2 + i * 8);
-			indices_total.push_back(2 + i * 8);
-			indices_total.push_back(3 + i * 8);
-			indices_total.push_back(3 + i * 8);
-			indices_total.push_back(0 + i * 8);
-			indices_total.push_back(4 + i * 8);
-			indices_total.push_back(5 + i * 8);
-			indices_total.push_back(5 + i * 8);
-			indices_total.push_back(6 + i * 8);
-			indices_total.push_back(6 + i * 8);
-			indices_total.push_back(7 + i * 8);
-			indices_total.push_back(7 + i * 8);
-			indices_total.push_back(4 + i * 8);
-			indices_total.push_back(0 + i * 8);
-			indices_total.push_back(4 + i * 8);
-			indices_total.push_back(1 + i * 8);
-			indices_total.push_back(5 + i * 8);
-			indices_total.push_back(2 + i * 8);
-			indices_total.push_back(6 + i * 8);
-			indices_total.push_back(3 + i * 8);
-			indices_total.push_back(7 + i * 8);
+			if (!phong_pbr_objects[i]->GetCollider() || !phong_pbr_objects[i]->GetTransform())
+				continue;
+
+			if (auto* terrain = dynamic_cast<ITerrainModel*>(phong_pbr_objects[i]->GetModel()); terrain)
+			{
+				auto vec_of_extrems = terrain->GetExtremsOfMeshesLocalSpace();
+				for (GLuint j = 0; j < vec_of_extrems.size(); ++j)
+				{
+					extrems_total.insert(extrems_total.end(), vec_of_extrems[j].begin(), vec_of_extrems[j].end());
+					indices_total.push_back(0 + j * 8);
+					indices_total.push_back(1 + j * 8);
+					indices_total.push_back(1 + j * 8);
+					indices_total.push_back(2 + j * 8);
+					indices_total.push_back(2 + j * 8);
+					indices_total.push_back(3 + j * 8);
+					indices_total.push_back(3 + j * 8);
+					indices_total.push_back(0 + j * 8);
+					indices_total.push_back(4 + j * 8);
+					indices_total.push_back(5 + j * 8);
+					indices_total.push_back(5 + j * 8);
+					indices_total.push_back(6 + j * 8);
+					indices_total.push_back(6 + j * 8);
+					indices_total.push_back(7 + j * 8);
+					indices_total.push_back(7 + j * 8);
+					indices_total.push_back(4 + j * 8);
+					indices_total.push_back(0 + j * 8);
+					indices_total.push_back(4 + j * 8);
+					indices_total.push_back(1 + j * 8);
+					indices_total.push_back(5 + j * 8);
+					indices_total.push_back(2 + j * 8);
+					indices_total.push_back(6 + j * 8);
+					indices_total.push_back(3 + j * 8);
+					indices_total.push_back(7 + j * 8);
+				}
+			}
+			else
+			{
+				std::vector<glm::vec3> extrems = phong_pbr_objects[i]->GetCollider()->GetExtrems(*phong_pbr_objects[i]->GetTransform());
+				extrems_total.insert(extrems_total.end(), extrems.begin(), extrems.end());
+				indices_total.push_back(0 + i * 8);
+				indices_total.push_back(1 + i * 8);
+				indices_total.push_back(1 + i * 8);
+				indices_total.push_back(2 + i * 8);
+				indices_total.push_back(2 + i * 8);
+				indices_total.push_back(3 + i * 8);
+				indices_total.push_back(3 + i * 8);
+				indices_total.push_back(0 + i * 8);
+				indices_total.push_back(4 + i * 8);
+				indices_total.push_back(5 + i * 8);
+				indices_total.push_back(5 + i * 8);
+				indices_total.push_back(6 + i * 8);
+				indices_total.push_back(6 + i * 8);
+				indices_total.push_back(7 + i * 8);
+				indices_total.push_back(7 + i * 8);
+				indices_total.push_back(4 + i * 8);
+				indices_total.push_back(0 + i * 8);
+				indices_total.push_back(4 + i * 8);
+				indices_total.push_back(1 + i * 8);
+				indices_total.push_back(5 + i * 8);
+				indices_total.push_back(2 + i * 8);
+				indices_total.push_back(6 + i * 8);
+				indices_total.push_back(3 + i * 8);
+				indices_total.push_back(7 + i * 8);
+			}
 		}
 		bounding_boxes_mesh.UpdateData(extrems_total, indices_total, { 1.0f, 1.0f, 0.0f, 1.0f});
 		line_meshes.push_back(&bounding_boxes_mesh);

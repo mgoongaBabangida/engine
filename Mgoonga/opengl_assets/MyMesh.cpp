@@ -228,8 +228,12 @@ bool MyMesh::SwitchLOD(GLuint _LOD) //starts from one
 	{
 		if (EBO.size() < _LOD) // EBO for this lod does not exists
 		{
-			EBO.push_back({});
-			glGenBuffers(1, &this->EBO[_LOD - 1]);
+			unsigned int new_ebos = _LOD - EBO.size();
+			for (unsigned int i = 0; i < new_ebos; ++i)
+			{
+				EBO.push_back({});
+				glGenBuffers(1, &this->EBO.back());
+			}
 		}
 
 		glBindVertexArray(this->VAO);

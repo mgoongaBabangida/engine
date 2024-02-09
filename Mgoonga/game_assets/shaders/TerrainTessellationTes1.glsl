@@ -15,7 +15,7 @@ void main()
 
     if(gl_InvocationID == 0)
     {
-        const int MIN_TESS_LEVEL = 4;
+        const int MIN_TESS_LEVEL = 1;
         const int MAX_TESS_LEVEL = 16;
         const float MIN_DISTANCE = 20;
         const float MAX_DISTANCE = 800;
@@ -36,12 +36,12 @@ void main()
         //float tessLevel2 = mix( MAX_TESS_LEVEL, MIN_TESS_LEVEL, min(distance01, distance11) );
         //float tessLevel3 = mix( MAX_TESS_LEVEL, MIN_TESS_LEVEL, min(distance11, distance10) );
 
-        gl_TessLevelOuter[0] = MIN_TESS_LEVEL; //tessLevel0;
-        gl_TessLevelOuter[1] = MIN_TESS_LEVEL; //tessLevel1;
-        gl_TessLevelOuter[2] = MIN_TESS_LEVEL; //tessLevel2;
-        gl_TessLevelOuter[3] = MIN_TESS_LEVEL; //tessLevel3;
+        gl_TessLevelOuter[0] = MAX_TESS_LEVEL; //tessLevel0;
+        gl_TessLevelOuter[1] = MAX_TESS_LEVEL; //tessLevel1;
+        gl_TessLevelOuter[2] = MAX_TESS_LEVEL; //tessLevel2;
+        gl_TessLevelOuter[3] = MAX_TESS_LEVEL; //tessLevel3;
 
-        gl_TessLevelInner[0] = MIN_TESS_LEVEL; //max(tessLevel1, tessLevel3);
-        gl_TessLevelInner[1] = MIN_TESS_LEVEL; //max(tessLevel0, tessLevel2);
+        gl_TessLevelInner[0] = MAX_TESS_LEVEL; //max(tessLevel1, tessLevel3);
+        gl_TessLevelInner[1] = MAX_TESS_LEVEL; //max(tessLevel0, tessLevel2);
     }
 }

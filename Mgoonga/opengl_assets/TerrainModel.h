@@ -1,11 +1,13 @@
 #pragma once
+#include "opengl_assets.h"
 
 #include <base/base.h>
-#include "opengl_assets.h"
+
 #include "MyModel.h"
 
 struct Texture;
 class TerrainMesh;
+class Camera;
 
 struct TerrainType
 {
@@ -36,6 +38,7 @@ public:
 									 bool spreed_texture = true, float _height_scale = 1.0f, float _max_height = 1.0f);
 
 	void EnableTessellation(bool _enable);
+	void SetCamera(Camera* _camera);
 
 	virtual void														Draw()					override;
 	virtual const std::string&							GetName() const override;
@@ -53,7 +56,8 @@ public:
 	//ITerrainModel
 	float							GetHeight(float x , float z)	override;
 	glm::vec3					GetNormal(float x, float z)		override;
-	
+	virtual std::vector<std::vector<glm::vec3>>	GetExtremsOfMeshesLocalSpace() const override;
+
 	std::vector<glm::vec3>	GetPositions()			const;
 	std::vector<GLuint>		  GetIndeces()			const;
 	std::vector<MyMesh*>	  getMeshes()				const;
@@ -70,6 +74,7 @@ protected:
 	Texture											m_height;
 	const Texture*							m_albedo_texture_array = nullptr;
 	bool												m_tessellation_enabled = false;
+	Camera*											m_camera = nullptr;
 
 	//---------------------------------------------------------------------------
 	void			_InitMaterialWithDefaults();

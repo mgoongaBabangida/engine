@@ -9,6 +9,7 @@
 #include <opengl_assets/TextureManager.h>
 #include <opengl_assets/openglrenderpipeline.h>
 #include <math/Random.h>
+#include <math/BoxCollider.h>
 
 #include "BezierCurveUIController.h"
 
@@ -61,9 +62,10 @@ void TerrainGeneratorTool::Initialize()
 	m_terrain_pointer = terrainModel.get();
 
 	m_terrain = factory.CreateObject(std::shared_ptr<IModel>(terrainModel.release()), eObject::RenderType::PHONG, "Terrain");
+	m_terrain->SetCollider(new BoxCollider);
 	m_terrain->SetName("Procedural Terrain");
-	m_terrain->GetTransform()->setScale(glm::vec3(0.1f, 0.1f, 0.1f));
-	m_terrain->GetTransform()->setTranslation(glm::vec3(0.0f, 1.6f, 0.0f));
+	//m_terrain->GetTransform()->setScale(glm::vec3(0.1f, 0.1f, 0.1f));
+	//m_terrain->GetTransform()->setTranslation(glm::vec3(0.0f, 1.6f, 0.0f));
 	m_terrain->SetTextureBlending(true);
 	m_terrain_pointer->setAlbedoTextureArray(m_texture_manager->Find("terrain_albedo_array_lague"));
 	//m_terrain->SetPickable(false);
@@ -117,9 +119,16 @@ void TerrainGeneratorTool::Initialize()
 
 	std::function<void()> tessellation__callback = [this]()
 	{
-		m_terrain_pointer->EnableTessellation(true);
-		if (true)
+		if (m_terrain->GetRenderType() != eObject::RenderType::TERRAIN_TESSELLATION)
+		{
+			m_terrain_pointer->EnableTessellation(true);
 			m_terrain->SetRenderType(eObject::RenderType::TERRAIN_TESSELLATION);
+		}
+		else
+		{
+			m_terrain_pointer->EnableTessellation(false);
+			m_terrain->SetRenderType(eObject::RenderType::PHONG);
+		}
 	};
 
 	std::function<void()> update__callback = [this]()
@@ -197,7 +206,7 @@ void TerrainGeneratorTool::Initialize()
 
 	m_initialized = true;
 
-	if (false)
+	if (true)
 	{
 		_UpdateCurrentMesh();
 	}
@@ -213,6 +222,7 @@ void TerrainGeneratorTool::Initialize()
 				m_noise_offset.y = y * ((int)m_height);
 				Update(0);
 		}
+		m_terrain_pointer->SetCamera(&m_game->GetMainCamera());
 		m_auto_update = false;
 	}
 }

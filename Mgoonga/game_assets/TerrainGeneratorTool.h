@@ -52,15 +52,15 @@ protected:
 
   int         m_cur_pos_X = 0;
   int         m_cur_pos_Y = 0;
-  GLuint      m_width = 257;
-  GLuint      m_height = 257;
-  float       m_scale = 100.0f;
-  GLuint      m_octaves = 4;
+  GLuint      m_width = 1025;
+  GLuint      m_height = 1025;
+  float       m_scale = 300.0f;
+  GLuint      m_octaves = 12;
   float       m_persistance = 0.5f;
   float       m_lacunarity = 2.0f;
   glm::vec2   m_noise_offset = {0.0f, 0.0f};
   GLuint      m_seed = 1;
-  float       m_height_scale = 7.0f;
+  float       m_height_scale = 1.75f;
   float       m_texture_scale[8];
   float       m_max_height_coef = 1.0f;
   float       m_min_height_coef = 0.0f;

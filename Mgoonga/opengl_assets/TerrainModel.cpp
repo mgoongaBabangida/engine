@@ -4,6 +4,8 @@
 #include "TerrainMesh.h"
 #include "Texture.h"
 
+#include <math/Camera.h>
+
 #include <algorithm>
 #include<cmath> 
 
@@ -112,6 +114,8 @@ void TerrainModel::Initialize(const Texture* _diffuse,
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 1);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 2);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 3);
+		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 4);
+		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 5);
 		mesh->AssignHeights(*_heightMap, _height_scale, _max_height);
 		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth, _heightMap->mTextureHeight)->id;
 		mesh->GenerateTessellationData();
@@ -126,6 +130,8 @@ void TerrainModel::Initialize(const Texture* _diffuse,
 
 	mesh->calculatedTangent();
 	mesh->setupMesh();
+	if (m_camera)
+		mesh->SetCamera(m_camera);
 }
 
 //----------------------------------------------------------------
@@ -160,6 +166,8 @@ void TerrainModel::AddOrUpdate(glm::ivec2 _pos, glm::vec2 _offset, const Texture
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 1);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 2);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 3);
+		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 4);
+		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 5);
 		mesh->AssignHeights(*_heightMap, _height_scale, _max_height);
 		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth, _heightMap->mTextureHeight)->id;
 		mesh->GenerateTessellationData();
@@ -174,12 +182,22 @@ void TerrainModel::AddOrUpdate(glm::ivec2 _pos, glm::vec2 _offset, const Texture
 
 	mesh->calculatedTangent();
 	mesh->setupMesh();
+	if (m_camera)
+		mesh->SetCamera(m_camera);
 }
 
 //----------------------------------------------------------------
 void TerrainModel::EnableTessellation(bool _enable)
 {
 	m_tessellation_enabled = _enable;
+}
+
+//----------------------------------------------------------------
+void TerrainModel::SetCamera(Camera* _camera)
+{
+	m_camera = _camera;
+	for (auto* mesh : m_meshes)
+		mesh->SetCamera(_camera);
 }
 
 //----------------------------------------------------------------
@@ -208,15 +226,24 @@ void TerrainModel::Draw()
 		glBindTextureUnit(12, m_albedo_texture_array->id);
 	}
 
-	if (!m_tessellation_enabled)
-	{
+	std::vector<TerrainMesh*> rendered_meshes;
+	if (m_camera)
+	 {
 		for (auto* mesh : m_meshes)
-			mesh->Draw();
+		{
+			if(m_camera->getCameraRay().IsInFrustum(mesh->GetExtrems()))
+				rendered_meshes.push_back(mesh);
+		}
 	}
 	else
+		rendered_meshes = m_meshes;
+
+	for (auto* mesh : rendered_meshes)
 	{
-		for (auto* mesh : m_meshes)
-			mesh->DrawTessellated();
+		if (!m_tessellation_enabled)
+				mesh->Draw();
+		else
+				mesh->DrawTessellated();
 	}
 }
 
@@ -270,6 +297,15 @@ glm::vec3 TerrainModel::GetNormal(float x, float z)
 			return vert->Normal;
 	}
 	return glm::vec3();
+}
+
+//----------------------------------------------------------------
+std::vector<std::vector<glm::vec3>> TerrainModel::GetExtremsOfMeshesLocalSpace() const
+{
+	std::vector<std::vector<glm::vec3>> ret;
+	for (auto& mesh : m_meshes)
+		ret.push_back(mesh->GetExtrems());
+	return ret;
 }
 
 //----------------------------------------------------------------

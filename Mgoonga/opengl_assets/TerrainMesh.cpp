@@ -1,12 +1,34 @@
 #include "stdafx.h"
 
 #include "TerrainMesh.h"
+#include <math/Camera.h>
 
 //---------------------------------------------------
 TerrainMesh::TerrainMesh(const std::string& _name)
   : MyMesh(_name) , m_position(0, 0), m_world_offset(0, 0)
 {
 	m_normalMap = Texture::GetTexture1x1(TColor::BLUE);
+}
+
+//----------------------------------------------------------------------------
+void TerrainMesh::Draw()
+{
+	if (m_camera && indicesLods.size() > 1)
+	{
+		glm::vec3 center = glm::vec3((m_maxX - (m_maxX - m_minX) / 2),
+																  m_maxY,
+																 (m_maxZ - (m_maxZ - m_minZ) / 2));
+		float dist = glm::length(m_camera->getPosition() - center);
+		for (unsigned int i = indicesLods.size(); i > 0; --i)
+		{
+			if (dist >= m_LOD_Step * i)
+			{
+				SwitchLOD(i);
+				break;
+			}
+		}
+	}
+	MyMesh::Draw();
 }
 
 //----------------------------------------------------------------------------
@@ -97,6 +119,82 @@ void TerrainMesh::MakePlaneIndices(unsigned int _dimensions)
 	}
 }
 
+
+//-----------------------------------------------------------------------------------------------
+void TerrainMesh::SetCamera(Camera* _camera)
+{
+	m_camera = _camera;
+}
+
+//-----------------------------------------------------------------------------------------------
+std::vector<glm::mat3> TerrainMesh::GetBoundingTriangles() const
+{
+	std::vector<glm::mat3> ret; // Getting 12 triangles of the bouning cube
+	ret.push_back(glm::mat3(glm::vec3(m_maxX, m_maxY, m_minZ),
+		glm::vec3(m_minX, m_maxY, m_maxZ),
+		glm::vec3(m_maxX, m_maxY, m_maxZ)));
+
+	ret.push_back(glm::mat3(glm::vec3(m_maxX, m_maxY, m_minZ),
+		glm::vec3(m_minX, m_maxY, m_minZ),
+		glm::vec3(m_minX, m_maxY, m_maxZ)));
+
+	ret.push_back(glm::mat3(glm::vec3(m_maxX, m_minY, m_minZ),
+		glm::vec3(m_minX, m_minY, m_maxZ),
+		glm::vec3(m_maxX, m_minY, m_maxZ)));
+
+	ret.push_back(glm::mat3(glm::vec3(m_maxX, m_minY, m_minZ),
+		glm::vec3(m_minX, m_minY, m_minZ),
+		glm::vec3(m_minX, m_minY, m_maxZ)));
+
+	ret.push_back(glm::mat3(glm::vec3(m_minX, m_maxY, m_maxZ),
+		glm::vec3(m_minX, m_minY, m_maxZ),
+		glm::vec3(m_maxX, m_minY, m_maxZ)));
+
+	ret.push_back(glm::mat3(glm::vec3(m_minX, m_maxY, m_maxZ),
+		glm::vec3(m_maxX, m_minY, m_maxZ),
+		glm::vec3(m_maxX, m_maxY, m_maxZ)));
+
+	ret.push_back(glm::mat3(glm::vec3(m_minX, m_maxY, m_minZ),
+		glm::vec3(m_minX, m_minY, m_minZ),
+		glm::vec3(m_maxX, m_minY, m_minZ)));
+
+	ret.push_back(glm::mat3(glm::vec3(m_minX, m_maxY, m_minZ),
+		glm::vec3(m_maxX, m_minY, m_minZ),
+		glm::vec3(m_maxX, m_maxY, m_minZ)));
+
+	ret.push_back(glm::mat3(glm::vec3(m_maxX, m_maxY, m_minZ),
+		glm::vec3(m_maxX, m_minY, m_minZ),
+		glm::vec3(m_maxX, m_minY, m_maxZ)));
+
+	ret.push_back(glm::mat3(glm::vec3(m_maxX, m_maxY, m_minZ),
+		glm::vec3(m_maxX, m_minY, m_maxZ),
+		glm::vec3(m_maxX, m_maxY, m_maxZ)));
+
+	ret.push_back(glm::mat3(glm::vec3(m_minX, m_maxY, m_minZ),
+		glm::vec3(m_minX, m_minY, m_minZ),
+		glm::vec3(m_minX, m_minY, m_maxZ)));
+
+	ret.push_back(glm::mat3(glm::vec3(m_minX, m_maxY, m_minZ),
+		glm::vec3(m_minX, m_minY, m_maxZ),
+		glm::vec3(m_minX, m_maxY, m_maxZ)));
+	return ret;
+}
+
+//-------------------------------------------------------------------------------
+std::vector<glm::vec3> TerrainMesh::GetExtrems() const
+{
+	std::vector<glm::vec3> ret;
+	ret.push_back(glm::vec3(m_maxX, m_maxY, m_maxZ));
+	ret.push_back(glm::vec3(m_maxX, m_maxY, m_minZ));
+	ret.push_back(glm::vec3(m_minX, m_maxY, m_minZ));
+	ret.push_back(glm::vec3(m_minX, m_maxY, m_maxZ));
+	ret.push_back(glm::vec3(m_maxX, m_minY, m_maxZ));
+	ret.push_back(glm::vec3(m_maxX, m_minY, m_minZ));
+	ret.push_back(glm::vec3(m_minX, m_minY, m_minZ));
+	ret.push_back(glm::vec3(m_minX, m_minY, m_maxZ));
+	return ret;
+}
+
 //-----------------------------------------------------------------------------------------------
 void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, float _max_height)
 {
@@ -112,6 +210,10 @@ void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, 
 		{
 			float height = (float)(buffer[i] * _height_scale);
 			this->vertices[i / 4].Position.y = height <= _max_height ? height : _max_height;
+			if (this->vertices[i / 4].Position.y < m_minY)
+				m_minY = this->vertices[i / 4].Position.y;
+			if (this->vertices[i / 4].Position.y > m_maxY)
+				m_maxY = this->vertices[i / 4].Position.y;
 		}
 		delete[] buffer;
 	}
@@ -126,6 +228,10 @@ void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, 
 		{
 			float height = (float)(buffer[i] * _height_scale);
 			this->vertices[i].Position.y = height <= _max_height ? height : _max_height;
+			if (this->vertices[i / 4].Position.y < m_minY)
+				m_minY = this->vertices[i / 4].Position.y;
+			if (this->vertices[i / 4].Position.y > m_maxY)
+				m_maxY = this->vertices[i / 4].Position.y;
 		}
 		delete[] buffer;
 	}

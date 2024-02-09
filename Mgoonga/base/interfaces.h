@@ -184,6 +184,7 @@ public:
 	virtual ~ITerrainModel() = default;
 	virtual float			GetHeight(float, float) = 0;
 	virtual glm::vec3	GetNormal(float, float) = 0;
+	virtual std::vector<std::vector<glm::vec3>>	GetExtremsOfMeshesLocalSpace() const = 0;
 };
 
 //-----------------------------------------------------------------------------------------------

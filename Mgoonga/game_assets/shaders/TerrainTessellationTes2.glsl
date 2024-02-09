@@ -7,6 +7,9 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
+uniform float height_scale = 7.0f;
+uniform float max_height = 7.0f;
+
 in vec2 TextureCoord[];
 
 out float Height;
@@ -26,6 +29,9 @@ void main()
     vec2 texCoord = (t1 - t0) * v + t0;
 
     Height = texture(heightMap, texCoord).x;
+    Height *= height_scale;
+    if(Height > max_height)
+	Height = max_height;
 
     vec4 p00 = gl_in[0].gl_Position;
     vec4 p01 = gl_in[1].gl_Position;
