@@ -25,6 +25,7 @@ public:
 
 	std::vector<glm::mat3>	GetBoundingTriangles() const;
 	std::vector<glm::vec3>	GetExtrems() const;
+	glm::vec3								GetCenter() const;
 
 	void										AssignHeights(const Texture& heightMap, float _height_scale = 1.0f, float _max_height = 1.0f);
 
@@ -37,16 +38,25 @@ public:
 	Texture*								GenerateNormals(GLuint rows, GLuint columns);
 	Texture*								GenerateNormals(GLuint size);
 
+	GLuint									GetNormalMapId() const { return m_normalMap.id; }
+
   std::optional<Vertex>		FindVertex(float x, float z);
 
-	GLuint		m_size		= 0;
-	GLuint		m_rows		= 0;
-	GLuint		m_columns = 0;
+	GLuint		Size() const { return m_size; }
+	GLuint		Rows() const { return m_rows; }
+	GLuint		Columns() const { return m_columns; }
+
 protected:
+	void _GenerateNormalMap(const GLfloat* _heightmap, unsigned int _width, unsigned int _height);
+
 	Texture				m_heightMap;
 	Texture				m_normalMap;
 
-  unsigned int	m_devisor = 100;
+	GLuint		m_size = 0;
+	GLuint		m_rows = 0;
+	GLuint		m_columns = 0;
+
+  unsigned int	m_devisor = 10;
 	glm::ivec2		m_position;
 	glm::vec2			m_world_offset;
 	float					m_LOD_Step = 1.5f;

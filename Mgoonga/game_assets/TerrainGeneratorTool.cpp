@@ -31,7 +31,7 @@ TerrainGeneratorTool::TerrainGeneratorTool(eMainContextBase* _game,
 	, m_imgui(_imgui)
 {
 	for (auto& s : m_texture_scale)
-		s = 9.0f;
+		s = 3.0f;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -47,6 +47,10 @@ void TerrainGeneratorTool::Initialize()
 	_GenerateFallOffMap();
 
 	m_noise_map.resize(m_width * m_height);
+	m_octaves_buffer.resize(m_octaves);
+	for (auto& octave_buffer : m_octaves_buffer)
+		octave_buffer.resize(m_width * m_height);
+
 	_GenerateNoiseMap(m_width, m_height, m_scale, m_octaves, m_persistance, m_lacunarity, m_noise_offset, m_seed);
 	m_noise_texture.TextureFromBuffer<GLfloat>(&m_noise_map[0], m_width, m_height, GL_RED);
 
@@ -71,6 +75,7 @@ void TerrainGeneratorTool::Initialize()
 	//m_terrain->SetPickable(false);
 	m_game->AddObject(m_terrain);
 
+	//@todo delete duplication
 	int counter = 0;
 	for (const auto& type : m_terrain_types)
 	{
@@ -81,10 +86,29 @@ void TerrainGeneratorTool::Initialize()
 		m_pipeline.get().SetUniformData("class ePhongRender",
 			"textureScale[" + std::to_string(counter) + "]",
 			m_texture_scale[counter]);
+
 		++counter;
 	}
 
 	m_pipeline.get().SetUniformData("class ePhongRender",
+		"base_start_heights[" + std::to_string(counter) + "]",
+		1.0f);
+
+	counter = 0;
+	for (const auto& type : m_terrain_types)
+	{
+		m_pipeline.get().SetUniformData("class eTerrainTessellatedRender",
+			"base_start_heights[" + std::to_string(counter) + "]",
+			type.threshold_start);
+
+		m_pipeline.get().SetUniformData("class eTerrainTessellatedRender",
+			"textureScale[" + std::to_string(counter) + "]",
+			m_texture_scale[counter]);
+
+		++counter;
+	}
+
+	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender",
 		"base_start_heights[" + std::to_string(counter) + "]",
 		1.0f);
 
@@ -206,6 +230,7 @@ void TerrainGeneratorTool::Initialize()
 
 	m_initialized = true;
 
+	m_terrain_pointer->SetCamera(&m_game->GetMainCamera());
 	if (true)
 	{
 		_UpdateCurrentMesh();
@@ -222,9 +247,10 @@ void TerrainGeneratorTool::Initialize()
 				m_noise_offset.y = y * ((int)m_height);
 				Update(0);
 		}
-		m_terrain_pointer->SetCamera(&m_game->GetMainCamera());
 		m_auto_update = false;
 	}
+
+	m_imgui->Add(TEXTURE, "Normal map", (void*)m_terrain_pointer->GetMaterial()->normal_texture_id);
 }
 
 //-----------------------------------------------------------------------------
@@ -242,9 +268,9 @@ void TerrainGeneratorTool::Update(float _tick)
 		static float last_scale = m_scale;
 		static float last_persistance = m_persistance;
 		static float last_lacunarirty = m_lacunarity;
-		static glm::vec2 noise_offset = { 0.0f, 0.0f };
-		static GLuint octaves = 4;
-		static GLuint seed = 1;
+		static glm::vec2 noise_offset = m_noise_offset;
+		static GLuint octaves = m_octaves;
+		static GLuint seed = m_seed;
 		static float last_height_scale = m_height_scale;
 		static bool use_falloff = false;
 		static bool use_curve = false;
@@ -263,6 +289,11 @@ void TerrainGeneratorTool::Update(float _tick)
 			m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[1]", m_texture_scale[1]);
 			m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[2]", m_texture_scale[2]);
 			m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[3]", m_texture_scale[3]);
+
+			m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "textureScale[0]", m_texture_scale[0]);
+			m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "textureScale[1]", m_texture_scale[1]);
+			m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "textureScale[2]", m_texture_scale[2]);
+			m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "textureScale[3]", m_texture_scale[3]);
 		}
 
 		if (m_noise_texture.mTextureWidth != m_width ||
@@ -278,16 +309,21 @@ void TerrainGeneratorTool::Update(float _tick)
 				use_curve != m_use_curve)
 		{
 			m_noise_map.resize(m_width * m_height);
+			m_octaves_buffer.resize(m_octaves);
+			for (auto& octave_buffer : m_octaves_buffer)
+				octave_buffer.resize(m_width * m_height);
+
 			_GenerateNoiseMap(m_width, m_height, m_scale, m_octaves, m_persistance, m_lacunarity, m_noise_offset, m_seed);
 
 			//update noise texture
 			m_noise_texture.mTextureWidth = m_width;
 			m_noise_texture.mTextureHeight = m_height;
+			m_noise_texture.mChannels = 1;
 			glBindTexture(GL_TEXTURE_2D, m_noise_texture.id);
 			glTexStorage2D(GL_TEXTURE_2D, 1, GL_RED, m_width, m_height);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_FLOAT, &m_noise_map[0]);
 			glBindTexture(GL_TEXTURE_2D, 0);
-
+			m_noise_texture.saveToFile("noise_terrain.jpg", GL_TEXTURE_2D, GL_RED, GL_FLOAT);
 			//update color texture
 			_GenerateColorMap();
 			m_color_texture.TextureFromBuffer<GLfloat>(&m_color_map[0].x, m_width, m_height, GL_RGBA);
@@ -347,60 +383,88 @@ void TerrainGeneratorTool::_GenerateNoiseMap(GLuint _width, GLuint _height, floa
 	static float maxHeight = -100'000.0f; // float min
 	static bool update_max_heights = true;
 
-	float halfWidth = _width / 2;
-	float halfHeight = _height / 2;
+	// launch master thread not to block the main thread
+	/*std::function<bool()> main_func = [this, _octaves, _persistance, _lacunarity, _height, _width, _scale, 
+																		 octaveOffsets]()->bool
+	{*/
+		float halfWidth = _width / 2;
+		float halfHeight = _height / 2;
 
-	for (uint32_t row = 0; row < _height; ++row)
-	{
-		for (uint32_t col = 0; col < _width; ++col)
+		float amplitude = 1.0f;
+		float frequency = 1.0f;
+
+		std::vector<std::future<bool>> m_tasks;
+		// launch async task for every octave
+		for (uint32_t octave = 0; octave < _octaves; ++octave)
 		{
-			float amplitude = 1.0f;
-			float frequency = 1.0f;
-			float noiseHeight = 0.0f;
-
-			for (uint32_t i = 0; i < _octaves; ++i)
+			std::function<bool()> func = [this, amplitude, frequency, halfWidth, halfHeight,
+				octave, _height, _width, _scale, octaveOffsets]()->bool
 			{
-				float sampleX = (col - halfWidth + octaveOffsets[i].x) / _scale * frequency;
-				float sampleY = (row - halfHeight + octaveOffsets[i].y) / _scale * frequency;
-				float perlinValue = glm::perlin(glm::vec2{sampleX,sampleY}) * 2.0f - 1.0f;
-				noiseHeight += perlinValue * amplitude;
-
-				amplitude *= _persistance;
-				frequency *= _lacunarity;
-			}
-
-			if (update_max_heights)
-			{
-				if (noiseHeight > maxHeight)
-					maxHeight = noiseHeight;
-				if (noiseHeight < minHeight)
-					minHeight = noiseHeight;
-			}
-
-			m_noise_map[row * _width + col] = noiseHeight;
+				for (uint32_t row = 0; row < _height; ++row)
+				{
+					for (uint32_t col = 0; col < _width; ++col)
+					{
+						float sampleX = (col - halfWidth + octaveOffsets[octave].x) / _scale * frequency;
+						float sampleY = (row - halfHeight + octaveOffsets[octave].y) / _scale * frequency;
+						float perlinValue = glm::perlin(glm::vec2{ sampleX, sampleY }) * 2.0f - 1.0f;
+						m_octaves_buffer[octave][row * _width + col] = perlinValue * amplitude;
+					}
+				}
+				return true;
+			};
+			m_tasks.emplace_back(std::async(func));
+			amplitude *= _persistance;
+			frequency *= _lacunarity;
 		}
-	}
 
-	dbb::Bezier interpolation_curve_normalized;
-	interpolation_curve_normalized.p0 = { (m_interpolation_curve.p0.x + 1.0f) / 2.0f, (m_interpolation_curve.p0.y + 1.0f) / 2.0f, 0.0f }; // ( +1) /2 from -1 1 to 0 1
-	interpolation_curve_normalized.p1 = { (m_interpolation_curve.p1.x + 1.0f) / 2.0f, (m_interpolation_curve.p1.y + 1.0f) / 2.0f, 0.0f };
-	interpolation_curve_normalized.p2 = { (m_interpolation_curve.p2.x + 1.0f) / 2.0f, (m_interpolation_curve.p2.y + 1.0f) / 2.0f, 0.0f };
-	interpolation_curve_normalized.p3 = { (m_interpolation_curve.p3.x + 1.0f) / 2.0f, (m_interpolation_curve.p3.y + 1.0f) / 2.0f, 0.0f };
-	//noise values should be normalized
-	for (auto& val : m_noise_map)
-	{
-		val = InverseLerp(maxHeight, minHeight, val);
-		if (m_use_curve)
+		//wait for the tasks
+		for (auto& fut : m_tasks)
 		{
-			val = dbb::GetPoint(interpolation_curve_normalized, val).y;
+			fut.get();
 		}
-	}
 
-	if (m_apply_falloff)
-		for (int i = 0; i < m_noise_map.size(); ++i)
-			m_noise_map[i] = glm::clamp(m_noise_map[i] - m_falloff_map[i], 0.f, 1.f);
+		//sum up all the octaves
+		for (uint32_t i = 0; i < _octaves; ++i)
+			for (uint32_t row = 0; row < _height; ++row)
+				for (uint32_t col = 0; col < _width; ++col)
+					m_noise_map[row * _width + col] += m_octaves_buffer[i][row * _width + col];
 
-	update_max_heights = false;
+		if (update_max_heights)
+		{
+			for (uint32_t i = 0; i < m_noise_map.size(); ++i)
+			{
+				if (m_noise_map[i] > maxHeight)
+					maxHeight = m_noise_map[i];
+				if (m_noise_map[i] < minHeight)
+					minHeight = m_noise_map[i];
+			}
+		}
+
+		dbb::Bezier interpolation_curve_normalized;
+		interpolation_curve_normalized.p0 = { (m_interpolation_curve.p0.x + 1.0f) / 2.0f, (m_interpolation_curve.p0.y + 1.0f) / 2.0f, 0.0f }; // ( +1) /2 from -1 1 to 0 1
+		interpolation_curve_normalized.p1 = { (m_interpolation_curve.p1.x + 1.0f) / 2.0f, (m_interpolation_curve.p1.y + 1.0f) / 2.0f, 0.0f };
+		interpolation_curve_normalized.p2 = { (m_interpolation_curve.p2.x + 1.0f) / 2.0f, (m_interpolation_curve.p2.y + 1.0f) / 2.0f, 0.0f };
+		interpolation_curve_normalized.p3 = { (m_interpolation_curve.p3.x + 1.0f) / 2.0f, (m_interpolation_curve.p3.y + 1.0f) / 2.0f, 0.0f };
+		
+		//noise values should be normalized
+		for (auto& val : m_noise_map)
+		{
+			val = InverseLerp(maxHeight, minHeight, val);
+			if (m_use_curve)
+			{
+				val = dbb::GetPoint(interpolation_curve_normalized, val).y;
+			}
+		}
+
+		if (m_apply_falloff)
+			for (int i = 0; i < m_noise_map.size(); ++i)
+				m_noise_map[i] = glm::clamp(m_noise_map[i] - m_falloff_map[i], 0.f, 1.f);
+
+		update_max_heights = false;
+	/*	return true;
+	};
+
+	m_generat_noise_task = std::async(main_func);*/
 }
 
 //-----------------------------------------------------------------------------
@@ -441,6 +505,10 @@ void TerrainGeneratorTool::_UpdateCurrentMesh()
 		m_pipeline.get().SetUniformData("class ePhongRender", "min_height", 0.0f);
 		m_pipeline.get().SetUniformData("class ePhongRender", "max_height", m_height_scale);
 		m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[0]", m_texture_scale[0]);
+
+		m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "min_height", 0.0f);
+		m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "max_height", m_height_scale);
+		m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "textureScale[0]", m_texture_scale[0]);
 	}
 }
 
@@ -461,6 +529,10 @@ void TerrainGeneratorTool::_AddCurrentMesh()
 		m_pipeline.get().SetUniformData("class ePhongRender", "min_height", 0.0f);
 		m_pipeline.get().SetUniformData("class ePhongRender", "max_height", m_height_scale);
 		m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[0]", m_texture_scale[0]);
+
+		m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "min_height", 0.0f);
+		m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "max_height", m_height_scale);
+		m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "textureScale[0]", m_texture_scale[0]);
 	}
 }
 

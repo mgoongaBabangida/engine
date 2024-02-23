@@ -35,9 +35,6 @@ TerrainModel::TerrainModel(Texture* diffuse,
 
 	m_meshes.push_back(new TerrainMesh("terrain0 0"));
 	TerrainMesh* mesh = m_meshes.back();
-	mesh->m_size = heightMap->mTextureHeight;
-	mesh->m_rows = heightMap->mTextureWidth;
-	mesh->m_columns = heightMap->mTextureHeight;
 	
 	mesh->MakePlaneVerts(heightMap->mTextureWidth,heightMap->mTextureHeight, false);
 	mesh->MakePlaneIndices(heightMap->mTextureWidth, heightMap->mTextureHeight);
@@ -60,10 +57,9 @@ TerrainModel::TerrainModel(Texture* color)
 
 	m_meshes.push_back(new TerrainMesh("terrain0 0"));
 	TerrainMesh* mesh = m_meshes.back();
-	mesh->m_size = 10;
 	mesh->MakePlaneVerts(10);
 	mesh->MakePlaneIndices(10);
-	m_material.normal_texture_id = mesh->GenerateNormals(mesh->m_size)->id;
+	m_material.normal_texture_id = mesh->GenerateNormals(10)->id;
 	mesh->setupMesh();
 	mesh->calculatedTangent();
 }
@@ -105,27 +101,22 @@ void TerrainModel::Initialize(const Texture* _diffuse,
 	{
 		m_height = *_heightMap;
 
-		mesh->m_size = _heightMap->mTextureHeight;
-		mesh->m_rows = _heightMap->mTextureWidth;
-		mesh->m_columns = _heightMap->mTextureHeight;
-
-		mesh->MakePlaneVerts(_heightMap->mTextureWidth, _heightMap->mTextureHeight, spreed_texture);
+		mesh->MakePlaneVerts(_heightMap->mTextureWidth / 16, _heightMap->mTextureHeight / 16, spreed_texture);
 		//@todo make lod number outside
-		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 1);
-		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 2);
+		mesh->MakePlaneIndices(_heightMap->mTextureWidth / 16, _heightMap->mTextureHeight / 16, 1);
+		/*mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 2);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 3);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 4);
-		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 5);
+		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 5);*/
 		mesh->AssignHeights(*_heightMap, _height_scale, _max_height);
-		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth, _heightMap->mTextureHeight)->id;
+		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth / 16, _heightMap->mTextureHeight / 16)->id;
 		mesh->GenerateTessellationData();
 	}
 	else
 	{
-		mesh->m_size = _diffuse->mTextureHeight;
 		mesh->MakePlaneVerts(_diffuse->mTextureHeight, _diffuse->mTextureHeight, spreed_texture);
 		mesh->MakePlaneIndices(_diffuse->mTextureHeight);
-		m_material.normal_texture_id = mesh->GenerateNormals(mesh->m_size)->id;
+		m_material.normal_texture_id = mesh->GenerateNormals(mesh->Size() / 16)->id;
 	}
 
 	mesh->calculatedTangent();
@@ -157,27 +148,22 @@ void TerrainModel::AddOrUpdate(glm::ivec2 _pos, glm::vec2 _offset, const Texture
 	{
 		m_height = *_heightMap;
 
-		mesh->m_size = _heightMap->mTextureHeight;
-		mesh->m_rows = _heightMap->mTextureWidth;
-		mesh->m_columns = _heightMap->mTextureHeight;
-
-		mesh->MakePlaneVerts(_heightMap->mTextureWidth, _heightMap->mTextureHeight, spreed_texture);
+		mesh->MakePlaneVerts(_heightMap->mTextureWidth / 16, _heightMap->mTextureHeight / 16, spreed_texture);
 		//@todo make lod number outside
-		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 1);
-		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 2);
+		mesh->MakePlaneIndices(_heightMap->mTextureWidth / 16, _heightMap->mTextureHeight / 16, 1);
+		/*mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 2);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 3);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 4);
-		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 5);
+		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 5);*/
 		mesh->AssignHeights(*_heightMap, _height_scale, _max_height);
-		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth, _heightMap->mTextureHeight)->id;
+		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth / 16, _heightMap->mTextureHeight / 16)->id;
 		mesh->GenerateTessellationData();
 	}
 	else
 	{
-		mesh->m_size = _diffuse->mTextureHeight;
 		mesh->MakePlaneVerts(_diffuse->mTextureHeight, _diffuse->mTextureHeight, spreed_texture);
 		mesh->MakePlaneIndices(_diffuse->mTextureHeight);
-		m_material.normal_texture_id = mesh->GenerateNormals(mesh->m_size)->id;
+		m_material.normal_texture_id = mesh->GenerateNormals(mesh->Size() / 16)->id;
 	}
 
 	mesh->calculatedTangent();
@@ -231,8 +217,12 @@ void TerrainModel::Draw()
 	 {
 		for (auto* mesh : m_meshes)
 		{
-			if(m_camera->getCameraRay().IsInFrustum(mesh->GetExtrems()))
+			auto extrems = mesh->GetExtrems();
+			extrems.emplace_back(mesh->GetCenter());
+			if (m_camera->getCameraRay().IsInFrustum(extrems))
 				rendered_meshes.push_back(mesh);
+			else
+				continue; //out of frust
 		}
 	}
 	else

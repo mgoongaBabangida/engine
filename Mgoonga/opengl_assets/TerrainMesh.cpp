@@ -19,7 +19,7 @@ void TerrainMesh::Draw()
 																  m_maxY,
 																 (m_maxZ - (m_maxZ - m_minZ) / 2));
 		float dist = glm::length(m_camera->getPosition() - center);
-		for (unsigned int i = indicesLods.size(); i > 0; --i)
+		for (size_t i = indicesLods.size(); i > 0; --i)
 		{
 			if (dist >= m_LOD_Step * i)
 			{
@@ -34,6 +34,9 @@ void TerrainMesh::Draw()
 //----------------------------------------------------------------------------
 void TerrainMesh::MakePlaneVerts(unsigned int _dimensions, bool _spreed_texture)
 {
+	m_rows = _dimensions;
+	m_columns = _dimensions;
+	m_size = _dimensions;
 	this->vertices.resize(_dimensions * _dimensions);
 	int half = _dimensions / 2;
 	for (int i = 0; i < _dimensions; i++)
@@ -63,6 +66,8 @@ void TerrainMesh::MakePlaneVerts(unsigned int _dimensions, bool _spreed_texture)
 //---------------------------------------------------------------------------
 void TerrainMesh::MakePlaneVerts(unsigned int _rows, unsigned int _columns, bool _spreed_texture)
 {
+	m_rows = _rows;
+	m_columns = _columns;
 	this->vertices.resize(_rows * _columns);
 	int half_r = (_rows) / 2;
 	int half_c = (_columns) / 2;
@@ -118,7 +123,6 @@ void TerrainMesh::MakePlaneIndices(unsigned int _dimensions)
 		}
 	}
 }
-
 
 //-----------------------------------------------------------------------------------------------
 void TerrainMesh::SetCamera(Camera* _camera)
@@ -180,7 +184,7 @@ std::vector<glm::mat3> TerrainMesh::GetBoundingTriangles() const
 	return ret;
 }
 
-//-------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------
 std::vector<glm::vec3> TerrainMesh::GetExtrems() const
 {
 	std::vector<glm::vec3> ret;
@@ -196,16 +200,22 @@ std::vector<glm::vec3> TerrainMesh::GetExtrems() const
 }
 
 //-----------------------------------------------------------------------------------------------
+glm::vec3 TerrainMesh::GetCenter() const
+{
+	return glm::vec3(m_maxX - glm::length(m_maxX - m_minX) / 2,
+									 m_maxY - glm::length(m_maxY - m_minY) / 2,
+									 m_maxZ - glm::length(m_maxZ - m_minZ) / 2);
+}
+
+//-----------------------------------------------------------------------------------------------
 void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, float _max_height)
 {
 	glBindTexture(GL_TEXTURE_2D, _heightMap.id);
 	if (_heightMap.mChannels == 4)
 	{
 		GLfloat* buffer = new GLfloat[_heightMap.mTextureHeight * _heightMap.mTextureWidth * 4];
-
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buffer);
 		m_heightMap.TextureFromBuffer((GLfloat*)buffer, _heightMap.mTextureWidth, _heightMap.mTextureHeight, GL_RGBA, GL_REPEAT, GL_LINEAR);
-		int counter = 0;
 		for (int i = 0; i < _heightMap.mTextureHeight * _heightMap.mTextureWidth * 4; i += 4)
 		{
 			float height = (float)(buffer[i] * _height_scale);
@@ -219,21 +229,43 @@ void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, 
 	}
 	else if (_heightMap.mChannels == 1)
 	{
-		GLfloat* buffer = new GLfloat[_heightMap.mTextureHeight * _heightMap.mTextureWidth];
+			GLfloat* buffer = new GLfloat[_heightMap.mTextureHeight * _heightMap.mTextureWidth];
+			glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, buffer);
+			m_heightMap.TextureFromBuffer((GLfloat*)buffer, _heightMap.mTextureWidth, _heightMap.mTextureHeight, GL_RED, GL_REPEAT, GL_LINEAR);
+			if (_heightMap.mTextureHeight == m_rows && _heightMap.mTextureWidth == m_columns)
+			{
+				for (int i = 0; i < _heightMap.mTextureHeight * _heightMap.mTextureWidth; ++i)
+				{
+					float height = (float)(buffer[i] * _height_scale);
+					this->vertices[i].Position.y = height <= _max_height ? height : _max_height;
 
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, buffer);
-		m_heightMap.TextureFromBuffer((GLfloat*)buffer, _heightMap.mTextureWidth, _heightMap.mTextureHeight, GL_RED, GL_REPEAT, GL_LINEAR);
-		int counter = 0;
-		for (int i = 0; i < _heightMap.mTextureHeight * _heightMap.mTextureWidth; ++i)
-		{
-			float height = (float)(buffer[i] * _height_scale);
-			this->vertices[i].Position.y = height <= _max_height ? height : _max_height;
-			if (this->vertices[i / 4].Position.y < m_minY)
-				m_minY = this->vertices[i / 4].Position.y;
-			if (this->vertices[i / 4].Position.y > m_maxY)
-				m_maxY = this->vertices[i / 4].Position.y;
-		}
-		delete[] buffer;
+					if (this->vertices[i].Position.y < m_minY)
+						m_minY = this->vertices[i].Position.y;
+					if (this->vertices[i].Position.y > m_maxY)
+						m_maxY = this->vertices[i].Position.y;
+				}
+			}
+			else
+			{
+				unsigned int height_map_res_ratio = _heightMap.mTextureHeight / m_rows;
+				for (int col = 0; col < m_columns; ++col)
+				{
+					for (int row = 0; row < m_rows; ++row)
+					{
+						unsigned int index = col * _heightMap.mTextureWidth * height_map_res_ratio + row * height_map_res_ratio; // or mTextureHeight ??
+
+						float height = buffer[index] * _height_scale;
+						this->vertices[col* m_columns + row].Position.y = (height <= _max_height ? height : _max_height);
+
+						if (this->vertices[col * m_columns + row].Position.y < m_minY)
+							m_minY = this->vertices[col * m_columns + row].Position.y;
+						if (this->vertices[col * m_columns + row].Position.y > m_maxY)
+							m_maxY = this->vertices[col * m_columns + row].Position.y;
+					}
+				}
+			}
+			_GenerateNormalMap(buffer, _heightMap.mTextureWidth, _heightMap.mTextureHeight);
+			delete[] buffer;
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -358,6 +390,7 @@ void TerrainMesh::GenerateTessellationData()
 	if (this->indicesLods.empty())
 		return;
 
+	m_tessellation_data.m_vertices.reserve(indicesLods.back().size() / 6 * 20);
 	for (unsigned int i = 0; i < indicesLods.back().size(); i += 6) // take the lowest detailed mesh
 	{
 		// indices in patch quad -> 0, 1, 2, 5
@@ -406,6 +439,8 @@ void TerrainMesh::DrawTessellated()
 {
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_heightMap.id);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, m_normalMap.id);
 	glPatchParameteri(GL_PATCH_VERTICES, 4/* num pointsin patch*/);
 	glBindVertexArray(m_tessellation_data.m_terrainVAO);
 	glDrawArrays(GL_PATCHES, 0, 4/* num pointsin patch*/ * (m_tessellation_data.m_vertices.size()/5));
@@ -425,4 +460,34 @@ std::optional<Vertex> TerrainMesh::FindVertex(float _x, float _z)
 		return *vert;
 	else
 		return std::nullopt;
+}
+
+//---------------------------------------------------------------------------
+void TerrainMesh::_GenerateNormalMap(const GLfloat* _heightmap, unsigned int _width, unsigned int _height)
+{
+	GLfloat* normalMapBuffer = new GLfloat[_width * _height * 3];
+	for (int y = 0; y < _height; ++y)
+	{
+		for (int x = 0; x < _width; ++x)
+		{
+			float hL = _heightmap[y * _width + std::max(x - 1, 0)];
+			float hR = _heightmap[y * _width + std::min((int)x + 1, (int)_width - 1)];
+			float hU = _heightmap[std::max(y - 1, 0) * _width + x];
+			float hD = _heightmap[std::min((int)y + 1, (int)_height - 1) * _width + x];
+
+			glm::vec3 normal;
+			normal.x = hL - hR;
+			normal.z = hU - hD;
+			normal.y = 0.010f; // You can adjust this value as needed for the vertical scaling
+			normal = glm::normalize(normal);
+			normal.x = (normal.x + 1.0f) / 2.0f;
+			normal.y = (normal.y + 1.0f) / 2.0f;
+			normal.z = (normal.z + 1.0f) / 2.0f;
+			normalMapBuffer[(y * _width + x) * 3] = normal.x;
+			normalMapBuffer[(y * _width + x) * 3 + 1] = normal.y;
+			normalMapBuffer[(y * _width + x) * 3 + 2] = normal.z;
+		}
+	}
+	m_normalMap.TextureFromBuffer(normalMapBuffer, _width, _height, GL_RGB, GL_REPEAT, GL_LINEAR);
+	delete[] normalMapBuffer;
 }

@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <set>
+#include <future>
 
 class IWindowImGui;
 class eMainContextBase;
@@ -41,6 +42,7 @@ protected:
 
   void _GenerateFallOffMap();
 
+  std::future<bool>        m_generat_noise_task;
   std::vector<GLfloat>     m_noise_map;
   std::vector<glm::vec4>   m_color_map;
   std::vector<GLfloat>     m_falloff_map;
@@ -50,11 +52,14 @@ protected:
   std::shared_ptr<eObject> m_terrain;
   TerrainModel*            m_terrain_pointer = nullptr;
 
+  using eOctavesHeightsBuffer = std::vector<GLfloat>;
+  std::vector<eOctavesHeightsBuffer> m_octaves_buffer;
+
   int         m_cur_pos_X = 0;
   int         m_cur_pos_Y = 0;
-  GLuint      m_width = 1025;
-  GLuint      m_height = 1025;
-  float       m_scale = 300.0f;
+  GLuint      m_width = 2048;
+  GLuint      m_height = 2048;
+  float       m_scale = 500.0f;
   GLuint      m_octaves = 12;
   float       m_persistance = 0.5f;
   float       m_lacunarity = 2.0f;
