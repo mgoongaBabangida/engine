@@ -564,34 +564,35 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 
 			if (auto* terrain = dynamic_cast<ITerrainModel*>(phong_pbr_objects[i]->GetModel()); terrain)
 			{
+				auto indexSize = extrems_total.size();
 				auto vec_of_extrems = terrain->GetExtremsOfMeshesLocalSpace();
 				for (GLuint j = 0; j < vec_of_extrems.size(); ++j)
 				{
 					extrems_total.insert(extrems_total.end(), vec_of_extrems[j].begin(), vec_of_extrems[j].end());
-					indices_total.push_back(0 + j * 8);
-					indices_total.push_back(1 + j * 8);
-					indices_total.push_back(1 + j * 8);
-					indices_total.push_back(2 + j * 8);
-					indices_total.push_back(2 + j * 8);
-					indices_total.push_back(3 + j * 8);
-					indices_total.push_back(3 + j * 8);
-					indices_total.push_back(0 + j * 8);
-					indices_total.push_back(4 + j * 8);
-					indices_total.push_back(5 + j * 8);
-					indices_total.push_back(5 + j * 8);
-					indices_total.push_back(6 + j * 8);
-					indices_total.push_back(6 + j * 8);
-					indices_total.push_back(7 + j * 8);
-					indices_total.push_back(7 + j * 8);
-					indices_total.push_back(4 + j * 8);
-					indices_total.push_back(0 + j * 8);
-					indices_total.push_back(4 + j * 8);
-					indices_total.push_back(1 + j * 8);
-					indices_total.push_back(5 + j * 8);
-					indices_total.push_back(2 + j * 8);
-					indices_total.push_back(6 + j * 8);
-					indices_total.push_back(3 + j * 8);
-					indices_total.push_back(7 + j * 8);
+					indices_total.push_back(indexSize + 0 + j * 8);
+					indices_total.push_back(indexSize + 1 + j * 8);
+					indices_total.push_back(indexSize + 1 + j * 8);
+					indices_total.push_back(indexSize + 2 + j * 8);
+					indices_total.push_back(indexSize + 2 + j * 8);
+					indices_total.push_back(indexSize + 3 + j * 8);
+					indices_total.push_back(indexSize + 3 + j * 8);
+					indices_total.push_back(indexSize + 0 + j * 8);
+					indices_total.push_back(indexSize + 4 + j * 8);
+					indices_total.push_back(indexSize + 5 + j * 8);
+					indices_total.push_back(indexSize + 5 + j * 8);
+					indices_total.push_back(indexSize + 6 + j * 8);
+					indices_total.push_back(indexSize + 6 + j * 8);
+					indices_total.push_back(indexSize + 7 + j * 8);
+					indices_total.push_back(indexSize + 7 + j * 8);
+					indices_total.push_back(indexSize + 4 + j * 8);
+					indices_total.push_back(indexSize + 0 + j * 8);
+					indices_total.push_back(indexSize + 4 + j * 8);
+					indices_total.push_back(indexSize + 1 + j * 8);
+					indices_total.push_back(indexSize + 5 + j * 8);
+					indices_total.push_back(indexSize + 2 + j * 8);
+					indices_total.push_back(indexSize + 6 + j * 8);
+					indices_total.push_back(indexSize + 3 + j * 8);
+					indices_total.push_back(indexSize + 7 + j * 8);
 				}
 			}
 			else

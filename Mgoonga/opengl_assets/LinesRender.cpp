@@ -35,6 +35,9 @@ void eLinesRender::Render(const Camera& _camera, std::vector<const LineMesh*>& _
   glm::mat4 mvp = _camera.getProjectionMatrix() * _camera.getWorldToViewMatrix() * UNIT_MATRIX;
   glUniformMatrix4fv(MVPLoc, 1, GL_FALSE, &mvp[0][0]);
 
+  if (_meshes.empty())
+    return;
+
   for (auto& mesh : _meshes)
   {
     linesShader.SetUniformData("color", mesh->GetColor());

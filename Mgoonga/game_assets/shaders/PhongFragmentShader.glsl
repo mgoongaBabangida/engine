@@ -293,7 +293,7 @@ subroutine(LightingPtr) vec3 calculateBlinnPhongDirectionalSpecDif(Light light, 
     float spec = clamp(dot(normal, halfvector), 0, 1);
     spec=pow(spec, shininess);
     vec3 specularLight = vec3(light.specular.xyz * spec * SampleSpecularTexture(Texcoords));//* material.specular
-    specularLight=clamp(specularLight,0,1);	
+    specularLight = clamp(specularLight,0,1);	
 	
     return diffuseLight + specularLight;
 }
@@ -312,7 +312,7 @@ subroutine(LightingPtr) vec3 calculateBlinnPhongFlashSpecDif(Light light, vec3 n
 void main()
 {   
   if(debug_white_texcoords)
-	outColor = vec4(emission_strength,emission_strength,emission_strength,emission_strength); 
+	outColor = vec4(emission_strength, emission_strength, emission_strength, emission_strength); 
   else if(debug_white_color)
   {
 	outColor = vec4(1.0f,1.0f,1.0f, 1.0f);

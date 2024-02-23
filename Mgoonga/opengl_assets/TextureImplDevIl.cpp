@@ -82,10 +82,10 @@ void eTextureImplDevIl::SaveToFile(const uint8_t * buffer, const std::string & _
 
 	ilEnable(IL_FILE_OVERWRITE);
 
-	// actually save out as png
-	ilSave(IL_PNG, (const wchar_t*)_path.c_str());
-	// now try saving as jpg
-	//ilSave(IL_JPG, (const wchar_t*)"output.jpg");
+	if(_path.find(".png") != std::string::npos)
+		ilSave(IL_PNG, (const wchar_t*)_path.c_str());
+	else if (_path.find(".jpg") != std::string::npos)
+		ilSave(IL_JPG, (const wchar_t*)_path.c_str());
 	// now save as bmp
 	//ilSave(IL_BMP, (const wchar_t*) "output.bmp");
 
