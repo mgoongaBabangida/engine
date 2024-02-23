@@ -149,8 +149,8 @@ namespace dbb
 		plane right(line2.M, line4.M, line2.M + line2.p);
 		plane top(line1.M, line4.M, line1.M + line1.p);
 		plane bottom(line2.M, line3.M, line2.M + line2.p);
-		plane back(line1.M, line2.M, line3.M);
-		plane front(line1.M + line1.p, line2.M + line2.p, line3.M + line3.p);
+		plane front(line1.M, line2.M, line3.M);
+		plane back(line1.M + line1.p, line2.M + line2.p, line3.M + line3.p);
 
 		for (auto& obj : _objects)
 		{
@@ -161,13 +161,15 @@ namespace dbb
 				continue;
 
 			std::vector<glm::vec3> extrems = obj->GetCollider()->GetExtrems(*(obj->GetTransform()));
+			extrems.push_back(obj->GetTransform()->getModelMatrix() * glm::vec4(obj->GetCollider()->GetCenter(), 1.0f));
+
 			for (auto& extrem : extrems)
 			{
 				if (!isOpSign(left.A * extrem.x + left.B * extrem.y + left.C * extrem.z + left.D,
 											right.A * extrem.x + right.B * extrem.y + right.C * extrem.z + right.D) &&
 					  !isOpSign(top.A * extrem.x + top.B * extrem.y + top.C * extrem.z + top.D,
 											bottom.A * extrem.x + bottom.B * extrem.y + bottom.C * extrem.z + bottom.D) &&
-						 isOpSign(back.A * extrem.x + back.B * extrem.y + back.C * extrem.z + back.D,
+						!isOpSign(back.A * extrem.x + back.B * extrem.y + back.C * extrem.z + back.D,
 											front.A * extrem.x + front.B * extrem.y + front.C * extrem.z + front.D))
 				{
 					ret.push_back(obj);
@@ -181,31 +183,36 @@ namespace dbb
 	//------------------------------------------------------------------------------------------------
 	bool	CameraRay::IsInFrustum(const std::vector<glm::vec3>& _extrems)
 	{
-		if (_extrems.size() != 8)
+		if (_extrems.size() < 8)
 			return false;  // error
 
 		const Camera& camera = m_camera.get();
 
+		// frustum corner rays
 		line  line1 = _getLine({ 0, 0 });
 		line  line2 = _getLine({ camera.getWidth(), camera.getHeight() });
 		line  line3 = _getLine(glm::vec2(0, camera.getHeight()));
 		line  line4 = _getLine(glm::vec2(camera.getWidth(), 0));
 
+		//frustum planes
 		plane left(line1.M, line3.M, line1.M + line1.p);
 		plane right(line2.M, line4.M, line2.M + line2.p);
 		plane top(line1.M, line4.M, line1.M + line1.p);
 		plane bottom(line2.M, line3.M, line2.M + line2.p);
-		plane back(line1.M, line2.M, line3.M);
-		plane front(line1.M + line1.p, line2.M + line2.p, line3.M + line3.p);
+		plane front(line1.M, line2.M, line3.M);
+		plane back(line1.M + line1.p,
+							 line2.M + line2.p,
+							 line3.M + line3.p);
 
+		//if at least one of the extrems is inside frustum box -> true
 		for (auto& extrem : _extrems)
 		{
 			if (!isOpSign(left.A * extrem.x + left.B * extrem.y + left.C * extrem.z + left.D,
-				right.A * extrem.x + right.B * extrem.y + right.C * extrem.z + right.D) &&
-				!isOpSign(top.A * extrem.x + top.B * extrem.y + top.C * extrem.z + top.D,
-					bottom.A * extrem.x + bottom.B * extrem.y + bottom.C * extrem.z + bottom.D) &&
-				isOpSign(back.A * extrem.x + back.B * extrem.y + back.C * extrem.z + back.D,
-					front.A * extrem.x + front.B * extrem.y + front.C * extrem.z + front.D))
+										right.A * extrem.x + right.B * extrem.y + right.C * extrem.z + right.D) &&
+					!isOpSign(top.A * extrem.x + top.B * extrem.y + top.C * extrem.z + top.D,
+										bottom.A * extrem.x + bottom.B * extrem.y + bottom.C * extrem.z + bottom.D) &&
+					!isOpSign(back.A * extrem.x + back.B * extrem.y + back.C * extrem.z + back.D,
+										front.A * extrem.x + front.B * extrem.y + front.C * extrem.z + front.D))
 				return true;
 		}
 		return false;
@@ -240,8 +247,8 @@ namespace dbb
 		float widthN = heightN* (camera.getWidth() / camera.getHeight());
 		float widthF = heightF* (camera.getWidth() / camera.getHeight());
 
-		glm::vec3 dot1 = glm::vec3(widthN / 2 - XOffsetCoef * widthN, heightN / 2 - YOffsetCoef * heightN, camera.getNearPlane());
-		glm::vec3 dot2 = glm::vec3(widthF / 2 - XOffsetCoef * widthF, heightF / 2 - YOffsetCoef * heightF, camera.getFarPlane());  // plus or minus Z ?
+		glm::vec3 dot1 = glm::vec3(widthN / 2 - XOffsetCoef * widthN, heightN / 2 - YOffsetCoef * heightN, -camera.getNearPlane());
+		glm::vec3 dot2 = glm::vec3(widthF / 2 - XOffsetCoef * widthF, heightF / 2 - YOffsetCoef * heightF, -camera.getFarPlane());  // plus or minus Z ?
 
 		glm::vec3 dir = dot2 - dot1;
 		line.M = m_transform.getModelMatrix() * glm::vec4(dot1, 1.0f); //origin
