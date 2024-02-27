@@ -80,7 +80,8 @@ void TerrainModel::Initialize(const Texture* _diffuse,
 														  const Texture* _heightMap,
 														  bool spreed_texture,
 															float _height_scale,
-															float _max_height)
+															float _max_height,
+															unsigned int _tessellation_coef)
 {
 	if (_diffuse != nullptr)
 		m_material.albedo_texture_id = _diffuse->id;
@@ -101,22 +102,22 @@ void TerrainModel::Initialize(const Texture* _diffuse,
 	{
 		m_height = *_heightMap;
 
-		mesh->MakePlaneVerts(_heightMap->mTextureWidth / 16, _heightMap->mTextureHeight / 16, spreed_texture);
+		mesh->MakePlaneVerts(_heightMap->mTextureWidth / _tessellation_coef, _heightMap->mTextureHeight / _tessellation_coef, spreed_texture);
 		//@todo make lod number outside
-		mesh->MakePlaneIndices(_heightMap->mTextureWidth / 16, _heightMap->mTextureHeight / 16, 1);
+		mesh->MakePlaneIndices(_heightMap->mTextureWidth / _tessellation_coef, _heightMap->mTextureHeight / _tessellation_coef, 1);
 		/*mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 2);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 3);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 4);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 5);*/
 		mesh->AssignHeights(*_heightMap, _height_scale, _max_height);
-		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth / 16, _heightMap->mTextureHeight / 16)->id;
+		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth / _tessellation_coef, _heightMap->mTextureHeight / _tessellation_coef)->id;
 		mesh->GenerateTessellationData();
 	}
 	else
 	{
 		mesh->MakePlaneVerts(_diffuse->mTextureHeight, _diffuse->mTextureHeight, spreed_texture);
 		mesh->MakePlaneIndices(_diffuse->mTextureHeight);
-		m_material.normal_texture_id = mesh->GenerateNormals(mesh->Size() / 16)->id;
+		m_material.normal_texture_id = mesh->GenerateNormals(mesh->Size() / _tessellation_coef)->id;
 	}
 
 	mesh->calculatedTangent();
@@ -126,7 +127,14 @@ void TerrainModel::Initialize(const Texture* _diffuse,
 }
 
 //----------------------------------------------------------------
-void TerrainModel::AddOrUpdate(glm::ivec2 _pos, glm::vec2 _offset, const Texture* _diffuse, const Texture* _heightMap, bool spreed_texture, float _height_scale, float _max_height)
+void TerrainModel::AddOrUpdate(glm::ivec2 _pos, 
+															 glm::vec2 _offset,
+															 const Texture* _diffuse,
+															 const Texture* _heightMap,
+															 bool spreed_texture,
+															 float _height_scale,
+															 float _max_height,
+															 unsigned int _tessellation_coef)
 {
 	TerrainMesh* mesh = nullptr;
 	for (auto* m : m_meshes)
@@ -148,22 +156,22 @@ void TerrainModel::AddOrUpdate(glm::ivec2 _pos, glm::vec2 _offset, const Texture
 	{
 		m_height = *_heightMap;
 
-		mesh->MakePlaneVerts(_heightMap->mTextureWidth / 16, _heightMap->mTextureHeight / 16, spreed_texture);
+		mesh->MakePlaneVerts(_heightMap->mTextureWidth / _tessellation_coef, _heightMap->mTextureHeight / _tessellation_coef, spreed_texture);
 		//@todo make lod number outside
-		mesh->MakePlaneIndices(_heightMap->mTextureWidth / 16, _heightMap->mTextureHeight / 16, 1);
+		mesh->MakePlaneIndices(_heightMap->mTextureWidth / _tessellation_coef, _heightMap->mTextureHeight / _tessellation_coef, 1);
 		/*mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 2);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 3);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 4);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 5);*/
 		mesh->AssignHeights(*_heightMap, _height_scale, _max_height);
-		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth / 16, _heightMap->mTextureHeight / 16)->id;
+		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth / _tessellation_coef, _heightMap->mTextureHeight / _tessellation_coef)->id;
 		mesh->GenerateTessellationData();
 	}
 	else
 	{
 		mesh->MakePlaneVerts(_diffuse->mTextureHeight, _diffuse->mTextureHeight, spreed_texture);
 		mesh->MakePlaneIndices(_diffuse->mTextureHeight);
-		m_material.normal_texture_id = mesh->GenerateNormals(mesh->Size() / 16)->id;
+		m_material.normal_texture_id = mesh->GenerateNormals(mesh->Size() / _tessellation_coef)->id;
 	}
 
 	mesh->calculatedTangent();

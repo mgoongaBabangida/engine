@@ -22,7 +22,7 @@
 
 //---------------------------------------------------------------------------
 eMgoongaGameContext::eMgoongaGameContext(eInputController*  _input,
-                                         std::vector<IWindowImGui*> _externalGui,
+                                         std::vector<IWindowImGui*>& _externalGui,
 						                             const std::string& _modelsPath,
 						                             const std::string& _assetsPath, 
 						                             const std::string& _shadersPath)
@@ -42,7 +42,6 @@ eMgoongaGameContext::eMgoongaGameContext(eInputController*  _input,
 
 //--------------------------------------------------------------------------
 eMgoongaGameContext::~eMgoongaGameContext() {}
-
 
 //*********************Initialize**************************************
 //-----------------------------------------------------------------------------
@@ -158,7 +157,7 @@ void eMgoongaGameContext::_InitMainTestSceane()
                            texManager->Find("Tgrass0_d"),
                            &Texture::GetTexture1x1(BLUE),
                            texManager->Find("TOcean0_s"),
-                           false);
+                           false, 1.0f, 1.0f, 1);
 
   //OBJECTS
   ObjectFactoryBase factory;

@@ -32,10 +32,10 @@ public:
 	virtual ~TerrainModel();
 
 	void Initialize(const Texture* diffuse, const Texture* specular, const Texture* normal = nullptr, const Texture* heightMap = nullptr,
-									bool spreed_texture = true, float _height_scale = 1.0f, float _max_height = 1.0f);
+									bool spreed_texture = true, float _height_scale = 1.0f, float _max_height = 1.0f, unsigned int _tessellation_coef = 16);
 	
 	void AddOrUpdate(glm::ivec2 _pos, glm::vec2 _offset, const Texture* _diffuse, const Texture* heightMap = nullptr,
-									 bool spreed_texture = true, float _height_scale = 1.0f, float _max_height = 1.0f);
+									 bool spreed_texture = true, float _height_scale = 1.0f, float _max_height = 1.0f, unsigned int _tessellation_coef = 16);
 
 	void EnableTessellation(bool _enable);
 	void SetCamera(Camera* _camera);

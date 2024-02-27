@@ -20,7 +20,7 @@ class AmericanTreasureGame : public eMainContextBase
 {
 public:
 	AmericanTreasureGame(eInputController*,
-		std::vector<IWindowImGui*> _externalGui,
+		std::vector<IWindowImGui*>& _externalGui,
 		const std::string& modelsPath,
 		const std::string& assetsPath,
 		const std::string& shadersPath);
