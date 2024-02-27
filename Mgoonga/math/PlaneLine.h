@@ -2,9 +2,8 @@
 
 #include "math.h"
 
-#include <glm\glm\glm.hpp>
-#include <glm\glm\gtc\matrix_transform.hpp>
-#include <glm\glm\gtx\transform.hpp>
+#include "Utils.h"
+#include "Geometry.h"
 
 #include <assert.h>
 #include <exception>
@@ -13,15 +12,9 @@ using glm::vec3;
 using glm::vec4;
 using glm::mat4;
 
-#include <cmath>
-
-namespace dbb { //@todo move to utils
-
-	DLL_MATH float round(float _x, int _num_decimal_precision_digits);
-}
-
 namespace dbb
 {
+	//----------------------------------------------------------------------
 	class DLL_MATH plane
 	{
 	public:
@@ -31,32 +24,34 @@ namespace dbb
 		float D;
 
 		plane(float a, float b, float c, float d);
-		plane(glm::vec3 dot1, glm::vec3 dot2, glm::vec3 dot3);
-		plane(glm::mat3 m_dots);
+		plane(dbb::point dot1, dbb::point dot2, dbb::point dot3);
+		plane(dbb::triangle _triangle_on_plane);
 		
-		bool isOn(glm::vec3 dot);
-		bool isSame(plane other);
+		bool isOn(dbb::point dot);
+		bool isInFront(dbb::point dot);
+		bool isSame(dbb::plane other);
+		float PlaneEquation(const dbb::point& dot);
 	};
 
+	//---------------------------------------------------------------------
 	class DLL_MATH line
 	{
 	public:
-		glm::vec3 M; // dot
+		dbb::point M; // dot
 		glm::vec3 p; //vector direction
 
-		line(glm::vec3 dot, glm::vec3 direction);
+		line(dbb::point dot, glm::vec3 direction);
 		line() :M(glm::vec3()), p(glm::vec3()) {}
 		
-		bool		isOn(glm::vec3 dot);
-		float		findT(glm::vec3 dot);
+		bool		isOn(dbb::point dot);
+		float		findT(dbb::point dot);
 		glm::vec3	getDotFromT(float t);
 	};
 
 	DLL_MATH glm::vec3 intersection(dbb::plane P, dbb::line L);
 
-	DLL_MATH bool IsInside(glm::mat3 triangle, glm::vec3 dot);
+	DLL_MATH bool IsInside(dbb::triangle _triangle, dbb::point _dot);
 }
 
 //http://trivial-programming.blogspot.de/2009/04/v1.html
-
 
