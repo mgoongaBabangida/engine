@@ -31,6 +31,7 @@ namespace dbb
 		bool isInFront(dbb::point dot);
 		bool isSame(dbb::plane other);
 		float PlaneEquation(const dbb::point& dot);
+		dbb::point GetClosestPointOnPlane(const dbb::point& point);
 	};
 
 	//---------------------------------------------------------------------

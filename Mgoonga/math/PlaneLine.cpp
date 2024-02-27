@@ -189,6 +189,14 @@ float dbb::plane::PlaneEquation(const dbb::point& dot)
 }
 
 //--------------------------------------------------------
+dbb::point dbb::plane::GetClosestPointOnPlane(const dbb::point& point)
+{
+	float dot = glm::dot(glm::vec3(A,B,C), point);
+	float distance = dot - D;
+	return point - glm::vec3(A, B, C) * distance;
+}
+
+//--------------------------------------------------------
 float dbb::line::findT(dbb::point dot) //  isOn parametric
 {
 	float tx = (dot.x - M.x) / p.x;  // 0 cases

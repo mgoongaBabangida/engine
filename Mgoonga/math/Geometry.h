@@ -67,8 +67,8 @@ namespace dbb
     inline AABB(const dbb::point& o, const glm::vec3& s) :
       origin(o), size(s) { }
 
-    glm::vec3 GetMin();
-    glm::vec3 GetMax();
+    glm::vec3 GetMin() const;
+    glm::vec3 GetMax() const;
   };
 
   AABB FromMinMax(const glm::vec3& min, const glm::vec3& max);
@@ -86,4 +86,15 @@ namespace dbb
     inline OBB(const dbb::point& p, const glm::vec3& s, const glm::mat3& o)
       : origin(p), size(s), orientation(o) { }
   };
+
+  bool IsPointInSphere(const dbb::point& point, const dbb::sphere& sphere);
+  dbb::point GetClosestPointOnSphere(const dbb::sphere& sphere, const dbb::point& point);
+  bool IsPointInAABB(const dbb::point& point, const AABB& aabb);
+  dbb::point GetClosestPointOnAABB(const AABB& aabb, const dbb::point& point);
+  bool IsPointInOBB(const dbb::point& point, const OBB& obb);
+  dbb::point GetClosestPointOnOBB(const OBB& obb, const dbb::point& point);
+  bool IsPointOnLine(const dbb::point& point, const dbb::lineSegment& line);
+  dbb::point GetClosestPointOnLineSegment(const dbb::lineSegment& line, const dbb::point& point);
+  bool IsPointOnRay(const dbb::point& point, const dbb::ray& ray);
+  dbb::point GetClosestPointOnRay(const dbb::ray& ray, const dbb::point& point);
 }
