@@ -48,6 +48,34 @@ bool dbb::OBBPlane(const OBB& obb, const dbb::plane& plane)
 	return fabsf(dist) <= pLen;
 }
 
+//------------------------------------------------------------------
+float dbb::Raycast(const dbb::plane& plane, const dbb::ray& ray)
+{
+	float nd = glm::dot(ray.direction, plane.Normal());
+	float pn = glm::dot(ray.origin, plane.Normal());
+	if (nd >= 0.0f)
+		return -1;
+
+	float t = (plane.D - pn) / nd;
+
+	if (t >= 0.0f)
+		return t;
+	return -1;
+}
+
+bool dbb::LineTest(const dbb::plane& plane, dbb::lineSegment line)
+ {
+	vec3 ab = line.end - line.start;
+	float nA = glm::dot(plane.Normal(), line.start);
+	float nAB = glm::dot(plane.Normal(), ab);
+	// If the line and plane are parallel, nAB will be 0
+	// This will cause a divide by 0 exception below
+	// If you plan on testing parallel lines and planes
+	// it is sage to early out when nAB is 0. 
+	float t = (plane.D - nA) / nAB;
+	return t >= 0.0f && t <= 1.0f;
+}
+
 //--------------------------------------------------------
 glm::vec3 dbb::intersection(dbb::plane P, dbb::line L)
 {

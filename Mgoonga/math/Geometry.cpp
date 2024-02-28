@@ -10,15 +10,43 @@
 namespace dbb
 {
   //----------------------------------------------------
-  float lineSegment::Length()
+  float lineSegment::Length() const
   {
     return glm::length(start - end);
   }
 
   //----------------------------------------------------
-  float lineSegment::LengthSq()
+  float lineSegment::LengthSq() const
   {
     return glm::length2(start - end);
+  }
+
+  //----------------------------------------------------
+  bool lineSegment::LineTest(const dbb::sphere& sphere) const
+  {
+    dbb::point closest = GetClosestPointOnLineSegment(*this, sphere.position);
+    float distSq = glm::length2(sphere.position - closest);
+    return distSq <= (sphere.radius * sphere.radius);
+  }
+
+  //----------------------------------------------------
+  bool lineSegment::LineTest(const AABB& aabb) const
+  {
+    dbb::ray ray;
+    ray.origin = start;
+    ray.direction = glm::normalize(end - start);
+    float t = ray.Raycast(aabb);
+    return t >= 0 && t * t <= LengthSq();
+  }
+
+  //----------------------------------------------------
+  bool lineSegment::LineTest(const OBB& obb) const
+  {
+    dbb::ray ray;
+    ray.origin = start;
+    ray.direction = glm::normalize(end - start);
+    float t = ray.Raycast(obb);
+    return t >= 0 && t * t <= LengthSq();
   }
 
   //----------------------------------------------------
@@ -348,5 +376,132 @@ namespace dbb
       }
     }
     return true; // Seperating axis not found
+  }
+
+  //---------------------------------------------
+  float ray::Raycast(const dbb::sphere& sphere)
+  {
+    //Construct a vector from the origin of the ray to the center of the sphere:
+    glm::vec3 e = sphere.position - origin;
+    //Store the squared magnitude of this new vector, as well as the squared radius of the sphere :
+    float rSq = sphere.radius * sphere.radius;
+    float eSq = glm::length2(e);
+    // ray.direction is assumed to be normalized
+    float a = glm::dot(e, glm::normalize(direction));
+   /* Construct the sides a triangle using the radius of the circle at the projected point
+      from the last step.The sides of this triangle are radius, band f.We work with
+      squared units :*/
+    float bSq = eSq - (a * a);
+    float f = sqrt(rSq - bSq);
+    /*Compare the length of the squared radius against the hypotenuse of the triangle from
+      the last step.This is visually explained in the How it works section :*/
+    // No collision has happened
+    if (rSq - (eSq - (a * a)) < 0.0f)
+      return -1; // -1 is invalid.
+
+    // Ray starts inside the sphere
+    else if (eSq < rSq)
+      return a + f; // Just reverse direction
+
+    // else Normal intersection
+    return a - f;
+  }
+
+  //----------------------------------------------------
+  float ray::Raycast(const AABB& aabb)
+  {
+    glm::vec3 min = aabb.GetMin();
+    glm::vec3 max = aabb.GetMax();
+    // NOTE: Any component of direction could be 0!
+    // to avoid a division by 0, you need to add 
+    // additional safety checks.
+    float t1 = (min.x - origin.x) / direction.x;
+    float t2 = (max.x - origin.x) / direction.x;
+    float t3 = (min.y - origin.y) / direction.y;
+    float t4 = (max.y - origin.y) / direction.y;
+    float t5 = (min.z - origin.z) / direction.z;
+    float t6 = (max.z - origin.z) / direction.z;
+    //Find the largest minimum value
+    float tmin = fmaxf(
+      fmaxf(
+        fminf(t1, t2),
+        fminf(t3, t4)
+      ),
+      fminf(t5, t6)
+    );
+    //Find the smallest maximum value
+    float tmax = fminf(
+      fminf(
+        fmaxf(t1, t2),
+        fmaxf(t3, t4)
+      ),
+      fmaxf(t5, t6)
+    );
+    /*If tmax is less than zero, the ray is intersecting AABB in the negative direction.This
+      means the entire AABB is behind the origin of the ray, this should not be treated as
+      an intersection :*/
+    if (tmax < 0)
+      return -1;
+   /* If tmin is greater than tmax, the ray does not intersect AABB :*/
+    if (tmin > tmax)
+      return -1;
+    /*If tmin is less than zero, that means the ray intersects the AABB but its origin is
+      inside the AABB.This means tmax is the valid collision point :*/
+    if (tmin < 0.0f)
+      return tmax;
+    return tmin;
+  }
+
+  //------------------------------------------
+  float ray::Raycast(const OBB& obb)
+  {
+    const float* o = &obb.orientation[0][0];
+    const float* size = &obb.size[0];
+    // X, Y and Z axis of OBB
+    glm::vec3 X(o[0], o[1], o[2]);
+    glm::vec3 Y(o[3], o[4], o[5]);
+    glm::vec3 Z(o[6], o[7], o[8]);
+    glm::vec3 p = obb.origin - origin;
+    glm::vec3 f(
+     glm::dot(X, direction),
+     glm::dot(Y, direction),
+     glm::dot(Z, direction)
+    );
+    glm::vec3 e(
+      glm::dot(X, p),
+      glm::dot(Y, p),
+      glm::dot(Z, p)
+    );
+    float t[6] = { 0, 0, 0, 0, 0, 0 };
+    for (int i = 0; i < 3; ++i)
+    {
+      if (f[i] == 0) //CMP ?
+      {
+        if (-e[i] - size[i] > 0 || -e[i] + size[i] < 0)
+          return -1;
+        f[i] = 0.00001f; // Avoid div by 0!
+      }
+      t[i * 2 + 0] = (e[i] + size[i]) / f[i]; // min
+      t[i * 2 + 1] = (e[i] - size[i]) / f[i]; // max
+    }
+
+    float tmin = fmaxf(
+      fmaxf(
+        fminf(t[0], t[1]),
+        fminf(t[2], t[3])),
+      fminf(t[4], t[5])
+    );
+    float tmax = fminf(
+      fminf(
+        fmaxf(t[0], t[1]),
+        fmaxf(t[2], t[3])),
+      fmaxf(t[4], t[5])
+    );
+
+    if (tmax < 0)
+      return -1.0f;
+    if (tmin < 0.0f)
+      return tmax;
+    return tmin;
   }
 }

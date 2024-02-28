@@ -21,41 +21,6 @@ namespace dbb
   using point = glm::vec3;
 
   //-------------------------------------------------
-  struct lineSegment
-  {
-    dbb::point start;
-    dbb::point end;
-    inline lineSegment() {}
-    inline lineSegment(const dbb::point& s, const dbb::point& e) :
-      start(s), end(e) { }
-
-    float Length();
-    float LengthSq();
-  };
-
-  //-------------------------------------------------
-  struct ray
-  {
-    dbb::point origin;
-    glm::vec3 direction;
-
-    inline ray() : direction(0.0f, 0.0f, 1.0f), origin(0.0f, 0.0f, 0.0f) {}
-    inline ray(const dbb::point& o, const glm::vec3& d) :
-      origin(o), direction(d) {
-      NormalizeDirection();
-    }
-
-    inline void NormalizeDirection() {
-      glm::normalize(direction);
-    }
-
-    static dbb::ray inline FromPoint(const dbb::point& from, const dbb::point& to)
-    {
-      return ray(from, glm::normalize(to - from));
-    }
-  };
-
-  //-------------------------------------------------
   struct sphere
   {
     dbb::point position;
@@ -96,6 +61,50 @@ namespace dbb
       : origin(p), size(s), orientation(o) { }
   };
 
+  //-------------------------------------------------
+  struct lineSegment
+  {
+    dbb::point start;
+    dbb::point end;
+
+    inline lineSegment() {}
+    inline lineSegment(const dbb::point& s, const dbb::point& e) :
+      start(s), end(e) { }
+
+    float Length() const;
+    float LengthSq() const;
+
+    bool LineTest(const dbb::sphere& sphere) const;
+    bool LineTest(const AABB& aabb) const;
+    bool LineTest(const OBB& obb) const;
+  };
+
+  //-------------------------------------------------
+  struct ray
+  {
+    dbb::point origin;
+    glm::vec3 direction;
+
+    inline ray() : direction(0.0f, 0.0f, 1.0f), origin(0.0f, 0.0f, 0.0f) {}
+    inline ray(const dbb::point& o, const glm::vec3& d) :
+      origin(o), direction(d) {
+      NormalizeDirection();
+    }
+
+    inline void NormalizeDirection() {
+      glm::normalize(direction);
+    }
+
+    static dbb::ray inline FromPoint(const dbb::point& from, const dbb::point& to)
+    {
+      return ray(from, glm::normalize(to - from));
+    }
+
+    float Raycast(const dbb::sphere& sphere);
+    float Raycast(const AABB& aabb);
+    float Raycast(const OBB& obb);
+  };
+
   //Point checks
   bool IsPointInSphere(const dbb::point& point, const dbb::sphere& sphere);
   dbb::point GetClosestPointOnSphere(const dbb::sphere& sphere, const dbb::point& point);
@@ -126,5 +135,4 @@ namespace dbb
   bool AABBOBB(const AABB& aabb, const OBB& obb);
   bool OverlapOnAxis(const OBB& obb1, const OBB& obb2, const glm::vec3& axis);
   bool OBBOBB(const OBB& obb1, const OBB& obb2);
-
 }

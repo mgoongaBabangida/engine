@@ -33,6 +33,7 @@ namespace dbb
 		plane(dbb::point dot1, dbb::point dot2, dbb::point dot3);
 		plane(dbb::triangle _triangle_on_plane);
 		
+		glm::vec3 Normal() const { return glm::normalize(glm::vec3{ A, B, C }); }
 		bool isOn(dbb::point dot);
 		bool isInFront(dbb::point dot);
 		bool isSame(dbb::plane other);
@@ -44,6 +45,9 @@ namespace dbb
 	bool SpherePlane(const dbb::sphere& sphere, const dbb::plane& plane); //@todo to transfer later
 	bool AABBPlane(const AABB& aabb, const dbb::plane& plane); //@todo to transfer later
 	bool OBBPlane(const OBB& obb, const dbb::plane& plane); //@todo to transfer later
+
+	float Raycast(const dbb::plane& plane, const dbb::ray& ray); //@todo to transfer later
+	bool LineTest(const dbb::plane& plane, dbb::lineSegment);
 
 	//---------------------------------------------------------------------
 	class DLL_MATH line
