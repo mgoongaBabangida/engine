@@ -6,6 +6,15 @@
 #include <glm\glm\gtc\matrix_transform.hpp>
 #include <glm\glm\gtx\transform.hpp>
 
+#define AABBSphere(aabb, sphere) \
+ SphereAABB(Sphere, AABB)
+
+#define OBBSphere(obb, sphere) \
+SphereOBB(sphere, obb)
+
+#define OBBAABB(obb, aabb) \
+ AABBOBB(aabb, obb)
+
 namespace dbb
 {
   using triangle = glm::mat3;
@@ -39,12 +48,12 @@ namespace dbb
     inline void NormalizeDirection() {
       glm::normalize(direction);
     }
-  };
 
-  dbb::ray inline FromPoint(const dbb::point& from, const dbb::point& to)
-  {
-    return ray(from, glm::normalize(to - from));
-  }
+    static dbb::ray inline FromPoint(const dbb::point& from, const dbb::point& to)
+    {
+      return ray(from, glm::normalize(to - from));
+    }
+  };
 
   //-------------------------------------------------
   struct sphere
@@ -87,6 +96,7 @@ namespace dbb
       : origin(p), size(s), orientation(o) { }
   };
 
+  //Point checks
   bool IsPointInSphere(const dbb::point& point, const dbb::sphere& sphere);
   dbb::point GetClosestPointOnSphere(const dbb::sphere& sphere, const dbb::point& point);
   bool IsPointInAABB(const dbb::point& point, const AABB& aabb);
@@ -97,4 +107,24 @@ namespace dbb
   dbb::point GetClosestPointOnLineSegment(const dbb::lineSegment& line, const dbb::point& point);
   bool IsPointOnRay(const dbb::point& point, const dbb::ray& ray);
   dbb::point GetClosestPointOnRay(const dbb::ray& ray, const dbb::point& point);
+
+  //Collision checks
+  bool SphereSphere(const dbb::sphere& s1, const dbb::sphere& s2);
+  bool SphereAABB(const dbb::sphere& sphere, const AABB& aabb);
+  bool SphereOBB(const dbb::sphere& sphere, const OBB& obb);
+  bool AABBAABB(const AABB& aabb1, const AABB& aabb2);
+
+  struct Interval
+  {
+    float min;
+    float max;
+  };
+
+  Interval GetInterval(const AABB& rect, const glm::vec3& axis);
+  Interval GetInterval(const OBB& rect, const glm::vec3& axis);
+  bool OverlapOnAxis(const AABB& aabb, const OBB& obb, const glm::vec3& axis);
+  bool AABBOBB(const AABB& aabb, const OBB& obb);
+  bool OverlapOnAxis(const OBB& obb1, const OBB& obb2, const glm::vec3& axis);
+  bool OBBOBB(const OBB& obb1, const OBB& obb2);
+
 }

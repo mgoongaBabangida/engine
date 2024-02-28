@@ -5,6 +5,49 @@
 #include <limits>
 #include <iostream>
 
+#include <glm\glm\glm.hpp>
+#include <glm\glm\gtc\quaternion.hpp>
+#include <glm\glm\gtx\quaternion.hpp>
+
+//---------------------------------------------------------------------
+bool dbb::SpherePlane(const dbb::sphere& sphere, const dbb::plane& plane)
+{
+	dbb::point closestPoint = plane.GetClosestPointOnPlane(sphere.position);
+	float distSq = glm::length2(sphere.position - closestPoint);
+	float radiusSq = sphere.radius * sphere.radius;
+	return distSq < radiusSq;
+}
+
+//--------------------------------------------------------
+bool dbb::AABBPlane(const AABB& aabb, const dbb::plane& plane)
+{
+	float pLen = aabb.size.x * fabsf(plane.A) +
+							 aabb.size.y * fabsf(plane.B) +
+							 aabb.size.z * fabsf(plane.C);
+	float dot = glm::dot({ plane.A, plane.B, plane.B }, aabb.origin);
+	float dist = dot - plane.D;
+	return fabsf(dist) <= pLen;
+}
+
+//--------------------------------------------------------
+bool dbb::OBBPlane(const OBB& obb, const dbb::plane& plane)
+{
+	// Local variables for readability only
+	const float* o = &obb.orientation[0][0];
+	glm::vec3 rot[] = { // rotation / orientation
+	glm::vec3(o[0], o[1], o[2]),
+	glm::vec3(o[3], o[4], o[5]),
+	glm::vec3(o[6], o[7], o[8]),
+	};
+	glm::vec3 normal = {plane.A, plane.B, plane.C}; //normalize ?
+	float pLen = obb.size.x * fabsf(glm::dot(normal, rot[0])) +
+							 obb.size.y * fabsf(glm::dot(normal, rot[1])) +
+							 obb.size.z * fabsf(glm::dot(normal, rot[2]));
+	float dot = glm::dot(glm::vec3{ plane.A, plane.B, plane.C }, obb.origin); // /normaliz?
+	float dist = dot - plane.D;
+	return fabsf(dist) <= pLen;
+}
+
 //--------------------------------------------------------
 glm::vec3 dbb::intersection(dbb::plane P, dbb::line L)
 {
@@ -189,7 +232,7 @@ float dbb::plane::PlaneEquation(const dbb::point& dot)
 }
 
 //--------------------------------------------------------
-dbb::point dbb::plane::GetClosestPointOnPlane(const dbb::point& point)
+dbb::point dbb::plane::GetClosestPointOnPlane(const dbb::point& point) const
 {
 	float dot = glm::dot(glm::vec3(A,B,C), point);
 	float distance = dot - D;

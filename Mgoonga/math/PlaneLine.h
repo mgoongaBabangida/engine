@@ -12,6 +12,12 @@ using glm::vec3;
 using glm::vec4;
 using glm::mat4;
 
+#define PlaneSphere(plane, sphere) \
+ SpherePlane(sphere, plane)
+
+#define PlaneOBB(plane, obb) \
+ OBBPlane(obb, plane)
+
 namespace dbb
 {
 	//----------------------------------------------------------------------
@@ -31,8 +37,13 @@ namespace dbb
 		bool isInFront(dbb::point dot);
 		bool isSame(dbb::plane other);
 		float PlaneEquation(const dbb::point& dot);
-		dbb::point GetClosestPointOnPlane(const dbb::point& point);
+		dbb::point GetClosestPointOnPlane(const dbb::point& point) const;
 	};
+
+	//intersactions
+	bool SpherePlane(const dbb::sphere& sphere, const dbb::plane& plane); //@todo to transfer later
+	bool AABBPlane(const AABB& aabb, const dbb::plane& plane); //@todo to transfer later
+	bool OBBPlane(const OBB& obb, const dbb::plane& plane); //@todo to transfer later
 
 	//---------------------------------------------------------------------
 	class DLL_MATH line

@@ -174,4 +174,179 @@ namespace dbb
     t = fmaxf(t, 0.0f);
     return dbb::point(ray.origin + ray.direction * t);
   }
+
+  //-------------------------------------------------------------
+  bool SphereSphere(const dbb::sphere& s1, const dbb::sphere& s2)
+  {
+    float radiiSum = s1.radius + s2.radius;
+    float sqDistance = glm::length2(s1.position - s2.position);
+    return sqDistance < radiiSum * radiiSum;
+  }
+
+  //-----------------------------------------------------------
+  bool SphereAABB(const dbb::sphere& sphere, const AABB& aabb)
+  {
+    dbb::point closestPoint = GetClosestPointOnAABB(aabb, sphere.position);
+    float distSq = glm::length2(sphere.position - closestPoint);
+    float radiusSq = sphere.radius * sphere.radius;
+    return distSq < radiusSq;
+  }
+
+  //-----------------------------------------------------------
+  bool SphereOBB(const dbb::sphere& sphere, const OBB& obb)
+  {
+    dbb::point closestPoint = GetClosestPointOnOBB(obb, sphere.position);
+    float distSq = glm::length2(sphere.position - closestPoint);
+    float radiusSq = sphere.radius * sphere.radius;
+    return distSq < radiusSq;
+  }
+
+  //---------------------------------------------------------
+  bool AABBAABB(const AABB& aabb1, const AABB& aabb2)
+  {
+    dbb::point aMin = aabb1.GetMin();
+    dbb::point aMax = aabb1.GetMax();
+    dbb::point bMin = aabb2.GetMin();
+    dbb::point bMax = aabb2.GetMax();
+    return (aMin.x <= bMax.x && aMax.x >= bMin.x) &&
+           (aMin.y <= bMax.y && aMax.y >= bMin.y) &&
+           (aMin.z <= bMax.z && aMax.z >= bMin.z);
+  }
+
+  //--------------------------------------------------------------
+  Interval GetInterval(const AABB& aabb, const glm::vec3& axis)
+  {
+   glm::vec3 i = aabb.GetMin();
+   glm::vec3 a = aabb.GetMax();
+   glm::vec3 vertex[8] = {
+   glm::vec3(i.x, a.y, a.z),
+   glm::vec3(i.x, a.y, i.z),
+   glm::vec3(i.x, i.y, a.z),
+   glm::vec3(i.x, i.y, i.z),
+   glm::vec3(a.x, a.y, a.z),
+   glm::vec3(a.x, a.y, i.z),
+   glm::vec3(a.x, i.y, a.z),
+   glm::vec3(a.x, i.y, i.z)
+    };
+
+   Interval result;
+   result.min = result.max = glm::dot(axis, vertex[0]);
+   for (int i = 1; i < 8; ++i)
+   {
+     float projection = glm::dot(axis, vertex[i]);
+     result.min = (projection < result.min) ?
+       projection : result.min;
+     result.max = (projection > result.max) ?
+       projection : result.max;
+   }
+   return result;
+  }
+
+  //-----------------------------------------------------------
+  Interval GetInterval(const OBB& obb, const glm::vec3& axis)
+  {
+    glm::vec3 vertex[8];
+    glm::vec3 C = obb.origin; // OBB Center
+    glm::vec3 E = obb.size; // OBB Extents
+    const float* o = &obb.orientation[0][0];
+    glm::vec3 A[] = { // OBB Axis
+    glm::vec3(o[0], o[1], o[2]),
+    glm::vec3(o[3], o[4], o[5]),
+    glm::vec3(o[6], o[7], o[8]),
+    };
+
+    vertex[0] = C + A[0] * E[0] + A[1] * E[1] + A[2] * E[2];
+    vertex[1] = C - A[0] * E[0] + A[1] * E[1] + A[2] * E[2];
+    vertex[2] = C + A[0] * E[0] - A[1] * E[1] + A[2] * E[2];
+    vertex[3] = C + A[0] * E[0] + A[1] * E[1] - A[2] * E[2];
+    vertex[4] = C - A[0] * E[0] - A[1] * E[1] - A[2] * E[2];
+    vertex[5] = C + A[0] * E[0] - A[1] * E[1] - A[2] * E[2];
+    vertex[6] = C - A[0] * E[0] + A[1] * E[1] - A[2] * E[2];
+    vertex[7] = C - A[0] * E[0] - A[1] * E[1] + A[2] * E[2];
+
+    Interval result;
+    result.min = result.max = glm::dot(axis, vertex[0]);
+    for (int i = 1; i < 8; ++i)
+    {
+      float projection = glm::dot(axis, vertex[i]);
+      result.min = (projection < result.min) ?
+        projection : result.min;
+      result.max = (projection > result.max) ?
+        projection : result.max;
+    }
+    return result;
+  }
+
+  //-------------------------------------------------------------------------
+  bool OverlapOnAxis(const AABB& aabb, const OBB& obb, const glm::vec3& axis)
+  {
+    Interval a = GetInterval(aabb, axis);
+    Interval b = GetInterval(obb, axis);
+    return ((b.min <= a.max) && (a.min <= b.max));
+  }
+
+  //-------------------------------------------------
+  bool AABBOBB(const AABB& aabb, const OBB& obb)
+  {
+    const float* o = &obb.orientation[0][0];
+    glm::vec3 test[15] = {
+    glm::vec3(1, 0, 0), // AABB axis 1
+    glm::vec3(0, 1, 0), // AABB axis 2
+    glm::vec3(0, 0, 1), // AABB axis 3
+    glm::vec3(o[0], o[1], o[2]), // OBB axis 1
+    glm::vec3(o[3], o[4], o[5]), // OBB axis 2
+    glm::vec3(o[6], o[7], o[8]) // OBB axis 3
+    // We will fill out the remaining axis in the next step
+    };
+
+    for (int i = 0; i < 3; ++i) { // Fill out rest of axis
+      test[6 + i * 3 + 0] = glm::cross(test[i], test[0]);
+      test[6 + i * 3 + 1] = glm::cross(test[i], test[1]);
+      test[6 + i * 3 + 2] = glm::cross(test[i], test[2]);
+    }
+
+    for (int i = 0; i < 15; ++i) {
+      if (!OverlapOnAxis(aabb, obb, test[i])) {
+        return false; // Seperating axis found
+      }
+    }
+    return true; // Seperating axis not found
+  }
+
+  //-------------------------------------------------------------------------
+  bool OverlapOnAxis(const OBB& obb1, const OBB& obb2, const glm::vec3& axis)
+  {
+    Interval a = GetInterval(obb1, axis);
+    Interval b = GetInterval(obb1, axis);
+    return ((b.min <= a.max) && (a.min <= b.max));
+  }
+
+  //---------------------------------------------------------
+  bool OBBOBB(const OBB& obb1, const OBB& obb2)
+  {
+    const float* o1 = &obb1.orientation[0][0];
+    const float* o2 = &obb2.orientation[0][0];
+    glm::vec3 test[15] = {
+    glm::vec3(o1[0], o1[1], o1[2]),
+    glm::vec3(o1[3], o1[4], o1[5]),
+    glm::vec3(o1[6], o1[7], o1[8]),
+    glm::vec3(o2[0], o2[1], o2[2]),
+    glm::vec3(o2[3], o2[4], o2[5]),
+    glm::vec3(o2[6], o2[7], o2[8])
+    };
+
+    for (int i = 0; i < 3; ++i)
+    { // Fill out rest of axis
+      test[6 + i * 3 + 0] = glm::cross(test[i], test[0]);
+      test[6 + i * 3 + 1] = glm::cross(test[i], test[1]);
+      test[6 + i * 3 + 2] = glm::cross(test[i], test[2]);
+    }
+
+    for (int i = 0; i < 15; ++i) {
+      if (!OverlapOnAxis(obb1, obb2, test[i])) {
+        return false; // Seperating axis found
+      }
+    }
+    return true; // Seperating axis not found
+  }
 }
