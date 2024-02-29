@@ -45,23 +45,10 @@ namespace dbb
 
     glm::vec3 GetMin() const;
     glm::vec3 GetMax() const;
+    static AABB FromMinMax(const glm::vec3& min, const glm::vec3& max);
   };
 
-  AABB FromMinMax(const glm::vec3& min, const glm::vec3& max);
-
-  //----------------------------------------------------
-  struct OBB
-  {
-    dbb::point origin;
-    glm::vec3 size;
-    glm::mat3 orientation;
-  
-    inline OBB() : size(1, 1, 1) { }
-    inline OBB(const dbb::point& p, const glm::vec3& s) :
-      origin(p), size(s) { }
-    inline OBB(const dbb::point& p, const glm::vec3& s, const glm::mat3& o)
-      : origin(p), size(s), orientation(o) { }
-  };
+  struct OBB;
 
   //-------------------------------------------------
   struct lineSegment
@@ -79,6 +66,26 @@ namespace dbb
     bool LineTest(const dbb::sphere& sphere) const;
     bool LineTest(const AABB& aabb) const;
     bool LineTest(const OBB& obb) const;
+  };
+
+  //----------------------------------------------------
+  struct OBB
+  {
+    dbb::point origin;
+    glm::vec3 size;
+    glm::mat3 orientation;
+
+    inline OBB() : size(1, 1, 1) { }
+    inline OBB(const dbb::point& p, const glm::vec3& s) :
+      origin(p), size(s) { }
+    inline OBB(const dbb::point& p, const glm::vec3& s, const glm::mat3& o)
+      : origin(p), size(s), orientation(o) { }
+
+    std::vector<dbb::point> GetVertices() const;
+    std::vector<dbb::lineSegment> GetEdges() const;
+    /*std::vector<dbb::plane> GetPlanes();*/ // @todo after getting plane
+    /*std::vector<dbb::point> ClipEdgesToOBB(const std::vector<dbb::lineSegment>& edges);*/ // ?
+    float PenetrationDepth(const OBB& other, const glm::vec3& axis, bool* outShouldFlip) const;
   };
 
   //-------------------------------------------------
@@ -107,24 +114,7 @@ namespace dbb
     float Raycast(const OBB& obb, RaycastResult& outResult);
   };
 
-  //Point checks
-  bool IsPointInSphere(const dbb::point& point, const dbb::sphere& sphere);
-  dbb::point GetClosestPointOnSphere(const dbb::sphere& sphere, const dbb::point& point);
-  bool IsPointInAABB(const dbb::point& point, const AABB& aabb);
-  dbb::point GetClosestPointOnAABB(const AABB& aabb, const dbb::point& point);
-  bool IsPointInOBB(const dbb::point& point, const OBB& obb);
-  dbb::point GetClosestPointOnOBB(const OBB& obb, const dbb::point& point);
-  bool IsPointOnLine(const dbb::point& point, const dbb::lineSegment& line);
-  dbb::point GetClosestPointOnLineSegment(const dbb::lineSegment& line, const dbb::point& point);
-  bool IsPointOnRay(const dbb::point& point, const dbb::ray& ray);
-  dbb::point GetClosestPointOnRay(const dbb::ray& ray, const dbb::point& point);
-
-  //Collision checks
-  bool SphereSphere(const dbb::sphere& s1, const dbb::sphere& s2);
-  bool SphereAABB(const dbb::sphere& sphere, const AABB& aabb);
-  bool SphereOBB(const dbb::sphere& sphere, const OBB& obb);
-  bool AABBAABB(const AABB& aabb1, const AABB& aabb2);
-
+  //-------------------------------------------------
   struct Interval
   {
     float min;
@@ -133,8 +123,14 @@ namespace dbb
 
   Interval GetInterval(const AABB& rect, const glm::vec3& axis);
   Interval GetInterval(const OBB& rect, const glm::vec3& axis);
-  bool OverlapOnAxis(const AABB& aabb, const OBB& obb, const glm::vec3& axis);
-  bool AABBOBB(const AABB& aabb, const OBB& obb);
-  bool OverlapOnAxis(const OBB& obb1, const OBB& obb2, const glm::vec3& axis);
-  bool OBBOBB(const OBB& obb1, const OBB& obb2);
+
+  //-------------------------------------------------
+  struct CollisionManifold
+  {
+    bool colliding;
+    glm::vec3 normal;
+    float depth;
+    std::vector<glm::vec3> contacts;
+    static void ResetCollisionManifold(CollisionManifold& result);
+  };
 }

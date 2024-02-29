@@ -9,45 +9,6 @@
 #include <glm\glm\gtc\quaternion.hpp>
 #include <glm\glm\gtx\quaternion.hpp>
 
-//---------------------------------------------------------------------
-bool dbb::SpherePlane(const dbb::sphere& sphere, const dbb::plane& plane)
-{
-	dbb::point closestPoint = plane.GetClosestPointOnPlane(sphere.position);
-	float distSq = glm::length2(sphere.position - closestPoint);
-	float radiusSq = sphere.radius * sphere.radius;
-	return distSq < radiusSq;
-}
-
-//--------------------------------------------------------
-bool dbb::AABBPlane(const AABB& aabb, const dbb::plane& plane)
-{
-	float pLen = aabb.size.x * fabsf(plane.A) +
-							 aabb.size.y * fabsf(plane.B) +
-							 aabb.size.z * fabsf(plane.C);
-	float dot = glm::dot({ plane.A, plane.B, plane.B }, aabb.origin);
-	float dist = dot - plane.D;
-	return fabsf(dist) <= pLen;
-}
-
-//--------------------------------------------------------
-bool dbb::OBBPlane(const OBB& obb, const dbb::plane& plane)
-{
-	// Local variables for readability only
-	const float* o = &obb.orientation[0][0];
-	glm::vec3 rot[] = { // rotation / orientation
-	glm::vec3(o[0], o[1], o[2]),
-	glm::vec3(o[3], o[4], o[5]),
-	glm::vec3(o[6], o[7], o[8]),
-	};
-	glm::vec3 normal = {plane.A, plane.B, plane.C}; //normalize ?
-	float pLen = obb.size.x * fabsf(glm::dot(normal, rot[0])) +
-							 obb.size.y * fabsf(glm::dot(normal, rot[1])) +
-							 obb.size.z * fabsf(glm::dot(normal, rot[2]));
-	float dot = glm::dot(glm::vec3{ plane.A, plane.B, plane.C }, obb.origin); // /normaliz?
-	float dist = dot - plane.D;
-	return fabsf(dist) <= pLen;
-}
-
 //------------------------------------------------------------------
 float dbb::Raycast(const dbb::plane& plane, const dbb::ray& ray, RaycastResult& outResult)
 {
@@ -83,7 +44,29 @@ bool dbb::LineTest(const dbb::plane& plane, dbb::lineSegment line)
 	return t >= 0.0f && t <= 1.0f;
 }
 
-//--------------------------------------------------------
+//-----------------------------------------------------------------
+std::vector<dbb::plane> dbb::GetPlanes(const dbb::OBB& _obb)
+{
+	glm::vec3 c = _obb.origin; // OBB Center
+	glm::vec3 e = _obb.size; // OBB Extents
+	const float* o = &_obb.orientation[0][0];
+	glm::vec3 a[] = { // OBB Axis
+	glm::vec3(o[0], o[1], o[2]),
+	glm::vec3(o[3], o[4], o[5]),
+	glm::vec3(o[6], o[7], o[8]),
+	};
+	std::vector<dbb::plane> result;
+	result.resize(6);
+	result[0] = dbb::plane(a[0], glm::dot(a[0], (c + a[0] * e.x)));
+	result[1] = dbb::plane(a[0] * -1.0f, -glm::dot(a[0], (c - a[0] * e.x)));
+	result[2] = dbb::plane(a[1], glm::dot(a[1], (c + a[1] * e.y)));
+	result[3] = dbb::plane(a[1] * -1.0f, -glm::dot(a[1], (c - a[1] * e.y)));
+	result[4] = dbb::plane(a[2], glm::dot(a[2], (c + a[2] * e.z)));
+	result[5] = dbb::plane(a[2] * -1.0f, -glm::dot(a[2], (c - a[2] * e.z)));
+	return result;
+}
+
+//-----------------------------------------------------------------------------------------------
 glm::vec3 dbb::intersection(dbb::plane P, dbb::line L)
 {
 	float t = 0.0f;

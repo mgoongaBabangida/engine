@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <exception>
+#include <vector>
 
 using glm::vec3;
 using glm::vec4;
@@ -24,13 +25,15 @@ namespace dbb
 	class DLL_MATH plane
 	{
 	public:
-		float A;
-		float B;
-		float C;
-		float D;
+		float A = std::numeric_limits<float>::min();
+		float B	= std::numeric_limits<float>::min();
+		float C	= std::numeric_limits<float>::min();
+		float D	= std::numeric_limits<float>::min();
 
+		plane() {}
 		plane(float a, float b, float c, float d);
 		plane(dbb::point dot1, dbb::point dot2, dbb::point dot3);
+		plane(glm::vec3 normal, float distance) : A(normal.x), B(normal.y), C(normal.z), D(distance) {}
 		plane(dbb::triangle _triangle_on_plane);
 		
 		glm::vec3 Normal() const { return glm::normalize(glm::vec3{ A, B, C }); }
@@ -41,14 +44,10 @@ namespace dbb
 		dbb::point GetClosestPointOnPlane(const dbb::point& point) const;
 	};
 
-	//intersactions
-	bool SpherePlane(const dbb::sphere& sphere, const dbb::plane& plane); //@todo to transfer later
-	bool AABBPlane(const AABB& aabb, const dbb::plane& plane); //@todo to transfer later
-	bool OBBPlane(const OBB& obb, const dbb::plane& plane); //@todo to transfer later
-
 	float Raycast(const dbb::plane& plane, const dbb::ray& ray, RaycastResult& outResult); //@todo to transfer later
 	bool LineTest(const dbb::plane& plane, dbb::lineSegment);
 	//bool Raycast(const dbb::triangle& triangle, const dbb::ray& ray, RaycastResult& outResult); // @todo to implement
+	std::vector<dbb::plane> GetPlanes(const dbb::OBB& _obb);
 
 	//---------------------------------------------------------------------
 	class DLL_MATH line
