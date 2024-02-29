@@ -141,6 +141,22 @@ struct eCollision
 };
 
 //-------------------------------------------------------
+struct RaycastResult
+{
+	float t;
+	bool hit;
+	glm::vec3 point;
+	glm::vec3 normal;
+	static void ResetRaycastResult(RaycastResult* r)
+	{
+		r->t = 0;
+		r->hit = false;
+		r->point = {0,0,0};
+		r->normal = {0,1,0};
+	}
+};
+
+//-------------------------------------------------------
 enum Side
 {
 	FORWARD,

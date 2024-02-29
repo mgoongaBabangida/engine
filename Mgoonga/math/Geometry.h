@@ -2,6 +2,8 @@
 
 #include "math.h"
 
+#include <base/base.h>
+
 #include <glm\glm\glm.hpp>
 #include <glm\glm\gtc\matrix_transform.hpp>
 #include <glm\glm\gtx\transform.hpp>
@@ -83,7 +85,7 @@ namespace dbb
   struct ray
   {
     dbb::point origin;
-    glm::vec3 direction;
+    glm::vec3 direction; 
 
     inline ray() : direction(0.0f, 0.0f, 1.0f), origin(0.0f, 0.0f, 0.0f) {}
     inline ray(const dbb::point& o, const glm::vec3& d) :
@@ -100,9 +102,9 @@ namespace dbb
       return ray(from, glm::normalize(to - from));
     }
 
-    float Raycast(const dbb::sphere& sphere);
-    float Raycast(const AABB& aabb);
-    float Raycast(const OBB& obb);
+    float Raycast(const dbb::sphere& sphere, RaycastResult& outResult);
+    float Raycast(const AABB& aabb, RaycastResult& outResult);
+    float Raycast(const OBB& obb, RaycastResult& outResult);
   };
 
   //Point checks

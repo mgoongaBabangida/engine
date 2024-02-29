@@ -35,7 +35,10 @@ namespace dbb
     dbb::ray ray;
     ray.origin = start;
     ray.direction = glm::normalize(end - start);
-    float t = ray.Raycast(aabb);
+    RaycastResult raycast;
+    float t = ray.Raycast(aabb, raycast);
+    if (!raycast.hit)
+      return false;
     return t >= 0 && t * t <= LengthSq();
   }
 
@@ -45,7 +48,10 @@ namespace dbb
     dbb::ray ray;
     ray.origin = start;
     ray.direction = glm::normalize(end - start);
-    float t = ray.Raycast(obb);
+    RaycastResult raycast;
+    float t = ray.Raycast(obb, raycast);
+    if (!raycast.hit)
+      return false;
     return t >= 0 && t * t <= LengthSq();
   }
 
@@ -379,8 +385,9 @@ namespace dbb
   }
 
   //---------------------------------------------
-  float ray::Raycast(const dbb::sphere& sphere)
+  float ray::Raycast(const dbb::sphere& sphere, RaycastResult& outResult)
   {
+    RaycastResult::ResetRaycastResult(&outResult);
     //Construct a vector from the origin of the ray to the center of the sphere:
     glm::vec3 e = sphere.position - origin;
     //Store the squared magnitude of this new vector, as well as the squared radius of the sphere :
@@ -393,6 +400,7 @@ namespace dbb
       squared units :*/
     float bSq = eSq - (a * a);
     float f = sqrt(rSq - bSq);
+    float t = a - f; // Assume normal intersection!
     /*Compare the length of the squared radius against the hypotenuse of the triangle from
       the last step.This is visually explained in the How it works section :*/
     // No collision has happened
@@ -403,48 +411,73 @@ namespace dbb
     else if (eSq < rSq)
       return a + f; // Just reverse direction
 
+    outResult.t = t;
+    outResult.hit = true;
+    outResult.point = origin + direction * t;
+    outResult.normal = glm::normalize(outResult.point - sphere.position);
+
     // else Normal intersection
     return a - f;
   }
 
   //----------------------------------------------------
-  float ray::Raycast(const AABB& aabb)
+  float ray::Raycast(const AABB& aabb, RaycastResult& outResult)
   {
+    RaycastResult::ResetRaycastResult(&outResult);
     glm::vec3 min = aabb.GetMin();
     glm::vec3 max = aabb.GetMax();
     // NOTE: Any component of direction could be 0!
     // to avoid a division by 0, you need to add 
     // additional safety checks.
-    float t1 = (min.x - origin.x) / direction.x;
-    float t2 = (max.x - origin.x) / direction.x;
-    float t3 = (min.y - origin.y) / direction.y;
-    float t4 = (max.y - origin.y) / direction.y;
-    float t5 = (min.z - origin.z) / direction.z;
-    float t6 = (max.z - origin.z) / direction.z;
+    float t[] = { 0, 0, 0, 0, 0, 0 };
+    t[0] = (min.x - origin.x) / direction.x;
+    t[1] = (max.x - origin.x) / direction.x;
+    t[2] = (min.y - origin.y) / direction.y;
+    t[3] = (max.y - origin.y) / direction.y;
+    t[4] = (min.z - origin.z) / direction.z;
+    t[5] = (max.z - origin.z) / direction.z;
     //Find the largest minimum value
     float tmin = fmaxf(
       fmaxf(
-        fminf(t1, t2),
-        fminf(t3, t4)
+        fminf(t[0], t[1]),
+        fminf(t[2], t[3])
       ),
-      fminf(t5, t6)
+      fminf(t[4], t[5])
     );
     //Find the smallest maximum value
     float tmax = fminf(
       fminf(
-        fmaxf(t1, t2),
-        fmaxf(t3, t4)
+        fmaxf(t[0], t[1]),
+        fmaxf(t[2], t[3])
       ),
-      fmaxf(t5, t6)
+      fmaxf(t[4], t[5])
     );
+
     /*If tmax is less than zero, the ray is intersecting AABB in the negative direction.This
-      means the entire AABB is behind the origin of the ray, this should not be treated as
-      an intersection :*/
+  means the entire AABB is behind the origin of the ray, this should not be treated as
+  an intersection :*/
     if (tmax < 0)
       return -1;
-   /* If tmin is greater than tmax, the ray does not intersect AABB :*/
+    /* If tmin is greater than tmax, the ray does not intersect AABB :*/
     if (tmin > tmax)
       return -1;
+
+    float t_result = tmin;
+    if (tmin < 0.0f) { t_result = tmax; }
+
+    outResult.t = t_result;
+    outResult.hit = true;
+    outResult.point = origin + direction * t_result;
+    glm::vec3 normals[] = {
+    glm::vec3(-1, 0, 0), glm::vec3(1, 0, 0),
+    glm::vec3(0, -1, 0), glm::vec3(0, 1, 0),
+    glm::vec3(0, 0, -1), glm::vec3(0, 0, 1)
+    };
+    for (int i = 0; i < 6; ++i) {
+      if (t_result == t[i])
+        outResult.normal = normals[i];
+    }
+
     /*If tmin is less than zero, that means the ray intersects the AABB but its origin is
       inside the AABB.This means tmax is the valid collision point :*/
     if (tmin < 0.0f)
@@ -453,8 +486,9 @@ namespace dbb
   }
 
   //------------------------------------------
-  float ray::Raycast(const OBB& obb)
+  float ray::Raycast(const OBB& obb, RaycastResult& outResult)
   {
+    RaycastResult::ResetRaycastResult(&outResult);
     const float* o = &obb.orientation[0][0];
     const float* size = &obb.size[0];
     // X, Y and Z axis of OBB
@@ -502,6 +536,23 @@ namespace dbb
       return -1.0f;
     if (tmin < 0.0f)
       return tmax;
+
+    float t_result = tmin;
+    if (tmin < 0.0f) { t_result = tmax; }
+
+    outResult.hit = true;
+    outResult.t = t_result;
+    outResult.point = origin + direction
+      * t_result;
+    glm::vec3 normals[] = { X, X * -1.0f,
+    Y, Y * -1.0f,
+    Z, Z * -1.0f
+    };
+    for (int i = 0; i < 6; ++i) {
+      if (t_result == t[i])
+        outResult.normal = glm::normalize(normals[i]);
+    }
+
     return tmin;
   }
 }

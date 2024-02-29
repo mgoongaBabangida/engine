@@ -46,8 +46,9 @@ namespace dbb
 	bool AABBPlane(const AABB& aabb, const dbb::plane& plane); //@todo to transfer later
 	bool OBBPlane(const OBB& obb, const dbb::plane& plane); //@todo to transfer later
 
-	float Raycast(const dbb::plane& plane, const dbb::ray& ray); //@todo to transfer later
+	float Raycast(const dbb::plane& plane, const dbb::ray& ray, RaycastResult& outResult); //@todo to transfer later
 	bool LineTest(const dbb::plane& plane, dbb::lineSegment);
+	//bool Raycast(const dbb::triangle& triangle, const dbb::ray& ray, RaycastResult& outResult); // @todo to implement
 
 	//---------------------------------------------------------------------
 	class DLL_MATH line

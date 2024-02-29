@@ -40,7 +40,7 @@ bool eRigidBody::Update(float _dt, std::vector<std::shared_ptr<eObject> > _objec
 		}
 	}
 
-	// rare case, check if the object got totally inside of AABB of one of the objects
+	// rare case, check if the object got totally inside of OBB of one of the objects
 	for (const auto& obj : _objects)
 	{
 		if (!obj->GetTransform() || !obj->GetCollider() || m_object == obj.get())

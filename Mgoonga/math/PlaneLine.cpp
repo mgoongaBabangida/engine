@@ -49,7 +49,7 @@ bool dbb::OBBPlane(const OBB& obb, const dbb::plane& plane)
 }
 
 //------------------------------------------------------------------
-float dbb::Raycast(const dbb::plane& plane, const dbb::ray& ray)
+float dbb::Raycast(const dbb::plane& plane, const dbb::ray& ray, RaycastResult& outResult)
 {
 	float nd = glm::dot(ray.direction, plane.Normal());
 	float pn = glm::dot(ray.origin, plane.Normal());
@@ -59,10 +59,17 @@ float dbb::Raycast(const dbb::plane& plane, const dbb::ray& ray)
 	float t = (plane.D - pn) / nd;
 
 	if (t >= 0.0f)
+	{
+		outResult.t = t;
+		outResult.hit = true;
+		outResult.point = ray.origin + ray.direction * t;
+		outResult.normal = glm::normalize(plane.Normal());
 		return t;
+	}
 	return -1;
 }
 
+//------------------------------------------------------------------
 bool dbb::LineTest(const dbb::plane& plane, dbb::lineSegment line)
  {
 	vec3 ab = line.end - line.start;
