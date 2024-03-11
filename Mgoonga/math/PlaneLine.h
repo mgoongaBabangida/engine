@@ -25,10 +25,10 @@ namespace dbb
 	class DLL_MATH plane
 	{
 	public:
-		float A = std::numeric_limits<float>::min();
-		float B	= std::numeric_limits<float>::min();
-		float C	= std::numeric_limits<float>::min();
-		float D	= std::numeric_limits<float>::min();
+		float A;
+		float B;
+		float C;
+		float D;
 
 		plane() {}
 		plane(float a, float b, float c, float d);
@@ -47,7 +47,7 @@ namespace dbb
 	float Raycast(const dbb::plane& plane, const dbb::ray& ray, RaycastResult& outResult); //@todo to transfer later
 	bool LineTest(const dbb::plane& plane, dbb::lineSegment);
 	//bool Raycast(const dbb::triangle& triangle, const dbb::ray& ray, RaycastResult& outResult); // @todo to implement
-	std::vector<dbb::plane> GetPlanes(const dbb::OBB& _obb);
+	std::vector<dbb::plane> GetPlanes(const dbb::OBB&);
 
 	//---------------------------------------------------------------------
 	class DLL_MATH line
