@@ -43,7 +43,7 @@ namespace dbb
       m_bodies[i]->Update(_deltaTime);
 
     //sync
-    for (int i = 0, size = m_collisions.size(); i < size; ++i)
+    for (size_t i = 0, size = m_collisions.size(); i < size; ++i)
     {
       float totalMass = m_collisions[i].m_A->InvMass() + m_collisions[i].m_B->InvMass();
       if (totalMass == 0.0f)
@@ -57,7 +57,7 @@ namespace dbb
       m_collisions[i].m_A->SynchCollisionVolumes();
     }
 
-    for (int i = 0, size = m_bodies.size(); i < size; ++i)
+    for (size_t i = 0, size = m_bodies.size(); i < size; ++i)
       m_bodies[i]->SolveConstraints(m_constraints);
   }
 

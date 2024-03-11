@@ -7,13 +7,16 @@
 
 namespace dbb
 {
+  class RigidBody;
+
   //---------------------------------------------------------------------
   class Collider
   {
   public:
-    static CollisionManifold FindCollisionFeatures(const Collider& _A, const Collider& _B) { return CollisionManifold(); }
+    static CollisionManifold FindCollisionFeatures(const Collider& _A, const Collider& _B) { return CollisionManifold(); } //@todo !!!
 
-    void SynchCollisionVolumes(const glm::vec3& _pos) { box.origin = _pos; sphere.position = _pos; }
+    void SynchCollisionVolumes(const glm::vec3& _pos, const glm::vec3& _orientation);
+    glm::vec4 GetTensor(RigidBody&) const;
   protected:
     dbb::OBB box;
     dbb::sphere sphere;
@@ -39,12 +42,16 @@ namespace dbb
     void      SetPosition(const glm::vec3& pos) { m_position = m_oldPosition = pos; }
     glm::vec3 GetPosition() { return m_position; }
     void      SetBounce(float b) { m_bounce = b; }
-    float     GetBounce() { return m_bounce; }
+    float     GetBounce() const{ return m_bounce; }
+    float     GetMass() const { return m_mass; }
     glm::vec3 GetVelocity() const;
 
     void SynchCollisionVolumes();
     float InvMass();
     void AddLinearImpulse(const glm::vec3& impulse);
+
+    glm::mat4 InvTensor();
+    virtual void AddRotationalImpulse(const glm::vec3& point, const glm::vec3& impulse);
 
   protected:
     dbb::Collider* m_collider = nullptr; // no collider means particle
@@ -56,5 +63,9 @@ namespace dbb
     float m_cor; // coef of restitution
     float m_bounce = 0.7f;
     float m_friction;
+    //rotation info
+    glm::vec3 m_orientation;
+    glm::vec3 m_angVel;
+    glm::vec3 m_torques; // Sum torques
   };
 }
