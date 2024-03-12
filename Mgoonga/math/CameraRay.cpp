@@ -25,8 +25,8 @@ namespace dbb
 		const Camera& camera = m_camera.get();
 		this->m_transform.billboard(camera.getDirection());
 		this->m_transform.setTranslation(camera.getPosition());
-		float w = camera.getWidth();
-		float h = camera.getHeight();
+		float w = (float)camera.getWidth();
+		float h = (float)camera.getHeight();
 
 		float XOffsetCoef = click_x / w;
 		float YOffsetCoef = click_y / h;

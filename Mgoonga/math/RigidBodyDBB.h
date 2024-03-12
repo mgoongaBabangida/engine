@@ -10,15 +10,42 @@ namespace dbb
   class RigidBody;
 
   //---------------------------------------------------------------------
-  class Collider
+  class ICollider //@todo move colliders to separate file
   {
   public:
-    static CollisionManifold FindCollisionFeatures(const Collider& _A, const Collider& _B) { return CollisionManifold(); } //@todo !!!
+    static CollisionManifold FindCollisionFeatures(const ICollider& _A, const ICollider& _B) { return _A.CollidesWith(_B); }
 
-    void SynchCollisionVolumes(const glm::vec3& _pos, const glm::vec3& _orientation);
-    glm::vec4 GetTensor(RigidBody&) const;
+    virtual void SynchCollisionVolumes(const glm::vec3& _pos, const glm::vec3& _orientation) = 0;
+    virtual glm::vec4 GetTensor(RigidBody&) const = 0;
+    virtual CollisionManifold CollidesWith(const ICollider& _other) const = 0;
+  };
+
+  class SphereCollider;
+
+  class OBBCollider : public ICollider
+  {
+  public:
+    virtual void SynchCollisionVolumes(const glm::vec3& _pos, const glm::vec3& _orientation) override;
+    virtual glm::vec4 GetTensor(RigidBody&) const override;
+    virtual CollisionManifold CollidesWith(const ICollider& _other) const override { return _other.CollidesWith(*this); }
+    const dbb::OBB& GetBox() const { return box; }
   protected:
+    CollisionManifold CollidesWith(const SphereCollider& _other) const;
+    CollisionManifold CollidesWith(const OBBCollider& _other) const;
     dbb::OBB box;
+  };
+
+  class SphereCollider : public ICollider
+  {
+  public:
+    virtual void SynchCollisionVolumes(const glm::vec3& _pos, const glm::vec3& _orientation) override;
+    virtual glm::vec4 GetTensor(RigidBody&) const override;
+    virtual CollisionManifold CollidesWith(const ICollider& _other) const override { return _other.CollidesWith(*this); }
+
+    const dbb::sphere& GetSphere() const { return sphere; }
+  protected:
+    CollisionManifold CollidesWith(const SphereCollider& _other) const;
+    CollisionManifold CollidesWith(const OBBCollider& _other) const;
     dbb::sphere sphere;
   };
 
@@ -37,7 +64,7 @@ namespace dbb
     virtual void SolveConstraints(const std::vector<OBB>& _constraints);
     virtual bool HasVolume() const { return m_collider == nullptr; }  // no collider means particle, no volume
 
-    dbb::Collider* GetCollider() const { return m_collider; }
+    dbb::ICollider* GetCollider() const { return m_collider; }
 
     void      SetPosition(const glm::vec3& pos) { m_position = m_oldPosition = pos; }
     glm::vec3 GetPosition() { return m_position; }
@@ -54,7 +81,7 @@ namespace dbb
     virtual void AddRotationalImpulse(const glm::vec3& point, const glm::vec3& impulse);
 
   protected:
-    dbb::Collider* m_collider = nullptr; // no collider means particle
+    dbb::ICollider* m_collider = nullptr; // no collider means particle
     glm::vec3 m_position;
     glm::vec3 m_oldPosition;
     glm::vec3 m_velocity;

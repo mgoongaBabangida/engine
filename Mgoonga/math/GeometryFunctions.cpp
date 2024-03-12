@@ -334,7 +334,7 @@ namespace dbb
   }
 
   //---------------------------------------------------------------------------------
-  CollisionManifold FindCollisionFeatures(const dbb::sphere& A, const dbb::sphere& B)
+  CollisionManifold FindCollision(const dbb::sphere& A, const dbb::sphere& B)
   {
     CollisionManifold result;
     CollisionManifold::ResetCollisionManifold(result);
@@ -354,7 +354,7 @@ namespace dbb
   }
 
   //---------------------------------------------------------------------------------
-  CollisionManifold FindCollisionFeatures(const dbb::OBB& A, const dbb::sphere& B)
+  CollisionManifold FindCollision(const dbb::OBB& A, const dbb::sphere& B)
   {
     CollisionManifold result;
     CollisionManifold::ResetCollisionManifold(result);
@@ -387,7 +387,7 @@ namespace dbb
   }
 
   //---------------------------------------------------------------------------------
-  CollisionManifold FindCollisionFeatures(const OBB& A, const OBB& B)
+  CollisionManifold FindCollision(const OBB& A, const OBB& B)
   {
     CollisionManifold result;
     CollisionManifold::ResetCollisionManifold(result);

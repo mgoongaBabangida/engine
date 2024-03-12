@@ -1,5 +1,7 @@
 #include "RigidBodyDBB.h"
 
+#include "GeometryFunctions.h"
+
 #include <glm\glm\gtc\quaternion.hpp>
 #include <glm\glm\gtx\quaternion.hpp>
 #include <glm\glm\gtx\euler_angles.hpp>
@@ -13,7 +15,7 @@ namespace dbb
   CollisionManifold RigidBody::FindCollisionFeatures(RigidBody& ra, RigidBody& rb)
   {
     if (ra.GetCollider() != nullptr && rb.GetCollider() != nullptr)
-      return dbb::Collider::FindCollisionFeatures(*ra.GetCollider(), *rb.GetCollider());
+      return dbb::ICollider::FindCollisionFeatures(*ra.GetCollider(), *rb.GetCollider());
     else
       return CollisionManifold();
   }
@@ -241,30 +243,21 @@ namespace dbb
   }
 
   //---------------------------------------------------------------------------------------
-  void Collider::SynchCollisionVolumes(const glm::vec3& _pos, const glm::vec3& _orientation)
+  void OBBCollider::SynchCollisionVolumes(const glm::vec3& _pos, const glm::vec3& _orientation)
   {
     box.origin = _pos;
-    sphere.position = _pos;
     box.orientation = glm::eulerAngleYXZ(_orientation.y , _orientation.x, _orientation.z);
   }
 
   //--------------------------------------------------
-  glm::vec4 Collider::GetTensor(RigidBody& _rb) const
+  glm::vec4 OBBCollider::GetTensor(RigidBody& _rb) const
   {
     float ix = 0.0f;
     float iy = 0.0f;
     float iz = 0.0f;
     float iw = 0.0f;
-    if (_rb.GetMass() != 0 /*&& type == RIGIDBODY_TYPE_SPHERE*/)
+    if(_rb.GetMass() != 0)
     {
-      float r2 = sphere.radius * sphere.radius;
-      float fraction = (2.0f / 5.0f);
-      ix = r2 * _rb.GetMass() * fraction;
-      iy = r2 * _rb.GetMass() * fraction;
-      iz = r2 * _rb.GetMass() * fraction;
-      iw = 1.0f;
-    }
-    else if (_rb.GetMass() != 0 /*&& type == RIGIDBODY_TYPE_BOX*/) {
       glm::vec3 size = box.size * 2.0f;
       float fraction = (1.0f / 12.0f);
       float x2 = size.x * size.x;
@@ -276,5 +269,54 @@ namespace dbb
       iw = 1.0f;
     }
     return glm::vec4(ix, iy, iz, iw);
+  }
+
+  //---------------------------------------------------------------------------------------
+  CollisionManifold OBBCollider::CollidesWith(const SphereCollider& _sphere) const
+  {
+    return FindCollision(box, _sphere.GetSphere());
+  }
+
+  //---------------------------------------------------------------------------------------
+  CollisionManifold OBBCollider::CollidesWith(const OBBCollider& _box) const
+  {
+    return FindCollision(box, _box.GetBox());
+  }
+
+  //---------------------------------------------------------------------------------------
+  void SphereCollider::SynchCollisionVolumes(const glm::vec3& _pos, const glm::vec3& _orientation)
+  {
+    sphere.position = _pos;
+  }
+
+  //--------------------------------------------------
+  glm::vec4 SphereCollider::GetTensor(RigidBody& _rb) const
+  {
+    float ix = 0.0f;
+    float iy = 0.0f;
+    float iz = 0.0f;
+    float iw = 0.0f;
+    if (_rb.GetMass() != 0)
+    {
+      float r2 = sphere.radius * sphere.radius;
+      float fraction = (2.0f / 5.0f);
+      ix = r2 * _rb.GetMass() * fraction;
+      iy = r2 * _rb.GetMass() * fraction;
+      iz = r2 * _rb.GetMass() * fraction;
+      iw = 1.0f;
+    }
+    return glm::vec4(ix, iy, iz, iw);
+  }
+
+  //--------------------------------------------------------------------------------
+  CollisionManifold SphereCollider::CollidesWith(const SphereCollider& _sphere) const
+  {
+    return FindCollision(sphere, _sphere.GetSphere());
+  }
+
+  //--------------------------------------------------------------------------------
+  CollisionManifold SphereCollider::CollidesWith(const OBBCollider& _box) const
+  {
+    return FindCollision(_box.GetBox(), sphere);
   }
 }
