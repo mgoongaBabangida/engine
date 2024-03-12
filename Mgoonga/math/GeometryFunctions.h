@@ -1,10 +1,31 @@
 #pragma once
 
-//#include "Geometry.h"
-#include "PlaneLine.h"
+#include "math.h"
+
+#include <glm\glm\glm.hpp>
+#include <glm\glm\gtc\matrix_transform.hpp>
+#include <glm\glm\gtx\transform.hpp>
+
+#include <vector>
+#include <assert.h>
+#include <exception>
+
+#include "Utils.h"
 
 namespace dbb
 {
+  using triangle = glm::mat3;
+  using point = glm::vec3;
+
+  struct sphere;
+  struct AABB;
+  struct lineSegment;
+  struct OBB;
+  struct ray;
+  class plane;
+  class line;
+  struct CollisionManifold;
+
   //Point checks
   bool IsPointInSphere(const dbb::point& point, const dbb::sphere& sphere);
   dbb::point GetClosestPointOnSphere(const dbb::sphere& sphere, const dbb::point& point);

@@ -284,7 +284,7 @@ void eParticleSystemRenderGPU_V2::_InitBuffers()
   glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
 
   // Fill the first velocity buffer with random velocities
-  vec3 v(0.0f);
+  glm::vec3 v(0.0f);
   float velocity, theta, phi;
   for (int i = 0; i < nParticles; i++) {
 

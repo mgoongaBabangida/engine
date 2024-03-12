@@ -119,7 +119,7 @@ public:
 	{
 		float maxDist = 40.0f;
 		float minDist = 10.0f;
-		vec4 color = vec4{0.5f,0.5f ,0.5f ,1.0f};
+		glm::vec4 color = glm::vec4 {0.5f,0.5f ,0.5f ,1.0f};
 		bool fog_on = true;
 		float density = 0.03f;
 		float gradient = 4.0f;

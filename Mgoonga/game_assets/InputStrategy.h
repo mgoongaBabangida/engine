@@ -1,6 +1,6 @@
 #pragma once
 #include <base/interfaces.h>
-#include <math/PlaneLine.h>
+#include <math/Geometry.h>
 #include <math/Camera.h>
 
 //-------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ public:
 	virtual bool OnMouseRelease()
 	{
 		m_grab_camera_line = std::nullopt;
-		m_translation_vector = vec3{ 0.0f, 0.0f, 0.0f };
+		m_translation_vector = glm::vec3{ 0.0f, 0.0f, 0.0f };
 		return true;
 	}
 

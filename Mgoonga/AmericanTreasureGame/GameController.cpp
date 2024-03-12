@@ -5,7 +5,7 @@
 #include <math/Camera.h>
 #include <math/Random.h>
 #include <math/ParticleSystem.h>
-#include <math/PlaneLine.h>
+#include <math/Geometry.h>
 
 #include <tcp_lib/Network.h>
 #include <tcp_lib/Server.h>
@@ -68,7 +68,7 @@ void GameController::Initialize()
   m_pipeline.get().SetUniformData("class ePhongRender", "emission_strength", 5.0f); //this does not work // This is common uniform
   shObject hdr_object = factory.CreateObject(m_modelManager->Find("white_sphere"), eObject::RenderType::PHONG, "LightObject"); // or "white_quad"
   if (hdr_object->GetModel()->GetName() == "white_sphere")
-    hdr_object->GetTransform()->setScale(vec3(0.15f, 0.15f, 0.15f));
+    hdr_object->GetTransform()->setScale(glm::vec3(0.15f, 0.15f, 0.15f));
   hdr_object->GetTransform()->setTranslation(m_game->GetMainLight().light_position);
   std::array<glm::vec4, 4> points = { // for area light
                                       glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f),
@@ -77,7 +77,7 @@ void GameController::Initialize()
                                       glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
   m_game->GetMainLight().points = points;
 
-  Material m { vec3{}, 0.0f, 0.0f, 1.0f,
+  Material m { glm::vec3{}, 0.0f, 0.0f, 1.0f,
               Texture::GetTexture1x1(TColor::YELLOW).id, Texture::GetTexture1x1(TColor::WHITE).id,
               Texture::GetTexture1x1(TColor::BLUE).id,   Texture::GetTexture1x1(TColor::WHITE).id, Texture::GetTexture1x1(TColor::YELLOW).id,
               true, true, true, true };
@@ -806,7 +806,7 @@ void GameController::_InitializeDiceLogicAndVisual()
   float pos_x = 10.0f;
   float pos_y = m_game->Height() - 125.0f - 10.0f;
   glm::vec2 icon_size = { 125.0f , 125.0f };
-  m_dice_gui = std::make_shared<GUI>(pos_x, pos_y, (float)icon_size.x, (float)icon_size.y, m_game->Width(), m_game->Height());
+  m_dice_gui = std::make_shared<GUI>((int)pos_x, (int)pos_y, (int)icon_size.x, (int)icon_size.y, m_game->Width(), m_game->Height());
   auto dice_tex = _GetDiceTexture();
   m_dice_gui->SetTexture(*dice_tex, { 0,0 }, { dice_tex->mTextureWidth, dice_tex->mTextureHeight });
   m_dice_gui->setCommand(std::make_shared<GUICommand>([this]()
@@ -833,7 +833,7 @@ void GameController::_InitializeShipIcons()
     float pos_x = (10.0f + icon_size.x) * i;
     float pos_y = 10.0f;
     const Texture* ship_tex = m_game->GetTexture("ship1");
-    std::shared_ptr<GUI> ship_gui = std::make_shared<GUI>(pos_x, pos_y, icon_size.x, icon_size.y, m_game->Width(), m_game->Height());
+    std::shared_ptr<GUI> ship_gui = std::make_shared<GUI>((int)pos_x, (int)pos_y, (int)icon_size.x, (int)icon_size.y, m_game->Width(), m_game->Height());
     ship_gui->SetTexture(*ship_tex, { 0,0 }, { ship_tex->mTextureWidth, ship_tex->mTextureHeight });
     ship_gui->SetRenderingFunc(GUI::RenderFunc::GreyKernel);
     ship_gui->setCommand(std::make_shared<GUICommand>([this, ship_gui]()
@@ -866,7 +866,7 @@ void GameController::_InitializeShipIcons()
     float pos_x = m_game->Width() - ((icon_size.x + 10.0f) * (i+1));
     float pos_y = 10.0f;
     const Texture* ship_tex = m_game->GetTexture("ship1");
-    std::shared_ptr<GUI> ship_gui = std::make_shared<GUI>(pos_x, pos_y, icon_size.x, icon_size.y, m_game->Width(), m_game->Height());
+    std::shared_ptr<GUI> ship_gui = std::make_shared<GUI>((int)pos_x, (int)pos_y, (int)icon_size.x, (int)icon_size.y, m_game->Width(), m_game->Height());
     ship_gui->SetTexture(*ship_tex, { 0,0 }, { ship_tex->mTextureWidth, ship_tex->mTextureHeight });
     ship_gui->SetRenderingFunc(GUI::RenderFunc::GreyKernel);
     ship_gui->setCommand(std::make_shared<GUICommand>([this, ship_gui]()
@@ -899,7 +899,7 @@ void GameController::_InitializeShipIcons()
   {
     float pos_x = 35.0f + 60.0f * i;
     float pos_y = 50.0f;
-    std::shared_ptr<GUI> status_gui = std::make_shared<GUIWithAlpha>(pos_x, pos_y, icon_size.x, icon_size.y, m_game->Width(), m_game->Height());
+    std::shared_ptr<GUI> status_gui = std::make_shared<GUIWithAlpha>((int)pos_x, (int)pos_y, (int)icon_size.x, (int)icon_size.y, m_game->Width(), m_game->Height());
     status_gui->SetRenderingFunc(GUI::RenderFunc::Default);
     status_gui->SetTransparent(true);
     m_game->AddGUI(status_gui);
@@ -910,7 +910,7 @@ void GameController::_InitializeShipIcons()
   {
     float pos_x = m_game->Width() - 35.0f - (60.0f * i);
     float pos_y = 50.0f;
-    std::shared_ptr<GUI> status_gui = std::make_shared<GUIWithAlpha>(pos_x, pos_y, icon_size.x, icon_size.y, m_game->Width(), m_game->Height());
+    std::shared_ptr<GUI> status_gui = std::make_shared<GUIWithAlpha>((int)pos_x, (int)pos_y, (int)icon_size.x, (int)icon_size.y, m_game->Width(), m_game->Height());
     status_gui->SetRenderingFunc(GUI::RenderFunc::Default);
     status_gui->SetTransparent(true);
     m_game->AddGUI(status_gui);
@@ -960,8 +960,8 @@ void GameController::_InitializeShips()
 
   m_terrain = factory.CreateObject(std::shared_ptr<IModel>(terrainModel.release()), eObject::RenderType::PHONG, "Terrain");
   m_terrain->SetName("Terrain");
-  m_terrain->GetTransform()->setScale(vec3(0.3f, 0.3f, 0.3f));
-  m_terrain->GetTransform()->setTranslation(vec3(0.0f, 1.85f, 0.0f));
+  m_terrain->GetTransform()->setScale(glm::vec3(0.3f, 0.3f, 0.3f));
+  m_terrain->GetTransform()->setTranslation(glm::vec3(0.0f, 1.85f, 0.0f));
   m_terrain->SetTextureBlending(true);
   m_terrain->SetPickable(false);
   m_game->AddObject(m_terrain);
@@ -1010,11 +1010,11 @@ void GameController::_InitializeShips()
     //material.albedo = colors[i];
     shObject ship = factory.CreateObject(m_modelManager->Find("ship"), eObject::RenderType::PBR, "Ship" + std::to_string(i));
     //shObject ship = factory.CreateObject(m_modelManager->Find("wall_cube"), eObject::RenderType::PHONG, "Ship" + std::to_string(i));
-    ship->GetTransform()->setScale(vec3(0.1f, 0.1f, 0.1f));
-    ship->GetTransform()->setTranslation(vec3(m_hexes[55 + i*40].x(), m_ship_height_level, m_hexes[55 + i * 40].z()));
+    ship->GetTransform()->setScale(glm::vec3(0.1f, 0.1f, 0.1f));
+    ship->GetTransform()->setTranslation(glm::vec3(m_hexes[55 + i*40].x(), m_ship_height_level, m_hexes[55 + i * 40].z()));
     ship->GetTransform()->setUp(glm::vec3(0.0f, 0.0f, 1.0f));
     ship->GetTransform()->setForward(glm::vec3(-1.0f, 0.0f, 0.0f));
-    ship->GetTransform()->turnTo(vec3{ m_hexes[110].x(), m_ship_height_level, m_hexes[110].z() }, 0.05f);
+    ship->GetTransform()->turnTo(glm::vec3{ m_hexes[110].x(), m_ship_height_level, m_hexes[110].z() }, 0.05f);
 
     m_hexes[55 + i * 40].SetTaken(true);
 
@@ -1038,8 +1038,8 @@ void GameController::_InitializeShips()
   for (int i = 0; i < m_ship_quantity_pirate; ++i)
   {
     shObject ship = factory.CreateObject(m_modelManager->Find("pirate_ship"), eObject::RenderType::PBR, "Pirate" + std::to_string(i));
-    ship->GetTransform()->setScale(vec3(0.04f, 0.04f, 0.04f));
-    ship->GetTransform()->setTranslation(vec3(m_hexes[26 + i * 40].x(), m_ship_height_level, m_hexes[26 + i * 40].z()));
+    ship->GetTransform()->setScale(glm::vec3(0.04f, 0.04f, 0.04f));
+    ship->GetTransform()->setTranslation(glm::vec3(m_hexes[26 + i * 40].x(), m_ship_height_level, m_hexes[26 + i * 40].z()));
     ship->GetTransform()->setUp(glm::vec3(0.0f, 0.0f, 1.0f));
     ship->GetTransform()->setRotation(0.0f, PI/2, 0.0f);
     ship->GetTransform()->setForward(glm::vec3(1.0f, 0.0f, 0.0f));
@@ -1124,8 +1124,8 @@ void GameController::_InitializeBases()
   //1
   float scale = 0.02f;
   shObject base1 = factory.CreateObject(m_modelManager->Find("castle"), eObject::RenderType::PHONG, "Base Veracruz");
-  base1->GetTransform()->setScale(vec3(scale, scale, scale));
-  base1->GetTransform()->setTranslation(vec3(m_hexes[99].x(), m_pipeline.get().GetWaterHeight() + 0.15f, m_hexes[99].z()));
+  base1->GetTransform()->setScale(glm::vec3(scale, scale, scale));
+  base1->GetTransform()->setTranslation(glm::vec3(m_hexes[99].x(), m_pipeline.get().GetWaterHeight() + 0.15f, m_hexes[99].z()));
   m_hexes[99].SetBase(true);
   auto* base_script1 = new eBaseScript(m_game, m_texManager->Find("TSpanishFlag0_s"));
   base_script1->ObjectCameToBase.Subscribe(
@@ -1159,8 +1159,8 @@ void GameController::_InitializeBases()
 
   //2
   shObject base2 = factory.CreateObject(m_modelManager->Find("castle"), eObject::RenderType::PHONG, "Base Cartagena");
-  base2->GetTransform()->setScale(vec3(scale, scale, scale));
-  base2->GetTransform()->setTranslation(vec3(m_hexes[38].x(), m_pipeline.get().GetWaterHeight() + 0.15f, m_hexes[38].z()));
+  base2->GetTransform()->setScale(glm::vec3(scale, scale, scale));
+  base2->GetTransform()->setTranslation(glm::vec3(m_hexes[38].x(), m_pipeline.get().GetWaterHeight() + 0.15f, m_hexes[38].z()));
   m_hexes[38].SetBase(true);
   auto* base_script2 = new eBaseScript(m_game, m_texManager->Find("TSpanishFlag0_s"));
   base_script2->ObjectCameToBase.Subscribe(
@@ -1179,8 +1179,8 @@ void GameController::_InitializeBases()
 
   //3
   shObject base3 = factory.CreateObject(m_modelManager->Find("castle"), eObject::RenderType::PHONG, "Base Casablanca");
-  base3->GetTransform()->setScale(vec3(scale, scale, scale));
-  base3->GetTransform()->setTranslation(vec3(m_hexes[83].x(), m_pipeline.get().GetWaterHeight() + 0.15f, m_hexes[83].z()));
+  base3->GetTransform()->setScale(glm::vec3(scale, scale, scale));
+  base3->GetTransform()->setTranslation(glm::vec3(m_hexes[83].x(), m_pipeline.get().GetWaterHeight() + 0.15f, m_hexes[83].z()));
   m_hexes[83].SetBase(true);
   auto* base_script3 = new eBaseScript(m_game, m_texManager->Find("TSpanishFlag0_s"));
   base_script3->ObjectCameToBase.Subscribe(
@@ -1199,8 +1199,8 @@ void GameController::_InitializeBases()
 
   //4
   shObject base4 = factory.CreateObject(m_modelManager->Find("castle"), eObject::RenderType::PHONG, "Base Sevillia");
-  base4->GetTransform()->setScale(vec3(scale, scale, scale));
-  base4->GetTransform()->setTranslation(vec3(m_hexes[141].x(), m_pipeline.get().GetWaterHeight() + 0.15f, m_hexes[141].z()));
+  base4->GetTransform()->setScale(glm::vec3(scale, scale, scale));
+  base4->GetTransform()->setTranslation(glm::vec3(m_hexes[141].x(), m_pipeline.get().GetWaterHeight() + 0.15f, m_hexes[141].z()));
   m_hexes[141].SetBase(true);
   auto* base_script4 = new eBaseScript(m_game, m_texManager->Find("TSpanishFlag0_s"));
   base_script4->ObjectCameToBase.Subscribe(
@@ -1224,7 +1224,7 @@ void GameController::_InitializeGoldenFrame()
   float pos_x = 50 * 5;
   float pos_y = 5.0f;
   const Texture* tex = m_game->GetTexture("golden_frame");
-  std::shared_ptr<GUI> frame_gui = std::make_shared<GUI>(pos_x, pos_y, 70, 70, m_game->Width(), m_game->Height());
+  std::shared_ptr<GUI> frame_gui = std::make_shared<GUI>((int)pos_x, (int)pos_y, 70, 70, m_game->Width(), m_game->Height());
   frame_gui->SetTexture(*tex, { 0,0 }, { tex->mTextureWidth, tex->mTextureHeight });
   frame_gui->SetTakeMouseEvents(true);
   frame_gui->SetMovable2D(true);

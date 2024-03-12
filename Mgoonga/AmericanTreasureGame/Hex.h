@@ -1,7 +1,7 @@
 #pragma once
 
 #include <base/Object.h>
-#include <math/PlaneLine.h>
+#include <math/Geometry.h>
 #include <math.h>
 
 #include <deque>

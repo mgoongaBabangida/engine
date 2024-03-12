@@ -347,7 +347,7 @@ void eComputeShaderRender::_RenderClothSimul(const Camera& _camera)
   glm::mat4 view = _camera.getWorldToViewMatrix();
   glm::mat4 model = glm::mat4(1.0f);
   glm::mat4 mv = view * model;
-  glm::mat3 norm = glm::mat3(vec3(mv[0]), vec3(mv[1]), vec3(mv[2]));
+  glm::mat3 norm = glm::mat3(glm::vec3(mv[0]), glm::vec3(mv[1]), glm::vec3(mv[2]));
 
   mRenderClothSimulShader.SetUniformData("ModelViewMatrix", mv);
   mRenderClothSimulShader.SetUniformData("NormalMatrix", glm::mat4(norm));

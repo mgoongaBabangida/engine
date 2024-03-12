@@ -36,7 +36,7 @@ void eAreaLightsOnlyRender::Render(const Camera& _camera, const Light& _light, c
 	glUniform4fv(pointsLoc, 4, &_light.points[0][0]);
 
 	mainShader.SetUniformData("areaLight.intensity", _light.intensity.x);
-	mainShader.SetUniformData("areaLight.color", vec4{1.0f, 1.0f, 0.0f, 1.0f});
+	mainShader.SetUniformData("areaLight.color", glm::vec4{1.0f, 1.0f, 0.0f, 1.0f});
 	mainShader.SetUniformData("areaLight.twoSided", true);
 
 	mainShader.SetUniformData("areaLightTranslate", _light.light_position);

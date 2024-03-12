@@ -58,7 +58,7 @@ protected:
 
   float metallic = 0.5f;
   float spec = 0.2f;
-  glm::vec4 scale = vec4(.8, .8, .8, 1.);
+  glm::vec4 scale = glm::vec4(.8, .8, .8, 1.);
   float k = 19.19f;
 
   std::unique_ptr<eScreenMesh>	screenMesh;

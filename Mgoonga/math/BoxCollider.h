@@ -4,7 +4,7 @@
 
 #include <base/interfaces.h>
 #include <base/Object.h>
-#include <math/PlaneLine.h>
+#include <math/Geometry.h>
 
 #include <glm\glm/gtc/constants.hpp>
 
@@ -29,7 +29,7 @@ public:
 
 	virtual glm::vec3								GetCenter() override;
 	virtual float										GetRadius() override;
-	virtual const std::string&			GetModelName() override { return m_model_name;  }
+
 	virtual std::vector<glm::mat3>	GetBoundingTriangles(const ITransform& trans)const override;
 	virtual std::vector<glm::vec3>	GetExtrems(const ITransform& trans) const override;
 
@@ -37,6 +37,7 @@ public:
 	virtual std::vector<glm::vec3>	GetExtremsLocalSpace() const override;
 	virtual extremDots							GetExtremDotsLocalSpace() const override { return m_dots; }
 
+	virtual const std::string&			GetModelName() override { return m_model_name; } // ?
 	virtual const std::string&			GetPath() const { return m_path; }
 	virtual void										SetPath(const std::string& _path) { m_path = _path; }
 

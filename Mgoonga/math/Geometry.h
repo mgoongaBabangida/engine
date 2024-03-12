@@ -8,6 +8,12 @@
 #include <glm\glm\gtc\matrix_transform.hpp>
 #include <glm\glm\gtx\transform.hpp>
 
+#include <assert.h>
+#include <exception>
+#include <vector>
+
+#include "Utils.h"
+
 #define AABBSphere(aabb, sphere) \
  SphereAABB(Sphere, AABB)
 
@@ -16,6 +22,12 @@ SphereOBB(sphere, obb)
 
 #define OBBAABB(obb, aabb) \
  AABBOBB(aabb, obb)
+
+#define PlaneSphere(plane, sphere) \
+ SpherePlane(sphere, plane)
+
+#define PlaneOBB(plane, obb) \
+ OBBPlane(obb, plane)
 
 namespace dbb
 {
@@ -49,6 +61,7 @@ namespace dbb
   };
 
   struct OBB;
+  class plane;
 
   //-------------------------------------------------
   struct lineSegment
@@ -66,6 +79,7 @@ namespace dbb
     bool LineTest(const dbb::sphere& sphere) const;
     bool LineTest(const AABB& aabb) const;
     bool LineTest(const OBB& obb) const;
+    bool LineTest(const dbb::plane& plane);
   };
 
   //----------------------------------------------------
@@ -83,8 +97,8 @@ namespace dbb
 
     std::vector<dbb::point> GetVertices() const;
     std::vector<dbb::lineSegment> GetEdges() const;
-    /*std::vector<dbb::plane> GetPlanes();*/ // @todo after getting plane
-    /*std::vector<dbb::point> ClipEdgesToOBB(const std::vector<dbb::lineSegment>& edges);*/ // ?
+    std::vector<dbb::plane> GetPlanes() const;
+
     float PenetrationDepth(const OBB& other, const glm::vec3& axis, bool* outShouldFlip) const;
   };
 
@@ -112,7 +126,51 @@ namespace dbb
     float Raycast(const dbb::sphere& sphere, RaycastResult& outResult);
     float Raycast(const AABB& aabb, RaycastResult& outResult);
     float Raycast(const OBB& obb, RaycastResult& outResult);
+    float Raycast(const dbb::plane& plane, RaycastResult& outResult);
+    //bool Raycast(const dbb::triangle& triangle, RaycastResult& outResult); // @todo to implement
   };
+
+  //----------------------------------------------------------------------
+  class DLL_MATH plane
+  {
+  public:
+    float A;
+    float B;
+    float C;
+    float D;
+
+    plane() {}
+    plane(float a, float b, float c, float d);
+    plane(dbb::point dot1, dbb::point dot2, dbb::point dot3);
+    plane(glm::vec3 normal, float distance) : A(normal.x), B(normal.y), C(normal.z), D(distance) {}
+    plane(dbb::triangle _triangle_on_plane);
+
+    glm::vec3 Normal() const { return glm::normalize(glm::vec3{ A, B, C }); }
+    bool isOn(dbb::point dot);
+    bool isInFront(dbb::point dot);
+    bool isSame(dbb::plane other);
+    float PlaneEquation(const dbb::point& dot);
+    dbb::point GetClosestPointOnPlane(const dbb::point& point) const;
+  };
+
+  //---------------------------------------------------------------------
+  class DLL_MATH line
+  {
+  public:
+    dbb::point M; // dot
+    glm::vec3 p; //vector direction
+
+    line(dbb::point dot, glm::vec3 direction);
+    line() :M(glm::vec3()), p(glm::vec3()) {}
+
+    bool		isOn(dbb::point dot);
+    float		findT(dbb::point dot);
+    glm::vec3	getDotFromT(float t);
+  };
+
+  DLL_MATH glm::vec3 intersection(dbb::plane P, dbb::line L);
+
+  DLL_MATH bool IsInside(dbb::triangle _triangle, dbb::point _dot);
 
   //-------------------------------------------------
   struct Interval

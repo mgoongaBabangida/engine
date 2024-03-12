@@ -1,5 +1,7 @@
 #include "stdafx.h"
+
 #include "GeometryFunctions.h"
+#include "Geometry.h"
 
 #include <cmath>
 #include <cfloat>
@@ -10,6 +12,7 @@
 
 #include <glm\glm\gtc\quaternion.hpp>
 #include <glm\glm\gtx\quaternion.hpp>
+
 namespace dbb
 {
   //----------------------------------------------------
@@ -319,7 +322,7 @@ namespace dbb
     std::vector<dbb::point> result;
     result.reserve(_edges.size());
     dbb::point intersection;
-    std::vector<dbb::plane> planes = GetPlanes(_obb);
+    std::vector<dbb::plane> planes = _obb.GetPlanes();
     for (int i = 0; i < planes.size(); ++i) {
       for (int j = 0; j < _edges.size(); ++j) {
         if (ClipToPlane(planes[i], _edges[j], &intersection))
@@ -436,7 +439,7 @@ namespace dbb
     Interval i = GetInterval(A, axis);
     float distance = (i.max - i.min) * 0.5f - result.depth * 0.5f;
     glm::vec3 pointOnPlane = A.origin + axis * distance;
-    for (int i = result.contacts.size() - 1; i >= 0; --i)
+    for (size_t i = result.contacts.size() - 1; i >= 0; --i)
     {
       glm::vec3 contact = result.contacts[i];
       result.contacts[i] = contact + (axis * glm::dot(axis, pointOnPlane - contact));

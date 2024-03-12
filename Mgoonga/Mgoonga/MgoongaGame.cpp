@@ -164,15 +164,15 @@ void eMgoongaGameContext::_InitMainTestSceane()
   ObjectFactoryBase factory;
 
   shObject wallCube = factory.CreateObject(modelManager->Find("wall_cube"), eObject::RenderType::PHONG, "WallCube");
-  wallCube->GetTransform()->setTranslation(vec3(3.0f, 3.0f, 3.0f));
+  wallCube->GetTransform()->setTranslation(glm::vec3(3.0f, 3.0f, 3.0f));
   m_objects.push_back(wallCube);
 
   shObject containerCube = factory.CreateObject(modelManager->Find("container_cube"), eObject::RenderType::PHONG, "ContainerCube");
-  containerCube->GetTransform()->setTranslation(vec3(-2.5f, 3.0f, 3.5f));
+  containerCube->GetTransform()->setTranslation(glm::vec3(-2.5f, 3.0f, 3.5f));
   m_objects.push_back(containerCube);
 
   shObject grassPlane = factory.CreateObject(modelManager->Find("grass_plane"), eObject::RenderType::PHONG, "GrassPlane");
-  grassPlane->GetTransform()->setTranslation(vec3(0.0f, 1.5f, 0.0f));
+  grassPlane->GetTransform()->setTranslation(glm::vec3(0.0f, 1.5f, 0.0f));
   grassPlane->GetTransform()->setScale({ 5.0f, 5.0f, 5.0f });
   m_objects.push_back(grassPlane);
 
@@ -183,25 +183,25 @@ void eMgoongaGameContext::_InitMainTestSceane()
   m_objects.push_back(terrain);*/
 
   shObject nanosuit = factory.CreateObject(modelManager->Find("nanosuit"), eObject::RenderType::PHONG, "Nanosuit");
-  nanosuit->GetTransform()->setTranslation(vec3(0.0f, 2.0f, 0.0f));
+  nanosuit->GetTransform()->setTranslation(glm::vec3(0.0f, 2.0f, 0.0f));
   nanosuit->GetTransform()->setRotation(0.0f, glm::radians(180.0f), 0.0f);
-  nanosuit->GetTransform()->setScale(vec3(0.12f, 0.12f, 0.12f));
+  nanosuit->GetTransform()->setScale(glm::vec3(0.12f, 0.12f, 0.12f));
   m_objects.push_back(nanosuit);
 
   shObject wolf = factory.CreateObject(modelManager->Find("wolf"), eObject::RenderType::PHONG, "Wolf");
   wolf->GetTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);
-  wolf->GetTransform()->setTranslation(vec3(4.0f, 3.0f, 0.0f));
+  wolf->GetTransform()->setTranslation(glm::vec3(4.0f, 3.0f, 0.0f));
   wolf->SetRigger(new Rigger((Model*)modelManager->Find("wolf").get())); //@todo improve
   wolf->GetRigger()->ChangeName(std::string(), "Running");//@todo improve
   m_objects.push_back(wolf);
 
   shObject brickCube = factory.CreateObject(modelManager->Find("brick_cube"), eObject::RenderType::PHONG, "BrickCube");
   brickCube->SetModel(modelManager->Find("brick_cube"));
-  brickCube->GetTransform()->setTranslation(vec3(0.5f, 3.0f, 3.5f));
+  brickCube->GetTransform()->setTranslation(glm::vec3(0.5f, 3.0f, 3.5f));
   m_objects.push_back(brickCube);
 
   shObject guard = factory.CreateObject(modelManager->Find("guard"), eObject::RenderType::PHONG, "Guard");
-  guard->GetTransform()->setTranslation(vec3(2.0f, 2.0f, 0.0f));
+  guard->GetTransform()->setTranslation(glm::vec3(2.0f, 2.0f, 0.0f));
   guard->GetTransform()->setRotation(glm::radians(-90.0f), glm::radians(-90.0f), 0.0f);
   guard->GetTransform()->setScale(glm::vec3(0.03f, 0.03f, 0.03f));
   guard->GetTransform()->setUp(glm::vec3(0.0f, 0.0f, 1.0f));
@@ -219,7 +219,7 @@ void eMgoongaGameContext::_InitMainTestSceane()
   //light
   GetMainLight().light_position.y = 3.5f;
   m_light_object = factory.CreateObject(modelManager->Find("white_sphere"), eObject::RenderType::PHONG, "WhiteSphere");
-  m_light_object->GetTransform()->setScale(vec3(0.05f, 0.05f, 0.05f));
+  m_light_object->GetTransform()->setScale(glm::vec3(0.05f, 0.05f, 0.05f));
   m_light_object->GetTransform()->setTranslation(GetMainLight().light_position);
   m_objects.push_back(m_light_object);
 
@@ -231,7 +231,7 @@ void eMgoongaGameContext::_InitMainTestSceane()
   const_cast<I3DMesh*>(obj->GetModel()->Get3DMeshes()[0])->SetMaterial(mat);
 
   shObject goldsphere = factory.CreateObject(modelManager->Find("sphere_gold"), eObject::RenderType::PBR, "SpherePBRGold");
-  goldsphere->GetTransform()->setTranslation(vec3(-7.0f, 3.5f, 2.0f));
+  goldsphere->GetTransform()->setTranslation(glm::vec3(-7.0f, 3.5f, 2.0f));
   m_objects.push_back(goldsphere);
   mat = *goldsphere->GetModel()->Get3DMeshes()[0]->GetMaterial();
   mat.ao = 0.5f;
