@@ -83,7 +83,7 @@ namespace dbb
   };
 
   //----------------------------------------------------
-  struct OBB
+  struct DLL_MATH OBB
   {
     dbb::point origin;
     glm::vec3 size;

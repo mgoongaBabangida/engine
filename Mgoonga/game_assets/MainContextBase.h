@@ -111,6 +111,8 @@ public:
 		m_input_strategy.reset(_input_strategy);
 	}
 
+	const ModelManagerYAML* GetModelManager() const { return modelManager.get(); }
+
 protected:
 	virtual void		InitializePipline();
 	virtual void		InitializeBuffers();

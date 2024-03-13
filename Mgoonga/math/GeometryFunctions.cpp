@@ -71,7 +71,7 @@ namespace dbb
     glm::vec3 dir = point - obb.origin;
     for (int i = 0; i < 3; ++i)
     {
-      const float* orientation = &obb.orientation[i * 3][0];
+      const float* orientation = &obb.orientation[i][0];
       glm::vec3 axis(orientation[0], orientation[1], orientation[2]);
       float distance = glm::dot(dir, axis);
       if (distance > obb.size[i])
@@ -89,7 +89,7 @@ namespace dbb
     glm::vec3 dir = point - obb.origin;
     for (int i = 0; i < 3; ++i)
     {
-      const float* orientation = &obb.orientation[i * 3][0];;
+      const float* orientation = &obb.orientation[i][0];
       glm::vec3 axis(orientation[0], orientation[1], orientation[2]);
       float distance = glm::dot(dir, axis);
       if (distance > obb.size[i])
@@ -323,8 +323,10 @@ namespace dbb
     result.reserve(_edges.size());
     dbb::point intersection;
     std::vector<dbb::plane> planes = _obb.GetPlanes();
-    for (int i = 0; i < planes.size(); ++i) {
-      for (int j = 0; j < _edges.size(); ++j) {
+    for (int i = 0; i < planes.size(); ++i)
+    {
+      for (int j = 0; j < _edges.size(); ++j)
+      {
         if (ClipToPlane(planes[i], _edges[j], &intersection))
           if (IsPointInOBB(intersection, _obb))
             result.push_back(intersection);
@@ -360,9 +362,9 @@ namespace dbb
     CollisionManifold::ResetCollisionManifold(result);
     dbb::point closestPoint = GetClosestPointOnOBB(A, B.position);
     float distanceSq = glm::length2(closestPoint - B.position);
-    if (distanceSq > B.radius * B.radius) {
+    if (distanceSq > B.radius * B.radius)
       return result;
-    }
+
     glm::vec3 normal;
     if (distanceSq == 0.0f)
     {
@@ -439,7 +441,7 @@ namespace dbb
     Interval i = GetInterval(A, axis);
     float distance = (i.max - i.min) * 0.5f - result.depth * 0.5f;
     glm::vec3 pointOnPlane = A.origin + axis * distance;
-    for (size_t i = result.contacts.size() - 1; i >= 0; --i)
+    for (int i = result.contacts.size() - 1; i >= 0; --i)
     {
       glm::vec3 contact = result.contacts[i];
       result.contacts[i] = contact + (axis * glm::dot(axis, pointOnPlane - contact));

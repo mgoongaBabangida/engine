@@ -41,6 +41,8 @@ public:
 	virtual const std::string&			GetPath() const { return m_path; }
 	virtual void										SetPath(const std::string& _path) { m_path = _path; }
 
+	virtual std::optional<dbb::OBB>			GetOBB(const ITransform& trans) override;
+	virtual std::optional<dbb::sphere>	GetSphere(const ITransform& trans) override;
 protected:
 	std::vector<dbb::line>	_getRays(const ITransform& trans, Side moveDirection, std::vector<float>& lengths);
 	void										_getForwardRayLengths(const ITransform& trans,

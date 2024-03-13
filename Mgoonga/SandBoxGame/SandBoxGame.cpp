@@ -21,6 +21,7 @@
 #include <game_assets/ObjectFactory.h>
 #include <game_assets/ShootScript.h>
 #include <game_assets/AnimationSocketScript.h>
+#include <game_assets/PhysicsEngineTestScript.h>
 
 #include "SandBoxScript.h"
 
@@ -91,7 +92,7 @@ void eSandBoxGame::InitializeModels()
 
 	//@todo make it dynamic, make clear order
 	//GLOBAL SCRIPTS
-	m_global_scripts.push_back(std::make_shared<ShootScript>(this, modelManager.get()));
+	m_global_scripts.push_back(std::make_shared<PhysicsEngineTestScript>(this));
 	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
 
 	m_global_scripts.push_back(std::make_shared<GUIControllerBase>(this, this->pipeline, soundManager->GetSound("page_sound")));

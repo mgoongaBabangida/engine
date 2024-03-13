@@ -55,7 +55,7 @@ namespace dbb
   bool ClipToPlane(const dbb::plane& plane, const dbb::lineSegment& line, dbb::point* outPoint);
   std::vector<dbb::point> ClipEdgesToOBB(const std::vector<dbb::lineSegment>& _edges, const OBB& _obb);
 
-  CollisionManifold FindCollision(const dbb::sphere& A, const dbb::sphere& B);
-  CollisionManifold FindCollision(const dbb::OBB& A, const dbb::sphere& B);
-  CollisionManifold FindCollision(const OBB& A, const OBB& B);
+  DLL_MATH CollisionManifold FindCollision(const dbb::sphere& A, const dbb::sphere& B);
+  DLL_MATH CollisionManifold FindCollision(const dbb::OBB& A, const dbb::sphere& B);
+  DLL_MATH CollisionManifold FindCollision(const OBB& A, const OBB& B);
 }

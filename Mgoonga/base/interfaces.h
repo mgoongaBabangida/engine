@@ -219,6 +219,12 @@ public:
 	virtual bool		isRotationValid() = 0;
 };
 
+namespace dbb
+{
+	struct OBB;
+	struct sphere;
+}
+
 //----------------------------------------------------------------------------------------------
 class ICollider
 {
@@ -249,6 +255,9 @@ public:
 	virtual std::vector<glm::mat3>	GetBoundingTrianglesLocalSpace()const = 0;
 	virtual std::vector<glm::vec3>	GetExtremsLocalSpace() const = 0;
 	virtual extremDots							GetExtremDotsLocalSpace() const = 0;
+
+	virtual std::optional<dbb::OBB> GetOBB(const ITransform& trans) = 0;
+	virtual std::optional<dbb::sphere> GetSphere(const ITransform& trans) = 0;
 };
 
 //----------------------------------------------------------------------------------------------

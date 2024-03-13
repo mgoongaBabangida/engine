@@ -38,7 +38,7 @@ eModelManager::~eModelManager()
 {
 }
 
-std::shared_ptr<IModel> eModelManager::Find(const std::string& name)
+std::shared_ptr<IModel> eModelManager::Find(const std::string& name) const
 {
 	return  models.find(name)->second;
 }

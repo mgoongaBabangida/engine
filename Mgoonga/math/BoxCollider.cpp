@@ -429,6 +429,27 @@ bool BoxCollider::IsInsideOfAABB(const ITransform& _trans, const ITransform& _tr
 }
 
 //----------------------------------------------------------------------------------------
+std::optional<dbb::OBB> BoxCollider::GetOBB(const ITransform& _trans)
+{
+	dbb::OBB obb;
+	obb.origin = _trans.getModelMatrix() * glm::vec4(this->GetCenter(), 1.0f);
+	obb.size = { ((this->GetExtremDotsLocalSpace().MaxX - this->GetExtremDotsLocalSpace().MinX) * _trans.getScaleAsVector().x )/ 2,
+							 ((this->GetExtremDotsLocalSpace().MaxY - this->GetExtremDotsLocalSpace().MinY) * _trans.getScaleAsVector().y) / 2,
+							 ((this->GetExtremDotsLocalSpace().MaxZ - this->GetExtremDotsLocalSpace().MinZ) * _trans.getScaleAsVector().z) / 2 };
+	obb.orientation = glm::toMat4(_trans.getRotation());
+	return obb;
+}
+
+//----------------------------------------------------------------------------------------
+std::optional<dbb::sphere> BoxCollider::GetSphere(const ITransform& _trans)
+{
+	dbb::sphere sphere;
+	sphere.position = _trans.getTranslation();
+	sphere.radius = ((this->GetExtremDotsLocalSpace().MaxX - this->GetExtremDotsLocalSpace().MinX) * _trans.getScaleAsVector().x) / 2;
+	return sphere;
+}
+
+//----------------------------------------------------------------------------------------
 bool BoxCollider::_CheckByRadius(const ITransform& _trans, const ITransform& _trans_other, ICollider* _other)
 {
 	glm::vec4 center				= _trans.getModelMatrix()				* glm::vec4(GetCenter(), 1.0f);

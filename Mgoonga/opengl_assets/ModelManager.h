@@ -21,7 +21,7 @@ class DLL_OPENGL_ASSETS eModelManager
     ~eModelManager();
 
   	void							            InitializePrimitives();
-  	std::shared_ptr<IModel>			  Find(const std::string& name);
+  	std::shared_ptr<IModel>			  Find(const std::string& name) const;
 
   	virtual void							    Add(const std::string& name, char* path, bool invert_y_uv = false);
     virtual void                  Add(const std::string& _name, Primitive _type, Material&& _material);

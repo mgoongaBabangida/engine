@@ -1,6 +1,7 @@
 #pragma once
 #include "BoxCollider.h"
 
+//-----------------------------------------------------------
 class DLL_MATH BoxColliderDynamic : public BoxCollider
 {
 public:
@@ -36,6 +37,10 @@ public:
   virtual std::vector<glm::vec3>	GetExtrems(const ITransform& trans) const override;
   virtual glm::vec3               GetCenter() override;
   virtual float										GetRadius() override;
+
+  // @todo override these 
+  /*virtual std::optional<dbb::OBB>		GetOBB(const ITransform& trans) override;
+  virtual std::optional<dbb::sphere>	GetSphere(const ITransform& trans) override;*/
 
   const std::vector<AnimationData>& GetData() const { return m_data; }
   const IRigger*                    GetRigger() const { return m_rigger;}

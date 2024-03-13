@@ -166,9 +166,9 @@ void eMainContextBase::InitializeGL()
 		//init main light
 		m_lights.push_back({});
 		//m_lights[0].light_position = vec4(0.0f, 4.0f, -1.0f, 1.0f);
-		m_lights[0].light_position = vec4(0.5f, 2.0f, -4.0f, 1.0f);
-		m_lights[0].light_direction = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-		m_lights[0].intensity = vec4{ 10.0f,10.0f ,10.0f, 1.0f };
+		m_lights[0].light_position = glm::vec4(0.5f, 2.0f, -4.0f, 1.0f);
+		m_lights[0].light_direction = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		m_lights[0].intensity = glm::vec4{ 10.0f,10.0f ,10.0f, 1.0f };
 		m_lights[0].type = eLightType::DIRECTION;
 		m_lights[0].constant = 0.9f;
 		m_lights[0].linear = 0.5f;
