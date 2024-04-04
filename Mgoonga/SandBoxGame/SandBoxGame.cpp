@@ -68,6 +68,7 @@ void eSandBoxGame::InitializeModels()
 	//_InitializeScene();
 
 	//light
+	GetMainLight().light_position = glm::vec4(0.f, 6.5f, 5.f , 1.f);
 	ObjectFactoryBase factory(animationManager.get());
 	pipeline.SetUniformData("class ePhongRender", "emission_strength", 5.0f);
 	shObject hdr_object = factory.CreateObject(modelManager->Find("white_quad"), eObject::RenderType::PHONG, "LightObject"); // or "white_quad"
@@ -82,6 +83,9 @@ void eSandBoxGame::InitializeModels()
 		glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
 	GetMainLight().points = points;
 
+	GetMainCamera().setPosition({-1, 2, 10});
+	GetMainCamera().setDirection({0, 0, -1.f});
+
 	Material m{ glm::vec3{}, 0.0f, 0.0f, 1.0f,
 		Texture::GetTexture1x1(TColor::YELLOW).id, Texture::GetTexture1x1(TColor::WHITE).id,
 		Texture::GetTexture1x1(TColor::BLUE).id,   Texture::GetTexture1x1(TColor::WHITE).id, Texture::GetTexture1x1(TColor::YELLOW).id,
@@ -92,7 +96,7 @@ void eSandBoxGame::InitializeModels()
 
 	//@todo make it dynamic, make clear order
 	//GLOBAL SCRIPTS
-	m_global_scripts.push_back(std::make_shared<PhysicsEngineTestScript>(this));
+	m_global_scripts.push_back(std::make_shared<PhysicsEngineTestScript>(this, this->externalGui[13]));
 	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
 
 	m_global_scripts.push_back(std::make_shared<GUIControllerBase>(this, this->pipeline, soundManager->GetSound("page_sound")));

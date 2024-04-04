@@ -201,6 +201,7 @@ namespace dbb
     RaycastResult::ResetRaycastResult(&outResult);
     const float* o = &obb.orientation[0][0];
     const float* size = &obb.size[0];
+
     // X, Y and Z axis of OBB
     glm::vec3 X(o[0], o[1], o[2]);
     glm::vec3 Y(o[3], o[4], o[5]);
@@ -252,8 +253,7 @@ namespace dbb
 
     outResult.hit = true;
     outResult.t = t_result;
-    outResult.point = origin + direction
-      * t_result;
+    outResult.point = origin + direction * t_result;
     glm::vec3 normals[] = { X, X * -1.0f,
     Y, Y * -1.0f,
     Z, Z * -1.0f

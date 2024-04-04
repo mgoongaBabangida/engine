@@ -169,15 +169,25 @@ void eWindowImGuiExternal::Render()
     {
       int* value = nullptr;
       std::function<void(int, int*&)> callback = *(reinterpret_cast<std::function<void(int, int*&)>*>(std::get<2>(item)));
-      if (std::get<0>(item) == "Sky box")
+      if (std::get<0>(item) == "Sky box") //@ todo change it asasp !!!!
       {
         static int skybox_spin_value = 0;
         value = &skybox_spin_value;
       }
-      else if (std::get<0>(item) == "IBL Map")
+      else if (std::get<0>(item) == "IBL Map")//@ todo change it asasp !!!!
       {
         static int ibl_spin_value = 0;
         value = &ibl_spin_value;
+      }
+      else if (std::get<0>(item) == "Penetration Slack")//@ todo change it asasp !!!!
+      {
+        static int penetration_slack = 0;
+        value = &penetration_slack;
+      }
+      else if (std::get<0>(item) == "Impulse Iterations")//@ todo change it asasp !!!!
+      {
+        static int impulse_iterations = 0;
+        value = &impulse_iterations;
       }
       else
       {

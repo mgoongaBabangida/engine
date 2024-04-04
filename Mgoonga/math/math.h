@@ -1,4 +1,5 @@
 #pragma once
+#include "stdafx.h"
 
 #ifdef DLLDIR_EX
 #define DLL_MATH __declspec(dllexport)

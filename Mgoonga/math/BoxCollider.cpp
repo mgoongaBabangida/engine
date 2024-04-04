@@ -437,6 +437,8 @@ std::optional<dbb::OBB> BoxCollider::GetOBB(const ITransform& _trans)
 							 ((this->GetExtremDotsLocalSpace().MaxY - this->GetExtremDotsLocalSpace().MinY) * _trans.getScaleAsVector().y) / 2,
 							 ((this->GetExtremDotsLocalSpace().MaxZ - this->GetExtremDotsLocalSpace().MinZ) * _trans.getScaleAsVector().z) / 2 };
 	obb.orientation = glm::toMat4(_trans.getRotation());
+	if (obb.size.y == 0.0f) // for planes to have some volume
+		obb.size.y = 0.3f;
 	return obb;
 }
 

@@ -393,6 +393,7 @@ namespace dbb
   {
     CollisionManifold result;
     CollisionManifold::ResetCollisionManifold(result);
+
     const float* o1 = &A.orientation[0][0];
     const float* o2 = &B.orientation[0][0];
     glm::vec3 test[15] = { // Face axis
@@ -435,17 +436,30 @@ namespace dbb
     glm::vec3 axis = normalize(*hitNormal);
     std::vector<dbb::point> c1 = ClipEdgesToOBB(B.GetEdges(), A);
     std::vector<dbb::point> c2 = ClipEdgesToOBB(A.GetEdges(), B);
+
     result.contacts.reserve(c1.size() + c2.size());
     result.contacts.insert(result.contacts.end(), c1.begin(), c1.end());
     result.contacts.insert(result.contacts.end(), c2.begin(), c2.end());
+
     Interval i = GetInterval(A, axis);
     float distance = (i.max - i.min) * 0.5f - result.depth * 0.5f;
     glm::vec3 pointOnPlane = A.origin + axis * distance;
+
     for (int i = result.contacts.size() - 1; i >= 0; --i)
     {
       glm::vec3 contact = result.contacts[i];
       result.contacts[i] = contact + (axis * glm::dot(axis, pointOnPlane - contact));
+
+      for (int j = result.contacts.size() - 1; j > i; --j)
+      {
+        if (glm::length2(result.contacts[j] - result.contacts[i]) < 0.0001f)
+        {
+          result.contacts.erase(result.contacts.begin() + j);
+          break;
+        }
+      }
     }
+
     result.colliding = true;
     result.normal = axis;
     return result;
