@@ -88,7 +88,7 @@ namespace dbb
     virtual void SolveConstraints(const std::vector<OBB>& _constraints);
     virtual bool HasVolume() const;
 
-    void          AddLinearImpulse(const glm::vec3& impulse);
+    virtual void  AddLinearImpulse(const glm::vec3& impulse);
     virtual void  AddRotationalImpulse(const glm::vec3& point, const glm::vec3& impulse);
 
     dbb::ICollider* GetCollider() const;

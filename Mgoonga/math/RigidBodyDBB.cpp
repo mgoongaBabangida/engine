@@ -395,7 +395,7 @@ namespace dbb
   void OBBCollider::SynchCollisionVolumes(const glm::vec3& _pos, const glm::vec3& _orientation)
   {
     box.origin = _pos;
-    box.orientation = glm::eulerAngleYXZ(_orientation.x , _orientation.y, _orientation.z);
+    box.orientation = glm::eulerAngleYXZ(_orientation.y , _orientation.x, _orientation.z);
   }
 
   //--------------------------------------------------
@@ -468,7 +468,9 @@ namespace dbb
   //---------------------------------------------------------------------------------------
   CollisionManifold OBBCollider::CollidesWith(const SphereCollider& _sphere) const
   {
-    return FindCollision(box, *_sphere.GetSphere()); //@todo check optional
+    CollisionManifold cm = FindCollision(box, *_sphere.GetSphere()); //@todo check optional
+    cm.normal = -cm.normal;
+    return cm;
   }
 
   //---------------------------------------------------------------------------------------
@@ -480,7 +482,7 @@ namespace dbb
   //--------------------------------------------------------------------------------
   CollisionManifold SphereCollider::CollidesWith(const SphereCollider& _sphere) const
   {
-    return FindCollision(sphere, *_sphere.GetSphere());
+    return FindCollision(*_sphere.GetSphere(), sphere);
   }
 
   //--------------------------------------------------------------------------------

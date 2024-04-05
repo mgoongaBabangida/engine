@@ -44,6 +44,7 @@ PhysicsEngineTestScript::PhysicsEngineTestScript(eMainContextBase* _game, IWindo
 //------------------------------------------------------------------------------
 PhysicsEngineTestScript::~PhysicsEngineTestScript()
 {
+  m_timer->stop();
 }
 
 //------------------------------------------------------------------------------
@@ -111,6 +112,18 @@ bool PhysicsEngineTestScript::OnKeyPress(uint32_t _asci, KeyModifiers _modifier)
       m_reset = true;
       break;
     }
+    case ASCII_V:
+    {
+      sphere2.first->GetTransform()->setTranslation(m_game->GetMainCameraPosition());
+      sphere2.first->GetTransform()->setScale({ 0.1,0.1,0.1 });
+      sphere2.second->AddLinearImpulse(m_game->GetMainCameraDirection() * 25.f);
+
+      dbb::sphere sph2 = sphere2.first->GetCollider()->GetSphere(*sphere2.first->GetTransform()).value(); // get from old collider!
+      dbb::ICollider* c_sph2 = new dbb::SphereCollider(sph2);
+      sphere2.second->SetCollider(c_sph2);
+
+      break;
+    }
     default: return false;
   }
   return true;
@@ -124,11 +137,7 @@ void PhysicsEngineTestScript::Update(float _tick)
 
   if (m_simulation_on)
   {
-    m_physics_system->SetLinearProjectionPercent(m_projection_percent);
-    m_physics_system->SetPenetrationSlack(m_penetration_slack);
-    m_physics_system->SetImpulseIteration(m_impulse_iterations);
-    m_physics_system->SetLinearImpulsesOnly(m_linear_impulses_only);
-    m_physics_system->Update(_tick); // @todo make stable fps
+    m_physics_system->Update(_tick);
   }
 
   {
@@ -161,6 +170,8 @@ void PhysicsEngineTestScript::Update(float _tick)
       cube2.first->GetTransform()->setRotation(glm::toQuat(c2.orientation)); //works incorrectly!
       cube2.first->GetTransform()->setTranslation(c2.origin - (cube2.first->GetTransform()->getRotation() * cube2.first->GetCollider()->GetCenter()));
 
+      sphere2.first->GetTransform()->setTranslation(s2.position - sphere2.first->GetCollider()->GetCenter());
+
       //grassPlane.first->GetTransform()->setTranslation(grass_obb.origin - grassPlane.first->GetCollider()->GetCenter());
     }
   }
@@ -180,6 +191,24 @@ void PhysicsEngineTestScript::Initialize()
 {
   m_physics_system = std::make_unique<dbb::PhysicsSystem>();
   m_physics_system->CollisionOccured.Subscribe([this](const dbb::CollisionPair& _c) { OnCollisionOccured(_c); });
+
+  static math::eClock s_clock;
+  s_clock.start();
+
+  m_timer.reset(new math::Timer([this]()->bool
+    {
+      float tick = s_clock.newFrame();
+      if (m_simulation_on)
+      {
+        m_physics_system->SetLinearProjectionPercent(m_projection_percent);
+        m_physics_system->SetPenetrationSlack(m_penetration_slack);
+        m_physics_system->SetImpulseIteration(m_impulse_iterations);
+        m_physics_system->SetLinearImpulsesOnly(m_linear_impulses_only);
+        m_physics_system->UpdateAsync(tick);
+      }
+      return true;
+    }));
+  m_timer->start(33); //~30 fps
 
   ObjectFactoryBase factory;
   m_normal_mesh = new LineMesh({}, {}, glm::vec4{ 1.0f, 1.0f, 0.0f, 1.0f });
@@ -207,6 +236,9 @@ void PhysicsEngineTestScript::Initialize()
     dbb::ICollider* c_obb1 = new dbb::OBBCollider(obb1);
     cube1.second.reset(new dbb::RigidBody{ c_obb1 });
     cube1.second->SetCoefOfRestitution(m_restitution);
+
+    m_imgui->Add(SLIDER_FLOAT_NERROW, "Damping Chair", (void*)&cube1.second->GetDamping());
+    m_imgui->Add(SLIDER_FLOAT_NERROW, "Angular Velocity Damper", (void*)&cube1.second->g_angular_vel_damper);
   }
 
   //sphere 2
@@ -282,6 +314,14 @@ void PhysicsEngineTestScript::Reset()
   sphere1.second->SetCoefOfRestitution(m_restitution);
   sphere1.second->SetFriction(m_friction);
 
+  sphere2.first->GetTransform()->setTranslation(glm::vec3(-5.5f, 3.0f, 0.0f));
+  sphere2.first->GetTransform()->setRotation(0, 0, 0);
+  dbb::sphere sph2 = sphere2.first->GetCollider()->GetSphere(*sphere2.first->GetTransform()).value();
+  dbb::ICollider* c_sph2 = new dbb::SphereCollider(sph2);
+  sphere2.second.reset(new dbb::RigidBody{ c_sph2 });
+  sphere2.second->SetCoefOfRestitution(m_restitution);
+  sphere2.second->SetFriction(m_friction);
+
   cube1.first->GetTransform()->setTranslation(glm::vec3(-3.0f, 5.0f, 0.0f));
   cube1.first->GetTransform()->setRotation(0,0,0);
   dbb::OBB obb1 = cube1.first->GetCollider()->GetOBB(*cube1.first->GetTransform()).value(); // get obb from old collider!
@@ -289,6 +329,8 @@ void PhysicsEngineTestScript::Reset()
   cube1.second.reset(new dbb::RigidBody{ c_obb1 });
   cube1.second->SetCoefOfRestitution(m_restitution);
   cube1.second->SetFriction(m_friction);
+  m_imgui->Add(SLIDER_FLOAT_NERROW, "Damping Chair", (void*)&cube1.second->GetDamping());
+  m_imgui->Add(SLIDER_FLOAT_NERROW, "Angular Velocity Damper", (void*)&cube1.second->g_angular_vel_damper);
 
   cube2.first->GetTransform()->setTranslation(glm::vec3(3.0f, 3.0f, 0.0f));
   cube2.first->GetTransform()->setRotation(0, 0, 0);
@@ -312,6 +354,7 @@ void PhysicsEngineTestScript::Reset()
   if (m_add_cube2)
     m_physics_system->AddRigidbody(cube2.second.get());
 
+  m_physics_system->AddRigidbody(sphere2.second.get());
   m_physics_system->AddRigidbody(grassPlane.second.get());
   //m_physics_system->AddConstraint(grassPlane.first->GetCollider()->GetOBB(*grassPlane.first->GetTransform()).value());
   m_reset = false;

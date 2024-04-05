@@ -5,6 +5,8 @@
 #include <base/Event.h>
 #include "RigidBodyDBB.h"
 
+#include <queue>
+
 namespace dbb
 {
   struct CollisionPair
@@ -22,7 +24,9 @@ namespace dbb
   public:
     Event<std::function<void(const CollisionPair&)>>  CollisionOccured;
 
-    void Update(float _deltaTime); //needs to be called at fixed fps, should be separate thread(or separate clock) with fixed interval of calls like 30fps
+    void Update(float _deltaTime); // called in main thread
+    void UpdateAsync(float _deltaTime); //needs to be called at fixed fps, should be separate thread(or separate clock) with fixed interval of calls like 30fps
+    
     void AddRigidbody(dbb::RigidBody* _body);
     void AddConstraint(const OBB& _constraint);
 
@@ -41,10 +45,12 @@ namespace dbb
     void ClearRigidbodys();
     void ClearConstraints();
     void ClearCollisions();
+
   protected:
     std::vector<dbb::RigidBody*>   m_bodies;
     std::vector<dbb::OBB>          m_constraints;
     std::vector<CollisionPair>     m_collisions;
+    std::queue<CollisionPair>      m_callbacks;
 
     float m_linearProjectionPercent = 0.6f;
     float m_penetrationSlack = 0.01f;

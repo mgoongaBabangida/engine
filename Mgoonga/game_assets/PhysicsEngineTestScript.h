@@ -4,6 +4,8 @@
 #include <base/interfaces.h>
 #include <base/Object.h>
 
+#include <math/Timer.h>
+
 class eMainContextBase;
 class LineMesh;
 class IWindowImGui;
@@ -33,6 +35,7 @@ public:
 protected:
   eMainContextBase*                   m_game = nullptr;
   std::unique_ptr<dbb::PhysicsSystem> m_physics_system;
+  std::unique_ptr<math::Timer>        m_timer;
 
   std::pair<shObject, std::unique_ptr<dbb::RigidBody>> sphere1;
   std::pair<shObject, std::unique_ptr<dbb::RigidBody>> cube1;

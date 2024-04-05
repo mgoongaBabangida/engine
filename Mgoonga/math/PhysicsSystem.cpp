@@ -5,6 +5,17 @@ namespace dbb
   //-------------------------------------------------------
   void PhysicsSystem::Update(float _deltaTime)
   {
+    size_t size = m_callbacks.size();
+    for (size_t i = 0; i < size; ++i)
+    {
+      CollisionOccured.Occur(m_callbacks.front());
+      m_callbacks.pop();
+    }
+  }
+
+  //-------------------------------------------------------
+  void PhysicsSystem::UpdateAsync(float _deltaTime)
+  {
     ClearCollisions();
     for (size_t i = 0, size = m_bodies.size(); i < size; ++i)
     {
@@ -20,7 +31,7 @@ namespace dbb
           if (result.colliding)
           {
             m_collisions.emplace_back(m_bodies[i], m_bodies[j], result);
-            CollisionOccured.Occur(m_collisions.back());
+            m_callbacks.push(m_collisions.back());
           }
         }
       }
@@ -57,8 +68,8 @@ namespace dbb
       if (totalMass == 0.0f)
         continue;
 
-      /*if (!m_collisions[i].m_A->GetGravityApplicable() || !m_collisions[i].m_B->GetGravityApplicable())
-        m_collisions[i].m_result.depth *= 2;*/
+      if (!m_collisions[i].m_A->GetGravityApplicable() || !m_collisions[i].m_B->GetGravityApplicable())
+        m_collisions[i].m_result.depth *= 2;
 
       float depth = fmaxf(m_collisions[i].m_result.depth - m_penetrationSlack, 0.0f);
       float scalar = depth / totalMass;
