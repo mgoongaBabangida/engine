@@ -316,6 +316,7 @@ MenuBehaviorLeanerMove::~MenuBehaviorLeanerMove()
 	{
 		gui->SetVisible(false);
 		anim.Reset();
-		timer->stop();
+		if(timer.get())
+			timer->stop();
 	}
 }

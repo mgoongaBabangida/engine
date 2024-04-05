@@ -216,14 +216,21 @@ void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, 
 		GLfloat* buffer = new GLfloat[_heightMap.mTextureHeight * _heightMap.mTextureWidth * 4];
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buffer);
 		m_heightMap.TextureFromBuffer((GLfloat*)buffer, _heightMap.mTextureWidth, _heightMap.mTextureHeight, GL_RGBA, GL_REPEAT, GL_LINEAR);
-		for (int i = 0; i < _heightMap.mTextureHeight * _heightMap.mTextureWidth * 4; i += 4)
+		if (_heightMap.mTextureHeight == m_rows && _heightMap.mTextureWidth == m_columns)
 		{
-			float height = (float)(buffer[i] * _height_scale);
-			this->vertices[i / 4].Position.y = height <= _max_height ? height : _max_height;
-			if (this->vertices[i / 4].Position.y < m_minY)
-				m_minY = this->vertices[i / 4].Position.y;
-			if (this->vertices[i / 4].Position.y > m_maxY)
-				m_maxY = this->vertices[i / 4].Position.y;
+			for (int i = 0; i < _heightMap.mTextureHeight * _heightMap.mTextureWidth * 4; i += 4)
+			{
+				float height = (float)(buffer[i] * _height_scale);
+				this->vertices[i / 4].Position.y = height <= _max_height ? height : _max_height;
+				if (this->vertices[i / 4].Position.y < m_minY)
+					m_minY = this->vertices[i / 4].Position.y;
+				if (this->vertices[i / 4].Position.y > m_maxY)
+					m_maxY = this->vertices[i / 4].Position.y;
+			}
+		}
+		else
+		{
+
 		}
 		delete[] buffer;
 	}

@@ -65,7 +65,7 @@ void eSandBoxGame::InitializeModels()
 	material.emissive_texture_id = Texture::GetTexture1x1(TColor::BLACK).id;
 	modelManager->Add("sphere_red", Primitive::SPHERE, std::move(material));
 
-	//_InitializeScene();
+	_InitializeScene();
 
 	//light
 	GetMainLight().light_position = glm::vec4(0.f, 6.5f, 5.f , 1.f);
