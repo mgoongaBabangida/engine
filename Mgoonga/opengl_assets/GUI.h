@@ -28,7 +28,7 @@ public:
 	GUI(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight);
 	GUI(const dbb::Rect&, int scWidth, int scHeight);
 	GUI(const GUI&);
-	virtual ~GUI() {}
+	virtual ~GUI();
 
 	virtual bool	OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier) override;
 	virtual bool	OnMouseRelease(KeyModifiers _modifier) override;
@@ -53,29 +53,25 @@ public:
 	bool									isHover(int x, int y);
 	bool					virtual isPressed(int x, int y);
 
-	bool					IsVisible() const { return m_is_visible; }
-	void					SetVisible(bool _isVisible) { m_is_visible = _isVisible; }
+	bool					IsVisible() const;
+	void					SetVisible(bool _isVisible);
 
-	bool					IsTransparent() const { return m_is_transparent; }
-	void					SetTransparent(bool _isTransparent) { m_is_transparent = _isTransparent; }
+	bool					IsTransparent() const;
+	void					SetTransparent(bool _isTransparent);
 
-	bool					IsMovable2D() const { return m_is_moveble2d; }
-	void					SetMovable2D(bool _isMovable2D) { m_is_moveble2d = _isMovable2D; }
+	bool					IsMovable2D() const;
+	void					SetMovable2D(bool _isMovable2D);
 
-	bool					IsExecuteOnRelease() const { return m_is_execute_on_release; }
-	void					SetExecuteOnRelease(bool _is_execute_on_release) { m_is_execute_on_release = _is_execute_on_release; }
+	bool					IsExecuteOnRelease() const;
+	void					SetExecuteOnRelease(bool _is_execute_on_release);
 
-	bool					IsTakingMouseEvents() const { return m_take_mouse_moves; }
-	void					SetTakeMouseEvents(bool _take_mouse_moves) { m_take_mouse_moves = _take_mouse_moves; }
+	bool					IsTakingMouseEvents() const;
+	void					SetTakeMouseEvents(bool _take_mouse_moves);
 
-	RenderFunc GetRenderingFunc() const { return m_render_func; }
-	void SetRenderingFunc(RenderFunc _func) { m_render_func = _func; }
+	RenderFunc GetRenderingFunc() const;
+	void SetRenderingFunc(RenderFunc _func);
 
-	void Move(glm::ivec2 _newTopLeft)
-	{
-		topleftX = _newTopLeft.x;
-		topleftY = _newTopLeft.y;
-	}
+	void Move(glm::ivec2 _newTopLeft);
 
 	glm::ivec4		getViewPort() const;
 	glm::ivec2		getTopLeft() const;
@@ -134,6 +130,7 @@ class DLL_OPENGL_ASSETS GUIWithAlpha : public GUI
 {
 public:
 	GUIWithAlpha(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight);
+	virtual ~GUIWithAlpha();
 
 	virtual bool isPressed(int x, int y) override;
 	virtual void Perssed() override;

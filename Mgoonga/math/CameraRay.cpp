@@ -25,6 +25,7 @@ namespace dbb
 		const Camera& camera = m_camera.get();
 		this->m_transform.billboard(camera.getDirection());
 		this->m_transform.setTranslation(camera.getPosition());
+
 		float w = (float)camera.getWidth();
 		float h = (float)camera.getHeight();
 
@@ -66,7 +67,7 @@ namespace dbb
 			{
 				plane plane(triangle);
 				glm::vec3 inters = intersection(plane, line);
-				if (IsInside(triangle, inters) /*&& glm::dot(line.p, glm::vec3(inters - line.M))> 0.0f*/) //check if behind 
+				if (IsInside(triangle, inters) && glm::dot(line.p, glm::vec3(inters - line.M))> 0.0f) //check if behind 
 				{
 					intersections.insert(std::pair<shObject, glm::vec3>(obj, inters));
 				}

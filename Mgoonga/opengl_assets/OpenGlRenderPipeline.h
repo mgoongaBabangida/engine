@@ -59,7 +59,7 @@ public:
 	void			SwitchWater(bool on)  { water = on; }
 
 	// Getters
-	float			GetWaterHeight() const { return waterHeight; }
+	float			GetWaterHeight() const;
 
   bool& GetBoundingBoxBoolRef() { return draw_bounding_boxes; }
   bool& GetMultiSamplingBoolRef() { return mts; }
@@ -69,7 +69,7 @@ public:
   float& GetBlurCoefRef() { return blur_coef; }
 	bool& GetKernelOnRef() { return kernel; }
 	bool& GetSkyNoiseOnRef() { return sky_noise; }
-	bool& GetOutlineFocusedRef() { return outline_focused; }
+	bool& GetOutlineFocusedRef();
 	bool& GetSSAOEnabledRef() { return ssao; }
 	bool& GetSSREnabledRef() { return ssr; }
 	bool& GetEnabledCameraInterpolationRef() { return camera_interpolation; }
@@ -91,7 +91,7 @@ public:
 	bool& GetGammaCorrectionRef();
 	bool& GetToneMappingRef();
 
-	bool& IBL() { return ibl_on; }
+	bool& IBL();
 
 	//Water Render
 	float& WaveSpeedFactor();

@@ -45,6 +45,43 @@ GUI::GUI(const GUI& _other)
 }
 
 //-------------------------------------------------------
+GUI::~GUI()
+{
+}
+
+//-------------------------------------------------------
+bool	GUI::IsVisible() const { return m_is_visible; }
+void	GUI::SetVisible(bool _isVisible) { m_is_visible = _isVisible; }
+
+//-------------------------------------------------------
+bool	GUI::IsTransparent() const { return m_is_transparent; }
+void	GUI::SetTransparent(bool _isTransparent) { m_is_transparent = _isTransparent; }
+
+//-------------------------------------------------------
+bool	GUI::IsMovable2D() const { return m_is_moveble2d; }
+void	GUI::SetMovable2D(bool _isMovable2D) { m_is_moveble2d = _isMovable2D; }
+
+//-------------------------------------------------------
+bool	GUI::IsExecuteOnRelease() const { return m_is_execute_on_release; }
+void	GUI::SetExecuteOnRelease(bool _is_execute_on_release) { m_is_execute_on_release = _is_execute_on_release; }
+
+//-------------------------------------------------------
+bool	GUI::IsTakingMouseEvents() const { return m_take_mouse_moves; }
+void	GUI::SetTakeMouseEvents(bool _take_mouse_moves) { m_take_mouse_moves = _take_mouse_moves; }
+
+//-------------------------------------------------------
+GUI::RenderFunc GUI::GetRenderingFunc() const { return m_render_func; }
+void GUI::SetRenderingFunc(RenderFunc _func) { m_render_func = _func; }
+
+//-------------------------------------------------------
+void GUI::Move(glm::ivec2 _newTopLeft)
+{
+	topleftX = _newTopLeft.x;
+	topleftY = _newTopLeft.y;
+}
+
+
+//-------------------------------------------------------
 bool GUI::OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier)
 {
 	if(left && m_is_visible && isPressed(x, y))
@@ -181,6 +218,10 @@ std::pair<uint32_t, uint32_t> GUI::pointOnGUI(uint32_t x_window, uint32_t y_wind
 //---------------------------------------------------------------------------------
 GUIWithAlpha::GUIWithAlpha(int topleftX, int topleftY, int Width, int Height, int scWidth, int scHeight)
 : GUI(topleftX, topleftY, Width, Height, scWidth, scHeight)
+{
+}
+
+GUIWithAlpha::~GUIWithAlpha()
 {
 }
 

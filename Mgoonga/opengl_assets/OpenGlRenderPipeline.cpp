@@ -13,6 +13,10 @@
 
 #include <algorithm>
 
+float eOpenGlRenderPipeline::GetWaterHeight() const { return waterHeight; }
+bool& eOpenGlRenderPipeline::GetOutlineFocusedRef() { return outline_focused; }
+bool& eOpenGlRenderPipeline::IBL() { return ibl_on; }
+
 //---------------------------------------------------------------------------------------------
 void	eOpenGlRenderPipeline::SetSkyBoxTexture(const Texture* _t)
 { renderManager->SkyBoxRender()->SetSkyBoxTexture(_t); }
@@ -412,24 +416,27 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	{
 		for (const auto& obj : focused)
 		{
-			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-			glStencilFunc(GL_ALWAYS, 1, 0xFF);
-			glStencilMask(0xFF);
+			if (obj->IsVisible())
+			{
+				glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+				glStencilFunc(GL_ALWAYS, 1, 0xFF);
+				glStencilMask(0xFF);
 
-			if (std::find(phong_objs.begin(), phong_objs.end(), obj) != phong_objs.end())
-				RenderMain(_camera, _light, { obj });
-			else
-				RenderPBR(_camera, _light, { obj });
+				if (std::find(phong_objs.begin(), phong_objs.end(), obj) != phong_objs.end())
+					RenderMain(_camera, _light, { obj });
+				else if (std::find(pbr_objs.begin(), pbr_objs.end(), obj) != pbr_objs.end())
+					RenderPBR(_camera, _light, { obj });
 
-			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-			glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-			glStencilMask(0x00);
+				glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+				glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+				glStencilMask(0x00);
 
-			RenderOutlineFocused(_camera, _light, { obj });
+				RenderOutlineFocused(_camera, _light, { obj });
 
-			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-			glStencilFunc(GL_ALWAYS, 0, 0xFF);
-			glStencilMask(0xFF);
+				glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+				glStencilFunc(GL_ALWAYS, 0, 0xFF);
+				glStencilMask(0xFF);
+			}
 		}
 	}
 	else

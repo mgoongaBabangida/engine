@@ -174,7 +174,7 @@ protected:
 	};
 
 	bool m_l_pressed = false;
-	FramedChoice m_framed_choice_enabled = FramedChoice::WITH_LEFT;
+	FramedChoice m_framed_choice_enabled = FramedChoice::DISABLED;
 	bool m_update_hovered = false;
 	bool m_show_fps = true;
 	bool m_debug_csm = false;
