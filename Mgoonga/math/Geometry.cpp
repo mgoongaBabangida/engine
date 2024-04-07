@@ -75,6 +75,17 @@ namespace dbb
   }
 
   //----------------------------------------------------
+  bool lineSegment::Linetest(const dbb::triangle& triangle)
+  {
+    ray ray;
+    ray.origin = start;
+    ray.direction = glm::normalize(end - start);
+    RaycastResult res;
+    float t = ray.Raycast(triangle, res);
+    return t >= 0 && t * t <= LengthSq();
+  }
+
+  //----------------------------------------------------
   glm::vec3 AABB::GetMin() const
   {
     glm::vec3 p1 = origin + size;
@@ -95,7 +106,7 @@ namespace dbb
   }
 
   //---------------------------------------------------------------------------------
-  float ray::Raycast(const dbb::sphere& sphere, RaycastResult& outResult)
+  float ray::Raycast(const dbb::sphere& sphere, RaycastResult& outResult) const
   {
     RaycastResult::ResetRaycastResult(&outResult);
     //Construct a vector from the origin of the ray to the center of the sphere:
@@ -131,7 +142,7 @@ namespace dbb
   }
 
   //----------------------------------------------------
-  float ray::Raycast(const AABB& aabb, RaycastResult& outResult)
+  float ray::Raycast(const AABB& aabb, RaycastResult& outResult) const
   {
     RaycastResult::ResetRaycastResult(&outResult);
     glm::vec3 min = aabb.GetMin();
@@ -196,7 +207,7 @@ namespace dbb
   }
 
   //------------------------------------------
-  float ray::Raycast(const OBB& obb, RaycastResult& outResult)
+  float ray::Raycast(const OBB& obb, RaycastResult& outResult) const
   {
     RaycastResult::ResetRaycastResult(&outResult);
     const float* o = &obb.orientation[0][0];
@@ -267,7 +278,7 @@ namespace dbb
   }
 
   //----------------------------------------------------------------------------
-  float ray::Raycast(const dbb::plane& plane, RaycastResult& outResult)
+  float ray::Raycast(const dbb::plane& plane, RaycastResult& outResult) const
   {
     float nd = glm::dot(direction, plane.Normal());
     float pn = glm::dot(origin, plane.Normal());
@@ -284,6 +295,26 @@ namespace dbb
       outResult.normal = glm::normalize(plane.Normal());
       return t;
     }
+    return -1;
+  }
+
+  //----------------------------------------------------------------------------
+  float ray::Raycast(const dbb::triangle& triangle, RaycastResult& outResult) const
+  {
+    dbb::plane plane(triangle);
+    RaycastResult res;
+    float t = Raycast(plane, res);
+    if (t < 0.0f)
+      return t;
+
+    dbb::point result = origin + direction * t;
+
+    glm::vec3 barycentric = Barycentric(result, triangle);
+    if (barycentric.x >= 0.0f && barycentric.x <= 1.0f &&
+        barycentric.y >= 0.0f && barycentric.y <= 1.0f &&
+        barycentric.z >= 0.0f && barycentric.z <= 1.0f)
+        return t;
+
     return -1;
   }
 
@@ -373,6 +404,39 @@ namespace dbb
     if (outShouldFlip != 0)
       *outShouldFlip = (i2.min < i1.min);
     return (len1 + len2) - length;
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  glm::vec3 Project(const glm::vec3& length, const glm::vec3& direction)
+  {
+    float dot = glm::dot(length, direction);
+    float magSq = glm::length2(direction);
+    return direction * (dot / magSq);
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  glm::vec3 Barycentric(const point& p, const triangle& _t)
+  {
+    dbb::point triangle1_p1(_t[0][0], _t[0][1], _t[0][2]);
+    dbb::point triangle1_p2(_t[1][0], _t[1][1], _t[1][2]);
+    dbb::point triangle1_p3(_t[2][0], _t[2][1], _t[2][2]);
+
+    glm::vec3 ap = p - triangle1_p1;
+    glm::vec3 bp = p - triangle1_p2;
+    glm::vec3 cp = p - triangle1_p3;
+    glm::vec3 ab = triangle1_p2 - triangle1_p1;
+    glm::vec3 ac = triangle1_p3 - triangle1_p1;
+    glm::vec3 bc = triangle1_p3 - triangle1_p2;
+    glm::vec3 cb = triangle1_p2 - triangle1_p3;
+    glm::vec3 ca = triangle1_p1 - triangle1_p3;
+
+    glm::vec3 v = ab - Project(ab, cb);
+    float a = 1.0f - (glm::dot(v, ap) / glm::dot(v, ab));
+    v = bc - Project(bc, ac);
+    float b = 1.0f - (glm::dot(v, bp) / glm::dot(v, bc));
+    v = ca - Project(ca, ab);
+    float c = 1.0f - (glm::dot(v, cp) / glm::dot(v, ca));
+    return glm::vec3(a, b, c);
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -553,7 +617,7 @@ namespace dbb
   }
 
   //--------------------------------------------------------
-  float dbb::plane::PlaneEquation(const dbb::point& dot)
+  float dbb::plane::PlaneEquation(const dbb::point& dot) const
   {
     return A * dot.x + B * dot.y + C * dot.z - D;
   }
@@ -649,6 +713,21 @@ namespace dbb
         projection : result.min;
       result.max = (projection > result.max) ?
         projection : result.max;
+    }
+    return result;
+  }
+
+  //---------------------------------------------------------------
+  Interval GetInterval(const dbb::triangle& _triangle, const glm::vec3& _axis)
+  {
+    Interval result;
+    result.min = glm::dot(_axis, { _triangle[0][0],_triangle[0][1],_triangle[0][3] });
+    result.max = result.min;
+    for (int i = 0; i < 3; ++i)
+    {
+      float value = glm::dot(_axis, { _triangle[i][0],_triangle[i][1],_triangle[i][3] });
+      result.min = fminf(result.min, value);
+      result.max = fmaxf(result.max, value);
     }
     return result;
   }

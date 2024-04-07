@@ -150,6 +150,363 @@ namespace dbb
   }
 
   //-------------------------------------------------------------
+  bool IsPointInTriangle(const dbb::point& _point, const dbb::triangle& _triangle)
+  {
+    dbb::point triangle_p1(_triangle[0][0], _triangle[0][1], _triangle[0][2]);
+    dbb::point triangle_p2(_triangle[1][0], _triangle[1][1], _triangle[1][2]);
+    dbb::point triangle_p3(_triangle[2][0], _triangle[2][1], _triangle[2][2]);
+
+    glm::vec3 a = triangle_p1 - _point;
+    glm::vec3 b = triangle_p2 - _point;
+    glm::vec3 c = triangle_p3 - _point;
+
+    // The point should be moved too, so they are both
+    // relative, but because we don't use p in the
+    // equation anymore, we don't need it!
+    // p -= p; This would just equal the zero vector!
+    glm::vec3 normPBC = glm::cross(b, c); // Normal of PBC (u)
+    glm::vec3 normPCA = glm::cross(c, a); // Normal of PCA (v)
+    glm::vec3 normPAB = glm::cross(a, b); // Normal of PAB (w)
+
+    if (glm::dot(normPBC, normPCA) < 0.0f)
+      return false;
+    else if (glm::dot(normPBC, normPAB) < 0.0f)
+      return false;
+
+    return true;
+  }
+
+  //-------------------------------------------------------------
+  dbb::point GetClosestPointOnTriangle(const dbb::triangle& _triangle, const dbb::point& _point)
+  {
+    dbb::plane plane(_triangle);
+    dbb::point closest = plane.GetClosestPointOnPlane(_point);
+    if (IsPointInTriangle(closest, _triangle))
+      return closest;
+
+    dbb::point triangle_p1(_triangle[0][0], _triangle[0][1], _triangle[0][2]);
+    dbb::point triangle_p2(_triangle[1][0], _triangle[1][1], _triangle[1][2]);
+    dbb::point triangle_p3(_triangle[2][0], _triangle[2][1], _triangle[2][2]);
+
+    dbb::point c1 = GetClosestPointOnLineSegment(dbb::lineSegment(triangle_p1, triangle_p2), _point); // Line AB
+    dbb::point c2 = GetClosestPointOnLineSegment(dbb::lineSegment(triangle_p2, triangle_p3), _point); // Line BC
+    dbb::point c3 = GetClosestPointOnLineSegment(dbb::lineSegment(triangle_p3, triangle_p1), _point); // Line CA
+
+    float magSq1 = glm::length2(_point - c1);
+    float magSq2 = glm::length2(_point - c2);
+    float magSq3 = glm::length2(_point - c3);
+
+    if (magSq1 < magSq2 && magSq1 < magSq3)
+      return c1;
+
+    else if (magSq2 < magSq1 && magSq2 < magSq3)
+      return c2;
+
+    return c3;
+  }
+
+  //-------------------------------------------------------------
+  bool OverlapOnAxis(const AABB& _aabb, const dbb::triangle& _triangle, const glm::vec3& _axis)
+  {
+    Interval a = GetInterval(_aabb, _axis);
+    Interval b = GetInterval(_triangle, _axis);
+    return ((b.min <= a.max) && (a.min <= b.max));
+  }
+
+  //-------------------------------------------------------------
+  bool OverlapOnAxis(const OBB& _obb, const dbb::triangle& _triangle, const glm::vec3& _axis)
+  {
+    Interval a = GetInterval(_obb, _axis);
+    Interval b = GetInterval(_triangle, _axis);
+    return ((b.min <= a.max) && (a.min <= b.max));
+  }
+
+  //-------------------------------------------------------------
+  bool OverlapOnAxis(const dbb::triangle& t1, const dbb::triangle& t2, const glm::vec3& axis)
+  {
+    Interval a = GetInterval(t1, axis);
+    Interval b = GetInterval(t2, axis);
+    return ((b.min <= a.max) && (a.min <= b.max));
+  }
+
+  //-------------------------------------------------------------
+  bool TriangleAABB(const dbb::triangle& _triangle, const AABB& _axis)
+  {
+    dbb::point triangle_p1(_triangle[0][0], _triangle[0][1], _triangle[0][2]);
+    dbb::point triangle_p2(_triangle[1][0], _triangle[1][1], _triangle[1][2]);
+    dbb::point triangle_p3(_triangle[2][0], _triangle[2][1], _triangle[2][2]);
+
+    glm::vec3 f0 = triangle_p2 - triangle_p1;
+    glm::vec3 f1 = triangle_p3 - triangle_p2;
+    glm::vec3 f2 = triangle_p1 - triangle_p3;
+
+    glm::vec3 u0(1.0f, 0.0f, 0.0f);
+    glm::vec3 u1(0.0f, 1.0f, 0.0f);
+    glm::vec3 u2(0.0f, 0.0f, 1.0f);
+
+    glm::vec3 test[13] = { u0, // AABB Axis 1
+                           u1, // AABB Axis 2
+                           u2, // AABB Axis 3
+      glm::cross(f0, f1),
+      glm::cross(u0, f0), glm::cross(u0, f1), glm::cross(u0, f2),
+      glm::cross(u1, f0), glm::cross(u1, f1), glm::cross(u1, f2),
+      glm::cross(u2, f0), glm::cross(u2, f1), glm::cross(u2, f2)
+    };
+
+    for (int i = 0; i < 13; ++i)
+    {
+      if (!OverlapOnAxis(_axis, _triangle, test[i]))
+        return false; // Separating axis found
+    }
+    return true; // Separating axis not found
+  }
+
+  //-------------------------------------------------------------
+  bool TriangleOBB(const dbb::triangle& _triangle, const OBB& _obb)
+  {
+    dbb::point triangle_p1(_triangle[0][0], _triangle[0][1], _triangle[0][2]);
+    dbb::point triangle_p2(_triangle[1][0], _triangle[1][1], _triangle[1][2]);
+    dbb::point triangle_p3(_triangle[2][0], _triangle[2][1], _triangle[2][2]);
+
+    // Compute the edge vectors of the triangle (ABC)
+    glm::vec3 f0 = triangle_p2 - triangle_p1;
+    glm::vec3 f1 = triangle_p3 - triangle_p2;
+    glm::vec3 f2 = triangle_p1 - triangle_p3;
+
+    const float* orientation = &_obb.orientation[0][0];
+    glm::vec3 u0(orientation[0],
+                 orientation[1],
+                 orientation[2]);
+    glm::vec3 u1(orientation[3],
+                 orientation[4],
+                 orientation[5]);
+    glm::vec3 u2(orientation[6],
+                 orientation[7],
+                 orientation[8]);
+
+    glm::vec3 test[13] = {
+      u0, // OBB Axis 1
+      u1, // OBB Axis 2
+      u2, // OBB Axis 3
+      glm::cross(f0, f1), // Normal of the Triangle 
+      glm::cross(u0, f0), glm::cross(u0, f1), glm::cross(u0, f2),
+      glm::cross(u1, f0), glm::cross(u1, f1), glm::cross(u1, f2),
+      glm::cross(u2, f0), glm::cross(u2, f1), glm::cross(u2, f2)
+    };
+
+    for (int i = 0; i < 13; ++i)
+    {
+      if (!OverlapOnAxis(_obb, _triangle, test[i]))
+        return false; // Separating axis found
+    }
+    return true; // Separating axis not found
+  }
+
+  //-------------------------------------------------------------
+  bool TrianglePlane(const dbb::triangle& _triangle, const dbb::plane& _plane)
+  {
+    float side1 = _plane.PlaneEquation({_triangle[0][0], _triangle[0][1], _triangle[0][2]});
+    float side2 = _plane.PlaneEquation({_triangle[0][0], _triangle[0][1], _triangle[0][2]});
+    float side3 = _plane.PlaneEquation({_triangle[0][0], _triangle[0][1], _triangle[0][2]});
+
+    if (side1 == 0 && side2 == 0 && side3 == 0)
+      return true;
+
+    if (side1 > 0 && side2 > 0 && side3 > 0)
+      return false;
+
+    if (side1 < 0 && side2 < 0 && side3 < 0)
+      return false;
+
+    return true; // Intersection
+  }
+
+  //-------------------------------------------------------------
+  bool TriangleTriangle(const dbb::triangle& _t1, const dbb::triangle& _t2)
+  {
+    dbb::point triangle1_p1(_t1[0][0], _t1[0][1], _t1[0][2]);
+    dbb::point triangle1_p2(_t1[1][0], _t1[1][1], _t1[1][2]);
+    dbb::point triangle1_p3(_t1[2][0], _t1[2][1], _t1[2][2]);
+
+    dbb::point triangle2_p1(_t2[0][0], _t2[0][1], _t2[0][2]);
+    dbb::point triangle2_p2(_t2[1][0], _t2[1][1], _t2[1][2]);
+    dbb::point triangle2_p3(_t2[2][0], _t2[2][1], _t2[2][2]);
+
+    glm::vec3 t1_f0 = triangle1_p2 - triangle1_p1; // Triangle 1, Edge 0
+    glm::vec3 t1_f1 = triangle1_p3 - triangle1_p2; // Triangle 1, Edge 1
+    glm::vec3 t1_f2 = triangle1_p1 - triangle1_p3; // Triangle 1, Edge 
+
+    glm::vec3 t2_f0 = triangle2_p2 - triangle2_p1; // Triangle 2, Edge 0
+    glm::vec3 t2_f1 = triangle2_p3 - triangle2_p2; // Triangle 2, Edge 1
+    glm::vec3 t2_f2 = triangle2_p1 - triangle2_p3; // Triangle 2, Edge 2
+
+    glm::vec3 axisToTest[] = {
+      glm::cross(t1_f0, t1_f1),
+      glm::cross(t2_f0, t2_f1),
+      glm::cross(t2_f0, t1_f0), glm::cross(t2_f0, t1_f1),
+      glm::cross(t2_f0, t1_f2), glm::cross(t2_f1, t1_f0),
+      glm::cross(t2_f1, t1_f1), glm::cross(t2_f1, t1_f2),
+      glm::cross(t2_f2, t1_f0), glm::cross(t2_f2, t1_f1),
+      glm::cross(t2_f2, t1_f2)};
+
+    for (int i = 0; i < 11; ++i)
+    {
+      if (!OverlapOnAxis(_t1, _t2, axisToTest[i]))
+        return false; // Seperating axis found
+    }
+    return true; // Seperating axis not found
+  }
+
+  //-------------------------------------------------------------
+  glm::vec3 SatCrossEdge(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c, const glm::vec3& d)
+  {
+    glm::vec3 ab = a - b;
+    glm::vec3 cd = c - d;
+    glm::vec3 result = glm::cross(ab, cd);
+
+    if (!glm::length2(result) == 0)
+      return result; // Not parallel!
+    else
+    {
+      glm::vec3 axis = glm::cross(ab, c - a);
+      result = glm::cross(ab, axis);
+      if (!glm::length2(result) == 0)
+        return result; // Not parallel
+    }
+    return glm::vec3();
+  }
+
+  //-------------------------------------------------------------
+  bool TriangleTriangleRobust(const dbb::triangle& _t1, const dbb::triangle& _t2)
+  {
+    dbb::point triangle1_p1(_t1[0][0], _t1[0][1], _t1[0][2]);
+    dbb::point triangle1_p2(_t1[1][0], _t1[1][1], _t1[1][2]);
+    dbb::point triangle1_p3(_t1[2][0], _t1[2][1], _t1[2][2]);
+
+    dbb::point triangle2_p1(_t2[0][0], _t2[0][1], _t2[0][2]);
+    dbb::point triangle2_p2(_t2[1][0], _t2[1][1], _t2[1][2]);
+    dbb::point triangle2_p3(_t2[2][0], _t2[2][1], _t2[2][2]);
+
+    glm::vec3 axisToTest[] = {
+      // Triangle 1, Normal
+      SatCrossEdge(triangle1_p1, triangle1_p2, triangle1_p2, triangle1_p3),
+      // Triangle 2, Normal
+      SatCrossEdge(triangle2_p1, triangle2_p2, triangle2_p2, triangle2_p3),
+      SatCrossEdge(triangle2_p1, triangle2_p2, triangle1_p1, triangle1_p2),
+      SatCrossEdge(triangle2_p1, triangle2_p2, triangle1_p2, triangle1_p3),
+      SatCrossEdge(triangle2_p1, triangle2_p2, triangle1_p3, triangle1_p1),
+      SatCrossEdge(triangle2_p2, triangle2_p3, triangle1_p1, triangle1_p2),
+      SatCrossEdge(triangle2_p2, triangle2_p3, triangle1_p2, triangle1_p3),
+      SatCrossEdge(triangle2_p2, triangle2_p3, triangle1_p3, triangle1_p1),
+      SatCrossEdge(triangle2_p3, triangle2_p1, triangle1_p1, triangle1_p2),
+      SatCrossEdge(triangle2_p3, triangle2_p1, triangle1_p2, triangle1_p3),
+      SatCrossEdge(triangle2_p3, triangle2_p1, triangle1_p3, triangle1_p1),
+    };
+
+    for (int i = 0; i < 11; ++i) {
+      if (!OverlapOnAxis(_t1, _t2, axisToTest[i]))
+      {
+        if (!glm::length2(axisToTest[i]) == 0)
+          return false; // Seperating axis found
+      }
+    }
+    return true; // Seperating axis not found
+  }
+
+  //-------------------------------------------------------------
+  float MeshRay(const I3DMesh& _mesh, const dbb::ray& _ray)
+  {
+    size_t points_count = _mesh.GetIndices().size();
+    std::vector<Vertex> vertices = _mesh.GetVertexs(); //@todo avoid copy, get ref
+    std::vector<unsigned int> indices = _mesh.GetIndices();
+    for (int i = 0; i < points_count; i+=3)
+    {
+      dbb::triangle tr = { {vertices[indices[i]].Position}, {vertices[indices[i+1]].Position}, {vertices[indices[i+2]].Position} };
+      RaycastResult res;
+      float result = _ray.Raycast(tr, res);
+      if (result >= 0) {
+        return result;
+      }
+    }
+    return false;
+  }
+
+  //-------------------------------------------------------------
+  bool MeshAABB(const I3DMesh& _mesh, const dbb::AABB& aabb)
+  {
+    size_t points_count = _mesh.GetIndices().size();
+    std::vector<Vertex> vertices = _mesh.GetVertexs(); //@todo avoid copy, get ref
+    std::vector<unsigned int> indices = _mesh.GetIndices();
+    for (int i = 0; i < points_count; i += 3)
+    {
+      dbb::triangle tr = { {vertices[indices[i]].Position}, {vertices[indices[i + 1]].Position}, {vertices[indices[i + 2]].Position} };
+      if (TriangleAABB(tr, aabb))
+        return true;
+    }
+    return false;
+  }
+
+  //-------------------------------------------------------------
+  bool MeshOBB(const I3DMesh& _mesh, const OBB& _obb)
+  {
+    size_t points_count = _mesh.GetIndices().size();
+    std::vector<Vertex> vertices = _mesh.GetVertexs(); //@todo avoid copy, get ref
+    std::vector<unsigned int> indices = _mesh.GetIndices();
+    for (int i = 0; i < points_count; i += 3)
+    {
+      dbb::triangle tr = { {vertices[indices[i]].Position}, {vertices[indices[i + 1]].Position}, {vertices[indices[i + 2]].Position} };
+      if (TriangleOBB(tr, _obb))
+        return true;
+    }
+    return false;
+  }
+
+  //-------------------------------------------------------------
+  bool MeshSphere(const I3DMesh& _mesh, const dbb::sphere& _s)
+  {
+    size_t points_count = _mesh.GetIndices().size();
+    std::vector<Vertex> vertices = _mesh.GetVertexs(); //@todo avoid copy, get ref
+    std::vector<unsigned int> indices = _mesh.GetIndices();
+    for (int i = 0; i < points_count; i += 3)
+    {
+      dbb::triangle tr = { {vertices[indices[i]].Position}, {vertices[indices[i + 1]].Position}, {vertices[indices[i + 2]].Position} };
+      if (TriangleSphere(tr, _s))
+        return true;
+    }
+    return false;
+  }
+
+  //-------------------------------------------------------------
+  bool MeshPlane(const I3DMesh& _mesh, const dbb::plane& _p)
+  {
+    size_t points_count = _mesh.GetIndices().size();
+    std::vector<Vertex> vertices = _mesh.GetVertexs(); //@todo avoid copy, get ref
+    std::vector<unsigned int> indices = _mesh.GetIndices();
+    for (int i = 0; i < points_count; i += 3)
+    {
+      dbb::triangle tr = { {vertices[indices[i]].Position}, {vertices[indices[i + 1]].Position}, {vertices[indices[i + 2]].Position} };
+      if (TrianglePlane(tr, _p))
+        return true;
+    }
+    return false;
+  }
+
+  //-------------------------------------------------------------
+  bool MeshTriangle(const I3DMesh& _mesh, const dbb::triangle& _t)
+  {
+    size_t points_count = _mesh.GetIndices().size();
+    std::vector<Vertex> vertices = _mesh.GetVertexs(); //@todo avoid copy, get ref
+    std::vector<unsigned int> indices = _mesh.GetIndices();
+    for (int i = 0; i < points_count; i += 3)
+    {
+      dbb::triangle tr = { {vertices[indices[i]].Position}, {vertices[indices[i + 1]].Position}, {vertices[indices[i + 2]].Position} };
+      if (TriangleTriangle(tr, _t))
+        return true;
+    }
+    return false;
+  }
+
+  //-------------------------------------------------------------
   bool SphereSphere(const dbb::sphere& s1, const dbb::sphere& s2)
   {
     float radiiSum = s1.radius + s2.radius;
@@ -297,6 +654,14 @@ namespace dbb
       }
     }
     return true; // Seperating axis not found
+  }
+
+  //---------------------------------------------------------------------------------
+  bool TriangleSphere(const dbb::triangle& _triangle, const dbb::sphere& _sphere)
+  {
+    dbb::point closest = GetClosestPointOnTriangle(_triangle, _sphere.position);
+    float magSq = glm::length2(closest - _sphere.position);
+    return magSq <= _sphere.radius * _sphere.radius;
   }
 
   //---------------------------------------------------------------------------------

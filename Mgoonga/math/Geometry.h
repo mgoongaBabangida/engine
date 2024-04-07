@@ -14,25 +14,13 @@
 
 #include "Utils.h"
 
-#define AABBSphere(aabb, sphere) \
- SphereAABB(Sphere, AABB)
-
-#define OBBSphere(obb, sphere) \
-SphereOBB(sphere, obb)
-
-#define OBBAABB(obb, aabb) \
- AABBOBB(aabb, obb)
-
-#define PlaneSphere(plane, sphere) \
- SpherePlane(sphere, plane)
-
-#define PlaneOBB(plane, obb) \
- OBBPlane(obb, plane)
-
 namespace dbb
 {
   using triangle = glm::mat3;
   using point = glm::vec3;
+
+  //returns the barycentric coordinates of a point with respect to a triangle
+  glm::vec3 Barycentric(const point& p, const triangle& t);
 
   //-------------------------------------------------
   struct sphere
@@ -80,6 +68,7 @@ namespace dbb
     bool LineTest(const AABB& aabb) const;
     bool LineTest(const OBB& obb) const;
     bool LineTest(const dbb::plane& plane);
+    bool Linetest(const dbb::triangle& triangle);
   };
 
   //----------------------------------------------------
@@ -123,11 +112,11 @@ namespace dbb
       return ray(from, glm::normalize(to - from));
     }
 
-    float Raycast(const dbb::sphere& sphere, RaycastResult& outResult);
-    float Raycast(const AABB& aabb, RaycastResult& outResult);
-    float Raycast(const OBB& obb, RaycastResult& outResult);
-    float Raycast(const dbb::plane& plane, RaycastResult& outResult);
-    //bool Raycast(const dbb::triangle& triangle, RaycastResult& outResult); // @todo to implement
+    float Raycast(const dbb::sphere& sphere, RaycastResult& outResult) const;
+    float Raycast(const AABB& aabb, RaycastResult& outResult) const;
+    float Raycast(const OBB& obb, RaycastResult& outResult) const;
+    float Raycast(const dbb::plane& plane, RaycastResult& outResult) const;
+    float Raycast(const dbb::triangle& triangle, RaycastResult& outResult) const;
   };
 
   //----------------------------------------------------------------------
@@ -149,7 +138,7 @@ namespace dbb
     bool isOn(dbb::point dot);
     bool isInFront(dbb::point dot);
     bool isSame(dbb::plane other);
-    float PlaneEquation(const dbb::point& dot);
+    float PlaneEquation(const dbb::point& dot) const;
     dbb::point GetClosestPointOnPlane(const dbb::point& point) const;
   };
 
@@ -181,6 +170,7 @@ namespace dbb
 
   Interval GetInterval(const AABB& rect, const glm::vec3& axis);
   Interval GetInterval(const OBB& rect, const glm::vec3& axis);
+  Interval GetInterval(const dbb::triangle& triangle, const glm::vec3& axis);
 
   //-------------------------------------------------
   struct CollisionManifold
