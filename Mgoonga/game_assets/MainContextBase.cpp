@@ -484,6 +484,7 @@ void eMainContextBase::InitializeModels()
 			std::istreambuf_iterator<char>(),
 			std::ostreambuf_iterator<char>(sstream));
 
+		std::vector<std::tuple<std::string, std::string, bool>> file_infos;
 		std::string file_name, name, end;
 		while (!sstream.eof())
 		{
@@ -492,11 +493,49 @@ void eMainContextBase::InitializeModels()
 			sstream >> end;
 			if (end == "true")
 			{
-				modelManager->Add(name, (GLchar*)std::string(modelFolderPath + file_name).c_str(), true);
-				sstream >> end;
+				if (m_load_model_multithreading)
+				{
+					file_infos.emplace_back(name, file_name, true);
+				}
+				else
+				{
+					modelManager->Add(name, (GLchar*)std::string(modelFolderPath + file_name).c_str(), true);
+					sstream >> end;
+				}
 			}
 			else
-				modelManager->Add(name, (GLchar*)std::string(modelFolderPath + file_name).c_str());
+			{
+				if(m_load_model_multithreading)
+					file_infos.emplace_back(name, file_name, false);
+				else
+					modelManager->Add(name, (GLchar*)std::string(modelFolderPath + file_name).c_str());
+			}
+		}
+
+		if (m_load_model_multithreading) //@todo textures are loaded in main thread only, need to load  them separately
+		{
+			size_t thread_count = file_infos.size() > 4 ? 4 : file_infos.size();
+			size_t step = file_infos.size() / thread_count;
+			if (step * thread_count != file_infos.size())
+				++step;
+			std::vector<std::future<bool>> tasks;
+			for (size_t i = 0; i < thread_count; ++i)
+			{
+				std::function<bool()> func = [this, i, step, &file_infos, thread_count]()->bool
+				{
+					size_t model_index = step * i;
+					while (model_index < (i + 1) * step && model_index < file_infos.size())
+					{
+						modelManager->Add(std::get<0>(file_infos[model_index]), (GLchar*)std::string(modelFolderPath + std::get<1>(file_infos[model_index])).c_str(), std::get<2>(file_infos[model_index]));
+						++model_index;
+					}
+					return true;
+				};
+				tasks.emplace_back(std::async(func));
+			}
+			//wait for the tasks
+			for (auto& fut : tasks)
+				fut.get();
 		}
 	}
 }
