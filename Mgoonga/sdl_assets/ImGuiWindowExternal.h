@@ -11,10 +11,12 @@ public:
 
 	virtual void Render()	override;
 	virtual void Add(TypeImGui, const std::string& name, void*) override;
+
 protected:
 	std::vector<eItem>	lines;
 	std::string					name;
 	bool								visible = true;
+
 	std::map<std::string, std::function<void()>> callbacks;
 	std::map<std::string, std::function<void(shObject, const std::string&)>> callbacks_string;
 	IGame* mp_game = nullptr;

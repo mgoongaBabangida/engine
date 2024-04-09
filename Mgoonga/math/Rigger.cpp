@@ -62,6 +62,15 @@ bool Rigger::Apply(const std::string & _animation, bool _play_once)
 		cv.notify_one();
 		return true;
 	}
+	else if (_animation == "Null" || _animation == "NULL")
+	{
+		std::lock_guard lk(mutex);
+		currentAnim = nullptr;
+		for (auto& m : matrices)
+			m = UNIT_MATRIX;
+		cv.notify_one();
+		return true;
+	}
 	else
 	{
 		auto anim = std::find_if(animations.begin(), animations.end(),

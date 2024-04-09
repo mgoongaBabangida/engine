@@ -564,26 +564,29 @@ void eWindowImGuiExternal::Render()
           ImGui::Text(text.c_str());
 
           //Animations
-          if (ImGui::BeginCombo("Object Animations", current_animation_item)) // The second parameter is the label previewed before opening the combo.
+          if (current_animation_item != NULL && animation_names.size() > 1 && !animation_names[0].empty())
           {
-            for (int n = 0; n < animation_names.size(); n++)
+            if (ImGui::BeginCombo("Object Animations", current_animation_item)) // The second parameter is the label previewed before opening the combo.
             {
-              bool is_selected = (current_animation_item == animation_names[n].c_str()); // You can store your selection however you want, outside or inside your objects
-              if (ImGui::Selectable(animation_names[n].c_str(), is_selected))
+              for (int n = 0; n < animation_names.size(); ++n)
               {
-                frame_names.clear();
-                current_animation_item = animation_names[n].c_str();
-                rigger->SetCurrentAnimation(animation_names[n]);
-                for (size_t i = 0; i < rigger->GetCurrentAnimation()->GetNumFrames(); ++i)
-                  frame_names.push_back(std::to_string(i));
-                current_frame_item = frame_names[0].c_str();
+                bool is_selected = (current_animation_item == animation_names[n].c_str()); // You can store your selection however you want, outside or inside your objects
+                if (ImGui::Selectable(animation_names[n].c_str(), is_selected))
+                {
+                  frame_names.clear();
+                  current_animation_item = animation_names[n].c_str();
+                  rigger->SetCurrentAnimation(animation_names[n]);
+                  for (size_t i = 0; i < rigger->GetCurrentAnimation()->GetNumFrames(); ++i)
+                    frame_names.push_back(std::to_string(i));
+                  current_frame_item = frame_names[0].c_str();
+                }
+                if (is_selected)
+                {
+                  ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+                }
               }
-              if (is_selected)
-              {
-                ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
-              }
+              ImGui::EndCombo();
             }
-            ImGui::EndCombo();
           }
 
           //Frames
@@ -697,29 +700,6 @@ void eWindowImGuiExternal::Render()
           ImGui::Text(std::to_string(boneMatrix[3][2]).c_str()); ImGui::SameLine();
           ImGui::Text(std::to_string(boneMatrix[3][3]).c_str());
 
-          /*static glm::mat4 bindMatrix = rigger->GetBindMatrixForBone(current_bone_item);
-
-          ImGui::Text("Bone bind transform Matrix");
-          ImGui::Text(std::to_string(bindMatrix[0][0]).c_str()); ImGui::SameLine();
-          ImGui::Text(std::to_string(bindMatrix[0][1]).c_str()); ImGui::SameLine();
-          ImGui::Text(std::to_string(bindMatrix[0][2]).c_str()); ImGui::SameLine();
-          ImGui::Text(std::to_string(bindMatrix[0][3]).c_str());
-
-          ImGui::Text(std::to_string(bindMatrix[1][0]).c_str()); ImGui::SameLine();
-          ImGui::Text(std::to_string(bindMatrix[1][1]).c_str()); ImGui::SameLine();
-          ImGui::Text(std::to_string(bindMatrix[1][2]).c_str()); ImGui::SameLine();
-          ImGui::Text(std::to_string(bindMatrix[1][3]).c_str());
-
-          ImGui::Text(std::to_string(bindMatrix[2][0]).c_str()); ImGui::SameLine();
-          ImGui::Text(std::to_string(bindMatrix[2][1]).c_str()); ImGui::SameLine();
-          ImGui::Text(std::to_string(bindMatrix[2][2]).c_str()); ImGui::SameLine();
-          ImGui::Text(std::to_string(bindMatrix[2][3]).c_str());
-
-          ImGui::Text(std::to_string(bindMatrix[3][0]).c_str()); ImGui::SameLine();
-          ImGui::Text(std::to_string(bindMatrix[3][1]).c_str()); ImGui::SameLine();
-          ImGui::Text(std::to_string(bindMatrix[3][2]).c_str()); ImGui::SameLine();
-          ImGui::Text(std::to_string(bindMatrix[3][3]).c_str());*/
-
           //Play animation
           if (ImGui::Button("Play current animations "))
           {
@@ -734,6 +714,10 @@ void eWindowImGuiExternal::Render()
           if (ImGui::Button("Stop current animations "))
           {
             obj->GetRigger()->Stop();
+          }
+          if (ImGui::Button("Idle"))
+          {
+            obj->GetRigger()->Apply("Null", false);
           }
         }
 
