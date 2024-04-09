@@ -222,7 +222,7 @@ void PhysicsEngineTestScript::Initialize()
 
     dbb::sphere sph1 = sphere1.first->GetCollider()->GetSphere(*sphere1.first->GetTransform()).value();
     dbb::ICollider* c_sph1 = new dbb::SphereCollider(sph1);
-    sphere1.second.reset(new dbb::RigidBody{ c_sph1 });
+    sphere1.second = std::make_shared<dbb::RigidBody>(c_sph1);
     sphere1.second->SetCoefOfRestitution(m_restitution);
   }
 
@@ -234,7 +234,7 @@ void PhysicsEngineTestScript::Initialize()
 
     dbb::OBB obb1 = cube1.first->GetCollider()->GetOBB(*cube1.first->GetTransform()).value(); // get obb from old collider!
     dbb::ICollider* c_obb1 = new dbb::OBBCollider(obb1);
-    cube1.second.reset(new dbb::RigidBody{ c_obb1 });
+    cube1.second = std::make_shared<dbb::RigidBody>(c_obb1);
     cube1.second->SetCoefOfRestitution(m_restitution);
 
     m_imgui->Add(SLIDER_FLOAT_NERROW, "Damping Chair", (void*)&cube1.second->GetDamping());
@@ -249,7 +249,7 @@ void PhysicsEngineTestScript::Initialize()
 
     dbb::sphere sph2 = sphere2.first->GetCollider()->GetSphere(*sphere2.first->GetTransform()).value();
     dbb::ICollider* c_sph2 =new dbb::SphereCollider(sph2);
-    sphere2.second.reset(new dbb::RigidBody{ c_sph2 });
+    sphere2.second = std::make_shared<dbb::RigidBody>(c_sph2);
   }
 
   //cube 2
@@ -260,7 +260,7 @@ void PhysicsEngineTestScript::Initialize()
 
     dbb::OBB obb2 = cube2.first->GetCollider()->GetOBB(*cube2.first->GetTransform()).value();
     dbb::ICollider* c_obb2 = new dbb::OBBCollider(obb2);
-    cube2.second.reset(new dbb::RigidBody{ c_obb2 });
+    cube2.second = std::make_shared<dbb::RigidBody>(c_obb2);
   }
 
   // plane
@@ -272,19 +272,19 @@ void PhysicsEngineTestScript::Initialize()
 
     dbb::OBB grass_obb = grassPlane.first->GetCollider()->GetOBB(*grassPlane.first->GetTransform()).value();
     dbb::ICollider* c_grass = new dbb::OBBCollider(grass_obb);
-    grassPlane.second.reset(new dbb::RigidBody{ c_grass });
+    grassPlane.second = std::make_shared<dbb::RigidBody>(c_grass);
     grassPlane.second->SetMass(m_terrain_mass);
     grassPlane.second->SetCoefOfRestitution(m_restitution);
     grassPlane.second->SetGravityApplicable(false);
   }
 
   if (m_add_cube1)
-    m_physics_system->AddRigidbody(cube1.second.get());
+    m_physics_system->AddRigidbody(cube1.second);
   if (m_add_sphere)
-    m_physics_system->AddRigidbody(sphere1.second.get());
+    m_physics_system->AddRigidbody(sphere1.second);
   if (m_add_cube2)
-    m_physics_system->AddRigidbody(cube2.second.get());
-  m_physics_system->AddRigidbody(grassPlane.second.get());
+    m_physics_system->AddRigidbody(cube2.second);
+  m_physics_system->AddRigidbody(grassPlane.second);
   //m_physics_system->AddConstraint(grassPlane.first->GetCollider()->GetOBB(*grassPlane.first->GetTransform()).value());
 }
 
@@ -310,7 +310,7 @@ void PhysicsEngineTestScript::Reset()
   sphere1.first->GetTransform()->setRotation(0,0,0);
   dbb::sphere sph1 = sphere1.first->GetCollider()->GetSphere(*sphere1.first->GetTransform()).value();
   dbb::ICollider* c_sph1 = new dbb::SphereCollider(sph1);
-  sphere1.second.reset(new dbb::RigidBody{ c_sph1 });
+  sphere1.second = std::make_shared<dbb::RigidBody>(c_sph1);
   sphere1.second->SetCoefOfRestitution(m_restitution);
   sphere1.second->SetFriction(m_friction);
 
@@ -318,7 +318,7 @@ void PhysicsEngineTestScript::Reset()
   sphere2.first->GetTransform()->setRotation(0, 0, 0);
   dbb::sphere sph2 = sphere2.first->GetCollider()->GetSphere(*sphere2.first->GetTransform()).value();
   dbb::ICollider* c_sph2 = new dbb::SphereCollider(sph2);
-  sphere2.second.reset(new dbb::RigidBody{ c_sph2 });
+  sphere2.second = std::make_shared<dbb::RigidBody>(c_sph2);
   sphere2.second->SetCoefOfRestitution(m_restitution);
   sphere2.second->SetFriction(m_friction);
 
@@ -326,7 +326,7 @@ void PhysicsEngineTestScript::Reset()
   cube1.first->GetTransform()->setRotation(0,0,0);
   dbb::OBB obb1 = cube1.first->GetCollider()->GetOBB(*cube1.first->GetTransform()).value(); // get obb from old collider!
   dbb::ICollider* c_obb1 = new dbb::OBBCollider(obb1); // incorrect rotations
-  cube1.second.reset(new dbb::RigidBody{ c_obb1 });
+  cube1.second = std::make_shared<dbb::RigidBody>(c_obb1);
   cube1.second->SetCoefOfRestitution(m_restitution);
   cube1.second->SetFriction(m_friction);
   m_imgui->Add(SLIDER_FLOAT_NERROW, "Damping Chair", (void*)&cube1.second->GetDamping());
@@ -336,26 +336,26 @@ void PhysicsEngineTestScript::Reset()
   cube2.first->GetTransform()->setRotation(0, 0, 0);
   dbb::OBB obb2 = cube2.first->GetCollider()->GetOBB(*cube2.first->GetTransform()).value(); // get obb from old collider!
   dbb::ICollider* c_obb2 = new dbb::OBBCollider(obb2); // incorrect rotations
-  cube2.second.reset(new dbb::RigidBody{ c_obb2 });
+  cube2.second = std::make_shared<dbb::RigidBody>(c_obb2);
   cube2.second->SetCoefOfRestitution(m_restitution);
   cube2.second->SetFriction(m_friction);
 
   dbb::OBB grass_obb = grassPlane.first->GetCollider()->GetOBB(*grassPlane.first->GetTransform()).value();
   dbb::ICollider* c_grass = new dbb::OBBCollider(grass_obb);
-  grassPlane.second.reset(new dbb::RigidBody{ c_grass });
+  grassPlane.second = std::make_shared<dbb::RigidBody>(c_grass);
   grassPlane.second->SetMass(m_terrain_mass);
   grassPlane.second->SetCoefOfRestitution(m_restitution);
   grassPlane.second->SetGravityApplicable(false);
 
   if (m_add_cube1)
-    m_physics_system->AddRigidbody(cube1.second.get());
+    m_physics_system->AddRigidbody(cube1.second);
   if(m_add_sphere)
-   m_physics_system->AddRigidbody(sphere1.second.get());
+   m_physics_system->AddRigidbody(sphere1.second);
   if (m_add_cube2)
-    m_physics_system->AddRigidbody(cube2.second.get());
+    m_physics_system->AddRigidbody(cube2.second);
 
-  m_physics_system->AddRigidbody(sphere2.second.get());
-  m_physics_system->AddRigidbody(grassPlane.second.get());
+  m_physics_system->AddRigidbody(sphere2.second);
+  m_physics_system->AddRigidbody(grassPlane.second);
   //m_physics_system->AddConstraint(grassPlane.first->GetCollider()->GetOBB(*grassPlane.first->GetTransform()).value());
   m_reset = false;
 }

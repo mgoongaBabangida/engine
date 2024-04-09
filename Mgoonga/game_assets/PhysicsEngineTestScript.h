@@ -37,11 +37,11 @@ protected:
   std::unique_ptr<dbb::PhysicsSystem> m_physics_system;
   std::unique_ptr<math::Timer>        m_timer;
 
-  std::pair<shObject, std::unique_ptr<dbb::RigidBody>> sphere1;
-  std::pair<shObject, std::unique_ptr<dbb::RigidBody>> cube1;
-  std::pair<shObject, std::unique_ptr<dbb::RigidBody>> sphere2;
-  std::pair<shObject, std::unique_ptr<dbb::RigidBody>> cube2;
-  std::pair<shObject, std::unique_ptr<dbb::RigidBody>> grassPlane;
+  std::pair<shObject, std::shared_ptr<dbb::RigidBody>> sphere1;
+  std::pair<shObject, std::shared_ptr<dbb::RigidBody>> cube1;
+  std::pair<shObject, std::shared_ptr<dbb::RigidBody>> sphere2;
+  std::pair<shObject, std::shared_ptr<dbb::RigidBody>> cube2;
+  std::pair<shObject, std::shared_ptr<dbb::RigidBody>> grassPlane;
 
   std::vector<shObject> m_visual;
   LineMesh*             m_normal_mesh = nullptr;

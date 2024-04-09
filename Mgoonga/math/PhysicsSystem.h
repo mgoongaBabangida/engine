@@ -11,10 +11,10 @@ namespace dbb
 {
   struct CollisionPair
   {
-    CollisionPair(dbb::RigidBody* _A, dbb::RigidBody* _B, const CollisionManifold& _res)
+    CollisionPair(std::shared_ptr<dbb::RigidBody> _A, std::shared_ptr<dbb::RigidBody> _B, const CollisionManifold& _res)
       :m_A(_A), m_B(_B), m_result(_res) {}
-    dbb::RigidBody* m_A = nullptr;
-    dbb::RigidBody* m_B = nullptr;
+    std::shared_ptr<dbb::RigidBody> m_A = nullptr;
+    std::shared_ptr<dbb::RigidBody> m_B = nullptr;
     CollisionManifold m_result;
   };
 
@@ -27,7 +27,7 @@ namespace dbb
     void Update(float _deltaTime); // called in main thread
     void UpdateAsync(float _deltaTime); //needs to be called at fixed fps, should be separate thread(or separate clock) with fixed interval of calls like 30fps
     
-    void AddRigidbody(dbb::RigidBody* _body);
+    void AddRigidbody(std::shared_ptr<dbb::RigidBody> _body);
     void AddConstraint(const OBB& _constraint);
 
     void SetLinearProjectionPercent(float);
@@ -44,13 +44,15 @@ namespace dbb
 
     void ClearRigidbodys();
     void ClearConstraints();
-    void ClearCollisions();
 
   protected:
-    std::vector<dbb::RigidBody*>   m_bodies;
-    std::vector<dbb::OBB>          m_constraints;
-    std::vector<CollisionPair>     m_collisions;
-    std::queue<CollisionPair>      m_callbacks;
+    void ClearCollisions();
+
+    std::vector<std::shared_ptr<dbb::RigidBody>>   m_bodies;
+    std::atomic<bool>								               body_container_flag = false;
+    std::vector<dbb::OBB>                          m_constraints;
+    std::vector<CollisionPair>                     m_collisions;
+    std::queue<CollisionPair>                      m_callbacks;
 
     float m_linearProjectionPercent = 0.6f;
     float m_penetrationSlack = 0.01f;

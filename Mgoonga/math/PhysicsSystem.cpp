@@ -17,87 +17,96 @@ namespace dbb
   void PhysicsSystem::UpdateAsync(float _deltaTime)
   {
     ClearCollisions();
-    for (size_t i = 0, size = m_bodies.size(); i < size; ++i)
-    {
-      for (size_t j = i; j < size; ++j)
+    bool fls = false;
+    while (!body_container_flag.compare_exchange_weak(fls, true)) { fls = false; }
+
+      for (size_t i = 0, size = m_bodies.size(); i < size; ++i)
       {
-        if (i == j)
+        for (size_t j = i; j < size; ++j)
+        {
+          if (i == j)
+            continue;
+          CollisionManifold result;
+          CollisionManifold::ResetCollisionManifold(result);
+          if (m_bodies[i]->HasVolume() && m_bodies[j]->HasVolume())
+          {
+            result = ICollider::FindCollisionFeatures(*m_bodies[i]->GetCollider(), *m_bodies[j]->GetCollider());
+            if (result.colliding)
+            {
+              m_collisions.emplace_back(m_bodies[i], m_bodies[j], result);
+              m_callbacks.push(m_collisions.back());
+            }
+          }
+        }
+      }
+
+      for (size_t i = 0, size = m_bodies.size(); i < size; ++i)
+        m_bodies[i]->ApplyForces();
+
+      for (size_t k = 0; k < m_impulseIteration; ++k)
+      {
+        for (size_t i = 0; i < m_collisions.size(); ++i)
+        {
+          size_t jSize = m_collisions[i].m_result.contacts.size();
+          for (int j = 0; j < jSize; ++j)
+          {
+            if (m_collisions[i].m_A->HasVolume() && m_collisions[i].m_B->HasVolume())
+            {
+              if (m_linear_impulses_only)
+                RigidBody::ApplyImpulseLinear(*m_collisions[i].m_A, *m_collisions[i].m_B, m_collisions[i].m_result, j);
+              else
+                RigidBody::ApplyImpulse(*m_collisions[i].m_A, *m_collisions[i].m_B, m_collisions[i].m_result, j);
+            }
+          }
+        }
+      }
+
+      for (size_t i = 0, size = m_bodies.size(); i < size; ++i)
+        m_bodies[i]->Update(_deltaTime);
+
+      //sync
+      size_t size = m_collisions.size();
+      for (size_t i = 0; i < size; ++i)
+      {
+        float totalMass = m_collisions[i].m_A->InvMass() + m_collisions[i].m_B->InvMass();
+        if (totalMass == 0.0f)
           continue;
-        CollisionManifold result;
-        CollisionManifold::ResetCollisionManifold(result);
-        if (m_bodies[i]->HasVolume() && m_bodies[j]->HasVolume())
+
+        if (!m_collisions[i].m_A->GetGravityApplicable() || !m_collisions[i].m_B->GetGravityApplicable())
+          m_collisions[i].m_result.depth *= 2;
+
+        float depth = fmaxf(m_collisions[i].m_result.depth - m_penetrationSlack, 0.0f);
+        float scalar = depth / totalMass;
+        glm::vec3 correction = m_collisions[i].m_result.normal * scalar * m_linearProjectionPercent;
+
+        if (m_collisions[i].m_A->GetGravityApplicable())
         {
-          result = ICollider::FindCollisionFeatures(*m_bodies[i]->GetCollider(), *m_bodies[j]->GetCollider());
-          if (result.colliding)
-          {
-            m_collisions.emplace_back(m_bodies[i], m_bodies[j], result);
-            m_callbacks.push(m_collisions.back());
-          }
+          correction = glm::dot(m_collisions[i].m_A->GetVelocity(), m_collisions[i].m_result.normal) > 0.0f ? correction : -correction;
+          m_collisions[i].m_A->SetPosition(m_collisions[i].m_A->GetPosition() + correction * m_collisions[i].m_A->InvMass());
         }
-      }
-    }
-
-    for (size_t i = 0, size = m_bodies.size(); i < size; ++i)
-      m_bodies[i]->ApplyForces();
-
-    for (size_t k = 0; k < m_impulseIteration; ++k)
-    {
-      for (size_t i = 0; i < m_collisions.size(); ++i)
-      {
-        size_t jSize = m_collisions[i].m_result.contacts.size();
-        for (int j = 0; j < jSize; ++j)
+        if (m_collisions[i].m_B->GetGravityApplicable())
         {
-          if (m_collisions[i].m_A->HasVolume() && m_collisions[i].m_B->HasVolume())
-          {
-            if (m_linear_impulses_only)
-              RigidBody::ApplyImpulseLinear(*m_collisions[i].m_A, *m_collisions[i].m_B, m_collisions[i].m_result, j);
-            else
-              RigidBody::ApplyImpulse(*m_collisions[i].m_A, *m_collisions[i].m_B, m_collisions[i].m_result, j);
-          }
+          correction = glm::dot(m_collisions[i].m_B->GetVelocity(), m_collisions[i].m_result.normal) > 0.0f ? correction : -correction;
+          m_collisions[i].m_B->SetPosition(m_collisions[i].m_B->GetPosition() + correction * m_collisions[i].m_B->InvMass());
         }
-      }
-    }
 
-    for (size_t i = 0, size = m_bodies.size(); i < size; ++i)
-      m_bodies[i]->Update(_deltaTime);
-
-    //sync
-    for (size_t i = 0, size = m_collisions.size(); i < size; ++i)
-    {
-      float totalMass = m_collisions[i].m_A->InvMass() + m_collisions[i].m_B->InvMass();
-      if (totalMass == 0.0f)
-        continue;
-
-      if (!m_collisions[i].m_A->GetGravityApplicable() || !m_collisions[i].m_B->GetGravityApplicable())
-        m_collisions[i].m_result.depth *= 2;
-
-      float depth = fmaxf(m_collisions[i].m_result.depth - m_penetrationSlack, 0.0f);
-      float scalar = depth / totalMass;
-      glm::vec3 correction = m_collisions[i].m_result.normal * scalar * m_linearProjectionPercent;
-
-      if (m_collisions[i].m_A->GetGravityApplicable())
-      {
-        correction = glm::dot(m_collisions[i].m_A->GetVelocity(), m_collisions[i].m_result.normal) > 0.0f ? correction : -correction;
-        m_collisions[i].m_A->SetPosition(m_collisions[i].m_A->GetPosition() + correction * m_collisions[i].m_A->InvMass());
-      }
-      if (m_collisions[i].m_B->GetGravityApplicable())
-      {
-        correction = glm::dot(m_collisions[i].m_B->GetVelocity(), m_collisions[i].m_result.normal) > 0.0f ? correction : -correction;
-        m_collisions[i].m_B->SetPosition(m_collisions[i].m_B->GetPosition() + correction * m_collisions[i].m_B->InvMass());
+        m_collisions[i].m_A->SynchCollisionVolumes();
+        m_collisions[i].m_A->SynchCollisionVolumes();
       }
 
-      m_collisions[i].m_A->SynchCollisionVolumes();
-      m_collisions[i].m_A->SynchCollisionVolumes();
-    }
+      for (size_t i = 0, size = m_bodies.size(); i < size; ++i)
+        m_bodies[i]->SolveConstraints(m_constraints);
 
-    for (size_t i = 0, size = m_bodies.size(); i < size; ++i)
-      m_bodies[i]->SolveConstraints(m_constraints);
+      body_container_flag.store(false);
   }
 
   //-------------------------------------------------------
-  void PhysicsSystem::AddRigidbody(dbb::RigidBody* _body)
+  void PhysicsSystem::AddRigidbody(std::shared_ptr<dbb::RigidBody> _body)
   {
+    bool fls = false;
+    while (!body_container_flag.compare_exchange_weak(fls, true)) { fls = false; }
     m_bodies.push_back(_body);
+    body_container_flag.store(false);
   }
 
   //-------------------------------------------------------
@@ -152,7 +161,10 @@ namespace dbb
   //-------------------------------------------------------
   void PhysicsSystem::ClearRigidbodys()
   {
+    bool fls = false;
+    while (!body_container_flag.compare_exchange_weak(fls, true)) { fls = false; }
     m_bodies.clear();
+    body_container_flag.store(false);
   }
 
   //-------------------------------------------------------
