@@ -26,7 +26,6 @@ namespace dbb
   struct ray;
   class plane;
   class line;
-  struct CollisionManifold;
 
   //Point checks
   bool IsPointInSphere(const dbb::point& point, const dbb::sphere& sphere);

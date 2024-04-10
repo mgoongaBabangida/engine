@@ -167,7 +167,7 @@ std::vector<glm::vec3> BoxColliderDynamic::GetExtrems(const ITransform& _trans) 
 }
 
 //------------------------------------------------------------------
-glm::vec3 BoxColliderDynamic::GetCenter()
+glm::vec3 BoxColliderDynamic::GetCenter() const
 {
 	if (!m_rigger || m_rigger->GetCurrentAnimation() == nullptr || m_rigger->GetCurrentAnimationFrameIndex() == -1)
 		return BoxCollider::GetCenter();
@@ -185,7 +185,7 @@ glm::vec3 BoxColliderDynamic::GetCenter()
 }
 
 //------------------------------------------------------------------
-float BoxColliderDynamic::GetRadius()
+float BoxColliderDynamic::GetRadius() const
 {
 	if (!m_rigger || m_rigger->GetCurrentAnimation() == nullptr)
 		return BoxCollider::GetRadius();

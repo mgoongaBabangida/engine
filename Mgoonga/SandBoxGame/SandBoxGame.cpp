@@ -5,7 +5,6 @@
 
 #include <math/Rigger.h>
 #include <math/BoxCollider.h>
-#include <math/RigidBody.h>
 
 #include <opengl_assets/Sound.h>
 #include <opengl_assets/TextureManager.h>
@@ -22,8 +21,6 @@
 #include <game_assets/ShootScript.h>
 #include <game_assets/AnimationSocketScript.h>
 #include <game_assets/PhysicsEngineTestScript.h>
-
-#include "SandBoxScript.h"
 
 //#include <sdl_assets/ImGuiWindowInternal.h>
 
@@ -65,7 +62,7 @@ void eSandBoxGame::InitializeModels()
 	material.emissive_texture_id = Texture::GetTexture1x1(TColor::BLACK).id;
 	modelManager->Add("sphere_red", Primitive::SPHERE, std::move(material));
 
-	//_InitializeScene();
+	_InitializeScene();
 
 	//light
 	GetMainLight().light_position = glm::vec4(0.f, 6.5f, 5.f , 1.f);
@@ -96,8 +93,8 @@ void eSandBoxGame::InitializeModels()
 
 	//@todo make it dynamic, make clear order
 	//GLOBAL SCRIPTS
-	m_global_scripts.push_back(std::make_shared<PhysicsEngineTestScript>(this, this->externalGui[13]));
-	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
+	//m_global_scripts.push_back(std::make_shared<PhysicsEngineTestScript>(this, this->externalGui[13]));
+	//m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
 
 	m_global_scripts.push_back(std::make_shared<GUIControllerBase>(this, this->pipeline, soundManager->GetSound("page_sound")));
 	m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera()));
@@ -169,7 +166,7 @@ void eSandBoxGame::_InitializeScene()
 	Texture t;
 
 	shObject grassPlane = factory.CreateObject(modelManager->Find("grass_plane"), eObject::RenderType::PHONG, "GrassPlane");
-	//grassPlane->GetModel()->SetMaterial(material);
+	//grassPlane->GetModel()->SetMaterial(material); //!!! to test area light need roughness !!!
 	grassPlane->GetTransform()->setTranslation(glm::vec3(0.0f, -2.0f, 0.0f));
 	grassPlane->GetTransform()->setScale(glm::vec3(5.0f, 5.0f, 5.0f));
 	m_objects.push_back(grassPlane);

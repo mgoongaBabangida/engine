@@ -319,15 +319,6 @@ namespace dbb
   }
 
   //------------------------------------------------------------
-  void CollisionManifold::ResetCollisionManifold(CollisionManifold& result)
-  {
-    result.colliding = false;
-    result.normal = glm::vec3(0, 0, 1);
-    result.depth = FLT_MAX;
-    result.contacts.clear();
-  }
-
-  //------------------------------------------------------------
   std::vector<dbb::point> OBB::GetVertices() const
   {
     std::vector<glm::vec3> v;

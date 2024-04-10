@@ -2,7 +2,6 @@
 #include "ObjectFactory.h"
 
 #include <math/Rigger.h>
-#include <math/RigidBody.h>
 #include <math/BoxColliderDynamic.h>
 #include <math/AnimatedModel.h>
 
@@ -21,8 +20,6 @@ std::unique_ptr<eObject> ObjectFactoryBase::CreateObject(std::shared_ptr<IModel>
   if (!_model->Get3DMeshes().empty())
   {
     obj->SetCollider(new BoxCollider);
-    obj->SetRigidBody(new eRigidBody);
-    obj->GetRigidBody()->SetObject(obj.get());
     obj->GetCollider()->CalculateExtremDots(obj.get());
   }
   obj->SetName(_name);

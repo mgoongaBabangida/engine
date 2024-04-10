@@ -175,7 +175,7 @@ std::vector<glm::vec3> BoxCollider::GetExtremsLocalSpace() const
 }
 
 //-------------------------------------------------------------------------------
-glm::vec3 BoxCollider::GetCenter()
+glm::vec3 BoxCollider::GetCenter() const
 {
 	if (m_center == std::nullopt)
 	{
@@ -187,7 +187,7 @@ glm::vec3 BoxCollider::GetCenter()
 }
 
 //-------------------------------------------------------------------------------
-float BoxCollider::GetRadius()
+float BoxCollider::GetRadius() const
 {
 	if (m_radius == 0.0f)
 	{
@@ -429,7 +429,7 @@ bool BoxCollider::IsInsideOfAABB(const ITransform& _trans, const ITransform& _tr
 }
 
 //----------------------------------------------------------------------------------------
-std::optional<dbb::OBB> BoxCollider::GetOBB(const ITransform& _trans)
+dbb::OBB BoxCollider::_GetOBB(const ITransform& _trans) const
 {
 	dbb::OBB obb;
 	obb.origin = _trans.getModelMatrix() * glm::vec4(this->GetCenter(), 1.0f);
@@ -437,13 +437,13 @@ std::optional<dbb::OBB> BoxCollider::GetOBB(const ITransform& _trans)
 							 ((this->GetExtremDotsLocalSpace().MaxY - this->GetExtremDotsLocalSpace().MinY) * _trans.getScaleAsVector().y) / 2,
 							 ((this->GetExtremDotsLocalSpace().MaxZ - this->GetExtremDotsLocalSpace().MinZ) * _trans.getScaleAsVector().z) / 2 };
 	obb.orientation = glm::toMat4(_trans.getRotation());
-	if (obb.size.y == 0.0f) // for planes to have some volume
+	if (obb.size.y == 0.0f) // for planes to have some volume @todo make collider for planes ?
 		obb.size.y = 0.3f;
 	return obb;
 }
 
 //----------------------------------------------------------------------------------------
-std::optional<dbb::sphere> BoxCollider::GetSphere(const ITransform& _trans)
+dbb::sphere BoxCollider::_GetSphere(const ITransform& _trans) const
 {
 	dbb::sphere sphere;
 	sphere.position = _trans.getTranslation();

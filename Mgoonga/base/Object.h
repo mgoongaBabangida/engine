@@ -55,7 +55,6 @@ public:
 	void				SetCollider(ICollider*);
 	void				SetModel(IModel*);
 	void				SetModel(std::shared_ptr<IModel>);
-	void				SetRigidBody(IRigidBody*);
 	void 				SetName(const std::string& _name) { name = _name; }
 
 	//Getters
@@ -64,7 +63,6 @@ public:
 	ICollider*					GetCollider()	const;
 	IModel*							GetModel()		const;
 	IRigger*						GetRigger()		const;
-	IRigidBody*					GetRigidBody()	const	{ return movementApi.get(); }
 	const std::string&	Name()			const	{ return name;				}
 
 protected:
@@ -73,7 +71,6 @@ protected:
 	std::unique_ptr<ITransform>		transform;
 	std::unique_ptr<ICollider>		collider;
 	std::unique_ptr<IRigger>			rigger;
-	std::unique_ptr<IRigidBody>		movementApi;
 	std::string										name;
 	std::vector<std::shared_ptr<eObject>> m_children;
 

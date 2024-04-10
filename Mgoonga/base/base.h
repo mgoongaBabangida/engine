@@ -140,6 +140,23 @@ struct eCollision
 	glm::mat3 triangle;
 };
 
+//-------------------------------------------------
+struct CollisionManifold
+{
+	bool colliding;
+	glm::vec3 normal;
+	float depth;
+	std::vector<glm::vec3> contacts;
+
+	static void ResetCollisionManifold(CollisionManifold& result)
+	{
+		result.colliding = false;
+		result.normal = glm::vec3(0, 0, 1);
+		result.depth = FLT_MAX;
+		result.contacts.clear();
+	}
+};
+
 //-------------------------------------------------------
 struct RaycastResult
 {

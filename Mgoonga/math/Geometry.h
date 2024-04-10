@@ -172,13 +172,4 @@ namespace dbb
   Interval GetInterval(const OBB& rect, const glm::vec3& axis);
   Interval GetInterval(const dbb::triangle& triangle, const glm::vec3& axis);
 
-  //-------------------------------------------------
-  struct CollisionManifold
-  {
-    bool colliding;
-    glm::vec3 normal;
-    float depth;
-    std::vector<glm::vec3> contacts;
-    static void ResetCollisionManifold(CollisionManifold& result);
-  };
 }

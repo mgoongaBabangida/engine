@@ -4,7 +4,6 @@
 
 #include <math/ParticleSystem.h>
 #include <math/BoxCollider.h>
-#include <math/RigidBody.h>
 
 #include <opengl_assets/Sound.h>
 #include <opengl_assets/MyModel.h>
@@ -82,7 +81,7 @@ void eShipScript::CollisionCallback(const eCollision& _collision)
 			auto rot = glm::toQuat(glm::rotate(UNIT_MATRIX, glm::radians(5.0f)/*(-5 ? )*/, glm::vec3(0.0f, 1.0f, 0.0f)));
 			collision_rotation += 5.0f;
 			object->GetTransform()->setRotation(rot * object->GetTransform()->getRotation());
-			object->GetRigidBody()->Move(objsToCollide);
+			//object->GetRigidBody()->Move(objsToCollide);
 		}
 	}
 }
@@ -107,13 +106,13 @@ void eShipScript::Update(float _tick)
 			{
 				if (glm::length2(object->GetTransform()->getTranslation() - destination) > move_speed)
 				{
-					object->GetRigidBody()->MoveForward({});
+					//object->GetRigidBody()->MoveForward({});
 				}
 				else
 				{ //@todo if destionation is not final there might be bugs, test
 					object->GetTransform()->setTranslation(destination);
 					destination = NONE;
-					object->GetRigidBody()->Move(objsToCollide);
+					//object->GetRigidBody()->Move(objsToCollide);
 				}
 			}
 		}

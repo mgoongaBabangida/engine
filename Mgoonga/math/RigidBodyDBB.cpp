@@ -1,6 +1,7 @@
 #include "RigidBodyDBB.h"
 
 #include "GeometryFunctions.h"
+#include "Colliders.h"
 
 #include <glm\glm\gtc\quaternion.hpp>
 #include <glm\glm\gtx\quaternion.hpp>
@@ -12,7 +13,7 @@ namespace dbb
   float RigidBody::g_friction = 0.95f;
 
   //--------------------------------------------------------------------------------
-  RigidBody::RigidBody(dbb::ICollider* _collider)
+  RigidBody::RigidBody(ICollider* _collider)
     : m_collider(_collider)
   {
     if (m_collider != nullptr)
@@ -26,7 +27,7 @@ namespace dbb
   CollisionManifold RigidBody::FindCollisionFeatures(RigidBody& ra, RigidBody& rb)
   {
     if (ra.GetCollider() != nullptr && rb.GetCollider() != nullptr)
-      return dbb::ICollider::FindCollisionFeatures(*ra.GetCollider(), *rb.GetCollider());
+      return dbb::FindCollisionFeatures(*ra.GetCollider(), *rb.GetCollider());
     else
       return CollisionManifold();
   }
@@ -295,7 +296,7 @@ namespace dbb
   //--------------------------------------------------------------------------------------
   glm::mat4 RigidBody::InvTensor()
   {
-    glm::vec4 i = m_collider->GetTensor(*this);
+    glm::vec4 i = m_collider->GetTensor(m_mass);
     return glm::inverse(glm::mat4(
                                   i.x, 0, 0, 0,
                                   0, i.y, 0, 0,
@@ -313,15 +314,15 @@ namespace dbb
   }
 
   //--------------------------------------------------------------------------------------
-  dbb::ICollider* RigidBody::GetCollider() const
+  ICollider* RigidBody::GetCollider() const
   {
     return m_collider;
   }
 
   //--------------------------------------------------------------------------------------
-  void RigidBody::SetCollider(dbb::ICollider* _c)
+  void RigidBody::SetCollider(ICollider* _c)
   {
-    dbb::ICollider* old = m_collider;
+    ICollider* old = m_collider;
     if (_c)
     {
       m_collider = _c;
@@ -390,135 +391,5 @@ namespace dbb
   float RigidBody::GetFriction() const
   {
     return m_friction;
-  }
-
-  //---------------------------------------------------------------------------------------
-  void OBBCollider::SynchCollisionVolumes(const glm::vec3& _pos, const glm::vec3& _orientation)
-  {
-    box.origin = _pos;
-    box.orientation = glm::eulerAngleYXZ(_orientation.y , _orientation.x, _orientation.z);
-  }
-
-  //--------------------------------------------------
-  glm::vec4 OBBCollider::GetTensor(RigidBody& _rb) const
-  {
-    float ix = 0.0f;
-    float iy = 0.0f;
-    float iz = 0.0f;
-    float iw = 0.0f;
-    if(_rb.GetMass() != 0)
-    {
-      glm::vec3 size = box.size * 2.0f;
-      float fraction = (1.0f / 12.0f);
-      float x2 = size.x * size.x;
-      float y2 = size.y * size.y;
-      float z2 = size.z * size.z;
-      ix = (y2 + z2) * _rb.GetMass() * fraction;
-      iy = (x2 + z2) * _rb.GetMass() * fraction;
-      iz = (x2 + y2) * _rb.GetMass() * fraction;
-      iw = 1.0f;
-    }
-    return glm::vec4(ix, iy, iz, iw);
-  }
-
-  //---------------------------------------------------------------------------------------
-  CollisionManifold OBBCollider::Dispatch(const ICollider& _other) const
-  {
-    return _other.CollidesWith(*this);
-  }
-
-  //---------------------------------------------------------------------------------------
-  CollisionManifold SphereCollider::Dispatch(const ICollider& _other) const
-  {
-    return _other.CollidesWith(*this);
-  }
-
-  //---------------------------------------------------------------------------------------
-  std::optional<dbb::OBB> OBBCollider::GetBox() const
-  { return box; }
-
-  //---------------------------------------------------------------------------------------
-  dbb::point OBBCollider::GetCenter() const
-  {
-    return box.origin;
-  }
-
-  // -------------------------------------------------------------------------------------- -
-  glm::vec3 OBBCollider::GetOrientation() const
-  {
-    return glm::eulerAngles(glm::toQuat(box.orientation)); // pitch(x), yaw(x), roll(x)
-    //return { xyz.y, xyz.x, xyz.z }; /// yaw, pitch, roll
-  }
-
-  //---------------------------------------------------------------------------------------
-  std::optional <dbb::sphere> SphereCollider::GetSphere() const
-  { return sphere; }
-
-  //---------------------------------------------------------------------------------------
-  dbb::point SphereCollider::GetCenter() const
-  {
-    return sphere.position;
-  }
-
-  // -------------------------------------------------------------------------------------- -
-  glm::vec3 SphereCollider::GetOrientation() const
-  {
-    return {1,1,1};
-  }
-
-  //---------------------------------------------------------------------------------------
-  CollisionManifold OBBCollider::CollidesWith(const SphereCollider& _sphere) const
-  {
-    CollisionManifold cm = FindCollision(box, *_sphere.GetSphere()); //@todo check optional
-    cm.normal = -cm.normal;
-    return cm;
-  }
-
-  //---------------------------------------------------------------------------------------
-  CollisionManifold OBBCollider::CollidesWith(const OBBCollider& _box) const
-  {
-    return FindCollision(*_box.GetBox(), box);
-  }
-
-  //--------------------------------------------------------------------------------
-  CollisionManifold SphereCollider::CollidesWith(const SphereCollider& _sphere) const
-  {
-    return FindCollision(*_sphere.GetSphere(), sphere);
-  }
-
-  //--------------------------------------------------------------------------------
-  CollisionManifold SphereCollider::CollidesWith(const OBBCollider& _box) const
-  {
-    return FindCollision(*_box.GetBox(), sphere);
-  }
-
-  //---------------------------------------------------------------------------------------
-  void SphereCollider::SynchCollisionVolumes(const glm::vec3& _pos, const glm::vec3& _orientation)
-  {
-    sphere.position = _pos;
-  }
-
-  //--------------------------------------------------
-  glm::vec4 SphereCollider::GetTensor(RigidBody& _rb) const
-  {
-    float ix = 0.0f;
-    float iy = 0.0f;
-    float iz = 0.0f;
-    float iw = 0.0f;
-    if (_rb.GetMass() != 0)
-    {
-      float r2 = sphere.radius * sphere.radius;
-      float fraction = (2.0f / 5.0f);
-      ix = r2 * _rb.GetMass() * fraction;
-      iy = r2 * _rb.GetMass() * fraction;
-      iz = r2 * _rb.GetMass() * fraction;
-      iw = 1.0f;
-    }
-    return glm::vec4(ix, iy, iz, iw);
-  }
-
-  CollisionManifold ICollider::FindCollisionFeatures(const ICollider& _A, const ICollider& _B)
-  {
-    return _A.Dispatch(_B);
   }
 }

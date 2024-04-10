@@ -1,6 +1,7 @@
 #pragma once
 #include "BoxCollider.h"
 
+//@todo need to re-implement and retest some functions to make it work proparly
 //-----------------------------------------------------------
 class DLL_MATH BoxColliderDynamic : public BoxCollider
 {
@@ -35,8 +36,8 @@ public:
 
   virtual std::vector<glm::mat3>	GetBoundingTriangles(const ITransform& trans)const override;
   virtual std::vector<glm::vec3>	GetExtrems(const ITransform& trans) const override;
-  virtual glm::vec3               GetCenter() override;
-  virtual float										GetRadius() override;
+  virtual glm::vec3               GetCenter() const override;
+  virtual float										GetRadius() const override;
 
   // @todo override these 
   /*virtual std::optional<dbb::OBB>		GetOBB(const ITransform& trans) override;

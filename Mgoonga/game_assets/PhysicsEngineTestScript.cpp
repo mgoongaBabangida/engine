@@ -9,6 +9,7 @@
 #include <math/GeometryFunctions.h>
 #include <math/RigidBodyDBB.h>
 #include <math/PhysicsSystem.h>
+#include <math/Colliders.h>
 
 #include <sdl_assets/ImGuiContext.h>
 
@@ -58,23 +59,21 @@ bool PhysicsEngineTestScript::OnKeyPress(uint32_t _asci, KeyModifiers _modifier)
       {
         //visualize obb
         ObjectFactoryBase factory;
-        std::optional<dbb::OBB> obb1 = cube1.second->GetCollider()->GetBox();
-        if (obb1.has_value())
+        dbb::OBB obb1 = dynamic_cast<dbb::OBBCollider*>(cube1.second->GetCollider())->GetBox();
+
+        for (size_t i = 0; i < obb1.GetVertices().size(); ++i)
         {
-          for (size_t i = 0; i < obb1->GetVertices().size(); ++i)
-          {
-            shObject obj = factory.CreateObject(m_game->GetModelManager()->Find("sphere_red"), eObject::RenderType::PBR, "OBB vertex" + std::to_string(i));
-            obj->GetTransform()->setTranslation(obb1->GetVertices()[i]);
-            obj->GetTransform()->setScale({ 0.05f,0.05f,0.05f });
-            m_visual.push_back(obj);
-          }
+          shObject obj = factory.CreateObject(m_game->GetModelManager()->Find("sphere_red"), eObject::RenderType::PBR, "OBB vertex" + std::to_string(i));
+          obj->GetTransform()->setTranslation(obb1.GetVertices()[i]);
+          obj->GetTransform()->setScale({ 0.05f,0.05f,0.05f });
+          m_visual.push_back(obj);
         }
       }
 
-      auto manifold = dbb::ICollider::FindCollisionFeatures(*cube1.second->GetCollider(), *sphere1.second->GetCollider());
-      manifold = dbb::ICollider::FindCollisionFeatures(*sphere1.second->GetCollider(), *sphere2.second->GetCollider());
-      manifold = dbb::ICollider::FindCollisionFeatures(*cube1.second->GetCollider(), *cube2.second->GetCollider());
-      manifold = dbb::ICollider::FindCollisionFeatures(*grassPlane.second->GetCollider(), *cube1.second->GetCollider());
+      auto manifold = dbb::RigidBody::FindCollisionFeatures(*cube1.second, *sphere1.second);
+      manifold = dbb::RigidBody::FindCollisionFeatures(*sphere1.second, *sphere2.second);
+      manifold = dbb::RigidBody::FindCollisionFeatures(*cube1.second, *cube2.second);
+      manifold = dbb::RigidBody::FindCollisionFeatures(*grassPlane.second, *cube1.second);
       if (manifold.colliding)
       {
         //visualize collision
@@ -118,8 +117,7 @@ bool PhysicsEngineTestScript::OnKeyPress(uint32_t _asci, KeyModifiers _modifier)
       sphere2.first->GetTransform()->setScale({ 0.1,0.1,0.1 });
       sphere2.second->AddLinearImpulse(m_game->GetMainCameraDirection() * 25.f);
 
-      dbb::sphere sph2 = sphere2.first->GetCollider()->GetSphere(*sphere2.first->GetTransform()).value(); // get from old collider!
-      dbb::ICollider* c_sph2 = new dbb::SphereCollider(sph2);
+      ICollider* c_sph2 = dbb::SphereCollider::CreateFrom(dynamic_cast<dbb::SphereCollider&>(*sphere2.first->GetCollider()), *sphere2.first->GetTransform());
       sphere2.second->SetCollider(c_sph2);
 
       break;
@@ -143,34 +141,26 @@ void PhysicsEngineTestScript::Update(float _tick)
   {
     if (!m_simulation_on) // preparation
     {
-      dbb::OBB obb1 = cube1.first->GetCollider()->GetOBB(*cube1.first->GetTransform()).value(); // get obb from old collider!
-      dbb::ICollider* c_obb1 = new dbb::OBBCollider(obb1);
+      // get obb from old collider!
+      ICollider* c_obb1 = dbb::OBBCollider::CreateFrom(dynamic_cast<BoxCollider&>(*cube1.first->GetCollider()), *cube1.first->GetTransform());
       cube1.second->SetCollider(c_obb1);
     }
 
-    //update transforms with the collider data to visualize correctily
-    dbb::sphere s1 =      sphere1.second->GetCollider()->GetSphere().value();
-    dbb::OBB c1 =         cube1.second->GetCollider()->GetBox().value();
-    dbb::sphere s2 =      sphere2.second->GetCollider()->GetSphere().value();
-    dbb::OBB c2 =         cube2.second->GetCollider()->GetBox().value();
-    dbb::OBB grass_obb =  grassPlane.second->GetCollider()->GetBox().value();
+    dbb::OBB c1 = dynamic_cast<dbb::OBBCollider*>(cube1.second->GetCollider())->GetBox();
+    dbb::OBB grass_obb = dynamic_cast<dbb::OBBCollider*>(grassPlane.second->GetCollider())->GetBox();
 
     m_normal_mesh->UpdateData(dbb::Unite(c1.GetVertices(), grass_obb.GetVertices()),
       { 6,1, 6,3, 6,4, 2,7, 2,5, 2,0, 0,1, 0,3, 7,1, 7,4, 4,5, 5,3,
         6+8, 1 + 8, 6 + 8,3 + 8, 6 + 8,4 + 8, 2 + 8,7 + 8, 2 + 8,5 + 8, 2 + 8,0 + 8, 0 + 8,1 + 8, 0 + 8,3 + 8, 7 + 8,1 + 8, 7 + 8,4 + 8, 4 + 8,5 + 8, 5 + 8,3 + 8 },
       { 1.0f, 1.0f ,0.0f, 1.0f });
 
+    //update transforms with the collider data to visualize correctily
     if (m_simulation_on)
     {
-      cube1.first->GetTransform()->setRotation(glm::toQuat(c1.orientation)); //works incorrectly!
-      cube1.first->GetTransform()->setTranslation(c1.origin - (cube1.first->GetTransform()->getRotation() * cube1.first->GetCollider()->GetCenter()));
-
-      sphere1.first->GetTransform()->setTranslation(s1.position - sphere1.first->GetCollider()->GetCenter());
-
-      cube2.first->GetTransform()->setRotation(glm::toQuat(c2.orientation)); //works incorrectly!
-      cube2.first->GetTransform()->setTranslation(c2.origin - (cube2.first->GetTransform()->getRotation() * cube2.first->GetCollider()->GetCenter()));
-
-      sphere2.first->GetTransform()->setTranslation(s2.position - sphere2.first->GetCollider()->GetCenter());
+      cube1.second->GetCollider()->SetTo(*cube1.first->GetTransform());
+      cube2.second->GetCollider()->SetTo(*cube2.first->GetTransform());
+      sphere1.second->GetCollider()->SetTo(*sphere1.first->GetTransform());
+      sphere2.second->GetCollider()->SetTo(*sphere2.first->GetTransform());
 
       //grassPlane.first->GetTransform()->setTranslation(grass_obb.origin - grassPlane.first->GetCollider()->GetCenter());
     }
@@ -220,8 +210,7 @@ void PhysicsEngineTestScript::Initialize()
     sphere1.first->GetTransform()->setTranslation(glm::vec3(-3.0f, 3.0f, 0.0f));
     m_game->AddObject(sphere1.first);
 
-    dbb::sphere sph1 = sphere1.first->GetCollider()->GetSphere(*sphere1.first->GetTransform()).value();
-    dbb::ICollider* c_sph1 = new dbb::SphereCollider(sph1);
+    ICollider* c_sph1 = dbb::SphereCollider::CreateFrom(dynamic_cast<BoxCollider&>(*sphere1.first->GetCollider()), *sphere1.first->GetTransform());
     sphere1.second = std::make_shared<dbb::RigidBody>(c_sph1);
     sphere1.second->SetCoefOfRestitution(m_restitution);
   }
@@ -232,8 +221,7 @@ void PhysicsEngineTestScript::Initialize()
     cube1.first->GetTransform()->setTranslation(glm::vec3(-3.0f, 5.0f, 0.0f));
     m_game->AddObject(cube1.first);
 
-    dbb::OBB obb1 = cube1.first->GetCollider()->GetOBB(*cube1.first->GetTransform()).value(); // get obb from old collider!
-    dbb::ICollider* c_obb1 = new dbb::OBBCollider(obb1);
+    ICollider* c_obb1 = dbb::OBBCollider::CreateFrom(dynamic_cast<BoxCollider&>(*cube1.first->GetCollider()), *cube1.first->GetTransform());
     cube1.second = std::make_shared<dbb::RigidBody>(c_obb1);
     cube1.second->SetCoefOfRestitution(m_restitution);
 
@@ -247,8 +235,7 @@ void PhysicsEngineTestScript::Initialize()
     sphere2.first->GetTransform()->setTranslation(glm::vec3(-5.5f, 3.0f, 0.0f));
     m_game->AddObject(sphere2.first);
 
-    dbb::sphere sph2 = sphere2.first->GetCollider()->GetSphere(*sphere2.first->GetTransform()).value();
-    dbb::ICollider* c_sph2 =new dbb::SphereCollider(sph2);
+    ICollider* c_sph2 = dbb::SphereCollider::CreateFrom(dynamic_cast<BoxCollider&>(*sphere2.first->GetCollider()), *sphere2.first->GetTransform());
     sphere2.second = std::make_shared<dbb::RigidBody>(c_sph2);
   }
 
@@ -258,8 +245,7 @@ void PhysicsEngineTestScript::Initialize()
     cube2.first->GetTransform()->setTranslation(glm::vec3(3.0f, 3.0f, 0.0f));
     m_game->AddObject(cube2.first);
 
-    dbb::OBB obb2 = cube2.first->GetCollider()->GetOBB(*cube2.first->GetTransform()).value();
-    dbb::ICollider* c_obb2 = new dbb::OBBCollider(obb2);
+    ICollider* c_obb2 = dbb::OBBCollider::CreateFrom(dynamic_cast<BoxCollider&>(*cube2.first->GetCollider()), *cube2.first->GetTransform());
     cube2.second = std::make_shared<dbb::RigidBody>(c_obb2);
   }
 
@@ -270,8 +256,7 @@ void PhysicsEngineTestScript::Initialize()
     grassPlane.first->GetTransform()->setScale(glm::vec3(10.0f, 0.5f, 10.0f));
     m_game->AddObject(grassPlane.first);
 
-    dbb::OBB grass_obb = grassPlane.first->GetCollider()->GetOBB(*grassPlane.first->GetTransform()).value();
-    dbb::ICollider* c_grass = new dbb::OBBCollider(grass_obb);
+    ICollider* c_grass = dbb::OBBCollider::CreateFrom(dynamic_cast<BoxCollider&>(*grassPlane.first->GetCollider()), *grassPlane.first->GetTransform());
     grassPlane.second = std::make_shared<dbb::RigidBody>(c_grass);
     grassPlane.second->SetMass(m_terrain_mass);
     grassPlane.second->SetCoefOfRestitution(m_restitution);
@@ -308,24 +293,22 @@ void PhysicsEngineTestScript::Reset()
 
   sphere1.first->GetTransform()->setTranslation(glm::vec3(-3.0f, 3.0f, 0.0f));
   sphere1.first->GetTransform()->setRotation(0,0,0);
-  dbb::sphere sph1 = sphere1.first->GetCollider()->GetSphere(*sphere1.first->GetTransform()).value();
-  dbb::ICollider* c_sph1 = new dbb::SphereCollider(sph1);
+  ICollider* c_sph1 = dbb::SphereCollider::CreateFrom(dynamic_cast<BoxCollider&>(*sphere1.first->GetCollider()), *sphere1.first->GetTransform());
   sphere1.second = std::make_shared<dbb::RigidBody>(c_sph1);
   sphere1.second->SetCoefOfRestitution(m_restitution);
   sphere1.second->SetFriction(m_friction);
 
   sphere2.first->GetTransform()->setTranslation(glm::vec3(-5.5f, 3.0f, 0.0f));
   sphere2.first->GetTransform()->setRotation(0, 0, 0);
-  dbb::sphere sph2 = sphere2.first->GetCollider()->GetSphere(*sphere2.first->GetTransform()).value();
-  dbb::ICollider* c_sph2 = new dbb::SphereCollider(sph2);
+  ICollider* c_sph2 = dbb::SphereCollider::CreateFrom(dynamic_cast<BoxCollider&>(*sphere2.first->GetCollider()), *sphere2.first->GetTransform());
   sphere2.second = std::make_shared<dbb::RigidBody>(c_sph2);
   sphere2.second->SetCoefOfRestitution(m_restitution);
   sphere2.second->SetFriction(m_friction);
 
   cube1.first->GetTransform()->setTranslation(glm::vec3(-3.0f, 5.0f, 0.0f));
   cube1.first->GetTransform()->setRotation(0,0,0);
-  dbb::OBB obb1 = cube1.first->GetCollider()->GetOBB(*cube1.first->GetTransform()).value(); // get obb from old collider!
-  dbb::ICollider* c_obb1 = new dbb::OBBCollider(obb1); // incorrect rotations
+  // get obb from old collider!
+  ICollider* c_obb1 = dbb::OBBCollider::CreateFrom(dynamic_cast<BoxCollider&>(*cube1.first->GetCollider()), *cube1.first->GetTransform()); // incorrect rotations
   cube1.second = std::make_shared<dbb::RigidBody>(c_obb1);
   cube1.second->SetCoefOfRestitution(m_restitution);
   cube1.second->SetFriction(m_friction);
@@ -334,14 +317,13 @@ void PhysicsEngineTestScript::Reset()
 
   cube2.first->GetTransform()->setTranslation(glm::vec3(3.0f, 3.0f, 0.0f));
   cube2.first->GetTransform()->setRotation(0, 0, 0);
-  dbb::OBB obb2 = cube2.first->GetCollider()->GetOBB(*cube2.first->GetTransform()).value(); // get obb from old collider!
-  dbb::ICollider* c_obb2 = new dbb::OBBCollider(obb2); // incorrect rotations
+  // get obb from old collider!
+  ICollider* c_obb2 = dbb::OBBCollider::CreateFrom(dynamic_cast<BoxCollider&>(*cube2.first->GetCollider()), *cube2.first->GetTransform()); // incorrect rotations
   cube2.second = std::make_shared<dbb::RigidBody>(c_obb2);
   cube2.second->SetCoefOfRestitution(m_restitution);
   cube2.second->SetFriction(m_friction);
 
-  dbb::OBB grass_obb = grassPlane.first->GetCollider()->GetOBB(*grassPlane.first->GetTransform()).value();
-  dbb::ICollider* c_grass = new dbb::OBBCollider(grass_obb);
+  ICollider* c_grass = dbb::OBBCollider::CreateFrom(dynamic_cast<BoxCollider&>(*grassPlane.first->GetCollider()), *grassPlane.first->GetTransform());
   grassPlane.second = std::make_shared<dbb::RigidBody>(c_grass);
   grassPlane.second->SetMass(m_terrain_mass);
   grassPlane.second->SetCoefOfRestitution(m_restitution);

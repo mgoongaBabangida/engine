@@ -30,7 +30,7 @@ namespace dbb
           CollisionManifold::ResetCollisionManifold(result);
           if (m_bodies[i]->HasVolume() && m_bodies[j]->HasVolume())
           {
-            result = ICollider::FindCollisionFeatures(*m_bodies[i]->GetCollider(), *m_bodies[j]->GetCollider());
+            result = RigidBody::FindCollisionFeatures(*m_bodies[i], *m_bodies[j]);
             if (result.colliding)
             {
               m_collisions.emplace_back(m_bodies[i], m_bodies[j], result);

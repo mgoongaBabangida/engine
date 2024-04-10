@@ -6,7 +6,6 @@
 
 #include <math/ParticleSystem.h>
 #include <math/Rigger.h>
-#include <math/RigidBody.h>
 #include <math/BoxCollider.h>
 
 #include <opengl_assets/Texture.h>

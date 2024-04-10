@@ -54,12 +54,6 @@ void eObject::SetModel(std::shared_ptr<IModel> _m)
 	model = _m;
 }
 
-//-----------------------------------------------------------------------------
-void eObject::SetRigidBody(IRigidBody* _rb)
-{
-	movementApi.reset(_rb);
-}
-
 IScript*			eObject::GetScript()	const { return script.get(); }
 ITransform*			eObject::GetTransform()	const { return transform.get();	}
 ICollider*			eObject::GetCollider()	const { return collider.get(); }

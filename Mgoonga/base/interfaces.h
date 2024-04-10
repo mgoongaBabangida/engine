@@ -221,8 +221,8 @@ public:
 
 namespace dbb
 {
-	struct OBB;
-	struct sphere;
+	class SphereCollider;
+	class OBBCollider;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -230,12 +230,15 @@ class ICollider
 {
 public:
 	virtual ~ICollider() = default;
+
 	virtual void CalculateExtremDots(const eObject* _object) = 0;
+
 	virtual bool CollidesWith(const ITransform& trans1,
-							  const ITransform& trans2,
-							  const ICollider& other,
-							  Side moveDirection,
-							  eCollision& collision) = 0;
+														const ITransform& trans2,
+														const ICollider& other,
+														Side moveDirection,
+														eCollision& collision) = 0;
+
 	virtual bool CollidesWith(const ITransform& _trans,
 														std::vector<std::shared_ptr<eObject>> _objects,
 														Side _moveDirection,
@@ -243,8 +246,9 @@ public:
 
 	virtual bool IsInsideOfAABB(const ITransform& _trans, const ITransform& trans2, const ICollider& other) = 0;
 
-	virtual glm::vec3								GetCenter() = 0;
-	virtual float										GetRadius() = 0;
+	virtual glm::vec3								GetCenter() const = 0;
+	virtual float										GetRadius() const = 0;
+
 	virtual const std::string&			GetModelName() = 0;
 	virtual const std::string&			GetPath() const = 0;
 	virtual void										SetPath(const std::string&) = 0;
@@ -256,8 +260,18 @@ public:
 	virtual std::vector<glm::vec3>	GetExtremsLocalSpace() const = 0;
 	virtual extremDots							GetExtremDotsLocalSpace() const = 0;
 
-	virtual std::optional<dbb::OBB> GetOBB(const ITransform& trans) = 0;
-	virtual std::optional<dbb::sphere> GetSphere(const ITransform& trans) = 0;
+	virtual void										SetFrom(const ITransform& trans) = 0;
+	virtual void										SetTo(ITransform& trans) const = 0;
+
+	// new functions
+	virtual CollisionManifold				Dispatch(const ICollider& other) const = 0;
+	virtual void										SynchCollisionVolumes(const glm::vec3& _pos, const glm::vec3& _orientation) = 0;
+	virtual glm::vec4								GetTensor(float mass) const = 0;
+
+	virtual glm::vec3								GetOrientation() const = 0;
+
+	virtual CollisionManifold				CollidesWith(const dbb::SphereCollider& _other) const = 0;
+	virtual CollisionManifold				CollidesWith(const dbb::OBBCollider& _other) const = 0;
 };
 
 //----------------------------------------------------------------------------------------------
@@ -284,48 +298,6 @@ public:
 	virtual void													SetPath(const std::string&)																															= 0;
 
 	virtual bool													UseFirstFrameAsIdle()																																		= 0;
-};
-
-//-----------------------------------------------------------------------------------------------
-class IRigidBody
-{
-public:
-	virtual ~IRigidBody() = default;
-
-	virtual void SetObject(eObject* obj) =0;
-
-	virtual bool Update(float _dt, std::vector<std::shared_ptr<eObject> > objects) = 0;
-
-	virtual void ApplyForce(glm::vec3 _force) = 0;
-	virtual void ApplyForce(glm::vec3 _direction, float _magitude) = 0;
-
-	virtual void ApplyAcceleration(glm::vec3 _acceleration) = 0;
-	virtual void ApplyAcceleration(glm::vec3 _direction, float _magitude) = 0;
-
-	virtual void ApplyImpulse(glm::vec3 _force, float _dt) = 0;
-	virtual void ApplyImpulse(glm::vec3 _direction, float _magitude, float _dt) = 0;
-
-	virtual void TransferEnergy(float _joules) = 0;
-
-	virtual void TurnRight(std::vector<std::shared_ptr<eObject> > objects) = 0;
-	virtual void TurnLeft(std::vector<std::shared_ptr<eObject> > objects) = 0;
-	virtual void LeanRight(std::vector<std::shared_ptr<eObject> > objects) = 0;
-	virtual void LeanLeft(std::vector<std::shared_ptr<eObject> > objects) = 0;
-	virtual void LeanForward(std::vector<std::shared_ptr<eObject> > objects) = 0;
-	virtual void LeanBack(std::vector<std::shared_ptr<eObject> > objects) = 0;
-
-	virtual void MoveForward(std::vector<std::shared_ptr<eObject> > objects) = 0;
-	virtual void MoveBack(std::vector<std::shared_ptr<eObject> > objects) = 0;
-	virtual void MoveLeft(std::vector<std::shared_ptr<eObject> > objects) = 0;
-	virtual void MoveRight(std::vector<std::shared_ptr<eObject> > objects) = 0;
-	virtual void MoveUp(std::vector<std::shared_ptr<eObject> > objects) = 0;
-	virtual void MoveDown(std::vector<std::shared_ptr<eObject> > objects) = 0;
-
-	virtual void Move(std::vector<std::shared_ptr<eObject> > objects, float _dt = 0.0f) = 0;
-	virtual void Turn(glm::vec3 direction, std::vector<std::shared_ptr<eObject>> objects) = 0;
-
-	virtual void				SetCurrentVelocity(glm::vec3 _vel) = 0;
-	virtual glm::vec3		Velocity()	const = 0;
 };
 
 //---------------------------------------------------------------------------
