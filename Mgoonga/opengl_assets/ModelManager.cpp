@@ -1,10 +1,13 @@
 #include "stdafx.h"
+
 #include "ModelManager.h"
+
 #include "ShapeGenerator.h"
 #include "ShapeData.h"
 #include "MyMesh.h"
-#include "AssimpModel.h"
+#include "AssimpLoader.h"
 #include "ShpereTexturedModel.h"
+
 #include "TextureManager.h"
 
 void eModelManager::InitializePrimitives()
@@ -31,11 +34,15 @@ void eModelManager::InitializePrimitives()
 	square.cleanup();
 }
 
-eModelManager::eModelManager(): terrain(new TerrainModel)
+eModelManager::eModelManager()
+	: terrain(new TerrainModel)
+	, m_assimpLoader(new AssimpLoader)
 {}
 
 eModelManager::~eModelManager()
 {
+	if (m_assimpLoader)
+		delete m_assimpLoader;
 }
 
 std::shared_ptr<IModel> eModelManager::Find(const std::string& name) const
@@ -43,9 +50,13 @@ std::shared_ptr<IModel> eModelManager::Find(const std::string& name) const
 	return  models.find(name)->second;
 }
 
-void eModelManager::Add(const std::string& name, char* path, bool invert_y_uv)
+IModel* eModelManager::Add(const std::string& name, char* path, bool invert_y_uv)
 {
-	models.insert(std::pair<std::string, std::shared_ptr<IModel> >(name, new Model(path, name, invert_y_uv)) );
+	AssimpLoader loader;
+	IModel* model = loader.LoadModel(path, name, invert_y_uv);
+	if(model)
+		models.insert(std::pair<std::string, std::shared_ptr<IModel> >(name, model));
+	return model;
 }
 
 void eModelManager::Add(const std::string& _name, Primitive _type, Material&& _material)

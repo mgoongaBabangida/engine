@@ -1,3 +1,5 @@
+#include "stdafx.h"
+
 #include "ModelManagerYAML.h"
 
 #include <opengl_assets/Texture.h>
@@ -7,14 +9,21 @@
 
 #include <fstream>
 
+//@todo finish and test
 //------------------------------------------------------------------------
-void ModelManagerYAML::Add(const std::string& _name, char* _path, bool _invert_y_uv)
+IModel* ModelManagerYAML::Add(const std::string& _name, char* _path, bool _invert_y_uv)
 {
   std::string path(_path);
   if (path.find("mgoongaObject3d") == std::string::npos)
     return eModelManager::Add(_name, _path, _invert_y_uv);
 
-  _LoadModel(_name, path);
+  return _LoadModel(_name, path);
+}
+
+//------------------------------------------------------------------------
+void ModelManagerYAML::Add(const std::string& _name, Primitive _type, Material&& _material)
+{
+  eModelManager::Add(_name, _type, std::move(_material));
 }
 
 //------------------------------------------------------------------------
@@ -162,7 +171,7 @@ void ModelManagerYAML::Save(IModel* _model, const std::string& _filepath)
 }
 
 //------------------------------------------------------------------------
-bool ModelManagerYAML::_LoadModel(const std::string& _name, const std::string& _filepath)
+IModel* ModelManagerYAML::_LoadModel(const std::string& _name, const std::string& _filepath)
 {
   std::ifstream stream(_filepath);
   std::stringstream strstream;
@@ -206,6 +215,7 @@ bool ModelManagerYAML::_LoadModel(const std::string& _name, const std::string& _
     }
   }
 
+  std::vector<AssimpMesh> meshes;
   auto serialized_meshes = data["Meshes"];
   for (auto serialized_mesh : serialized_meshes)
   {
@@ -271,9 +281,11 @@ bool ModelManagerYAML::_LoadModel(const std::string& _name, const std::string& _
       if(emissive)
         emissive_path = emissive.as<std::string>();
     }
+
+    meshes.emplace_back(vertices, indeces, textures, m, name, true);
   }
 
-  /*IModel* model = nullptr;
-  models.insert(std::pair<std::string, std::shared_ptr<IModel> >(_name, model));*/
-  return true;
+  std::shared_ptr<IModel> model(MakeModel(_name, std::move(meshes), bones));
+  models.insert(std::pair<std::string, std::shared_ptr<IModel> >(_name, model));
+  return model.get();
 }

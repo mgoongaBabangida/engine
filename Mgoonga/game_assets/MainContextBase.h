@@ -178,5 +178,5 @@ protected:
 	bool m_update_hovered = false;
 	bool m_show_fps = true;
 	bool m_debug_csm = false;
-	bool m_load_model_multithreading = false;
+	bool m_load_model_multithreading = true;
 };

@@ -1,10 +1,18 @@
 #pragma once
 
-#include "Texture.h"
 #include <base/interfaces.h>
 
+#include "Texture.h"
+
+DLL_OPENGL_ASSETS I3DMesh* MakeMesh(std::vector<Vertex> vertices,
+                                    std::vector<GLuint> indices,
+                                    std::vector<Texture> textures,
+                                    const Material& material,
+                                    const std::string& name = "Default",
+                                    bool _calculate_tangent = false);
+//@todo try to stop exporting
 //-----------------------------------------------------------------
-class AssimpMesh : public I3DMesh
+class DLL_OPENGL_ASSETS AssimpMesh : public I3DMesh
 {
 public:
   friend class Model;
@@ -12,19 +20,24 @@ public:
 	AssimpMesh(std::vector<Vertex> vertices,
              std::vector<GLuint> indices,
              std::vector<Texture> textures,
-             const Material material,
+             const Material& material,
              const std::string& name = "Default",
              bool _calculate_tangent = false);
   virtual ~AssimpMesh();
 
   AssimpMesh(const AssimpMesh&) = delete;
-  AssimpMesh(AssimpMesh&&) = default;
+  AssimpMesh& operator=(const AssimpMesh&) = delete;
 
+  AssimpMesh(AssimpMesh&&) noexcept = default;
+  AssimpMesh& operator=(AssimpMesh&&) noexcept = default;
+
+  void Draw() override;
+  void DrawInstanced(int32_t instances) override;
+
+  void SetupMesh();
+  void ReloadTextures();
   void FreeTextures();
   virtual void ReloadVertexBuffer() override;
-
-	void Draw() override;
-  void DrawInstanced(int32_t instances) override;
 
   virtual const std::string& Name() const override { return name;}
 
@@ -41,22 +54,19 @@ public:
   virtual void											SetMaterial(const Material&) override;
   virtual std::optional<Material>		GetMaterial() const override { return m_material; }
 
-  virtual void												calculatedTangent() override;
+  virtual void											calculatedTangent() override;
 
 protected:
   void _BindRawTextures();
   void _BindMaterialTextures();
 
   /*  Mesh Data  */
-  std::vector<Vertex>	      vertices;
-  std::vector<GLuint>			  indices;
-  std::vector<Texture>			textures;
-  std::string               name;
-  Material                  m_material;
+  std::vector<Vertex>	    vertices;
+  std::vector<GLuint>			indices;
+  std::vector<Texture>		textures;
+  std::string             name;
+  Material                m_material;
 
 	/*  Render data  */
 	GLuint VAO, VBO, EBO;
-
-	/*  Functions    */
-	void setupMesh();
 };

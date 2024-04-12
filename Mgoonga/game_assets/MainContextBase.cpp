@@ -512,30 +512,39 @@ void eMainContextBase::InitializeModels()
 			}
 		}
 
-		if (m_load_model_multithreading) //@todo textures are loaded in main thread only, need to load  them separately
+		if (m_load_model_multithreading)
 		{
 			size_t thread_count = file_infos.size() > 4 ? 4 : file_infos.size();
 			size_t step = file_infos.size() / thread_count;
 			if (step * thread_count != file_infos.size())
 				++step;
-			std::vector<std::future<bool>> tasks;
+			std::vector<std::future<std::vector<IModel*>>> tasks;
 			for (size_t i = 0; i < thread_count; ++i)
 			{
-				std::function<bool()> func = [this, i, step, &file_infos, thread_count]()->bool
+				std::function<std::vector<IModel*>()> func = [this, i, step, &file_infos, thread_count]()-> std::vector<IModel*>
 				{
+					std::vector<IModel*> models;
 					size_t model_index = step * i;
 					while (model_index < (i + 1) * step && model_index < file_infos.size())
 					{
-						modelManager->Add(std::get<0>(file_infos[model_index]), (GLchar*)std::string(modelFolderPath + std::get<1>(file_infos[model_index])).c_str(), std::get<2>(file_infos[model_index]));
+						models.push_back(modelManager->Add(std::get<0>(file_infos[model_index]),
+																							(GLchar*)std::string(modelFolderPath + std::get<1>(file_infos[model_index])).c_str(), std::get<2>(file_infos[model_index])));
 						++model_index;
 					}
-					return true;
+					return models;
 				};
-				tasks.emplace_back(std::async(func));
+				tasks.push_back(std::async(std::launch::async, func));
 			}
 			//wait for the tasks
-			for (auto& fut : tasks)
-				fut.get();
+			for (auto& fut : tasks) //textures are loaded in main thread only, need to load  them separately in main thread
+			{
+				std::vector<IModel*> models = fut.get();
+				for (IModel* m : models)
+				{
+					m->SetUpMeshes();
+					m->ReloadTextures();
+				}
+			}
 		}
 	}
 }

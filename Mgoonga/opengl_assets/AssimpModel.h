@@ -1,39 +1,36 @@
 #pragma once
 
-#include "stdafx.h"
-
-//#include <assimp/Importer.hpp>
-//#include <assimp/scene.h>
-//#include <assimp/postprocess.h>
-#include <assimp-3.1.1/include/assimp/Importer.hpp>
-#include <assimp-3.1.1/include/assimp/scene.h>
-#include <assimp-3.1.1/include/assimp/postprocess.h>
+#include "opengl_assets.h"
 
 #include "AssimpMesh.h"
-#include "MyModel.h"
 
 #include <math/AnimatedModel.h>
 #include <math/Bone.h>
 
-#define NUM_BONES_PER_VEREX 4 
+#define NUM_BONES_PER_VEREX 4
+
+DLL_OPENGL_ASSETS IModel* MakeModel(const std::string& _name, std::vector<AssimpMesh>&& _meshes, std::vector<Bone> _bones);
 
 //------------------------------------------------------
-class Model: public eAnimatedModel
+class /*DLL_OPENGL_ASSETS*/ Model: public eAnimatedModel //I not e?
 {
+	friend class AssimpLoader;
 public:
-	Model(char* path,
-				const std::string& _name,
-				bool _m_invert_y_uv = false);
+	Model(char* path, const std::string& _name);
+	Model(const std::string& _name, std::vector<AssimpMesh>&&	_meshes, std::vector<Bone> _bones);
   virtual ~Model();
 
-	virtual void Draw()  ;
+	virtual void Draw();
 	virtual void DrawInstanced(int32_t _instances) override;
 
+	virtual void SetUpMeshes() override;
+	virtual void ReloadTextures() override;
+
 	virtual const std::string& GetName() const override { return m_name; }
-	virtual const std::string& GetPath() const override { return directory; }
+	virtual const std::string& GetPath() const override { return m_directory; }
 
   virtual size_t													GetVertexCount() const override;
-  virtual size_t													GetMeshCount() const  override { return meshes.size();}
+  virtual size_t													GetMeshCount() const  override { return m_meshes.size();}
 	virtual std::vector<const I3DMesh*>			Get3DMeshes() const override;
 	virtual std::vector<const IMesh*>				GetMeshes() const override;
 
@@ -43,25 +40,12 @@ public:
   virtual size_t													GetAnimationCount() const override { return m_animations.size(); }
   virtual std::vector<const IAnimation*>	GetAnimations() const override;
 
-public:
+	// Animated Model
 	std::string														RootBoneName();
 	std::vector<Bone>											Bones()				const { return m_bones; }
 	const std::vector<SceletalAnimation>&	Animations()		const { return m_animations; }
 	glm::mat4															GlobalTransform()	const { return m_GlobalInverseTransform; }
 
-private:
-	/*  Model Data  */
-	std::vector<AssimpMesh>		meshes;
-	std::string								directory;
-	std::string								m_name;
-
-	/*  Functions   */
-  void							              loadModel(const std::string& path);
-  void							              processNode(aiNode* node, const aiScene* scene);
-	AssimpMesh						          processMesh(aiMesh* mesh, const aiScene* scene);
-	void														mapMehsesToNodes();
-	std::vector<Texture>					  loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
-	
 	// VertexBoneData
 	struct VertexBoneData
 	{
@@ -108,31 +92,25 @@ private:
 	};
 
 private:
-	std::unique_ptr<Assimp::Importer>				m_import;
-	std::unique_ptr <aiScene>								m_scene; //?
-	
+	/*  Model Data  */
+	std::vector<AssimpMesh>		m_meshes;
+	std::string								m_directory;
+	std::string								m_name;
+
+	/*  Bone Data  */
 	std::vector<Bone>				      m_bones;
-	Bone*							            root_bone	= nullptr;
+	Bone*							            m_root_bone	= nullptr;
 	int								            m_NumBones	= 0;
 	std::map<std::string, int>		m_BoneMapping;
 
+	/*  Animation Data  */
 	std::vector<SceletalAnimation>	m_animations;
 	glm::mat4						            m_GlobalInverseTransform;
   bool														m_invert_y_uv = false;
 	bool														m_no_real_bones = false;
 
-	void							loadNodesToBone(aiNode * node);
-	void							loadBoneChildren(aiNode* node);
-	void							ProccessAnimations(const aiAnimation* anim);
-	void							updateAnimation(Bone & bone,const Frame& frame, const glm::mat4 & ParentTransform);
-
 private:
-	//Dumpers////
-	std::vector<std::string>		DumpAiMeshes();
-	std::vector<std::string>		DumpAiMesh(aiMesh* mesh);
-	std::vector<std::string>		DumpAiNodes();
-	void							          DumpAiNode(aiNode* node, std::vector<std::string>& BoneNames);
-	void							          DumpBone();
-	void							          DumpAiAnimation(const aiAnimation * anim);
-	void							          DumpAssimpMeshes();
+	void												updateAnimation(Bone & bone,const Frame& frame, const glm::mat4 & ParentTransform);
+	void												mapMehsesToNodes();
+	Texture											LoatTexture(std::string _fileName, std::string _typeName);
 };

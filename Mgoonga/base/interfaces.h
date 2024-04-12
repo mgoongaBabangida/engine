@@ -158,6 +158,9 @@ public:
 	virtual void														Draw()					= 0;
 	virtual void														DrawInstanced(int32_t) {}
 
+	virtual void														SetUpMeshes() {} //@todo
+	virtual void														ReloadTextures() {} //@todo
+
 	virtual const std::string&							GetName() const = 0;
 	virtual const std::string&							GetPath() const = 0;
 
