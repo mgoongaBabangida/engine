@@ -2,8 +2,10 @@
 #include "ObjectFactory.h"
 
 #include <math/Rigger.h>
+#include <math/Colliders.h>
 #include <math/BoxColliderDynamic.h>
 #include <math/AnimatedModel.h>
+#include <math/RigidBody.h>
 
 #include <game_assets/AnimationManagerYAML.h>
 #include <game_assets/DynamicBoundingBoxColliderSerializerYAML.h>
@@ -19,9 +21,10 @@ std::unique_ptr<eObject> ObjectFactoryBase::CreateObject(std::shared_ptr<IModel>
   obj->SetTransform(new Transform);
   if (!_model->Get3DMeshes().empty())
   {
-    obj->SetCollider(new BoxCollider);
+    obj->SetCollider(new dbb::OBBCollider(dbb::OBB{}));
     obj->GetCollider()->CalculateExtremDots(obj.get());
   }
+  obj->SetRigidBody(new dbb::RigidBody(obj->GetCollider()));
   obj->SetName(_name);
   return obj;
 }

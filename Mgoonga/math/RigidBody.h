@@ -14,7 +14,7 @@ namespace dbb
   class RigidBody;
 
   //---------------------------------------------------------------------
-  class DLL_MATH RigidBody
+  class DLL_MATH RigidBody : public IRigidBody
   {
   public:
     explicit RigidBody(ICollider* _collider = nullptr);

@@ -54,11 +54,18 @@ void eObject::SetModel(std::shared_ptr<IModel> _m)
 	model = _m;
 }
 
+//-----------------------------------------------------------------------------
+void eObject::SetRigidBody(IRigidBody* _rb)
+{
+	rigid_body.reset(_rb);
+}
+
 IScript*			eObject::GetScript()	const { return script.get(); }
 ITransform*			eObject::GetTransform()	const { return transform.get();	}
 ICollider*			eObject::GetCollider()	const { return collider.get(); }
 IModel*				eObject::GetModel()		const { return model.get(); }
 IRigger*			eObject::GetRigger()	const { return rigger.get(); }
+std::shared_ptr<IRigidBody> eObject::GetRigidBody() const { return rigid_body; }
 
 
 std::vector<std::shared_ptr<eObject>> GetObjectsWithChildren(std::vector<std::shared_ptr<eObject>> _objects)

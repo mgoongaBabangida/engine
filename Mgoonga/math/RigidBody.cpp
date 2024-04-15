@@ -1,4 +1,4 @@
-#include "RigidBodyDBB.h"
+#include "RigidBody.h"
 
 #include "GeometryFunctions.h"
 #include "Colliders.h"

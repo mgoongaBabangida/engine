@@ -56,14 +56,16 @@ public:
 	void				SetModel(IModel*);
 	void				SetModel(std::shared_ptr<IModel>);
 	void 				SetName(const std::string& _name) { name = _name; }
+	void				SetRigidBody(IRigidBody*);
 
 	//Getters
-	IScript*						GetScript()		const;
-	ITransform*					GetTransform()	const;
-	ICollider*					GetCollider()	const;
-	IModel*							GetModel()		const;
-	IRigger*						GetRigger()		const;
-	const std::string&	Name()			const	{ return name;				}
+	IScript*										GetScript()		const;
+	ITransform*									GetTransform()	const;
+	ICollider*									GetCollider()	const;
+	IModel*											GetModel()		const;
+	IRigger*										GetRigger()		const;
+	std::shared_ptr<IRigidBody>	GetRigidBody() const;
+	const std::string&					Name()			const	{ return name; }
 
 protected:
 	std::shared_ptr<IModel>				model;
@@ -71,6 +73,7 @@ protected:
 	std::unique_ptr<ITransform>		transform;
 	std::unique_ptr<ICollider>		collider;
 	std::unique_ptr<IRigger>			rigger;
+	std::shared_ptr<IRigidBody>		rigid_body;
 	std::string										name;
 	std::vector<std::shared_ptr<eObject>> m_children;
 

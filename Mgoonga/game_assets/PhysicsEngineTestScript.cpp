@@ -7,7 +7,7 @@
 
 #include <math/Geometry.h>
 #include <math/GeometryFunctions.h>
-#include <math/RigidBodyDBB.h>
+#include <math/RigidBody.h>
 #include <math/PhysicsSystem.h>
 #include <math/Colliders.h>
 

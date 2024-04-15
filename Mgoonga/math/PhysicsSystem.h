@@ -3,7 +3,7 @@
 #include "math.h"
 
 #include <base/Event.h>
-#include "RigidBodyDBB.h"
+#include "RigidBody.h"
 
 #include <queue>
 
@@ -27,6 +27,8 @@ namespace dbb
     void Update(float _deltaTime); // called in main thread
     void UpdateAsync(float _deltaTime); //needs to be called at fixed fps, should be separate thread(or separate clock) with fixed interval of calls like 30fps
     
+    std::vector<std::shared_ptr<dbb::RigidBody>>  GetRigidBodies() const { return m_bodies; }
+
     void AddRigidbody(std::shared_ptr<dbb::RigidBody> _body);
     void AddConstraint(const OBB& _constraint);
 

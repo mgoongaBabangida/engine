@@ -22,6 +22,10 @@ class eSoundManager;
 class eInputController;
 class IWindowImGui;
 class ITcpAgent;
+namespace dbb
+{
+	class PhysicsSystem;
+}
 
 //-------------------------------------------------------
 class DLL_GAME_ASSETS eMainContextBase : public IGame, public IInputObserver
@@ -112,6 +116,7 @@ public:
 	}
 
 	const ModelManagerYAML* GetModelManager() const { return modelManager.get(); }
+	dbb::PhysicsSystem* GetPhysicsSystem() const { return m_physics_system.get(); }
 
 protected:
 	virtual void		InitializePipline();
@@ -165,6 +170,7 @@ protected:
 	std::unique_ptr<AnimationManagerYAML>			animationManager;//m_
 	std::unique_ptr<eSoundManager>						soundManager;//m_
   std::vector<IWindowImGui*>&								externalGui;//m_
+	std::unique_ptr<dbb::PhysicsSystem>				m_physics_system;
 
 	enum class FramedChoice
 	{

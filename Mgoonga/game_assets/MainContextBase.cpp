@@ -6,9 +6,11 @@
 #include "ModelManagerYAML.h"
 #include "AnimationManagerYAML.h"
 #include "ParticleSystemToolController.h"
+#include "PhysicsSystemController.h"
 #include "TerrainGeneratorTool.h"
 #include "BezierCurveUIController.h"
 #include "CameraSecondScript.h"
+
 #include <base/InputController.h>
 
 #include <tcp_lib/Network.h>
@@ -24,6 +26,7 @@
 #include <math/Clock.h>
 #include <math/Rigger.h>
 #include <math/ParticleSystem.h>
+#include <math/PhysicsSystem.h>
 
 #include <thread>
 #include <sstream>
@@ -44,6 +47,7 @@ eMainContextBase::eMainContextBase(eInputController* _input,
 , animationManager(new AnimationManagerYAML)
 , soundManager(new eSoundManager(_assetsPath))
 , externalGui(_externalGui)
+, m_physics_system(new dbb::PhysicsSystem)
 , pipeline(1200, 600) //@todo should get from outside
 {
 	m_cameras.reserve(8); //@todo redesign
@@ -947,6 +951,13 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[9]->Add(CONSOLE, "Console", reinterpret_cast<void*>(&console_plane_callbaack));
 
 	m_global_scripts.push_back(std::make_shared<ParticleSystemToolController>(this, externalGui[10], modelManager.get(),texManager.get(), soundManager.get(), pipeline));
+
+	auto physics = std::make_shared<PhysicsSystemController>(this);
+	m_global_scripts.push_back(physics);
+	static std::function<void()> run_physics = [physics]() { physics->RunPhysics(); };
+	static std::function<void()> stop_physics = [physics]() { physics->StopPhysics(); };
+	externalGui[1]->Add(BUTTON, "Run Physicsa", &run_physics);
+	externalGui[1]->Add(BUTTON, "Stop Physics", &stop_physics);
 }
 
 //------------------------------------------------------------
