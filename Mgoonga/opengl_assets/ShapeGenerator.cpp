@@ -920,7 +920,7 @@ ShapeData ShapeGenerator::makeSquare(float Width, float Height) {
 ShapeData ShapeGenerator::makeEllipse(float radiusX, float radiusY, float radiusZ, int segments)
 {
 	std::vector<ShapeData::Vertex> vertices;
-	std::vector<unsigned int> indices;
+	std::vector<unsigned short> indices;
 	// Generate vertices around the ellipse
 	for (int i = 0; i <= segments; ++i)
 	{
@@ -981,10 +981,10 @@ ShapeData ShapeGenerator::makeEllipse(float radiusX, float radiusY, float radius
 	ShapeData ret;
 	ret.numVertices = vertices.size();
 	ret.vertices = new ShapeData::Vertex[ret.numVertices];
-	memcpy(ret.vertices, &vertices, sizeof(ShapeData::Vertex) * vertices.size());  //need clean up
+	memcpy(ret.vertices, &vertices[0], sizeof(ShapeData::Vertex) * vertices.size());  //need clean up
 
 	ret.numIndices = indices.size();
 	ret.indices = new GLushort[ret.numIndices];
-	memcpy(ret.indices, &indices, sizeof(unsigned int) * indices.size());
+	memcpy(ret.indices, &indices[0], sizeof(unsigned short) * indices.size());
 	return ret;
 }
