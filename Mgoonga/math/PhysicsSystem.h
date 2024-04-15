@@ -4,6 +4,8 @@
 
 #include <base/Event.h>
 #include "RigidBody.h"
+#include "Spring.h"
+#include "Cloth.h"
 
 #include <queue>
 
@@ -31,6 +33,8 @@ namespace dbb
 
     void AddRigidbody(std::shared_ptr<dbb::RigidBody> _body);
     void AddConstraint(const OBB& _constraint);
+    void AddSpring(const Spring& spring);
+    void AddCloth(Cloth* cloth);
 
     void SetLinearProjectionPercent(float);
     float GetLinearProjectionPercent();
@@ -46,11 +50,15 @@ namespace dbb
 
     void ClearRigidbodys();
     void ClearConstraints();
+    void ClearSprings();
+    void ClearCloths();
 
   protected:
     void ClearCollisions();
 
     std::vector<std::shared_ptr<dbb::RigidBody>>   m_bodies;
+    std::vector<Spring>                            m_springs;
+    std::vector<Cloth*>                            m_cloths;
     std::atomic<bool>								               body_container_flag = false;
     std::vector<dbb::OBB>                          m_constraints;
     std::vector<CollisionPair>                     m_collisions;

@@ -199,10 +199,15 @@ namespace dbb
     }
     else
     {
-      glm::vec3 velocity = m_position - m_oldPosition;
+      /*glm::vec3 velocity = m_position - m_oldPosition;
       m_oldPosition = m_position;
       float deltaSquare = _deltaTime * _deltaTime;
-      m_position = m_position + (velocity * g_friction + m_forces * deltaSquare);
+      m_position = m_position + (velocity * m_friction + m_forces * deltaSquare);*/
+
+      m_oldPosition = m_position;
+      glm::vec3 acceleration = m_forces * InvMass();
+      m_velocity = m_velocity * m_friction + + acceleration * _deltaTime;
+      m_position = m_position + m_velocity * _deltaTime;
     }
   }
 
@@ -360,6 +365,9 @@ namespace dbb
   //--------------------------------------------------------------------------------------
   void RigidBody::SetMass(float _mass)
   {
+    if (_mass < 0)
+      _mass = 0;
+
     m_mass = _mass;
   }
 
@@ -384,6 +392,8 @@ namespace dbb
   //---------------------------------------------------------------------------------------
   void RigidBody::SetFriction(float _f)
   {
+    if (_f < 0)
+      _f = 0;
     m_friction = _f;
   }
 

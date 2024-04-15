@@ -41,6 +41,7 @@
 *.recipe
 *FileListAbsolute.txt
 Thumbs.db
+*db-shm
 
 
 # [Common artifact folders]

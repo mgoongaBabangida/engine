@@ -43,6 +43,10 @@ namespace dbb
       for (size_t i = 0, size = m_bodies.size(); i < size; ++i)
         m_bodies[i]->ApplyForces();
 
+      // Calculate forces acting on cloths
+      for (int i = 0, size = m_cloths.size(); i < size; ++i)
+        m_cloths[i]->ApplyForces();
+
       for (size_t k = 0; k < m_impulseIteration; ++k)
       {
         for (size_t i = 0; i < m_collisions.size(); ++i)
@@ -63,6 +67,10 @@ namespace dbb
 
       for (size_t i = 0, size = m_bodies.size(); i < size; ++i)
         m_bodies[i]->Update(_deltaTime);
+
+      // Integrate velocity and impulse of cloths
+      for (int i = 0, size = m_cloths.size(); i < size; ++i)
+        m_cloths[i]->Update(_deltaTime);
 
       //sync
       size_t size = m_collisions.size();
@@ -94,8 +102,21 @@ namespace dbb
         m_collisions[i].m_A->SynchCollisionVolumes();
       }
 
+      // Apply spring forces
+      for (int i = 0, size = m_springs.size(); i < size; ++i)
+        m_springs[i].ApplyForce(_deltaTime);
+
+      // apply spring forces for cloths
+      for (int i = 0, size = m_cloths.size(); i < size; ++i)
+        m_cloths[i]->ApplySpringForces(_deltaTime);
+
+      //Solve Constraints
       for (size_t i = 0, size = m_bodies.size(); i < size; ++i)
         m_bodies[i]->SolveConstraints(m_constraints);
+
+      // NEW: Same as above, solve cloth constraints
+      for (int i = 0, size = m_cloths.size(); i < size; ++i)
+        m_cloths[i]->SolveConstraints(m_constraints);
 
       body_container_flag.store(false);
   }
@@ -113,6 +134,16 @@ namespace dbb
   void PhysicsSystem::AddConstraint(const OBB& _obb)
   {
     m_constraints.push_back(_obb);
+  }
+  //-------------------------------------------------------
+  void PhysicsSystem::AddSpring(const Spring& _spring)
+  {
+    m_springs.push_back(_spring);
+  }
+  //-------------------------------------------------------
+  void PhysicsSystem::AddCloth(Cloth* _cloth)
+  {
+    m_cloths.push_back(_cloth);
   }
   //-------------------------------------------------------
   void PhysicsSystem::SetLinearProjectionPercent(float _linearProjectionPercent)
@@ -171,6 +202,18 @@ namespace dbb
   void PhysicsSystem::ClearConstraints()
   {
     m_constraints.clear();
+  }
+
+  //-------------------------------------------------------
+  void PhysicsSystem::ClearSprings()
+  {
+    m_springs.clear();
+  }
+
+  //-------------------------------------------------------
+  void PhysicsSystem::ClearCloths()
+  {
+    m_cloths.clear();
   }
 
   //-------------------------------------------------------

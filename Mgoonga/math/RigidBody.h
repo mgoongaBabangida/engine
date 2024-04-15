@@ -22,7 +22,7 @@ namespace dbb
     static glm::vec3  g_gravity; //@todo constexpr somewhere above
     static float      g_friction;
 
-    float      g_angular_vel_damper = 1.0f;
+    float      g_angular_vel_damper = 1.0f; //temp
 
     static CollisionManifold FindCollisionFeatures(RigidBody& ra, RigidBody& rb);
 
@@ -39,17 +39,24 @@ namespace dbb
 
     ICollider*      GetCollider() const;
     void            SetCollider(ICollider*);
+
     void            SetPosition(const glm::vec3& pos);
     glm::vec3       GetPosition();
+
     void            SetBounce(float b);
     float           GetBounce() const;
+
     void            SetMass(float);
     float           GetMass() const;
+
     void            SetCoefOfRestitution(float);
     float           GetCoefOfRestitution() const;
+
     void            SetFriction(float);
     float           GetFriction() const;
+
     glm::vec3       GetVelocity() const;
+
     void            SetGravityApplicable(bool);
     bool            GetGravityApplicable() const;
 
@@ -62,7 +69,7 @@ namespace dbb
     glm::mat4 InvTensor();
 
   protected:
-    ICollider*          m_collider = nullptr; // delete !!! // no collider means particle
+    ICollider*          m_collider = nullptr; // no collider means particle
     glm::vec3           m_position = {};
     glm::vec3           m_oldPosition = {};
     glm::vec3           m_velocity = {};
