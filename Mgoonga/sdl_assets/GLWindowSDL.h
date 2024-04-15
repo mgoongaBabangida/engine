@@ -23,34 +23,34 @@ public:
 	dbGLWindowSDL(const IGameFactory&);
 	~dbGLWindowSDL();
 
-	bool		InitializeGL();
-	void		Run();
-  void		Close();
-	void		OnDockSpace();
+	bool	InitializeGL();
+	void	Run();
+	void	Close();
+	void	OnDockSpace();
 
 protected:
-	void										PaintGL(); //update? tick?
+	void	PaintGL(); //update? tick?
 
-	std::unique_ptr<math::Timer>		dTimer;
-	std::vector<IWindowImGui*>			guiWnd;
-	eInputController								inputController;
-	std::unique_ptr<IGame>					mainContext; 
+	std::unique_ptr<math::Timer>	dTimer;
+	std::vector<IWindowImGui*>		guiWnd;
+	eInputController				inputController;
+	std::unique_ptr<IGame>			mainContext; 
 
-	SDL_Window*							window  = nullptr;
+	SDL_Window*						window  = nullptr;
 
-	const GLint							WIDTH	= 1200; //@todo
-	const GLint							HEIGHT	= 600;
+	const GLint						WIDTH	= 1200; //@todo
+	const GLint						HEIGHT	= 600;
 
-  bool                    running = true;
-  std::function<void()>		on_close;
+	bool							running = true;
+	std::function<void()>			on_close;
 };
 
 //----------------------------------------------------------------------
 class IGameFactory
 {
 public:
-	virtual IGame* CreateGame(eInputController*						_input,
-														std::vector<IWindowImGui*>&	_imgui_windows) const = 0;
+	virtual IGame* CreateGame(eInputController*				_input,
+							  std::vector<IWindowImGui*>&	_imgui_windows) const = 0;
 };
 
 #endif
