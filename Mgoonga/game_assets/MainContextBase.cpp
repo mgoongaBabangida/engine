@@ -1015,6 +1015,10 @@ void eMainContextBase::_PreInitModelManager()
 		std::make_shared<MyModel>(modelManager->FindMesh("quad"),
 															"white_quad",
 															&Texture::GetTexture1x1(WHITE)));
+	modelManager->AddPrimitive("white_ellipse",
+		std::make_shared<MyModel>(modelManager->FindMesh("ellipse"),
+															"white_quad",
+															&Texture::GetTexture1x1(WHITE)));
 }
 
 //------------------------------------------------------------

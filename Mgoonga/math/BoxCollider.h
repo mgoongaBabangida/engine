@@ -54,6 +54,7 @@ public:
 protected:
 	virtual CollisionManifold				CollidesWith(const dbb::SphereCollider& _other) const override  { return CollisionManifold{}; }
 	virtual CollisionManifold				CollidesWith(const dbb::OBBCollider& _other) const override  { return CollisionManifold{}; }
+	virtual CollisionManifold				CollidesWith(const dbb::EllipseCollider& _other) const override { return CollisionManifold{}; };
 	// --------------------------------- -------------------------------------------------
 
 protected:

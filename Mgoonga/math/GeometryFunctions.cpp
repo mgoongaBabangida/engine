@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include <cfloat>
+#include <algorithm>
 
 #include <glm\glm\glm.hpp>
 #include <glm\glm\gtc\matrix_transform.hpp>
@@ -657,6 +658,103 @@ namespace dbb
   }
 
   //---------------------------------------------------------------------------------
+  bool EllipseOBB(const ellipse& ellipse, const OBB& obb)
+  {
+    // Transform the ellipse center into the coordinate system of the OBB
+      glm::vec3 centerInOBB = glm::inverse(obb.orientation) * (ellipse.center - obb.origin);
+
+    // Transform the ellipse orientation to the coordinate system of the OBB
+    glm::mat3 orientationInOBB = glm::transpose(glm::inverse(obb.orientation)) * ellipse.orientation;
+
+    std::vector<glm::vec3> vertices = {
+        glm::vec3(-0.5f, -0.5f, -0.5f),
+        glm::vec3(0.5f, -0.5f, -0.5f),
+        glm::vec3(-0.5f, 0.5f, -0.5f),
+        glm::vec3(0.5f, 0.5f, -0.5f),
+        glm::vec3(-0.5f, -0.5f, 0.5f),
+        glm::vec3(0.5f, -0.5f, 0.5f),
+        glm::vec3(-0.5f, 0.5f, 0.5f),
+        glm::vec3(0.5f, 0.5f, 0.5f)
+    };
+
+    // Transform vertices by the orientation matrix
+    for (glm::vec3& vertex : vertices)
+      vertex = obb.orientation * vertex;
+
+
+    // Calculate half extents by finding the maximum distance from the origin along each axis
+    glm::vec3 halfExtents;
+    for (int i = 0; i < 3; ++i)
+    {
+      auto minmax = std::minmax_element(vertices.begin(), vertices.end(), [&](const glm::vec3& a, const glm::vec3& b) { return a[i] < b[i]; });
+      float maxDistance = std::max(std::abs((*minmax.second)[i]), std::abs((*minmax.first)[i]));
+      halfExtents[i] = maxDistance;
+    }
+
+    // Calculate the squared distance from the ellipse center to the OBB
+    float squaredDistance = 0.0f;
+    for (int i = 0; i < 3; ++i)
+    {
+      float distanceAlongAxis = glm::clamp(centerInOBB[i], -halfExtents[i], halfExtents[i]);
+      squaredDistance += glm::pow(distanceAlongAxis - centerInOBB[i], 2.0f);
+    }
+
+    // Check if the squared distance is less than the squared radii of the ellipse
+    bool intersects = (squaredDistance < glm::length2(ellipse.radii));
+
+    // Additional check for orientation
+    // Calculate the squared distance from the ellipse center to the OBB based on orientation
+    // This check ensures that the ellipse doesn't intersect the OBB if it's rotated in such a way that it lies completely outside
+    // of the OBB's bounding box in any orientation
+    if (intersects)
+    {
+      glm::mat3 rotationMatrix = glm::mat3(1.0f);
+      for (int i = 0; i < 3; ++i)
+      {
+        float distance = centerInOBB[i];
+        rotationMatrix[i] *= distance;
+      }
+
+      glm::vec3 rotatedRadii = glm::mat3{ glm::abs(orientationInOBB[0]), glm::abs(orientationInOBB[1]), glm::abs(orientationInOBB[2]) } *ellipse.radii;
+      float squaredDistanceWithOrientation = glm::length2(rotationMatrix * rotatedRadii);
+      intersects = (squaredDistanceWithOrientation < 1.0f);
+    }
+    return intersects;
+  }
+
+  //---------------------------------------------------------------------------------
+  bool EllipseSphere(const dbb::ellipse& _ellipse, const dbb::sphere& _sphere)
+  {
+    // Transform the center of the sphere to the coordinate system of the ellipse
+    glm::vec3 sphereCenterInEllipseSpace = glm::inverse(_ellipse.orientation) * (_sphere.position - _ellipse.center);
+
+    // Calculate the distance between the center of the ellipse and the center of the sphere in the ellipse's coordinate system
+    float distance = glm::length(sphereCenterInEllipseSpace);
+
+    // Calculate the radius of the sphere projected onto the ellipse's coordinate system
+    float sphereRadiusInEllipseSpace = glm::max(_sphere.radius, glm::length(glm::inverse(_ellipse.orientation) * glm::vec3(_sphere.radius)));
+
+    // Check if the distance between the centers of the ellipse and the sphere is less than the sum of their radii
+    return distance <= sphereRadiusInEllipseSpace + glm::length(_ellipse.radii);
+  }
+
+  //---------------------------------------------------------------------------------
+  bool EllipseEllipse(const dbb::ellipse& _ellipse1, const dbb::ellipse& _ellipse2)
+  {
+    // Transform the center of ellipse2 to the coordinate system of ellipse1
+    glm::vec3 center2InEllipse1Space = glm::inverse(_ellipse1.orientation) * (_ellipse2.center - _ellipse1.center);
+
+    // Calculate the radii of ellipse2 projected onto the coordinate system of ellipse1
+    glm::vec3 radii2InEllipse1Space = glm::abs(glm::inverse(_ellipse1.orientation) * _ellipse2.orientation * _ellipse2.radii); //abs?
+
+    // Calculate the distance between the centers of the two ellipses in the coordinate system of ellipse1
+    float distance = glm::length(center2InEllipse1Space);
+
+    // Check if the distance between the centers of the ellipses is less than the sum of their radii
+    return distance <= glm::length(_ellipse1.radii + radii2InEllipse1Space);
+  }
+
+  //---------------------------------------------------------------------------------
   bool TriangleSphere(const dbb::triangle& _triangle, const dbb::sphere& _sphere)
   {
     dbb::point closest = GetClosestPointOnTriangle(_triangle, _sphere.position);
@@ -828,5 +926,176 @@ namespace dbb
     result.colliding = true;
     result.normal = axis;
     return result;
+  }
+
+  //-----------------------------------------------------------------------------------
+  CollisionManifold FindCollision(const dbb::sphere& sphere, const dbb::ellipse& ellipse)
+  {
+    CollisionManifold result;
+    CollisionManifold::ResetCollisionManifold(result);
+
+    // Transform the center of the sphere to the coordinate system of the ellipse
+    glm::vec3 centerInEllipseSpace = glm::inverse(ellipse.orientation) * (sphere.position - ellipse.center);
+
+    // Calculate the closest point on the ellipse to the center of the sphere
+    glm::vec3 closestPointOnEllipse = glm::clamp(centerInEllipseSpace, -ellipse.radii, ellipse.radii);
+
+    // Calculate the vector from the closest point on the ellipse to the center of the sphere
+    glm::vec3 closestToPointVector = centerInEllipseSpace - closestPointOnEllipse;
+
+    // Check if the sphere intersects the ellipse
+    if (glm::length(closestToPointVector) <= sphere.radius)
+    {
+      // Calculate the penetration depth
+      result.depth = sphere.radius - glm::length(closestToPointVector);
+
+      // Calculate the intersection point on the ellipse
+      glm::vec3 intersectionPoint = ellipse.center + ellipse.orientation * closestPointOnEllipse;
+
+      // Add the intersection point to the set of intersection points
+      result.contacts.push_back(intersectionPoint);
+    }
+
+    // Calculate the collision normal based on the closest point on the ellipse
+    result.normal = glm::normalize(ellipse.center + ellipse.orientation * closestPointOnEllipse - sphere.position);
+
+    // Check for intersection
+    result.colliding = (glm::length(closestToPointVector) <= sphere.radius);
+    return result;
+  }
+
+  //-----------------------------------------------------------------------------------
+  CollisionManifold FindCollision(const OBB& obb, const dbb::ellipse& ellipse)
+  {
+    CollisionManifold result;
+    CollisionManifold::ResetCollisionManifold(result);
+
+    // Transform the center of the ellipse to the coordinate system of the OBB
+    glm::vec3 centerInOBB = glm::inverse(obb.orientation) * (ellipse.center - obb.origin);
+
+    // Calculate the closest point on the OBB to the center of the ellipse
+    glm::vec3 closestPointOnOBB = glm::clamp(centerInOBB, -obb.size, obb.size);
+    closestPointOnOBB = obb.orientation * closestPointOnOBB + obb.origin;
+
+    // Calculate the vector from the closest point on the OBB to the center of the ellipse
+    glm::vec3 closestToPointVector = ellipse.center - closestPointOnOBB;
+
+    // Check if the ellipse intersects the OBB's faces
+    for (int i = 0; i < 3; ++i)
+    {
+      glm::vec3 axis = glm::normalize(obb.orientation[i]);
+
+      // Calculate the projected radius of the ellipse along the current axis
+      float ellipseRadiusAlongAxis = glm::length(ellipse.orientation[i]) * ellipse.radii[i];
+
+      // Calculate the penetration depth along the current axis
+      float penetrationDepth = glm::dot(closestToPointVector, axis);
+
+      // Check if the ellipse intersects the face along the current axis
+      if (glm::abs(penetrationDepth) < ellipseRadiusAlongAxis)
+      {
+        // Calculate the intersection point on the face
+        glm::vec3 intersectionPoint = closestPointOnOBB + axis * penetrationDepth;
+        result.contacts.push_back(intersectionPoint);
+        result.colliding = true;
+      }
+    }
+
+    // Check if the ellipse intersects the edges of the OBB
+    for (int i = 0; i < 3; ++i) {
+      glm::vec3 axis1 = glm::normalize(obb.orientation[i]);
+      for (int j = i + 1; j < 3; ++j) {
+        glm::vec3 axis2 = glm::normalize(obb.orientation[j]);
+        glm::vec3 edgeDirection = glm::cross(axis1, axis2);
+
+        // Calculate the projected radius of the ellipse along the edge direction
+        float ellipseRadiusAlongEdge = glm::length(ellipse.orientation * glm::cross(axis1, axis2)) * glm::length(ellipse.radii);
+
+        // Calculate the penetration depth along the edge direction
+        float penetrationDepth = glm::dot(closestToPointVector, edgeDirection);
+
+        // Check if the ellipse intersects the edge
+        if (glm::abs(penetrationDepth) < ellipseRadiusAlongEdge)
+        {
+          // Calculate the intersection point on the edge
+          glm::vec3 intersectionPoint = closestPointOnOBB + edgeDirection * penetrationDepth;
+          result.contacts.push_back(intersectionPoint);
+          result.colliding = true;
+        }
+      }
+    }
+
+    // Check if the ellipse intersects the corners of the OBB
+    for (float sign1 : {-1.0f, 1.0f}) {
+      for (float sign2 : {-1.0f, 1.0f}) {
+        for (float sign3 : {-1.0f, 1.0f}) {
+          glm::vec3 corner = obb.origin + sign1 * obb.size[0] * obb.orientation[0] +
+            sign2 * obb.size[1] * obb.orientation[1] +
+            sign3 * obb.size[2] * obb.orientation[2];
+
+          // Calculate the vector from the corner to the center of the ellipse
+          glm::vec3 cornerToCenterVector = ellipse.center - corner;
+
+          // Calculate the squared distance from the corner to the center of the ellipse
+          float squaredDistance = glm::dot(cornerToCenterVector, cornerToCenterVector);
+
+          // Check if the squared distance is less than the squared radii of the ellipse
+          if (squaredDistance < glm::dot(ellipse.radii, ellipse.radii))
+          {
+            // Calculate the intersection point on the corner
+            result.contacts.push_back(corner);
+            result.colliding = true;
+          }
+        }
+      }
+    }
+
+    // Calculate the collision normal and penetration depth based on the closest point on the OBB
+    result.normal = glm::normalize(ellipse.center - closestPointOnOBB);
+    result.depth = glm::length(ellipse.center - closestPointOnOBB) - glm::length(ellipse.radii);
+
+    // Check for intersection
+    bool intersects = (result.depth <= 0);
+
+    return result;
+  }
+
+  //-----------------------------------------------------------------------------------
+  CollisionManifold FindCollision(const dbb::ellipse& ellipse1, const dbb::ellipse& ellipse2)
+  {
+    CollisionManifold result;
+    CollisionManifold::ResetCollisionManifold(result);
+
+    // Transform the center of ellipse2 to the coordinate system of ellipse1
+    glm::vec3 centerInEllipse1Space = glm::inverse(ellipse1.orientation) * (ellipse2.center - ellipse1.center);
+
+    // Calculate the squared distances from the center of ellipse2 to the axes of ellipse1
+    glm::vec3 distances = glm::pow(centerInEllipse1Space / ellipse1.radii, glm::vec3(2.0f));
+
+    // Check if the center of ellipse2 is inside ellipse1
+    if (glm::length(distances) < 1.0f) {
+      // Calculate the intersection points in the coordinate system of ellipse1
+      glm::vec3 centerToIntersection = glm::sqrt(1.0f - distances) * ellipse1.radii;
+
+      // Transform the intersection points back to the original coordinate system
+      glm::mat3 inverseOrientation = glm::transpose(ellipse1.orientation);
+      for (float x : {-1.0f, 1.0f}) {
+        for (float y : {-1.0f, 1.0f}) {
+          for (float z : {-1.0f, 1.0f}) {
+            glm::vec3 intersectionPoint = ellipse1.center + inverseOrientation * (centerToIntersection * glm::vec3(x, y, z));
+            result.contacts.push_back(intersectionPoint);
+            result.colliding = true;
+          }
+        }
+      }
+
+      // Calculate the collision normal based on the center of ellipse2
+      result.normal = glm::normalize(ellipse2.center - ellipse1.center);
+
+      // Calculate the penetration depth
+      result.depth = glm::length(centerInEllipse1Space) - glm::length(ellipse2.center - ellipse1.center);
+
+      return result;
+    }
   }
 }

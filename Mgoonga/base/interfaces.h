@@ -226,6 +226,7 @@ namespace dbb
 {
 	class SphereCollider;
 	class OBBCollider;
+	class EllipseCollider;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -263,10 +264,10 @@ public:
 	virtual std::vector<glm::vec3>	GetExtremsLocalSpace() const = 0;
 	virtual extremDots							GetExtremDotsLocalSpace() const = 0;
 
+	// new functions
 	virtual void										SetFrom(const ITransform& trans) = 0;
 	virtual void										SetTo(ITransform& trans) const = 0;
 
-	// new functions
 	virtual CollisionManifold				Dispatch(const ICollider& other) const = 0;
 	virtual void										SynchCollisionVolumes(const glm::vec3& _pos, const glm::vec3& _orientation) = 0;
 	virtual glm::vec4								GetTensor(float mass) const = 0;
@@ -275,6 +276,7 @@ public:
 
 	virtual CollisionManifold				CollidesWith(const dbb::SphereCollider& _other) const = 0;
 	virtual CollisionManifold				CollidesWith(const dbb::OBBCollider& _other) const = 0;
+	virtual CollisionManifold				CollidesWith(const dbb::EllipseCollider& _other) const = 0;
 };
 
 //----------------------------------------------------------------------------------------------

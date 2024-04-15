@@ -31,6 +31,7 @@ class ShapeGenerator
 	static glm::vec3 evaluate(int gridU, int gridV, float *B, glm::vec3 patch[][4]);
 	static glm::vec3 evaluateNormal(int gridU, int gridV,
 		float *B, float *dB, glm::vec3 patch[][4]);
+
 public:
 	static ShapeData makeTriangle();
 	static ShapeData makeCube();
@@ -43,5 +44,6 @@ public:
 	static ShapeData makeMyPlane(float Width, float Height);
 	static ShapeData makeQuad();
 	static ShapeData makeSquare(float Width, float Height);
+	static ShapeData makeEllipse(float x, float y, float z, int segments);
 };
 

@@ -916,3 +916,75 @@ ShapeData ShapeGenerator::makeSquare(float Width, float Height) {
 
 	return ret;
 }
+
+ShapeData ShapeGenerator::makeEllipse(float radiusX, float radiusY, float radiusZ, int segments)
+{
+	std::vector<ShapeData::Vertex> vertices;
+	std::vector<unsigned int> indices;
+	// Generate vertices around the ellipse
+	for (int i = 0; i <= segments; ++i)
+	{
+		float angle = glm::two_pi<float>() * static_cast<float>(i) / static_cast<float>(segments);
+		float x = radiusX * glm::cos(angle);
+		float y = radiusY * glm::sin(angle);
+		float z = 0.0f;
+
+		vertices.push_back({ glm::vec3(x, y, z), {}, {} });
+	}
+
+	// Duplicate vertices for caps
+	int startIndex = vertices.size();
+	for (int i = 0; i <= segments; ++i)
+		vertices.push_back(vertices[i]);
+
+	// Generate indices for the ellipse sides
+	for (int i = 0; i < segments; ++i)
+	{
+		indices.push_back(i);
+		indices.push_back(i + 1);
+		indices.push_back(i + startIndex);
+		indices.push_back(i + 1);
+		indices.push_back(i + startIndex + 1);
+		indices.push_back(i + startIndex);
+
+		// Calculate normal for the current triangle
+		glm::vec3 v1 = vertices[i].position;
+		glm::vec3 v2 = vertices[i + 1].position;
+		glm::vec3 v3 = vertices[i + startIndex].position;
+		glm::vec3 normal = glm::normalize(glm::cross(v2 - v1, v3 - v1));
+
+		// Store the normal for each vertex of the triangle
+		vertices[i].normal = normal;
+		vertices[i + 1].normal = normal;
+		vertices[i + startIndex].normal = normal;
+	}
+
+	// Generate indices for the ellipse caps
+	for (int i = 0; i < segments; ++i)
+	{
+		indices.push_back(i);
+		indices.push_back(i + 1);
+		indices.push_back(i + startIndex);
+
+		// Calculate normal for the cap triangle
+		glm::vec3 v1 = vertices[i].position;
+		glm::vec3 v2 = vertices[i + 1].position;
+		glm::vec3 v3 = vertices[i + startIndex].position;
+		glm::vec3 normal = glm::normalize(glm::cross(v2 - v1, v3 - v1));
+
+		// Store the normal for each vertex of the triangle
+		vertices[i].normal = normal;
+		vertices[i + 1].normal = normal;
+		vertices[i + startIndex].normal = normal;
+	}
+
+	ShapeData ret;
+	ret.numVertices = vertices.size();
+	ret.vertices = new ShapeData::Vertex[ret.numVertices];
+	memcpy(ret.vertices, &vertices, sizeof(ShapeData::Vertex) * vertices.size());  //need clean up
+
+	ret.numIndices = indices.size();
+	ret.indices = new GLushort[ret.numIndices];
+	memcpy(ret.indices, &indices, sizeof(unsigned int) * indices.size());
+	return ret;
+}

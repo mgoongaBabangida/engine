@@ -24,6 +24,7 @@ namespace dbb
   struct lineSegment;
   struct OBB;
   struct ray;
+  struct ellipse;
   class plane;
   class line;
 
@@ -60,6 +61,9 @@ namespace dbb
   bool OBBPlane(const OBB& obb, const dbb::plane& plane);
   bool AABBOBB(const AABB& aabb, const OBB& obb);
   bool OBBOBB(const OBB& obb1, const OBB& obb2);
+  bool EllipseOBB(const dbb::ellipse& ellipse, const OBB& obb);
+  bool EllipseSphere(const dbb::ellipse& _ellipse, const dbb::sphere& _sphere);
+  bool EllipseEllipse(const dbb::ellipse& _ellipse1, const dbb::ellipse& _ellipse2);
 
   bool TriangleSphere(const dbb::triangle& t, const dbb::sphere& s);
   bool TriangleAABB(const dbb::triangle& t, const AABB& a);
@@ -71,7 +75,7 @@ namespace dbb
   bool TriangleTriangleRobust(const dbb::triangle& t1,const dbb::triangle& t2);
 
   // Mesh checks
-  float MeshRay(const I3DMesh& mesh, const dbb::ray& ray);
+  float MeshRay(const I3DMesh& mesh, const dbb::ray& ray); //@to ray?
   bool MeshAABB(const I3DMesh& mesh, const dbb::AABB& aabb);
   bool MeshOBB(const I3DMesh& mesh, const OBB& o);
   bool MeshSphere(const I3DMesh& mesh, const dbb::sphere& s);
@@ -84,4 +88,7 @@ namespace dbb
   DLL_MATH CollisionManifold FindCollision(const dbb::sphere& A, const dbb::sphere& B);
   DLL_MATH CollisionManifold FindCollision(const dbb::OBB& A, const dbb::sphere& B);
   DLL_MATH CollisionManifold FindCollision(const OBB& A, const OBB& B);
+  DLL_MATH CollisionManifold FindCollision(const dbb::sphere&, const dbb::ellipse& B);
+  DLL_MATH CollisionManifold FindCollision(const OBB& A, const dbb::ellipse& B);
+  DLL_MATH CollisionManifold FindCollision(const dbb::ellipse&, const dbb::ellipse& B);
 }

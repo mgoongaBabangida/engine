@@ -18,6 +18,7 @@ void eModelManager::InitializePrimitives()
 	ShapeData quad = ShapeGenerator::makeQuad();
 	ShapeData sphere = ShapeGenerator::makeSphere(40);
 	ShapeData square = ShapeGenerator::makeSquare(5.0f, 5.0f); //(Width() / Height(), 1.0f )
+	ShapeData ellipse = ShapeGenerator::makeEllipse(2.0f, 4.0f, 2.0f, 10);
 
 	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh>>("cube", new MyMesh("cube", cube)));
 	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh> >("plane", new MyMesh("plane", plane)));
@@ -25,6 +26,7 @@ void eModelManager::InitializePrimitives()
 	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh> >("quad", new MyMesh("quad", quad)));
 	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh> >("sphere", new MyMesh("sphere", sphere)));
 	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh> >("square", new MyMesh("square", square)));
+	myMeshes.insert(std::pair<std::string, std::shared_ptr<MyMesh> >("ellipse", new MyMesh("ellipse", ellipse)));
 
 	cube.cleanup();
 	arrow.cleanup();
@@ -32,17 +34,15 @@ void eModelManager::InitializePrimitives()
 	quad.cleanup();
 	sphere.cleanup();
 	square.cleanup();
+	ellipse.cleanup();
 }
 
 eModelManager::eModelManager()
 	: terrain(new TerrainModel)
-	, m_assimpLoader(new AssimpLoader)
 {}
 
 eModelManager::~eModelManager()
 {
-	if (m_assimpLoader)
-		delete m_assimpLoader;
 }
 
 std::shared_ptr<IModel> eModelManager::Find(const std::string& name) const

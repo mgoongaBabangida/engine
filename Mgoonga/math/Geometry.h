@@ -79,14 +79,12 @@ namespace dbb
     glm::mat3 orientation;
 
     inline OBB() : size(1, 1, 1) { }
-    inline OBB(const dbb::point& p, const glm::vec3& s) :
-      origin(p), size(s) { }
-    inline OBB(const dbb::point& p, const glm::vec3& s, const glm::mat3& o)
-      : origin(p), size(s), orientation(o) { }
+    inline OBB(const dbb::point& p, const glm::vec3& s) : origin(p), size(s) { }
+    inline OBB(const dbb::point& p, const glm::vec3& s, const glm::mat3& o) : origin(p), size(s), orientation(o) { }
 
-    std::vector<dbb::point> GetVertices() const;
+    std::vector<dbb::point>       GetVertices() const;
     std::vector<dbb::lineSegment> GetEdges() const;
-    std::vector<dbb::plane> GetPlanes() const;
+    std::vector<dbb::plane>       GetPlanes() const;
 
     float PenetrationDepth(const OBB& other, const glm::vec3& axis, bool* outShouldFlip) const;
   };
@@ -161,6 +159,14 @@ namespace dbb
 
   DLL_MATH bool IsInside(dbb::triangle _triangle, dbb::point _dot);
 
+  //---------------------------------------------------------------------
+  struct DLL_MATH ellipse
+  {
+    dbb::point center;
+    glm::vec3 radii;
+    glm::mat3 orientation;
+  };
+
   //-------------------------------------------------
   struct Interval
   {
@@ -171,5 +177,4 @@ namespace dbb
   Interval GetInterval(const AABB& rect, const glm::vec3& axis);
   Interval GetInterval(const OBB& rect, const glm::vec3& axis);
   Interval GetInterval(const dbb::triangle& triangle, const glm::vec3& axis);
-
 }

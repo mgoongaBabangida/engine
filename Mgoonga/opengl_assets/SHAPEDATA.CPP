@@ -2,7 +2,7 @@
 #include "ShapeData.h"
 
 ShapeData::ShapeData()
-:vertices(nullptr), numVertices(0), indices(nullptr), numIndices(0) 
+: vertices(nullptr), numVertices(0), indices(nullptr), numIndices(0) 
 {}
 
 GLsizeiptr ShapeData::vertexBufferSize() const

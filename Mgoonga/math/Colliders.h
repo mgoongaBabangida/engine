@@ -70,4 +70,32 @@ namespace dbb
     virtual CollisionManifold CollidesWith(const OBBCollider& _other) const override;
     dbb::sphere sphere;
   };
+
+  //---------------------------------------------------------------------
+  class DLL_MATH EllipseCollider : public BoxCollider
+  {
+    EllipseCollider(const dbb::ellipse& _ellipse) : ellipse(_ellipse) {}
+    EllipseCollider(const BoxCollider&, const ITransform& _trans);
+
+    static EllipseCollider* CreateFrom(const BoxCollider&, const ITransform&);
+
+    dbb::ellipse GetEllipse() const;
+
+    virtual void                        SynchCollisionVolumes(const glm::vec3& _pos, const glm::vec3& _orientation) override;
+    virtual glm::vec4                   GetTensor(float mass) const override;
+
+    virtual dbb::point                  GetCenter() const override;
+    virtual glm::vec3                   GetOrientation() const override;
+
+    virtual void										    SetFrom(const ITransform& trans) override;
+    virtual void										    SetTo(ITransform& trans) const override;
+
+    virtual CollisionManifold Dispatch(const ICollider& other) const override;
+  protected:
+    virtual CollisionManifold CollidesWith(const SphereCollider& _other) const override;
+    virtual CollisionManifold CollidesWith(const OBBCollider& _other) const override;
+    virtual CollisionManifold CollidesWith(const EllipseCollider& _other) const override;
+
+    dbb::ellipse ellipse;
+  };
 }
