@@ -19,8 +19,11 @@ namespace dbb
 class DLL_GAME_ASSETS PhysicsSystemController : public IScript
 {
 public:
-  PhysicsSystemController(eMainContextBase* _game);
+  explicit PhysicsSystemController(eMainContextBase* _game);
   ~PhysicsSystemController();
+
+  PhysicsSystemController(const PhysicsSystemController&) = delete;
+  PhysicsSystemController& operator=(const PhysicsSystemController&) = delete;
 
   virtual void	Update(float _tick) override;
   virtual void  Initialize() override;

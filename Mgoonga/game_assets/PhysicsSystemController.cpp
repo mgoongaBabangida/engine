@@ -20,7 +20,7 @@ void PhysicsSystemController::Update(float _tick)
     m_physics_system->Update(_tick); //Syncronous update to send events in main thread
 
     std::vector<shObject> objects = m_game->GetObjects();
-    for (auto body : m_physics_system->GetRigidBodies()) // Set Transform position and orientation from colliders
+    for (std::shared_ptr<dbb::RigidBody> body : m_physics_system->GetRigidBodies()) // Set Transform position and orientation from colliders
     {
       auto it = std::find_if(objects.begin(), objects.end(), [body](const shObject& _obj) { return _obj->GetRigidBody() == body; });
       if(it!= objects.end())
@@ -30,7 +30,7 @@ void PhysicsSystemController::Update(float _tick)
   else
   {
     std::vector<shObject> objects = m_game->GetObjects();
-    for (auto body : m_physics_system->GetRigidBodies()) // Set colliders from tramsform
+    for (std::shared_ptr<dbb::RigidBody> body : m_physics_system->GetRigidBodies()) // Set colliders from tramsform
     {
       auto it = std::find_if(objects.begin(), objects.end(), [body](const shObject& _obj) { return _obj->GetRigidBody() == body; });
       if (it != objects.end())
@@ -42,14 +42,12 @@ void PhysicsSystemController::Update(float _tick)
 //----------------------------------------------------
 void PhysicsSystemController::Initialize()
 {
-  static math::eClock s_clock;
-  s_clock.start();
-
   m_timer.reset(new math::Timer([this]()->bool
     {
-      float tick = s_clock.newFrame();
       if (m_simulation_on)
-        m_physics_system->UpdateAsync(tick);
+      {
+        m_physics_system->UpdateAsync(33);
+      }
       return true;
     }));
   m_timer->start(33); //~30 fps

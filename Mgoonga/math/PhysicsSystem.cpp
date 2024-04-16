@@ -87,12 +87,12 @@ namespace dbb
         float scalar = depth / totalMass;
         glm::vec3 correction = m_collisions[i].m_result.normal * scalar * m_linearProjectionPercent;
 
-        if (m_collisions[i].m_A->GetGravityApplicable())
+        if (m_collisions[i].m_A->GetGravityApplicable() || m_correct_all_objects)
         {
           correction = glm::dot(m_collisions[i].m_A->GetVelocity(), m_collisions[i].m_result.normal) > 0.0f ? correction : -correction;
           m_collisions[i].m_A->SetPosition(m_collisions[i].m_A->GetPosition() + correction * m_collisions[i].m_A->InvMass());
         }
-        if (m_collisions[i].m_B->GetGravityApplicable())
+        if (m_collisions[i].m_B->GetGravityApplicable() || m_correct_all_objects)
         {
           correction = glm::dot(m_collisions[i].m_B->GetVelocity(), m_collisions[i].m_result.normal) > 0.0f ? correction : -correction;
           m_collisions[i].m_B->SetPosition(m_collisions[i].m_B->GetPosition() + correction * m_collisions[i].m_B->InvMass());
@@ -187,6 +187,18 @@ namespace dbb
   bool PhysicsSystem::GetLinearImpulsesOnly()
   {
     return m_linear_impulses_only;
+  }
+
+  //-------------------------------------------------------
+  void PhysicsSystem::SetCorrectAllObjects(bool _c)
+  {
+    m_correct_all_objects = _c;
+  }
+
+  //-------------------------------------------------------
+  bool PhysicsSystem::GetCorrectAllObjects()
+  {
+    return m_correct_all_objects;
   }
 
   //-------------------------------------------------------

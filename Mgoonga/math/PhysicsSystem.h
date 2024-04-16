@@ -48,6 +48,9 @@ namespace dbb
     void SetLinearImpulsesOnly(bool);
     bool GetLinearImpulsesOnly();
 
+    void SetCorrectAllObjects(bool);
+    bool GetCorrectAllObjects();
+
     void ClearRigidbodys();
     void ClearConstraints();
     void ClearSprings();
@@ -64,9 +67,10 @@ namespace dbb
     std::vector<CollisionPair>                     m_collisions;
     std::queue<CollisionPair>                      m_callbacks;
 
-    float m_linearProjectionPercent = 0.6f;
+    float m_linearProjectionPercent = 0.1f;
     float m_penetrationSlack = 0.01f;
     int32_t m_impulseIteration = 20;
     bool m_linear_impulses_only = false;
+    bool m_correct_all_objects = false;
   };
 }

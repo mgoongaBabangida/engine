@@ -38,4 +38,5 @@ class DLL_OPENGL_ASSETS eModelManager
   	std::map<std::string, std::shared_ptr<IModel> >   models;
   	std::map<std::string, std::shared_ptr<MyModel> >	primitves;
   	std::unique_ptr<TerrainModel>						          terrain;
+    std::atomic<bool>                                 container_flag;
 };

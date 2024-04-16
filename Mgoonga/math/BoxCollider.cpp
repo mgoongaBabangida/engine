@@ -25,8 +25,8 @@ void BoxCollider::CalculateExtremDots(const eObject* _object)
 				m_dots.MinZ = vertices[i].Position.z;
 		}
 	}
-	m_center = GetCenter();
-	m_radius = GetRadius();
+	m_center = BoxCollider::GetCenter();
+	m_radius = BoxCollider::GetRadius();
 	m_model_name = _object->GetModel()->GetName();
 }
 
@@ -312,7 +312,7 @@ bool BoxCollider::CollidesWith(const ITransform& _trans,
 {
 	std::vector<float> lengths;
 	std::vector<dbb::line> rays = _getRays(_trans, _moveDirection, lengths);
-	glm::vec3 center = _trans.getModelMatrix() * glm::vec4(GetCenter(), 1.0f);
+	glm::vec3 center = _trans.getModelMatrix() * glm::vec4(BoxCollider::GetCenter(), 1.0f);
 
 	std::vector<glm::mat3> boundings = _other.GetBoundingTriangles(_trans_other);
 	for (int i = 0; i < rays.size(); ++i)
@@ -354,7 +354,7 @@ bool BoxCollider::CollidesWith(const ITransform& _trans, std::vector<shObject> _
 
 	std::vector<float> lengths;
 	std::vector<dbb::line> rays = _getRays(_trans, _moveDirection, lengths);
-	glm::vec3 center = _trans.getModelMatrix() * glm::vec4(GetCenter(), 1.0f);
+	glm::vec3 center = _trans.getModelMatrix() * glm::vec4(BoxCollider::GetCenter(), 1.0f);
 
 	for (auto& obj : objects_to_check)
 	{
@@ -432,7 +432,7 @@ bool BoxCollider::IsInsideOfAABB(const ITransform& _trans, const ITransform& _tr
 dbb::OBB BoxCollider::_GetOBB(const ITransform& _trans) const
 {
 	dbb::OBB obb;
-	obb.origin = _trans.getModelMatrix() * glm::vec4(this->GetCenter(), 1.0f);
+	obb.origin = _trans.getModelMatrix() * glm::vec4(BoxCollider::GetCenter(), 1.0f);
 	obb.size = { ((this->GetExtremDotsLocalSpace().MaxX - this->GetExtremDotsLocalSpace().MinX) * _trans.getScaleAsVector().x )/ 2,
 							 ((this->GetExtremDotsLocalSpace().MaxY - this->GetExtremDotsLocalSpace().MinY) * _trans.getScaleAsVector().y) / 2,
 							 ((this->GetExtremDotsLocalSpace().MaxZ - this->GetExtremDotsLocalSpace().MinZ) * _trans.getScaleAsVector().z) / 2 };
@@ -454,7 +454,7 @@ dbb::sphere BoxCollider::_GetSphere(const ITransform& _trans) const
 //----------------------------------------------------------------------------------------
 bool BoxCollider::_CheckByRadius(const ITransform& _trans, const ITransform& _trans_other, ICollider* _other)
 {
-	glm::vec4 center				= _trans.getModelMatrix()				* glm::vec4(GetCenter(), 1.0f);
+	glm::vec4 center				= _trans.getModelMatrix()				* glm::vec4(BoxCollider::GetCenter(), 1.0f);
 	glm::vec4 other_center	= _trans_other.getModelMatrix() * glm::vec4(_other->GetCenter(), 1.0f);
 
 	float distance_betwen_centers = glm::length(center - other_center);

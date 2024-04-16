@@ -954,8 +954,8 @@ void eMainContextBase::InitializeExternalGui()
 
 	auto physics = std::make_shared<PhysicsSystemController>(this);
 	m_global_scripts.push_back(physics);
-	static std::function<void()> run_physics = [physics]() { physics->RunPhysics(); };
-	static std::function<void()> stop_physics = [physics]() { physics->StopPhysics(); };
+	static std::function<void()> run_physics = [&physics]() { physics->RunPhysics(); };
+	static std::function<void()> stop_physics = [&physics]() { physics->StopPhysics(); };
 	externalGui[1]->Add(BUTTON, "Run Physicsa", &run_physics);
 	externalGui[1]->Add(BUTTON, "Stop Physics", &stop_physics);
 }

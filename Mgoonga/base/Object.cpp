@@ -40,6 +40,8 @@ void eObject::SetTransform(ITransform* _t)
 void eObject::SetCollider(ICollider* _c)
 {
 	collider.reset(_c);
+	if(rigid_body)
+		rigid_body->SetCollider(collider.get());
 }
 
 //-----------------------------------------------------------------------------

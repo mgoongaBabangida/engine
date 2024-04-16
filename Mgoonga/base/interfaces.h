@@ -282,7 +282,29 @@ public:
 //----------------------------------------------------------------------------------------------
 class IRigidBody
 {
+public:
+	virtual void  AddLinearImpulse(const glm::vec3& impulse) = 0;
+	virtual void  AddRotationalImpulse(const glm::vec3& point, const glm::vec3& impulse) = 0;
 
+	virtual ICollider*		GetCollider() const = 0;
+	virtual void					SetCollider(ICollider*) = 0;
+
+	virtual void    SetMass(float) = 0;
+	virtual float   GetMass() const = 0;
+
+	virtual void    SetCoefOfRestitution(float) = 0;
+	virtual float   GetCoefOfRestitution() const = 0;
+
+	virtual void    SetFriction(float) = 0;
+	virtual float   GetFriction() const = 0;
+
+	virtual void    SetGravityApplicable(bool) = 0;
+	virtual bool    GetGravityApplicable() const = 0;
+
+	//debug
+	virtual float& GetDamping() = 0;
+
+	virtual ~IRigidBody() = default;
 };
 
 //----------------------------------------------------------------------------------------------

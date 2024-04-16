@@ -327,15 +327,12 @@ namespace dbb
   //--------------------------------------------------------------------------------------
   void RigidBody::SetCollider(ICollider* _c)
   {
-    ICollider* old = m_collider;
     if (_c)
     {
       m_collider = _c;
       m_position = m_collider->GetCenter();
       m_orientation = m_collider->GetOrientation();
     }
-    if (old != nullptr)
-      delete old;
   }
 
   //--------------------------------------------------------------------------------------

@@ -78,12 +78,8 @@ namespace dbb
   //---------------------------------------------------------------------------------------
   void OBBCollider::SetTo(ITransform& _trans) const
   {
-    //dbb::OBB c1 = cube1.second->GetCollider()->GetBox().value();
-    //cube1.first->GetTransform()->setRotation(glm::toQuat(c1.orientation)); //works incorrectly!
-    //cube1.first->GetTransform()->setTranslation(c1.origin - (cube1.first->GetTransform()->getRotation() * cube1.first->GetCollider()->GetCenter()));
-
-    _trans.setRotation(glm::toQuat(box.orientation)); //@todo works incorrectly!!!!!!
-    _trans.setTranslation(box.origin - (_trans.getRotation() * BoxCollider::GetCenter())); //!?
+    _trans.setRotation(glm::toQuat(box.orientation));
+    _trans.setTranslation(box.origin - (_trans.getRotation() * BoxCollider::GetCenter()));
   }
 
   //---------------------------------------------------------------------------------------

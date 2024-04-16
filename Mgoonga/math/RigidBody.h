@@ -34,11 +34,11 @@ namespace dbb
     virtual void SolveConstraints(const std::vector<OBB>& _constraints);
     virtual bool HasVolume() const;
 
-    virtual void  AddLinearImpulse(const glm::vec3& impulse);
-    virtual void  AddRotationalImpulse(const glm::vec3& point, const glm::vec3& impulse);
+    virtual void  AddLinearImpulse(const glm::vec3& impulse) override;
+    virtual void  AddRotationalImpulse(const glm::vec3& point, const glm::vec3& impulse) override;
 
-    ICollider*      GetCollider() const;
-    void            SetCollider(ICollider*);
+    ICollider*      GetCollider() const override;
+    void            SetCollider(ICollider*) override;
 
     void            SetPosition(const glm::vec3& pos);
     glm::vec3       GetPosition();
@@ -46,22 +46,22 @@ namespace dbb
     void            SetBounce(float b);
     float           GetBounce() const;
 
-    void            SetMass(float);
-    float           GetMass() const;
+    void            SetMass(float) override;
+    float           GetMass() const override;
 
-    void            SetCoefOfRestitution(float);
-    float           GetCoefOfRestitution() const;
+    void            SetCoefOfRestitution(float) override;
+    float           GetCoefOfRestitution() const override;
 
-    void            SetFriction(float);
-    float           GetFriction() const;
+    void            SetFriction(float) override;
+    float           GetFriction() const override;
 
     glm::vec3       GetVelocity() const;
 
-    void            SetGravityApplicable(bool);
-    bool            GetGravityApplicable() const;
+    void            SetGravityApplicable(bool) override;
+    bool            GetGravityApplicable() const override;
 
     //debug
-    float& GetDamping() { return m_damping; }
+    float& GetDamping() override { return m_damping; }
 
     // protected
     void SynchCollisionVolumes();
@@ -76,9 +76,9 @@ namespace dbb
     glm::vec3           m_forces = {}; // sum of all forces
 
     float               m_mass = 1.0f;
-    float               m_cor = 0.5f;
+    float               m_cor = 0.45f;
     float               m_bounce = 0.7f;
-    float               m_friction = 0.2f;
+    float               m_friction = 0.97f;
     bool                m_gravity_applicable = true;
     float               m_damping = 0.98f;
 

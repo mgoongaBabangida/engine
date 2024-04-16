@@ -54,8 +54,13 @@ IModel* eModelManager::Add(const std::string& name, char* path, bool invert_y_uv
 {
 	AssimpLoader loader;
 	IModel* model = loader.LoadModel(path, name, invert_y_uv);
-	if(model)
+	if (model)
+	{
+		bool fls = false;
+		while (!container_flag.compare_exchange_weak(fls, true)) { fls = false; }
 		models.insert(std::pair<std::string, std::shared_ptr<IModel> >(name, model));
+		container_flag.store(false);
+	}
 	return model;
 }
 
