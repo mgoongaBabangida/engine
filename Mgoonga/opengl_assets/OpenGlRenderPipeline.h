@@ -55,8 +55,8 @@ public:
 	void AddParticleSystem(std::shared_ptr<IParticleSystem> system);
 	void AddParticleSystemGPU(glm::vec3 _startPos, const Texture* _texture);
 
-	void			SwitchSkyBox(bool on) { skybox = on; }
-	void			SwitchWater(bool on)  { water = on; }
+	void			SwitchSkyBox(bool on);
+	void			SwitchWater(bool on);
 
 	// Getters
 	float			GetWaterHeight() const;
@@ -67,8 +67,8 @@ public:
 	bool& GetWaterOnRef() { return water; }
 	bool& GetGeometryOnRef() { return geometry; }
   float& GetBlurCoefRef() { return blur_coef; }
-	bool& GetKernelOnRef() { return kernel; }
-	bool& GetSkyNoiseOnRef() { return sky_noise; }
+	bool& GetKernelOnRef();
+	bool& GetSkyNoiseOnRef();
 	bool& GetOutlineFocusedRef();
 	bool& GetSSAOEnabledRef() { return ssao; }
 	bool& GetSSREnabledRef() { return ssr; }

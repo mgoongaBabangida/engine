@@ -10,6 +10,7 @@
 #include "TerrainGeneratorTool.h"
 #include "BezierCurveUIController.h"
 #include "CameraSecondScript.h"
+#include "SettingsLoadingService.h"
 
 #include <base/InputController.h>
 
@@ -28,9 +29,7 @@
 #include <math/ParticleSystem.h>
 #include <math/PhysicsSystem.h>
 
-#include <thread>
 #include <sstream>
-#include <fstream>
 
 //-----------------------------------------------------------------
 eMainContextBase::eMainContextBase(eInputController* _input,
@@ -431,41 +430,10 @@ glm::vec3 eMainContextBase::GetMainCameraDirection() const
 }
 
 //--------------------------------------------------------------------------------
-void eMainContextBase::InitializePipline()
+void eMainContextBase::InitializePipline() //e
 {
 	pipeline.Initialize();
-
-	std::ifstream infile("pipeline.ini");
-	if (infile.is_open())
-	{
-		std::stringstream sstream;
-		std::copy(std::istreambuf_iterator<char>(infile),
-			std::istreambuf_iterator<char>(),
-			std::ostreambuf_iterator<char>(sstream));
-
-		std::string name, value, end;
-		while (!sstream.eof())
-		{
-			sstream >> name;
-			sstream >> value;
-			sstream >> end;
-
-			if (name == "SwitchSkyBox")
-				value == "true" ? pipeline.SwitchSkyBox(true) : pipeline.SwitchSkyBox(false);
-			else if (name == "SwitchWater")
-				value == "true" ? pipeline.SwitchWater(true) : pipeline.SwitchWater(false);
-			else if (name == "SkyNoiseOn")
-				value == "true" ? pipeline.GetSkyNoiseOnRef() = true : pipeline.GetSkyNoiseOnRef() = false;
-			else if (name == "KernelOn")
-				value == "true" ? pipeline.GetKernelOnRef() = true : pipeline.GetKernelOnRef() = false;
-			else if (name == "UseGuizmo")
-				value == "true" ? m_use_guizmo = true : m_use_guizmo = false;
-			else if(name == "RotateSkyBox")
-				value == "true" ? pipeline.GetRotateSkyBoxRef() = true : pipeline.GetRotateSkyBoxRef() = false;
-			else if (name == "ShowFPS")
-				value == "true" ? m_show_fps = true : m_show_fps = false;
-		}
-	}
+	SettingsLoadingService::LoadPipelineSettings("pipeline.ini", this, pipeline);
 }
 
 //--------------------------------------------------------------------------------
@@ -479,78 +447,7 @@ void eMainContextBase::InitializeModels()
 {
 	// Camera should be here in editor mode @todo ifdef EDITOR
 	modelManager->Add("Camera", (GLchar*)std::string(modelFolderPath + "Camera_v2/Camera_v2.obj").c_str());
-
-	std::ifstream infile("models.ini");
-	if (infile.is_open())
-	{
-		std::stringstream sstream;
-		std::copy(std::istreambuf_iterator<char>(infile),
-			std::istreambuf_iterator<char>(),
-			std::ostreambuf_iterator<char>(sstream));
-
-		std::vector<std::tuple<std::string, std::string, bool>> file_infos;
-		std::string file_name, name, end;
-		while (!sstream.eof())
-		{
-			sstream >> file_name;
-			sstream >> name;
-			sstream >> end;
-			if (end == "true")
-			{
-				if (m_load_model_multithreading)
-				{
-					file_infos.emplace_back(name, file_name, true);
-				}
-				else
-				{
-					modelManager->Add(name, (GLchar*)std::string(modelFolderPath + file_name).c_str(), true);
-					sstream >> end;
-				}
-			}
-			else
-			{
-				if(m_load_model_multithreading)
-					file_infos.emplace_back(name, file_name, false);
-				else
-					modelManager->Add(name, (GLchar*)std::string(modelFolderPath + file_name).c_str());
-			}
-		}
-
-		if (m_load_model_multithreading)
-		{
-			size_t thread_count = file_infos.size() > 4 ? 4 : file_infos.size();
-			size_t step = file_infos.size() / thread_count;
-			if (step * thread_count != file_infos.size())
-				++step;
-			std::vector<std::future<std::vector<IModel*>>> tasks;
-			for (size_t i = 0; i < thread_count; ++i)
-			{
-				std::function<std::vector<IModel*>()> func = [this, i, step, &file_infos, thread_count]()-> std::vector<IModel*>
-				{
-					std::vector<IModel*> models;
-					size_t model_index = step * i;
-					while (model_index < (i + 1) * step && model_index < file_infos.size())
-					{
-						models.push_back(modelManager->Add(std::get<0>(file_infos[model_index]),
-																							(GLchar*)std::string(modelFolderPath + std::get<1>(file_infos[model_index])).c_str(), std::get<2>(file_infos[model_index])));
-						++model_index;
-					}
-					return models;
-				};
-				tasks.push_back(std::async(std::launch::async, func));
-			}
-			//wait for the tasks
-			for (auto& fut : tasks) //textures are loaded in main thread only, need to load  them separately in main thread
-			{
-				std::vector<IModel*> models = fut.get();
-				for (IModel* m : models)
-				{
-					m->SetUpMeshes();
-					m->ReloadTextures();
-				}
-			}
-		}
-	}
+	SettingsLoadingService::LoadModels("models.ini",modelFolderPath, modelManager.get(), m_load_model_multithreading);
 }
 
 //--------------------------------------------------------------------------------
@@ -950,6 +847,7 @@ void eMainContextBase::InitializeExternalGui()
 	};
 	externalGui[9]->Add(CONSOLE, "Console", reinterpret_cast<void*>(&console_plane_callbaack));
 
+	//Global Scrips
 	m_global_scripts.push_back(std::make_shared<ParticleSystemToolController>(this, externalGui[10], modelManager.get(),texManager.get(), soundManager.get(), pipeline));
 
 	auto physics = std::make_shared<PhysicsSystemController>(this);

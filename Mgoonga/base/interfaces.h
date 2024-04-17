@@ -373,8 +373,10 @@ public:
 	virtual void AddInputObserver(IInputObserver* _observer, ePriority _priority) = 0;
 	virtual void DeleteInputObserver(IInputObserver* _observer) = 0;
 
-	virtual bool UseGizmo() = 0;
+	virtual bool& UseGizmo() = 0;
 	virtual uint32_t CurGizmoType() = 0;
+
+	virtual bool& ShowFPS() = 0;
 
 	virtual uint32_t	Width() const = 0 ;
 	virtual uint32_t	Height() const = 0 ;

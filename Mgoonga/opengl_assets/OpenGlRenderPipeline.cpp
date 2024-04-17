@@ -14,6 +14,8 @@
 #include <algorithm>
 
 float eOpenGlRenderPipeline::GetWaterHeight() const { return waterHeight; }
+bool& eOpenGlRenderPipeline::GetKernelOnRef() { return kernel; }
+bool& eOpenGlRenderPipeline::GetSkyNoiseOnRef() { return sky_noise; }
 bool& eOpenGlRenderPipeline::GetOutlineFocusedRef() { return outline_focused; }
 bool& eOpenGlRenderPipeline::IBL() { return ibl_on; }
 
@@ -42,6 +44,10 @@ void eOpenGlRenderPipeline::AddParticleSystemGPU(glm::vec3 _startPos, const Text
 {
 	renderManager->AddParticleSystemGPU(_startPos, _texture);
 }
+
+void eOpenGlRenderPipeline::SwitchSkyBox(bool on) { skybox = on; }
+
+void eOpenGlRenderPipeline::SwitchWater(bool on) { water = on; }
 
 //---------------------------------------------------------------------------------------------
 const std::vector<ShaderInfo>& eOpenGlRenderPipeline::GetShaderInfos() const

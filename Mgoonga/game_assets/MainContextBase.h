@@ -95,8 +95,10 @@ public:
 	virtual glm::vec3 GetMainCameraPosition() const override;
 	virtual glm::vec3 GetMainCameraDirection() const override;
 
-	virtual bool			UseGizmo() override { return m_use_guizmo; }
+	virtual bool&			UseGizmo() override { return m_use_guizmo; }
 	virtual uint32_t	CurGizmoType() override { return (uint32_t)m_gizmo_type; }
+
+	virtual bool& ShowFPS() override { return m_show_fps; }
 
 	virtual uint32_t			Width() const override;
 	virtual uint32_t			Height()  const override;
