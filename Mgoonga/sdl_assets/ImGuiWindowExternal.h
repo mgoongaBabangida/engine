@@ -26,9 +26,9 @@ protected:
 	shObject									m_current_object;
 	std::vector<std::string>	mesh_names;
 	std::vector<std::string>	animation_names;
-	std::vector<std::string>	frame_names;
 	std::vector<std::string>	bone_names;
 	std::function<void(const std::string&)> console_callback;
+	std::map<std::string, int> spin_box_values;
 };
 
 //---------------------------------------------

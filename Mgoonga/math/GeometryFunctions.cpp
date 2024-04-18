@@ -1094,8 +1094,7 @@ namespace dbb
 
       // Calculate the penetration depth
       result.depth = glm::length(centerInEllipse1Space) - glm::length(ellipse2.center - ellipse1.center);
-
-      return result;
     }
+    return result;
   }
 }

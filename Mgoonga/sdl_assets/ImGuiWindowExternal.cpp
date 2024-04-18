@@ -169,30 +169,9 @@ void eWindowImGuiExternal::Render()
     {
       int* value = nullptr;
       std::function<void(int, int*&)> callback = *(reinterpret_cast<std::function<void(int, int*&)>*>(std::get<2>(item)));
-      if (std::get<0>(item) == "Sky box") //@ todo change it asasp !!!!
-      {
-        static int skybox_spin_value = 0;
-        value = &skybox_spin_value;
-      }
-      else if (std::get<0>(item) == "IBL Map")//@ todo change it asasp !!!!
-      {
-        static int ibl_spin_value = 0;
-        value = &ibl_spin_value;
-      }
-      else if (std::get<0>(item) == "Penetration Slack")//@ todo change it asasp !!!!
-      {
-        static int penetration_slack = 0;
-        value = &penetration_slack;
-      }
-      else if (std::get<0>(item) == "Impulse Iterations")//@ todo change it asasp !!!!
-      {
-        static int impulse_iterations = 0;
-        value = &impulse_iterations;
-      }
-      else
-      {
-        callback(0, value);
-      }
+      
+      auto val = spin_box_values.find(std::get<0>(item));
+      value = &val->second;
 
       if (ImGui::InputInt(std::get<0>(item).c_str(), value))
       {
@@ -494,11 +473,11 @@ void eWindowImGuiExternal::Render()
     {
       static const char* current_mesh_item = NULL;
       static const char* current_animation_item = NULL;
-      static const char* current_frame_item = NULL;
       static const char* current_bone_item = NULL;
       static const char* current_bone_child_item = NULL;
       static const char* current_game_object_item = NULL;
       static Rigger* g_rigger = nullptr;
+      static int cur_frame = 0;
 
       shObject* p_object = static_cast<shObject*>(std::get<2>(item));
       if (p_object && *p_object)
@@ -513,8 +492,8 @@ void eWindowImGuiExternal::Render()
             mesh_names.push_back(m_current_object->GetModel()->GetMeshes()[i]->Name() + " " + std::to_string(i));
 
           animation_names.clear();
-          frame_names.clear();
           bone_names.clear();
+
           if (m_current_object->GetRigger())
           {
             Rigger* rigger = dynamic_cast<Rigger*>(m_current_object->GetRigger());
@@ -524,10 +503,6 @@ void eWindowImGuiExternal::Render()
               current_animation_item = animation_names[0].c_str();
               rigger->SetCurrentAnimation(animation_names[0]);
             }
-            for (size_t i = 0; i < rigger->GetCurrentAnimation()->GetNumFrames(); ++i)
-              frame_names.push_back(std::to_string(i));
-
-            current_frame_item = frame_names[0].c_str();
             bone_names = rigger->GetBoneNames();
             current_bone_item = bone_names[0].c_str();
             g_rigger = rigger;
@@ -573,12 +548,8 @@ void eWindowImGuiExternal::Render()
                 bool is_selected = (current_animation_item == animation_names[n].c_str()); // You can store your selection however you want, outside or inside your objects
                 if (ImGui::Selectable(animation_names[n].c_str(), is_selected))
                 {
-                  frame_names.clear();
                   current_animation_item = animation_names[n].c_str();
                   rigger->SetCurrentAnimation(animation_names[n]);
-                  for (size_t i = 0; i < rigger->GetCurrentAnimation()->GetNumFrames(); ++i)
-                    frame_names.push_back(std::to_string(i));
-                  current_frame_item = frame_names[0].c_str();
                 }
                 if (is_selected)
                 {
@@ -596,23 +567,16 @@ void eWindowImGuiExternal::Render()
             ImGui::Text(text.c_str());
 
             //frames combo
-            if (ImGui::BeginCombo("Animation frames", current_frame_item)) // The second parameter is the label previewed before opening the combo.
+            int* value = nullptr;
+            value = &cur_frame;
+            if (ImGui::InputInt("Animation frames", value)) // The second parameter is the label previewed before opening the combo.
             {
-              for (int n = 0; n < frame_names.size(); n++)
-              {
-                bool is_selected = (current_frame_item == frame_names[n].c_str()); // You can store your selection however you want, outside or inside your objects
-                if (ImGui::Selectable(frame_names[n].c_str(), is_selected))
-                  current_frame_item = frame_names[n].c_str();
-                if (is_selected)
-                  ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
-              }
-              ImGui::EndCombo();
             }
 
             static bool is_frame_freez = obj->GetRigger()->UseFirstFrameAsIdle();
             ImGui::Checkbox("FreezeFrame frame", &is_frame_freez);
             if (is_frame_freez)
-              rigger->GetCurrentAnimation()->FreezeFrame(std::stoi(current_frame_item));
+              rigger->GetCurrentAnimation()->FreezeFrame(cur_frame);
             else
               rigger->GetCurrentAnimation()->FreezeFrame(-1);
           }
@@ -925,6 +889,10 @@ void eWindowImGuiExternal::Add(TypeImGui _type, const std::string& _name, void* 
   {
     auto callback = reinterpret_cast<std::function<void()>*>(_data);
     callbacks.insert({ _name, *callback });
+  }
+  else if (_type == SPIN_BOX)
+  {
+    spin_box_values.insert_or_assign(_name, 0);
   }
 
   auto it = std::find_if(lines.begin(), lines.end(), [&_name](const eItem& _item)

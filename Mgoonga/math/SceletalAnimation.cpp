@@ -4,7 +4,9 @@
 const Frame& SceletalAnimation::getCurrentFrame()
 {
 	if (freeze_frame != -1)
-		return frames[freeze_frame];
+	{
+		return freeze_frame < frames.size() ? frames[freeze_frame] : frames[frames.size()-1];
+	}
 
 	if (clock.timeEllapsedMsc() > duration)
 	{

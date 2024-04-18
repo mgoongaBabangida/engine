@@ -493,8 +493,8 @@ void eMainContextBase::InitializeScripts()
 void eMainContextBase::InitializeExternalGui()
 {
 	// Lights & Cameras
-	externalGui[0]->Add(TEXT, "Light", nullptr);
-	externalGui[0]->Add(GAME, "Game", (void*)&(*this));
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(TEXT, "Light", nullptr);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(GAME, "Game", (void*)&(*this));
 
 	std::function<void(size_t)> light_type_callback = [this](size_t _index) 
 	{
@@ -508,27 +508,28 @@ void eMainContextBase::InitializeExternalGui()
 			GetMainLight().type = eLightType::CSM;
 	};
 	static eVectorStringsCallback light_types{ {"directional", "point", "cut-off", "csm"}, light_type_callback};
-	externalGui[0]->Add(COMBO_BOX, "Light type.", &light_types);
-	externalGui[0]->Add(LIGHT_TYPE_VISUAL, "Light object.", modelManager.get());
-	externalGui[0]->Add(SLIDER_FLOAT_3, "Light position.", &GetMainLight().light_position);
-	externalGui[0]->Add(SLIDER_FLOAT_3, "Light direction.", &GetMainLight().light_direction);
-	externalGui[0]->Add(SLIDER_FLOAT_3_LARGE, "Light intensity.", &GetMainLight().intensity);
-	externalGui[0]->Add(SLIDER_FLOAT_3, "Light ambient.", &GetMainLight().ambient);
-	externalGui[0]->Add(SLIDER_FLOAT_3, "Light diffuse.", &GetMainLight().diffuse);
-	externalGui[0]->Add(SLIDER_FLOAT_3, "Light specular.", &GetMainLight().specular);
-	externalGui[0]->Add(TEXT, "Light constant", nullptr);
-	externalGui[0]->Add(SLIDER_FLOAT_NERROW, "Constant", &GetMainLight().constant);
-	externalGui[0]->Add(TEXT, "Light linear", nullptr);
-	externalGui[0]->Add(SLIDER_FLOAT_NERROW, "Linear", &GetMainLight().linear);
-	externalGui[0]->Add(TEXT, "Light quadratic", nullptr);
-	externalGui[0]->Add(SLIDER_FLOAT_NERROW, "Quadratic", &GetMainLight().quadratic);
-	externalGui[0]->Add(TEXT, "Light cut off", nullptr);
-	externalGui[0]->Add(SLIDER_FLOAT_NERROW, "Cut off", &GetMainLight().cutOff);
-	externalGui[0]->Add(TEXT, "Light outer cut off", nullptr);
-	externalGui[0]->Add(SLIDER_FLOAT_NERROW, "Outer cut off", &GetMainLight().outerCutOff);
-	externalGui[0]->Add(TEXT, "Camera", nullptr);
-	externalGui[0]->Add(SLIDER_FLOAT_3, "position", &GetMainCamera().PositionRef());
-	externalGui[0]->Add(SLIDER_FLOAT_3, "direction", &GetMainCamera().ViewDirectionRef());
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(COMBO_BOX, "Light type.", &light_types);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(LIGHT_TYPE_VISUAL, "Light object.", modelManager.get());
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_3, "Light position.", &GetMainLight().light_position);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_3, "Light direction.", &GetMainLight().light_direction);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_3_LARGE, "Light intensity.", &GetMainLight().intensity);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_3, "Light ambient.", &GetMainLight().ambient);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_3, "Light diffuse.", &GetMainLight().diffuse);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_3, "Light specular.", &GetMainLight().specular);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(TEXT, "Light constant", nullptr);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_NERROW, "Constant", &GetMainLight().constant);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(TEXT, "Light linear", nullptr);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_NERROW, "Linear", &GetMainLight().linear);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(TEXT, "Light quadratic", nullptr);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_NERROW, "Quadratic", &GetMainLight().quadratic);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(TEXT, "Light cut off", nullptr);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_NERROW, "Cut off", &GetMainLight().cutOff);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(TEXT, "Light outer cut off", nullptr);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_NERROW, "Outer cut off", &GetMainLight().outerCutOff);
+	
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(TEXT, "Camera", nullptr);
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_3, "position", &GetMainCamera().PositionRef());
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_3, "direction", &GetMainCamera().ViewDirectionRef());
 	std::function<void()> add_camera_callback = [this]()
 	{
 		m_cameras.emplace_back(pipeline.Width(), pipeline.Height(), 0.1f, 10.0f);
@@ -541,7 +542,8 @@ void eMainContextBase::InitializeExternalGui()
 			else
 				m_cur_camera = 0;
 		};
-		externalGui[0]->Add(BUTTON, "Switch Camera", &switch_camera_callback);
+		externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(BUTTON, "Switch Camera", &switch_camera_callback);
+		
 		Material material;
 		material.albedo = glm::vec3(0.8f, 0.0f, 0.0f);
 		material.ao = 1.0f;
@@ -552,6 +554,7 @@ void eMainContextBase::InitializeExternalGui()
 		material.use_metalic = false;
 		material.use_roughness = false;
 		material.use_normal = true;
+
 		ObjectFactoryBase factory(animationManager.get());
 		m_camera_obj = factory.CreateObject(modelManager->Find("Camera"), eObject::RenderType::PBR, "Camera1");
 		m_camera_obj->SetScript(new CameraSecondScript(&m_cameras.back(), this));
@@ -560,14 +563,15 @@ void eMainContextBase::InitializeExternalGui()
 			const_cast<I3DMesh*>(mesh)->SetMaterial(material);
 		m_objects.push_back(m_camera_obj);
 	};
-	externalGui[0]->Add(BUTTON, "Add camera", &add_camera_callback);
+
+	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(BUTTON, "Add camera", &add_camera_callback);
 
 	//Pipeline
-	externalGui[1]->Add(TEXT_INT32, "Draw calls ", &pipeline.GetDrawCalls());
-	externalGui[1]->Add(CHECKBOX, "Show bounding boxes", &pipeline.GetBoundingBoxBoolRef());
-	externalGui[1]->Add(CHECKBOX, "Use Multi sampling", &pipeline.GetMultiSamplingBoolRef());
-	externalGui[1]->Add(CHECKBOX, "Sky box on", &pipeline.GetSkyBoxOnRef());
-	externalGui[1]->Add(CHECKBOX, "Rotate Sky box", &pipeline.GetRotateSkyBoxRef());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXT_INT32, "Draw calls ", &pipeline.GetDrawCalls());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Show bounding boxes", &pipeline.GetBoundingBoxBoolRef());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Use Multi sampling", &pipeline.GetMultiSamplingBoolRef());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Sky box on", &pipeline.GetSkyBoxOnRef());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Rotate Sky box", &pipeline.GetRotateSkyBoxRef());
 	static std::function<void(int)> change_skybox_callback = [this](int _skybox)
 	{
 		if (texManager->GetCubeMapIds().size() > _skybox)
@@ -576,7 +580,7 @@ void eMainContextBase::InitializeExternalGui()
 			pipeline.SetSkyBoxTexture(skybox);
 		}
 	};
-	externalGui[1]->Add(SPIN_BOX, "Sky box", (void*)&change_skybox_callback);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SPIN_BOX, "Sky box", (void*)&change_skybox_callback);
 	static std::function<void(int)> change_ibl_callback = [this](int _ibl)
 	{
 		if (texManager->GetIBLIds().size() > _ibl)
@@ -585,61 +589,61 @@ void eMainContextBase::InitializeExternalGui()
 			pipeline.SetSkyIBL(irr, prefilter);
 		}
 	};
-	externalGui[1]->Add(CHECKBOX, "Use IBL", &pipeline.IBL());
-	externalGui[1]->Add(SPIN_BOX, "IBL Map", (void*)&change_ibl_callback);
-	externalGui[1]->Add(CHECKBOX, "Water", &pipeline.GetWaterOnRef());
-	externalGui[1]->Add(CHECKBOX, "Hex", &pipeline.GetGeometryOnRef());
-	externalGui[1]->Add(CHECKBOX, "Mesh line draw", &pipeline.GetMeshLineOn());
-	externalGui[1]->Add(CHECKBOX, "Kernel", &pipeline.GetKernelOnRef());
-	externalGui[1]->Add(CHECKBOX, "Sky noise", &pipeline.GetSkyNoiseOnRef());
-	externalGui[1]->Add(CHECKBOX, "Use gizmo", &m_use_guizmo);
-	externalGui[1]->Add(CHECKBOX, "Outline focused", &pipeline.GetOutlineFocusedRef());
-	externalGui[1]->Add(CHECKBOX, "Gamma Correction", &pipeline.GetGammaCorrectionRef());
-	externalGui[1]->Add(CHECKBOX, "Gamma Tone Mapping", &pipeline.GetToneMappingRef());
-	externalGui[1]->Add(SLIDER_FLOAT, "Gamma Exposure", &pipeline.GetExposureRef());
-	externalGui[1]->Add(SLIDER_FLOAT_NERROW, "Blur coefficients", &pipeline.GetBlurCoefRef());
-	externalGui[1]->Add(SLIDER_FLOAT, "Emission Strength", &pipeline.GetEmissionStrengthRef());
-	externalGui[1]->Add(CHECKBOX, "SSAO", &pipeline.GetSSAOEnabledRef());
-	externalGui[1]->Add(SLIDER_FLOAT, "SSAO Threshold", &pipeline.GetSaoThresholdRef());
-	externalGui[1]->Add(SLIDER_FLOAT, "SSAO Strength", &pipeline.GetSaoStrengthRef());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Use IBL", &pipeline.IBL());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SPIN_BOX, "IBL Map", (void*)&change_ibl_callback);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Water", &pipeline.GetWaterOnRef());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Hex", &pipeline.GetGeometryOnRef());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Mesh line draw", &pipeline.GetMeshLineOn());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Kernel", &pipeline.GetKernelOnRef());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Sky noise", &pipeline.GetSkyNoiseOnRef());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Use gizmo", &m_use_guizmo);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Outline focused", &pipeline.GetOutlineFocusedRef());
+	externalGui[ExternalWindow::HDR_BLOOM_WND]->Add(CHECKBOX, "Gamma Correction", &pipeline.GetGammaCorrectionRef());
+	externalGui[ExternalWindow::HDR_BLOOM_WND]->Add(CHECKBOX, "Gamma Tone Mapping", &pipeline.GetToneMappingRef());
+	externalGui[ExternalWindow::HDR_BLOOM_WND]->Add(SLIDER_FLOAT, "Gamma Exposure", &pipeline.GetExposureRef());
+	externalGui[ExternalWindow::HDR_BLOOM_WND]->Add(SLIDER_FLOAT_NERROW, "Blur coefficients", &pipeline.GetBlurCoefRef());
+	externalGui[ExternalWindow::HDR_BLOOM_WND]->Add(SLIDER_FLOAT, "Emission Strength", &pipeline.GetEmissionStrengthRef());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "SSAO", &pipeline.GetSSAOEnabledRef());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT, "SSAO Threshold", &pipeline.GetSaoThresholdRef());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT, "SSAO Strength", &pipeline.GetSaoStrengthRef());
 	//Fog
-	externalGui[1]->Add(CHECKBOX, "Fog", &pipeline.GetFogInfo().fog_on);
-	externalGui[1]->Add(SLIDER_FLOAT_3, "Fog color.", &pipeline.GetFogInfo().color);
-	externalGui[1]->Add(SLIDER_FLOAT_NERROW, "Fog density", &pipeline.GetFogInfo().density);
-	externalGui[1]->Add(SLIDER_FLOAT, "Fog gradient", &pipeline.GetFogInfo().gradient);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Fog", &pipeline.GetFogInfo().fog_on);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT_3, "Fog color.", &pipeline.GetFogInfo().color);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT_NERROW, "Fog density", &pipeline.GetFogInfo().density);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT, "Fog gradient", &pipeline.GetFogInfo().gradient);
 	//SSR
-	externalGui[1]->Add(CHECKBOX, "SSR", &pipeline.GetSSREnabledRef());
-	externalGui[1]->Add(SLIDER_FLOAT, "Step", &pipeline.Step());
-	externalGui[1]->Add(SLIDER_FLOAT, "MinRayStep", &pipeline.MinRayStep());
-	externalGui[1]->Add(SLIDER_FLOAT, "Metallic", &pipeline.Metallic());
-	externalGui[1]->Add(SLIDER_INT_NERROW, "NumBinarySearchSteps", &pipeline.NumBinarySearchSteps());
-	externalGui[1]->Add(SLIDER_FLOAT, "ReflectionSpecularFalloffExponent", &pipeline.ReflectionSpecularFalloffExponent());
-	externalGui[1]->Add(SLIDER_FLOAT_LARGE, "K", &pipeline.K());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "SSR", &pipeline.GetSSREnabledRef());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT, "Step", &pipeline.Step());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT, "MinRayStep", &pipeline.MinRayStep());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT, "Metallic", &pipeline.Metallic());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_INT_NERROW, "NumBinarySearchSteps", &pipeline.NumBinarySearchSteps());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT, "ReflectionSpecularFalloffExponent", &pipeline.ReflectionSpecularFalloffExponent());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT_LARGE, "K", &pipeline.K());
 	//Camera Interpolation
-	externalGui[1]->Add(CHECKBOX, "CameraInterpolation", &pipeline.GetEnabledCameraInterpolationRef());
-	externalGui[1]->Add(TEXTURE, "Compute Shader buffer", (void*)pipeline.GetComputeParticleSystem().id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "CameraInterpolation", &pipeline.GetEnabledCameraInterpolationRef());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Compute Shader buffer", (void*)pipeline.GetComputeParticleSystem().id);
 	
 	if (auto* image = texManager->Find("computeImageRW"); image != nullptr)
 	{
-		externalGui[1]->Add(CHECKBOX, "Compute shader", &pipeline.GetComputeShaderRef());
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Compute shader", &pipeline.GetComputeShaderRef());
 		uint32_t id = image->id;
-		externalGui[1]->Add(TEXTURE, "Compute image", (void*)(id));
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Compute image", (void*)(id));
 	}
 
-	externalGui[12]->Add(SLIDER_FLOAT_3, "Second Camera Position", &pipeline.GetSecondCameraPositionRef());
-	externalGui[12]->Add(SLIDER_FLOAT, "Displacement", &pipeline.GetDisplacementRef());
+	externalGui[ExternalWindow::GAME_DEBUG_WND]->Add(SLIDER_FLOAT_3, "Second Camera Position", &pipeline.GetSecondCameraPositionRef());
+	externalGui[ExternalWindow::GAME_DEBUG_WND]->Add(SLIDER_FLOAT, "Displacement", &pipeline.GetDisplacementRef());
 
 	if (auto* image = texManager->Find("computeImageRWCameraInterpolation"); image != nullptr)
 	{
 		uint32_t id = image->id;
-		externalGui[12]->Add(TEXTURE, "Camera Interpolation image", (void*)(id));
+		externalGui[ExternalWindow::GAME_DEBUG_WND]->Add(TEXTURE, "Camera Interpolation image", (void*)(id));
 
-		externalGui[12]->Add(MATRIX, "Look At Matrix", (void*)&pipeline.GetLookAtMatrix());
-		externalGui[12]->Add(MATRIX, "Projection Matrix", (void*)&pipeline.GetProjectionMatrix());
-		externalGui[12]->Add(MATRIX, "Look At Projected Matrix", (void*)&pipeline.GetLookAtProjectedMatrix());
+		externalGui[ExternalWindow::GAME_DEBUG_WND]->Add(MATRIX, "Look At Matrix", (void*)&pipeline.GetLookAtMatrix());
+		externalGui[ExternalWindow::GAME_DEBUG_WND]->Add(MATRIX, "Projection Matrix", (void*)&pipeline.GetProjectionMatrix());
+		externalGui[ExternalWindow::GAME_DEBUG_WND]->Add(MATRIX, "Look At Projected Matrix", (void*)&pipeline.GetLookAtProjectedMatrix());
 	}
 
-	externalGui[1]->Add(CHECKBOX, "Shadows", &pipeline.ShadowingRef());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Shadows", &pipeline.ShadowingRef());
 
 	std::function<void()> emit_partilces_callback = [this]()
 	{
@@ -659,64 +663,64 @@ void eMainContextBase::InitializeExternalGui()
 		pipeline.UpdateShadersInfo();
 	};
 
-	externalGui[1]->Add(BUTTON, "Emit particle system", (void*)&emit_partilces_callback);
-	externalGui[1]->Add(BUTTON, "Emit particle system gpu", (void*)&emit_partilces_gpu_callback);
-	externalGui[1]->Add(CHECKBOX, "Debug white", &pipeline.GetDebugWhite());
-	externalGui[1]->Add(CHECKBOX, "Debug Tex Coords", &pipeline.GetDebugTexCoords());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(BUTTON, "Emit particle system", (void*)&emit_partilces_callback);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(BUTTON, "Emit particle system gpu", (void*)&emit_partilces_gpu_callback);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Debug white", &pipeline.GetDebugWhite());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Debug Tex Coords", &pipeline.GetDebugTexCoords());
 
-	externalGui[1]->Add(SLIDER_FLOAT, "PBR debug dist", (void*)&pipeline.debug_float[0]);
-	externalGui[1]->Add(SLIDER_FLOAT, "PBR debug intensity", (void*)&pipeline.debug_float[1]);
-	externalGui[1]->Add(SLIDER_FLOAT, "PBR debug shininess", (void*)&pipeline.debug_float[2]);
-	externalGui[1]->Add(SLIDER_FLOAT, "PBR debug ao", (void*)&pipeline.debug_float[3]);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT, "PBR debug dist", (void*)&pipeline.debug_float[0]);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT, "PBR debug intensity", (void*)&pipeline.debug_float[1]);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT, "PBR debug shininess", (void*)&pipeline.debug_float[2]);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT, "PBR debug ao", (void*)&pipeline.debug_float[3]);
 
-	externalGui[1]->Add(TEXTURE, "Reflection buffer", (void*)pipeline.GetReflectionBufferTexture().id);
-	externalGui[1]->Add(TEXTURE, "Refraction buffer", (void*)pipeline.GetRefractionBufferTexture().id);
-	externalGui[1]->Add(TEXTURE, "Gaussian buffer", (void*)pipeline.GetGausian2BufferTexture().id);
-	externalGui[1]->Add(TEXTURE, "Bright filter buffer", (void*)pipeline.GetBrightFilter().id);
-	externalGui[1]->Add(TEXTURE, "SSAO buffer", (void*)pipeline.GetSSAO().id);
-	externalGui[1]->Add(TEXTURE, "SSR buffer", (void*)pipeline.GetSSRTexture().id);
-	externalGui[1]->Add(TEXTURE, "SSR buffer blur", (void*)pipeline.GetSSRWithScreenTexture().id);
-	externalGui[1]->Add(TEXTURE, "SSR Mask", (void*)pipeline.GetSSRTextureScreenMask().id);
-	externalGui[1]->Add(TEXTURE, "Deffered Pos", (void*)pipeline.GetDefferedOne().id);
-	externalGui[1]->Add(TEXTURE, "Deffered Norm", (void*)pipeline.GetDefferedTwo().id);
-	externalGui[1]->Add(TEXTURE, "LUT", (void*)pipeline.GetLUT().id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Reflection buffer", (void*)pipeline.GetReflectionBufferTexture().id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Refraction buffer", (void*)pipeline.GetRefractionBufferTexture().id);
+	externalGui[ExternalWindow::HDR_BLOOM_WND]->Add(TEXTURE, "Gaussian buffer", (void*)pipeline.GetGausian2BufferTexture().id);
+	externalGui[ExternalWindow::HDR_BLOOM_WND]->Add(TEXTURE, "Bright filter buffer", (void*)pipeline.GetBrightFilter().id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "SSAO buffer", (void*)pipeline.GetSSAO().id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "SSR buffer", (void*)pipeline.GetSSRTexture().id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "SSR buffer blur", (void*)pipeline.GetSSRWithScreenTexture().id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "SSR Mask", (void*)pipeline.GetSSRTextureScreenMask().id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Deffered Pos", (void*)pipeline.GetDefferedOne().id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Deffered Norm", (void*)pipeline.GetDefferedTwo().id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "LUT", (void*)pipeline.GetLUT().id);
 	if (GetMainLight().type == eLightType::DIRECTION)
-		externalGui[1]->Add(TEXTURE, "Shadow buffer directional", (void*)pipeline.GetShadowBufferTexture().id);
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Shadow buffer directional", (void*)pipeline.GetShadowBufferTexture().id);
 	else
-		externalGui[1]->Add(TEXTURE, "Shadow buffer point", (void*)pipeline.GetShadowBufferTexture().id);
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Shadow buffer point", (void*)pipeline.GetShadowBufferTexture().id);
 	if (m_debug_csm)
 	{
 		pipeline.DumpCSMTextures();
-		externalGui[1]->Add(TEXTURE, "CSM 1", (void*)pipeline.GetCSMMapLayer1().id);
-		externalGui[1]->Add(TEXTURE, "CSM 2", (void*)pipeline.GetCSMMapLayer2().id);
-		externalGui[1]->Add(TEXTURE, "CSM 3", (void*)pipeline.GetCSMMapLayer3().id);
-		externalGui[1]->Add(TEXTURE, "CSM 4", (void*)pipeline.GetCSMMapLayer4().id);
-		externalGui[1]->Add(TEXTURE, "CSM 5", (void*)pipeline.GetCSMMapLayer5().id);
-		externalGui[1]->Add(SLIDER_FLOAT, "Z mult", (void*)&pipeline.ZMult());
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "CSM 1", (void*)pipeline.GetCSMMapLayer1().id);
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "CSM 2", (void*)pipeline.GetCSMMapLayer2().id);
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "CSM 3", (void*)pipeline.GetCSMMapLayer3().id);
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "CSM 4", (void*)pipeline.GetCSMMapLayer4().id);
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "CSM 5", (void*)pipeline.GetCSMMapLayer5().id);
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT, "Z mult", (void*)&pipeline.ZMult());
 	}
-	externalGui[1]->Add(CHECKBOX, "Physicly Based Bloom", &pipeline.PBBloomRef());
-	externalGui[1]->Add(TEXTURE, "Bloom", (void*)pipeline.GetBloomTexture().id);
+	externalGui[ExternalWindow::HDR_BLOOM_WND]->Add(CHECKBOX, "Physicly Based Bloom", &pipeline.PBBloomRef());
+	externalGui[ExternalWindow::HDR_BLOOM_WND]->Add(TEXTURE, "Bloom", (void*)pipeline.GetBloomTexture().id);
 
 	//Objects transform
-	externalGui[2]->Add(OBJECT_REF_TRANSFORM, "Transform", (void*)&m_focused);
+	externalGui[ExternalWindow::TRANSFORM_WND]->Add(OBJECT_REF_TRANSFORM, "Transform", (void*)&m_focused);
 
 	//Shaders
-	externalGui[3]->Add(BUTTON, "Update shaders", (void*)&update_uniforms_callback);
-	externalGui[3]->Add(SHADER, "Shaders", (void*)&pipeline.GetShaderInfos());
+	externalGui[ExternalWindow::SHADER_WND]->Add(BUTTON, "Update shaders", (void*)&update_uniforms_callback);
+	externalGui[ExternalWindow::SHADER_WND]->Add(SHADER, "Shaders", (void*)&pipeline.GetShaderInfos());
 
 	//Main Menu
 	static std::function<void(const std::string&)> add_model_callback = [this](const std::string& _path)
 	{
 		modelManager->Add("Name", (GLchar*)_path.c_str());//@todo parse real name
 	};
-	externalGui[4]->Add(MENU_OPEN, "Add model", reinterpret_cast<void*>(&add_model_callback));
+	externalGui[ExternalWindow::MAIN_MENU_WND]->Add(MENU_OPEN, "Add model", reinterpret_cast<void*>(&add_model_callback));
 
 	static std::function<void(const std::string&)> serealize_scene_callback = [this](const std::string& _path)
 	{
 		SceneSerializer serealizer(GetObjects(), *modelManager.get(), *animationManager.get());
 		serealizer.Serialize(_path);
 	};
-	externalGui[4]->Add(MENU_SAVE_SCENE, "Serealize scene", reinterpret_cast<void*>(&serealize_scene_callback));
+	externalGui[ExternalWindow::MAIN_MENU_WND]->Add(MENU_SAVE_SCENE, "Serealize scene", reinterpret_cast<void*>(&serealize_scene_callback));
 	
 	static std::function<void(const std::string&)> deserealize_scene_callback = [this](const std::string& _path)
 	{
@@ -724,15 +728,15 @@ void eMainContextBase::InitializeExternalGui()
 		SceneSerializer serealizer(GetObjects(), *modelManager.get(), *animationManager.get());
 		m_objects = serealizer.Deserialize(_path);
 	};
-	externalGui[4]->Add(MENU_OPEN_SCENE, "Deserealize scene", reinterpret_cast<void*>(&deserealize_scene_callback));
+	externalGui[ExternalWindow::MAIN_MENU_WND]->Add(MENU_OPEN_SCENE, "Deserealize scene", reinterpret_cast<void*>(&deserealize_scene_callback));
 
 	// Tools Menu
 	static std::function<void()> terrain_tool_callback = [this]()
 	{
-		m_global_scripts.push_back(std::make_shared<TerrainGeneratorTool>(this, modelManager.get(), texManager.get(), pipeline, externalGui[11]));
+		m_global_scripts.push_back(std::make_shared<TerrainGeneratorTool>(this, modelManager.get(), texManager.get(), pipeline, externalGui[ExternalWindow::TERRAIN_GENERATOR_WND]));
 		m_global_scripts.back()->Initialize();
 	};
-	externalGui[4]->Add(MENU, "Terrain Tool", reinterpret_cast<void*>(&terrain_tool_callback));
+	externalGui[ExternalWindow::MAIN_MENU_WND]->Add(MENU, "Terrain Tool", reinterpret_cast<void*>(&terrain_tool_callback));
 
 	//Create
 	std::function<void()> create_cube_callbaack = [this]()
@@ -741,7 +745,7 @@ void eMainContextBase::InitializeExternalGui()
 		shObject cube = factory.CreateObject(std::make_shared<MyModel>(modelManager->FindMesh("cube"), "default_cube"), eObject::RenderType::PHONG, "DefaultCube");
 		m_objects.push_back(cube);
 	};
-	externalGui[5]->Add(BUTTON, "Cube", (void*)&create_cube_callbaack);
+	externalGui[ExternalWindow::CREATE_WND]->Add(BUTTON, "Cube", (void*)&create_cube_callbaack);
 
 	std::function<void()> create_sphere_callbaack = [this]()
 	{
@@ -749,7 +753,7 @@ void eMainContextBase::InitializeExternalGui()
 		shObject sphere = factory.CreateObject(std::make_shared<MyModel>(modelManager->FindMesh("sphere"), "default_sphere"), eObject::RenderType::PHONG, "DefaultSphere");
 		m_objects.push_back(sphere);
 	};
-	externalGui[5]->Add(BUTTON, "Sphere", (void*)&create_sphere_callbaack);
+	externalGui[ExternalWindow::CREATE_WND]->Add(BUTTON, "Sphere", (void*)&create_sphere_callbaack);
 
 	std::function<void()> create_plane_callbaack = [this]()
 	{
@@ -757,7 +761,7 @@ void eMainContextBase::InitializeExternalGui()
 		shObject plane = factory.CreateObject(std::make_shared<MyModel>(modelManager->FindMesh("plane"), "default_plane"), eObject::RenderType::PHONG, "DefaultSphere");
 		m_objects.push_back(plane);
 	};
-	externalGui[5]->Add(BUTTON, "Plane", (void*)&create_plane_callbaack);
+	externalGui[ExternalWindow::CREATE_WND]->Add(BUTTON, "Plane", (void*)&create_plane_callbaack);
 
 	//bezier 2d
 	std::function<void()> create_bezier_callback = [this]()
@@ -780,7 +784,7 @@ void eMainContextBase::InitializeExternalGui()
 		}
 		bezier_model->SetScript(new BezierCurveUIController(this, bezier_model, 0.02f, texManager->Find("pseudo_imgui")));
 	};
-	externalGui[5]->Add(BUTTON, "Bezier Curve 2D", (void*)&create_bezier_callback);
+	externalGui[ExternalWindow::CREATE_WND]->Add(BUTTON, "Bezier Curve 2D", (void*)&create_bezier_callback);
 
 	//bezier 3d
 	std::function<void()> create_bezier_callbaack_3d = [this]()
@@ -802,29 +806,29 @@ void eMainContextBase::InitializeExternalGui()
 		}
 		bezier_model->SetScript(new BezierCurveUIController(this, bezier_model, 0.1f));
 	};
-	externalGui[5]->Add(BUTTON, "Bezier Curve 3D", (void*)&create_bezier_callbaack_3d);
+	externalGui[ExternalWindow::CREATE_WND]->Add(BUTTON, "Bezier Curve 3D", (void*)&create_bezier_callbaack_3d);
 
 	//Object List
-	externalGui[6]->Add(OBJECT_LIST, "Objects List", (void*)this);
+	externalGui[ExternalWindow::OBJECTS_WND]->Add(OBJECT_LIST, "Objects List", (void*)this);
 
 	//Objects material
-	externalGui[7]->Add(OBJECT_REF_MATERIAL, "Material", (void*)&m_focused);
+	externalGui[ExternalWindow::MATERIAL_WND]->Add(OBJECT_REF_MATERIAL, "Material", (void*)&m_focused);
 
 	//Objects rigger
-	externalGui[8]->Add(GAME, "Game", (void*)&(*this));
-	externalGui[8]->Add(OBJECT_REF_RIGGER, "Rigger", (void*)&m_focused);
+	externalGui[ExternalWindow::RIGGER_WND]->Add(GAME, "Game", (void*)&(*this));
+	externalGui[ExternalWindow::RIGGER_WND]->Add(OBJECT_REF_RIGGER, "Rigger", (void*)&m_focused);
 	static std::function<void(shObject, const std::string&)> load_rigger = [this](shObject obj, const std::string& _path)
 	{
 		IRigger* rigger = animationManager->DeserializeRigger(_path);
 		obj->SetRigger(rigger);
 	};
-	externalGui[8]->Add(ADD_CALLBACK, "Load Rigger", reinterpret_cast<void*>(&load_rigger));
+	externalGui[ExternalWindow::RIGGER_WND]->Add(ADD_CALLBACK, "Load Rigger", reinterpret_cast<void*>(&load_rigger));
 	static std::function<void(shObject, const std::string&)> save_rigger = [this](shObject obj, const std::string& _path)
 	{
 		IRigger* rigger = obj->GetRigger();
 		animationManager->SerializeRigger(dynamic_cast<const Rigger*>(rigger), _path);
 	};
-	externalGui[8]->Add(ADD_CALLBACK, "Save Rigger", reinterpret_cast<void*>(&save_rigger));
+	externalGui[ExternalWindow::RIGGER_WND]->Add(ADD_CALLBACK, "Save Rigger", reinterpret_cast<void*>(&save_rigger));
 
 	//Console
 	static std::function<void(const std::string&)> console_plane_callbaack = [this](const std::string& _commandLine)
@@ -845,17 +849,17 @@ void eMainContextBase::InitializeExternalGui()
 		else if(res.size() == 6)
 			pipeline.SetUniformData(res[0] + " " + res[1], res[2], glm::vec3(std::stof(res[3]), std::stof(res[4]), std::stof(res[5])));
 	};
-	externalGui[9]->Add(CONSOLE, "Console", reinterpret_cast<void*>(&console_plane_callbaack));
+	externalGui[ExternalWindow::CONSOLE_WND]->Add(CONSOLE, "Console", reinterpret_cast<void*>(&console_plane_callbaack));
 
 	//Global Scrips
-	m_global_scripts.push_back(std::make_shared<ParticleSystemToolController>(this, externalGui[10], modelManager.get(),texManager.get(), soundManager.get(), pipeline));
+	m_global_scripts.push_back(std::make_shared<ParticleSystemToolController>(this, externalGui[ExternalWindow::PARTICLE_SYSTEM_WND], modelManager.get(),texManager.get(), soundManager.get(), pipeline));
 
 	auto physics = std::make_shared<PhysicsSystemController>(this);
 	m_global_scripts.push_back(physics);
 	static std::function<void()> run_physics = [&physics]() { physics->RunPhysics(); };
 	static std::function<void()> stop_physics = [&physics]() { physics->StopPhysics(); };
-	externalGui[1]->Add(BUTTON, "Run Physicsa", &run_physics);
-	externalGui[1]->Add(BUTTON, "Stop Physics", &stop_physics);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(BUTTON, "Run Physicsa", &run_physics);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(BUTTON, "Stop Physics", &stop_physics);
 }
 
 //------------------------------------------------------------

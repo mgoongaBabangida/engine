@@ -36,6 +36,26 @@ private:
 	static bool			is_initialized;
 };
 
+//---------------------------------------------
+enum ExternalWindow : uint32_t
+{
+	LIGHT_CAMERA_WND = 0,
+	PIPELINE_WND = 1,
+	TRANSFORM_WND = 2,
+	SHADER_WND = 3,
+	MAIN_MENU_WND = 4,
+	CREATE_WND = 5,
+	OBJECTS_WND = 6,
+	MATERIAL_WND = 7,
+	RIGGER_WND = 8,
+	CONSOLE_WND = 9,
+	PARTICLE_SYSTEM_WND = 10,
+	TERRAIN_GENERATOR_WND = 11,
+	GAME_DEBUG_WND = 12,
+	PHYSICS_TEST_WND = 13,
+	HDR_BLOOM_WND = 14
+};
+
 enum TypeImGui
 {
 	SLIDER_FLOAT,
