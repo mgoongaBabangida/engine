@@ -1,8 +1,8 @@
 #pragma once
 
 #include "stdafx.h"
-#include <AL\include\al.h>
-#include <AL\include\alc.h>
+#include <AL/al.h>
+#include <AL/alc.h>
 
 #include <base/interfaces.h>
 

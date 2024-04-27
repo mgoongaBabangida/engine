@@ -7,6 +7,8 @@ workspace "Mgoonga"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+os.execute("check_third_party.bat")
+
 ------------------------------------------------------------------------------------------------
 project "base"
 	location "base"
@@ -134,7 +136,8 @@ project "opengl_assets"
    includedirs 
    { 
    "./"; "../../third_party",
-   "./"; "../../third_party/freetype-2.11.0/include"
+   "./"; "../../third_party/freetype-2.11.0/include",
+   "./"; "../../third_party/openal/include"
    }
 	
    libdirs 
@@ -145,7 +148,8 @@ project "opengl_assets"
    "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
-   "../../third_party/freetype-2.11.0/objs"
+   "../../third_party/freetype-2.11.0/objs",
+   "../../third_party/openal/libs/Win64"
    }
 
    links
@@ -189,7 +193,9 @@ project "sdl_assets"
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
    
-   includedirs { "./"; "../../third_party" }
+   includedirs { "./"; "../../third_party",
+      "../../third_party/openal/include"
+   }
 	
    libdirs 
    { 
@@ -199,7 +205,8 @@ project "sdl_assets"
    "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
-   "../../third_party/freetype-2.11.0/objs"
+   "../../third_party/freetype-2.11.0/objs",
+   "../../third_party/openal/libs/Win64"
    }
 
    links
@@ -248,6 +255,7 @@ project "game_assets"
    {
 	"./"; 
 	"../../third_party",
+   "../../third_party/openal/include",
 	"yaml-cpp/include"   
    }
 	
@@ -259,7 +267,8 @@ project "game_assets"
    "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
-   "../../third_party/freetype-2.11.0/objs"
+   "../../third_party/freetype-2.11.0/objs",
+   "../../third_party/openal/libs/Win64"
    }
 
    links
@@ -302,7 +311,7 @@ project "Mgoonga"
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
    
-   includedirs { "./"; "../../third_party" }
+   includedirs { "./"; "../../third_party", "../../third_party/openal/include" }
    
    libdirs 
    { 
@@ -312,7 +321,8 @@ project "Mgoonga"
    "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
-   "../../third_party/freetype-2.11.0/objs"
+   "../../third_party/freetype-2.11.0/objs",
+   "../../third_party/openal/libs/Win64"
    }
 
    links
@@ -354,7 +364,7 @@ project "AmericanTreasureGame"
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
    
-   includedirs { "./"; "../../third_party" }
+   includedirs { "./"; "../../third_party","../../third_party/openal/include" }
    
    libdirs 
    { 
@@ -364,7 +374,8 @@ project "AmericanTreasureGame"
    "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
-   "../../third_party/freetype-2.11.0/objs"
+   "../../third_party/freetype-2.11.0/objs",
+   "../../third_party/openal/libs/Win64"
    }
 
    links
@@ -407,7 +418,7 @@ project "SandBoxGame"
 	
    files { "%{prj.name}/**.h", "%{prj.name}/**.cpp"}
    
-   includedirs { "./"; "../../third_party" }
+   includedirs { "./"; "../../third_party", "../../third_party/openal/include" }
    
    libdirs 
    { 
@@ -417,7 +428,8 @@ project "SandBoxGame"
    "../../third_party/assimp-3.1.1/build/code/Debug",
    "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
-   "../../third_party/freetype-2.11.0/objs"
+   "../../third_party/freetype-2.11.0/objs",
+   "../../third_party/openal/libs/Win64"
    }
 
    links
