@@ -488,6 +488,7 @@ bool Texture::generatePerlin(GLuint _width, GLuint _height, bool periodic)
 	return true;
 }
 
+//----------------------------------------------------------------------
 bool Texture::loadHdr(const std::string& _path)
 {
 	stbi_set_flip_vertically_on_load(true);
@@ -519,25 +520,29 @@ bool Texture::loadTexture2DArray(std::vector<std::string> _paths)
 {
 	path = "";
 	type = "";
-	mTextureWidth = 512; //?
-	mTextureHeight = 512;
+	mTextureWidth = 0;
+	mTextureHeight = 0;
 	GLsizei layers = (GLsizei)_paths.size();
+
+	if (layers == 0)
+		return false;
 
 	glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &id);
 	++textures_in_use;
 	indexes_in_use.insert(id);
 
-	glTextureStorage3D(id, 1, GL_RGBA8, mTextureWidth, mTextureHeight, layers);
-
 	uint32_t ilId;
 	for (int layer = 0; layer < _paths.size(); ++layer)
 	{
 		mChannels = eTextureImplDevIl::LoadTexture(_paths[layer], ilId, mTextureWidth, mTextureHeight); //rgb ? rgba
+		if(layer == 0)
+			glTextureStorage3D(id, 1, GL_RGBA8, mTextureWidth, mTextureHeight, layers); // after eTextureImplDevIl::LoadTexture assignes width an height
 		uint8_t* data = nullptr;
 		eTextureImplDevIl::AssignPixels(data, mTextureWidth, mTextureHeight);
 		glTextureSubImage3D(id, 0/*mipmap_level*/, 0/*offset.x*/, 0/*offset.y*/, layer/*offset.z*/, mTextureWidth, mTextureHeight, 1 /*layer*/, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		eTextureImplDevIl::DeleteImage(ilId);
 	}
+
 	glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

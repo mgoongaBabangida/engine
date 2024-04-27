@@ -4,6 +4,7 @@ in float Height;
 in vec2 texCoord;
 in vec3 thePositionWorld;
 in vec4 LocalSpacePos;
+in mat3 TBN;
 
 out vec4 FragColor;
 
@@ -24,9 +25,7 @@ struct Light
     float outerCutOff;
 };
 
-uniform Light light;
-
-uniform float height_scale = 1.75f;
+uniform Light lights[1]; // uniform size 
 
 uniform vec4 eyePositionWorld;
 uniform float shininess = 16.0f;
@@ -40,15 +39,41 @@ uniform float base_start_heights[max_texture_array_size];
 uniform int color_count = 4;
 uniform float textureScale[max_texture_array_size];
 
+uniform bool pbr_renderer = false;
+uniform bool use_normal_texture_pbr = true;
+
 layout(binding=4) uniform sampler2D normalMap;
 
 layout(binding=12) uniform sampler2DArray  texture_array_albedo;
+layout(binding=13) uniform sampler2DArray  texture_array_normal;
+layout(binding=14) uniform sampler2DArray  texture_array_metallic;
+layout(binding=15) uniform sampler2DArray  texture_array_roughness;
+layout(binding=16) uniform sampler2DArray  texture_array_ao;
 
 float inverseLerp(float a, float b, float value);
 vec3 triplaner(float layer, vec3 blendAxes, vec4 localSpacePos);
 vec3 SampleAlbedoTexture(vec3 Normal, vec4 localSpacePos);
+vec3 SampleNormalTexture(vec3 Normal, vec4 localSpacePos);
+float SampleMetallicTexture(vec3 Normal, vec4 localSpacePos);
+float SampleRoughnessTexture(vec3 Normal, vec4 localSpacePos);
+float SampleAOTexture(vec3 Normal, vec4 localSpacePos);
+
+vec4 PhongModel();
+vec4 PBRModel();
+ 
+ const float PI = 3.14159265359;
+  
+float DistributionGGX(vec3 N, vec3 H, float roughness);
+float GeometrySchlickGGX(float NdotV, float roughness);
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
+vec3 fresnelSchlick(float cosTheta, vec3 F0);
 
 void main()
+{	
+    FragColor = pbr_renderer ? PBRModel() : PhongModel();
+}
+
+vec4 PhongModel()
 {
 	vec4 localSpacePos = vec4(LocalSpacePos.x, Height, LocalSpacePos.z, 1.0f); // ? /height_scale
     vec3 normal = texture(normalMap, texCoord).xyz;
@@ -56,9 +81,9 @@ void main()
 	vec3 color  = SampleAlbedoTexture(normal, localSpacePos); //vec3(0.4f, 0.15f, 0.f);
 	
 	//diffuse	
-    vec3 lightVector = -normalize(vec3(light.direction));
+    vec3 lightVector = -normalize(vec3(lights[0].direction));
     float Brightness  = clamp(dot(lightVector, normal), 0, 1);
-    vec3 diffuseColor = color * Brightness * light.diffuse.xyz;
+    vec3 diffuseColor = color * Brightness * lights[0].diffuse.xyz;
 	
 	// specular shading
     vec3 eyeVector = normalize(eyePositionWorld.xyz - thePositionWorld);
@@ -66,12 +91,80 @@ void main()
 	float spec = clamp(dot(normal, halfvector), 0, 1);	
     spec=pow(spec, shininess);
 	   
-	vec3 specularLight = light.specular.xyz * spec * color;
+	vec3 specularLight = lights[0].specular.xyz * spec * color;
 	specularLight = clamp(specularLight,0,1);
 	
-	vec3 ambientLight = light.ambient.xyz * color;
+	vec3 ambientLight = lights[0].ambient.xyz * color;
 	
-    FragColor = vec4(diffuseColor + specularLight + ambientLight, 1.0f);
+    return vec4(diffuseColor + specularLight + ambientLight, 1.0f);
+}
+
+vec4 PBRModel()
+{
+	vec4 localSpacePos = vec4(LocalSpacePos.x, Height, LocalSpacePos.z, 1.0f);
+    vec3 baseNormal 	= texture(normalMap, texCoord).xyz;
+    baseNormal = normalize(baseNormal * 2.0 - 1.0);
+	
+	vec3 albedo     = SampleAlbedoTexture(baseNormal, localSpacePos);
+    float metallic  = SampleMetallicTexture(baseNormal, localSpacePos);
+    float roughness = SampleRoughnessTexture(baseNormal, localSpacePos);
+    float ao        = SampleAOTexture(baseNormal, localSpacePos);
+	
+	vec3 N;
+	if(use_normal_texture_pbr)
+	{
+		vec3 normal 	= SampleNormalTexture(baseNormal, localSpacePos);
+		normal = normalize(normal * 2.0 - 1.0);
+		normal = normalize(TBN * normal);
+		N = normalize(normal);
+	}
+	else
+	{
+		N = baseNormal;
+	}
+	
+    vec3 V = normalize(eyePositionWorld.xyz - thePositionWorld);
+
+    vec3 F0 = vec3(0.04); 
+    F0 = mix(F0, albedo, metallic);
+	           
+    // reflectance equation
+    vec3 Lo = vec3(0.0);
+    for(int i = 0; i < 1; ++i) 
+    {
+        // calculate per-light radiance
+        vec3 L = -normalize(vec3(lights[i].direction)); // directional light
+		// normalize(lights[i].position.xyz - thePositionWorld);
+        vec3 H = normalize(V + L);
+        float distance    = length(lights[i].position.xyz - thePositionWorld);
+        float attenuation = 1.0; // / (distance * distance);
+        vec3 radiance     = lights[i].ambient.xyz * 50 * attenuation;       // light color  
+        
+        // cook-torrance brdf
+        float NDF = DistributionGGX(N, H, roughness);        
+        float G   = GeometrySmith(N, V, L, roughness);      
+        vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);       
+        
+        vec3 kS = F;
+        vec3 kD = vec3(1.0) - kS;
+        kD *= 1.0 - metallic;	  
+        
+        vec3 numerator    = NDF * G * F;
+        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+        vec3 specular     = numerator / denominator;  
+            
+        // add to outgoing radiance Lo
+        float NdotL = max(dot(N, L), 0.0);                
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL; 
+    }   
+  
+    vec3 ambient = vec3(0.03) * albedo * ao;
+    vec3 color = ambient + Lo;
+	
+    color = color / (color + vec3(1.0));
+    //color = pow(color, vec3(1.0/2.2));  
+   
+    return vec4(color, 1.0);
 }
 
 float inverseLerp(float a, float b, float value)
@@ -122,3 +215,79 @@ vec3 SampleAlbedoTexture(vec3 Normal, vec4 localSpacePos)
 	}
 	return colorAlbedo;
 }
+
+float DistributionGGX(vec3 N, vec3 H, float roughness)
+{
+    float a      = roughness*roughness;
+    float a2     = a*a;
+    float NdotH  = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH*NdotH;
+	
+    float num   = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
+	
+    return num / denom;
+}
+
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+    float r = (roughness + 1.0);
+    float k = (r*r) / 8.0;
+
+    float num   = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+	
+    return num / denom;
+}
+
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2  = GeometrySchlickGGX(NdotV, roughness);
+    float ggx1  = GeometrySchlickGGX(NdotL, roughness);
+	
+    return ggx1 * ggx2;
+}
+
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+vec3 SampleNormalTexture(vec3 Normal, vec4 localSpacePos)
+{
+	vec3 outNormal = vec3(0,1,0);
+	float heightPercent = inverseLerp(min_height, max_height, Height);
+	vec3 blendAxes = normalize(Normal);	
+	for(int i = 0; i < color_count; ++i)
+	{		
+		if(heightPercent >= base_start_heights[i] && heightPercent <= base_start_heights[i+1])
+		{
+			int index = int(i);
+			vec3 scaledWorldPos = vec3(localSpacePos) / textureScale[index];
+			vec3 xProjection = vec3(texture(texture_array_normal, vec3(scaledWorldPos.yz, index))) * abs(blendAxes.x);
+			vec3 yProjection = vec3(texture(texture_array_normal, vec3(scaledWorldPos.xz, index))) * abs(blendAxes.y);
+			vec3 zProjection = vec3(texture(texture_array_normal, vec3(scaledWorldPos.xy, index))) * abs(blendAxes.z);
+			outNormal = xProjection + yProjection + zProjection;
+		}
+	}
+	return outNormal;
+}
+
+float SampleMetallicTexture(vec3 Normal, vec4 localSpacePos)
+{
+	return 0.1f;
+}
+
+float SampleRoughnessTexture(vec3 Normal, vec4 localSpacePos)
+{
+	return 0.9f;
+}
+
+float SampleAOTexture(vec3 Normal, vec4 localSpacePos)
+{
+	return 1.0f;
+}
+	

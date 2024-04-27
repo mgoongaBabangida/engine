@@ -62,7 +62,7 @@ void eSandBoxGame::InitializeModels()
 	material.emissive_texture_id = Texture::GetTexture1x1(TColor::BLACK).id;
 	modelManager->Add("sphere_red", Primitive::SPHERE, std::move(material));
 
-	_InitializeScene();
+	//_InitializeScene();
 
 	//light
 	GetMainLight().light_position = glm::vec4(0.f, 6.5f, 5.f , 1.f);
@@ -93,8 +93,8 @@ void eSandBoxGame::InitializeModels()
 
 	//@todo make it dynamic, make clear order
 	//GLOBAL SCRIPTS
-	//m_global_scripts.push_back(std::make_shared<PhysicsEngineTestScript>(this, this->externalGui[13]));
-	//m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);
+	/*m_global_scripts.push_back(std::make_shared<PhysicsEngineTestScript>(this, this->externalGui[13]));
+	m_input_controller->AddObserver(&*m_global_scripts.back(), WEAK);*/
 
 	m_global_scripts.push_back(std::make_shared<GUIControllerBase>(this, this->pipeline, soundManager->GetSound("page_sound")));
 	m_global_scripts.push_back(std::make_shared<CameraFreeController>(GetMainCamera()));

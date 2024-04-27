@@ -20,17 +20,17 @@ void eTerrainTessellatedRender::Render(const Camera& _camera, const Light& _ligh
 {
   glUseProgram(m_tessellation_shader.ID());
 
-  m_tessellation_shader.SetUniformData("light.ambient", _light.ambient);
-  m_tessellation_shader.SetUniformData("light.diffuse", _light.diffuse);
-  m_tessellation_shader.SetUniformData("light.specular", _light.specular);
-  m_tessellation_shader.SetUniformData("light.position", _light.light_position);
-  m_tessellation_shader.SetUniformData("light.direction", _light.light_direction);
+  m_tessellation_shader.SetUniformData("lights[0].ambient", _light.ambient);
+  m_tessellation_shader.SetUniformData("lights[0].diffuse", _light.diffuse);
+  m_tessellation_shader.SetUniformData("lights[0].specular", _light.specular);
+  m_tessellation_shader.SetUniformData("lights[0].position", _light.light_position);
+  m_tessellation_shader.SetUniformData("lights[0].direction", _light.light_direction);
 
-  m_tessellation_shader.SetUniformData("light.constant", _light.constant);
-  m_tessellation_shader.SetUniformData("light.linear", _light.linear);
-  m_tessellation_shader.SetUniformData("light.quadratic", _light.quadratic);
-  m_tessellation_shader.SetUniformData("light.cutOff", _light.cutOff);
-  m_tessellation_shader.SetUniformData("light.outerCutOff", _light.outerCutOff);
+  m_tessellation_shader.SetUniformData("lights[0].constant", _light.constant);
+  m_tessellation_shader.SetUniformData("lights[0].linear", _light.linear);
+  m_tessellation_shader.SetUniformData("lights[0].quadratic", _light.quadratic);
+  m_tessellation_shader.SetUniformData("lights[0].cutOff", _light.cutOff);
+  m_tessellation_shader.SetUniformData("lights[0].outerCutOff", _light.outerCutOff);
 
   m_tessellation_shader.SetUniformData("view", _camera.getWorldToViewMatrix());
   m_tessellation_shader.SetUniformData("projection", _camera.getProjectionMatrix());

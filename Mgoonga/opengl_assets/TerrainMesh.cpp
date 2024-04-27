@@ -2,6 +2,7 @@
 
 #include "TerrainMesh.h"
 #include <math/Camera.h>
+#include <opengl_assets/GlDrawContext.h>
 
 //---------------------------------------------------
 TerrainMesh::TerrainMesh(const std::string& _name)
@@ -394,6 +395,7 @@ Texture* TerrainMesh::GenerateNormals(GLuint rows, GLuint columns)
 //---------------------------------------------------------------------------
 void TerrainMesh::GenerateTessellationData()
 {
+	m_tessellation_data.Clear();
 	if (this->indicesLods.empty())
 		return;
 
@@ -450,7 +452,7 @@ void TerrainMesh::DrawTessellated()
 	glBindTexture(GL_TEXTURE_2D, m_normalMap.id);
 	glPatchParameteri(GL_PATCH_VERTICES, 4/* num pointsin patch*/);
 	glBindVertexArray(m_tessellation_data.m_terrainVAO);
-	glDrawArrays(GL_PATCHES, 0, 4/* num pointsin patch*/ * (m_tessellation_data.m_vertices.size()/5));
+	eGlDrawContext::GetInstance().DrawArrays(GL_PATCHES, 0, 4/* num pointsin patch*/ * (m_tessellation_data.m_vertices.size() / 5), "TerrainMesh");
 }
 
 //---------------------------------------------------------------------------

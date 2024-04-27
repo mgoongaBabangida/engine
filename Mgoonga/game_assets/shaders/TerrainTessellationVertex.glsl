@@ -13,5 +13,4 @@ void main()
     gl_Position = vec4(aPos, 1.0);
     TexCoord = aTex;
     thePositionWorld = vec3(model * vec4(aPos, 1.0f));
-
 }

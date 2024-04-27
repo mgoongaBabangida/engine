@@ -74,10 +74,15 @@ protected:
 	{
 		unsigned int m_terrainVAO, m_terrainVBO;
 		std::vector<float> m_vertices;
-		TessellationData::~TessellationData()
+		void Clear()
 		{
+			m_vertices.clear();
 			glDeleteVertexArrays(1, &m_terrainVAO);
 			glDeleteBuffers(1, &m_terrainVBO);
+		}
+		TessellationData::~TessellationData()
+		{
+			Clear();
 		}
 	};
 	TessellationData m_tessellation_data;

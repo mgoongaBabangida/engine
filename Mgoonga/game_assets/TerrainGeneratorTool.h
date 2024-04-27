@@ -41,6 +41,7 @@ protected:
   void _AddCurrentMesh();
 
   void _GenerateFallOffMap();
+  void _UpdateShaderUniforms();
 
   std::future<bool>        m_generat_noise_task;
   std::vector<GLfloat>     m_noise_map;
@@ -59,11 +60,11 @@ protected:
   int         m_cur_pos_Y = 0;
   GLuint      m_width = 2048;
   GLuint      m_height = 2048;
-  float       m_scale = 500.0f;
+  int         m_scale = 500;
   GLuint      m_octaves = 12;
   float       m_persistance = 0.5f;
   float       m_lacunarity = 2.0f;
-  glm::vec2   m_noise_offset = {0.0f, 0.0f};
+  glm::ivec2  m_noise_offset = {0,0};
   GLuint      m_seed = 1;
   float       m_height_scale = 1.75f;
   float       m_texture_scale[8];
@@ -73,7 +74,9 @@ protected:
   bool        m_use_curve = false;
   bool        m_initialized = false;
   bool        m_auto_update = false;
+  bool        m_update_textures = false;
   bool        m_apply_falloff = false;
+  bool        m_use_normal_texture_pbr = false;
 
   eMainContextBase* m_game = nullptr;
   eModelManager*    m_modelManager = nullptr;

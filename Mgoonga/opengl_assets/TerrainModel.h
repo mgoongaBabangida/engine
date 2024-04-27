@@ -65,6 +65,7 @@ public:
 	void setDiffuse(uint32_t _id);
 	void setSpecular(uint32_t _id);
 	void setAlbedoTextureArray(const Texture*);
+	void setNormalTextureArray(const Texture*);
 
 protected:
 	std::string									m_path;
@@ -73,6 +74,7 @@ protected:
 
 	Texture											m_height;
 	const Texture*							m_albedo_texture_array = nullptr;
+	const Texture*							m_normal_texture_array = nullptr;
 	bool												m_tessellation_enabled = false;
 	Camera*											m_camera = nullptr;
 

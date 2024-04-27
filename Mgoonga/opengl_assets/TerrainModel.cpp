@@ -272,6 +272,11 @@ void TerrainModel::setAlbedoTextureArray(const Texture* _t)
 	m_albedo_texture_array = _t;
 }
 
+//----------------------------------------------------------------
+void TerrainModel::setNormalTextureArray(const Texture* _t)
+{
+	m_normal_texture_array = _t;
+}
 
  //----------------------------------------------------------------
 float TerrainModel::GetHeight(float x, float z)

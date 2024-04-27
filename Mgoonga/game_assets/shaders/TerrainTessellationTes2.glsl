@@ -10,11 +10,15 @@ uniform mat4 projection;
 uniform float height_scale = 1.75f;
 uniform float max_height = 1.75f;
 
+uniform float heightMapResoultion = 2056.f;
+uniform float terrainSizeXZ = 12.7f;
+
 in vec2 TextureCoord[];
 
 out float Height;
 out vec2 texCoord;
 out vec4 LocalSpacePos;
+out mat3 TBN;
 
 void main()
 {
@@ -35,6 +39,8 @@ void main()
     if(Height > max_height)
 		Height = max_height;
 
+    // ----------------------------------------------------------------------
+    // retrieve control point position coordinates
     vec4 p00 = gl_in[0].gl_Position;
     vec4 p01 = gl_in[1].gl_Position;
     vec4 p10 = gl_in[2].gl_Position;
@@ -49,5 +55,27 @@ void main()
     vec4 p = (p1 - p0) * v + p0 + normal * Height;
 	LocalSpacePos = p;
 	
-    gl_Position = projection * view * model * p;
+	gl_Position = projection * view * model * p;
+		
+	float uTexelSize = 1.0f / heightMapResoultion;
+	float heightRight = texture(heightMap, texCoord + vec2( uTexelSize, 0.0)).x;
+	heightRight *= height_scale;
+    if(heightRight > max_height)
+		heightRight = max_height;
+	float heightUp    = texture(heightMap, texCoord + vec2(0.0,  uTexelSize)).x;
+	heightUp *= height_scale;
+    if(heightUp > max_height)
+		heightUp = max_height;
+	
+	vec3 pos  = vec3(0 , Height, 0);
+	vec3 posR = vec3(terrainSizeXZ/heightMapResoultion, heightRight, 0);
+	vec3 posU = vec3(0, heightUp, terrainSizeXZ/heightMapResoultion);
+	
+	vec3 T = normalize(posR - pos);
+	vec3 B = normalize(posU - pos);
+	vec3 N = normalize(cross(T, B));
+  
+  if (dot(cross(N, T), B) < 0.0)
+                T = T * -1.0;
+  TBN = mat3(T,B,N);  
 }
