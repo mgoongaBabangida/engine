@@ -154,16 +154,20 @@ void dbGLWindowSDL::Run()
 			else if ((SDL_GetModState() & KMOD_CTRL))
 				mod = KeyModifiers::CTRL;
 
-      if (windowEvent.type == SDL_KEYDOWN && windowEvent.key.keysym.sym == SDLK_ESCAPE)
+			if (windowEvent.type == SDL_KEYDOWN && windowEvent.key.keysym.sym == SDLK_ESCAPE)
 			{
 				dTimer->stop();
-        running = false;
+				running = false;
 				break;
 			}
 			else if(SDL_KEYDOWN == windowEvent.type)
 			{
-				if (!inputController.OnKeyPress(windowEvent.key.keysym.sym, mod))
+				if (!inputController.OnKeyJustPressed(windowEvent.key.keysym.sym, mod))
 					return;
+			}
+			else if(SDL_KEYUP == windowEvent.type)
+			{
+				inputController.OnKeyRelease(windowEvent.key.keysym.sym);
 			}
 			else if(SDL_MOUSEBUTTONDOWN == windowEvent.type)
 			{
@@ -192,6 +196,10 @@ void dbGLWindowSDL::Run()
 			{
 				inputController.OnMouseWheel(windowEvent.wheel.x, windowEvent.wheel.y, mod);
 			}
+		}
+		if(inputController.IsAnyKeyPressed())
+		{
+			inputController.OnKeyPress();
 		}
 	}
 }

@@ -1,6 +1,14 @@
 #include "stdafx.h"
 #include "InputController.h"
 
+eInputController::eInputController()
+{
+	for(int i = 0; i < 128; ++i)
+	{
+		keysPressed.push_back(false);
+	}
+}
+
 //------------------------------------------------------------------
 void eInputController::OnMouseMove(uint32_t x, uint32_t y, KeyModifiers _modifiers)
 {
@@ -31,14 +39,15 @@ void eInputController::OnMouseMove(uint32_t x, uint32_t y, KeyModifiers _modifie
 }
 
 //------------------------------------------------------------------
-bool eInputController::OnKeyPress(uint32_t asci, KeyModifiers _modifier)
+bool eInputController::OnKeyJustPressed(uint32_t _asci, KeyModifiers _modifier)
 {
+	keysPressed[_asci] = true;
 	bool taken = false;
 	for (auto& observer : observersPriority)
 	{
 		if (observer)
 		{
-			if(observer->OnKeyPress(asci, _modifier))
+			if(observer->OnKeyJustPressed(_asci, _modifier))
 				return false;
 			taken = false; //do not take keyboard, only mouse ?
 			break;
@@ -49,20 +58,69 @@ bool eInputController::OnKeyPress(uint32_t asci, KeyModifiers _modifier)
 	{
 		for (auto& observer : observers)
 		{
-      if (observer)
-        if (observer->OnKeyPress(asci, _modifier))
-          break;
+			if(observer)
+			{
+				if (observer->OnKeyJustPressed(_asci, _modifier)) break;
+			}
 		}
 	}
 
 	for (auto& observer : observersAlways)
 	{
-		if (observer)
-			if (observer->OnKeyPress(asci, _modifier))
-				break;
+		if(observer)
+		{
+			if (observer->OnKeyJustPressed(_asci, _modifier)) break;
+		}
 	}
 
 	return true;
+}
+
+//------------------------------------------------------------------
+bool eInputController::OnKeyPress()
+{
+	bool taken = false;
+	for (auto& observer : observersPriority)
+	{
+		if (observer)
+		{
+			if(observer->OnKeyPress(keysPressed, KeyModifiers::NONE))
+				return false;
+			taken = false; //do not take keyboard, only mouse ?
+			break;
+		}
+	}
+
+	if (!taken)
+	{
+		for (auto& observer : observers)
+		{
+			if(observer)
+			{
+				if (observer->OnKeyPress(keysPressed, KeyModifiers::NONE)) break;
+			}
+		}
+	}
+
+	for (auto& observer : observersAlways)
+	{
+		if(observer)
+		{
+			if (observer->OnKeyPress(keysPressed, KeyModifiers::NONE)) break;
+		}
+	}
+
+	return true;
+}
+
+//----------------------------------------------------------------------
+bool eInputController::OnKeyRelease(uint32_t asci)
+{
+	if(keysPressed[asci])
+	{
+		keysPressed[asci] = false;
+	}
+	return false;
 }
 
 //----------------------------------------------------------------------
@@ -123,6 +181,16 @@ void eInputController::OnMouseWheel(int32_t _x, int32_t _y, KeyModifiers _modifi
 		if (observer)
 			observer->OnMouseWheel(_x, _y, _modifier);
 	}
+}
+
+//----------------------------------------------------------------------
+bool eInputController::IsAnyKeyPressed() const
+{
+	for(bool isPressed : keysPressed)
+	{
+		if(isPressed) return true;
+	}
+	return false;
 }
 
 //----------------------------------------------------------------------

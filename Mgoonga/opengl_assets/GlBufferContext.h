@@ -42,6 +42,7 @@ public:
 	eGlBufferContext(const eGlBufferContext&)		= delete;
 	eGlBufferContext& operator=(eGlBufferContext&)	= delete;
 	
+	/// @todo
 	void BufferInit(eBuffer, unsigned int, unsigned int);
 
 	GLuint BufferCustomInit(const std::string& _name, unsigned int, unsigned int, bool = false, bool = false);
@@ -80,14 +81,14 @@ private:
 	ShadowMapFBO	 depthDirFBO;
 	ShadowMapFBO	 depthCubeFBO;
 	ShadowMapFBO	 depthCSMFBO;
-  eColorFBO		   screenFBO;
-  eColorFBO		   mtsFBO;
-  eColorFBO		   reflectionFBO;
-  eColorFBO		   refractionFBO;
-  eColorFBO		   brightFilterFBO;
-  eColorFBO		   gausian1FBO;
-  eColorFBO		   gausian2FBO;
-  eColorFBO		   squereFBO;
+	eColorFBO		   screenFBO;
+	eColorFBO		   mtsFBO;
+	eColorFBO		   reflectionFBO;
+	eColorFBO		   refractionFBO;
+	eColorFBO		   brightFilterFBO;
+	eColorFBO		   gausian1FBO;
+	eColorFBO		   gausian2FBO;
+	eColorFBO		   squereFBO;
 	eGFBO			     gFBO;
 	SimpleColorFBO ssaoFBO;
 	SimpleColorFBO ssaoBlurFBO;

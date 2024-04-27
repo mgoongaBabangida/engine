@@ -66,7 +66,7 @@ uint32_t eMainContextBase::Height()  const { return pipeline.Height(); }
 
 //*********************InputObserver*********************************
 //--------------------------------------------------------------------------
-bool eMainContextBase::OnKeyPress(uint32_t _asci, KeyModifiers _modifier)
+bool eMainContextBase::OnKeyJustPressed(uint32_t _asci, KeyModifiers _modifier)
 {
 	switch (_asci)
 	{

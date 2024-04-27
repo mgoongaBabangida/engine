@@ -5,8 +5,8 @@ void eGlBufferContext::BufferInit(eBuffer _buffer, unsigned int _width, unsigned
 {
 	switch (_buffer)
 	{
-		case eBuffer::BUFFER_DEFAULT:					defaultFBO.Init(_width, _height);							break;
-		case eBuffer::BUFFER_SHADOW_DIR:			depthDirFBO.Init(_width, _height, false);			break;
+		case eBuffer::BUFFER_DEFAULT:			defaultFBO.Init(_width, _height);							break;
+		case eBuffer::BUFFER_SHADOW_DIR:		depthDirFBO.Init(_width, _height, false);			break;
 		case eBuffer::BUFFER_SHADOW_CUBE_MAP:	depthCubeFBO.Init(_width, _height, true);			break;
 		case eBuffer::BUFFER_SHADOW_CSM:			depthCSMFBO.InitCSM(_width, _height, 5);			break; //@todo layers
 		case eBuffer::BUFFER_BRIGHT_FILTER:		brightFilterFBO.Init(_width, _height);				break;

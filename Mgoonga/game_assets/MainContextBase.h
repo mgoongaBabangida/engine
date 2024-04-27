@@ -59,7 +59,7 @@ public:
 	Event<std::function<void(shObject)>>											ObjectBeingDeletedFromScene;
 
 	//IInputObserver
-	virtual bool	OnKeyPress(uint32_t asci, KeyModifiers _modifier)	override;
+	virtual bool	OnKeyJustPressed(uint32_t asci, KeyModifiers _modifier)	override;
 	virtual bool	OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier) override;
 	virtual bool	OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier) override;
 	virtual bool	OnMouseRelease(KeyModifiers _modifier) override;

@@ -18,11 +18,12 @@ class IInputObserver
 public:
 	virtual ~IInputObserver() = default;
 
-	virtual bool OnKeyPress(uint32_t asci, KeyModifiers _modifier)											{ return false; }
-	virtual bool OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier)							{ return false; }
+	virtual bool OnKeyPress(const std::vector<bool>, KeyModifiers _modifier)			{ return false; }
+	virtual bool OnKeyJustPressed(uint32_t asci, KeyModifiers _modifier)				{ return false; }
+	virtual bool OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier)				{ return false; }
 	virtual bool OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier)	{ return false; }
-	virtual bool OnMouseRelease(KeyModifiers _modifier)																	{ return false; }
-	virtual bool OnMouseWheel(int32_t x, int32_t y, KeyModifiers _modifier)							{ return false; }
+	virtual bool OnMouseRelease(KeyModifiers _modifier)									{ return false; }
+	virtual bool OnMouseWheel(int32_t x, int32_t y, KeyModifiers _modifier)				{ return false; }
 };
 
 //----------------------------------------------------------------------------------------------
@@ -41,17 +42,17 @@ public:
 
 	static const int32_t MAX_PARTICLES = 1'000;
 
-	virtual void								            Start() = 0;
-	virtual void														GenerateParticles(int64_t _tick)			= 0;
+	virtual void							Start() = 0;
+	virtual void							GenerateParticles(int64_t _tick)			= 0;
 	virtual std::vector<Particle>::iterator PrepareParticles(const glm::vec3& cameraPosition)	= 0;
-	virtual std::vector<Particle>&					GetParticles()	= 0;
+	virtual std::vector<Particle>&			GetParticles()	= 0;
 	
-	virtual bool														IsFinished()		= 0;
-	virtual bool								            IsStarted()			= 0;
-	virtual void								            Reset()					= 0;
+	virtual bool							IsFinished()		= 0;
+	virtual bool							IsStarted()			= 0;
+	virtual void							Reset()				= 0;
 
 	virtual float&			ConeAngle() = 0;
-	virtual glm::vec3&	Scale()	= 0;
+	virtual glm::vec3&		Scale()	= 0;
 	virtual float&			Speed() = 0;
 	virtual float&			RandomizeMagnitude() = 0;
 	virtual float&			BaseRadius() = 0;
@@ -59,7 +60,7 @@ public:
 	virtual int&				ParticlesPerSecond() = 0;
 	virtual bool&				Loop() = 0;
 	virtual float&			Gravity() = 0;
-	virtual glm::vec3&	GetSystemCenter() = 0;
+	virtual glm::vec3&		GetSystemCenter() = 0;
 	virtual Type&				SystemType() = 0;
 	virtual void				SetSizeBezier(std::array<glm::vec3, 4>) = 0;
 
