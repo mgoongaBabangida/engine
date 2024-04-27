@@ -69,7 +69,7 @@ ShootScript::~ShootScript()
 }
 
 //---------------------------------------
-bool ShootScript::OnKeyPress(uint32_t _asci, KeyModifiers _modifier)
+bool ShootScript::OnKeyJustPressed(uint32_t _asci, KeyModifiers _modifier)
 {
   switch (_asci)
   {
