@@ -24,7 +24,7 @@ public:
   PhysicsEngineTestScript(eMainContextBase* _game, IWindowImGui* _imgui);
   virtual ~PhysicsEngineTestScript();
 
-  virtual bool  OnKeyPress(uint32_t _asci, KeyModifiers _modifier) override;
+  virtual bool  OnKeyJustPressed(uint32_t _asci, KeyModifiers _modifier) override;
   virtual void	Update(float _tick) override;
   virtual void  Initialize() override;
 

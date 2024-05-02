@@ -50,23 +50,39 @@ bool CameraFreeController::OnKeyJustPressed(uint32_t _asci, KeyModifiers _modifi
 //-----------------------------------------------------------
 bool CameraFreeController::OnKeyPress(const std::vector<bool> _keys, KeyModifiers _modifier)
 {
-	static std::vector<ASCII> asci{ASCII_W, ASCII_S, ASCII_D, ASCII_A, ASCII_R, ASCII_F};
+	if (m_clock.timeEllapsedLastFrameMsc() < 10)
+		return true;
+
+	if (!m_clock.isActive())
+		m_clock.restart();
+	float speed = m_camera.get().MovementSpeedRef();
+	m_camera.get().MovementSpeedRef() = (speed + m_clock.newFrame() * m_camera_speed * 0.001f) / 2.f;
+
+	static std::vector<ASCII> asci{ ASCII_W, ASCII_S, ASCII_D, ASCII_A, ASCII_R, ASCII_F };
 	for(const auto a : asci)
 	{
 		if(_keys[a])
-		{
 			OnKeyJustPressed(a, _modifier);
-		}
 	}
 	return true;
 }
 
 //-----------------------------------------------------------
+bool CameraFreeController::OnKeyRelease(ASCII _key, const std::vector<bool> _keys, KeyModifiers _modifier)
+{
+	m_clock.reset();
+	return false;
+}
+
+//-----------------------------------------------------------
 bool CameraFreeController::OnMouseWheel(int32_t _x, int32_t _y, KeyModifiers _modifier)
 {
+	float speed = m_camera.get().MovementSpeedRef();
+	m_camera.get().MovementSpeedRef() = 0.05f;
 	if(_y > 0)
 		m_camera.get().moveForward();
 	else if(_y < 0)
 		m_camera.get().moveBackword();
+	m_camera.get().MovementSpeedRef() = speed;
 	return true;
 }

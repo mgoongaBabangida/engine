@@ -20,6 +20,7 @@ public:
 
 	virtual bool OnKeyPress(const std::vector<bool>, KeyModifiers _modifier)			{ return false; }
 	virtual bool OnKeyJustPressed(uint32_t asci, KeyModifiers _modifier)				{ return false; }
+	virtual bool OnKeyRelease(ASCII _key, const std::vector<bool>, KeyModifiers _modifier) { return false; }
 	virtual bool OnMouseMove(int32_t x, int32_t y, KeyModifiers _modifier)				{ return false; }
 	virtual bool OnMousePress(int32_t x, int32_t y, bool left, KeyModifiers _modifier)	{ return false; }
 	virtual bool OnMouseRelease(KeyModifiers _modifier)									{ return false; }

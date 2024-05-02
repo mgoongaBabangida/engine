@@ -137,7 +137,7 @@ bool eMainContextBase::OnMousePress(int32_t x, int32_t y, bool _left, KeyModifie
 		 (!_left && m_framed_choice_enabled == FramedChoice::WITH_RIGHT))
 		GetMainCamera().getCameraRay().press(x, y);
 
-	//should be inside input strategy which needs it(frame, moveXZ)
+	//@todo should be inside input strategy which needs it(frame, moveXZ)
 	GetMainCamera().MovementSpeedRef() = 0.f;
 
 	//Get Visible and Children
@@ -158,7 +158,7 @@ bool eMainContextBase::OnMouseRelease(KeyModifiers _modifier)
 	if (m_input_strategy)
 		m_input_strategy->OnMouseRelease();
 	//@todo should be inside input strategy which needs it(frame, moveXZ)
-	GetMainCamera().MovementSpeedRef() = 0.05f;
+	GetMainCamera().MovementSpeedRef() = 0.000'005f;
 	return true;
 }
 

@@ -54,8 +54,8 @@ public:
 
 	void setFarPlane(float far);
 
-	glm::vec3&				PositionRef()							{ return position; }
-	glm::vec3&				ViewDirectionRef()						{ return viewDirection; }
+	glm::vec3&			PositionRef()							{ return position; }
+	glm::vec3&			ViewDirectionRef()						{ return viewDirection; }
 	float&					NearPlaneRef()							{ return nearPlane; }
 	float&					FarPlaneRef()							{ return farPlane; }
 	uint32_t&				StrafeThresholdRef()					{ return strafeThreshold; }
@@ -68,7 +68,8 @@ protected:
 	glm::vec2		oldMousePosition;
 	glm::vec3		strafeDirection;
 	glm::mat3		rotationMatrix;
-	float			MOVEMENT_SPEED			= 0.00005f;
+	float				MOVEMENT_SPEED			= 0.000'005f;
+	float				rotation_speed			= 0.005f;
 
 	glm::mat4		projectionMatrix;
 	glm::mat4		projectionOrthoMatrix;
@@ -82,7 +83,7 @@ protected:
 	dbb::CameraRay	camRay;
 
 	uint32_t		strafeThreshold			= 5;
-	bool			m_visualise_frustum =	 false;
+	bool				m_visualise_frustum =	 false;
 };
 
 

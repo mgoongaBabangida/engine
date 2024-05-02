@@ -120,7 +120,39 @@ bool eInputController::OnKeyRelease(uint32_t asci)
 	{
 		keysPressed[asci] = false;
 	}
-	return false;
+	
+	bool taken = false;
+	for (auto& observer : observersPriority)
+	{
+		if (observer)
+		{
+			if (observer->OnKeyRelease((ASCII)asci, keysPressed, KeyModifiers::NONE))
+				return false;
+			taken = false; //do not take keyboard, only mouse ?
+			break;
+		}
+	}
+
+	if (!taken)
+	{
+		for (auto& observer : observers)
+		{
+			if (observer)
+			{
+				if (observer->OnKeyRelease((ASCII)asci, keysPressed, KeyModifiers::NONE)) break;
+			}
+		}
+	}
+
+	for (auto& observer : observersAlways)
+	{
+		if (observer)
+		{
+			if (observer->OnKeyRelease((ASCII)asci, keysPressed, KeyModifiers::NONE)) break;
+		}
+	}
+
+	return true;
 }
 
 //----------------------------------------------------------------------

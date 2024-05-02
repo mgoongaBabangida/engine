@@ -50,7 +50,7 @@ PhysicsEngineTestScript::~PhysicsEngineTestScript()
 }
 
 //------------------------------------------------------------------------------
-bool PhysicsEngineTestScript::OnKeyPress(uint32_t _asci, KeyModifiers _modifier)
+bool PhysicsEngineTestScript::OnKeyJustPressed(uint32_t _asci, KeyModifiers _modifier)
 {
   switch (_asci)
   {

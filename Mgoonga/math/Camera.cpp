@@ -129,13 +129,13 @@ void Camera::mouseUpdate(const glm::vec2& newMousePosition)
 	{
 		strafeDirection = glm::cross(up,viewDirection);
 		viewDirection = glm::mat3(
-			glm::rotate(-mouseDelta.x * MOVEMENT_SPEED * 0.1f , up) * 
-			glm::rotate(mouseDelta.y * MOVEMENT_SPEED * 0.1f, strafeDirection)) * viewDirection;
+			glm::rotate(-mouseDelta.x * rotation_speed, up) *
+			glm::rotate(mouseDelta.y * rotation_speed, strafeDirection)) * viewDirection;
 
 		oldMousePosition = newMousePosition;
 
-		rotationMatrix = rotationMatrix * glm::mat3(glm::rotate(-mouseDelta.x * MOVEMENT_SPEED * 0.1f, up) *
-																								glm::rotate(mouseDelta.y * MOVEMENT_SPEED * 0.1f, strafeDirection));
+		rotationMatrix = rotationMatrix * glm::mat3(glm::rotate(-mouseDelta.x * rotation_speed, up) *
+																								glm::rotate(mouseDelta.y * rotation_speed, strafeDirection));
 	}
 }
 //---------------------------------------------------------------------
