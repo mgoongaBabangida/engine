@@ -27,7 +27,7 @@ public:
 	std::vector<glm::vec3>	GetExtrems() const;
 	glm::vec3								GetCenter() const;
 
-	void										AssignHeights(const Texture& heightMap, float _height_scale = 1.0f, float _max_height = 1.0f);
+	void										AssignHeights(const Texture& heightMap, float _height_scale = 1.0f, float _max_height = 1.0f, float _min_height = 0.0f, int32_t _normal_sharpness = 10);
 
 	void										MakePlaneIndices(unsigned int rows, unsigned int columns, unsigned int _lod = 1);
 	void										MakePlaneIndices(unsigned int dimensions);
@@ -47,7 +47,9 @@ public:
 	GLuint		Columns() const { return m_columns; }
 
 protected:
-	void _GenerateNormalMap(const GLfloat* _heightmap, unsigned int _width, unsigned int _height);
+	void _GenerateNormalMap(const GLfloat* _heightmap, unsigned int _width, unsigned int _height, int32_t normal_sharpness);
+
+	void _SmoothNormals(std::vector<float>& normalMap, int width, int height, float sigma);
 
 	Texture				m_heightMap;
 	Texture				m_normalMap;

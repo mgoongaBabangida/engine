@@ -81,6 +81,8 @@ void TerrainModel::Initialize(const Texture* _diffuse,
 														  bool spreed_texture,
 															float _height_scale,
 															float _max_height,
+															float _min_height,
+															int32_t _normal_sharpness,
 															unsigned int _tessellation_coef)
 {
 	if (_diffuse != nullptr)
@@ -109,7 +111,7 @@ void TerrainModel::Initialize(const Texture* _diffuse,
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 3);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 4);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 5);*/
-		mesh->AssignHeights(*_heightMap, _height_scale, _max_height);
+		mesh->AssignHeights(*_heightMap, _height_scale, _max_height, _min_height, _normal_sharpness);
 		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth / _tessellation_coef, _heightMap->mTextureHeight / _tessellation_coef)->id;
 		mesh->GenerateTessellationData();
 	}
@@ -134,6 +136,8 @@ void TerrainModel::AddOrUpdate(glm::ivec2 _pos,
 															 bool spreed_texture,
 															 float _height_scale,
 															 float _max_height,
+															 float _min_height,
+															 int32_t _normal_sharpness,
 															 unsigned int _tessellation_coef)
 {
 	TerrainMesh* mesh = nullptr;
@@ -163,7 +167,7 @@ void TerrainModel::AddOrUpdate(glm::ivec2 _pos,
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 3);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 4);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 5);*/
-		mesh->AssignHeights(*_heightMap, _height_scale, _max_height);
+		mesh->AssignHeights(*_heightMap, _height_scale, _max_height, _min_height, _normal_sharpness);
 		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth / _tessellation_coef, _heightMap->mTextureHeight / _tessellation_coef)->id;
 		mesh->GenerateTessellationData();
 	}
@@ -216,8 +220,31 @@ void TerrainModel::Draw()
 	{
 		glActiveTexture(GL_TEXTURE12);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, m_albedo_texture_array->id);
-
 		glBindTextureUnit(12, m_albedo_texture_array->id);
+	}
+	if (m_normal_texture_array != nullptr)
+	{
+		glActiveTexture(GL_TEXTURE13);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, m_normal_texture_array->id);
+		glBindTextureUnit(13, m_normal_texture_array->id);
+	}
+	if (m_metallic_texture_array != nullptr)
+	{
+		glActiveTexture(GL_TEXTURE14);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, m_metallic_texture_array->id);
+		glBindTextureUnit(14, m_metallic_texture_array->id);
+	}
+	if (m_roughness_texture_array != nullptr)
+	{
+		glActiveTexture(GL_TEXTURE15);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, m_roughness_texture_array->id);
+		glBindTextureUnit(15, m_roughness_texture_array->id);
+	}
+	if (m_ao_texture_array != nullptr)
+	{
+		glActiveTexture(GL_TEXTURE16);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, m_ao_texture_array->id);
+		glBindTextureUnit(16, m_ao_texture_array->id);
 	}
 
 	std::vector<TerrainMesh*> rendered_meshes;
@@ -276,6 +303,24 @@ void TerrainModel::setAlbedoTextureArray(const Texture* _t)
 void TerrainModel::setNormalTextureArray(const Texture* _t)
 {
 	m_normal_texture_array = _t;
+}
+
+//----------------------------------------------------------------
+void TerrainModel::setMetallicTextureArray(const Texture* _t)
+{
+	m_metallic_texture_array = _t;
+}
+
+//----------------------------------------------------------------
+void TerrainModel::setRoughnessTextureArray(const Texture* _t)
+{
+	m_roughness_texture_array = _t;
+}
+
+//----------------------------------------------------------------
+void TerrainModel::setAOTextureArray(const Texture* _t)
+{
+	m_ao_texture_array = _t;
 }
 
  //----------------------------------------------------------------

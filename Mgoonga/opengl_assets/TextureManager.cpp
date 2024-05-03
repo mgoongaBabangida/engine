@@ -60,7 +60,7 @@ void eTextureManager::Initialize()
 			if (!type.empty() && type != ";")
 				text.type = type;
 
-			if(type == "skybox" || type == "array" || type == "array_last")
+			if(type == "skybox" || type == "array" || type == "array_last" || type == "array_last_r")
 				faces.push_back(folderPath + file_name);
 
 			if (faces.size() == 6 && type == "skybox")
@@ -72,6 +72,11 @@ void eTextureManager::Initialize()
 			else if (type == "array_last")
 			{
 				text.loadTexture2DArray(faces);
+				faces.clear();
+			}
+			else if (type == "array_last_r")
+			{
+				text.loadTexture2DArray(faces, GL_RED);
 				faces.clear();
 			}
 			else if (!wrap.empty() && wrap != ";")

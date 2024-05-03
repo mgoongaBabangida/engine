@@ -9,6 +9,7 @@ uniform mat4 projection;
 
 uniform float height_scale = 1.75f;
 uniform float max_height = 1.75f;
+uniform float min_height = 0.f;
 
 uniform float heightMapResoultion = 2056.f;
 uniform float terrainSizeXZ = 12.7f;
@@ -38,6 +39,9 @@ void main()
     Height *= height_scale;
     if(Height > max_height)
 		Height = max_height;
+		
+	if(Height < min_height)
+		Height = min_height;
 
     // ----------------------------------------------------------------------
     // retrieve control point position coordinates
@@ -73,7 +77,7 @@ void main()
 	
 	vec3 T = normalize(posR - pos);
 	vec3 B = normalize(posU - pos);
-	vec3 N = normalize(cross(T, B));
+	vec3 N = normalize(cross(B, T));
   
   if (dot(cross(N, T), B) < 0.0)
                 T = T * -1.0;

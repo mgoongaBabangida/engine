@@ -209,7 +209,7 @@ glm::vec3 TerrainMesh::GetCenter() const
 }
 
 //-----------------------------------------------------------------------------------------------
-void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, float _max_height)
+void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, float _max_height, float _min_height, int32_t _normal_sharpness)
 {
 	glBindTexture(GL_TEXTURE_2D, _heightMap.id);
 	if (_heightMap.mChannels == 4)
@@ -264,6 +264,8 @@ void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, 
 
 						float height = buffer[index] * _height_scale;
 						this->vertices[col* m_columns + row].Position.y = (height <= _max_height ? height : _max_height);
+						this->vertices[col * m_columns + row].Position.y = (this->vertices[col * m_columns + row].Position.y > _min_height
+																																? this->vertices[col * m_columns + row].Position.y : _min_height);
 
 						if (this->vertices[col * m_columns + row].Position.y < m_minY)
 							m_minY = this->vertices[col * m_columns + row].Position.y;
@@ -272,7 +274,7 @@ void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, 
 					}
 				}
 			}
-			_GenerateNormalMap(buffer, _heightMap.mTextureWidth, _heightMap.mTextureHeight);
+			_GenerateNormalMap(buffer, _heightMap.mTextureWidth, _heightMap.mTextureHeight, _normal_sharpness);
 			delete[] buffer;
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -472,9 +474,9 @@ std::optional<Vertex> TerrainMesh::FindVertex(float _x, float _z)
 }
 
 //---------------------------------------------------------------------------
-void TerrainMesh::_GenerateNormalMap(const GLfloat* _heightmap, unsigned int _width, unsigned int _height)
+void TerrainMesh::_GenerateNormalMap(const GLfloat* _heightmap, unsigned int _width, unsigned int _height, int32_t _normal_sharpness)
 {
-	GLfloat* normalMapBuffer = new GLfloat[_width * _height * 3];
+	std::vector<GLfloat> normalMapBuffer(_width * _height * 3);
 	for (int y = 0; y < _height; ++y)
 	{
 		for (int x = 0; x < _width; ++x)
@@ -487,7 +489,7 @@ void TerrainMesh::_GenerateNormalMap(const GLfloat* _heightmap, unsigned int _wi
 			glm::vec3 normal;
 			normal.x = hL - hR;
 			normal.z = hU - hD;
-			normal.y = 0.010f; // You can adjust this value as needed for the vertical scaling
+			normal.y = _normal_sharpness * 0.001f; // You can adjust this value as needed for the vertical scaling
 			normal = glm::normalize(normal);
 			normal.x = (normal.x + 1.0f) / 2.0f;
 			normal.y = (normal.y + 1.0f) / 2.0f;
@@ -497,6 +499,76 @@ void TerrainMesh::_GenerateNormalMap(const GLfloat* _heightmap, unsigned int _wi
 			normalMapBuffer[(y * _width + x) * 3 + 2] = normal.z;
 		}
 	}
-	m_normalMap.TextureFromBuffer(normalMapBuffer, _width, _height, GL_RGB, GL_REPEAT, GL_LINEAR);
-	delete[] normalMapBuffer;
+
+	if(_normal_sharpness == 10) //@todo temp
+		_SmoothNormals(normalMapBuffer, _width, _height, 1.0f);
+
+	m_normalMap.TextureFromBuffer(&normalMapBuffer[0], _width, _height, GL_RGB, GL_REPEAT, GL_LINEAR);
+}
+
+// Function to apply Gaussian blur to a normal map
+//---------------------------------------------------------------------------
+void TerrainMesh::_SmoothNormals(std::vector<float>& normalMap, int width, int height, float sigma)
+{
+	// Define Gaussian kernel size (e.g., 5x5)
+	int kernelSize = 5;
+
+	// Calculate half kernel size
+	int halfKernel = kernelSize / 2;
+
+	// Generate Gaussian kernel
+	std::vector<float> kernel(kernelSize * kernelSize);
+	float sum = 0.0f;
+	for (int i = -halfKernel; i <= halfKernel; ++i) {
+		for (int j = -halfKernel; j <= halfKernel; ++j) {
+			int index = (i + halfKernel) * kernelSize + (j + halfKernel);
+			float weight = exp(-(i * i + j * j) / (2 * sigma * sigma));
+			kernel[index] = weight;
+			sum += weight;
+		}
+	}
+
+	// Normalize the kernel
+	for (int i = 0; i < kernelSize * kernelSize; ++i) {
+		kernel[i] /= sum;
+	}
+
+	// Apply the Gaussian blur separately to each component of the normal vectors
+	std::vector<float> smoothedNormalMap(normalMap.size());
+	for (int c = 0; c < 3; ++c) { // Iterate over x, y, z components
+		for (int y = 0; y < height; ++y) {
+			for (int x = 0; x < width; ++x) {
+				float sum = 0.0f;
+				for (int ky = -halfKernel; ky <= halfKernel; ++ky) {
+					for (int kx = -halfKernel; kx <= halfKernel; ++kx) {
+						int offsetX = x + kx;
+						int offsetY = y + ky;
+						if (offsetX >= 0 && offsetX < width && offsetY >= 0 && offsetY < height) {
+							int index = (offsetY * width + offsetX) * 3 + c; // Component index
+							int kernelIndex = (ky + halfKernel) * kernelSize + (kx + halfKernel);
+							sum += normalMap[index] * kernel[kernelIndex];
+						}
+					}
+				}
+				int index = (y * width + x) * 3 + c; // Component index
+				smoothedNormalMap[index] = sum;
+			}
+		}
+	}
+
+	// Normalize the smoothed normal vectors
+	for (size_t i = 0; i < smoothedNormalMap.size(); i += 3) {
+		float x = smoothedNormalMap[i];
+		float y = smoothedNormalMap[i + 1];
+		float z = smoothedNormalMap[i + 2];
+		float length = sqrt(x * x + y * y + z * z);
+		if (length > 0.0f) {
+			smoothedNormalMap[i] /= length;
+			smoothedNormalMap[i + 1] /= length;
+			smoothedNormalMap[i + 2] /= length;
+		}
+	}
+
+	// Copy the smoothed normal map back to the original normal map
+	normalMap = smoothedNormalMap;
 }

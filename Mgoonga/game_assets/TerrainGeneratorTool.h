@@ -43,6 +43,8 @@ protected:
   void _GenerateFallOffMap();
   void _UpdateShaderUniforms();
 
+  void _ApplyGaussianBlur();
+
   std::future<bool>        m_generat_noise_task;
   std::vector<GLfloat>     m_noise_map;
   std::vector<glm::vec4>   m_color_map;
@@ -67,7 +69,11 @@ protected:
   glm::ivec2  m_noise_offset = {0,0};
   GLuint      m_seed = 1;
   float       m_height_scale = 1.75f;
+  float       m_min_height = 0.f;
   float       m_texture_scale[8];
+  float       m_min_tessellation_distance = 2.0f;
+  float       m_max_tessellation_distance = 16.0f;
+
   float       m_max_height_coef = 1.0f;
   float       m_min_height_coef = 0.0f;
   dbb::Bezier m_interpolation_curve;
@@ -77,6 +83,12 @@ protected:
   bool        m_update_textures = false;
   bool        m_apply_falloff = false;
   bool        m_use_normal_texture_pbr = false;
+  float       m_fall_off_a = 3.f;
+  float       m_fall_off_b = 2.2f;
+  bool        m_apply_blur = false;
+  float       m_blur_sigma = 1.0f;
+  int32_t     m_blur_kernel_size = 5;
+  int32_t     m_normal_sharpness = 10;
 
   eMainContextBase* m_game = nullptr;
   eModelManager*    m_modelManager = nullptr;

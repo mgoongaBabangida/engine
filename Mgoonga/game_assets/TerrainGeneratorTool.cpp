@@ -71,7 +71,11 @@ void TerrainGeneratorTool::Initialize()
 	m_terrain->SetTextureBlending(true);
 	m_terrain_pointer->setAlbedoTextureArray(m_texture_manager->Find("terrain_albedo_array_0"));
 	m_terrain_pointer->setNormalTextureArray(m_texture_manager->Find("terrain_normal_array_0"));
+	m_terrain_pointer->setMetallicTextureArray(m_texture_manager->Find("terrain_metallic_array_0"));
+	m_terrain_pointer->setRoughnessTextureArray(m_texture_manager->Find("terrain_roughness_array_0"));
+	m_terrain_pointer->setAOTextureArray(m_texture_manager->Find("terrain_ao_array_0"));
 	m_terrain->SetPickable(true);
+	//m_terrain_pointer->SetCamera(&m_game->GetMainCamera());
 	m_game->AddObject(m_terrain);
 
 	_UpdateShaderUniforms();
@@ -199,6 +203,7 @@ void TerrainGeneratorTool::Initialize()
 			m_scale = _new_value;
 	};
 
+
 	m_imgui->Add(TEXTURE, "Noise texture", (void*)m_noise_texture.id);
 	m_imgui->Add(SPIN_BOX, "Position X", (void*)&posX__callback);
 	m_imgui->Add(SPIN_BOX, "Position Y", (void*)&posY__callback);
@@ -214,11 +219,25 @@ void TerrainGeneratorTool::Initialize()
 	m_imgui->Add(SPIN_BOX, "Offset Y", (void*)&offsetY__callback);
 	m_imgui->Add(SLIDER_INT, "Seed", &m_seed);
 	m_imgui->Add(SLIDER_FLOAT, "Height Scale", &m_height_scale);
+	m_imgui->Add(SLIDER_FLOAT, "Min height", &m_min_height);
+	int counter = 0;
+	for (const auto& type : m_terrain_types)
+	{
+		m_imgui->Add(SLIDER_FLOAT, "Start height "+ std::to_string(counter), (void*)&type.threshold_start);
+		++counter;
+	}
 	m_imgui->Add(SLIDER_FLOAT, "Texture Scale 0", &m_texture_scale[0]);
 	m_imgui->Add(SLIDER_FLOAT, "Texture Scale 1", &m_texture_scale[1]);
 	m_imgui->Add(SLIDER_FLOAT, "Texture Scale 2", &m_texture_scale[2]);
 	m_imgui->Add(SLIDER_FLOAT, "Texture Scale 3", &m_texture_scale[3]);
+	m_imgui->Add(SLIDER_FLOAT, "Min Tes Distance", &m_min_tessellation_distance);
+	m_imgui->Add(SLIDER_FLOAT, "Max Tes Distance", &m_max_tessellation_distance);
 	m_imgui->Add(CHECKBOX, "Use Fall Off", (void*)&m_apply_falloff);
+	m_imgui->Add(SLIDER_FLOAT, "Adjust fallof A", (void*)&m_fall_off_a);
+	m_imgui->Add(SLIDER_FLOAT, "Adjust fallof B", (void*)&m_fall_off_b);
+	m_imgui->Add(CHECKBOX, "Apply noise blur", (void*)&m_apply_blur);
+	m_imgui->Add(SLIDER_FLOAT, "Blur Sigma", (void*)&m_blur_sigma);
+	m_imgui->Add(SLIDER_INT, "Kernel size", &m_blur_kernel_size);
 	m_imgui->Add(BUTTON, "Switch LOD", (void*)&switch_lod__callback);
 	m_imgui->Add(BUTTON, "Render mode", (void*)&render_mode__callback);
 	m_imgui->Add(BUTTON, "Texturing", (void*)&texturing__callback);
@@ -257,7 +276,6 @@ void TerrainGeneratorTool::Initialize()
 
 	m_initialized = true;
 
-	m_terrain_pointer->SetCamera(&m_game->GetMainCamera());
 	if (true)
 	{
 		_UpdateCurrentMesh();
@@ -277,6 +295,7 @@ void TerrainGeneratorTool::Initialize()
 		m_auto_update = false;
 	}
 
+	m_imgui->Add(SLIDER_INT, "Normal sharpness", &m_normal_sharpness);
 	m_imgui->Add(TEXTURE, "Normal map", (void*)m_terrain_pointer->GetMaterial()->normal_texture_id);
 }
 
@@ -299,13 +318,24 @@ void TerrainGeneratorTool::Update(float _tick)
 		static GLuint octaves = m_octaves;
 		static GLuint seed = m_seed;
 		static float last_height_scale = m_height_scale;
+		static float last_min_height = m_min_height;
 		static bool use_falloff = false;
 		static bool use_curve = false;
+		static float last_fall_off_a = m_fall_off_a;
+		static float last_fall_off_b = m_fall_off_b;
+		static float last_sigma = m_blur_sigma;
+		static float last_min_tes_dist = m_min_tessellation_distance;
+		static float last_max_tes_dist = m_max_tessellation_distance;
+		static int32_t last_normal_sharpness = m_normal_sharpness;
 
 		static float last_texture_scales0 = m_texture_scale[0];
 		static float last_texture_scales1 = m_texture_scale[1];
 		static float last_texture_scales2 = m_texture_scale[2];
 		static float last_texture_scales3 = m_texture_scale[3];
+		static float last_start_height0 = m_terrain_types.find({ "water",		0.0f, 0.4f, {0.0f, 0.0f, 0.8f} })->threshold_finish;
+		static float last_start_height1 = m_terrain_types.find({ "grass",		0.4f,	0.6f, {0.0f, 1.0f, 0.0f} })->threshold_finish;
+		static float last_start_height2 = m_terrain_types.find({ "mounten", 0.6f, 0.8f, {0.5f, 0.5f, 0.0f} })->threshold_finish;
+		static float last_start_height3 = m_terrain_types.find({ "snow",		0.8f, 1.0f, {1.0f, 1.0f, 1.0f} })->threshold_finish;
 
 		m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "use_normal_texture_pbr", m_use_normal_texture_pbr);
 
@@ -313,7 +343,15 @@ void TerrainGeneratorTool::Update(float _tick)
 				last_texture_scales1 != m_texture_scale[1] ||
 				last_texture_scales2 != m_texture_scale[2] ||
 				last_texture_scales3 != m_texture_scale[3] ||
-				last_height_scale		 != m_height_scale)
+				last_height_scale		 != m_height_scale		 ||
+				last_min_height			 != m_min_height			 ||
+				last_min_tes_dist != m_min_tessellation_distance ||
+				last_max_tes_dist != m_max_tessellation_distance ||
+				last_start_height0	 != m_terrain_types.find({ "water",		0.0f, 0.4f, {0.0f, 0.0f, 0.8f} })->threshold_finish ||
+				last_start_height1	 != m_terrain_types.find({ "grass",		0.4f,	0.6f, {0.0f, 1.0f, 0.0f} })->threshold_finish ||
+				last_start_height2	 != m_terrain_types.find({ "mounten", 0.6f, 0.8f, {0.5f, 0.5f, 0.0f} })->threshold_finish ||
+				last_start_height3	 != m_terrain_types.find({ "snow",		0.8f, 1.0f, {1.0f, 1.0f, 1.0f} })->threshold_finish
+			)
 		{
 			_UpdateShaderUniforms();
 		}
@@ -321,21 +359,28 @@ void TerrainGeneratorTool::Update(float _tick)
 		if (m_update_textures)
 		{
 			if (m_noise_texture.mTextureWidth != m_width ||
-				m_noise_texture.mTextureHeight != m_height ||
-				last_scale != m_scale ||
-				last_persistance != m_persistance ||
-				last_lacunarirty != m_lacunarity ||
-				noise_offset != m_noise_offset ||
-				octaves != m_octaves ||
-				seed != m_seed ||
-				last_height_scale != m_height_scale ||
-				use_falloff != m_apply_falloff ||
-				use_curve != m_use_curve)
+				  m_noise_texture.mTextureHeight != m_height ||
+				  last_scale != m_scale ||
+				  last_persistance != m_persistance ||
+				  last_lacunarirty != m_lacunarity ||
+				  noise_offset != m_noise_offset ||
+				  octaves != m_octaves ||
+				  seed != m_seed ||
+				  last_height_scale != m_height_scale ||
+				  use_falloff != m_apply_falloff ||
+				  use_curve != m_use_curve ||
+				  last_fall_off_a != m_fall_off_a ||
+				  last_fall_off_b != m_fall_off_b ||
+				  last_sigma != m_blur_sigma ||
+				  last_normal_sharpness != m_normal_sharpness)
 			{
 				m_noise_map.resize(m_width * m_height);
 				m_octaves_buffer.resize(m_octaves);
 				for (auto& octave_buffer : m_octaves_buffer)
 					octave_buffer.resize(m_width * m_height);
+
+				if (last_fall_off_a != m_fall_off_a || last_fall_off_b != m_fall_off_b)
+					_GenerateFallOffMap();
 
 				_GenerateNoiseMap(m_width, m_height, m_scale, m_octaves, m_persistance, m_lacunarity, m_noise_offset, m_seed);
 
@@ -347,6 +392,7 @@ void TerrainGeneratorTool::Update(float _tick)
 				glTexStorage2D(GL_TEXTURE_2D, 1, GL_RED, m_width, m_height);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_FLOAT, &m_noise_map[0]);
 				glBindTexture(GL_TEXTURE_2D, 0);
+
 				//m_noise_texture.saveToFile("noise_terrain.jpg", GL_TEXTURE_2D, GL_RED, GL_FLOAT);
 				//update color texture
 				_GenerateColorMap();
@@ -359,12 +405,19 @@ void TerrainGeneratorTool::Update(float _tick)
 				octaves = m_octaves;
 				seed = m_seed;
 				last_height_scale = m_height_scale;
+				last_min_height = m_min_height;
 				last_texture_scales0 = m_texture_scale[0];
 				last_texture_scales1 = m_texture_scale[1];
 				last_texture_scales2 = m_texture_scale[2];
 				last_texture_scales3 = m_texture_scale[3];
+				last_min_tes_dist = m_min_tessellation_distance;
+				last_max_tes_dist = m_max_tessellation_distance;
 				use_falloff = m_apply_falloff;
 				use_curve = m_use_curve;
+				last_fall_off_a = m_fall_off_a;
+				last_fall_off_b = m_fall_off_b;
+				last_sigma = m_blur_sigma;
+				last_normal_sharpness = m_normal_sharpness;
 
 				m_update_textures = false;
 			}
@@ -486,6 +539,10 @@ void TerrainGeneratorTool::_GenerateNoiseMap(GLuint _width, GLuint _height, floa
 			}
 		}
 
+		//blur the noise
+		if (m_apply_blur)
+			_ApplyGaussianBlur();
+
 		if (m_apply_falloff)
 			for (int i = 0; i < m_noise_map.size(); ++i)
 				m_noise_map[i] = glm::clamp(m_noise_map[i] - m_falloff_map[i], 0.f, 1.f);
@@ -532,7 +589,9 @@ void TerrainGeneratorTool::_UpdateCurrentMesh()
 																	&m_noise_texture,
 																	true,
 																	m_height_scale,
-																	m_height_scale * m_max_height_coef);
+																	m_height_scale * m_max_height_coef,
+																	m_min_height,
+																	m_normal_sharpness);
 	}
 }
 
@@ -549,7 +608,9 @@ void TerrainGeneratorTool::_AddCurrentMesh()
 																	 &m_noise_texture,
 																	 true,
 																	 m_height_scale,
-																	 m_height_scale * m_max_height_coef);
+																	 m_height_scale * m_max_height_coef,
+																	 m_min_height,
+																	 m_normal_sharpness);
 	}
 }
 
@@ -564,8 +625,8 @@ void TerrainGeneratorTool::_GenerateFallOffMap()
 			float y = col / (float)m_width * 2 - 1;
 			float value = glm::max(glm::abs(x), glm::abs(y));
 			// function adjustment
-			float a = 3.f, b = 2.2f;
-			value = glm::pow(value, a) / (glm::pow(value, a) + glm::pow(b - b * value, a) );
+			value = glm::pow(value, m_fall_off_a) /
+							(glm::pow(value, m_fall_off_a) + glm::pow(m_fall_off_b - m_fall_off_b * value, m_fall_off_a) );
 			m_falloff_map[row * m_width + col] = value;
 		}
 	}
@@ -611,11 +672,11 @@ void TerrainGeneratorTool::_UpdateShaderUniforms()
 		"base_start_heights[" + std::to_string(counter) + "]",
 		1.0f);
 
-	m_pipeline.get().SetUniformData("class ePhongRender", "min_height", 0.0f);
+	m_pipeline.get().SetUniformData("class ePhongRender", "min_height", m_min_height);
 	m_pipeline.get().SetUniformData("class ePhongRender", "max_height", m_height_scale);
 	m_pipeline.get().SetUniformData("class ePhongRender", "height_scale", m_height_scale);
 
-	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "min_height", 0.0f);
+	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "min_height", m_min_height);
 	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "max_height", m_height_scale);
 	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "height_scale", m_height_scale);
 
@@ -628,4 +689,69 @@ void TerrainGeneratorTool::_UpdateShaderUniforms()
 	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "textureScale[1]", m_texture_scale[1]);
 	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "textureScale[2]", m_texture_scale[2]);
 	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "textureScale[3]", m_texture_scale[3]);
+
+	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "min_distance", m_min_tessellation_distance);
+	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "max_distance", m_max_tessellation_distance);
+}
+
+//------------------------------------------------------------------------
+void TerrainGeneratorTool::_ApplyGaussianBlur()
+{
+	// Define Gaussian kernel size (e.g., 5x5)
+
+	// Calculate half kernel size
+	int32_t halfKernel = m_blur_kernel_size / 2;
+
+	// Generate Gaussian kernel
+	std::vector<float> kernel(size_t(m_blur_kernel_size * m_blur_kernel_size));
+	float sum = 0.0f;
+	for (int32_t i = -halfKernel; i <= halfKernel; ++i)
+	{
+		for (int32_t j = -halfKernel; j <= halfKernel; ++j)
+		{
+			int index = (i + halfKernel) * m_blur_kernel_size + (j + halfKernel);
+			float weight = exp(-(i * i + j * j) / (2 * m_blur_sigma * m_blur_sigma));
+			if (index < kernel.size())
+			{
+				kernel[index] = weight;
+				sum += weight;
+			}
+		}
+	}
+
+	// Normalize the kernel
+	for (int i = 0; i < m_blur_kernel_size * m_blur_kernel_size; ++i) {
+		kernel[i] /= sum;
+	}
+
+	// Apply the Gaussian blur
+	std::vector<float> blurredHeightmap(m_width * m_height);
+	for (int y = 0; y < m_height; ++y)
+	{
+		for (int x = 0; x < m_width; ++x)
+		{
+			float sum = 0.0f;
+			for (int ky = -halfKernel; ky <= halfKernel; ++ky)
+			{
+				for (int kx = -halfKernel; kx <= halfKernel; ++kx)
+				{
+					int offsetX = x + kx;
+					int offsetY = y + ky;
+					if (offsetX >= 0 && offsetX < m_width && offsetY >= 0 && offsetY < m_height)
+					{
+						int index = offsetY * m_width + offsetX;
+						int kernelIndex = (ky + halfKernel) * m_blur_kernel_size + (kx + halfKernel);
+						sum += m_noise_map[index] * kernel[kernelIndex];
+					}
+				}
+			}
+			int index = y * m_width + x;
+			blurredHeightmap[index] = sum;
+		}
+	}
+
+	// Copy the blurred heightmap back to the original heightmap
+	std::swap(blurredHeightmap, m_noise_map);
+	blurredHeightmap.clear();
+	kernel.clear();
 }

@@ -117,6 +117,7 @@ Texture::Texture(GLuint ID, GLuint TextureWidth, GLuint TextureHeight, int32_t T
 	:id(ID), mTextureWidth(TextureWidth), mTextureHeight(TextureHeight), mChannels(TextureChannels)
 {}
 
+//-----------------------------------------------------------------------------------------------
 bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenum wrap)
 {
 	path		= _path;
@@ -144,12 +145,16 @@ bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenu
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	if (type == "terrain")
+	{
 		glGenerateMipmap(id);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	}
 
 	eTextureImplDevIl::DeleteImage(ilId);
 	return true;
 }
 
+//-----------------------------------------------------------------------------------------------
 uint8_t* Texture::getPixelBuffer(GLenum _target, GLenum _format, GLenum _type) const
 { 
 	int sizeOfByte = _type == GL_FLOAT ? sizeof(float) : sizeof(unsigned char);
@@ -164,6 +169,7 @@ uint8_t* Texture::getPixelBuffer(GLenum _target, GLenum _format, GLenum _type) c
 	return imData;
 }
 
+//-----------------------------------------------------------------------------------------------
 bool Texture::saveToFile(const std::string &path, GLenum _target, GLenum _format, GLenum _type)
 {
 	uint8_t* imData = getPixelBuffer(_target, _format, _type);
@@ -172,6 +178,7 @@ bool Texture::saveToFile(const std::string &path, GLenum _target, GLenum _format
 	return true;
 }
 
+//-----------------------------------------------------------------------------------------------
 void Texture::freeTexture()
 {
 	//Delete texture
@@ -193,6 +200,7 @@ void Texture::freeTexture()
 	mTextureHeight = 0;
 }
 
+//-----------------------------------------------------------------------------------------------
 bool Texture::_loadTexture1x1(TColor color)
 {
 	GLubyte tex[4];
@@ -235,6 +243,7 @@ bool Texture::_loadTexture1x1(TColor color)
 	return true;
 }
 
+//-----------------------------------------------------------------------------------------------
 bool Texture::loadCubemap(std::vector<std::string> faces)
 {
   //unsigned char* image;
@@ -319,6 +328,7 @@ bool Texture::makeCubemap(size_t _size, bool _mipmap, GLenum _format, GLenum _in
 	return true;
 }
 
+//-----------------------------------------------------------------------------------------------
 bool Texture::makeDepthTexture()
 {
 	assert(mTextureHeight);
@@ -339,7 +349,7 @@ bool Texture::makeDepthTexture()
 	return true;
 }
 
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------
 bool Texture::makeDepthTextureArray(int32_t _layers)
 {
 	assert(mTextureHeight);
@@ -375,6 +385,7 @@ bool Texture::makeDepthTextureArray(int32_t _layers)
 	return true;
 }
 
+//-----------------------------------------------------------------------------------------------
 bool Texture::makeDepthCubeMap()
 {
 	assert(mTextureHeight);
@@ -395,6 +406,7 @@ bool Texture::makeDepthCubeMap()
 	return true;
 }
 
+//-----------------------------------------------------------------------------------------------
 bool Texture::makeRandom1DTexture(unsigned int _size)
 {
 	glm::vec3* pRandomData = new glm::vec3[_size];
@@ -418,6 +430,7 @@ bool Texture::makeRandom1DTexture(unsigned int _size)
 	return true;
 }
 
+//-----------------------------------------------------------------------------------------------
 bool Texture::makeImage(GLuint _width, GLuint _height)
 {
 	path = "";
@@ -437,6 +450,7 @@ bool Texture::makeImage(GLuint _width, GLuint _height)
 	return true;
 }
 
+//-----------------------------------------------------------------------------------------------
 bool Texture::generatePerlin(GLuint _width, GLuint _height, bool periodic)
 {
 	this->mTextureWidth = _width;
@@ -516,12 +530,17 @@ bool Texture::loadHdr(const std::string& _path)
 }
 
 //----------------------------------------------------------------------
-bool Texture::loadTexture2DArray(std::vector<std::string> _paths)
+bool Texture::loadTexture2DArray(std::vector<std::string> _paths, GLenum _format)
 {
 	path = "";
 	type = "";
 	mTextureWidth = 0;
 	mTextureHeight = 0;
+	if (_format == GL_RGBA)
+		mChannels = 4;
+	else
+		mChannels = 1;
+
 	GLsizei layers = (GLsizei)_paths.size();
 
 	if (layers == 0)
@@ -534,21 +553,25 @@ bool Texture::loadTexture2DArray(std::vector<std::string> _paths)
 	uint32_t ilId;
 	for (int layer = 0; layer < _paths.size(); ++layer)
 	{
-		mChannels = eTextureImplDevIl::LoadTexture(_paths[layer], ilId, mTextureWidth, mTextureHeight); //rgb ? rgba
-		if(layer == 0)
-			glTextureStorage3D(id, 1, GL_RGBA8, mTextureWidth, mTextureHeight, layers); // after eTextureImplDevIl::LoadTexture assignes width an height
+		eTextureImplDevIl::LoadTexture(_paths[layer], ilId, mTextureWidth, mTextureHeight); //rgb ? rgba
+		if (layer == 0)
+		{
+			if(_format == GL_RGBA)
+				glTextureStorage3D(id, 1, GL_RGBA8, mTextureWidth, mTextureHeight, layers); // after eTextureImplDevIl::LoadTexture assignes width an height
+			else if(_format == GL_RED)
+				glTextureStorage3D(id, 1, GL_R8, mTextureWidth, mTextureHeight, layers);
+		}
 		uint8_t* data = nullptr;
 		eTextureImplDevIl::AssignPixels(data, mTextureWidth, mTextureHeight);
-		glTextureSubImage3D(id, 0/*mipmap_level*/, 0/*offset.x*/, 0/*offset.y*/, layer/*offset.z*/, mTextureWidth, mTextureHeight, 1 /*layer*/, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glTextureSubImage3D(id, 0/*mipmap_level*/, 0/*offset.x*/, 0/*offset.y*/, layer/*offset.z*/, mTextureWidth, mTextureHeight, 1 /*layer*/, _format, GL_UNSIGNED_BYTE, data);
 		eTextureImplDevIl::DeleteImage(ilId);
+
+		glGenerateMipmap(id);
+		glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}
-
-	glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glGenerateMipmap(id);
-
 	return true;
 }
 

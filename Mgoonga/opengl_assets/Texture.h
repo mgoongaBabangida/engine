@@ -58,7 +58,7 @@ struct DLL_OPENGL_ASSETS Texture
 	bool loadTextureFromFile(const std::string& path, GLenum format = GL_RGBA, GLenum wrap = GL_CLAMP_TO_EDGE);
 	bool loadCubemap(std::vector<std::string> faces);
 	bool loadHdr(const std::string& _path);
-	bool loadTexture2DArray(std::vector<std::string> _paths);
+	bool loadTexture2DArray(std::vector<std::string> _paths, GLenum format = GL_RGBA);
 
 	bool generatePerlin(GLuint Width, GLuint Height, bool periodic);
 

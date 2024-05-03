@@ -5,6 +5,9 @@ layout(vertices=4) out;
 uniform mat4 model;
 uniform mat4 view;
 
+uniform float min_distance = 2;
+uniform float max_distance = 16;
+		
 in vec2 TexCoord[];
 
 out vec2 TextureCoord[];
@@ -18,8 +21,6 @@ void main()
     {
         const int MIN_TESS_LEVEL = 1;
         const int MAX_TESS_LEVEL = 16;
-        const float MIN_DISTANCE = 2;
-        const float MAX_DISTANCE = 16;
 
         vec4 eyeSpacePos00 = view * model * gl_in[0].gl_Position;
         vec4 eyeSpacePos01 = view * model * gl_in[1].gl_Position;
@@ -27,10 +28,10 @@ void main()
         vec4 eyeSpacePos11 = view * model * gl_in[3].gl_Position;
 
         // "distance" from camera scaled between 0 and 1
-        float distance00 = clamp( (abs(eyeSpacePos00.z) - MIN_DISTANCE) / (MAX_DISTANCE-MIN_DISTANCE), 0.0, 1.0 );
-        float distance01 = clamp( (abs(eyeSpacePos01.z) - MIN_DISTANCE) / (MAX_DISTANCE-MIN_DISTANCE), 0.0, 1.0 );
-        float distance10 = clamp( (abs(eyeSpacePos10.z) - MIN_DISTANCE) / (MAX_DISTANCE-MIN_DISTANCE), 0.0, 1.0 );
-        float distance11 = clamp( (abs(eyeSpacePos11.z) - MIN_DISTANCE) / (MAX_DISTANCE-MIN_DISTANCE), 0.0, 1.0 );
+        float distance00 = clamp( (abs(eyeSpacePos00.z) - min_distance) / (max_distance-min_distance), 0.0, 1.0 );
+        float distance01 = clamp( (abs(eyeSpacePos01.z) - min_distance) / (max_distance-min_distance), 0.0, 1.0 );
+        float distance10 = clamp( (abs(eyeSpacePos10.z) - min_distance) / (max_distance-min_distance), 0.0, 1.0 );
+        float distance11 = clamp( (abs(eyeSpacePos11.z) - min_distance) / (max_distance-min_distance), 0.0, 1.0 );
 
         float tessLevel0 = mix( MAX_TESS_LEVEL, MIN_TESS_LEVEL, min(distance10, distance00) );
         float tessLevel1 = mix( MAX_TESS_LEVEL, MIN_TESS_LEVEL, min(distance00, distance01) );

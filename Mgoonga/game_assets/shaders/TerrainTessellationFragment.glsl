@@ -37,6 +37,7 @@ uniform float min_height = 0.0f;
 uniform float max_height = 1.75f;
 uniform float base_start_heights[max_texture_array_size];
 uniform int color_count = 4;
+uniform int snow_color = 3;
 uniform float textureScale[max_texture_array_size];
 
 uniform bool pbr_renderer = false;
@@ -105,11 +106,6 @@ vec4 PBRModel()
     vec3 baseNormal 	= texture(normalMap, texCoord).xyz;
     baseNormal = normalize(baseNormal * 2.0 - 1.0);
 	
-	vec3 albedo     = SampleAlbedoTexture(baseNormal, localSpacePos);
-    float metallic  = SampleMetallicTexture(baseNormal, localSpacePos);
-    float roughness = SampleRoughnessTexture(baseNormal, localSpacePos);
-    float ao        = SampleAOTexture(baseNormal, localSpacePos);
-	
 	vec3 N;
 	if(use_normal_texture_pbr)
 	{
@@ -122,6 +118,11 @@ vec4 PBRModel()
 	{
 		N = baseNormal;
 	}
+	
+	vec3 albedo     = SampleAlbedoTexture(baseNormal, localSpacePos);
+    float metallic  = SampleMetallicTexture(baseNormal, localSpacePos);
+    float roughness = SampleRoughnessTexture(baseNormal, localSpacePos);
+    float ao        = SampleAOTexture(baseNormal, localSpacePos);
 	
     vec3 V = normalize(eyePositionWorld.xyz - thePositionWorld);
 
@@ -138,7 +139,7 @@ vec4 PBRModel()
         vec3 H = normalize(V + L);
         float distance    = length(lights[i].position.xyz - thePositionWorld);
         float attenuation = 1.0; // / (distance * distance);
-        vec3 radiance     = lights[i].ambient.xyz * 50 * attenuation;       // light color  
+        vec3 radiance     = lights[i].ambient.xyz * 15 * attenuation;       // light color  
         
         // cook-torrance brdf
         float NDF = DistributionGGX(N, H, roughness);        
@@ -158,10 +159,10 @@ vec4 PBRModel()
         Lo += (kD * albedo / PI + specular) * radiance * NdotL; 
     }   
   
-    vec3 ambient = vec3(0.03) * albedo * ao;
+    vec3 ambient = vec3(0.15) * albedo * ao;
     vec3 color = ambient + Lo;
 	
-    color = color / (color + vec3(1.0));
+    //color = color / (color + vec3(1.0));
     //color = pow(color, vec3(1.0/2.2));  
    
     return vec4(color, 1.0);
@@ -278,16 +279,64 @@ vec3 SampleNormalTexture(vec3 Normal, vec4 localSpacePos)
 
 float SampleMetallicTexture(vec3 Normal, vec4 localSpacePos)
 {
-	return 0.1f;
+	float metallic = 0.0f;
+	return metallic;
+	float heightPercent = inverseLerp(min_height, max_height, Height);
+	vec3 blendAxes = normalize(Normal);	
+	for(int i = 0; i < color_count; ++i)
+	{		
+		if(heightPercent >= base_start_heights[i] && heightPercent <= base_start_heights[i+1])
+		{
+			int index = int(i);
+			vec3 scaledWorldPos = vec3(localSpacePos) / textureScale[index];
+			//float xProjection = texture(texture_array_metallic, vec3(scaledWorldPos.yz, index)).r * abs(blendAxes.x);
+			float yProjection = texture(texture_array_metallic, vec3(scaledWorldPos.xz, index)).r; // * abs(blendAxes.y);
+			//float zProjection = texture(texture_array_metallic, vec3(scaledWorldPos.xy, index)).r * abs(blendAxes.z);
+			metallic = yProjection; //(xProjection + yProjection + zProjection)/3.f;
+		}
+	}
+	return clamp(metallic, 0, 1);
 }
 
 float SampleRoughnessTexture(vec3 Normal, vec4 localSpacePos)
 {
-	return 0.9f;
+	float roughness = 0.9f;
+	return roughness;
+	float heightPercent = inverseLerp(min_height, max_height, Height);
+	vec3 blendAxes = normalize(Normal);	
+	for(int i = 0; i < color_count; ++i)
+	{		
+		if(heightPercent >= base_start_heights[i] && heightPercent <= base_start_heights[i+1])
+		{
+			int index = int(i);
+			vec3 scaledWorldPos = vec3(localSpacePos) / textureScale[index];
+			//float xProjection = texture(texture_array_roughness, vec3(scaledWorldPos.yz, index)).r * abs(blendAxes.x);
+			float yProjection = texture(texture_array_roughness, vec3(scaledWorldPos.xz, index)).r; // * abs(blendAxes.y);
+			//float zProjection = texture(texture_array_roughness, vec3(scaledWorldPos.xy, index)).r * abs(blendAxes.z);
+			roughness = yProjection; //(xProjection + yProjection + zProjection)/3.f;
+		}
+	}
+	return clamp(roughness, 0, 1);
 }
 
 float SampleAOTexture(vec3 Normal, vec4 localSpacePos)
 {
-	return 1.0f;
+	float AO = 1.0f;
+	return AO;
+	float heightPercent = inverseLerp(min_height, max_height, Height);
+	vec3 blendAxes = normalize(Normal);	
+	for(int i = 0; i < color_count; ++i)
+	{		
+		if(heightPercent >= base_start_heights[i] && heightPercent <= base_start_heights[i+1])
+		{
+			int index = int(i);
+			vec3 scaledWorldPos = vec3(localSpacePos) / textureScale[index];
+			//float xProjection = texture(texture_array_ao, vec3(scaledWorldPos.yz, index)).r * abs(blendAxes.x);
+			float yProjection = texture(texture_array_ao, vec3(scaledWorldPos.xz, index)).r; // * abs(blendAxes.y);
+			//float zProjection = texture(texture_array_ao, vec3(scaledWorldPos.xy, index)).r * abs(blendAxes.z);
+			AO = yProjection; //(xProjection + yProjection + zProjection)/3.f;
+		}
+	}
+	return clamp(AO, 0, 1);
 }
 	
