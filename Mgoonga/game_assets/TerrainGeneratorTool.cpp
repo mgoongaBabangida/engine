@@ -203,6 +203,13 @@ void TerrainGeneratorTool::Initialize()
 			m_scale = _new_value;
 	};
 
+	static std::function<void(int, int*&)> snowness__callback = [this](int _new_value, int*& _data)
+	{
+		if (_data == nullptr)
+			_data = &m_snowness;
+		else
+			m_snowness = _new_value;
+	};
 
 	m_imgui->Add(TEXTURE, "Noise texture", (void*)m_noise_texture.id);
 	m_imgui->Add(SPIN_BOX, "Position X", (void*)&posX__callback);
@@ -230,6 +237,7 @@ void TerrainGeneratorTool::Initialize()
 	m_imgui->Add(SLIDER_FLOAT, "Texture Scale 1", &m_texture_scale[1]);
 	m_imgui->Add(SLIDER_FLOAT, "Texture Scale 2", &m_texture_scale[2]);
 	m_imgui->Add(SLIDER_FLOAT, "Texture Scale 3", &m_texture_scale[3]);
+	m_imgui->Add(SPIN_BOX, "Snowness", (void*)&snowness__callback);
 	m_imgui->Add(SLIDER_FLOAT, "Min Tes Distance", &m_min_tessellation_distance);
 	m_imgui->Add(SLIDER_FLOAT, "Max Tes Distance", &m_max_tessellation_distance);
 	m_imgui->Add(CHECKBOX, "Use Fall Off", (void*)&m_apply_falloff);
@@ -680,7 +688,7 @@ void TerrainGeneratorTool::_UpdateShaderUniforms()
 	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "max_height", m_height_scale);
 	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "height_scale", m_height_scale);
 
-	m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[0]", m_texture_scale[0]);
+	/*m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[0]", m_texture_scale[0]);
 	m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[1]", m_texture_scale[1]);
 	m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[2]", m_texture_scale[2]);
 	m_pipeline.get().SetUniformData("class ePhongRender", "textureScale[3]", m_texture_scale[3]);
@@ -688,10 +696,12 @@ void TerrainGeneratorTool::_UpdateShaderUniforms()
 	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "textureScale[0]", m_texture_scale[0]);
 	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "textureScale[1]", m_texture_scale[1]);
 	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "textureScale[2]", m_texture_scale[2]);
-	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "textureScale[3]", m_texture_scale[3]);
+	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "textureScale[3]", m_texture_scale[3]);*/
 
 	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "min_distance", m_min_tessellation_distance);
 	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "max_distance", m_max_tessellation_distance);
+
+	m_pipeline.get().SetUniformData("class eTerrainTessellatedRender", "snowness", (float)m_snowness/100.f);
 }
 
 //------------------------------------------------------------------------

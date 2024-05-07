@@ -38,6 +38,7 @@ uniform float max_height = 1.75f;
 uniform float base_start_heights[max_texture_array_size];
 uniform int color_count = 4;
 uniform int snow_color = 3;
+uniform float snowness = 0.65f;
 uniform float textureScale[max_texture_array_size];
 
 uniform bool pbr_renderer = false;
@@ -58,6 +59,7 @@ vec3 SampleNormalTexture(vec3 Normal, vec4 localSpacePos);
 float SampleMetallicTexture(vec3 Normal, vec4 localSpacePos);
 float SampleRoughnessTexture(vec3 Normal, vec4 localSpacePos);
 float SampleAOTexture(vec3 Normal, vec4 localSpacePos);
+float ShouldBeSnow(vec3 Normal);
 
 vec4 PhongModel();
 vec4 PBRModel();
@@ -204,7 +206,21 @@ vec3 SampleAlbedoTexture(vec3 Normal, vec4 localSpacePos)
 		if(heightPercent >= base_start_heights[i] && heightPercent <= base_start_heights[i+1])
 		{
 			vec3 colorMain = triplaner(i, blendAxes, localSpacePos);
-			if(base_start_heights[i+1] - heightPercent < 0.05f)
+			vec3 colorMix = triplaner(i-1, blendAxes, localSpacePos);
+			if(i == snow_color)
+			{
+				float should_be_snow = ShouldBeSnow(Normal);
+				if(should_be_snow > snowness)
+					colorAlbedo = colorMain;
+				else if(should_be_snow < snowness - 0.05)
+					colorAlbedo = colorMix;
+				else
+				{
+					float mixing = 1.0f / 0.05f;
+					colorAlbedo = mix(colorMain, colorMix,(snowness - should_be_snow) * mixing);
+				}				
+			}
+			else if(base_start_heights[i+1] - heightPercent < 0.05f && (i != snow_color-1 || snowness < 0.60) )
 			{
 				float mixing = 1.0f / 0.05f;
 				vec3 colorMix = triplaner(i+1, blendAxes, localSpacePos);
@@ -338,5 +354,32 @@ float SampleAOTexture(vec3 Normal, vec4 localSpacePos)
 		}
 	}
 	return clamp(AO, 0, 1);
+}
+
+float ShouldBeSnow(vec3 Normal)
+{
+	const int numLights = 3;  // Number of light sources
+	vec3 lightDirs[numLights];
+	lightDirs[0] = normalize(vec3(-1, 1, -1));
+	lightDirs[1] = vec3(0, 1, 0);
+	lightDirs[2] = normalize(vec3(1, 1, 1));
+	
+ // Initialize light intensity
+    float totalLightIntensity = 0.0;
+
+    // Calculate total light intensity by summing contributions from each light source
+    for (int i = 0; i < numLights; ++i) {
+        totalLightIntensity += dot(normalize(Normal), normalize(lightDirs[i]));
+    }
+    
+    // Normalize total light intensity
+    totalLightIntensity /= float(numLights);
+    
+    // Calculate the dot product between the surface normal and the view direction
+	//vec3 viewDir = normalize(eyePositionWorld.xyz - thePositionWorld);
+    //float viewIntensity = dot(normalize(Normal), normalize(viewDir));
+	
+	return clamp(totalLightIntensity, 0, 1);
+
 }
 	

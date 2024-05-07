@@ -73,6 +73,7 @@ protected:
   float       m_texture_scale[8];
   float       m_min_tessellation_distance = 2.0f;
   float       m_max_tessellation_distance = 16.0f;
+  int         m_snowness = 65;
 
   float       m_max_height_coef = 1.0f;
   float       m_min_height_coef = 0.0f;
