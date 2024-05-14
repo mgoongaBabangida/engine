@@ -61,7 +61,7 @@ void eGaussianBlurRender::Render()
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &BlurIndex);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);
-				
+
 		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_GAUSSIAN_ONE, GL_TEXTURE1);
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_GAUSSIAN_TWO);
 		glViewport(0, 0, width, height);

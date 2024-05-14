@@ -144,9 +144,8 @@ project "opengl_assets"
    { 
    "../../third_party/libs/Win64",
    "../../third_party/glew-2.1.0/lib/Release/x64",
-   "../../third_party/SDL/VisualC/x64/Release/",
+   "../../third_party/SDL/lib/x64/",
    "../../third_party/assimp-3.1.1/build/code/Debug",
-   "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
    "../../third_party/freetype-2.11.0/objs",
    "../../third_party/openal/libs/Win64"
@@ -162,8 +161,7 @@ project "opengl_assets"
    "DevIL", 
    "ILU", 
    "ILUT", 
-   "OpenAl32", 
-   -------------------"SDL2_image", 
+   "OpenAl32",  
    "SDL2", 
    "SDL2main",  
    "freetype.lib",
@@ -201,9 +199,8 @@ project "sdl_assets"
    { 
    "../../third_party/libs/Win64",
    "../../third_party/glew-2.1.0/lib/Release/x64",
-   "../../third_party/SDL/VisualC/x64/Release/",
+   "../../third_party/SDL/lib/x64/",
    "../../third_party/assimp-3.1.1/build/code/Debug",
-   "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
    "../../third_party/freetype-2.11.0/objs",
    "../../third_party/openal/libs/Win64"
@@ -221,7 +218,6 @@ project "sdl_assets"
    "ILU", 
    "ILUT", 
    "OpenAl32", 
-   -------------------------"SDL2_image", 
    "SDL2", 
    "SDL2main",
    "freetype.lib",
@@ -263,9 +259,8 @@ project "game_assets"
    { 
    "../../third_party/libs/Win64",
    "../../third_party/glew-2.1.0/lib/Release/x64",
-   "../../third_party/SDL/VisualC/x64/Release/",
+   "../../third_party/SDL/lib/x64/",
    "../../third_party/assimp-3.1.1/build/code/Debug",
-   "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
    "../../third_party/freetype-2.11.0/objs",
    "../../third_party/openal/libs/Win64"
@@ -286,7 +281,6 @@ project "game_assets"
    "ILU", 
    "ILUT", 
    "OpenAl32", 
-   ---------------------------------"SDL2_image", 
    "SDL2", 
    "SDL2main",
    "freetype.lib",
@@ -317,9 +311,8 @@ project "Mgoonga"
    { 
    "../../third_party/libs/Win64",
    "../../third_party/glew-2.1.0/lib/Release/x64",
-   "../../third_party/SDL/VisualC/x64/Release/",
+   "../../third_party/SDL/lib/x64/",
    "../../third_party/assimp-3.1.1/build/code/Debug",
-   "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
    "../../third_party/freetype-2.11.0/objs",
    "../../third_party/openal/libs/Win64"
@@ -339,7 +332,6 @@ project "Mgoonga"
    "ILU", 
    "ILUT", 
    "OpenAl32", 
-   -----------------------------------"SDL2_image", 
    "SDL2", 
    "SDL2main",  
    "freetype.lib",
@@ -370,9 +362,8 @@ project "AmericanTreasureGame"
    { 
    "../../third_party/libs/Win64",
    "../../third_party/glew-2.1.0/lib/Release/x64",
-   "../../third_party/SDL/VisualC/x64/Release/",
+   "../../third_party/SDL/lib/x64/",
    "../../third_party/assimp-3.1.1/build/code/Debug",
-   "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
    "../../third_party/freetype-2.11.0/objs",
    "../../third_party/openal/libs/Win64"
@@ -393,7 +384,6 @@ project "AmericanTreasureGame"
    "ILU", 
    "ILUT", 
    "OpenAl32", 
-   ------------------------------------------"SDL2_image", 
    "SDL2", 
    "SDL2main",  
    "freetype.lib",
@@ -424,9 +414,8 @@ project "SandBoxGame"
    { 
    "../../third_party/libs/Win64",
    "../../third_party/glew-2.1.0/lib/Release/x64",
-   "../../third_party/SDL/VisualC/x64/Release/",
+   "../../third_party/SDL/lib/x64/",
    "../../third_party/assimp-3.1.1/build/code/Debug",
-   "../../third_party/SDL2_image-2.0.4/VisualC/x64/Debug",
    "../../third_party/IL",
    "../../third_party/freetype-2.11.0/objs",
    "../../third_party/openal/libs/Win64"
@@ -446,7 +435,6 @@ project "SandBoxGame"
    "ILU", 
    "ILUT", 
    "OpenAl32", 
-   -----------------------------------------"SDL2_image", 
    "SDL2", 
    "SDL2main",  
    "freetype.lib",
