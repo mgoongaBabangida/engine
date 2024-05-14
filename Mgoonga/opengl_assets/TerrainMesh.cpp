@@ -8,7 +8,7 @@
 TerrainMesh::TerrainMesh(const std::string& _name)
   : MyMesh(_name) , m_position(0, 0), m_world_offset(0, 0)
 {
-	m_normalMap = Texture::GetTexture1x1(TColor::BLUE);
+	/*m_normalMap = Texture::GetTexture1x1(TColor::BLUE);*/
 }
 
 //----------------------------------------------------------------------------
@@ -131,6 +131,12 @@ void TerrainMesh::SetCamera(Camera* _camera)
 	m_camera = _camera;
 }
 
+//----------------------------------------------------------------------------------------------- -
+void TerrainMesh::SetTessellationRenderingInfo(const TessellationRenderingInfo& _info)
+{
+	m_tessellation_info = _info;
+}
+
 //-----------------------------------------------------------------------------------------------
 std::vector<glm::mat3> TerrainMesh::GetBoundingTriangles() const
 {
@@ -209,7 +215,7 @@ glm::vec3 TerrainMesh::GetCenter() const
 }
 
 //-----------------------------------------------------------------------------------------------
-void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, float _max_height, float _min_height, int32_t _normal_sharpness)
+void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, float _max_height, float _min_height, int32_t _normal_sharpness, bool _apply_normal_blur)
 {
 	glBindTexture(GL_TEXTURE_2D, _heightMap.id);
 	if (_heightMap.mChannels == 4)
@@ -446,8 +452,11 @@ void TerrainMesh::GenerateTessellationData()
 }
 
 //---------------------------------------------------------------------------
-void TerrainMesh::DrawTessellated()
+void TerrainMesh::DrawTessellated(std::function<void(const TessellationRenderingInfo&)> _info_updater)
 {
+	if(!m_tessellation_info.base_start_heights.empty() && !m_tessellation_info.texture_scale.empty())
+		_info_updater(m_tessellation_info);
+
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, m_heightMap.id);
 	glActiveTexture(GL_TEXTURE4);
@@ -474,7 +483,7 @@ std::optional<Vertex> TerrainMesh::FindVertex(float _x, float _z)
 }
 
 //---------------------------------------------------------------------------
-void TerrainMesh::_GenerateNormalMap(const GLfloat* _heightmap, unsigned int _width, unsigned int _height, int32_t _normal_sharpness)
+void TerrainMesh::_GenerateNormalMap(const GLfloat* _heightmap, unsigned int _width, unsigned int _height, int32_t _normal_sharpness, bool _apply_normal_blur)
 {
 	std::vector<GLfloat> normalMapBuffer(_width * _height * 3);
 	for (int y = 0; y < _height; ++y)
@@ -500,36 +509,35 @@ void TerrainMesh::_GenerateNormalMap(const GLfloat* _heightmap, unsigned int _wi
 		}
 	}
 
-	if(_normal_sharpness == 10) //@todo temp
-		_SmoothNormals(normalMapBuffer, _width, _height, 1.0f);
+	if(_apply_normal_blur)
+		_SmoothNormals(normalMapBuffer, _width, _height);
 
 	m_normalMap.TextureFromBuffer(&normalMapBuffer[0], _width, _height, GL_RGB, GL_REPEAT, GL_LINEAR);
 }
 
 // Function to apply Gaussian blur to a normal map
 //---------------------------------------------------------------------------
-void TerrainMesh::_SmoothNormals(std::vector<float>& normalMap, int width, int height, float sigma)
+void TerrainMesh::_SmoothNormals(std::vector<float>& normalMap, int width, int height)
 {
 	// Define Gaussian kernel size (e.g., 5x5)
-	int kernelSize = 5;
 
 	// Calculate half kernel size
-	int halfKernel = kernelSize / 2;
+	int halfKernel = m_kernel_size / 2;
 
 	// Generate Gaussian kernel
-	std::vector<float> kernel(kernelSize * kernelSize);
+	std::vector<float> kernel(m_kernel_size * m_kernel_size);
 	float sum = 0.0f;
 	for (int i = -halfKernel; i <= halfKernel; ++i) {
 		for (int j = -halfKernel; j <= halfKernel; ++j) {
-			int index = (i + halfKernel) * kernelSize + (j + halfKernel);
-			float weight = exp(-(i * i + j * j) / (2 * sigma * sigma));
+			int index = (i + halfKernel) * m_kernel_size + (j + halfKernel);
+			float weight = exp(-(i * i + j * j) / (2 * m_normal_sigma * m_normal_sigma));
 			kernel[index] = weight;
 			sum += weight;
 		}
 	}
 
 	// Normalize the kernel
-	for (int i = 0; i < kernelSize * kernelSize; ++i) {
+	for (int i = 0; i < m_kernel_size * m_kernel_size; ++i) {
 		kernel[i] /= sum;
 	}
 
@@ -545,7 +553,7 @@ void TerrainMesh::_SmoothNormals(std::vector<float>& normalMap, int width, int h
 						int offsetY = y + ky;
 						if (offsetX >= 0 && offsetX < width && offsetY >= 0 && offsetY < height) {
 							int index = (offsetY * width + offsetX) * 3 + c; // Component index
-							int kernelIndex = (ky + halfKernel) * kernelSize + (kx + halfKernel);
+							int kernelIndex = (ky + halfKernel) * m_kernel_size + (kx + halfKernel);
 							sum += normalMap[index] * kernel[kernelIndex];
 						}
 					}

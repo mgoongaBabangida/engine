@@ -60,8 +60,8 @@ protected:
 
   int         m_cur_pos_X = 0;
   int         m_cur_pos_Y = 0;
-  GLuint      m_width = 2048;
-  GLuint      m_height = 2048;
+  GLuint      m_width = 1024;
+  GLuint      m_height = 1024;
   int         m_scale = 500;
   GLuint      m_octaves = 12;
   float       m_persistance = 0.5f;
@@ -72,24 +72,24 @@ protected:
   float       m_min_height = 0.f;
   float       m_texture_scale[8];
   float       m_min_tessellation_distance = 2.0f;
-  float       m_max_tessellation_distance = 16.0f;
-  int         m_snowness = 65;
+  float       m_max_tessellation_distance = 10.0f;
+  int         m_snowness = 0;
 
-  float       m_max_height_coef = 1.0f;
-  float       m_min_height_coef = 0.0f;
-  dbb::Bezier m_interpolation_curve;
-  bool        m_use_curve = false;
-  bool        m_initialized = false;
-  bool        m_auto_update = false;
-  bool        m_update_textures = false;
-  bool        m_apply_falloff = false;
-  bool        m_use_normal_texture_pbr = false;
-  float       m_fall_off_a = 3.f;
-  float       m_fall_off_b = 2.2f;
-  bool        m_apply_blur = false;
-  float       m_blur_sigma = 1.0f;
-  int32_t     m_blur_kernel_size = 5;
-  int32_t     m_normal_sharpness = 10;
+  float             m_max_height_coef = 1.0f;
+  float             m_min_height_coef = 0.0f;
+  dbb::Bezier       m_interpolation_curve;
+  bool              m_use_curve = false;
+  bool              m_initialized = false;
+  bool              m_auto_update = false;
+  std::atomic<bool> m_update_textures = false;
+  bool              m_apply_falloff = false;
+  bool              m_use_normal_texture_pbr = false;
+  float             m_fall_off_a = 3.f;
+  float             m_fall_off_b = 2.2f;
+  bool              m_apply_blur = false;
+  float             m_blur_sigma = 1.0f;
+  int32_t           m_blur_kernel_size = 5;
+  int32_t           m_normal_sharpness = 10;
 
   eMainContextBase* m_game = nullptr;
   eModelManager*    m_modelManager = nullptr;

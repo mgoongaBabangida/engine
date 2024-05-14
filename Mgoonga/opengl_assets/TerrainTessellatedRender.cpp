@@ -15,7 +15,7 @@ eTerrainTessellatedRender::~eTerrainTessellatedRender()
 {
 }
 
-//------------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------
 void eTerrainTessellatedRender::Render(const Camera& _camera, const Light& _light, const std::vector<shObject>& _objects)
 {
   glUseProgram(m_tessellation_shader.ID());
@@ -35,9 +35,31 @@ void eTerrainTessellatedRender::Render(const Camera& _camera, const Light& _ligh
   m_tessellation_shader.SetUniformData("view", _camera.getWorldToViewMatrix());
   m_tessellation_shader.SetUniformData("projection", _camera.getProjectionMatrix());
   m_tessellation_shader.SetUniformData("eyePositionWorld", glm::vec4(_camera.getPosition(), 1.0f));
+
   for (auto& object : _objects)
   {
     m_tessellation_shader.SetUniformData("model", object->GetTransform()->getModelMatrix());
     object->GetModel()->Draw();
   }
+}
+
+//---------------------------------------------------
+void eTerrainTessellatedRender::UpdateMeshUniforms(const TessellationRenderingInfo& _info)
+{
+  int counter = 0;
+  for (const auto& height : _info.base_start_heights)
+  {
+    m_tessellation_shader.SetUniformData("base_start_heights[" + std::to_string(counter) + "]", height);
+    ++counter;
+  }
+  counter = 0;
+  for (const auto& texture_scale : _info.texture_scale)
+  {
+    m_tessellation_shader.SetUniformData("textureScale[" + std::to_string(counter) + "]", texture_scale);
+    ++counter;
+  }
+  m_tessellation_shader.SetUniformData("base_start_heights[" + std::to_string(counter) + "]", 1.0f);
+  m_tessellation_shader.SetUniformData("min_height",_info.min_height);
+  m_tessellation_shader.SetUniformData("max_height",_info.height_scale);
+  m_tessellation_shader.SetUniformData("height_scale",_info.height_scale);
 }

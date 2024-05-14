@@ -12,7 +12,7 @@ public:
 
 	virtual void						Draw()			override;
 
-	void										DrawTessellated();
+	void										DrawTessellated(std::function<void(const TessellationRenderingInfo&)> _info_updater);
 	void										GenerateTessellationData();
 
 	glm::ivec2							GetPosition() const { return m_position; }
@@ -22,12 +22,13 @@ public:
 	void										SetWorldOffset(glm::vec2 _pos) { m_world_offset = _pos; }
 
 	void										SetCamera(Camera* _camera);
+	void										SetTessellationRenderingInfo(const TessellationRenderingInfo&);
 
 	std::vector<glm::mat3>	GetBoundingTriangles() const;
 	std::vector<glm::vec3>	GetExtrems() const;
 	glm::vec3								GetCenter() const;
 
-	void										AssignHeights(const Texture& heightMap, float _height_scale = 1.0f, float _max_height = 1.0f, float _min_height = 0.0f, int32_t _normal_sharpness = 10);
+	void										AssignHeights(const Texture& heightMap, float _height_scale = 1.0f, float _max_height = 1.0f, float _min_height = 0.0f, int32_t _normal_sharpness = 10, bool _apply_normal_blur = false);
 
 	void										MakePlaneIndices(unsigned int rows, unsigned int columns, unsigned int _lod = 1);
 	void										MakePlaneIndices(unsigned int dimensions);
@@ -40,6 +41,12 @@ public:
 
 	GLuint									GetNormalMapId() const { return m_normalMap.id; }
 
+	float					GetNormalSigma() const { return m_normal_sigma; }
+	int32_t				GetKernelSize() const { return m_kernel_size; }
+
+	void					SetNormalSigma(float _sigma)  { m_normal_sigma = _sigma; }
+	void					SetKernelSize(int32_t _kernel) { m_kernel_size = _kernel; }
+
   std::optional<Vertex>		FindVertex(float x, float z);
 
 	GLuint		Size() const { return m_size; }
@@ -47,9 +54,9 @@ public:
 	GLuint		Columns() const { return m_columns; }
 
 protected:
-	void _GenerateNormalMap(const GLfloat* _heightmap, unsigned int _width, unsigned int _height, int32_t normal_sharpness);
+	void _GenerateNormalMap(const GLfloat* _heightmap, unsigned int _width, unsigned int _height, int32_t normal_sharpness, bool _apply_normal_blur = false);
 
-	void _SmoothNormals(std::vector<float>& normalMap, int width, int height, float sigma);
+	void _SmoothNormals(std::vector<float>& normalMap, int width, int height);
 
 	Texture				m_heightMap;
 	Texture				m_normalMap;
@@ -57,6 +64,9 @@ protected:
 	GLuint		m_size = 0;
 	GLuint		m_rows = 0;
 	GLuint		m_columns = 0;
+
+	float					m_normal_sigma = 2.0f;
+	int32_t				m_kernel_size = 5;
 
   unsigned int	m_devisor = 10;
 	glm::ivec2		m_position;
@@ -88,4 +98,6 @@ protected:
 		}
 	};
 	TessellationData m_tessellation_data;
+
+	TessellationRenderingInfo m_tessellation_info;
 };

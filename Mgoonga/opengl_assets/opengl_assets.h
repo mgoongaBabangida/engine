@@ -9,6 +9,7 @@
 #pragma warning( disable : 4251)
 
 #include <glm\glm\glm.hpp>
+#include <vector>
 
 struct bloomMip
 {
@@ -16,3 +17,13 @@ struct bloomMip
   glm::ivec2 intSize;
   unsigned int texture_id;
 };
+
+struct TessellationRenderingInfo
+{
+	std::vector<float> base_start_heights;
+	std::vector<float> texture_scale;
+	float min_height = 0.0f;
+	float max_height = 1.0f;
+	float height_scale = 1.0f;
+};
+

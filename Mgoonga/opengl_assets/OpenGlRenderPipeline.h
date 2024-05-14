@@ -49,6 +49,8 @@ public:
 													 const std::string& _uniformName,
 													 const UniformData& _data);
 
+	std::function<void(const TessellationRenderingInfo&)> GetTessellationInfoUpdater();
+
 	void			SetSkyBoxTexture(const Texture* _t);
 	void			SetSkyIBL(unsigned int _irr, unsigned int _prefilter);
 	

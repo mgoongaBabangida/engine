@@ -66,6 +66,12 @@ bool eOpenGlRenderPipeline::SetUniformData(const std::string& _renderName, const
 }
 
 //-------------------------------------------------------------------------------------------
+std::function<void(const TessellationRenderingInfo&)> eOpenGlRenderPipeline::GetTessellationInfoUpdater()
+{
+	return [this](const TessellationRenderingInfo& _info) { renderManager->TerrainTessellatedRender()->UpdateMeshUniforms(_info); };
+}
+
+//-------------------------------------------------------------------------------------------
 eOpenGlRenderPipeline::eOpenGlRenderPipeline(uint32_t _width, uint32_t _height)
 : width(_width),
   height(_height),

@@ -9,6 +9,8 @@ struct Texture;
 class TerrainMesh;
 class Camera;
 
+using TesellationInfoUpdater = std::function<void(const TessellationRenderingInfo&)>;
+
 struct TerrainType
 {
 	std::string name;
@@ -34,11 +36,13 @@ public:
 	void Initialize(const Texture* diffuse, const Texture* specular, const Texture* normal = nullptr, const Texture* heightMap = nullptr,
 									bool spreed_texture = true, float _height_scale = 1.0f, float _max_height = 1.0f, float _min_height = 0.0f, int32_t normal_sharpness = 10, unsigned int _tessellation_coef = 16);
 	
-	void AddOrUpdate(glm::ivec2 _pos, glm::vec2 _offset, const Texture* _diffuse, const Texture* heightMap = nullptr,
-									 bool spreed_texture = true, float _height_scale = 1.0f, float _max_height = 1.0f, float _min_height = 0.0f, int32_t normal_sharpness = 10, unsigned int _tessellation_coef = 16);
+	void AddOrUpdate(glm::ivec2 _pos, glm::vec2 _offset, const TessellationRenderingInfo&, const Texture* _diffuse, const Texture* heightMap = nullptr,
+									 bool spreed_texture = true, int32_t normal_sharpness = 10, bool _apply_normal_blur = false, unsigned int _tessellation_coef = 16);
 
 	void EnableTessellation(bool _enable);
 	void SetCamera(Camera* _camera);
+	void SetTessellationInfoUpdater(const TesellationInfoUpdater&);
+	void SetTessellationInfo(glm::ivec2 _pos, const TessellationRenderingInfo& _info);
 
 	virtual void														Draw()					override;
 	virtual const std::string&							GetName() const override;
@@ -82,6 +86,7 @@ protected:
 	const Texture*							m_roughness_texture_array = nullptr;
 	const Texture*							m_ao_texture_array = nullptr;
 	bool												m_tessellation_enabled = false;
+	TesellationInfoUpdater			m_tessellation_info_updater;
 	Camera*											m_camera = nullptr;
 
 	//---------------------------------------------------------------------------

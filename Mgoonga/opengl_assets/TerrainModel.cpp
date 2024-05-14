@@ -131,13 +131,12 @@ void TerrainModel::Initialize(const Texture* _diffuse,
 //----------------------------------------------------------------
 void TerrainModel::AddOrUpdate(glm::ivec2 _pos, 
 															 glm::vec2 _offset,
+															 const TessellationRenderingInfo& _tess_info,
 															 const Texture* _diffuse,
 															 const Texture* _heightMap,
 															 bool spreed_texture,
-															 float _height_scale,
-															 float _max_height,
-															 float _min_height,
 															 int32_t _normal_sharpness,
+															 bool _apply_normal_blur,
 															 unsigned int _tessellation_coef)
 {
 	TerrainMesh* mesh = nullptr;
@@ -156,6 +155,7 @@ void TerrainModel::AddOrUpdate(glm::ivec2 _pos,
 	}
 	mesh->SetPosition(_pos);
 	mesh->SetWorldOffset(_offset);
+	mesh->SetTessellationRenderingInfo(_tess_info);
 	if (_heightMap != nullptr)
 	{
 		m_height = *_heightMap;
@@ -167,8 +167,9 @@ void TerrainModel::AddOrUpdate(glm::ivec2 _pos,
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 3);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 4);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 5);*/
-		mesh->AssignHeights(*_heightMap, _height_scale, _max_height, _min_height, _normal_sharpness);
-		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth / _tessellation_coef, _heightMap->mTextureHeight / _tessellation_coef)->id;
+		mesh->AssignHeights(*_heightMap, _tess_info.height_scale, _tess_info.max_height, _tess_info.min_height, _normal_sharpness, _apply_normal_blur);
+		mesh->GenerateNormals(_heightMap->mTextureWidth / _tessellation_coef, _heightMap->mTextureHeight / _tessellation_coef);
+		m_material.normal_texture_id = mesh->GetNormalMapId();
 		mesh->GenerateTessellationData();
 	}
 	else
@@ -196,6 +197,25 @@ void TerrainModel::SetCamera(Camera* _camera)
 	m_camera = _camera;
 	for (auto* mesh : m_meshes)
 		mesh->SetCamera(_camera);
+}
+
+//----------------------------------------------------------------
+void TerrainModel::SetTessellationInfoUpdater(const TesellationInfoUpdater& _updater)
+{
+	m_tessellation_info_updater = _updater;
+}
+
+//----------------------------------------------------------------
+void TerrainModel::SetTessellationInfo(glm::ivec2 _pos, const TessellationRenderingInfo& _info)
+{
+	for (auto* m : m_meshes)
+	{
+		if (m->GetPosition() == _pos)
+		{
+			m->SetTessellationRenderingInfo(_info);
+			break;
+		}
+	}
 }
 
 //----------------------------------------------------------------
@@ -268,7 +288,7 @@ void TerrainModel::Draw()
 		if (!m_tessellation_enabled)
 				mesh->Draw();
 		else
-				mesh->DrawTessellated();
+				mesh->DrawTessellated(m_tessellation_info_updater);
 	}
 }
 
