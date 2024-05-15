@@ -31,7 +31,7 @@ class DLL_OPENGL_ASSETS eModelManager
   	std::unique_ptr<MyModel>		  ClonePrimitive(const std::string& name);
   	std::unique_ptr<TerrainModel>	CloneTerrain(const std::string& name);
 
-  	std::shared_ptr<MyMesh>			  FindMesh(const std::string&);
+  	std::shared_ptr<MyMesh>			  FindMesh(const std::string&) const;
   
   protected:
   	std::map<std::string, std::shared_ptr<MyMesh> >		myMeshes;

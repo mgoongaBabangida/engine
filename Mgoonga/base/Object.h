@@ -17,7 +17,8 @@ public:
 		BEZIER_CURVE,
 		LINES,
 		AREA_LIGHT_ONLY,
-		TERRAIN_TESSELLATION
+		TERRAIN_TESSELLATION,
+		VOLUMETRIC
 	};
 
 	explicit eObject() {} //@todo

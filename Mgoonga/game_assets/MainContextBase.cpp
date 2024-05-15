@@ -8,6 +8,7 @@
 #include "ParticleSystemToolController.h"
 #include "PhysicsSystemController.h"
 #include "TerrainGeneratorTool.h"
+#include "VolumetricCloudsTool.h"
 #include "BezierCurveUIController.h"
 #include "CameraSecondScript.h"
 #include "SettingsLoadingService.h"
@@ -218,7 +219,7 @@ void eMainContextBase::PaintGL()
 	{
 		int64_t tick = m_global_clock.newFrame();
 		std::map<eObject::RenderType, std::vector<shObject>> objects;
-		std::vector<shObject> phong, pbr, flags, bezier, geometry, lines, arealighted, terrain;
+		std::vector<shObject> phong, pbr, flags, bezier, geometry, lines, arealighted, terrain, volumetric;
 
 		if(!m_texts.empty() && m_show_fps)
 			m_texts[0]->content = { "FPS " + std::to_string(1000 / tick) };
@@ -266,6 +267,8 @@ void eMainContextBase::PaintGL()
 					arealighted.push_back(object);
 				else if (object->GetRenderType() == eObject::RenderType::TERRAIN_TESSELLATION)
 					terrain.push_back(object);
+				else if (object->GetRenderType() == eObject::RenderType::VOLUMETRIC)
+					volumetric.push_back(object);
 			}
 		}
 
@@ -296,6 +299,7 @@ void eMainContextBase::PaintGL()
 		objects.insert({ eObject::RenderType::GEOMETRY, geometry });
 		objects.insert({ eObject::RenderType::LINES, lines });
 		objects.insert({ eObject::RenderType::AREA_LIGHT_ONLY, arealighted });
+		objects.insert({ eObject::RenderType::VOLUMETRIC, volumetric });
 
 		pipeline.UpdateSharedUniforms();
 		pipeline.RenderFrame(objects, m_cameras, GetMainLight(), m_guis, m_texts);
@@ -737,6 +741,14 @@ void eMainContextBase::InitializeExternalGui()
 		m_global_scripts.back()->Initialize();
 	};
 	externalGui[ExternalWindow::MAIN_MENU_WND]->Add(MENU, "Terrain Tool", reinterpret_cast<void*>(&terrain_tool_callback));
+
+	// Tools Menu
+	static std::function<void()> clouds_tool_callback = [this]()
+	{
+		m_global_scripts.push_back(std::make_shared<VolumetricCloudsTool>(this, modelManager.get(), texManager.get(), pipeline, externalGui[ExternalWindow::TERRAIN_GENERATOR_WND]));
+		m_global_scripts.back()->Initialize();
+	};
+	externalGui[ExternalWindow::MAIN_MENU_WND]->Add(MENU, "Volumetric Clouds Tool", reinterpret_cast<void*>(&clouds_tool_callback));
 
 	//Create
 	std::function<void()> create_cube_callbaack = [this]()

@@ -333,6 +333,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	std::vector<shObject> bezier_objs = _objects.find(eObject::RenderType::BEZIER_CURVE)->second;
 	std::vector<shObject> lines_objs = _objects.find(eObject::RenderType::LINES)->second;
 	std::vector<shObject> arealighted_objs = _objects.find(eObject::RenderType::AREA_LIGHT_ONLY)->second;
+	std::vector<shObject> volumetric_objs = _objects.find(eObject::RenderType::VOLUMETRIC)->second;
 
 	auto comparator = [_camera](const shObject& obj1, const shObject& obj2)
 	{ 
@@ -354,6 +355,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	phong_pbr_objects.insert(phong_pbr_objects.end(), pbr_objs.begin(), pbr_objs.end());
 	phong_pbr_objects.insert(phong_pbr_objects.end(), arealighted_objs.begin(), arealighted_objs.end());
 	phong_pbr_objects.insert(phong_pbr_objects.end(), terrain_tes_objs.begin(), terrain_tes_objs.end());
+	phong_pbr_objects.insert(phong_pbr_objects.end(), volumetric_objs.begin(), volumetric_objs.end());
 
 	//Shadow Render Pass
 	if (_light.type == eLightType::DIRECTION || _light.type == eLightType::SPOT)
@@ -469,6 +471,8 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 												std::back_inserter(not_outlined), comparator);
 
 		RenderPBR(_camera, _light, not_outlined);
+
+		RenderVolumetric(_camera, _light, volumetric_objs);
 
 		RenderAreaLightsOnly(_camera, _light, arealighted_objs);
 
@@ -944,11 +948,19 @@ void eOpenGlRenderPipeline::RenderBloom()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+//-------------------------------------------------------
 void eOpenGlRenderPipeline::RenderTerrainTessellated(const Camera& _camera, const Light& _light, std::vector<shObject> _objs)
 {
 	renderManager->TerrainTessellatedRender()->Render(_camera, _light, _objs);
 }
 
+//-------------------------------------------------------
+void eOpenGlRenderPipeline::RenderVolumetric(const Camera& _camera, const Light& _light, std::vector<shObject> _objs)
+{
+	renderManager->VolumetricRender()->Render(_camera, _light, _objs);
+}
+
+//-------------------------------------------------------
 void eOpenGlRenderPipeline::RenderBlur(const Camera& _camera)
 {
 	renderManager->BrightFilterRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));

@@ -93,7 +93,7 @@ std::unique_ptr<TerrainModel> eModelManager::CloneTerrain(const std::string& nam
 	return std::make_unique<TerrainModel>(*(terrain));
 }
 
-std::shared_ptr<MyMesh> eModelManager::FindMesh(const std::string& name)
+std::shared_ptr<MyMesh> eModelManager::FindMesh(const std::string& name) const
 {
 	return  myMeshes.find(name)->second;
 }

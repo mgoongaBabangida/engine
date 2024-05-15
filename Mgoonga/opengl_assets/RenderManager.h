@@ -31,6 +31,7 @@
 #include "CameraInterpolationRender.h"
 #include "ComputeShaderRender.h"
 #include "TerrainTessellatedRender.h"
+#include "VolumetricRender.h"
 
 //----------------------------------------------------------------------------------------------
 class eRenderManager
@@ -84,6 +85,7 @@ private:
 	eCameraInterpolationRender* CameraInterpolationRender();
 	eComputeShaderRender* ComputeShaderRender();
 	eTerrainTessellatedRender* TerrainTessellatedRender();
+	eVolumetricRender* eRenderManager::VolumetricRender();
 
 private:
 	std::unique_ptr<eWaterRender>									m_waterRender;
@@ -112,6 +114,7 @@ private:
 	std::unique_ptr<eCameraInterpolationRender>		m_cameraInrepolationRender;
 	std::unique_ptr<eComputeShaderRender>					m_computeRender;
 	std::unique_ptr <eTerrainTessellatedRender>		m_terrainTesRender;
+	std::unique_ptr <eVolumetricRender>						m_volumetricRender;
 
 	std::string							folderPath;
 	std::vector<ShaderInfo>	shaders;

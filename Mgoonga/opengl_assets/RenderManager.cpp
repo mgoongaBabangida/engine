@@ -31,6 +31,7 @@ eAreaLightsOnlyRender* eRenderManager::AreaLightsRender(){return m_area_lights.g
 eCameraInterpolationRender* eRenderManager::CameraInterpolationRender(){return m_cameraInrepolationRender.get();}
 eComputeShaderRender* eRenderManager::ComputeShaderRender() { return m_computeRender.get();}
 eTerrainTessellatedRender* eRenderManager::TerrainTessellatedRender() { return m_terrainTesRender.get(); }
+eVolumetricRender* eRenderManager::VolumetricRender() { return  m_volumetricRender.get(); }
 
 //----------------------------------------------------------------------------------------------------------------
 void eRenderManager::AddParticleSystem(std::shared_ptr<IParticleSystem> system)
@@ -206,6 +207,10 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																												 folderPath + "TerrainTessellationTes1.glsl",
 																												 folderPath + "TerrainTessellationTes2.glsl"));
 	shader_lambda(m_terrainTesRender.get());
+
+	//Volumetric Tessellation
+	m_volumetricRender.reset(new eVolumetricRender(folderPath + "VolumetricVertex.glsl", folderPath + "VolumetricFragment.glsl"));
+	shader_lambda(m_volumetricRender.get());
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -241,6 +246,7 @@ void eRenderManager::UpdateShadersInfo()
 	shader_lambda(m_cameraInrepolationRender.get());
 	shader_lambda(m_computeRender.get());
 	shader_lambda(m_terrainTesRender.get());
+	shader_lambda(m_volumetricRender.get());
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -303,6 +309,8 @@ bool eRenderManager::SetUniformData(const std::string& _renderName, const std::s
 	if (shader_lambda(m_computeRender.get()))
 		return true;
 	if (shader_lambda(m_terrainTesRender.get()))
+		return true;
+	if (shader_lambda(m_volumetricRender.get()))
 		return true;
 	return false;
 }

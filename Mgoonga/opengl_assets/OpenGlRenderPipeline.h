@@ -54,8 +54,8 @@ public:
 	void			SetSkyBoxTexture(const Texture* _t);
 	void			SetSkyIBL(unsigned int _irr, unsigned int _prefilter);
 	
-	void AddParticleSystem(std::shared_ptr<IParticleSystem> system);
-	void AddParticleSystemGPU(glm::vec3 _startPos, const Texture* _texture);
+	void			AddParticleSystem(std::shared_ptr<IParticleSystem> system);
+	void			AddParticleSystemGPU(glm::vec3 _startPos, const Texture* _texture);
 
 	void			SwitchSkyBox(bool on);
 	void			SwitchWater(bool on);
@@ -200,6 +200,7 @@ protected:
 	void			RenderIBL(const Camera& _camera);
 	void			RenderBloom();
 	void			RenderTerrainTessellated(const Camera&, const Light& _light, std::vector<shObject> _objs);
+	void			RenderVolumetric(const Camera&, const Light& _light, std::vector<shObject> _objs);
 
 	bool			mts			= true;
 	bool			skybox		= true;
