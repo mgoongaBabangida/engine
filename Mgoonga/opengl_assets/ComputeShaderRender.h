@@ -14,11 +14,17 @@ public:
     const std::string& pSvS, const std::string& pSfS,
     const std::string& ClothvS, const std::string& ClothfS,
     const std::string& ClothcS, const std::string& ClothNormcS,
-    const std::string& EdgecS,
+    const std::string& EdgecS, const std::string& WorlycS,
+    const std::string& vRes, const std::string& f3DDebug,
     const Texture* _textileTexture,
     const Texture* _computeShaderImage);
+  ~eComputeShaderRender();
+
   void DispatchCompute(const Camera& _camera);
   void RenderComputeResult(const Camera& _camera);
+
+  GLuint GetWorley3DID() { return m_worley3DID; }
+  float& WorleyNoiseZDebug() { return m_WorleyZ; }
 
   Shader& GetShader() { return mPSComputeShader; }
 protected:
@@ -34,6 +40,10 @@ protected:
   void _DispatchClothSimul(const Camera& _camera);
   void _RenderClothSimul(const Camera& _camera);
 
+  void _InitWorley3d();
+
+  void DispatchWorley3D(const Camera& _camera);
+
   Shader mPSComputeShader;
   Shader mPSRenderResultShader;
 
@@ -41,12 +51,21 @@ protected:
   Shader mRenderClothSimulShader, mComputeClothSimulShader, mComputeClothSimulNorm;
 
   Shader mEdgeFinding;
-
+  Shader mWorley3D;;
   Shader mComputeShader;
+
+  Shader mDebugShader;
 
   GLuint mImageId;
   GLuint mImageWidth;
   GLuint mImageHeight;
+
+  GLuint m_worley3DID;
+  GLuint mWorleyDim = 512;
+  size_t mWorleyOctaveOneSize = 8;
+  alignas(16) std::vector<glm::vec4> mWorleyPoints;
+  GLuint mWorleyPointsBuffer;
+  float m_WorleyZ = 0.5f;
 
   struct ParticleSystemVars
   {

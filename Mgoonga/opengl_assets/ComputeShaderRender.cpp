@@ -1,5 +1,8 @@
 #include "ComputeShaderRender.h"
 #include "Texture.h"
+#include <math/Random.h>
+
+#include "ScreenMesh.h"
 
 #define PRIM_RESTART 0xffffff //?
 
@@ -8,7 +11,8 @@ eComputeShaderRender::eComputeShaderRender(const std::string& cS, const std::str
                                            const std::string& pSvS, const std::string& pSfS,
                                            const std::string& ClothvS, const std::string& ClothfS,
                                            const std::string& ClothcS, const std::string& ClothNormcS,
-                                           const std::string& EdgecS,
+                                           const std::string& EdgecS, const std::string& WorlycS,
+                                           const std::string& vRes, const std::string& f3DDebug,
                                            const Texture* _textileTexture, const Texture* _computeShaderImage)
 {
   mPSComputeShader.installShaders(pScS.c_str());
@@ -41,18 +45,48 @@ eComputeShaderRender::eComputeShaderRender(const std::string& cS, const std::str
   mImageId = _computeShaderImage->id;
   mImageWidth = _computeShaderImage->mTextureWidth;
   mImageHeight = _computeShaderImage->mTextureHeight;
+
+  //***********************************************************************//
+  mWorley3D.installShaders(WorlycS.c_str());
+  mWorley3D.GetUniformInfoFromShader();
+  _InitWorley3d();
+
+  mDebugShader.installShaders(vRes.c_str(), f3DDebug.c_str());
+  mDebugShader.GetUniformInfoFromShader();
 }
 
-//-------------------------------------------------------
+//---------------------------------------------------------------
+eComputeShaderRender::~eComputeShaderRender()
+{
+  glDeleteTextures(1, &m_worley3DID);
+  glDeleteBuffers(1, &mWorleyPointsBuffer);
+}
+
+//---------------------------------------------------------------
 void eComputeShaderRender::DispatchCompute(const Camera& _camera)
 {
-
+  static bool disp = false;
+  if(!disp)
+    DispatchWorley3D(_camera);
+  disp = true;
 }
 
 //-------------------------------------------------------
 void eComputeShaderRender::RenderComputeResult(const Camera& _camera)
 {
+  glUseProgram(mDebugShader.ID());
 
+  // Bind the 3D texture
+  GLint noiseTextureLocation = glGetUniformLocation(mDebugShader.ID(), "noiseTexture");
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_3D, m_worley3DID);
+  glUniform1i(noiseTextureLocation, 0);
+
+  mDebugShader.SetUniformData("z_slice", m_WorleyZ);
+
+  static eScreenMesh screenMesh({}, {});
+  screenMesh.SetViewPortToDefault();
+  screenMesh.Draw();
 }
 
 //-------------------------------------------------------
@@ -357,4 +391,79 @@ void eComputeShaderRender::_RenderClothSimul(const Camera& _camera)
   glBindVertexArray(clothVars.clothVao);
   glDrawElements(GL_TRIANGLE_STRIP, clothVars.numElements, GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
+}
+
+//-------------------------------------------------------
+void eComputeShaderRender::_InitWorley3d()
+{
+  //Generate cubic texture
+  glGenTextures(1, &m_worley3DID);
+  glBindTexture(GL_TEXTURE_3D, m_worley3DID);
+
+  // Create a 3D texture and fill it with data
+  const int mWorleyDim = 64; // Adjust according to your texture size
+  std::vector<float> textureData(mWorleyDim * mWorleyDim * mWorleyDim * 4); // RGBA format
+  // Fill textureData with your texture data
+  // For example, if you want to fill it with white color:
+  for (size_t i = 0; i < textureData.size(); i += 4) {
+    textureData[i]     = math::Random::RandomFloat(0.0f, 1.0f);  // Red
+    textureData[i + 1] = math::Random::RandomFloat(0.0f, 1.0f);  // Green
+    textureData[i + 2] = math::Random::RandomFloat(0.0f, 1.0f);  // Blue
+    textureData[i + 3] = math::Random::RandomFloat(0.0f, 1.0f);  // Alpha
+  }
+
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, mWorleyDim, mWorleyDim, mWorleyDim, 0, GL_RGBA, GL_FLOAT, textureData.data());
+  //glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, texSize, texSize, texSize, 0, GL_RGBA, GL_FLOAT, textureData);
+
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  glBindTexture(GL_TEXTURE_3D, 0);
+
+  //Init points buffer
+  int numPoints = mWorleyOctaveOneSize * mWorleyOctaveOneSize * mWorleyOctaveOneSize;
+  mWorleyPoints.resize(numPoints);
+
+  // Fill the points buffer with random points in [0, 1] space
+  for (int x = 0; x < mWorleyOctaveOneSize; ++x) {
+    for (int y = 0; y < mWorleyOctaveOneSize; ++y) {
+      for (int z = 0; z < mWorleyOctaveOneSize; ++z) {
+        int index = x + y * mWorleyOctaveOneSize + z * mWorleyOctaveOneSize * mWorleyOctaveOneSize;
+        mWorleyPoints[index] = glm::vec4(
+          static_cast<float>(x) / mWorleyOctaveOneSize + static_cast<float>(rand()) / RAND_MAX / mWorleyOctaveOneSize,
+          static_cast<float>(y) / mWorleyOctaveOneSize + static_cast<float>(rand()) / RAND_MAX / mWorleyOctaveOneSize,
+          static_cast<float>(z) / mWorleyOctaveOneSize + static_cast<float>(rand()) / RAND_MAX / mWorleyOctaveOneSize,
+          1.0f
+        );
+      }
+    }
+  }
+  glGenBuffers(1, &mWorleyPointsBuffer);
+}
+
+//-------------------------------------------------------
+void eComputeShaderRender::DispatchWorley3D(const Camera& _camera)
+{
+  glUseProgram(mWorley3D.ID());
+
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, mWorleyPointsBuffer);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, mWorleyPoints.size() * sizeof(glm::vec4), mWorleyPoints.data(), GL_DYNAMIC_DRAW);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, mWorleyPointsBuffer);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+  // Set uniform values
+  glUniform1i(glGetUniformLocation(mWorley3D.ID(), "octaveOneSize"), mWorleyOctaveOneSize);
+
+  // Bind the 3D texture
+  glActiveTexture(GL_TEXTURE0);
+  glBindImageTexture(0, m_worley3DID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
+  //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
+  // Dispatch the compute shader
+  glDispatchCompute((unsigned int)(mWorleyDim / 8), (unsigned int)(mWorleyDim / 8), (unsigned int)(mWorleyDim / 8));
+  // Wait for the compute shader to finish
+  glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
 }

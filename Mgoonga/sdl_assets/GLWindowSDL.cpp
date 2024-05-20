@@ -47,6 +47,7 @@ dbGLWindowSDL::dbGLWindowSDL(const IGameFactory& _factory)
 	guiWnd.push_back(new eWindowImGuiExternal("Game Debug"));//12
 	guiWnd.push_back(new eWindowImGuiExternal("Physics Engine Tes"));//13
 	guiWnd.push_back(new eWindowImGuiExternal("HDR BLOOM"));//14
+	guiWnd.push_back(new eWindowImGuiExternal("Clouds Generation Tool"));//15
 
   on_close = std::function<void()>{ [this](){this->Close(); } };
   guiWnd[4]->Add(MENU, "Close", reinterpret_cast<void*>(&on_close));

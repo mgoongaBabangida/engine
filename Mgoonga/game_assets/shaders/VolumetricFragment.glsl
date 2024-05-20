@@ -9,11 +9,13 @@ uniform vec4 viewDir;
 uniform float stepSize = 0.01f;
 uniform int noiseSize = 512;
 
+uniform float coef = 0.01f;
+
 vec4 sampleVolume(vec3 texCoord)
 {
-    //vec4 value = texture(noiseTexture, texCoord);
-    vec4 value = vec4(1., 1., 1., stepSize);
-    return value;
+	float val = texture(noiseTexture, texCoord).r;
+	//return vec4(1., 1., 1., 1.);
+    return vec4(1., 1., 1., val * coef);
 }
 
 void main()

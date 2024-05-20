@@ -197,6 +197,9 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																									folderPath + "ClothSimulationVertex.glsl", folderPath + "ClothSimulationFragment.glsl", 
 																									folderPath + "ClothSimulationCompute.glsl", folderPath + "ClothSimulationNormalsCompute.glsl",
 																									folderPath + "EdgeFindingCompute.glsl",
+																									folderPath + "Worley3DComputeShader.glsl",
+																									folderPath + "PostProcessingVertexShader.glsl", //result
+																									folderPath + "3DtextureDebugFragment.glsl", //debug 3d
 																									texManager.Find("TSpanishFlag0_s"),
 																									texManager.Find("computeImageRW")));
 	shader_lambda(m_cameraInrepolationRender.get());
@@ -209,7 +212,7 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 	shader_lambda(m_terrainTesRender.get());
 
 	//Volumetric Tessellation
-	m_volumetricRender.reset(new eVolumetricRender(folderPath + "VolumetricVertex.glsl", folderPath + "VolumetricFragment.glsl"));
+	m_volumetricRender.reset(new eVolumetricRender(folderPath + "VolumetricVertex.glsl", folderPath + "VolumetricFragment.glsl", m_computeRender->GetWorley3DID()));
 	shader_lambda(m_volumetricRender.get());
 }
 

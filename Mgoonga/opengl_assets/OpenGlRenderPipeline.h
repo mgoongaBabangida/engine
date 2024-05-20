@@ -141,6 +141,8 @@ public:
 	glm::vec4& Scale();
 	float& K();
 
+	float& Noize3DZDebug();
+
 	//statistic
 	uint32_t& GetDrawCalls() { return m_draw_calls; }
 

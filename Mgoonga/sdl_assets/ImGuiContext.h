@@ -53,7 +53,8 @@ enum ExternalWindow : uint32_t
 	TERRAIN_GENERATOR_WND = 11,
 	GAME_DEBUG_WND = 12,
 	PHYSICS_TEST_WND = 13,
-	HDR_BLOOM_WND = 14
+	HDR_BLOOM_WND = 14,
+	CLOUDS_WND = 15
 };
 
 enum TypeImGui

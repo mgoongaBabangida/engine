@@ -40,4 +40,12 @@ void VolumetricCloudsTool::Initialize()
 	ObjectFactoryBase factory;
 	shObject cube = factory.CreateObject(m_game->GetModelManager()->Find("wall_cube"), eObject::RenderType::VOLUMETRIC, "VolumetricCube");
 	m_game->AddObject(cube);
+
+	std::function<void()> test_callback = []()
+	{
+	};
+	m_imgui->Add(BUTTON, "Test", (void*)&test_callback);
+	static auto id =  m_pipeline.get().GetComputeParticleSystem().id;
+	m_imgui->Add(TEXTURE, "Noise 3D", (void*)id);
+	m_imgui->Add(SLIDER_FLOAT_NERROW, "Noise 3D Z Debug", &m_pipeline.get().Noize3DZDebug());
 }

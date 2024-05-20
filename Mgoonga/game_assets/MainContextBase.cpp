@@ -745,7 +745,8 @@ void eMainContextBase::InitializeExternalGui()
 	// Tools Menu
 	static std::function<void()> clouds_tool_callback = [this]()
 	{
-		m_global_scripts.push_back(std::make_shared<VolumetricCloudsTool>(this, modelManager.get(), texManager.get(), pipeline, externalGui[ExternalWindow::TERRAIN_GENERATOR_WND]));
+		pipeline.GetComputeShaderRef() = true;
+		m_global_scripts.push_back(std::make_shared<VolumetricCloudsTool>(this, modelManager.get(), texManager.get(), pipeline, externalGui[ExternalWindow::CLOUDS_WND]));
 		m_global_scripts.back()->Initialize();
 	};
 	externalGui[ExternalWindow::MAIN_MENU_WND]->Add(MENU, "Volumetric Clouds Tool", reinterpret_cast<void*>(&clouds_tool_callback));

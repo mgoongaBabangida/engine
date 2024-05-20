@@ -11,10 +11,11 @@ class Camera;
 class eVolumetricRender
 {
 public:
-  eVolumetricRender(const std::string& vS, const std::string& fS);
+  eVolumetricRender(const std::string& vS, const std::string& fS, GLuint _worlyID);
   void Render(const Camera& _camera, const Light& light, const std::vector<shObject>& objects);
   
   Shader& GetShader() { return m_volumetric_shader; }
 protected:
   Shader m_volumetric_shader;
+  GLuint mWorleyNoiseImage3DID;
 };

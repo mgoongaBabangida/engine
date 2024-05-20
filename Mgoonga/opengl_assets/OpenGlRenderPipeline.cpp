@@ -313,6 +313,11 @@ float& eOpenGlRenderPipeline::K()
 	return renderManager->SSRRenderer()->K();
 }
 
+float& eOpenGlRenderPipeline::Noize3DZDebug()
+{
+	return renderManager->ComputeShaderRender()->WorleyNoiseZDebug();
+}
+
 //-----------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vector<shObject>> _objects,
 																				std::vector<Camera>& _cameras,
@@ -355,7 +360,6 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	phong_pbr_objects.insert(phong_pbr_objects.end(), pbr_objs.begin(), pbr_objs.end());
 	phong_pbr_objects.insert(phong_pbr_objects.end(), arealighted_objs.begin(), arealighted_objs.end());
 	phong_pbr_objects.insert(phong_pbr_objects.end(), terrain_tes_objs.begin(), terrain_tes_objs.end());
-	phong_pbr_objects.insert(phong_pbr_objects.end(), volumetric_objs.begin(), volumetric_objs.end());
 
 	//Shadow Render Pass
 	if (_light.type == eLightType::DIRECTION || _light.type == eLightType::SPOT)
@@ -472,11 +476,11 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 
 		RenderPBR(_camera, _light, not_outlined);
 
-		RenderVolumetric(_camera, _light, volumetric_objs);
-
 		RenderAreaLightsOnly(_camera, _light, arealighted_objs);
 
 		RenderTerrainTessellated(_camera, _light, terrain_tes_objs);
+
+		RenderVolumetric(_camera, _light, volumetric_objs);
 	}
 
 	//Mesh Line
@@ -770,8 +774,8 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		// set up buffer for writing
 		eGlBufferContext::GetInstance().EnableCustomWrittingBuffer("ComputeParticleSystemBuffer");
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		/*glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
 		renderManager->ComputeShaderRender()->RenderComputeResult(_camera);
 	}
 
