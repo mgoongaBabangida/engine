@@ -41,6 +41,9 @@ void eInputController::OnMouseMove(uint32_t x, uint32_t y, KeyModifiers _modifie
 //------------------------------------------------------------------
 bool eInputController::OnKeyJustPressed(uint32_t _asci, KeyModifiers _modifier)
 {
+	if (_asci > keysPressed.size())
+		return true;
+
 	keysPressed[_asci] = true;
 	bool taken = false;
 	for (auto& observer : observersPriority)
@@ -114,11 +117,14 @@ bool eInputController::OnKeyPress()
 }
 
 //----------------------------------------------------------------------
-bool eInputController::OnKeyRelease(uint32_t asci)
+bool eInputController::OnKeyRelease(uint32_t _asci)
 {
-	if(keysPressed[asci])
+	if (_asci > keysPressed.size())
+		return true;
+
+	if(keysPressed[_asci])
 	{
-		keysPressed[asci] = false;
+		keysPressed[_asci] = false;
 	}
 	
 	bool taken = false;
@@ -126,7 +132,7 @@ bool eInputController::OnKeyRelease(uint32_t asci)
 	{
 		if (observer)
 		{
-			if (observer->OnKeyRelease((ASCII)asci, keysPressed, KeyModifiers::NONE))
+			if (observer->OnKeyRelease((ASCII)_asci, keysPressed, KeyModifiers::NONE))
 				return false;
 			taken = false; //do not take keyboard, only mouse ?
 			break;
@@ -139,7 +145,7 @@ bool eInputController::OnKeyRelease(uint32_t asci)
 		{
 			if (observer)
 			{
-				if (observer->OnKeyRelease((ASCII)asci, keysPressed, KeyModifiers::NONE)) break;
+				if (observer->OnKeyRelease((ASCII)_asci, keysPressed, KeyModifiers::NONE)) break;
 			}
 		}
 	}
@@ -148,7 +154,7 @@ bool eInputController::OnKeyRelease(uint32_t asci)
 	{
 		if (observer)
 		{
-			if (observer->OnKeyRelease((ASCII)asci, keysPressed, KeyModifiers::NONE)) break;
+			if (observer->OnKeyRelease((ASCII)_asci, keysPressed, KeyModifiers::NONE)) break;
 		}
 	}
 
