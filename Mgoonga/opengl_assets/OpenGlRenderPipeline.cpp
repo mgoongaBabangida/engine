@@ -318,6 +318,41 @@ float& eOpenGlRenderPipeline::Noize3DZDebug()
 	return renderManager->ComputeShaderRender()->WorleyNoiseZDebug();
 }
 
+int32_t& eOpenGlRenderPipeline::Noize3DOctaveDebug()
+{
+	return renderManager->ComputeShaderRender()->Noize3DOctaveDebug();
+}
+
+int32_t& eOpenGlRenderPipeline::GetCloudDensity()
+{
+	return renderManager->VolumetricRender()->GetCloudDensity();
+}
+
+int32_t& eOpenGlRenderPipeline::GetCloudAbsorption()
+{
+	return renderManager->VolumetricRender()->GetCloudAbsorption();
+}
+
+glm::vec3& eOpenGlRenderPipeline::GetCloudColor()
+{
+	return renderManager->VolumetricRender()->GetCloudColor();
+}
+
+float& eOpenGlRenderPipeline::GetCloudPerlinWeight()
+{
+	return renderManager->VolumetricRender()->GetPerilnWeight();
+}
+
+int32_t& eOpenGlRenderPipeline::GetCloudPerlinMotion()
+{
+	return renderManager->VolumetricRender()->GetCloudPerlinMotion();
+}
+
+int32_t& eOpenGlRenderPipeline::GetCloudWorleyMotion()
+{
+	return renderManager->VolumetricRender()->GetCloudWorleyMotion();
+}
+
 //-----------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vector<shObject>> _objects,
 																				std::vector<Camera>& _cameras,
@@ -479,8 +514,6 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		RenderAreaLightsOnly(_camera, _light, arealighted_objs);
 
 		RenderTerrainTessellated(_camera, _light, terrain_tes_objs);
-
-		RenderVolumetric(_camera, _light, volumetric_objs);
 	}
 
 	//Mesh Line
@@ -667,6 +700,12 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	mts ? eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS)
 		: eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 
+	// Volumetric data
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	RenderVolumetric(_camera, _light, volumetric_objs);
+	glDisable(GL_BLEND);
+
 	//7  Particles
 	if (particles) { RenderParticles(_camera); }
 
@@ -774,8 +813,8 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		// set up buffer for writing
 		eGlBufferContext::GetInstance().EnableCustomWrittingBuffer("ComputeParticleSystemBuffer");
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		/*glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		renderManager->ComputeShaderRender()->RenderComputeResult(_camera);
 	}
 

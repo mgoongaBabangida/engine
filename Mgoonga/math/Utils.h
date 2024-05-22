@@ -5,6 +5,8 @@
 #include <cmath>
 #include <vector>
 
+#include <glm/glm/gtc/noise.hpp>
+
 namespace dbb
 {
 	DLL_MATH float round(float _x, int _num_decimal_precision_digits);
@@ -16,4 +18,7 @@ namespace dbb
 		_modified.insert(_modified.end(), _second.begin(), _second.end());
 		return _modified;
 	}
+
+  // Function to generate 3D Perlin noise with 4 octaves and periodicity
+	DLL_MATH std::vector<float> generatePerlinNoise3D(int width, int height, int depth);
 }

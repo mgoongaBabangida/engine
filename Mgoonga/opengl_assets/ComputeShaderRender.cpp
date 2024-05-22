@@ -1,6 +1,7 @@
 #include "ComputeShaderRender.h"
 #include "Texture.h"
 #include <math/Random.h>
+#include <math/Utils.h>
 
 #include "ScreenMesh.h"
 
@@ -59,7 +60,9 @@ eComputeShaderRender::eComputeShaderRender(const std::string& cS, const std::str
 eComputeShaderRender::~eComputeShaderRender()
 {
   glDeleteTextures(1, &m_worley3DID);
-  glDeleteBuffers(1, &mWorleyPointsBuffer);
+  glDeleteBuffers(1, &mWorleyPointsBuffer1);
+  glDeleteBuffers(1, &mWorleyPointsBuffer2);
+  glDeleteBuffers(1, &mWorleyPointsBuffer3);
 }
 
 //---------------------------------------------------------------
@@ -83,6 +86,7 @@ void eComputeShaderRender::RenderComputeResult(const Camera& _camera)
   glUniform1i(noiseTextureLocation, 0);
 
   mDebugShader.SetUniformData("z_slice", m_WorleyZ);
+  mDebugShader.SetUniformData("debug_octave", m_WorleyOctave);
 
   static eScreenMesh screenMesh({}, {});
   screenMesh.SetViewPortToDefault();
@@ -403,36 +407,40 @@ void eComputeShaderRender::_InitWorley3d()
   // Create a 3D texture and fill it with data
   const int mWorleyDim = 64; // Adjust according to your texture size
   std::vector<float> textureData(mWorleyDim * mWorleyDim * mWorleyDim * 4); // RGBA format
+
+  // Generate perlin noise for 4th channel
+  std::vector<float> perlinNoise = dbb::generatePerlinNoise3D(mWorleyDim, mWorleyDim, mWorleyDim);
+
   // Fill textureData with your texture data
   // For example, if you want to fill it with white color:
   for (size_t i = 0; i < textureData.size(); i += 4) {
     textureData[i]     = math::Random::RandomFloat(0.0f, 1.0f);  // Red
     textureData[i + 1] = math::Random::RandomFloat(0.0f, 1.0f);  // Green
     textureData[i + 2] = math::Random::RandomFloat(0.0f, 1.0f);  // Blue
-    textureData[i + 3] = math::Random::RandomFloat(0.0f, 1.0f);  // Alpha
+    textureData[i + 3] = perlinNoise[i/4];                       // Alpha -> perlin noise
   }
 
   glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, mWorleyDim, mWorleyDim, mWorleyDim, 0, GL_RGBA, GL_FLOAT, textureData.data());
   //glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, texSize, texSize, texSize, 0, GL_RGBA, GL_FLOAT, textureData);
 
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   glBindTexture(GL_TEXTURE_3D, 0);
 
-  //Init points buffer
+  //Init points buffer 1
   int numPoints = mWorleyOctaveOneSize * mWorleyOctaveOneSize * mWorleyOctaveOneSize;
-  mWorleyPoints.resize(numPoints);
+  mWorleyPoints1.resize(numPoints);
 
   // Fill the points buffer with random points in [0, 1] space
   for (int x = 0; x < mWorleyOctaveOneSize; ++x) {
     for (int y = 0; y < mWorleyOctaveOneSize; ++y) {
       for (int z = 0; z < mWorleyOctaveOneSize; ++z) {
         int index = x + y * mWorleyOctaveOneSize + z * mWorleyOctaveOneSize * mWorleyOctaveOneSize;
-        mWorleyPoints[index] = glm::vec4(
+        mWorleyPoints1[index] = glm::vec4(
           static_cast<float>(x) / mWorleyOctaveOneSize + static_cast<float>(rand()) / RAND_MAX / mWorleyOctaveOneSize,
           static_cast<float>(y) / mWorleyOctaveOneSize + static_cast<float>(rand()) / RAND_MAX / mWorleyOctaveOneSize,
           static_cast<float>(z) / mWorleyOctaveOneSize + static_cast<float>(rand()) / RAND_MAX / mWorleyOctaveOneSize,
@@ -441,7 +449,47 @@ void eComputeShaderRender::_InitWorley3d()
       }
     }
   }
-  glGenBuffers(1, &mWorleyPointsBuffer);
+  glGenBuffers(1, &mWorleyPointsBuffer1);
+
+  //Init points buffer 2
+  numPoints = mWorleyOctaveTwoSize * mWorleyOctaveTwoSize * mWorleyOctaveTwoSize;
+  mWorleyPoints2.resize(numPoints);
+
+  // Fill the points buffer with random points in [0, 1] space
+  for (int x = 0; x < mWorleyOctaveTwoSize; ++x) {
+    for (int y = 0; y < mWorleyOctaveTwoSize; ++y) {
+      for (int z = 0; z < mWorleyOctaveTwoSize; ++z) {
+        int index = x + y * mWorleyOctaveTwoSize + z * mWorleyOctaveTwoSize * mWorleyOctaveTwoSize;
+        mWorleyPoints2[index] = glm::vec4(
+          static_cast<float>(x) / mWorleyOctaveTwoSize + static_cast<float>(rand()) / RAND_MAX / mWorleyOctaveTwoSize,
+          static_cast<float>(y) / mWorleyOctaveTwoSize + static_cast<float>(rand()) / RAND_MAX / mWorleyOctaveTwoSize,
+          static_cast<float>(z) / mWorleyOctaveTwoSize + static_cast<float>(rand()) / RAND_MAX / mWorleyOctaveTwoSize,
+          1.0f
+        );
+      }
+    }
+  }
+  glGenBuffers(1, &mWorleyPointsBuffer2);
+
+  //Init points buffer 3
+  numPoints = mWorleyOctaveThreeSize * mWorleyOctaveThreeSize * mWorleyOctaveThreeSize;
+  mWorleyPoints3.resize(numPoints);
+
+  // Fill the points buffer with random points in [0, 1] space
+  for (int x = 0; x < mWorleyOctaveThreeSize; ++x) {
+    for (int y = 0; y < mWorleyOctaveThreeSize; ++y) {
+      for (int z = 0; z < mWorleyOctaveThreeSize; ++z) {
+        int index = x + y * mWorleyOctaveThreeSize + z * mWorleyOctaveThreeSize * mWorleyOctaveThreeSize;
+        mWorleyPoints3[index] = glm::vec4(
+          static_cast<float>(x) / mWorleyOctaveThreeSize + static_cast<float>(rand()) / RAND_MAX / mWorleyOctaveThreeSize,
+          static_cast<float>(y) / mWorleyOctaveThreeSize + static_cast<float>(rand()) / RAND_MAX / mWorleyOctaveThreeSize,
+          static_cast<float>(z) / mWorleyOctaveThreeSize + static_cast<float>(rand()) / RAND_MAX / mWorleyOctaveThreeSize,
+          1.0f
+        );
+      }
+    }
+  }
+  glGenBuffers(1, &mWorleyPointsBuffer3);
 }
 
 //-------------------------------------------------------
@@ -449,17 +497,28 @@ void eComputeShaderRender::DispatchWorley3D(const Camera& _camera)
 {
   glUseProgram(mWorley3D.ID());
 
-  glBindBuffer(GL_SHADER_STORAGE_BUFFER, mWorleyPointsBuffer);
-  glBufferData(GL_SHADER_STORAGE_BUFFER, mWorleyPoints.size() * sizeof(glm::vec4), mWorleyPoints.data(), GL_DYNAMIC_DRAW);
-  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, mWorleyPointsBuffer);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, mWorleyPointsBuffer1);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, mWorleyPoints1.size() * sizeof(glm::vec4), mWorleyPoints1.data(), GL_STATIC_DRAW);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, mWorleyPointsBuffer1);
+
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, mWorleyPointsBuffer2);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, mWorleyPoints2.size() * sizeof(glm::vec4), mWorleyPoints2.data(), GL_STATIC_DRAW);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, mWorleyPointsBuffer2);
+
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, mWorleyPointsBuffer3);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, mWorleyPoints3.size() * sizeof(glm::vec4), mWorleyPoints3.data(), GL_STATIC_DRAW);
+  glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, mWorleyPointsBuffer3);
+
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
   // Set uniform values
   glUniform1i(glGetUniformLocation(mWorley3D.ID(), "octaveOneSize"), mWorleyOctaveOneSize);
+  glUniform1i(glGetUniformLocation(mWorley3D.ID(), "octaveTwoSize"), mWorleyOctaveTwoSize);
+  glUniform1i(glGetUniformLocation(mWorley3D.ID(), "octaveThreeSize"), mWorleyOctaveThreeSize);
 
   // Bind the 3D texture
   glActiveTexture(GL_TEXTURE0);
-  glBindImageTexture(0, m_worley3DID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+  glBindImageTexture(0, m_worley3DID, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA32F);
 
   //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
   // Dispatch the compute shader

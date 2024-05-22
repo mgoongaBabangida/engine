@@ -25,6 +25,7 @@ public:
 
   GLuint GetWorley3DID() { return m_worley3DID; }
   float& WorleyNoiseZDebug() { return m_WorleyZ; }
+  int32_t& Noize3DOctaveDebug() { return m_WorleyOctave; }
 
   Shader& GetShader() { return mPSComputeShader; }
 protected:
@@ -62,10 +63,21 @@ protected:
 
   GLuint m_worley3DID;
   GLuint mWorleyDim = 512;
-  size_t mWorleyOctaveOneSize = 8;
-  alignas(16) std::vector<glm::vec4> mWorleyPoints;
-  GLuint mWorleyPointsBuffer;
+
+  size_t mWorleyOctaveOneSize = 6;
+  alignas(16) std::vector<glm::vec4> mWorleyPoints1;
+  GLuint mWorleyPointsBuffer1;
+
+  size_t mWorleyOctaveTwoSize = 10;
+  alignas(16) std::vector<glm::vec4> mWorleyPoints2;
+  GLuint mWorleyPointsBuffer2;
+
+  size_t mWorleyOctaveThreeSize = 12;
+  alignas(16) std::vector<glm::vec4> mWorleyPoints3;
+  GLuint mWorleyPointsBuffer3;
+
   float m_WorleyZ = 0.5f;
+  int32_t m_WorleyOctave = 0;
 
   struct ParticleSystemVars
   {

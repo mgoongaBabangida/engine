@@ -142,6 +142,13 @@ public:
 	float& K();
 
 	float& Noize3DZDebug();
+	int32_t& Noize3DOctaveDebug();
+	int32_t& GetCloudDensity();
+	int32_t& GetCloudAbsorption();
+	glm::vec3& GetCloudColor();
+	float& GetCloudPerlinWeight();
+	int32_t& GetCloudPerlinMotion();
+	int32_t& GetCloudWorleyMotion();
 
 	//statistic
 	uint32_t& GetDrawCalls() { return m_draw_calls; }
