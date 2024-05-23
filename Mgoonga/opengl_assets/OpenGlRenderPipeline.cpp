@@ -353,6 +353,11 @@ int32_t& eOpenGlRenderPipeline::GetCloudWorleyMotion()
 	return renderManager->VolumetricRender()->GetCloudWorleyMotion();
 }
 
+float& eOpenGlRenderPipeline::GetCloudGParam()
+{
+	return renderManager->VolumetricRender()->GetGParam();
+}
+
 //-----------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vector<shObject>> _objects,
 																				std::vector<Camera>& _cameras,

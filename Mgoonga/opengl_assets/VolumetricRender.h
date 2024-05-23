@@ -23,6 +23,7 @@ public:
   float& GetPerilnWeight() { return m_perlin; }
   int32_t& GetCloudPerlinMotion() { return m_perlin_motion; }
   int32_t& GetCloudWorleyMotion() { return m_worley_motion; }
+  float& GetGParam() { return m_g; }
 
 protected:
   Shader m_volumetric_shader;
@@ -33,6 +34,7 @@ protected:
   float m_perlin = 0.5f;
   int32_t m_perlin_motion = 10;
   int32_t m_worley_motion = 10;
+  float m_g = 0.5f;
 
   math::eClock		m_clock;;
 };

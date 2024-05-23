@@ -62,17 +62,20 @@ void VolumetricCloudsTool::Initialize()
 	m_imgui->Add(SPIN_BOX, "Density", (void*)&control_density);
 	m_imgui->Add(SLIDER_INT, "Absorption", &m_pipeline.get().GetCloudAbsorption());
 	m_imgui->Add(SLIDER_FLOAT, "Perlin weight", &m_pipeline.get().GetCloudPerlinWeight());
-	m_imgui->Add(SLIDER_FLOAT_3, "Cloud color", &m_pipeline.get().GetCloudColor());
+	m_imgui->Add(SLIDER_FLOAT_NERROW, "G Value", &m_pipeline.get().GetCloudGParam());
+
 	static std::function<void(int)> perlin_motion = [this](int _value)
 	{
-		if (_value >= 0)
+		if (_value > 0)
 			m_pipeline.get().GetCloudWorleyMotion() = _value;
 	};
 	m_imgui->Add(SPIN_BOX, "Perlin motion", (void*)&perlin_motion);
 	static std::function<void(int)> worley_motion = [this](int _value)
 	{
-		if (_value >= 0)
+		if (_value > 0)
 			m_pipeline.get().GetCloudWorleyMotion() = _value;
 	};
 	m_imgui->Add(SPIN_BOX, "Worley motion", (void*)&worley_motion);
+
+	m_imgui->Add(SLIDER_FLOAT_3, "Cloud color", &m_pipeline.get().GetCloudColor());
 }

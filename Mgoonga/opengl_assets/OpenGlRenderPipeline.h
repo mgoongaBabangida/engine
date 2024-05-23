@@ -149,6 +149,7 @@ public:
 	float& GetCloudPerlinWeight();
 	int32_t& GetCloudPerlinMotion();
 	int32_t& GetCloudWorleyMotion();
+	float& GetCloudGParam();
 
 	//statistic
 	uint32_t& GetDrawCalls() { return m_draw_calls; }

@@ -6,12 +6,15 @@ in vec3 normalizedNoisePos;
 uniform sampler3D noiseTexture;
 
 uniform vec4 viewDir;
+uniform vec4 lightDir;
 uniform vec4 cloudColor;
 uniform float stepSize = 0.01f;
 uniform int noiseSize = 512;
 uniform float density = 0.015f;
 uniform float perlinWeight = 0.5f; // Weight for Perlin noise effect
 uniform float absorption = 0.05f;
+uniform float g = 0.5f; // Henyey-Greenstein parameter
+uniform float scatteringCoefficient = 2.0f; // Powdered sugar
 
 uniform float time; // Uniform variable for time
 uniform float perlinMotionScale = 0.1f; // Scale for Perlin noise motion
@@ -32,10 +35,17 @@ vec4 sampleVolume(vec3 texCoord, float distance)
     float combinedVal = worleyVal * (1.0 + perlinWeight * (perlinVal - 0.5));
 	
 	 // Adjust the density based on distance
-    float distanceFactor = exp(-distance * absorption); // Modify the factor to get the desired effect
-	combinedVal *= density * distanceFactor;
+	combinedVal *= density;
 	
     return vec4(vec3(cloudColor), combinedVal);
+}
+
+float henryGreenstein(float g, float cosTheta)
+{
+    float g2 = g * g;
+    float denom = 1.0 + g2 - 2.0 * g * cosTheta;
+    float hg = (1.0 - g2) / pow(denom, 1.5);
+    return max(hg, 0.01); // Ensure a minimum scattering value
 }
 
 void main()
@@ -46,7 +56,8 @@ void main()
     vec4 accumulatedColor = vec4(0.0);
     vec4 sampleRes = vec4(0.0);
     vec3 texCoord = rayOrigin;
-
+	float totalDistance = 0.0f;
+	
     for (int i = 0; i < noiseSize; ++i)
     {
         if (texCoord.x < -0.01 || texCoord.x > 1.01 || texCoord.y < -0.01 || texCoord.y > 1.01 || texCoord.z < -0.01 || texCoord.z > 1.01)
@@ -54,13 +65,36 @@ void main()
 			
 		float distance = length(texCoord - rayOrigin);
         sampleRes = sampleVolume(texCoord, distance);
-        accumulatedColor.rgb += (1.0 - accumulatedColor.a) * sampleRes.rgb * sampleRes.a;
+		
+		// Calculate scattering
+		float cosTheta = dot(normalize(rayDir), normalize(vec3(lightDir)));
+		// Calculate the Henyey-Greenstein phase function
+        float hgPhase = henryGreenstein(g, cosTheta);
+		
+		// Apply Beer's law for light attenuation
+        float absorptionCoef = exp(-totalDistance * absorption);
+		// Powderd sugar
+		float powderCoef = 1 - exp(-totalDistance * scatteringCoefficient);
+		// Combine absorption and scattering
+        float combinedEffect = absorptionCoef + powderCoef - (absorptionCoef * powderCoef);
+		
+		vec3 attenuatedLight = sampleRes.rgb * combinedEffect;
+				
+		// Apply the phase function to the sample
+        vec3 scatteredLight = attenuatedLight * hgPhase;
+		
+		// Calculate isotropic scattering
+        //float scattering = max(dot(rayDir, vec3(lightDir))* 0.5 + 0.5, 0.1);
+        //vec3 scatteredLight = sampleRes.rgb * scattering;
+		
+        accumulatedColor.rgb += (1.0 - accumulatedColor.a) * scatteredLight * sampleRes.a;
         accumulatedColor.a += (1.0 - accumulatedColor.a) * sampleRes.a;
 
         if (accumulatedColor.a >= 1.0)
             break;
 
         texCoord += rayDir * stepSize;
+		totalDistance += stepSize;
     }
 		
     FragColor = accumulatedColor;
