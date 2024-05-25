@@ -358,6 +358,41 @@ float& eOpenGlRenderPipeline::GetCloudGParam()
 	return renderManager->VolumetricRender()->GetGParam();
 }
 
+glm::vec3& eOpenGlRenderPipeline::GetNoiseScale()
+{
+	return renderManager->VolumetricRender()->GetNoiseScale();
+}
+
+bool& eOpenGlRenderPipeline::GetApplyPowder()
+{
+	return renderManager->VolumetricRender()->GetApplyPowder();
+}
+
+bool& eOpenGlRenderPipeline::GetFixedCloudColor()
+{
+	return renderManager->VolumetricRender()->GetFixedColor();
+}
+
+int32_t& eOpenGlRenderPipeline::GetWorleyOctaveSizeOne()
+{
+	return renderManager->ComputeShaderRender()->GetOctaveSizeOne();
+}
+
+int32_t& eOpenGlRenderPipeline::GetWorleyOctaveSizeTwo()
+{
+	return renderManager->ComputeShaderRender()->GetOctaveSizeTwo();
+}
+
+int32_t& eOpenGlRenderPipeline::GetWorleyOctaveSizeThree()
+{
+	return renderManager->ComputeShaderRender()->GetOctaveSizeThree();
+}
+
+void eOpenGlRenderPipeline::RedoWorleyNoise()
+{
+	renderManager->ComputeShaderRender()->RedoNoise();
+}
+
 //-----------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vector<shObject>> _objects,
 																				std::vector<Camera>& _cameras,

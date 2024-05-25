@@ -68,10 +68,17 @@ eComputeShaderRender::~eComputeShaderRender()
 //---------------------------------------------------------------
 void eComputeShaderRender::DispatchCompute(const Camera& _camera)
 {
-  static bool disp = false;
-  if(!disp)
+  static bool first_call = false;
+  if(!first_call)
     DispatchWorley3D(_camera);
-  disp = true;
+  first_call = true;
+
+  if (m_redo_noise)
+  {
+    _InitWorley3d();
+    DispatchWorley3D(_camera);
+    m_redo_noise = false;
+  }
 }
 
 //-------------------------------------------------------
@@ -401,35 +408,37 @@ void eComputeShaderRender::_RenderClothSimul(const Camera& _camera)
 void eComputeShaderRender::_InitWorley3d()
 {
   //Generate cubic texture
-  glGenTextures(1, &m_worley3DID);
-  glBindTexture(GL_TEXTURE_3D, m_worley3DID);
+  if (m_worley3DID == Texture::GetDefaultTextureId())
+  {
+    glGenTextures(1, &m_worley3DID);
+    glBindTexture(GL_TEXTURE_3D, m_worley3DID);
 
-  // Create a 3D texture and fill it with data
-  const int mWorleyDim = 64; // Adjust according to your texture size
-  std::vector<float> textureData(mWorleyDim * mWorleyDim * mWorleyDim * 4); // RGBA format
+    // Create a 3D texture and fill it with data
+    std::vector<float> textureData(mWorleyDim * mWorleyDim * mWorleyDim * 4); // RGBA format
 
-  // Generate perlin noise for 4th channel
-  std::vector<float> perlinNoise = dbb::generatePerlinNoise3D(mWorleyDim, mWorleyDim, mWorleyDim);
+    // Generate perlin noise for 4th channel
+    //@todo pre-calculate and load from file
+    std::vector<float> perlinNoise = dbb::generatePerlinNoise3D(mWorleyDim, mWorleyDim, mWorleyDim);
 
   // Fill textureData with your texture data
   // For example, if you want to fill it with white color:
-  for (size_t i = 0; i < textureData.size(); i += 4) {
-    textureData[i]     = math::Random::RandomFloat(0.0f, 1.0f);  // Red
-    textureData[i + 1] = math::Random::RandomFloat(0.0f, 1.0f);  // Green
-    textureData[i + 2] = math::Random::RandomFloat(0.0f, 1.0f);  // Blue
-    textureData[i + 3] = perlinNoise[i/4];                       // Alpha -> perlin noise
+    for (size_t i = 0; i < textureData.size(); i += 4) {
+      textureData[i] = math::Random::RandomFloat(0.0f, 1.0f);       // Red
+      textureData[i + 1] = math::Random::RandomFloat(0.0f, 1.0f);  // Green
+      textureData[i + 2] = math::Random::RandomFloat(0.0f, 1.0f);  // Blue
+      textureData[i + 3] = perlinNoise[i / 4];                     // Alpha -> perlin noise
+    }
+
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, mWorleyDim, mWorleyDim, mWorleyDim, 0, GL_RGBA, GL_FLOAT, textureData.data());
+
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_3D, 0);
   }
-
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, mWorleyDim, mWorleyDim, mWorleyDim, 0, GL_RGBA, GL_FLOAT, textureData.data());
-  //glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, texSize, texSize, texSize, 0, GL_RGBA, GL_FLOAT, textureData);
-
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  glBindTexture(GL_TEXTURE_3D, 0);
 
   //Init points buffer 1
   int numPoints = mWorleyOctaveOneSize * mWorleyOctaveOneSize * mWorleyOctaveOneSize;
@@ -449,7 +458,8 @@ void eComputeShaderRender::_InitWorley3d()
       }
     }
   }
-  glGenBuffers(1, &mWorleyPointsBuffer1);
+  if(mWorleyPointsBuffer1 == Texture::GetDefaultTextureId())
+    glGenBuffers(1, &mWorleyPointsBuffer1);
 
   //Init points buffer 2
   numPoints = mWorleyOctaveTwoSize * mWorleyOctaveTwoSize * mWorleyOctaveTwoSize;
@@ -469,7 +479,8 @@ void eComputeShaderRender::_InitWorley3d()
       }
     }
   }
-  glGenBuffers(1, &mWorleyPointsBuffer2);
+  if (mWorleyPointsBuffer2 == Texture::GetDefaultTextureId())
+    glGenBuffers(1, &mWorleyPointsBuffer2);
 
   //Init points buffer 3
   numPoints = mWorleyOctaveThreeSize * mWorleyOctaveThreeSize * mWorleyOctaveThreeSize;
@@ -489,7 +500,8 @@ void eComputeShaderRender::_InitWorley3d()
       }
     }
   }
-  glGenBuffers(1, &mWorleyPointsBuffer3);
+  if (mWorleyPointsBuffer3 == Texture::GetDefaultTextureId())
+    glGenBuffers(1, &mWorleyPointsBuffer3);
 }
 
 //-------------------------------------------------------

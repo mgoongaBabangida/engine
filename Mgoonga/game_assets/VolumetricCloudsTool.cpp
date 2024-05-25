@@ -48,18 +48,35 @@ void VolumetricCloudsTool::Initialize()
 	static auto id =  m_pipeline.get().GetComputeParticleSystem().id;
 	m_imgui->Add(TEXTURE, "Noise 3D", (void*)id);
 	m_imgui->Add(SLIDER_FLOAT_NERROW, "Noise 3D Z Debug", &m_pipeline.get().Noize3DZDebug());
+
 	static std::function<void(int)> debug_octave_callback = [this](int _octave)
 	{
 		if (_octave >= 0 && _octave <= 4)
 			m_pipeline.get().Noize3DOctaveDebug() = _octave;
 	};
 	m_imgui->Add(SPIN_BOX, "Debug octave", (void*)&debug_octave_callback);
+
+	static std::function<void(int)> octave_size_callback = [this](int _octave)
+	{
+		auto cur_octave = m_pipeline.get().Noize3DOctaveDebug();
+		if (cur_octave == 0)
+			m_pipeline.get().GetWorleyOctaveSizeOne() = _octave;
+		else if(cur_octave == 1)
+			m_pipeline.get().GetWorleyOctaveSizeTwo() = _octave;
+		else if(cur_octave == 2)
+			m_pipeline.get().GetWorleyOctaveSizeThree() = _octave;
+	};
+	m_imgui->Add(SPIN_BOX, "Current Octave Size", (void*)&octave_size_callback);
+	std::function<void(void)> redo_noise_callback = [this]() { m_pipeline.get().RedoWorleyNoise(); };
+	m_imgui->Add(BUTTON, "Redo Noise", &redo_noise_callback);
+
 	static std::function<void(int)> control_density = [this](int _value)
 	{
 		if(_value >= 0)
 			m_pipeline.get().GetCloudDensity() = _value;
 	};
 	m_imgui->Add(SPIN_BOX, "Density", (void*)&control_density);
+
 	m_imgui->Add(SLIDER_INT, "Absorption", &m_pipeline.get().GetCloudAbsorption());
 	m_imgui->Add(SLIDER_FLOAT, "Perlin weight", &m_pipeline.get().GetCloudPerlinWeight());
 	m_imgui->Add(SLIDER_FLOAT_NERROW, "G Value", &m_pipeline.get().GetCloudGParam());
@@ -77,5 +94,8 @@ void VolumetricCloudsTool::Initialize()
 	};
 	m_imgui->Add(SPIN_BOX, "Worley motion", (void*)&worley_motion);
 
+	m_imgui->Add(CHECKBOX, "Apply Powder", &m_pipeline.get().GetApplyPowder());
+	m_imgui->Add(CHECKBOX, "Fixed color", &m_pipeline.get().GetFixedCloudColor());
 	m_imgui->Add(SLIDER_FLOAT_3, "Cloud color", &m_pipeline.get().GetCloudColor());
+	m_imgui->Add(SLIDER_FLOAT_3, "Noise scale", &m_pipeline.get().GetNoiseScale());
 }

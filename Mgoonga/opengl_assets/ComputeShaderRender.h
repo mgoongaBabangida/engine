@@ -5,6 +5,7 @@
 #include <base/base.h>
 #include <math/Camera.h>
 #include <math/Clock.h>
+#include <opengl_assets/Texture.h>
 
 //------------------------------------------
 class eComputeShaderRender
@@ -26,6 +27,10 @@ public:
   GLuint GetWorley3DID() { return m_worley3DID; }
   float& WorleyNoiseZDebug() { return m_WorleyZ; }
   int32_t& Noize3DOctaveDebug() { return m_WorleyOctave; }
+  int32_t& GetOctaveSizeOne() { return mWorleyOctaveOneSize;}
+  int32_t& GetOctaveSizeTwo() { return mWorleyOctaveTwoSize; }
+  int32_t& GetOctaveSizeThree() { return mWorleyOctaveThreeSize; }
+  void RedoNoise() { m_redo_noise = true;  }
 
   Shader& GetShader() { return mPSComputeShader; }
 protected:
@@ -61,24 +66,26 @@ protected:
   GLuint mImageWidth;
   GLuint mImageHeight;
 
-  GLuint m_worley3DID;
-  GLuint mWorleyDim = 512;
+  GLuint m_worley3DID = Texture::GetDefaultTextureId();
+  const GLuint mWorleyDim = 64;
 
-  size_t mWorleyOctaveOneSize = 6;
+  int32_t mWorleyOctaveOneSize = 6;
   alignas(16) std::vector<glm::vec4> mWorleyPoints1;
-  GLuint mWorleyPointsBuffer1;
+  GLuint mWorleyPointsBuffer1 = Texture::GetDefaultTextureId();
 
-  size_t mWorleyOctaveTwoSize = 10;
+  int32_t mWorleyOctaveTwoSize = 10;
   alignas(16) std::vector<glm::vec4> mWorleyPoints2;
-  GLuint mWorleyPointsBuffer2;
+  GLuint mWorleyPointsBuffer2 = Texture::GetDefaultTextureId();
 
-  size_t mWorleyOctaveThreeSize = 12;
+  int32_t mWorleyOctaveThreeSize = 12;
   alignas(16) std::vector<glm::vec4> mWorleyPoints3;
-  GLuint mWorleyPointsBuffer3;
+  GLuint mWorleyPointsBuffer3 = Texture::GetDefaultTextureId();
 
   float m_WorleyZ = 0.5f;
   int32_t m_WorleyOctave = 0;
+  bool m_redo_noise = false;
 
+  //**************************************//
   struct ParticleSystemVars
   {
     glm::ivec3 nParticles;

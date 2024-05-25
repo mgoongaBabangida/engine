@@ -141,6 +141,7 @@ public:
 	glm::vec4& Scale();
 	float& K();
 
+	//Volumetric Clouds
 	float& Noize3DZDebug();
 	int32_t& Noize3DOctaveDebug();
 	int32_t& GetCloudDensity();
@@ -150,6 +151,13 @@ public:
 	int32_t& GetCloudPerlinMotion();
 	int32_t& GetCloudWorleyMotion();
 	float& GetCloudGParam();
+	glm::vec3& GetNoiseScale();
+	bool& GetApplyPowder();
+	bool& GetFixedCloudColor();
+	int32_t& GetWorleyOctaveSizeOne();
+	int32_t& GetWorleyOctaveSizeTwo();
+	int32_t& GetWorleyOctaveSizeThree();
+	void RedoWorleyNoise();
 
 	//statistic
 	uint32_t& GetDrawCalls() { return m_draw_calls; }

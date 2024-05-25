@@ -5,23 +5,30 @@ in vec3 normalizedNoisePos;
 
 uniform sampler3D noiseTexture;
 
-uniform vec4 viewDir;
-uniform vec4 lightDir;
-uniform vec4 cloudColor;
+uniform vec4  viewDir;
+uniform vec4  lightDir;
+uniform vec4  cloudColor;
 uniform float stepSize = 0.01f;
-uniform int noiseSize = 512;
+uniform int   noiseSize = 512;
 uniform float density = 0.015f;
 uniform float perlinWeight = 0.5f; // Weight for Perlin noise effect
 uniform float absorption = 0.05f;
 uniform float g = 0.5f; // Henyey-Greenstein parameter
 uniform float scatteringCoefficient = 2.0f; // Powdered sugar
+uniform bool apply_powder = true;
+uniform bool fixed_color = false;
+uniform float alphaThreshold = 0.01f; // Alpha threshold for discarding fragments
 
 uniform float time; // Uniform variable for time
 uniform float perlinMotionScale = 0.1f; // Scale for Perlin noise motion
 uniform float worleyMotionScale = 0.1f; // Scale for Worley noise motion
+uniform vec4  noiseScale = vec4(1.0f); // Scale for the noise textures in each dimension;
 
 vec4 sampleVolume(vec3 texCoord, float distance)
 {
+	// Scale the texture coordinates in each dimension
+    texCoord *= vec3(noiseScale);
+	
 	// Apply Brownian motion
     vec3 perlinTexCoord = texCoord + vec3(sin(time * perlinMotionScale), cos(time * perlinMotionScale), sin(time * perlinMotionScale * 0.5));
     vec3 worleyTexCoord = texCoord + vec3(cos(time * worleyMotionScale), sin(time * worleyMotionScale), cos(time * worleyMotionScale * 0.5));
@@ -74,9 +81,9 @@ void main()
 		// Apply Beer's law for light attenuation
         float absorptionCoef = exp(-totalDistance * absorption);
 		// Powderd sugar
-		float powderCoef = 1 - exp(-totalDistance * scatteringCoefficient);
+		float powderCoef = apply_powder ? 1 - exp(-totalDistance * scatteringCoefficient) : 0.0f;
 		// Combine absorption and scattering
-        float combinedEffect = absorptionCoef + powderCoef - (absorptionCoef * powderCoef);
+        float combinedEffect = absorptionCoef + powderCoef; // - (absorptionCoef * powderCoef);
 		
 		vec3 attenuatedLight = sampleRes.rgb * combinedEffect;
 				
@@ -87,7 +94,11 @@ void main()
         //float scattering = max(dot(rayDir, vec3(lightDir))* 0.5 + 0.5, 0.1);
         //vec3 scatteredLight = sampleRes.rgb * scattering;
 		
-        accumulatedColor.rgb += (1.0 - accumulatedColor.a) * scatteredLight * sampleRes.a;
+		if(fixed_color)
+			accumulatedColor.rgb += scatteredLight;
+		else
+			accumulatedColor.rgb += (1.0 - accumulatedColor.a) * scatteredLight * sampleRes.a;
+			
         accumulatedColor.a += (1.0 - accumulatedColor.a) * sampleRes.a;
 
         if (accumulatedColor.a >= 1.0)
@@ -96,6 +107,10 @@ void main()
         texCoord += rayDir * stepSize;
 		totalDistance += stepSize;
     }
+	
+	// Discard fragments with low alpha values
+    if (accumulatedColor.a < alphaThreshold)
+        discard;
 		
     FragColor = accumulatedColor;
 }
