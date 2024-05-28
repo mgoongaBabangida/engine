@@ -18,7 +18,7 @@ namespace math {
 	}
 
 	//-------------------------------------------------------------
-	int64_t eClock::timeEllapsedMsc()
+	int64_t eClock::timeElapsedMsc()
 	{
 		if (!paused)
 		{
@@ -52,7 +52,7 @@ namespace math {
 	}
 
 	//-------------------------------------------------------------
-	int64_t eClock::timeEllapsedLastFrameMsc()
+	int64_t eClock::timeElapsedLastFrameMsc()
 	{
 		if (!paused)
 		{

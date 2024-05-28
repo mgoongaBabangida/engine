@@ -13,7 +13,7 @@ namespace math {
 	bool Timer::start(unsigned int period)
 	{
 		bool fls = false;
-		if (!active.compare_exchange_weak(fls, true))
+		if (!active.compare_exchange_strong(fls, true))
 		{
 			return false;
 		}
@@ -24,10 +24,11 @@ namespace math {
 			{
 				while (active)
 				{
-					if (clock.timeEllapsedLastFrameMsc() >= period)
+					if (clock.timeElapsedLastFrameMsc() >= period)
 					{
 						this->callable();
 						this->clock.newFrame();
+						//@todo add some sleeping
 					}
 				}
 				return true;

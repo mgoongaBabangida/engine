@@ -90,7 +90,7 @@ void eParticleSystemRenderGPU::AddParticleSystem(glm::vec3 _startPos, Texture* _
 void eParticleSystemRenderGPU::_UpdateParticles()
 {
   glUseProgram(m_updateShader.ID());
-  glUniform1f(m_timeLocation, static_cast<float>(m_clock.timeEllapsedMsc()));
+  glUniform1f(m_timeLocation, static_cast<float>(m_clock.timeElapsedMsc()));
   glUniform1f(m_deltaTimeMillisLocation, static_cast<float>(m_clock.newFrame()));
 
   glActiveTexture(GL_TEXTURE6);
@@ -191,7 +191,7 @@ void eParticleSystemRenderGPU_V2::Render(const Camera& _camera)
   glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1 ,&m_updateSubLoc);
 
   // uniforms H Time
-  glUniform1f(m_timeLoc, static_cast<float>(m_clock.timeEllapsedMsc())/ 1000.0f);
+  glUniform1f(m_timeLoc, static_cast<float>(m_clock.timeElapsedMsc())/ 1000.0f);
   glUniform1f(m_HLoc, static_cast<float>(m_clock.newFrame())/ 1000.0f);
   // geometry
   glUniform1f(m_BillboardSizeLoc, 0.01f);

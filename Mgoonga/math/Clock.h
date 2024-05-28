@@ -11,16 +11,17 @@ namespace math {
 	class DLL_MATH eClock
 	{
 	public:
-		void			reset();
 		void			start();
-		int64_t		timeEllapsedMsc();
-		//returns time since last frame
-		int64_t		newFrame();
-		int64_t		timeEllapsedLastFrameMsc();
-		void			restart();
-		bool			isActive();
+		void			reset();
 		void			pause();
 		void			goOn();
+		void			restart();
+
+		int64_t		newFrame(); //returns time since last frame
+		int64_t		timeElapsedMsc(); // since start
+		int64_t		timeElapsedLastFrameMsc();
+
+		bool			isActive();
 		bool			isPaused();
 
 	protected:

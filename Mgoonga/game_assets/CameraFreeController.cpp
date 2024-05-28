@@ -50,7 +50,7 @@ bool CameraFreeController::OnKeyJustPressed(uint32_t _asci, KeyModifiers _modifi
 //-----------------------------------------------------------
 bool CameraFreeController::OnKeyPress(const std::vector<bool> _keys, KeyModifiers _modifier)
 {
-	if (m_clock.timeEllapsedLastFrameMsc() < 10)
+	if (m_clock.timeElapsedLastFrameMsc() < 10)
 		return true;
 
 	if (!m_clock.isActive())

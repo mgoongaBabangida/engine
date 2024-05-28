@@ -8,7 +8,7 @@ const Frame& SceletalAnimation::getCurrentFrame()
 		return freeze_frame < frames.size() ? frames[freeze_frame] : frames[frames.size()-1];
 	}
 
-	if (clock.timeEllapsedMsc() > duration)
+	if (clock.timeElapsedMsc() > duration)
 	{
 		if (play_once)
 			clock.pause();
@@ -16,7 +16,7 @@ const Frame& SceletalAnimation::getCurrentFrame()
 			clock.restart();
 	}
 
-	int64_t time = clock.timeEllapsedMsc();
+	int64_t time = clock.timeElapsedMsc();
 	size_t i = 0;
 
 	for (; i < frames.size() - 1; ++i)

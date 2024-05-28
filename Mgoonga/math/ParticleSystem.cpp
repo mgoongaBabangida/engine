@@ -59,7 +59,7 @@ void ParticleSystem::Start()
 //-------------------------------------------------------------------------
 void ParticleSystem::GenerateParticles(int64_t _tick)
 {
-	if(clock.timeEllapsedMsc() < m_duration || m_loop)
+	if(clock.timeElapsedMsc() < m_duration || m_loop)
 	{
 		int64_t msc = _tick + m_time_wo_new_particles;
 		float new_particlesf = static_cast<float>(msc) / 1000.0f * static_cast<float>(m_pps);
@@ -154,7 +154,7 @@ std::vector<Particle>::iterator ParticleSystem::PrepareParticles(const glm::vec3
 bool ParticleSystem::IsFinished()
 {
 	if (!m_loop)
-		return clock.timeEllapsedMsc() > m_duration + (m_life_length * 1000);
+		return clock.timeElapsedMsc() > m_duration + (m_life_length * 1000);
 	else
 		return false;
 }

@@ -25,12 +25,12 @@ namespace math
 
     std::vector<T> getCurrentFrame()
     {
-      if (m_clock.timeEllapsedMsc() > m_duration)
+      if (m_clock.timeElapsedMsc() > m_duration)
       {
         m_clock.pause();
         return m_end_points;
       }
-      float time_stamp = m_clock.timeEllapsedMsc() / static_cast<float>(m_duration);
+      float time_stamp = m_clock.timeElapsedMsc() / static_cast<float>(m_duration);
       std::vector<T> res(m_start_points.size());
       for (size_t i = 0; i < m_start_points.size(); ++i)
       {
