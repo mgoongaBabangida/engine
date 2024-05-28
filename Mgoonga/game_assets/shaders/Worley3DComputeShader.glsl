@@ -17,7 +17,7 @@ uniform int octaveOneSize = 8;
 uniform int octaveTwoSize = 12;
 uniform int octaveThreeSize = 16;
 
-uniform float gamma = 142.0; // Adjust this value for desired contrast enhancement
+uniform int gamma = 142; // Adjust this value for desired contrast enhancement
 
 float distanceSquared(vec3 p1, vec3 p2)
 {

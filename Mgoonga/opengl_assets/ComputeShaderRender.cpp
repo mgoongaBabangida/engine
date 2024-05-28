@@ -524,6 +524,7 @@ void eComputeShaderRender::DispatchWorley3D(const Camera& _camera)
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
   // Set uniform values
+  glUniform1i(glGetUniformLocation(mWorley3D.ID(), "gamma"), m_noise_gamma);
   glUniform1i(glGetUniformLocation(mWorley3D.ID(), "octaveOneSize"), mWorleyOctaveOneSize);
   glUniform1i(glGetUniformLocation(mWorley3D.ID(), "octaveTwoSize"), mWorleyOctaveTwoSize);
   glUniform1i(glGetUniformLocation(mWorley3D.ID(), "octaveThreeSize"), mWorleyOctaveThreeSize);

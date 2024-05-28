@@ -312,7 +312,7 @@ float& eOpenGlRenderPipeline::K()
 {
 	return renderManager->SSRRenderer()->K();
 }
-
+//---------------------------------------------------------------------------
 float& eOpenGlRenderPipeline::Noize3DZDebug()
 {
 	return renderManager->ComputeShaderRender()->WorleyNoiseZDebug();
@@ -368,9 +368,24 @@ bool& eOpenGlRenderPipeline::GetApplyPowder()
 	return renderManager->VolumetricRender()->GetApplyPowder();
 }
 
-bool& eOpenGlRenderPipeline::GetFixedCloudColor()
+float& eOpenGlRenderPipeline::GetSilverLiningDensity()
 {
-	return renderManager->VolumetricRender()->GetFixedColor();
+	return renderManager->VolumetricRender()->GetSilverLiningDensity();
+}
+
+int32_t& eOpenGlRenderPipeline::GetSilverLiningStrength()
+{
+	return renderManager->VolumetricRender()->GetSilverLiningStrength();
+}
+
+float& eOpenGlRenderPipeline::GetAlphathreshold()
+{
+	return renderManager->VolumetricRender()->GetAlphathreshold();
+}
+
+bool& eOpenGlRenderPipeline::GetCloudSilverLining()
+{
+	return renderManager->VolumetricRender()->GetSilverLining();
 }
 
 int32_t& eOpenGlRenderPipeline::GetWorleyOctaveSizeOne()
@@ -386,6 +401,11 @@ int32_t& eOpenGlRenderPipeline::GetWorleyOctaveSizeTwo()
 int32_t& eOpenGlRenderPipeline::GetWorleyOctaveSizeThree()
 {
 	return renderManager->ComputeShaderRender()->GetOctaveSizeThree();
+}
+
+int32_t& eOpenGlRenderPipeline::GetWorleyNoiseGamma()
+{
+	return renderManager->ComputeShaderRender()->GetNoiseGamma();
 }
 
 void eOpenGlRenderPipeline::RedoWorleyNoise()

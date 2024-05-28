@@ -30,9 +30,10 @@ public:
   int32_t& GetOctaveSizeOne() { return mWorleyOctaveOneSize;}
   int32_t& GetOctaveSizeTwo() { return mWorleyOctaveTwoSize; }
   int32_t& GetOctaveSizeThree() { return mWorleyOctaveThreeSize; }
-  void RedoNoise() { m_redo_noise = true;  }
+  void RedoNoise() { m_redo_noise = true; }
+  int32_t& GetNoiseGamma() { return m_noise_gamma; }
 
-  Shader& GetShader() { return mPSComputeShader; }
+  Shader& GetShader() { return mWorley3D; }
 protected:
   void _DispatchSimpleCompute();
 
@@ -83,6 +84,7 @@ protected:
 
   float m_WorleyZ = 0.5f;
   int32_t m_WorleyOctave = 0;
+  int32_t m_noise_gamma = 142;
   bool m_redo_noise = false;
 
   //**************************************//

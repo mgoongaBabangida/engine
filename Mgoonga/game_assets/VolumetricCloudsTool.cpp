@@ -67,6 +67,7 @@ void VolumetricCloudsTool::Initialize()
 			m_pipeline.get().GetWorleyOctaveSizeThree() = _octave;
 	};
 	m_imgui->Add(SPIN_BOX, "Current Octave Size", (void*)&octave_size_callback);
+	m_imgui->Add(SLIDER_INT, "Noise Gamma", &m_pipeline.get().GetWorleyNoiseGamma());
 	std::function<void(void)> redo_noise_callback = [this]() { m_pipeline.get().RedoWorleyNoise(); };
 	m_imgui->Add(BUTTON, "Redo Noise", &redo_noise_callback);
 
@@ -95,7 +96,10 @@ void VolumetricCloudsTool::Initialize()
 	m_imgui->Add(SPIN_BOX, "Worley motion", (void*)&worley_motion);
 
 	m_imgui->Add(CHECKBOX, "Apply Powder", &m_pipeline.get().GetApplyPowder());
-	m_imgui->Add(CHECKBOX, "Fixed color", &m_pipeline.get().GetFixedCloudColor());
+	m_imgui->Add(SLIDER_FLOAT_NERROW, "Alpha threhsold", &m_pipeline.get().GetAlphathreshold());
+	m_imgui->Add(CHECKBOX, "Silver lining", &m_pipeline.get().GetCloudSilverLining());
+	m_imgui->Add(SLIDER_FLOAT_NERROW, "Silver lining density", &m_pipeline.get().GetSilverLiningDensity());
+	m_imgui->Add(SLIDER_INT_NERROW, "Silver lining density", &m_pipeline.get().GetSilverLiningStrength());
 	m_imgui->Add(SLIDER_FLOAT_3, "Cloud color", &m_pipeline.get().GetCloudColor());
 	m_imgui->Add(SLIDER_FLOAT_3, "Noise scale", &m_pipeline.get().GetNoiseScale());
 }

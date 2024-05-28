@@ -153,10 +153,14 @@ public:
 	float& GetCloudGParam();
 	glm::vec3& GetNoiseScale();
 	bool& GetApplyPowder();
-	bool& GetFixedCloudColor();
+	float& GetSilverLiningDensity();
+	int32_t& GetSilverLiningStrength();
+	float& GetAlphathreshold();
+	bool& GetCloudSilverLining();
 	int32_t& GetWorleyOctaveSizeOne();
 	int32_t& GetWorleyOctaveSizeTwo();
 	int32_t& GetWorleyOctaveSizeThree();
+	int32_t& GetWorleyNoiseGamma();
 	void RedoWorleyNoise();
 
 	//statistic

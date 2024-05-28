@@ -202,7 +202,7 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																									folderPath + "3DtextureDebugFragment.glsl", //debug 3d
 																									texManager.Find("TSpanishFlag0_s"),
 																									texManager.Find("computeImageRW")));
-	shader_lambda(m_cameraInrepolationRender.get());
+	shader_lambda(m_computeRender.get());
 
 	//Terrain Tessellation
 	m_terrainTesRender.reset(new eTerrainTessellatedRender(folderPath + "TerrainTessellationVertex.glsl",
