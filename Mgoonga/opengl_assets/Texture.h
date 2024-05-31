@@ -111,6 +111,7 @@ protected:
 	static std::set<unsigned int> indexes_in_use;
 	static GLuint mg_default_texture_id;
 	static GLuint mg_empty_texture_id;
+	static bool m_use_mipmaps;
 };
 
 

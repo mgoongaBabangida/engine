@@ -15,6 +15,7 @@ unsigned int Texture::textures_in_use = 0;
 std::set<unsigned int> Texture::indexes_in_use = {};
 GLuint Texture::mg_default_texture_id = (GLuint)glm::pow(2, 32) - 1;
 GLuint Texture::mg_empty_texture_id = (GLuint)glm::pow(2, 32) - 1;
+bool Texture::m_use_mipmaps = true;
 
 //-----------------------------------------------
 GLuint Texture::GetDefaultTextureId()
@@ -144,9 +145,9 @@ bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenu
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	if (type == "terrain")
+	if (m_use_mipmaps)
 	{
-		glGenerateMipmap(id);
+		glGenerateMipmap(GL_TEXTURE_2D);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	}
 
@@ -266,13 +267,15 @@ bool Texture::loadCubemap(std::vector<std::string> faces)
     int i1 = IL_COULD_NOT_OPEN_FILE;
     int i2 = IL_ILLEGAL_OPERATION;
     int i3 = IL_INVALID_PARAM;
+
     //Image loaded successfully
     mTextureWidth = ilGetInteger(IL_IMAGE_WIDTH);
     mTextureHeight = ilGetInteger(IL_IMAGE_HEIGHT);
     auto pixmap = new BYTE[mTextureWidth * mTextureHeight * 3];
     ilCopyPixels(0, 0, 0, mTextureWidth, mTextureHeight, 1, IL_RGB, IL_UNSIGNED_BYTE, pixmap);
+
     //Convert image to RGBA
-    success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+    success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE); // always converts rgb -> rgba
     if (!success)
       std::cout << "error converting image" << std::endl;
     // Load textures
@@ -288,7 +291,7 @@ bool Texture::loadCubemap(std::vector<std::string> faces)
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
   glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-  mChannels = 4; // 3?
+  mChannels = 4;
 
   return true;
 }
@@ -296,8 +299,10 @@ bool Texture::loadCubemap(std::vector<std::string> faces)
 //----------------------------------------------------------------------------------------------------------
 bool Texture::makeCubemap(size_t _size, bool _mipmap, GLenum _format, GLenum _internal_format, GLenum _type)
 {
-	//@todo customize - channels
-	mChannels = 3;
+	if (_internal_format == GL_RGBA)
+		mChannels = 4;
+	else
+		mChannels = 3;
 	mTextureWidth = (int32_t)_size;
 	mTextureHeight = (int32_t)_size;
 
