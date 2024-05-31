@@ -3,14 +3,15 @@
 #include <glm\glm\gtx\transform.hpp>
 
 //---------------------------------------------------------------------
-Camera::Camera(float		_width,
-			   float		_height,
-			   float		_nearPlane,
-			   float		_farPlane,
-			   float		_perspectiveRatio, 
-			   glm::vec3	_position, 
-			   glm::vec3	_viewDirection)
-: up(0.0f, 1.0f, 0.0f)
+Camera::Camera(float			_width,
+							float				_height,
+							float				_nearPlane,
+							float				_farPlane,
+							float				_perspectiveRatio,
+							glm::vec3		_position, 
+							glm::vec3		_viewDirection,
+							glm::vec3 _up)
+: up(_up)
 , strafeDirection(1.0f, 0.0f, 0.0f)
 , projectionOrthoMatrix(glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, _nearPlane, _farPlane))
 , width(static_cast<uint32_t>(_width))

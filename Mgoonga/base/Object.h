@@ -18,7 +18,8 @@ public:
 		LINES,
 		AREA_LIGHT_ONLY,
 		TERRAIN_TESSELLATION,
-		VOLUMETRIC
+		VOLUMETRIC,
+		ENVIRONMENT_PROBE
 	};
 
 	explicit eObject() {} //@todo

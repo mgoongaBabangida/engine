@@ -16,6 +16,7 @@ public:
   virtual std::vector<const Texture*> GetTextures() const;
 
 	void SetTexture(const Texture* _t);
+	const Texture* GetTexture() const { return texture; }
 
 protected:
 	GLuint	 skyboxVAO;

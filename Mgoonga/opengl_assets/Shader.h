@@ -41,7 +41,7 @@ protected:
 	bool					checkShaderStatus(GLint shaderID);
 	bool					checkProgramStatus();
 
-	GLuint id;
+	GLuint id = UINT32_MAX;
 
 	GLuint vertexShaderID;
 	GLuint fragmentShaderID;

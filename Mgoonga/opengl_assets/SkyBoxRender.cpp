@@ -34,3 +34,8 @@ void eSkyBoxRender::SetSkyBoxTexture(const Texture* _t)
 {
 	skyBox->SetTexture(_t);
 }
+
+const Texture* eSkyBoxRender::GetSkyBoxTexture() const
+{
+	return skyBox->GetTexture();
+}

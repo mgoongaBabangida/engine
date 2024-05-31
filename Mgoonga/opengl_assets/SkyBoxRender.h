@@ -13,8 +13,10 @@ public:
 				  const std::string& vertexShaderPath,
 				  const std::string& fragmentShaderPath);
 
-	void Render(const Camera& camera);	
+	void Render(const Camera& camera);
+
 	void SetSkyBoxTexture(const Texture*);
+	const Texture* GetSkyBoxTexture() const;
 
 	Shader& GetShader() { return skyboxShader; }
 

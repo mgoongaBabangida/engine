@@ -32,7 +32,8 @@ enum class eBuffer
 	BUFFER_SSR,
 	BUFFER_SSR_BLUR,
 	BUFFER_SCREEN_MASK,
-	BUFFER_SCREEN_WITH_SSR
+	BUFFER_SCREEN_WITH_SSR,
+	BUFFER_ENVIRONMENT_CUBEMAP
 };
 
 //---------------------------------------------------------------------------
@@ -94,6 +95,7 @@ private:
 	SimpleColorFBO ssaoBlurFBO;
 	CubemapFBO		 iblCubemapFBO;
 	CubemapFBO		 iblCubemapIrrFBO;
+	CubemapFBO		 environmentCubemapFBO;
 	BloomFBO			 bloomFBO;
 	eColorFBO			 ssrFBO;
 	eColorFBO			 ssrblurFBO;

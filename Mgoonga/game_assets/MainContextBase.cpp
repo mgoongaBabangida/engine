@@ -219,7 +219,7 @@ void eMainContextBase::PaintGL()
 	{
 		int64_t tick = m_global_clock.newFrame();
 		std::map<eObject::RenderType, std::vector<shObject>> objects;
-		std::vector<shObject> phong, pbr, flags, bezier, geometry, lines, arealighted, terrain, volumetric;
+		std::vector<shObject> phong, pbr, flags, bezier, geometry, lines, arealighted, terrain, volumetric, environment;
 
 		if(!m_texts.empty() && m_show_fps)
 			m_texts[0]->content = { "FPS " + std::to_string(1000 / tick) };
@@ -269,6 +269,8 @@ void eMainContextBase::PaintGL()
 					terrain.push_back(object);
 				else if (object->GetRenderType() == eObject::RenderType::VOLUMETRIC)
 					volumetric.push_back(object);
+				else if (object->GetRenderType() == eObject::RenderType::ENVIRONMENT_PROBE)
+					environment.push_back(object);
 			}
 		}
 
@@ -300,6 +302,7 @@ void eMainContextBase::PaintGL()
 		objects.insert({ eObject::RenderType::LINES, lines });
 		objects.insert({ eObject::RenderType::AREA_LIGHT_ONLY, arealighted });
 		objects.insert({ eObject::RenderType::VOLUMETRIC, volumetric });
+		objects.insert({ eObject::RenderType::ENVIRONMENT_PROBE, environment });
 
 		pipeline.UpdateSharedUniforms();
 		pipeline.RenderFrame(objects, m_cameras, GetMainLight(), m_guis, m_texts);
@@ -688,6 +691,7 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Deffered Pos", (void*)pipeline.GetDefferedOne().id);
 	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Deffered Norm", (void*)pipeline.GetDefferedTwo().id);
 	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "LUT", (void*)pipeline.GetLUT().id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Environment", (void*)pipeline.GetEnvironmentCubeMap().id);
 	if (GetMainLight().type == eLightType::DIRECTION)
 		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Shadow buffer directional", (void*)pipeline.GetShadowBufferTexture().id);
 	else

@@ -139,6 +139,7 @@ void eOpenGlRenderPipeline::InitializeBuffers()
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SSAO_BLUR, width, height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_IBL_CUBEMAP, 512, 512);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_IBL_CUBEMAP_IRR, 32, 32);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP, 1024, 1024); // @todo should be the size of current skybox
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_BLOOM, width, height);
 	eGlBufferContext::GetInstance().BufferCustomInit("CameraInterpolationCoordsBuffer", width, height);
 	eGlBufferContext::GetInstance().BufferCustomInit("ComputeParticleSystemBuffer", width, height);
@@ -766,6 +767,10 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	RenderVolumetric(_camera, _light, volumetric_objs);
 	glDisable(GL_BLEND);
 
+	// Environment cubemaps
+	if(m_environment_map)
+		RenderEnvironmentSnapshot(_objects, _cameras, _light);
+
 	//7  Particles
 	if (particles) { RenderParticles(_camera); }
 
@@ -1174,7 +1179,7 @@ void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 	glBindFramebuffer(GL_FRAMEBUFFER, eGlBufferContext::GetInstance().GetId(eBuffer::BUFFER_IBL_CUBEMAP));
 	glBindRenderbuffer(GL_RENDERBUFFER, eGlBufferContext::GetInstance().GetRboID(eBuffer::BUFFER_IBL_CUBEMAP));
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderManager->IBLRender()->GetLUTTextureID(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderManager->IBLRender()->GetLUTTextureID(), 0); //!?
 
 	glViewport(0, 0, 512, 512);
 	renderManager->IBLRender()->RenderBrdf();
@@ -1195,8 +1200,8 @@ void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 
 		cube.makeCubemap(512, false); //@todo works only the first time, does not second @bugfix
 		glCopyImageSubData(cube_id, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
-			cube.id, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
-			512, 512, 6); //copy from buffer to texture
+											 cube.id, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+											 512, 512, 6); //copy from buffer to texture
 
    // irradiance
 		glActiveTexture(GL_TEXTURE5);
@@ -1208,8 +1213,8 @@ void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 		renderManager->IBLRender()->RenderIBLMap(_camera, irr_id); // write irr to irr buffer
 		irr.makeCubemap(32);
 		glCopyImageSubData(irr_id, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
-			irr.id, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
-			32, 32, 6); //copy from buffer to texture
+											 irr.id, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+											 32, 32, 6); //copy from buffer to texture
 
    // dots artifacts
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cube_id);
@@ -1241,6 +1246,102 @@ void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 	}
 
 	glEnable(GL_CULL_FACE);
+}
+
+//-------------------------------------------------------
+void	eOpenGlRenderPipeline::RenderEnvironmentSnapshot(std::map<eObject::RenderType, std::vector<shObject>> _objects,
+																											 std::vector<Camera>& _cameras, //@todo const ?
+																											 const Light& _light)
+{
+	//1. Copy skybox to environment map
+	GLuint sourceCubeMap	= eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP).id; // ID of the source cube map texture
+	GLuint destCubeMap		= eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP).id; // ID of the destination cube map texture
+	int width							= renderManager->SkyBoxRender()->GetSkyBoxTexture()->mTextureWidth; // Width of each face of the cube map
+	int height						= renderManager->SkyBoxRender()->GetSkyBoxTexture()->mTextureHeight; // Height of each face of the cube map
+
+	if (width != eGlBufferContext::GetInstance().GetSize(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP).x
+		|| height != eGlBufferContext::GetInstance().GetSize(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP).y)
+		return; //@todo regenerate buffer
+
+	GLenum cubeFaces[6] = {
+			GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+			GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+			GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+			GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+			GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+			GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+	};
+
+	//for (int i = 0; i < 6; ++i)
+	//{
+	//	glCopyImageSubData(
+	//		sourceCubeMap,          // Source texture ID
+	//		cubeFaces[i],           // Source texture target (face of the cube map)
+	//		0,                      // Source level
+	//		0, 0, 0,                // Source x, y, z offsets
+	//		destCubeMap,            // Destination texture ID
+	//		cubeFaces[i],           // Destination texture target (face of the cube map)
+	//		0,                      // Destination level
+	//		0, 0, 0,                // Destination x, y, z offsets
+	//		width, height, 1        // Width, height, depth
+	//	);
+	//}
+
+	glm::vec3 captureViews[6] = { glm::vec3(1.0f, 0.0f, 0.0f) , glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f),
+															glm::vec3(0.0f, -1.0f, 0.0f) , glm::vec3(0.0f, 0.0f, 1.0f) , glm::vec3(0.0f, 0.0f, -1.0f) };
+
+	glm::vec3 captureUps[6] = { glm::vec3(0.0f, 1.0f, 0.0f) , glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f),
+															glm::vec3(0.0f, 0.0f, -1.0f) , glm::vec3(0.0f, 1.0f, 0.0f) , glm::vec3(0.0f, 1.0f, 0.0f) };
+
+	for (unsigned int i = 0; i < 6; ++i)
+	{
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, cubeFaces[i], destCubeMap, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	glCopyImageSubData(sourceCubeMap, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+										 destCubeMap,   GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+										 width, height, 6); //copy from buffer to texture
+
+	//2. Render to all the faces
+	//GLuint env_id = eGlBufferContext::GetInstance().GetId(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP);
+	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP);
+	for (unsigned int i = 0; i < 6; ++i)
+	{
+		Camera camera((float)_cameras[0].getWidth(), (float)_cameras[0].getHeight(), _cameras[0].getNearPlane(),
+												 _cameras[0].getFarPlane(), 90.0f, glm::vec3{0,1,0}, captureViews[i], captureUps[i]);
+
+		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, cubeFaces[i], destCubeMap, 0);
+		glViewport(0, 0, width, height);
+		std::vector<shObject> phong_objs = _objects.find(eObject::RenderType::PHONG)->second;
+		RenderMain(camera, _light, phong_objs);
+	}
+
+	//3. Render reflective objects
+	// Assign Correct Draw framebuffer!!!
+	static Shader shader;
+	if (shader.ID() == UINT32_MAX)
+		shader.installShaders("../game_assets/shaders/EnvironmentTestVertex.glsl", "../game_assets/shaders/EnvironmentTestFragment.glsl");
+
+	glUseProgram(shader.ID());
+
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP).id);
+
+	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS); // or  eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
+	
+	for (unsigned int i = 0; i < 6; ++i)
+	{
+		shader.SetUniformData("view", _cameras[0].getWorldToViewMatrix());
+		shader.SetUniformData("projection", _cameras[0].getProjectionMatrix());
+		shader.SetUniformData("cameraPos", _cameras[0].getPosition());
+		std::vector<shObject> env_objs = _objects.find(eObject::RenderType::ENVIRONMENT_PROBE)->second;
+		for (auto& obj : env_objs)
+		{
+			shader.SetUniformData("model", obj->GetTransform()->getModelMatrix());
+			obj->GetModel()->Draw();
+		}
+	}
 }
 
 //-------------------------------------------------------
@@ -1324,7 +1425,13 @@ Texture eOpenGlRenderPipeline::GetDefferedTwo() const
 //----------------------------------------------------
 Texture eOpenGlRenderPipeline::GetHdrCubeMap() const
 {
-	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP);
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP); // does not work like this
+}
+
+//----------------------------------------------------
+Texture eOpenGlRenderPipeline::GetEnvironmentCubeMap() const
+{
+	return eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP); // does not work like this
 }
 
 //----------------------------------------------------

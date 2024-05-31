@@ -182,6 +182,7 @@ public:
 	Texture GetDefferedOne() const;
 	Texture GetDefferedTwo() const;
 	Texture GetHdrCubeMap() const;
+	Texture GetEnvironmentCubeMap() const;
 	Texture GetLUT() const;
 	Texture GetCSMMapLayer1() const;
 	Texture GetCSMMapLayer2() const;
@@ -220,6 +221,7 @@ protected:
 	void			RenderCameraInterpolationCompute(const Camera& _camera);
 	Texture*  RenderCameraInterpolation(const Camera& _camera);
 	void			RenderIBL(const Camera& _camera);
+	void			RenderEnvironmentSnapshot(std::map<eObject::RenderType, std::vector<shObject>> _objects, std::vector<Camera>& _cameras, const Light& _light);
 	void			RenderBloom();
 	void			RenderTerrainTessellated(const Camera&, const Light& _light, std::vector<shObject> _objs);
 	void			RenderVolumetric(const Camera&, const Light& _light, std::vector<shObject> _objs);
@@ -244,6 +246,7 @@ protected:
 	bool			m_mesh_line_on = false;
 	bool			ibl_on = true;
 	bool			m_compute_shader = false;
+	bool			m_environment_map = false;
 
 	FogInfo		m_foginfo;
 
