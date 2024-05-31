@@ -52,6 +52,7 @@ protected:
 
 	GLuint		m_rbo;
 	GLuint		m_rbo_mask;
+	GLuint		m_samples = 8; // used for multisampling 4 or 8
 };
 
 //-------------------------------------------------------------------------------------

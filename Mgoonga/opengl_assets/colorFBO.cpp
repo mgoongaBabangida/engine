@@ -74,7 +74,7 @@ bool eColorFBO::Init(unsigned int WindowWidth, unsigned int WindowHeight, bool m
 	{
 		//glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT, WindowWidth, WindowHeight); // Use a single renderbuffer object for both a depth AND stencil buffer.
 		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, WindowWidth, WindowHeight);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_samples, GL_DEPTH24_STENCIL8, WindowWidth, WindowHeight);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
 	}
 	// Now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
@@ -89,13 +89,13 @@ void eColorFBO::CreateMultisampleColorAttachement(unsigned int WindowWidth, unsi
 {
 	glGenRenderbuffers(1, &m_rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
-	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA16F, WindowWidth, WindowHeight); //GL_RGBA16F for hdr
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_samples, GL_RGBA16F, WindowWidth, WindowHeight); //GL_RGBA16F for hdr
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_rbo);
 
 	GLuint rbo_mask;
 	glGenRenderbuffers(1, &rbo_mask);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo_mask);
-	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RED, WindowWidth, WindowHeight);
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_samples, GL_RED, WindowWidth, WindowHeight);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_RENDERBUFFER, rbo_mask);
 
 	unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
