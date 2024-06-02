@@ -64,6 +64,8 @@ public:
 							const std::string& _name = "Default",
 							bool _calculate_tangent = false);
 
+	const eMesh* GetMeshByIndex(size_t _index) const;
+
 	// VertexBoneData
 	struct VertexBoneData
 	{
@@ -112,8 +114,8 @@ public:
 private:
 	/*  Model Data  */
 	std::vector<eMesh>	m_meshes;
-	std::string							m_directory;
-	std::string							m_name;
+	std::string					m_directory;
+	std::string					m_name;
 
 	/*  Bone Data  */
 	std::vector<Bone>				      m_bones;

@@ -2,9 +2,11 @@
 
 #include "MainContextBase.h"
 #include "ObjectFactory.h"
-#include "SceneSerializer.h"
+
+#include "SceneSerializerYAML.h"
 #include "ModelManagerYAML.h"
 #include "AnimationManagerYAML.h"
+
 #include "ParticleSystemToolController.h"
 #include "PhysicsSystemController.h"
 #include "TerrainGeneratorTool.h"
@@ -725,7 +727,7 @@ void eMainContextBase::InitializeExternalGui()
 
 	static std::function<void(const std::string&)> serealize_scene_callback = [this](const std::string& _path)
 	{
-		SceneSerializer serealizer(GetObjects(), *modelManager.get(), *animationManager.get());
+		SceneSerializerYAML serealizer(GetObjects(), *modelManager.get(), *animationManager.get());
 		serealizer.Serialize(_path);
 	};
 	externalGui[ExternalWindow::MAIN_MENU_WND]->Add(MENU_SAVE_SCENE, "Serealize scene", reinterpret_cast<void*>(&serealize_scene_callback));
@@ -733,7 +735,7 @@ void eMainContextBase::InitializeExternalGui()
 	static std::function<void(const std::string&)> deserealize_scene_callback = [this](const std::string& _path)
 	{
 		m_objects.clear();
-		SceneSerializer serealizer(GetObjects(), *modelManager.get(), *animationManager.get());
+		SceneSerializerYAML serealizer(GetObjects(), *modelManager.get(), *animationManager.get());
 		m_objects = serealizer.Deserialize(_path);
 	};
 	externalGui[ExternalWindow::MAIN_MENU_WND]->Add(MENU_OPEN_SCENE, "Deserealize scene", reinterpret_cast<void*>(&deserealize_scene_callback));

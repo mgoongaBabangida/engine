@@ -9,22 +9,6 @@
 using namespace std;
 
 //---------------------------------------------------------------------------
-std::string eModel::RootBoneName()
-{
-	return m_root_bone->GetName();
-}
-
-//---------------------------------------------------------------------------
-void eModel::AddMesh(std::vector<Vertex> _vertices, std::vector<GLuint> _indices, std::vector<TextureInfo> _textures, const Material& _material, const std::string& _name, bool _calculate_tangent)
-{
-	std::vector<Texture> textures;
-	for (auto t : _textures)
-		textures.emplace_back(t);
-
-	m_meshes.emplace_back(_vertices, _indices, textures, _material, _name, _calculate_tangent);
-}
-
-//---------------------------------------------------------------------------
 eModel::eModel(char* _path, const std::string& _name)
 	: m_name(_name)
 {
@@ -44,6 +28,31 @@ eModel::~eModel()
 {
 	for (auto& mesh : m_meshes)
 		mesh.FreeTextures();
+}
+
+//---------------------------------------------------------------------------
+std::string eModel::RootBoneName()
+{
+	return m_root_bone->GetName();
+}
+
+//---------------------------------------------------------------------------
+void eModel::AddMesh(std::vector<Vertex> _vertices, std::vector<GLuint> _indices, std::vector<TextureInfo> _textures, const Material& _material, const std::string& _name, bool _calculate_tangent)
+{
+	std::vector<Texture> textures;
+	for (auto t : _textures)
+		textures.emplace_back(t);
+
+	m_meshes.emplace_back(_vertices, _indices, textures, _material, _name, _calculate_tangent);
+}
+
+//---------------------------------------------------------------------------
+const eMesh* eModel::GetMeshByIndex(size_t _index) const
+{
+	if (_index < m_meshes.size())
+		return &m_meshes[_index];
+	else
+		return nullptr;
 }
 
 //---------------------------------------------------------------------------
@@ -79,7 +88,7 @@ size_t eModel::GetVertexCount() const
 {
   size_t count = 0;
   for (auto& mesh : m_meshes)
-    count += mesh.vertices.size();
+    count += mesh.m_vertices.size();
   return count;
 }
 
@@ -130,10 +139,10 @@ void eModel::mapMehsesToNodes()
 			{ return bone.GetName() == m_meshes[i].Name(); });
 		if (meshBoneIter != m_bones.end())
 		{
-			for (int32_t j = 0; j < m_meshes[i].vertices.size(); ++j)
+			for (int32_t j = 0; j < m_meshes[i].m_vertices.size(); ++j)
 			{
-				m_meshes[i].vertices[j].boneIDs[0] = (glm::i32)meshBoneIter->GetID();
-				m_meshes[i].vertices[j].weights[0] = 1.0f;
+				m_meshes[i].m_vertices[j].boneIDs[0] = (glm::i32)meshBoneIter->GetID();
+				m_meshes[i].m_vertices[j].weights[0] = 1.0f;
 			}
 			m_meshes[i].ReloadVertexBuffer();
 		}

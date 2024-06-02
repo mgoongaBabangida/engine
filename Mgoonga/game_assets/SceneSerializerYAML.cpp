@@ -1,13 +1,15 @@
-#include "SceneSerializer.h"
+#include "SceneSerializerYAML.h"
+
 #include "YamlTyps.h"
 #include "ObjectFactory.h"
 #include "AnimationManagerYAML.h"
+#include "ModelManagerYAML.h"
 
 #include <base/Object.h>
-#include <opengl_assets/ModelManager.h>
 
 #include <fstream>
 
+//---------------------------------------------------------------------------------------------
 static void SerializeObject(YAML::Emitter& _out, std::shared_ptr<eObject> _object)
 {
   _out << YAML::BeginMap; //Object
@@ -69,9 +71,9 @@ static void SerializeObject(YAML::Emitter& _out, std::shared_ptr<eObject> _objec
 }
 
 //-------------------------------------------------------------
-SceneSerializer::SceneSerializer(std::vector<std::shared_ptr<eObject>> _objects,
-                                 eModelManager& _model_manager,
-                                 AnimationManagerYAML& _animationManager)
+SceneSerializerYAML::SceneSerializerYAML(std::vector<std::shared_ptr<eObject>> _objects,
+                                        ModelManagerYAML& _model_manager,
+                                        AnimationManagerYAML& _animationManager)
   : m_objects(_objects)
   , m_model_manager(_model_manager)
   , m_animation_manager(_animationManager)
@@ -79,7 +81,7 @@ SceneSerializer::SceneSerializer(std::vector<std::shared_ptr<eObject>> _objects,
 }
 
 //-------------------------------------------------------------
-void SceneSerializer::Serialize(const std::string& _filepath)
+void SceneSerializerYAML::Serialize(const std::string& _filepath)
 {
   YAML::Emitter out;
   out << YAML::BeginMap;
@@ -97,7 +99,7 @@ void SceneSerializer::Serialize(const std::string& _filepath)
 }
 
 //-------------------------------------------------------------
-std::vector<std::shared_ptr<eObject>> SceneSerializer::Deserialize(const std::string& _filepath)
+std::vector<std::shared_ptr<eObject>> SceneSerializerYAML::Deserialize(const std::string& _filepath)
 {
   std::ifstream stream(_filepath);
   std::stringstream strstream;

@@ -29,11 +29,11 @@ eMesh::eMesh(vector<Vertex> _vertices,
                        const std::string& _name,
                        bool _calculate_tangent)
 {
-	vertices = _vertices;
-	indices = _indices;
-	textures = _textures;
+	m_vertices = _vertices;
+	m_indices = _indices;
+	m_textures = _textures;
   m_material = _material;
-  name = _name.empty() ? "Default" : _name;
+  m_name = _name.empty() ? "Default" : _name;
 
 	SetupMesh();
   if(_calculate_tangent)
@@ -64,7 +64,7 @@ eMesh::~eMesh()
 //-------------------------------------------------------------------------------------------
 void eMesh::ReloadTextures()
 {
-  for (Texture& t : textures)
+  for (Texture& t : m_textures)
   {
     if(t.m_id == Texture::GetDefaultTextureId())
       t.loadTextureFromFile(t.m_path);
@@ -85,7 +85,7 @@ void eMesh::ReloadTextures()
 //-------------------------------------------------------------------------------------------
 void eMesh::FreeTextures()
 {
-  for (auto& t : textures)
+  for (auto& t : m_textures)
     t.freeTexture();
 }
 
@@ -94,8 +94,8 @@ void eMesh::ReloadVertexBuffer()
 {
   glBindVertexArray(this->VAO);
   glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-  glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex),
-    &this->vertices[0], GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, this->m_vertices.size() * sizeof(Vertex),
+    &this->m_vertices[0], GL_STATIC_DRAW);
   glBindVertexArray(0);
 }
 
@@ -105,7 +105,7 @@ void eMesh::Draw()
   _BindMaterialTextures(); // _BindRawTextures();
 	// Draw mesh
 	glBindVertexArray(this->VAO);
-  eGlDrawContext::GetInstance().DrawElements(GL_TRIANGLES, (GLsizei)this->indices.size(), GL_UNSIGNED_INT, 0, this->name);
+  eGlDrawContext::GetInstance().DrawElements(GL_TRIANGLES, (GLsizei)this->m_indices.size(), GL_UNSIGNED_INT, 0, this->m_name);
 	glBindVertexArray(0);
 }
 
@@ -115,7 +115,7 @@ void eMesh::DrawInstanced(int32_t instances)
   _BindMaterialTextures(); // _BindRawTextures();
   // Draw mesh
   glBindVertexArray(this->VAO);
-  eGlDrawContext::GetInstance().DrawElementsInstanced(GL_TRIANGLES, (GLsizei)this->indices.size(), GL_UNSIGNED_INT, (GLvoid*)(0), instances, this->name);
+  eGlDrawContext::GetInstance().DrawElementsInstanced(GL_TRIANGLES, (GLsizei)this->m_indices.size(), GL_UNSIGNED_INT, (GLvoid*)(0), instances, this->m_name);
   glBindVertexArray(0);
 }
 
@@ -123,7 +123,7 @@ void eMesh::DrawInstanced(int32_t instances)
 std::vector<TextureInfo> eMesh::GetTextures() const
 {
    std::vector<TextureInfo> ret;
-   for (auto& t : textures)
+   for (auto& t : m_textures)
      ret.emplace_back(t.m_type, t.m_path);
    return ret;
 }
@@ -142,7 +142,7 @@ void eMesh::AddTexture(Texture* _texture)
   else if (_texture->m_type == "texture_emission")
     m_material.emissive_texture_id = _texture->m_id;
 
-  textures.push_back(*_texture);
+  m_textures.push_back(*_texture);
 }
 
 //-------------------------------------------------------------------------------------------
@@ -154,14 +154,14 @@ void eMesh::SetMaterial(const Material& _material)
 //-------------------------------------------------------------------------------------------
 void eMesh::calculatedTangent()
 {
-  for (int i = 0; i < indices.size(); i += 3)
+  for (int i = 0; i < m_indices.size(); i += 3)
   {
-    glm::vec3 pos1 = vertices[indices[i]].Position;
-    glm::vec3 pos2 = vertices[indices[i + 1]].Position;
-    glm::vec3 pos3 = vertices[indices[i + 2]].Position;
-    glm::vec2 uv1 = vertices[indices[i]].TexCoords;
-    glm::vec2 uv2 = vertices[indices[i + 1]].TexCoords;
-    glm::vec2 uv3 = vertices[indices[i + 2]].TexCoords;
+    glm::vec3 pos1 = m_vertices[m_indices[i]].Position;
+    glm::vec3 pos2 = m_vertices[m_indices[i + 1]].Position;
+    glm::vec3 pos3 = m_vertices[m_indices[i + 2]].Position;
+    glm::vec2 uv1 = m_vertices[m_indices[i]].TexCoords;
+    glm::vec2 uv2 = m_vertices[m_indices[i + 1]].TexCoords;
+    glm::vec2 uv3 = m_vertices[m_indices[i + 2]].TexCoords;
     // calculate tangent/bitangent vectors of both triangles
     glm::vec3 tangent1, bitangent1;
     // - triangle 1
@@ -182,12 +182,12 @@ void eMesh::calculatedTangent()
     bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
     bitangent1 = glm::normalize(bitangent1);
 
-    vertices[indices[i]].tangent = tangent1;
-    vertices[indices[i + 1]].tangent = tangent1;
-    vertices[indices[i + 2]].tangent = tangent1;
-    vertices[indices[i]].bitangent = bitangent1;
-    vertices[indices[i + 1]].bitangent = bitangent1;
-    vertices[indices[i + 2]].bitangent = bitangent1;
+    m_vertices[m_indices[i]].tangent = tangent1;
+    m_vertices[m_indices[i + 1]].tangent = tangent1;
+    m_vertices[m_indices[i + 2]].tangent = tangent1;
+    m_vertices[m_indices[i]].bitangent = bitangent1;
+    m_vertices[m_indices[i + 1]].bitangent = bitangent1;
+    m_vertices[m_indices[i + 2]].bitangent = bitangent1;
   }
 }
 
@@ -199,9 +199,9 @@ void eMesh::_BindRawTextures()
   GLuint normalNr = 0;
   GLuint emissionNr = 0;
   GLuint roughnesslNr = 0;
-  for (GLuint i = 0; i < this->textures.size(); i++)
+  for (GLuint i = 0; i < this->m_textures.size(); i++)
   {
-    string name = textures[i].m_type;
+    string name = m_textures[i].m_type;
     if (name == "texture_diffuse")
     {
       glActiveTexture(GL_TEXTURE2);
@@ -227,7 +227,7 @@ void eMesh::_BindRawTextures()
       glActiveTexture(GL_TEXTURE6);
       emissionNr++;
     }
-    glBindTexture(GL_TEXTURE_2D, this->textures[i].m_id);
+    glBindTexture(GL_TEXTURE_2D, this->m_textures[i].m_id);
   }
 
   if (diffuseNr == 0)
@@ -239,8 +239,8 @@ void eMesh::_BindRawTextures()
   if (specularNr == 0)
   {
     glActiveTexture(GL_TEXTURE3);
-    auto spec = std::find_if(textures.begin(), textures.end(), [](Texture& t) { return t.m_type == "texture_diffuse"; });
-    if (spec != textures.end())
+    auto spec = std::find_if(m_textures.begin(), m_textures.end(), [](Texture& t) { return t.m_type == "texture_diffuse"; });
+    if (spec != m_textures.end())
     {
       glBindTexture(GL_TEXTURE_2D, spec->m_id);
       specularNr++;
@@ -306,12 +306,12 @@ void eMesh::SetupMesh()
 	glBindVertexArray(this->VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-	glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(Vertex),
-		&this->vertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, this->m_vertices.size() * sizeof(Vertex),
+		&this->m_vertices[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(GLuint),
-		&this->indices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->m_indices.size() * sizeof(GLuint),
+		&this->m_indices[0], GL_STATIC_DRAW);
 
 	// Vertex Positions
 	glEnableVertexAttribArray(0);

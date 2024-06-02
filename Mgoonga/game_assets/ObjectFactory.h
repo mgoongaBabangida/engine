@@ -6,11 +6,12 @@
 class IModel;
 class AnimationManagerYAML;
 
+//--------------------------------------------------------------------------------------------
 class DLL_GAME_ASSETS ObjectFactoryBase
 {
 public:
   explicit ObjectFactoryBase(AnimationManagerYAML* _animationManager = nullptr)
-    :m_animationManager(_animationManager)
+    : m_animationManager(_animationManager)
   {}
 
   std::unique_ptr<eObject> CreateObject(std::shared_ptr<IModel>,
