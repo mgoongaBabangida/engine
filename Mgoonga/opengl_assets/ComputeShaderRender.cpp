@@ -42,10 +42,10 @@ eComputeShaderRender::eComputeShaderRender(const std::string& cS, const std::str
   mComputeShader.installShaders(cS.c_str());
   mComputeShader.GetUniformInfoFromShader();
 
-  mTextileTextureId = _textileTexture->id;
-  mImageId = _computeShaderImage->id;
-  mImageWidth = _computeShaderImage->mTextureWidth;
-  mImageHeight = _computeShaderImage->mTextureHeight;
+  mTextileTextureId = _textileTexture->m_id;
+  mImageId = _computeShaderImage->m_id;
+  mImageWidth = _computeShaderImage->m_width;
+  mImageHeight = _computeShaderImage->m_height;
 
   //***********************************************************************//
   mWorley3D.installShaders(WorlycS.c_str());
@@ -417,12 +417,17 @@ void eComputeShaderRender::_InitWorley3d()
     std::vector<float> textureData(mWorleyDim * mWorleyDim * mWorleyDim * 4); // RGBA format
 
     // Generate perlin noise for 4th channel
-    //@todo pre-calculate and load from file
-    std::vector<float> perlinNoise = dbb::generatePerlinNoise3D(mWorleyDim, mWorleyDim, mWorleyDim);
+    std::vector<float> perlinNoise;
+    if (!dbb::ReadFromFile(perlinNoise, "perlin3D.bin"))
+    {
+      perlinNoise = dbb::generatePerlinNoise3D(mWorleyDim, mWorleyDim, mWorleyDim);
+      dbb::WriteToFile(perlinNoise, "perlin3D.bin");
+    }
 
   // Fill textureData with your texture data
   // For example, if you want to fill it with white color:
-    for (size_t i = 0; i < textureData.size(); i += 4) {
+    for (size_t i = 0; i < textureData.size(); i += 4)
+    {
       textureData[i] = math::Random::RandomFloat(0.0f, 1.0f);       // Red
       textureData[i + 1] = math::Random::RandomFloat(0.0f, 1.0f);  // Green
       textureData[i + 2] = math::Random::RandomFloat(0.0f, 1.0f);  // Blue

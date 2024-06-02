@@ -18,6 +18,7 @@
 
 class eObject;
 
+//-------------------------------------------------------
 struct TextureInfo
 {
 	TextureInfo(const std::string& _type, const std::string& _path)

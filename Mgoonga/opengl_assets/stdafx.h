@@ -19,4 +19,6 @@
 #include <memory>
 #include <iostream>
 
+#include <glew-2.1.0\include\GL\glew.h>
+
 // TODO: reference additional headers your program requires here

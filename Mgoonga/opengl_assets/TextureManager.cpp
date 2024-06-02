@@ -23,12 +23,12 @@ eTextureManager::~eTextureManager()
     node.second.freeTexture();
 
 	// free static textures
-	Texture::freeTexture(Texture::GetTexture1x1(WHITE).id);
-	Texture::freeTexture(Texture::GetTexture1x1(BLACK).id);
-	Texture::freeTexture(Texture::GetTexture1x1(BLUE).id);
-	Texture::freeTexture(Texture::GetTexture1x1(PINK).id);
-	Texture::freeTexture(Texture::GetTexture1x1(YELLOW).id);
-	Texture::freeTexture(Texture::GetTexture1x1(GREY).id);
+	Texture::freeTexture(Texture::GetTexture1x1(WHITE).m_id);
+	Texture::freeTexture(Texture::GetTexture1x1(BLACK).m_id);
+	Texture::freeTexture(Texture::GetTexture1x1(BLUE).m_id);
+	Texture::freeTexture(Texture::GetTexture1x1(PINK).m_id);
+	Texture::freeTexture(Texture::GetTexture1x1(YELLOW).m_id);
+	Texture::freeTexture(Texture::GetTexture1x1(GREY).m_id);
 
 #ifdef SDL_IMAGE
 	{ IMG_Quit(); }
@@ -58,7 +58,7 @@ void eTextureManager::Initialize()
 				sstream >> wrap;
 
 			if (!type.empty() && type != ";")
-				text.type = type;
+				text.m_type = type;
 
 			if(type == "skybox" || type == "array" || type == "array_last" || type == "array_last_r")
 				faces.push_back(folderPath + file_name);
@@ -66,7 +66,7 @@ void eTextureManager::Initialize()
 			if (faces.size() == 6 && type == "skybox")
 			{
 				text.loadCubemap(faces);
-				m_cubemap_ids.push_back(text.id);
+				m_cubemap_ids.push_back(text.m_id);
 				faces.clear();
 			}
 			else if (type == "array_last")
@@ -89,7 +89,7 @@ void eTextureManager::Initialize()
 			else if (type == "hdr")
 			{
 				text.loadHdr(folderPath + file_name);
-				m_hdr_ids.push_back(text.id);
+				m_hdr_ids.push_back(text.m_id);
 			}
 			else
 				text.loadTextureFromFile(folderPath + file_name);
@@ -130,7 +130,7 @@ void eTextureManager::_LoadHardcoded()
 	Texture text;
 	text.loadTextureFromFile(folderPath + "empty.png");
 	m_Textures.insert(std::pair<std::string, Texture>("Tempty", text));
-	Texture::SetEmptyTextureId(text.id);
+	Texture::SetEmptyTextureId(text.m_id);
 
 	text.generatePerlin(600, 600, true); //@todo HARDCODING!
 	m_Textures.insert(std::pair<std::string, Texture>("Tperlin_n", text));
@@ -158,7 +158,7 @@ const Texture* eTextureManager::Find(const std::string& texture_name) const
 const Texture* eTextureManager::FindByID(unsigned int _id) const
 {
 	for (auto& texture : m_Textures)
-		if (texture.second.id == _id)
+		if (texture.second.m_id == _id)
 			return &texture.second;
 	return nullptr;
 }
@@ -167,8 +167,8 @@ const Texture* eTextureManager::FindByID(unsigned int _id) const
 void eTextureManager::AddExisting(const std::string& _name, Texture* _text)
 {
 	m_Textures.insert(std::pair<std::string, Texture>(_name, *_text));
-	if(_text->type == "skybox")
-		m_cubemap_ids.push_back(_text->id);
+	if(_text->m_type == "skybox")
+		m_cubemap_ids.push_back(_text->m_id);
 }
 
 //-----------------------------------------------------
@@ -176,8 +176,8 @@ uint64_t eTextureManager::LoadTexture(const std::string& _path, const std::strin
 {
 	Texture text;
 	text.loadTextureFromFile(_path);
-	text.type = _type;
+	text.m_type = _type;
 	m_Textures.insert(std::pair<std::string, Texture>(_name, text));
-	return text.id;
+	return text.m_id;
 }
 

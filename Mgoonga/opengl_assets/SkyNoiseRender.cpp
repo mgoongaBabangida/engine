@@ -17,8 +17,8 @@ eSkyNoiseRender::eSkyNoiseRender(std::unique_ptr<MyModel>	_model,
 	//@todo object not used , model &transform
 	model.swap(_model);
 	Material m;
-	m.normal_texture_id = _noise->id;
-	m.roughness_texture_id = _noise->id;
+	m.normal_texture_id = _noise->m_id;
+	m.roughness_texture_id = _noise->m_id;
 	model->SetMaterial(m);
 
 	object.reset(new eObject);

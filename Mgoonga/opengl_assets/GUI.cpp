@@ -251,7 +251,7 @@ void GUIWithAlpha::UpdateSync()
 		
 		auto[x, y] = pointOnGUI(m_press_coords.first, m_press_coords.second);// line and column of the pixel
 		y = Height - y; // invert y to bottom left coord system
-		int32_t elmes_per_line = texture.mTextureWidth * 4; // elements per line = 256 * "RGBA"
+		int32_t elmes_per_line = texture.m_width * 4; // elements per line = 256 * "RGBA"
 
 		float x_coef = static_cast<float>(x) / static_cast<float>(Width);
 		float y_coef = static_cast<float>(y) / static_cast<float>(Height);

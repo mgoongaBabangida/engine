@@ -21,36 +21,36 @@ MyModel::MyModel(std::shared_ptr<MyMesh> m, const std::string& _name,
 {
   if (t != nullptr)
   {
-    m_material.albedo_texture_id = t->id;
+    m_material.albedo_texture_id = t->m_id;
     m_material.use_albedo = true;
   }
   else
-    m_material.albedo_texture_id = Texture::GetTexture1x1(GREY).id;
+    m_material.albedo_texture_id = Texture::GetTexture1x1(GREY).m_id;
   
   if (t2 != nullptr)
   {
-    m_material.metalic_texture_id = t2->id;
+    m_material.metalic_texture_id = t2->m_id;
     m_material.use_metalic = true;
   }
   else
-    m_material.metalic_texture_id = Texture::GetTexture1x1(BLACK).id;
+    m_material.metalic_texture_id = Texture::GetTexture1x1(BLACK).m_id;
   if (t3 != nullptr)
   {
-    m_material.normal_texture_id = t3->id;
+    m_material.normal_texture_id = t3->m_id;
     m_material.use_normal = true;
   }
   else
-    m_material.normal_texture_id = Texture::GetTexture1x1(BLUE).id;
+    m_material.normal_texture_id = Texture::GetTexture1x1(BLUE).m_id;
 
   if (t4 != nullptr)
   {
-    m_material.roughness_texture_id = t4->id;
+    m_material.roughness_texture_id = t4->m_id;
     m_material.use_roughness = true;
   }
   else
-    m_material.roughness_texture_id = Texture::GetTexture1x1(WHITE).id;
+    m_material.roughness_texture_id = Texture::GetTexture1x1(WHITE).m_id;
 
-  m_material.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;//!!! add default emissive
+  m_material.emissive_texture_id = Texture::GetTexture1x1(BLACK).m_id;//!!! add default emissive
 }
 
 //-----------------------------------------------------------------
@@ -105,19 +105,19 @@ void MyModel::Debug()
 void MyModel::_InitMaterialWithDefaults()
 {
   if (m_material.albedo_texture_id == -1)
-    m_material.albedo_texture_id = Texture::GetTexture1x1(GREY).id;
+    m_material.albedo_texture_id = Texture::GetTexture1x1(GREY).m_id;
 
   if (m_material.metalic_texture_id == -1)
-    m_material.metalic_texture_id = Texture::GetTexture1x1(BLACK).id;
+    m_material.metalic_texture_id = Texture::GetTexture1x1(BLACK).m_id;
 
   if (m_material.normal_texture_id == -1)
-    m_material.normal_texture_id = Texture::GetTexture1x1(BLUE).id;
+    m_material.normal_texture_id = Texture::GetTexture1x1(BLUE).m_id;
 
   if (m_material.roughness_texture_id == -1)
-    m_material.roughness_texture_id = Texture::GetTexture1x1(WHITE).id;
+    m_material.roughness_texture_id = Texture::GetTexture1x1(WHITE).m_id;
 
   if (m_material.emissive_texture_id == -1)
-    m_material.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
+    m_material.emissive_texture_id = Texture::GetTexture1x1(BLACK).m_id;
 }
 
 size_t MyModel::GetVertexCount() const

@@ -21,26 +21,26 @@
  //-------------------------------------------------------------
  bool ShadowMapFBO::Init(unsigned int WindowWidth, unsigned int WindowHeight, bool needsCubeMap)
  {
-	 m_shadowMap.mTextureWidth = WindowWidth;
-	 m_shadowMap.mTextureHeight = WindowHeight;
+	 m_shadowMap.m_width = WindowWidth;
+	 m_shadowMap.m_height = WindowHeight;
 	 
 	 glGenFramebuffers(1, &m_fbo);
 	 glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo);
 
 	 if (needsCubeMap)
 	 {
-		 m_shadowMap.mTextureWidth = 1024; //!?
-		 m_shadowMap.mTextureHeight = 1024;//!?
+		 m_shadowMap.m_width = 1024; //!?
+		 m_shadowMap.m_height = 1024;//!?
 		 m_cubemap = needsCubeMap;
 		 m_shadowMap.makeDepthCubeMap();
-		 glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_shadowMap.id, 0);
+		 glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_shadowMap.m_id, 0);
 		 glReadBuffer(GL_NONE); //?
 	 }
 	 else
 	 {
 		 m_shadowMap.makeDepthTexture();
 		 glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
-			 m_shadowMap.id, 0);
+			 m_shadowMap.m_id, 0);
 	 }
 	 glDrawBuffer(GL_NONE);
 
@@ -58,15 +58,15 @@
  //-------------------------------------------------------------
  bool ShadowMapFBO::InitCSM(unsigned int WindowWidth, unsigned int WindowHeight, int32_t _layers)
  {
-	 m_shadowMap.mTextureWidth = WindowWidth;
-	 m_shadowMap.mTextureHeight = WindowHeight;
+	 m_shadowMap.m_width = WindowWidth;
+	 m_shadowMap.m_height = WindowHeight;
 
 	 glGenFramebuffers(1, &m_fbo);
 	 m_shadowMap.makeDepthTextureArray(_layers);
 	 glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo);
 	 glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
-		 m_shadowMap.id, 0);
-	 glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_shadowMap.id, 0);
+		 m_shadowMap.m_id, 0);
+	 glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_shadowMap.m_id, 0);
 
 	 glDrawBuffer(GL_NONE);
 	 glReadBuffer(GL_NONE);
@@ -95,11 +95,11 @@
 {
 	 glActiveTexture(TextureUnit);
 	 if (m_cubemap)
-		 glBindTexture(GL_TEXTURE_CUBE_MAP, m_shadowMap.id);
+		 glBindTexture(GL_TEXTURE_CUBE_MAP, m_shadowMap.m_id);
 	 else if(m_array)
-		 glBindTexture(GL_TEXTURE_2D_ARRAY, m_shadowMap.id);
+		 glBindTexture(GL_TEXTURE_2D_ARRAY, m_shadowMap.m_id);
 	 else
-		 glBindTexture(GL_TEXTURE_2D, m_shadowMap.id);
+		 glBindTexture(GL_TEXTURE_2D, m_shadowMap.m_id);
 }
 
  //-------------------------------------------------------------

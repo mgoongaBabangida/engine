@@ -43,11 +43,11 @@ void AmericanTreasureGame::InitializeModels()
   //MODELS
 
   Material pbr1;
-  pbr1.albedo_texture_id = texManager->Find("pbr1_basecolor")->id;
-  pbr1.metalic_texture_id = texManager->Find("pbr1_metallic")->id;
-  pbr1.normal_texture_id = texManager->Find("pbr1_normal")->id;
-  pbr1.roughness_texture_id = texManager->Find("pbr1_roughness")->id;
-  pbr1.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
+  pbr1.albedo_texture_id = texManager->Find("pbr1_basecolor")->m_id;
+  pbr1.metalic_texture_id = texManager->Find("pbr1_metallic")->m_id;
+  pbr1.normal_texture_id = texManager->Find("pbr1_normal")->m_id;
+  pbr1.roughness_texture_id = texManager->Find("pbr1_roughness")->m_id;
+  pbr1.emissive_texture_id = Texture::GetTexture1x1(BLACK).m_id;
   pbr1.use_albedo = pbr1.use_metalic = pbr1.use_normal = pbr1.use_roughness = true;
 
   Material red;

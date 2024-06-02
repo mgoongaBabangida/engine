@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Utils.h"
 
+#include <fstream>
+
 namespace dbb
 {
 	//-------------------------------------------------------
@@ -63,5 +65,34 @@ namespace dbb
     for (uint32_t i = 0; i < noiseData.size(); i++)
       noiseData[i] = noiseData[i] / max;
     return noiseData;
+  }
+
+  //-------------------------------------------------------
+  bool WriteToFile(const std::vector<float>& _data, const std::string& _filename)
+  {
+    std::ofstream outFile(_filename, std::ios::binary);
+    if (!outFile)
+      return false;
+
+    size_t dataSize = _data.size();
+    outFile.write(reinterpret_cast<const char*>(&dataSize), sizeof(dataSize));
+    outFile.write(reinterpret_cast<const char*>(_data.data()), dataSize * sizeof(float));
+    outFile.close();
+    return true;
+  }
+
+  //-------------------------------------------------------
+  bool ReadFromFile(std::vector<float>& _data, const std::string& _filename)
+  {
+    std::ifstream inFile(_filename, std::ios::binary);
+    if (!inFile)
+      return false;
+
+    size_t dataSize;
+    inFile.read(reinterpret_cast<char*>(&dataSize), sizeof(dataSize));
+    _data.resize(dataSize);
+    inFile.read(reinterpret_cast<char*>(_data.data()), dataSize * sizeof(float));
+    inFile.close();
+    return true;
   }
 }

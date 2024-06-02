@@ -202,7 +202,7 @@ void eWindowImGuiExternal::Render()
       ImGui::Text(std::get<0>(item).c_str());
       for (const Texture* t : *transfer_data)
       {
-        ImGui::Image((void*)(intptr_t)(t->id), ImVec2(240, 160)/* ImVec2(t->mTextureWidth, t->mTextureHeight)*/, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image((void*)(intptr_t)(t->m_id), ImVec2(240, 160)/* ImVec2(t->mTextureWidth, t->mTextureHeight)*/, ImVec2(0, 1), ImVec2(1, 0));
       }
     }
     break;
@@ -324,8 +324,8 @@ void eWindowImGuiExternal::Render()
             lightObj->GetTransform()->setScale(glm::vec3(0.3f, 0.3f, 0.3f));
 
             Material m{ glm::vec3{}, 0.0f, 0.0f, 1.0f,
-              Texture::GetTexture1x1(TColor::BLUE).id, Texture::GetTexture1x1(TColor::WHITE).id,
-              Texture::GetTexture1x1(TColor::BLUE).id, Texture::GetTexture1x1(TColor::WHITE).id, Texture::GetTexture1x1(TColor::BLUE).id,
+              Texture::GetTexture1x1(TColor::BLUE).m_id, Texture::GetTexture1x1(TColor::WHITE).m_id,
+              Texture::GetTexture1x1(TColor::BLUE).m_id, Texture::GetTexture1x1(TColor::WHITE).m_id, Texture::GetTexture1x1(TColor::BLUE).m_id,
             true, true, true, true };
             lightObj->GetModel()->SetMaterial(m);
           }
@@ -828,7 +828,7 @@ void eWindowImGuiExternal::Render()
         ImGui::SliderFloat("Position Y", &p_psystem->get()->GetSystemCenter().y, -10.0f, 10.0f);
         ImGui::SliderFloat("Position Z", &p_psystem->get()->GetSystemCenter().z, -10.0f, 10.0f);
         ImGui::Checkbox("Loop", &p_psystem->get()->Loop());
-        ImGui::Image((void*)(intptr_t)(p_psystem->get()->GetTexture()->id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image((void*)(intptr_t)(p_psystem->get()->GetTexture()->m_id), ImVec2(240, 160), ImVec2(0, 1), ImVec2(1, 0));
       }
     }
     break;

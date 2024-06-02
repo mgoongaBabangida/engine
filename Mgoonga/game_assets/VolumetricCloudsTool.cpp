@@ -45,7 +45,7 @@ void VolumetricCloudsTool::Initialize()
 	{
 	};
 	m_imgui->Add(BUTTON, "Test", (void*)&test_callback);
-	static auto id =  m_pipeline.get().GetComputeParticleSystem().id;
+	static auto id =  m_pipeline.get().GetComputeParticleSystem().m_id;
 	m_imgui->Add(TEXTURE, "Noise 3D", (void*)id);
 	m_imgui->Add(SLIDER_FLOAT_NERROW, "Noise 3D Z Debug", &m_pipeline.get().Noize3DZDebug());
 

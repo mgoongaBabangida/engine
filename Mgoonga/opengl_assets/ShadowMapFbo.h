@@ -16,7 +16,7 @@
 	 void BindForReading(GLenum TextureUnit);
 	 Texture GetTexture();
 	 GLuint  ID()			 { return m_fbo; }
-	 glm::ivec2 Size() { return { m_shadowMap.mTextureWidth , m_shadowMap.mTextureHeight }; }
+	 glm::ivec2 Size() { return { m_shadowMap.m_width , m_shadowMap.m_height }; }
  
  private:
 	 GLuint m_fbo;

@@ -114,7 +114,7 @@ std::vector<TextureInfo> MyMesh::GetTextures() const
 {
   std::vector<TextureInfo> ret;
   for (const Texture* t : textures)
-    ret.emplace_back(t->type, t->path);
+    ret.emplace_back(t->m_type, t->m_path);
   return ret;
 }
 
@@ -321,7 +321,7 @@ std::vector<TextureInfo> ParticleMesh::GetTextures() const
 {
   std::vector<TextureInfo> ret;
   for (const Texture& t : textures)
-    ret.emplace_back(t.type, t.path);
+    ret.emplace_back(t.m_type, t.m_path);
   return ret;
 }
 

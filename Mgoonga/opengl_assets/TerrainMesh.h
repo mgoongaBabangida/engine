@@ -39,7 +39,7 @@ public:
 	Texture*								GenerateNormals(GLuint rows, GLuint columns);
 	Texture*								GenerateNormals(GLuint size);
 
-	GLuint									GetNormalMapId() const { return m_normalMap.id; }
+	GLuint									GetNormalMapId() const { return m_normalMap.m_id; }
 
 	float					GetNormalSigma() const { return m_normal_sigma; }
 	int32_t				GetKernelSize() const { return m_kernel_size; }

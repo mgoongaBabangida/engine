@@ -29,7 +29,7 @@ ParticleSystemToolController::ParticleSystemToolController(eMainContextBase* _ga
 	m_psystem = std::make_shared<ParticleSystem>(50, 1.0f/50.0f, 0, 10'000, glm::vec3(0.5f, 3.0f, -2.5f),
 																							_texManager->Find("Tatlas2"),
 																							_soundManager->GetSound("shot_sound"),
-																							_texManager->Find("Tatlas2")->numberofRows);
+																							_texManager->Find("Tatlas2")->m_num_rows);
 
 	std::function<void()> emit_ps_callback = [this, &_pipeline]()
 	{

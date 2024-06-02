@@ -44,9 +44,9 @@ void eAreaLightsOnlyRender::Render(const Camera& _camera, const Light& _light, c
 	mainShader.SetUniformData("far_plane", _camera.getFarPlane());
 
 	glActiveTexture(GL_TEXTURE8);
-	glBindTexture(GL_TEXTURE_2D, m1.id);
+	glBindTexture(GL_TEXTURE_2D, m1.m_id);
 	glActiveTexture(GL_TEXTURE9);
-	glBindTexture(GL_TEXTURE_2D, m2.id);
+	glBindTexture(GL_TEXTURE_2D, m2.m_id);
 
 	glm::mat4 worldToProjectionMatrix = _camera.getProjectionMatrix() * _camera.getWorldToViewMatrix();
 	for (auto& object : _objects)

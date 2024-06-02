@@ -53,11 +53,11 @@ void eMgoongaGameContext::InitializeModels()
 
   //MATERIALS
   Material pbr1;
-  pbr1.albedo_texture_id = texManager->Find("pbr1_basecolor")->id;
-  pbr1.metalic_texture_id = texManager->Find("pbr1_metallic")->id;
-  pbr1.normal_texture_id = texManager->Find("pbr1_normal")->id;
-  pbr1.roughness_texture_id = texManager->Find("pbr1_roughness")->id;
-  pbr1.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
+  pbr1.albedo_texture_id = texManager->Find("pbr1_basecolor")->m_id;
+  pbr1.metalic_texture_id = texManager->Find("pbr1_metallic")->m_id;
+  pbr1.normal_texture_id = texManager->Find("pbr1_normal")->m_id;
+  pbr1.roughness_texture_id = texManager->Find("pbr1_roughness")->m_id;
+  pbr1.emissive_texture_id = Texture::GetTexture1x1(BLACK).m_id;
   pbr1.use_albedo = pbr1.use_metalic = pbr1.use_normal = pbr1.use_roughness = true;
 
   Material red;
@@ -67,11 +67,11 @@ void eMgoongaGameContext::InitializeModels()
   red.metallic = 0.5;
 
   Material gold;
-  gold.albedo_texture_id = texManager->Find("pbr_gold_basecolor")->id;
-  gold.metalic_texture_id = texManager->Find("pbr_gold_metallic")->id;
-  gold.normal_texture_id = texManager->Find("pbr_gold_normal")->id;
-  gold.roughness_texture_id = texManager->Find("pbr_gold_roughness")->id;
-  gold.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
+  gold.albedo_texture_id = texManager->Find("pbr_gold_basecolor")->m_id;
+  gold.metalic_texture_id = texManager->Find("pbr_gold_metallic")->m_id;
+  gold.normal_texture_id = texManager->Find("pbr_gold_normal")->m_id;
+  gold.roughness_texture_id = texManager->Find("pbr_gold_roughness")->m_id;
+  gold.emissive_texture_id = Texture::GetTexture1x1(BLACK).m_id;
   gold.use_albedo = gold.use_metalic = gold.use_normal = gold.use_roughness = true;
 
   modelManager->Add("sphere_textured", Primitive::SPHERE, std::move(pbr1));
@@ -107,9 +107,9 @@ void eMgoongaGameContext::InitializeModels()
   m_guis[1]->SetTexture(*tex, topLeft, bottomRight);*/
   const Texture* cursor = texManager->Find("cursor1");
   m_guis.emplace_back(new Cursor(0, 0, 30, 30, Width(), Height()));
-  m_guis[1]->SetTexture(*cursor, { 0,0 }, { cursor->mTextureWidth, cursor->mTextureHeight });
+  m_guis[1]->SetTexture(*cursor, { 0,0 }, { cursor->m_width, cursor->m_height });
   m_guis.emplace_back(new GUI(400, 0, 60, 60, Width(), Height()));
-  m_guis[2]->SetTexture(*flag, { 0,0 }, { flag->mTextureWidth, flag->mTextureHeight });
+  m_guis[2]->SetTexture(*flag, { 0,0 }, { flag->m_width, flag->m_height });
   m_guis[2]->SetTakeMouseEvents(true);
   m_guis[2]->SetMovable2D(true);
 
@@ -189,7 +189,7 @@ void eMgoongaGameContext::_InitMainTestSceane()
   shObject wolf = factory.CreateObject(modelManager->Find("wolf"), eObject::RenderType::PHONG, "Wolf");
   wolf->GetTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);
   wolf->GetTransform()->setTranslation(glm::vec3(4.0f, 3.0f, 0.0f));
-  wolf->SetRigger(new Rigger((Model*)modelManager->Find("wolf").get())); //@todo improve
+  wolf->SetRigger(new Rigger((eModel*)modelManager->Find("wolf").get())); //@todo improve
   wolf->GetRigger()->ChangeName(std::string(), "Running");//@todo improve
   m_objects.push_back(wolf);
 
@@ -204,7 +204,7 @@ void eMgoongaGameContext::_InitMainTestSceane()
   guard->GetTransform()->setScale(glm::vec3(0.03f, 0.03f, 0.03f));
   guard->GetTransform()->setUp(glm::vec3(0.0f, 0.0f, 1.0f));
   guard->GetTransform()->setForward(glm::vec3(0.0f, 1.0f, 0.0f));
-  guard->SetRigger(new Rigger((Model*)modelManager->Find("guard").get()));//@todo improve
+  guard->SetRigger(new Rigger((eModel*)modelManager->Find("guard").get()));//@todo improve
   m_objects.push_back(guard);
 
   //shObject vampire = factory.CreateObject(modelManager->Find("vampire"), "Vampire");

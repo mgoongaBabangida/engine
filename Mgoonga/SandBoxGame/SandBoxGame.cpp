@@ -59,20 +59,22 @@ void eSandBoxGame::InitializeModels()
 	eMainContextBase::InitializeModels();
 	
 	Material material{ glm::vec3(0.8f, 0.0f, 0.0f), 0.5f , 0.5f }; // -> move to base
-	material.emissive_texture_id = Texture::GetTexture1x1(TColor::BLACK).id;
+	material.emissive_texture_id = Texture::GetTexture1x1(TColor::BLACK).m_id;
 	modelManager->Add("sphere_red", Primitive::SPHERE, std::move(material));
 
-	//_InitializeScene();
+	_InitializeScene();
 
 	//light
 	GetMainLight().light_position = glm::vec4(0.f, 6.5f, 5.f , 1.f);
-	ObjectFactoryBase factory(animationManager.get());
 	pipeline.SetUniformData("class ePhongRender", "emission_strength", 5.0f);
+
+	ObjectFactoryBase factory(animationManager.get());
 	shObject hdr_object = factory.CreateObject(modelManager->Find("white_quad"), eObject::RenderType::PHONG, "LightObject"); // or "white_quad"
 	if (hdr_object->GetModel()->GetName() == "white_sphere")
 		hdr_object->GetTransform()->setScale(glm::vec3(0.3f, 0.3f, 0.3f));
 	hdr_object->GetTransform()->setTranslation(GetMainLight().light_position);
 	m_light_object = hdr_object;
+
 	std::array<glm::vec4, 4> points = { // for area light
 		glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f),
 		glm::vec4(1.0f, -1.0f, 0.0f, 1.0f),
@@ -84,8 +86,8 @@ void eSandBoxGame::InitializeModels()
 	GetMainCamera().setDirection({0, 0, -1.f});
 
 	Material m{ glm::vec3{}, 0.0f, 0.0f, 1.0f,
-		Texture::GetTexture1x1(TColor::YELLOW).id, Texture::GetTexture1x1(TColor::WHITE).id,
-		Texture::GetTexture1x1(TColor::BLUE).id,   Texture::GetTexture1x1(TColor::WHITE).id, Texture::GetTexture1x1(TColor::YELLOW).id,
+		Texture::GetTexture1x1(TColor::YELLOW).m_id, Texture::GetTexture1x1(TColor::WHITE).m_id,
+		Texture::GetTexture1x1(TColor::BLUE).m_id,   Texture::GetTexture1x1(TColor::WHITE).m_id, Texture::GetTexture1x1(TColor::YELLOW).m_id,
 	true, true, true, true };
 
 	hdr_object->GetModel()->SetMaterial(m);
@@ -110,6 +112,8 @@ void eSandBoxGame::InitializePipline()
 	pipeline.GetBlurCoefRef() = 0.05f;
 
 	pipeline.GetSkyBoxOnRef() = false;
+	pipeline.GetFogInfo().fog_on = false;
+	pipeline.GetSkyBoxOnRef() = true;
 }
 
 //-------------------------------------------------------------------------
@@ -120,24 +124,24 @@ void eSandBoxGame::_InitializeScene()
 	//modelManager->Add("Cottage", (GLchar*)std::string(modelFolderPath + "85-cottage_obj/cottage_obj.obj").c_str());
 
 	Material material{ glm::vec3(0.8f, 0.0f, 0.0f), 0.5f , 0.5f }; // -> move to base
-	material.emissive_texture_id = Texture::GetTexture1x1(TColor::BLACK).id;
+	material.emissive_texture_id = Texture::GetTexture1x1(TColor::BLACK).m_id;
 
 	//MATERIALS
 	Material pbr1;
-	pbr1.albedo_texture_id = texManager->Find("pbr1_basecolor")->id;
-	pbr1.metalic_texture_id = texManager->Find("pbr1_metallic")->id;
-	pbr1.normal_texture_id = texManager->Find("pbr1_normal")->id;
-	pbr1.roughness_texture_id = texManager->Find("pbr1_roughness")->id;
-	pbr1.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
+	pbr1.albedo_texture_id = texManager->Find("pbr1_basecolor")->m_id;
+	pbr1.metalic_texture_id = texManager->Find("pbr1_metallic")->m_id;
+	pbr1.normal_texture_id = texManager->Find("pbr1_normal")->m_id;
+	pbr1.roughness_texture_id = texManager->Find("pbr1_roughness")->m_id;
+	pbr1.emissive_texture_id = Texture::GetTexture1x1(BLACK).m_id;
 	pbr1.use_albedo = pbr1.use_metalic = pbr1.use_normal = pbr1.use_roughness = true;
 	pbr1.ao = 0.5f;
 
 	Material gold;
-	gold.albedo_texture_id = texManager->Find("pbr_gold_basecolor")->id;
-	gold.metalic_texture_id = texManager->Find("pbr_gold_metallic")->id;
-	gold.normal_texture_id = texManager->Find("pbr_gold_normal")->id;
-	gold.roughness_texture_id = texManager->Find("pbr_gold_roughness")->id;
-	gold.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
+	gold.albedo_texture_id = texManager->Find("pbr_gold_basecolor")->m_id;
+	gold.metalic_texture_id = texManager->Find("pbr_gold_metallic")->m_id;
+	gold.normal_texture_id = texManager->Find("pbr_gold_normal")->m_id;
+	gold.roughness_texture_id = texManager->Find("pbr_gold_roughness")->m_id;
+	gold.emissive_texture_id = Texture::GetTexture1x1(BLACK).m_id;
 	gold.use_albedo = gold.use_metalic = gold.use_normal = gold.use_roughness = true;
 	gold.ao = 0.9f;
 
@@ -189,7 +193,7 @@ void eSandBoxGame::_InitializeScene()
 	soldier->SetScript(new AnimationSocketScript(this));
 
 	//Set textures manually
-	t.type = "texture_normal";
+	t.m_type = "texture_normal";
 	t.loadTextureFromFile("../game_assets/Resources/DyingSoldier/textures/Ch15_1001_Normal.png");
 	const_cast<I3DMesh*>(soldier->GetModel()->Get3DMeshes()[0])->AddTexture(&t);
 	t.loadTextureFromFile("../game_assets/Resources/DyingSoldier/textures/Ch15_1002_Normal.png");
@@ -231,19 +235,19 @@ void eSandBoxGame::_InitializeScene()
 		const_cast<IMesh*>(chest->GetModel()->GetMeshes()[0])->SetMaterial(chest_material);
 
 		t.loadTextureFromFile("../game_assets/Resources/homemade/chest/chest-diffuse.png");
-		t.type = "texture_diffuse";
+		t.m_type = "texture_diffuse";
 		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[0])->AddTexture(&t);
 		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[1])->AddTexture(&t);
 		t.loadTextureFromFile("../game_assets/Resources/homemade/chest/chest-normal.png");
-		t.type = "texture_normal";
+		t.m_type = "texture_normal";
 		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[0])->AddTexture(&t);
 		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[1])->AddTexture(&t);
 		t.loadTextureFromFile("../game_assets/Resources/homemade/chest/chest-metallic.png");
-		t.type = "texture_specular";
+		t.m_type = "texture_specular";
 		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[0])->AddTexture(&t);
 		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[1])->AddTexture(&t);
 		t.loadTextureFromFile("../game_assets/Resources/homemade/chest/chest-roughness.png");
-		t.type = "texture_roughness";
+		t.m_type = "texture_roughness";
 		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[0])->AddTexture(&t);
 		const_cast<I3DMesh*>(chest->GetModel()->Get3DMeshes()[1])->AddTexture(&t);
 
@@ -392,43 +396,43 @@ void eSandBoxGame::_InitializeScene()
 					if (textures[0].m_path.find("barrel_texture1k") != std::string::npos)
 					{
 						t.loadTextureFromFile("../game_assets/Resources/PirateShip/barrel_texture1k/DefaultMaterial_Metallic_1001.png");
-						t.type = "texture_specular";
+						t.m_type = "texture_specular";
 						const_cast<I3DMesh*>(mesh)->AddTexture(&t);
 						mesh->GetMaterial()->use_metalic = true;
 
 						t.loadTextureFromFile("../game_assets/Resources/PirateShip/barrel_texture1k/DefaultMaterial_Normal_OpenGL_1001.png");
-						t.type = "texture_normal";
+						t.m_type = "texture_normal";
 						const_cast<I3DMesh*>(mesh)->AddTexture(&t);
 						mesh->GetMaterial()->use_normal = true;
 					}
 					else if (textures[0].m_path.find("cannon_texture1k") != std::string::npos)
 					{
 						t.loadTextureFromFile("../game_assets/Resources/PirateShip/cannon_texture1k/DefaultMaterial_Metallic_1001.png");
-						t.type = "texture_specular";
+						t.m_type = "texture_specular";
 						const_cast<I3DMesh*>(mesh)->AddTexture(&t);
 						mesh->GetMaterial()->use_metalic = true;
 					}
 					else if (textures[0].m_path.find("ship_texture4k") != std::string::npos)
 					{
 						t.loadTextureFromFile("../game_assets/Resources/PirateShip/ship_texture4k/ship_Metallic_1001.png");
-						t.type = "texture_specular";
+						t.m_type = "texture_specular";
 						const_cast<I3DMesh*>(mesh)->AddTexture(&t);
 						mesh->GetMaterial()->use_metalic = true;
 
 						t.loadTextureFromFile("../game_assets/Resources/PirateShip/ship_texture4k/ship_Normal_OpenGL_1001.png");
-						t.type = "texture_normal";
+						t.m_type = "texture_normal";
 						const_cast<I3DMesh*>(mesh)->AddTexture(&t);
 						mesh->GetMaterial()->use_normal = true;
 					}
 					else if (textures[0].m_path.find("skull_texture1k") != std::string::npos)
 					{
 						t.loadTextureFromFile("../game_assets/Resources/PirateShip/skull_texture1k/Skull_Metallic_1001.png");
-						t.type = "texture_specular";
+						t.m_type = "texture_specular";
 						const_cast<I3DMesh*>(mesh)->AddTexture(&t);
 						mesh->GetMaterial()->use_metalic = true;
 
 						t.loadTextureFromFile("../game_assets/Resources/PirateShip/skull_texture1k/Skull_Normal_OpenGL_1001.png");
-						t.type = "texture_normal";
+						t.m_type = "texture_normal";
 						const_cast<I3DMesh*>(mesh)->AddTexture(&t);
 						mesh->GetMaterial()->use_normal = true;
 					}
@@ -447,10 +451,10 @@ void eSandBoxGame::_InitializeScene()
 		for (auto& mesh : castle->GetModel()->Get3DMeshes())
 		{
 			t.loadTextureFromFile("../game_assets/assets/brickwall.jpg");
-			t.type = "texture_diffuse";
+			t.m_type = "texture_diffuse";
 			const_cast<I3DMesh*>(mesh)->AddTexture(&t);
 			t.loadTextureFromFile("../game_assets/assets/brickwall_normal.jpg");
-			t.type = "texture_normal";
+			t.m_type = "texture_normal";
 			const_cast<I3DMesh*>(mesh)->AddTexture(&t);
 			mesh->GetMaterial()->use_normal = true;
 			/*const_cast<I3DMesh*>(mesh)->calculatedTangent();

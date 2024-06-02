@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+
 #include "game_assets.h"
 
 #include <math/SceletalAnimation.h>
@@ -8,6 +9,7 @@
 
 class Rigger;
 
+//--------------------------------------------------------------
 class DLL_GAME_ASSETS AnimationManagerYAML
 {
 public:

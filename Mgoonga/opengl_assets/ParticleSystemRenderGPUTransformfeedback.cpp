@@ -94,7 +94,7 @@ void eParticleSystemRenderGPU::_UpdateParticles()
   glUniform1f(m_deltaTimeMillisLocation, static_cast<float>(m_clock.newFrame()));
 
   glActiveTexture(GL_TEXTURE6);
-  glBindTexture(GL_TEXTURE_2D, m_randomTexture->id);
+  glBindTexture(GL_TEXTURE_2D, m_randomTexture->m_id);
 
   glEnable(GL_RASTERIZER_DISCARD);
 
@@ -141,7 +141,7 @@ void eParticleSystemRenderGPU::_RenderParticles(const Camera& _camera)
   glUniformMatrix4fv(m_VPLocation, 1, GL_FALSE, &viewProjection[0][0]);
 
   glActiveTexture(GL_TEXTURE2);
-  glBindTexture(GL_TEXTURE_2D, m_particleTexture->id);
+  glBindTexture(GL_TEXTURE_2D, m_particleTexture->m_id);
 
   glDisable(GL_RASTERIZER_DISCARD);
 
@@ -203,7 +203,7 @@ void eParticleSystemRenderGPU_V2::Render(const Camera& _camera)
   glUniformMatrix4fv(m_gmvp, 1, GL_FALSE, &mvp[0][0]);
 
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, m_particleTexture->id);
+  glBindTexture(GL_TEXTURE_2D, m_particleTexture->m_id);
 
   glEnable(GL_RASTERIZER_DISCARD);
   

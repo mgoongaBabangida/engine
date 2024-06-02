@@ -95,14 +95,17 @@ void SettingsLoadingService::LoadModels(const std::string& _path, const std::str
 			std::vector<std::future<std::vector<IModel*>>> tasks;
 			for (size_t i = 0; i < thread_count; ++i)
 			{
-				std::function<std::vector<IModel*>()> func = [_modelManager, _modelFolder, i, step, &file_infos, thread_count]()-> std::vector<IModel*>
+				std::function<std::vector<IModel*>()> func = [_modelManager, _modelFolder, i, step,
+																											&file_infos, thread_count]
+				()-> std::vector<IModel*>
 				{
 					std::vector<IModel*> models;
 					size_t model_index = step * i;
 					while (model_index < (i + 1) * step && model_index < file_infos.size())
 					{
 						models.push_back(_modelManager->Add(std::get<0>(file_infos[model_index]),
-							(GLchar*)std::string(_modelFolder + std::get<1>(file_infos[model_index])).c_str(), std::get<2>(file_infos[model_index])));
+																								(GLchar*)std::string(_modelFolder + std::get<1>(file_infos[model_index])).c_str(),
+																								std::get<2>(file_infos[model_index])));
 						++model_index;
 					}
 					return models;
@@ -120,7 +123,6 @@ void SettingsLoadingService::LoadModels(const std::string& _path, const std::str
 					m->ReloadTextures();
 				}
 			}
-
 		}
 	}
 }

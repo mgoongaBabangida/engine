@@ -22,7 +22,7 @@ void GUIControllerBase::Initialize()
 {
 	const Texture* cursor_tex = m_game->GetTexture("cursor1");
 	std::shared_ptr<GUI> cursor = std::make_shared<Cursor>(0, 0, 30, 30, m_game->Width(), m_game->Height());
-	cursor->SetTexture(*cursor_tex, { 0,0 }, { cursor_tex->mTextureWidth, cursor_tex->mTextureHeight });
+	cursor->SetTexture(*cursor_tex, { 0,0 }, { cursor_tex->m_width, cursor_tex->m_height });
 	cursor->SetTransparent(true);
 	m_game->AddGUI(cursor);
 	m_game->AddInputObserver(cursor.get(), ALWAYS);
@@ -41,7 +41,7 @@ void GUIController::Initialize()
 	const Texture* menu_tex = m_game->GetTexture("menu3");
 	const Texture* mask_tex = m_game->GetTexture("menu2");
 	std::shared_ptr<GUI> menu = std::make_shared<GUI>(pos_x, pos_y, menu_size.x, menu_size.y, m_game->Width(), m_game->Height());
-	menu->SetTexture(*menu_tex, { 0,0 }, { menu_tex->mTextureWidth, menu_tex->mTextureHeight });
+	menu->SetTexture(*menu_tex, { 0,0 }, { menu_tex->m_width, menu_tex->m_height });
 	menu->SetTextureMask(*mask_tex);
 	menu->SetRenderingFunc(GUI::RenderFunc::CursorFollow);
 	m_game->AddGUI(menu);

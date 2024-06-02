@@ -3,6 +3,7 @@
 #include "ModelManagerYAML.h"
 
 #include <opengl_assets/Texture.h>
+#include <opengl_assets/Model.h>
 #include <opengl_assets/TextureManager.h>
 
 #include "YamlTyps.h"
@@ -215,14 +216,14 @@ IModel* ModelManagerYAML::_LoadModel(const std::string& _name, const std::string
     }
   }
 
-  std::vector<AssimpMesh> meshes;
+  eModel* model = new eModel(_name, {}, bones);
   auto serialized_meshes = data["Meshes"];
   for (auto serialized_mesh : serialized_meshes)
   {
     std::string name = serialized_mesh["MeshName"].as<std::string>();
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indeces;
-    std::vector<Texture> textures;
+    std::vector<TextureInfo> textures;
     Material m;
 
     auto verticesComponent = serialized_mesh["Vertices"];
@@ -264,28 +265,26 @@ IModel* ModelManagerYAML::_LoadModel(const std::string& _name, const std::string
       m.use_roughness = materialComponent["use_roughness"].as<bool>();
       m.use_phong_shading = materialComponent["use_phong_shading"].as<bool>();
 
-      std::string albedo_path, metallic_path, normal_path, roughness_path, emissive_path;
       auto albedo = materialComponent["albedo_texture_path"];
       if (albedo)
-        albedo_path = albedo.as<std::string>();
+        textures.emplace_back("texture_diffuse", albedo.as<std::string>());
       auto metallic = materialComponent["metalic_texture_path"];
       if(metallic)
-        metallic_path = metallic.as<std::string>();
+        textures.emplace_back("texture_specular", metallic.as<std::string>());
       auto normal = materialComponent["normal_texture_path"];
       if(normal)
-        normal_path = normal.as<std::string>();
+        textures.emplace_back("texture_normal", normal.as<std::string>());
       auto roughnes = materialComponent["roughness_texture_path"];
       if(roughnes)
-        roughness_path = roughnes.as<std::string>();
+        textures.emplace_back("texture_roughness", roughnes.as<std::string>());
       auto emissive = materialComponent["emissive_texture_path"];
       if(emissive)
-        emissive_path = emissive.as<std::string>();
+        textures.emplace_back("texture_emission", emissive.as<std::string>());
     }
 
-    meshes.emplace_back(vertices, indeces, textures, m, name, true);
+    model->AddMesh(vertices, indeces, textures, m, name, true);
   }
 
-  std::shared_ptr<IModel> model(MakeModel(_name, std::move(meshes), bones));
   models.insert(std::pair<std::string, std::shared_ptr<IModel> >(_name, model));
-  return model.get();
+  return model;
 }

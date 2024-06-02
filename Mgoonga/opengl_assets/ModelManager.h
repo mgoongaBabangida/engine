@@ -1,12 +1,12 @@
 #pragma once
 
 #include "stdafx.h"
+
 #include "opengl_assets.h"
 #include "MyModel.h"
-#include "AssimpModel.h"
 #include "TerrainModel.h"
 
-#include <set>
+#include <map>
 
 enum class Primitive
 {

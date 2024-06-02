@@ -12,9 +12,9 @@ eCameraInterpolationRender::eCameraInterpolationRender(const std::string& vS, co
   mComputeShader.installShaders(cS.c_str());
   mComputeShader.GetUniformInfoFromShader();
 
-  mImageId = _computeShaderImage->id;
-  mImageWidth = _computeShaderImage->mTextureWidth;
-  mImageHeight = _computeShaderImage->mTextureHeight;
+  mImageId = _computeShaderImage->m_id;
+  mImageWidth = _computeShaderImage->m_width;
+  mImageHeight = _computeShaderImage->m_height;
 }
 
 //---------------------------------------------------------------

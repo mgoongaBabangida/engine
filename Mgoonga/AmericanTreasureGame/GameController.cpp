@@ -78,8 +78,8 @@ void GameController::Initialize()
   m_game->GetMainLight().points = points;
 
   Material m { glm::vec3{}, 0.0f, 0.0f, 1.0f,
-              Texture::GetTexture1x1(TColor::YELLOW).id, Texture::GetTexture1x1(TColor::WHITE).id,
-              Texture::GetTexture1x1(TColor::BLUE).id,   Texture::GetTexture1x1(TColor::WHITE).id, Texture::GetTexture1x1(TColor::YELLOW).id,
+              Texture::GetTexture1x1(TColor::YELLOW).m_id, Texture::GetTexture1x1(TColor::WHITE).m_id,
+              Texture::GetTexture1x1(TColor::BLUE).m_id,   Texture::GetTexture1x1(TColor::WHITE).m_id, Texture::GetTexture1x1(TColor::YELLOW).m_id,
               true, true, true, true };
 
   hdr_object->GetModel()->SetMaterial(m);
@@ -420,9 +420,9 @@ void GameController::Update(float _tick)
     const Texture* red_tex = m_game->GetTexture("red_circle");
     const Texture* green_tex = m_game->GetTexture("green_circle");
     if (m_has_moved[i])
-      m_status_icons[i]->SetTexture(*red_tex, { 0,0 }, { red_tex->mTextureWidth, red_tex->mTextureHeight });
+      m_status_icons[i]->SetTexture(*red_tex, { 0,0 }, { red_tex->m_width, red_tex->m_height });
     else
-      m_status_icons[i]->SetTexture(*green_tex, { 0,0 }, { green_tex->mTextureWidth, green_tex->mTextureHeight });
+      m_status_icons[i]->SetTexture(*green_tex, { 0,0 }, { green_tex->m_width, green_tex->m_height });
   }
 
   //update icons move status pirate
@@ -431,9 +431,9 @@ void GameController::Update(float _tick)
     const Texture* red_tex = m_game->GetTexture("red_circle");
     const Texture* green_tex = m_game->GetTexture("green_circle");
     if (m_has_moved_pirate[i])
-      m_status_icons_pirate[i]->SetTexture(*red_tex, { 0,0 }, { red_tex->mTextureWidth, red_tex->mTextureHeight });
+      m_status_icons_pirate[i]->SetTexture(*red_tex, { 0,0 }, { red_tex->m_width, red_tex->m_height });
     else
-      m_status_icons_pirate[i]->SetTexture(*green_tex, { 0,0 }, { green_tex->mTextureWidth, green_tex->mTextureHeight });
+      m_status_icons_pirate[i]->SetTexture(*green_tex, { 0,0 }, { green_tex->m_width, green_tex->m_height });
   }
 
   // update base labels
@@ -808,7 +808,7 @@ void GameController::_InitializeDiceLogicAndVisual()
   glm::vec2 icon_size = { 125.0f , 125.0f };
   m_dice_gui = std::make_shared<GUI>((int)pos_x, (int)pos_y, (int)icon_size.x, (int)icon_size.y, m_game->Width(), m_game->Height());
   auto dice_tex = _GetDiceTexture();
-  m_dice_gui->SetTexture(*dice_tex, { 0,0 }, { dice_tex->mTextureWidth, dice_tex->mTextureHeight });
+  m_dice_gui->SetTexture(*dice_tex, { 0,0 }, { dice_tex->m_width, dice_tex->m_height });
   m_dice_gui->setCommand(std::make_shared<GUICommand>([this]()
     {
       if (!m_dice_rolled && m_game->GetFocusedObject() && !_CurrentShipHasMoved())
@@ -816,7 +816,7 @@ void GameController::_InitializeDiceLogicAndVisual()
         m_current_dice = math::Random::RandomInt(1, 6);
         m_dice_rolled = true;
         auto dice_tex = _GetDiceTexture();
-        m_dice_gui->SetTexture(*dice_tex, { 0,0 }, { dice_tex->mTextureWidth, dice_tex->mTextureHeight });
+        m_dice_gui->SetTexture(*dice_tex, { 0,0 }, { dice_tex->m_width, dice_tex->m_height });
       }
     }));
   m_game->AddGUI(m_dice_gui);
@@ -834,7 +834,7 @@ void GameController::_InitializeShipIcons()
     float pos_y = 10.0f;
     const Texture* ship_tex = m_game->GetTexture("ship1");
     std::shared_ptr<GUI> ship_gui = std::make_shared<GUI>((int)pos_x, (int)pos_y, (int)icon_size.x, (int)icon_size.y, m_game->Width(), m_game->Height());
-    ship_gui->SetTexture(*ship_tex, { 0,0 }, { ship_tex->mTextureWidth, ship_tex->mTextureHeight });
+    ship_gui->SetTexture(*ship_tex, { 0,0 }, { ship_tex->m_width, ship_tex->m_height });
     ship_gui->SetRenderingFunc(GUI::RenderFunc::GreyKernel);
     ship_gui->setCommand(std::make_shared<GUICommand>([this, ship_gui]()
     {
@@ -867,7 +867,7 @@ void GameController::_InitializeShipIcons()
     float pos_y = 10.0f;
     const Texture* ship_tex = m_game->GetTexture("ship1");
     std::shared_ptr<GUI> ship_gui = std::make_shared<GUI>((int)pos_x, (int)pos_y, (int)icon_size.x, (int)icon_size.y, m_game->Width(), m_game->Height());
-    ship_gui->SetTexture(*ship_tex, { 0,0 }, { ship_tex->mTextureWidth, ship_tex->mTextureHeight });
+    ship_gui->SetTexture(*ship_tex, { 0,0 }, { ship_tex->m_width, ship_tex->m_height });
     ship_gui->SetRenderingFunc(GUI::RenderFunc::GreyKernel);
     ship_gui->setCommand(std::make_shared<GUICommand>([this, ship_gui]()
       {
@@ -1058,43 +1058,43 @@ void GameController::_InitializeShips()
           if (textures[0].m_path.find("barrel_texture1k") != std::string::npos)
           {
             t.loadTextureFromFile("../game_assets/Resources/PirateShip/barrel_texture1k/DefaultMaterial_Metallic_1001.png");
-            t.type = "texture_specular";
+            t.m_type = "texture_specular";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_metalic = true;
 
             t.loadTextureFromFile("../game_assets/Resources/PirateShip/barrel_texture1k/DefaultMaterial_Normal_OpenGL_1001.png");
-            t.type = "texture_normal";
+            t.m_type = "texture_normal";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_normal = true;
           }
           else if (textures[0].m_path.find("cannon_texture1k") != std::string::npos)
           {
             t.loadTextureFromFile("../game_assets/Resources/PirateShip/cannon_texture1k/DefaultMaterial_Metallic_1001.png");
-            t.type = "texture_specular";
+            t.m_type = "texture_specular";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_metalic = true;
           }
           else if (textures[0].m_path.find("ship_texture4k") != std::string::npos)
           {
             t.loadTextureFromFile("../game_assets/Resources/PirateShip/ship_texture4k/ship_Metallic_1001.png");
-            t.type = "texture_specular";
+            t.m_type = "texture_specular";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_metalic = true;
 
             t.loadTextureFromFile("../game_assets/Resources/PirateShip/ship_texture4k/ship_Normal_OpenGL_1001.png");
-            t.type = "texture_normal";
+            t.m_type = "texture_normal";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_normal = true;
           }
           else if (textures[0].m_path.find("skull_texture1k") != std::string::npos)
           {
             t.loadTextureFromFile("../game_assets/Resources/PirateShip/skull_texture1k/Skull_Metallic_1001.png");
-            t.type = "texture_specular";
+            t.m_type = "texture_specular";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_metalic = true;
 
             t.loadTextureFromFile("../game_assets/Resources/PirateShip/skull_texture1k/Skull_Normal_OpenGL_1001.png");
-            t.type = "texture_normal";
+            t.m_type = "texture_normal";
             const_cast<I3DMesh*>(mesh)->AddTexture(&t);
             mesh->GetMaterial()->use_normal = true;
           }
@@ -1147,10 +1147,10 @@ void GameController::_InitializeBases()
   for (auto& mesh : base1->GetModel()->Get3DMeshes())
   {
     t.loadTextureFromFile("../game_assets/assets/brickwall.jpg");
-    t.type = "texture_diffuse";
+    t.m_type = "texture_diffuse";
     const_cast<I3DMesh*>(mesh)->AddTexture(&t);
     t.loadTextureFromFile("../game_assets/assets/brickwall_normal.jpg");
-    t.type = "texture_normal";
+    t.m_type = "texture_normal";
     const_cast<I3DMesh*>(mesh)->AddTexture(&t);
     mesh->GetMaterial()->use_normal = true;
     /*const_cast<I3DMesh*>(mesh)->calculatedTangent();
@@ -1225,7 +1225,7 @@ void GameController::_InitializeGoldenFrame()
   float pos_y = 5.0f;
   const Texture* tex = m_game->GetTexture("golden_frame");
   std::shared_ptr<GUI> frame_gui = std::make_shared<GUI>((int)pos_x, (int)pos_y, 70, 70, m_game->Width(), m_game->Height());
-  frame_gui->SetTexture(*tex, { 0,0 }, { tex->mTextureWidth, tex->mTextureHeight });
+  frame_gui->SetTexture(*tex, { 0,0 }, { tex->m_width, tex->m_height });
   frame_gui->SetTakeMouseEvents(true);
   frame_gui->SetMovable2D(true);
   frame_gui->SetExecuteOnRelease(true);

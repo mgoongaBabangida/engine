@@ -45,17 +45,17 @@ Texture Texture::GetTexture1x1(TColor color)
 	static Texture yellow;
 	static Texture grey;
 
-	if (white.id == GetDefaultTextureId())
+	if (white.m_id == GetDefaultTextureId())
 		white._loadTexture1x1(WHITE);
-	if (black.id == GetDefaultTextureId())
+	if (black.m_id == GetDefaultTextureId())
 		black._loadTexture1x1(BLACK);
-	if (blue.id == GetDefaultTextureId())
+	if (blue.m_id == GetDefaultTextureId())
 		blue._loadTexture1x1(BLUE);
-	if (pink.id == GetDefaultTextureId())
+	if (pink.m_id == GetDefaultTextureId())
 		pink._loadTexture1x1(PINK);
-	if (yellow.id == GetDefaultTextureId())
+	if (yellow.m_id == GetDefaultTextureId())
 		yellow._loadTexture1x1(YELLOW);
-	if (grey.id == GetDefaultTextureId())
+	if (grey.m_id == GetDefaultTextureId())
 		grey._loadTexture1x1(GREY);
 
 	switch (color)
@@ -72,6 +72,33 @@ Texture Texture::GetTexture1x1(TColor color)
 	return {};
 }
 
+//-----------------------------------------------------------------------------------------------
+Texture::Texture(GLuint Width, GLuint Height, int32_t TextureChannels)
+	: Texture()
+{
+	m_width = Width;
+	m_height = Height;
+	m_channels = TextureChannels;
+}
+
+//-----------------------------------------------------------------------------------------------
+Texture::Texture(GLuint ID, GLuint TextureWidth, GLuint TextureHeight, int32_t TextureChannels)
+	:m_id(ID), m_width(TextureWidth), m_height(TextureHeight), m_channels(TextureChannels)
+{}
+
+//-----------------------------------------------------------------------------------------------
+Texture::Texture()
+	: m_type("default"), m_path("empty"), m_id(GetDefaultTextureId()), m_width(1), m_height(1), m_channels(4)
+{
+}
+
+//-----------------------------------------------------------------------------------------------
+Texture::Texture(const TextureInfo& _info)
+	:m_type(_info.m_type), m_path(_info.m_path), m_id(GetDefaultTextureId())
+{
+}
+
+//-----------------------------------------------------------------------------------------------
 bool Texture::freeTexture(unsigned int _id)
 {
 	//Delete texture
@@ -92,51 +119,30 @@ bool Texture::freeTexture(unsigned int _id)
 	return false;
 }
 
-Texture::Texture()
-{
-	type = "default";
-	path = "empty";
-	id = GetDefaultTextureId();
-	mTextureWidth = 1, mTextureHeight = 1;
-	mChannels = 4;
-	//loadTexture1x1(YELLOW);
-}
-
+//-----------------------------------------------------------------------------------------------
 Texture::~Texture()
 {
 }
 
-Texture::Texture(GLuint Width, GLuint Height, int32_t TextureChannels)
-	:Texture()
-{
-	mTextureWidth = Width;
-	mTextureHeight = Height;
-	mChannels = TextureChannels;
-}
-
-Texture::Texture(GLuint ID, GLuint TextureWidth, GLuint TextureHeight, int32_t TextureChannels)
-	:id(ID), mTextureWidth(TextureWidth), mTextureHeight(TextureHeight), mChannels(TextureChannels)
-{}
-
 //-----------------------------------------------------------------------------------------------
 bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenum wrap)
 {
-	path		= _path;
+	m_path		= _path;
 	uint32_t ilId;
-	mChannels = eTextureImplDevIl::LoadTexture(path, ilId, mTextureWidth, mTextureHeight);
+	m_channels = eTextureImplDevIl::LoadTexture(m_path, ilId, m_width, m_height);
 	uint8_t* data = nullptr;
-	eTextureImplDevIl::AssignPixels(data, mTextureWidth, mTextureHeight);
+	eTextureImplDevIl::AssignPixels(data, m_width, m_height);
 
 	// Load textures
 	_genTexture();
-	glBindTexture(GL_TEXTURE_2D, id);
+	glBindTexture(GL_TEXTURE_2D, m_id);
 	glTexImage2D(GL_TEXTURE_2D,
 				0, 
-				mChannels == 4 ? GL_RGBA : GL_RGB,
-				mTextureWidth, 
-				mTextureHeight, 
+				m_channels == 4 ? GL_RGBA : GL_RGB,
+				m_width, 
+				m_height, 
 				0, 
-				mChannels == 4 ? GL_RGBA : GL_RGB,
+				m_channels == 4 ? GL_RGBA : GL_RGB,
 				GL_UNSIGNED_BYTE,
 				(GLubyte*)data);
 
@@ -159,11 +165,11 @@ bool Texture::loadTextureFromFile(const std::string& _path, GLenum format, GLenu
 uint8_t* Texture::getPixelBuffer(GLenum _target, GLenum _format, GLenum _type) const
 { 
 	int sizeOfByte = _type == GL_FLOAT ? sizeof(float) : sizeof(unsigned char);
-	int bytesToUsePerPixel = mChannels;
-	int theSize = mTextureWidth * mTextureHeight * sizeOfByte * bytesToUsePerPixel * layers;
+	int bytesToUsePerPixel = m_channels;
+	int theSize = m_width * m_height * sizeOfByte * bytesToUsePerPixel * m_layers;
 	uint8_t* imData = (uint8_t*)malloc(theSize);
 
-	glBindTexture(_target, this->id);
+	glBindTexture(_target, this->m_id);
 	glGetTexImage(_target, 0, _format, _type, (void*)imData); //generic
 
 	glBindTexture(_target, 0);
@@ -174,7 +180,7 @@ uint8_t* Texture::getPixelBuffer(GLenum _target, GLenum _format, GLenum _type) c
 bool Texture::saveToFile(const std::string &path, GLenum _target, GLenum _format, GLenum _type)
 {
 	uint8_t* imData = getPixelBuffer(_target, _format, _type);
-	eTextureImplDevIl::SaveToFile(imData, path, mTextureWidth, mTextureHeight, layers, mChannels, _type); //rgb/rgba byte/float ?
+	eTextureImplDevIl::SaveToFile(imData, path, m_width, m_height, m_layers, m_channels, _type); //rgb/rgba byte/float ?
 	free(imData);
 	return true;
 }
@@ -183,22 +189,22 @@ bool Texture::saveToFile(const std::string &path, GLenum _target, GLenum _format
 void Texture::freeTexture()
 {
 	//Delete texture
-	if (id != 0)
+	if (m_id != 0)
 	{
-		if (indexes_in_use.find(id) != indexes_in_use.end())
+		if (indexes_in_use.find(m_id) != indexes_in_use.end())
 		{
-			std::cout << "free texture " << id << ": " << --textures_in_use << std::endl;
-			indexes_in_use.erase(id);
-			glDeleteTextures(1, &id);
-			id = 0;
+			std::cout << "free texture " << m_id << ": " << --textures_in_use << std::endl;
+			indexes_in_use.erase(m_id);
+			glDeleteTextures(1, &m_id);
+			m_id = 0;
 		}
 		else
 		{
 			std::cout << "trying to free texture which was not generated by texture class" << std::endl;
 		}
 	}
-	mTextureWidth = 0;
-	mTextureHeight = 0;
+	m_width = 0;
+	m_height = 0;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -228,12 +234,12 @@ bool Texture::_loadTexture1x1(TColor color)
 	}
 	// Load textures
 	_genTexture();
-	glBindTexture(GL_TEXTURE_2D, id);
+	glBindTexture(GL_TEXTURE_2D, m_id);
 
-	mTextureWidth = 1;
-	mTextureHeight = 1;
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex);
-	mChannels = 4;
+	m_width = 1;
+	m_height = 1;
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex);
+	m_channels = 4;
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -249,7 +255,7 @@ bool Texture::loadCubemap(std::vector<std::string> faces)
 {
   //unsigned char* image;
   _genTexture();
-  glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, m_id);
   for (GLuint i = 0; i < faces.size(); i++)
   {
     //	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, Width, Height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
@@ -269,18 +275,18 @@ bool Texture::loadCubemap(std::vector<std::string> faces)
     int i3 = IL_INVALID_PARAM;
 
     //Image loaded successfully
-    mTextureWidth = ilGetInteger(IL_IMAGE_WIDTH);
-    mTextureHeight = ilGetInteger(IL_IMAGE_HEIGHT);
-    auto pixmap = new BYTE[mTextureWidth * mTextureHeight * 3];
-    ilCopyPixels(0, 0, 0, mTextureWidth, mTextureHeight, 1, IL_RGB, IL_UNSIGNED_BYTE, pixmap);
+    m_width = ilGetInteger(IL_IMAGE_WIDTH);
+    m_height = ilGetInteger(IL_IMAGE_HEIGHT);
+    auto pixmap = new BYTE[m_width * m_height * 3];
+    ilCopyPixels(0, 0, 0, m_width, m_height, 1, IL_RGB, IL_UNSIGNED_BYTE, pixmap);
 
     //Convert image to RGBA
     success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE); // always converts rgb -> rgba
     if (!success)
       std::cout << "error converting image" << std::endl;
     // Load textures
-    glBindTexture(GL_TEXTURE_2D, id);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLuint*)ilGetData());
+    glBindTexture(GL_TEXTURE_2D, m_id);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLuint*)ilGetData());
     //
     ilDeleteImages(1, &imgID);
 		delete[] pixmap;
@@ -291,7 +297,7 @@ bool Texture::loadCubemap(std::vector<std::string> faces)
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
   glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-  mChannels = 4;
+  m_channels = 4;
 
   return true;
 }
@@ -300,14 +306,14 @@ bool Texture::loadCubemap(std::vector<std::string> faces)
 bool Texture::makeCubemap(size_t _size, bool _mipmap, GLenum _format, GLenum _internal_format, GLenum _type)
 {
 	if (_internal_format == GL_RGBA)
-		mChannels = 4;
+		m_channels = 4;
 	else
-		mChannels = 3;
-	mTextureWidth = (int32_t)_size;
-	mTextureHeight = (int32_t)_size;
+		m_channels = 3;
+	m_width = (int32_t)_size;
+	m_height = (int32_t)_size;
 
 	_genTexture();
-	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_id);
 
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -318,13 +324,13 @@ bool Texture::makeCubemap(size_t _size, bool _mipmap, GLenum _format, GLenum _in
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	int buffer_size = mTextureWidth * mTextureHeight * mChannels;
+	int buffer_size = m_width * m_height * m_channels;
 
 	for (GLuint i = 0; i < 6; ++i)
 	{
 		std::vector<float> xData(buffer_size, 0.2f + i * 0.3f); //for debug
-		glBindTexture(GL_TEXTURE_2D, id);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, _internal_format, mTextureWidth, mTextureHeight, 0, _format, _type, &xData[0]);
+		glBindTexture(GL_TEXTURE_2D, m_id);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, _internal_format, m_width, m_height, 0, _format, _type, &xData[0]);
 	}
 	if(_mipmap)
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
@@ -336,12 +342,12 @@ bool Texture::makeCubemap(size_t _size, bool _mipmap, GLenum _format, GLenum _in
 //-----------------------------------------------------------------------------------------------
 bool Texture::makeDepthTexture()
 {
-	assert(mTextureHeight);
-	assert(mTextureWidth);
+	assert(m_height);
+	assert(m_width);
 
 	_genTexture();
-	glBindTexture(GL_TEXTURE_2D, id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, mTextureWidth, mTextureHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glBindTexture(GL_TEXTURE_2D, m_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
@@ -357,22 +363,22 @@ bool Texture::makeDepthTexture()
 //-----------------------------------------------------------------------------------------------
 bool Texture::makeDepthTextureArray(int32_t _layers)
 {
-	assert(mTextureHeight);
-	assert(mTextureWidth);
-	layers = _layers;
-	mChannels = 1;
+	assert(m_height);
+	assert(m_width);
+	m_layers = _layers;
+	m_channels = 1;
 
 	_genTexture();
-	glBindTexture(GL_TEXTURE_2D_ARRAY, id);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, m_id);
 
-	std::vector<float> xData(mTextureHeight* mTextureWidth* _layers, 0.2f); //for debug
+	std::vector<float> xData(m_height* m_width* _layers, 0.2f); //for debug
 
 	glTexImage3D(
 		GL_TEXTURE_2D_ARRAY,
 		0,
 		GL_DEPTH_COMPONENT32F,
-		mTextureWidth,
-		mTextureHeight,
+		m_width,
+		m_height,
 		_layers,
 		0,
 		GL_DEPTH_COMPONENT,
@@ -393,14 +399,14 @@ bool Texture::makeDepthTextureArray(int32_t _layers)
 //-----------------------------------------------------------------------------------------------
 bool Texture::makeDepthCubeMap()
 {
-	assert(mTextureHeight);
-	assert(mTextureWidth);
+	assert(m_height);
+	assert(m_width);
 
 	_genTexture();
-	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_id);
 	for (unsigned int i = 0; i < 6; ++i)
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT,
-			mTextureWidth, mTextureHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+			m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -424,7 +430,7 @@ bool Texture::makeRandom1DTexture(unsigned int _size)
 	}
 
 	_genTexture();
-	glBindTexture(GL_TEXTURE_1D, id);
+	glBindTexture(GL_TEXTURE_1D, m_id);
 	glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, _size, 0, GL_RGB, GL_FLOAT, pRandomData);//?
 	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -438,28 +444,28 @@ bool Texture::makeRandom1DTexture(unsigned int _size)
 //-----------------------------------------------------------------------------------------------
 bool Texture::makeImage(GLuint _width, GLuint _height)
 {
-	path = "";
-	type = "";
-	mTextureWidth = _width;
-	mTextureHeight = _height;
+	m_path = "";
+	m_type = "";
+	m_width = _width;
+	m_height = _height;
 	_genTexture();
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, id);
+	glBindTexture(GL_TEXTURE_2D, m_id);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, mTextureWidth, mTextureHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, m_width, m_height, 0, GL_RGBA, GL_FLOAT, NULL);
 
-	glBindImageTexture(0, id, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+	glBindImageTexture(0, m_id, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 	return true;
 }
 
 //-----------------------------------------------------------------------------------------------
 bool Texture::generatePerlin(GLuint _width, GLuint _height, bool periodic)
 {
-	this->mTextureWidth = _width;
-	this->mTextureHeight = _height;
+	this->m_width = _width;
+	this->m_height = _height;
 
 	float a = 1.0f;
 	float b = 2.0f;
@@ -467,7 +473,7 @@ bool Texture::generatePerlin(GLuint _width, GLuint _height, bool periodic)
 	float xFactor = 1.0f / (_width - 1);
 	float yFactor = 1.0f / (_height - 1);
 
-	this->mChannels = 4; //octaves
+	this->m_channels = 4; //octaves
 
 	GLubyte *data = new GLubyte[_width * _height * 4];
 	for (uint32_t row = 0; row < _height; row++)
@@ -479,7 +485,7 @@ bool Texture::generatePerlin(GLuint _width, GLuint _height, bool periodic)
 			float sum = 0.0f;
 			float freq = a;
 			float scale = b;
-			for (int oct = 0; oct < mChannels; ++oct)
+			for (int oct = 0; oct < m_channels; ++oct)
 			{
 				glm::vec2 p(x * freq, y * freq);
 				float val = 0.0f;
@@ -499,9 +505,9 @@ bool Texture::generatePerlin(GLuint _width, GLuint _height, bool periodic)
 	}
 	
 	_genTexture();
-	glBindTexture(GL_TEXTURE_2D, id);
-	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, this->mTextureWidth, this->mTextureHeight);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->mTextureWidth, this->mTextureHeight, GL_RGBA, GL_UNSIGNED_BYTE, (void*)data);
+	glBindTexture(GL_TEXTURE_2D, m_id);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, this->m_width, this->m_height);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, this->m_width, this->m_height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)data);
 	
 	delete[] data;
 	return true;
@@ -511,13 +517,13 @@ bool Texture::generatePerlin(GLuint _width, GLuint _height, bool periodic)
 bool Texture::loadHdr(const std::string& _path)
 {
 	stbi_set_flip_vertically_on_load(true);
-	path = _path;
-	float* data = stbi_loadf(_path.c_str(), &mTextureWidth, &mTextureHeight, &mChannels, 0);
+	m_path = _path;
+	float* data = stbi_loadf(_path.c_str(), &m_width, &m_height, &m_channels, 0);
 	if (data)
 	{
 		_genTexture();
-		glBindTexture(GL_TEXTURE_2D, id);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, mTextureWidth, mTextureHeight, 0, GL_RGB, GL_FLOAT, data);
+		glBindTexture(GL_TEXTURE_2D, m_id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_width, m_height, 0, GL_RGB, GL_FLOAT, data);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -537,45 +543,45 @@ bool Texture::loadHdr(const std::string& _path)
 //----------------------------------------------------------------------
 bool Texture::loadTexture2DArray(std::vector<std::string> _paths, GLenum _format)
 {
-	path = "";
-	type = "";
-	mTextureWidth = 0;
-	mTextureHeight = 0;
+	m_path = "";
+	m_type = "";
+	m_width = 0;
+	m_height = 0;
 	if (_format == GL_RGBA)
-		mChannels = 4;
+		m_channels = 4;
 	else
-		mChannels = 1;
+		m_channels = 1;
 
 	GLsizei layers = (GLsizei)_paths.size();
 
 	if (layers == 0)
 		return false;
 
-	glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &id);
+	glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &m_id);
 	++textures_in_use;
-	indexes_in_use.insert(id);
+	indexes_in_use.insert(m_id);
 
 	uint32_t ilId;
 	for (int layer = 0; layer < _paths.size(); ++layer)
 	{
-		eTextureImplDevIl::LoadTexture(_paths[layer], ilId, mTextureWidth, mTextureHeight); //rgb ? rgba
+		eTextureImplDevIl::LoadTexture(_paths[layer], ilId, m_width, m_height); //rgb ? rgba
 		if (layer == 0)
 		{
 			if(_format == GL_RGBA)
-				glTextureStorage3D(id, 1, GL_RGBA8, mTextureWidth, mTextureHeight, layers); // after eTextureImplDevIl::LoadTexture assignes width an height
+				glTextureStorage3D(m_id, 1, GL_RGBA8, m_width, m_height, layers); // after eTextureImplDevIl::LoadTexture assignes width an height
 			else if(_format == GL_RED)
-				glTextureStorage3D(id, 1, GL_R8, mTextureWidth, mTextureHeight, layers);
+				glTextureStorage3D(m_id, 1, GL_R8, m_width, m_height, layers);
 		}
 		uint8_t* data = nullptr;
-		eTextureImplDevIl::AssignPixels(data, mTextureWidth, mTextureHeight);
-		glTextureSubImage3D(id, 0/*mipmap_level*/, 0/*offset.x*/, 0/*offset.y*/, layer/*offset.z*/, mTextureWidth, mTextureHeight, 1 /*layer*/, _format, GL_UNSIGNED_BYTE, data);
+		eTextureImplDevIl::AssignPixels(data, m_width, m_height);
+		glTextureSubImage3D(m_id, 0/*mipmap_level*/, 0/*offset.x*/, 0/*offset.y*/, layer/*offset.z*/, m_width, m_height, 1 /*layer*/, _format, GL_UNSIGNED_BYTE, data);
 		eTextureImplDevIl::DeleteImage(ilId);
 
-		glGenerateMipmap(id);
-		glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glGenerateMipmap(m_id);
+		glTextureParameteri(m_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(m_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTextureParameteri(m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTextureParameteri(m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}
 	return true;
 }
@@ -583,11 +589,11 @@ bool Texture::loadTexture2DArray(std::vector<std::string> _paths, GLenum _format
 //----------------------------------------------------------------------
 void Texture::_genTexture()
 {
-	glGenTextures(1, &id);
-	if (id != GetDefaultTextureId())
+	glGenTextures(1, &m_id);
+	if (m_id != GetDefaultTextureId())
 	{
-		std::cout << "gen texture " << id << std::endl;
+		std::cout << "gen texture " << m_id << std::endl;
 		++textures_in_use;
-		indexes_in_use.insert(id);
+		indexes_in_use.insert(m_id);
 	}
 }

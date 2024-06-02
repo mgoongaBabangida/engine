@@ -217,15 +217,15 @@ glm::vec3 TerrainMesh::GetCenter() const
 //-----------------------------------------------------------------------------------------------
 void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, float _max_height, float _min_height, int32_t _normal_sharpness, bool _apply_normal_blur)
 {
-	glBindTexture(GL_TEXTURE_2D, _heightMap.id);
-	if (_heightMap.mChannels == 4)
+	glBindTexture(GL_TEXTURE_2D, _heightMap.m_id);
+	if (_heightMap.m_channels == 4)
 	{
-		GLfloat* buffer = new GLfloat[_heightMap.mTextureHeight * _heightMap.mTextureWidth * 4];
+		GLfloat* buffer = new GLfloat[_heightMap.m_height * _heightMap.m_width * 4];
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buffer);
-		m_heightMap.TextureFromBuffer((GLfloat*)buffer, _heightMap.mTextureWidth, _heightMap.mTextureHeight, GL_RGBA, GL_REPEAT, GL_LINEAR);
-		if (_heightMap.mTextureHeight == m_rows && _heightMap.mTextureWidth == m_columns)
+		m_heightMap.TextureFromBuffer((GLfloat*)buffer, _heightMap.m_width, _heightMap.m_height, GL_RGBA, GL_REPEAT, GL_LINEAR);
+		if (_heightMap.m_height == m_rows && _heightMap.m_width == m_columns)
 		{
-			for (int i = 0; i < _heightMap.mTextureHeight * _heightMap.mTextureWidth * 4; i += 4)
+			for (int i = 0; i < _heightMap.m_height * _heightMap.m_width * 4; i += 4)
 			{
 				float height = (float)(buffer[i] * _height_scale);
 				this->vertices[i / 4].Position.y = height <= _max_height ? height : _max_height;
@@ -241,14 +241,14 @@ void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, 
 		}
 		delete[] buffer;
 	}
-	else if (_heightMap.mChannels == 1)
+	else if (_heightMap.m_channels == 1)
 	{
-			GLfloat* buffer = new GLfloat[_heightMap.mTextureHeight * _heightMap.mTextureWidth];
+			GLfloat* buffer = new GLfloat[_heightMap.m_height * _heightMap.m_width];
 			glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, buffer);
-			m_heightMap.TextureFromBuffer((GLfloat*)buffer, _heightMap.mTextureWidth, _heightMap.mTextureHeight, GL_RED, GL_REPEAT, GL_LINEAR);
-			if (_heightMap.mTextureHeight == m_rows && _heightMap.mTextureWidth == m_columns)
+			m_heightMap.TextureFromBuffer((GLfloat*)buffer, _heightMap.m_width, _heightMap.m_height, GL_RED, GL_REPEAT, GL_LINEAR);
+			if (_heightMap.m_height == m_rows && _heightMap.m_width == m_columns)
 			{
-				for (int i = 0; i < _heightMap.mTextureHeight * _heightMap.mTextureWidth; ++i)
+				for (int i = 0; i < _heightMap.m_height * _heightMap.m_width; ++i)
 				{
 					float height = (float)(buffer[i] * _height_scale);
 					this->vertices[i].Position.y = height <= _max_height ? height : _max_height;
@@ -261,12 +261,12 @@ void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, 
 			}
 			else
 			{
-				unsigned int height_map_res_ratio = _heightMap.mTextureHeight / m_rows;
+				unsigned int height_map_res_ratio = _heightMap.m_height / m_rows;
 				for (int col = 0; col < m_columns; ++col)
 				{
 					for (int row = 0; row < m_rows; ++row)
 					{
-						unsigned int index = col * _heightMap.mTextureWidth * height_map_res_ratio + row * height_map_res_ratio; // or mTextureHeight ??
+						unsigned int index = col * _heightMap.m_width * height_map_res_ratio + row * height_map_res_ratio; // or mTextureHeight ??
 
 						float height = buffer[index] * _height_scale;
 						this->vertices[col* m_columns + row].Position.y = (height <= _max_height ? height : _max_height);
@@ -280,7 +280,7 @@ void TerrainMesh::AssignHeights(const Texture& _heightMap, float _height_scale, 
 					}
 				}
 			}
-			_GenerateNormalMap(buffer, _heightMap.mTextureWidth, _heightMap.mTextureHeight, _normal_sharpness);
+			_GenerateNormalMap(buffer, _heightMap.m_width, _heightMap.m_height, _normal_sharpness);
 			delete[] buffer;
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -458,9 +458,9 @@ void TerrainMesh::DrawTessellated(std::function<void(const TessellationRendering
 		_info_updater(m_tessellation_info);
 
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, m_heightMap.id);
+	glBindTexture(GL_TEXTURE_2D, m_heightMap.m_id);
 	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, m_normalMap.id);
+	glBindTexture(GL_TEXTURE_2D, m_normalMap.m_id);
 	glPatchParameteri(GL_PATCH_VERTICES, 4/* num pointsin patch*/);
 	glBindVertexArray(m_tessellation_data.m_terrainVAO);
 	eGlDrawContext::GetInstance().DrawArrays(GL_PATCHES, 0, 4/* num pointsin patch*/ * (m_tessellation_data.m_vertices.size() / 5), "TerrainMesh");

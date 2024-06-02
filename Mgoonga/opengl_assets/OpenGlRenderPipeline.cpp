@@ -508,14 +508,14 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		{
 			RenderSSAO(_camera, _light, phong_pbr_objects);
 			glActiveTexture(GL_TEXTURE7);
-			glBindTexture(GL_TEXTURE_2D, eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SSAO_BLUR).id);
+			glBindTexture(GL_TEXTURE_2D, eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SSAO_BLUR).m_id);
 		}
 	}
 
 	if(!ssao)
 	{
 		glActiveTexture(GL_TEXTURE7);
-		glBindTexture(GL_TEXTURE_2D, Texture::GetTexture1x1(WHITE).id);
+		glBindTexture(GL_TEXTURE_2D, Texture::GetTexture1x1(WHITE).m_id);
 	}
 
 		mts ? eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS)
@@ -1194,13 +1194,13 @@ void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 		// load hdr env
 		glViewport(0, 0, (GLsizei)512, (GLsizei)512); //@todo numbers // don't forget to configure the viewport to the capture dimensions.
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_IBL_CUBEMAP);
-		auto cube_id = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP).id;
+		auto cube_id = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP).m_id;
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cube_id);
 		renderManager->IBLRender()->RenderCubemap(_camera, cube_id); // write hdr texture into cube_id
 
 		cube.makeCubemap(512, false); //@todo works only the first time, does not second @bugfix
 		glCopyImageSubData(cube_id, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
-											 cube.id, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+											 cube.m_id, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
 											 512, 512, 6); //copy from buffer to texture
 
    // irradiance
@@ -1209,11 +1209,11 @@ void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 
 		glViewport(0, 0, 32, 32);
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_IBL_CUBEMAP_IRR);
-		auto irr_id = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP_IRR).id;
+		auto irr_id = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP_IRR).m_id;
 		renderManager->IBLRender()->RenderIBLMap(_camera, irr_id); // write irr to irr buffer
 		irr.makeCubemap(32);
 		glCopyImageSubData(irr_id, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
-											 irr.id, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+											 irr.m_id, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
 											 32, 32, 6); //copy from buffer to texture
 
    // dots artifacts
@@ -1229,20 +1229,20 @@ void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 		//glBindTexture(GL_TEXTURE_CUBE_MAP, cube_id);
 		prefilter.makeCubemap(128, true);
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_IBL_CUBEMAP);
-		renderManager->IBLRender()->RenderPrefilterMap(_camera, prefilter.id, eGlBufferContext::GetInstance().GetRboID(eBuffer::BUFFER_IBL_CUBEMAP));
+		renderManager->IBLRender()->RenderPrefilterMap(_camera, prefilter.m_id, eGlBufferContext::GetInstance().GetRboID(eBuffer::BUFFER_IBL_CUBEMAP));
 
 		//set textures to pbr
-		SetSkyIBL(irr.id, prefilter.id);
+		SetSkyIBL(irr.m_id, prefilter.m_id);
 
 		glViewport(0, 0, width, height);
 
 		m_texture_manager->AddExisting("cube_id"+ std::to_string(i), &cube);
-		m_texture_manager->AddCubeMapId(cube.id);
+		m_texture_manager->AddCubeMapId(cube.m_id);
 		m_texture_manager->AddExisting("irr_id" + std::to_string(i), &irr);
-		m_texture_manager->AddCubeMapId(irr.id);
+		m_texture_manager->AddCubeMapId(irr.m_id);
 		m_texture_manager->AddExisting("prefilter" + std::to_string(i), &prefilter);
-		m_texture_manager->AddCubeMapId(prefilter.id);
-		m_texture_manager->AddIBLId(irr.id, prefilter.id);
+		m_texture_manager->AddCubeMapId(prefilter.m_id);
+		m_texture_manager->AddIBLId(irr.m_id, prefilter.m_id);
 	}
 
 	glEnable(GL_CULL_FACE);
@@ -1254,10 +1254,10 @@ void	eOpenGlRenderPipeline::RenderEnvironmentSnapshot(std::map<eObject::RenderTy
 																											 const Light& _light)
 {
 	//1. Copy skybox to environment map
-	GLuint sourceCubeMap	= eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP).id; // ID of the source cube map texture
-	GLuint destCubeMap		= eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP).id; // ID of the destination cube map texture
-	int width							= renderManager->SkyBoxRender()->GetSkyBoxTexture()->mTextureWidth; // Width of each face of the cube map
-	int height						= renderManager->SkyBoxRender()->GetSkyBoxTexture()->mTextureHeight; // Height of each face of the cube map
+	GLuint sourceCubeMap	= eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP).m_id; // ID of the source cube map texture
+	GLuint destCubeMap		= eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP).m_id; // ID of the destination cube map texture
+	int width							= renderManager->SkyBoxRender()->GetSkyBoxTexture()->m_width; // Width of each face of the cube map
+	int height						= renderManager->SkyBoxRender()->GetSkyBoxTexture()->m_height; // Height of each face of the cube map
 
 	if (width != eGlBufferContext::GetInstance().GetSize(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP).x
 		|| height != eGlBufferContext::GetInstance().GetSize(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP).y)
@@ -1326,7 +1326,7 @@ void	eOpenGlRenderPipeline::RenderEnvironmentSnapshot(std::map<eObject::RenderTy
 	glUseProgram(shader.ID());
 
 	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP).id);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP).m_id);
 
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_MTS); // or  eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 	
@@ -1483,7 +1483,7 @@ void eOpenGlRenderPipeline::DumpCSMTextures() const
 	//t.saveToFile("dump_csm.png", GL_TEXTURE_2D_ARRAY, GL_DEPTH_COMPONENT, GL_FLOAT);
 
 	static std::vector<GLfloat> buffer(2400 * 1200 * 5);
-	glBindTexture(GL_TEXTURE_2D_ARRAY, t.id);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, t.m_id);
 	glGetTexImage(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, &buffer[0]);
 
 	Texture* csmp1 = const_cast<Texture*>(&csm_dump1);

@@ -5,6 +5,8 @@
 
 #include <opengl_assets/ModelManager.h>
 
+#include <glm/glm/gtx/norm.hpp>
+
 namespace
 {
   class BulletScript : public IScript

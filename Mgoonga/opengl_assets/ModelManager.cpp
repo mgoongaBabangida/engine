@@ -5,6 +5,7 @@
 #include "ShapeGenerator.h"
 #include "ShapeData.h"
 #include "MyMesh.h"
+#include "Model.h"
 #include "AssimpLoader.h"
 #include "ShpereTexturedModel.h"
 

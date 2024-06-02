@@ -47,7 +47,7 @@ void eBrightFilterRender::Render()
 	glUseProgram(shader.ID());
 	glBindVertexArray(quadVAO);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture.id);
+	glBindTexture(GL_TEXTURE_2D, texture.m_id);
 
 	//glUniform1f(TexWidthLoc, FBO->Width());
 	glDrawArrays(GL_TRIANGLES, 0, 6);

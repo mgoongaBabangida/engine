@@ -6,30 +6,30 @@
 
 DLL_OPENGL_ASSETS I3DMesh* MakeMesh(std::vector<Vertex> vertices,
                                     std::vector<GLuint> indices,
-                                    std::vector<Texture> textures,
+                                    std::vector<TextureInfo> textures,
                                     const Material& material,
                                     const std::string& name = "Default",
                                     bool _calculate_tangent = false);
-//@todo try to stop exporting
+
 //-----------------------------------------------------------------
-class DLL_OPENGL_ASSETS AssimpMesh : public I3DMesh
+class /*DLL_OPENGL_ASSETS*/ eMesh : public I3DMesh
 {
 public:
-  friend class Model;
+  friend class eModel;
 
-	AssimpMesh(std::vector<Vertex> vertices,
+	eMesh(std::vector<Vertex> vertices,
              std::vector<GLuint> indices,
              std::vector<Texture> textures,
              const Material& material,
              const std::string& name = "Default",
              bool _calculate_tangent = false);
-  virtual ~AssimpMesh();
+  virtual ~eMesh();
 
-  AssimpMesh(const AssimpMesh&) = delete;
-  AssimpMesh& operator=(const AssimpMesh&) = delete;
+  eMesh(const eMesh&) = delete;
+  eMesh& operator=(const eMesh&) = delete;
 
-  AssimpMesh(AssimpMesh&&) noexcept = default;
-  AssimpMesh& operator=(AssimpMesh&&) noexcept = default;
+  eMesh(eMesh&&) noexcept = default;
+  eMesh& operator=(eMesh&&) noexcept = default;
 
   void Draw() override;
   void DrawInstanced(int32_t instances) override;

@@ -37,7 +37,7 @@ BezierCurveUIController::BezierCurveUIController(eMainContextBase* _game, shObje
     window_rect.m_top_left = { 50, 50 };
     window_rect.m_size = { 900, 500 };
     m_window = std::make_shared<GUI>(window_rect, m_game->Width(), m_game->Height());
-    m_window->SetTexture(*_window_texture, { 0,0 }, { _window_texture->mTextureWidth, _window_texture->mTextureHeight });
+    m_window->SetTexture(*_window_texture, { 0,0 }, { _window_texture->m_width, _window_texture->m_height });
     m_window->SetTransparent(true);
     m_window->SetTakeMouseEvents(true);
     m_window->SetVisible(true);

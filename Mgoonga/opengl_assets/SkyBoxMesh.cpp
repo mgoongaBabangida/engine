@@ -71,7 +71,7 @@ void eSkyBoxMesh::Draw()
 {
 	glBindVertexArray(skyboxVAO);
 	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, texture->id);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture->m_id);
 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);

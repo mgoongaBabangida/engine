@@ -224,7 +224,7 @@ bool CubemapFBO::Init(unsigned int _size)
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
 	
 	m_textureBuffer.makeCubemap(_size);
-	m_texture = m_textureBuffer.id;
+	m_texture = m_textureBuffer.m_id;
 
 	for (unsigned int i = 0; i < 6; ++i)
 	{
@@ -250,5 +250,5 @@ void CubemapFBO::BindForReading(GLenum TextureUnit)
 
 Texture CubemapFBO::GetTexture()
 {
-	return Texture(m_texture, m_width, m_height, m_textureBuffer.mChannels); //!
+	return Texture(m_texture, m_width, m_height, m_textureBuffer.m_channels); //!
 }

@@ -86,7 +86,7 @@ void eParticleRender::Render(const Camera& _camera)
 		m_mesh->SetUpInstances(instances);
 
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, system->GetTexture()->id);
+		glBindTexture(GL_TEXTURE_2D, system->GetTexture()->m_id);
 		glUniform1i(glGetUniformLocation(m_particleShader.ID(), "texture_diffuse1"), 2);
 		m_mesh->Draw();
 

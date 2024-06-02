@@ -1,5 +1,7 @@
 #include "AssimpLoader.h"
 
+#include "Model.h"
+
 #include <math/Transform.h>
 
 #include <algorithm>
@@ -56,7 +58,7 @@ AssimpLoader::~AssimpLoader()
 }
 
 //--------------------------------------------------------------------------------------
-Model* AssimpLoader::LoadModel(char* path, const std::string& _name, bool _m_invert_y_uv)
+eModel* AssimpLoader::LoadModel(char* path, const std::string& _name, bool _m_invert_y_uv)
 {
 	if (!m_import)
 		return nullptr;
@@ -78,7 +80,7 @@ Model* AssimpLoader::LoadModel(char* path, const std::string& _name, bool _m_inv
 
 	m_invert_y_uv = _m_invert_y_uv;
 
-	m_model = new Model(path, _name);
+	m_model = new eModel(path, _name);
 
 	_ProcessNode(m_scene->mRootNode, m_scene.get());
 
@@ -114,7 +116,7 @@ void AssimpLoader::_ProcessNode(aiNode* _node, const aiScene* _scene)
 		for (GLuint i = 0; i < _node->mNumMeshes; i++)
 		{
 			aiMesh* mesh = _scene->mMeshes[_node->mMeshes[i]];
-			m_model->m_meshes.emplace_back(_ProcessMesh(mesh, _scene));
+			_ProcessMesh(mesh, _scene);
 		}
 	// Then do the same for each of its children
 	for (GLuint i = 0; i < _node->mNumChildren; i++)
@@ -124,12 +126,12 @@ void AssimpLoader::_ProcessNode(aiNode* _node, const aiScene* _scene)
 }
 
 //------------------------------------------------------------------------------------------------
-AssimpMesh AssimpLoader::_ProcessMesh(aiMesh* _mesh, const aiScene* _scene)
+void AssimpLoader::_ProcessMesh(aiMesh* _mesh, const aiScene* _scene)
 {
 	vector<Vertex> vertices;
 	vector<GLuint> indices;
-	vector<Texture> textures;
-	vector<Model::VertexBoneData> boneData;
+	vector<TextureInfo> textures;
+	vector<eModel::VertexBoneData> boneData;
 
 	for (GLuint i = 0; i < _mesh->mNumVertices; i++)
 	{
@@ -250,7 +252,7 @@ AssimpMesh AssimpLoader::_ProcessMesh(aiMesh* _mesh, const aiScene* _scene)
 	//-----------------------------Process material-------------------------------------------------
 	Material mat = _ProcessMaterial(_mesh, textures);
 
-	return AssimpMesh{ vertices, indices, textures, mat, _mesh->mName.C_Str(), _mesh->mTangents == NULL };
+	m_model->AddMesh( vertices, indices, textures, mat, _mesh->mName.C_Str(), _mesh->mTangents == NULL);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -311,93 +313,78 @@ void AssimpLoader::_ProccessAnimations(const aiAnimation* _anim)
 }
 
 //------------------------------------------------------------------------------------------------
-std::vector<Texture> AssimpLoader::_LoadMaterialTextures(aiMaterial* _mat, aiTextureType _type, std::string _typeName)
+std::vector<TextureInfo> AssimpLoader::_LoadMaterialTextures(aiMaterial* _mat, aiTextureType _type, std::string _typeName)
 {
-	vector<Texture> textures;
+	vector<TextureInfo> textures;
 	for (GLuint i = 0; i < _mat->GetTextureCount(_type); ++i)
 	{
 		aiString str;
 		_mat->GetTexture(_type, i, &str);
 		string filename = string(str.C_Str());
-		textures.push_back(m_model->LoatTexture(string(str.C_Str()), _typeName));
+
+		//@todo this is temp for pirate ship need to make better solution
+		std::string substring_to_delete = "C:\\\\Users\\\\58sal\\\\Desktop\\\\stylized_ship";
+		std::string::size_type it = filename.find(substring_to_delete);
+		if (it != std::string::npos)
+			filename.erase(it, substring_to_delete.length());
+
+		textures.emplace_back( _typeName, m_model->m_directory + '/' + filename);
 	}
 	return textures;
 }
 
 //------------------------------------------------------------------------------------------------
-Material AssimpLoader::_ProcessMaterial(aiMesh* _mesh, std::vector<Texture>& textures)
+Material AssimpLoader::_ProcessMaterial(aiMesh* _mesh, std::vector<TextureInfo>& textures)
 {
 	Material mat;
 	if (_mesh->mMaterialIndex >= 0)
 	{
 		aiMaterial* material = m_scene->mMaterials[_mesh->mMaterialIndex];
-		vector<Texture> diffuseMaps = _LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		vector<TextureInfo> diffuseMaps = _LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 		if (!diffuseMaps.empty())
 		{
 			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-			mat.albedo_texture_id = diffuseMaps[0].id;
 			mat.use_albedo = true;
 		}
-		else
-			mat.albedo_texture_id = Texture::GetDefaultTextureId();
 
-		vector<Texture> specularMaps = _LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		vector<TextureInfo> specularMaps = _LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		if (!specularMaps.empty())
 		{
 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-			mat.metalic_texture_id = specularMaps[0].id; // should be dif?
 			mat.use_metalic = true;
 		}
-		else
-			mat.metalic_texture_id = Texture::GetDefaultTextureId();
 
-		vector<Texture> normalMaps = _LoadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
+		vector<TextureInfo> normalMaps = _LoadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
 		if (!normalMaps.empty())
 		{
 			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-			mat.normal_texture_id = normalMaps[0].id;
 			mat.use_normal = true;
 		}
-		else
-			mat.normal_texture_id = Texture::GetDefaultTextureId();
 
 		//@!? height
 		/*vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
 		if (!normalMaps.empty())
-		{
-			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-			mat.normal_texture_id = normalMaps[0].id;
-		}
-		else
-			mat.normal_texture_id = GetDefaultTextureId();*/
+			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());*/
 
-		vector<Texture> emissionMaps = _LoadMaterialTextures(material, aiTextureType_EMISSIVE, "texture_emission");
+		vector<TextureInfo> emissionMaps = _LoadMaterialTextures(material, aiTextureType_EMISSIVE, "texture_emission");
 		if (!emissionMaps.empty())
 		{
 			textures.insert(textures.end(), emissionMaps.begin(), emissionMaps.end());
-			mat.emissive_texture_id = emissionMaps[0].id;
 		}
-		else
-			mat.emissive_texture_id = Texture::GetDefaultTextureId();
 
 		//glossiness is oposite to roughness @todo needs to be inverted!!!
-		vector<Texture> roughnessMaps = _LoadMaterialTextures(material, aiTextureType_SHININESS, "texture_roughness");
+		vector<TextureInfo> roughnessMaps = _LoadMaterialTextures(material, aiTextureType_SHININESS, "texture_roughness");
 		if (!roughnessMaps.empty())
 		{
 			textures.insert(textures.end(), roughnessMaps.begin(), roughnessMaps.end());
-			mat.roughness_texture_id = roughnessMaps[0].id;
-			mat.use_roughness;
+			mat.use_roughness = true;
 		}
-		else
-			mat.roughness_texture_id = Texture::GetDefaultTextureId();
 
-		vector<Texture> displacementMaps = _LoadMaterialTextures(material, aiTextureType_DISPLACEMENT, "texture_displacement");
+		vector<TextureInfo> displacementMaps = _LoadMaterialTextures(material, aiTextureType_DISPLACEMENT, "texture_displacement");
 		if (!displacementMaps.empty())
 		{
 			textures.insert(textures.end(), displacementMaps.begin(), displacementMaps.end());
-			//mat. = displacementMaps[0].id;
 		}
 	}
-
 	return mat;
 }

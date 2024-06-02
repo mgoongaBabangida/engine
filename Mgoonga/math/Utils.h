@@ -21,4 +21,7 @@ namespace dbb
 
   // Function to generate 3D Perlin noise with 4 octaves and periodicity
 	DLL_MATH std::vector<float> generatePerlinNoise3D(int width, int height, int depth);
+
+  DLL_MATH bool WriteToFile(const std::vector<float>& _data, const std::string& _filename);
+  DLL_MATH bool ReadFromFile(std::vector<float>& _data, const std::string& _filename);
 }

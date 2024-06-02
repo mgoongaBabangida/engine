@@ -329,9 +329,9 @@ void eMainContextBase::PaintGL()
 uint32_t eMainContextBase::GetFinalImageId()
 {
 	if (pipeline.GetEnabledCameraInterpolationRef())
-		return texManager->Find("computeImageRWCameraInterpolation")->id;
+		return texManager->Find("computeImageRWCameraInterpolation")->m_id;
 	else
-		return pipeline.GetDefaultBufferTexture().id;
+		return pipeline.GetDefaultBufferTexture().m_id;
 }
 
 //---------------------------------------------------------------------------------
@@ -556,7 +556,7 @@ void eMainContextBase::InitializeExternalGui()
 		material.ao = 1.0f;
 		material.roughness = 0.5;
 		material.metallic = 0.5;
-		material.emissive_texture_id = Texture::GetTexture1x1(TColor::BLACK).id;
+		material.emissive_texture_id = Texture::GetTexture1x1(TColor::BLACK).m_id;
 		material.use_albedo = false;
 		material.use_metalic = false;
 		material.use_roughness = false;
@@ -628,12 +628,12 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT_LARGE, "K", &pipeline.K());
 	//Camera Interpolation
 	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "CameraInterpolation", &pipeline.GetEnabledCameraInterpolationRef());
-	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Compute Shader buffer", (void*)pipeline.GetComputeParticleSystem().id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Compute Shader buffer", (void*)pipeline.GetComputeParticleSystem().m_id);
 	
 	if (auto* image = texManager->Find("computeImageRW"); image != nullptr)
 	{
 		externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Compute shader", &pipeline.GetComputeShaderRef());
-		uint32_t id = image->id;
+		uint32_t id = image->m_id;
 		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Compute image", (void*)(id));
 	}
 
@@ -642,7 +642,7 @@ void eMainContextBase::InitializeExternalGui()
 
 	if (auto* image = texManager->Find("computeImageRWCameraInterpolation"); image != nullptr)
 	{
-		uint32_t id = image->id;
+		uint32_t id = image->m_id;
 		externalGui[ExternalWindow::GAME_DEBUG_WND]->Add(TEXTURE, "Camera Interpolation image", (void*)(id));
 
 		externalGui[ExternalWindow::GAME_DEBUG_WND]->Add(MATRIX, "Look At Matrix", (void*)&pipeline.GetLookAtMatrix());
@@ -657,7 +657,7 @@ void eMainContextBase::InitializeExternalGui()
 		auto sys = std::make_shared<ParticleSystem>(50, 0, 0, 10'000, glm::vec3(0.0f, 3.0f, -2.5f),
 																								texManager->Find("Tatlas2"),
 																								soundManager->GetSound("shot_sound"),
-																								texManager->Find("Tatlas2")->numberofRows);
+																								texManager->Find("Tatlas2")->m_num_rows);
 		sys->Start();
 		pipeline.AddParticleSystem(sys);
 	};
@@ -680,34 +680,34 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT, "PBR debug shininess", (void*)&pipeline.debug_float[2]);
 	externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT, "PBR debug ao", (void*)&pipeline.debug_float[3]);
 
-	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Reflection buffer", (void*)pipeline.GetReflectionBufferTexture().id);
-	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Refraction buffer", (void*)pipeline.GetRefractionBufferTexture().id);
-	externalGui[ExternalWindow::HDR_BLOOM_WND]->Add(TEXTURE, "Gaussian buffer", (void*)pipeline.GetGausian2BufferTexture().id);
-	externalGui[ExternalWindow::HDR_BLOOM_WND]->Add(TEXTURE, "Bright filter buffer", (void*)pipeline.GetBrightFilter().id);
-	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "SSAO buffer", (void*)pipeline.GetSSAO().id);
-	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "SSR buffer", (void*)pipeline.GetSSRTexture().id);
-	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "SSR buffer blur", (void*)pipeline.GetSSRWithScreenTexture().id);
-	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "SSR Mask", (void*)pipeline.GetSSRTextureScreenMask().id);
-	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Deffered Pos", (void*)pipeline.GetDefferedOne().id);
-	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Deffered Norm", (void*)pipeline.GetDefferedTwo().id);
-	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "LUT", (void*)pipeline.GetLUT().id);
-	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Environment", (void*)pipeline.GetEnvironmentCubeMap().id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Reflection buffer", (void*)pipeline.GetReflectionBufferTexture().m_id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Refraction buffer", (void*)pipeline.GetRefractionBufferTexture().m_id);
+	externalGui[ExternalWindow::HDR_BLOOM_WND]->Add(TEXTURE, "Gaussian buffer", (void*)pipeline.GetGausian2BufferTexture().m_id);
+	externalGui[ExternalWindow::HDR_BLOOM_WND]->Add(TEXTURE, "Bright filter buffer", (void*)pipeline.GetBrightFilter().m_id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "SSAO buffer", (void*)pipeline.GetSSAO().m_id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "SSR buffer", (void*)pipeline.GetSSRTexture().m_id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "SSR buffer blur", (void*)pipeline.GetSSRWithScreenTexture().m_id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "SSR Mask", (void*)pipeline.GetSSRTextureScreenMask().m_id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Deffered Pos", (void*)pipeline.GetDefferedOne().m_id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Deffered Norm", (void*)pipeline.GetDefferedTwo().m_id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "LUT", (void*)pipeline.GetLUT().m_id);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Environment", (void*)pipeline.GetEnvironmentCubeMap().m_id);
 	if (GetMainLight().type == eLightType::DIRECTION)
-		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Shadow buffer directional", (void*)pipeline.GetShadowBufferTexture().id);
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Shadow buffer directional", (void*)pipeline.GetShadowBufferTexture().m_id);
 	else
-		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Shadow buffer point", (void*)pipeline.GetShadowBufferTexture().id);
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "Shadow buffer point", (void*)pipeline.GetShadowBufferTexture().m_id);
 	if (m_debug_csm)
 	{
 		pipeline.DumpCSMTextures();
-		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "CSM 1", (void*)pipeline.GetCSMMapLayer1().id);
-		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "CSM 2", (void*)pipeline.GetCSMMapLayer2().id);
-		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "CSM 3", (void*)pipeline.GetCSMMapLayer3().id);
-		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "CSM 4", (void*)pipeline.GetCSMMapLayer4().id);
-		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "CSM 5", (void*)pipeline.GetCSMMapLayer5().id);
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "CSM 1", (void*)pipeline.GetCSMMapLayer1().m_id);
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "CSM 2", (void*)pipeline.GetCSMMapLayer2().m_id);
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "CSM 3", (void*)pipeline.GetCSMMapLayer3().m_id);
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "CSM 4", (void*)pipeline.GetCSMMapLayer4().m_id);
+		externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXTURE, "CSM 5", (void*)pipeline.GetCSMMapLayer5().m_id);
 		externalGui[ExternalWindow::PIPELINE_WND]->Add(SLIDER_FLOAT, "Z mult", (void*)&pipeline.ZMult());
 	}
 	externalGui[ExternalWindow::HDR_BLOOM_WND]->Add(CHECKBOX, "Physicly Based Bloom", &pipeline.PBBloomRef());
-	externalGui[ExternalWindow::HDR_BLOOM_WND]->Add(TEXTURE, "Bloom", (void*)pipeline.GetBloomTexture().id);
+	externalGui[ExternalWindow::HDR_BLOOM_WND]->Add(TEXTURE, "Bloom", (void*)pipeline.GetBloomTexture().m_id);
 
 	//Objects transform
 	externalGui[ExternalWindow::TRANSFORM_WND]->Add(OBJECT_REF_TRANSFORM, "Transform", (void*)&m_focused);

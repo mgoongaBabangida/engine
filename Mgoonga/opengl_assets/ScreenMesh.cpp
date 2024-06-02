@@ -42,11 +42,11 @@ void eScreenMesh::DrawUnTextured()
 void eScreenMesh::Draw()
 {
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, textureOne.id);
+	glBindTexture(GL_TEXTURE_2D, textureOne.m_id);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, textureTwo.id);
+	glBindTexture(GL_TEXTURE_2D, textureTwo.m_id);
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, textureThree.id);
+	glBindTexture(GL_TEXTURE_2D, textureThree.m_id);
 
 	glBindVertexArray(quadVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -75,38 +75,38 @@ void eScreenMesh::UpdateFrame(float top_x, float top_y,
 	quadVertices[0] = (top_x / viewport_width) * 2 - 1.0f; // top left
 	quadVertices[1] = (top_y / viewport_height) * 2 - 1.0f;
 	
-	quadVertices[2] = tex_top_x / static_cast<float>(textureOne.mTextureWidth);
-	quadVertices[3] = tex_botom_y / static_cast<float>(textureOne.mTextureHeight);
+	quadVertices[2] = tex_top_x / static_cast<float>(textureOne.m_width);
+	quadVertices[3] = tex_botom_y / static_cast<float>(textureOne.m_height);
 
 	quadVertices[4] = (top_x / viewport_width) * 2 - 1.0f; // bottom left
 	quadVertices[5] = (botom_y / viewport_height) * 2 - 1.0f;
 	
-	quadVertices[6] = tex_top_x / static_cast<float>(textureOne.mTextureWidth);
-	quadVertices[7] = tex_top_y / static_cast<float>(textureOne.mTextureHeight);
+	quadVertices[6] = tex_top_x / static_cast<float>(textureOne.m_width);
+	quadVertices[7] = tex_top_y / static_cast<float>(textureOne.m_height);
 
 	quadVertices[8] = (botom_x / viewport_width) * 2 - 1.0f; // bottom right
 	quadVertices[9] = (botom_y / viewport_height) * 2 - 1.0f;
 	
-	quadVertices[10] = tex_botom_x / static_cast<float>(textureOne.mTextureWidth);
-	quadVertices[11] = tex_top_y / static_cast<float>(textureOne.mTextureHeight);
+	quadVertices[10] = tex_botom_x / static_cast<float>(textureOne.m_width);
+	quadVertices[11] = tex_top_y / static_cast<float>(textureOne.m_height);
 
 	quadVertices[12] = (top_x / viewport_width) * 2 - 1.0f;// top left
 	quadVertices[13] = (top_y / viewport_height) * 2 - 1.0f;
 
-	quadVertices[14] = tex_top_x / static_cast<float>(textureOne.mTextureWidth);
-	quadVertices[15] = tex_botom_y / static_cast<float>(textureOne.mTextureHeight);
+	quadVertices[14] = tex_top_x / static_cast<float>(textureOne.m_width);
+	quadVertices[15] = tex_botom_y / static_cast<float>(textureOne.m_height);
 
 	quadVertices[16] = (botom_x / viewport_width) * 2 - 1.0f;// bottom right
 	quadVertices[17] = (botom_y / viewport_height) * 2 - 1.0f;
 
-	quadVertices[18] = tex_botom_x / static_cast<float>(textureOne.mTextureWidth);
-	quadVertices[19] = tex_top_y / static_cast<float>(textureOne.mTextureHeight);
+	quadVertices[18] = tex_botom_x / static_cast<float>(textureOne.m_width);
+	quadVertices[19] = tex_top_y / static_cast<float>(textureOne.m_height);
 
 	quadVertices[20] = (botom_x / viewport_width) * 2 - 1.0f;// top right
 	quadVertices[21] = (top_y / viewport_height) * 2 - 1.0f;
 
-	quadVertices[22] = tex_botom_x / static_cast<float>(textureOne.mTextureWidth);
-	quadVertices[23] = tex_botom_y / static_cast<float>(textureOne.mTextureHeight);
+	quadVertices[22] = tex_botom_x / static_cast<float>(textureOne.m_width);
+	quadVertices[23] = tex_botom_y / static_cast<float>(textureOne.m_height);
 
 	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_DYNAMIC_DRAW);

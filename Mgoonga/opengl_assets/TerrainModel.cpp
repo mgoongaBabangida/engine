@@ -23,23 +23,23 @@ TerrainModel::TerrainModel(Texture* diffuse,
 													 Texture* heightMap)
 {
 	if (diffuse != nullptr)
-		m_material.albedo_texture_id = diffuse->id;
+		m_material.albedo_texture_id = diffuse->m_id;
 
 	if (specular != nullptr)
-		m_material.metalic_texture_id = specular->id;
+		m_material.metalic_texture_id = specular->m_id;
 
 	if (normal != nullptr)
-		m_material.normal_texture_id = normal->id;
+		m_material.normal_texture_id = normal->m_id;
 
 	_InitMaterialWithDefaults();
 
 	m_meshes.push_back(new TerrainMesh("terrain0 0"));
 	TerrainMesh* mesh = m_meshes.back();
 	
-	mesh->MakePlaneVerts(heightMap->mTextureWidth,heightMap->mTextureHeight, false);
-	mesh->MakePlaneIndices(heightMap->mTextureWidth, heightMap->mTextureHeight);
+	mesh->MakePlaneVerts(heightMap->m_width,heightMap->m_height, false);
+	mesh->MakePlaneIndices(heightMap->m_width, heightMap->m_height);
 	mesh->AssignHeights(m_height);
-	m_material.normal_texture_id = mesh->GenerateNormals(heightMap->mTextureWidth, heightMap->mTextureHeight)->id;
+	m_material.normal_texture_id = mesh->GenerateNormals(heightMap->m_width, heightMap->m_height)->m_id;
 	mesh->calculatedTangent();
 	mesh->setupMesh();
 }
@@ -48,10 +48,10 @@ TerrainModel::TerrainModel(Texture* diffuse,
 TerrainModel::TerrainModel(Texture* color)
 {
 	if (color != nullptr)
-		m_material.albedo_texture_id = color->id;
+		m_material.albedo_texture_id = color->m_id;
 
 	if (color != nullptr)
-		m_material.metalic_texture_id = color->id;
+		m_material.metalic_texture_id = color->m_id;
 
 	_InitMaterialWithDefaults();
 
@@ -59,7 +59,7 @@ TerrainModel::TerrainModel(Texture* color)
 	TerrainMesh* mesh = m_meshes.back();
 	mesh->MakePlaneVerts(10);
 	mesh->MakePlaneIndices(10);
-	m_material.normal_texture_id = mesh->GenerateNormals(10)->id;
+	m_material.normal_texture_id = mesh->GenerateNormals(10)->m_id;
 	mesh->setupMesh();
 	mesh->calculatedTangent();
 }
@@ -86,13 +86,13 @@ void TerrainModel::Initialize(const Texture* _diffuse,
 															unsigned int _tessellation_coef)
 {
 	if (_diffuse != nullptr)
-		m_material.albedo_texture_id = _diffuse->id;
+		m_material.albedo_texture_id = _diffuse->m_id;
 
 	if (_specular != nullptr)
-		m_material.metalic_texture_id = _specular->id;
+		m_material.metalic_texture_id = _specular->m_id;
 
 	if (_normal != nullptr)
-		m_material.normal_texture_id = _normal->id;
+		m_material.normal_texture_id = _normal->m_id;
 
 	_InitMaterialWithDefaults();
 
@@ -104,22 +104,22 @@ void TerrainModel::Initialize(const Texture* _diffuse,
 	{
 		m_height = *_heightMap;
 
-		mesh->MakePlaneVerts(_heightMap->mTextureWidth / _tessellation_coef, _heightMap->mTextureHeight / _tessellation_coef, spreed_texture);
+		mesh->MakePlaneVerts(_heightMap->m_width / _tessellation_coef, _heightMap->m_height / _tessellation_coef, spreed_texture);
 		//@todo make lod number outside
-		mesh->MakePlaneIndices(_heightMap->mTextureWidth / _tessellation_coef, _heightMap->mTextureHeight / _tessellation_coef, 1);
+		mesh->MakePlaneIndices(_heightMap->m_width / _tessellation_coef, _heightMap->m_height / _tessellation_coef, 1);
 		/*mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 2);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 3);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 4);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 5);*/
 		mesh->AssignHeights(*_heightMap, _height_scale, _max_height, _min_height, _normal_sharpness);
-		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->mTextureWidth / _tessellation_coef, _heightMap->mTextureHeight / _tessellation_coef)->id;
+		m_material.normal_texture_id = mesh->GenerateNormals(_heightMap->m_width / _tessellation_coef, _heightMap->m_height / _tessellation_coef)->m_id;
 		mesh->GenerateTessellationData();
 	}
 	else
 	{
-		mesh->MakePlaneVerts(_diffuse->mTextureHeight, _diffuse->mTextureHeight, spreed_texture);
-		mesh->MakePlaneIndices(_diffuse->mTextureHeight);
-		m_material.normal_texture_id = mesh->GenerateNormals(mesh->Size() / _tessellation_coef)->id;
+		mesh->MakePlaneVerts(_diffuse->m_height, _diffuse->m_height, spreed_texture);
+		mesh->MakePlaneIndices(_diffuse->m_height);
+		m_material.normal_texture_id = mesh->GenerateNormals(mesh->Size() / _tessellation_coef)->m_id;
 	}
 
 	mesh->calculatedTangent();
@@ -160,23 +160,23 @@ void TerrainModel::AddOrUpdate(glm::ivec2 _pos,
 	{
 		m_height = *_heightMap;
 
-		mesh->MakePlaneVerts(_heightMap->mTextureWidth / _tessellation_coef, _heightMap->mTextureHeight / _tessellation_coef, spreed_texture);
+		mesh->MakePlaneVerts(_heightMap->m_width / _tessellation_coef, _heightMap->m_height / _tessellation_coef, spreed_texture);
 		//@todo make lod number outside
-		mesh->MakePlaneIndices(_heightMap->mTextureWidth / _tessellation_coef, _heightMap->mTextureHeight / _tessellation_coef, 1);
+		mesh->MakePlaneIndices(_heightMap->m_width / _tessellation_coef, _heightMap->m_height / _tessellation_coef, 1);
 		/*mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 2);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 3);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 4);
 		mesh->MakePlaneIndices(_heightMap->mTextureWidth, _heightMap->mTextureHeight, 5);*/
 		mesh->AssignHeights(*_heightMap, _tess_info.height_scale, _tess_info.max_height, _tess_info.min_height, _normal_sharpness, _apply_normal_blur);
-		mesh->GenerateNormals(_heightMap->mTextureWidth / _tessellation_coef, _heightMap->mTextureHeight / _tessellation_coef);
+		mesh->GenerateNormals(_heightMap->m_width / _tessellation_coef, _heightMap->m_height / _tessellation_coef);
 		m_material.normal_texture_id = mesh->GetNormalMapId();
 		mesh->GenerateTessellationData();
 	}
 	else
 	{
-		mesh->MakePlaneVerts(_diffuse->mTextureHeight, _diffuse->mTextureHeight, spreed_texture);
-		mesh->MakePlaneIndices(_diffuse->mTextureHeight);
-		m_material.normal_texture_id = mesh->GenerateNormals(mesh->Size() / _tessellation_coef)->id;
+		mesh->MakePlaneVerts(_diffuse->m_height, _diffuse->m_height, spreed_texture);
+		mesh->MakePlaneIndices(_diffuse->m_height);
+		m_material.normal_texture_id = mesh->GenerateNormals(mesh->Size() / _tessellation_coef)->m_id;
 	}
 
 	mesh->calculatedTangent();
@@ -239,32 +239,32 @@ void TerrainModel::Draw()
 	if (m_albedo_texture_array != nullptr)
 	{
 		glActiveTexture(GL_TEXTURE12);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, m_albedo_texture_array->id);
-		glBindTextureUnit(12, m_albedo_texture_array->id);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, m_albedo_texture_array->m_id);
+		glBindTextureUnit(12, m_albedo_texture_array->m_id);
 	}
 	if (m_normal_texture_array != nullptr)
 	{
 		glActiveTexture(GL_TEXTURE13);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, m_normal_texture_array->id);
-		glBindTextureUnit(13, m_normal_texture_array->id);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, m_normal_texture_array->m_id);
+		glBindTextureUnit(13, m_normal_texture_array->m_id);
 	}
 	if (m_metallic_texture_array != nullptr)
 	{
 		glActiveTexture(GL_TEXTURE14);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, m_metallic_texture_array->id);
-		glBindTextureUnit(14, m_metallic_texture_array->id);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, m_metallic_texture_array->m_id);
+		glBindTextureUnit(14, m_metallic_texture_array->m_id);
 	}
 	if (m_roughness_texture_array != nullptr)
 	{
 		glActiveTexture(GL_TEXTURE15);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, m_roughness_texture_array->id);
-		glBindTextureUnit(15, m_roughness_texture_array->id);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, m_roughness_texture_array->m_id);
+		glBindTextureUnit(15, m_roughness_texture_array->m_id);
 	}
 	if (m_ao_texture_array != nullptr)
 	{
 		glActiveTexture(GL_TEXTURE16);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, m_ao_texture_array->id);
-		glBindTextureUnit(16, m_ao_texture_array->id);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, m_ao_texture_array->m_id);
+		glBindTextureUnit(16, m_ao_texture_array->m_id);
 	}
 
 	std::vector<TerrainMesh*> rendered_meshes;
@@ -433,19 +433,19 @@ void TerrainModel::SetMaterial(const Material& _m)
 void TerrainModel::_InitMaterialWithDefaults()
 {
 	if (m_material.albedo_texture_id == -1)
-		m_material.albedo_texture_id = Texture::GetTexture1x1(GREY).id;
+		m_material.albedo_texture_id = Texture::GetTexture1x1(GREY).m_id;
 
 	if (m_material.metalic_texture_id == -1)
-		m_material.metalic_texture_id = Texture::GetTexture1x1(BLACK).id;
+		m_material.metalic_texture_id = Texture::GetTexture1x1(BLACK).m_id;
 
 	if (m_material.normal_texture_id == -1)
-		m_material.normal_texture_id = Texture::GetTexture1x1(BLUE).id;
+		m_material.normal_texture_id = Texture::GetTexture1x1(BLUE).m_id;
 
 	if (m_material.roughness_texture_id == -1)
-		m_material.roughness_texture_id = Texture::GetTexture1x1(BLACK).id;
+		m_material.roughness_texture_id = Texture::GetTexture1x1(BLACK).m_id;
 
 	if (m_material.emissive_texture_id == -1)
-		m_material.emissive_texture_id = Texture::GetTexture1x1(BLACK).id;
+		m_material.emissive_texture_id = Texture::GetTexture1x1(BLACK).m_id;
 }
 
 //----------------------------------------------------------------

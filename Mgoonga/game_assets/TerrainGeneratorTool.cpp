@@ -210,7 +210,7 @@ void TerrainGeneratorTool::Initialize()
 			m_snowness = _new_value;
 	};
 
-	m_imgui->Add(TEXTURE, "Noise texture", (void*)m_noise_texture.id);
+	m_imgui->Add(TEXTURE, "Noise texture", (void*)m_noise_texture.m_id);
 	m_imgui->Add(SPIN_BOX, "Position X", (void*)&posX__callback);
 	m_imgui->Add(SPIN_BOX, "Position Y", (void*)&posY__callback);
 	m_imgui->Add(BUTTON, "Update", (void*)&update__callback);
@@ -251,7 +251,7 @@ void TerrainGeneratorTool::Initialize()
 	m_imgui->Add(BUTTON, "Albedo texture", (void*)&albedo_texture__callback);
 	m_imgui->Add(BUTTON, "PBR Model", (void*)&pbr_renderer__callback);
 	m_imgui->Add(CHECKBOX, "PBR use normal map", (void*)&m_use_normal_texture_pbr);
-	m_imgui->Add(TEXTURE, "Color texture", (void*)m_color_texture.id);
+	m_imgui->Add(TEXTURE, "Color texture", (void*)m_color_texture.m_id);
 
 	dbb::Bezier bezier;
 	bezier.p0 = { -0.85f, -0.75f, 0.0f };
@@ -382,8 +382,8 @@ void TerrainGeneratorTool::Update(float _tick)
 
 		if (m_update_textures)
 		{
-			if (m_noise_texture.mTextureWidth != m_width ||
-				  m_noise_texture.mTextureHeight != m_height ||
+			if (m_noise_texture.m_width != m_width ||
+				  m_noise_texture.m_height != m_height ||
 				  last_scale != m_scale ||
 				  last_persistance != m_persistance ||
 				  last_lacunarirty != m_lacunarity ||
@@ -409,10 +409,10 @@ void TerrainGeneratorTool::Update(float _tick)
 				_GenerateNoiseMap(m_width, m_height, m_scale, m_octaves, m_persistance, m_lacunarity, m_noise_offset, m_seed);
 
 				//update noise texture
-				m_noise_texture.mTextureWidth = m_width;
-				m_noise_texture.mTextureHeight = m_height;
-				m_noise_texture.mChannels = 1;
-				glBindTexture(GL_TEXTURE_2D, m_noise_texture.id);
+				m_noise_texture.m_width = m_width;
+				m_noise_texture.m_height = m_height;
+				m_noise_texture.m_channels = 1;
+				glBindTexture(GL_TEXTURE_2D, m_noise_texture.m_id);
 				glTexStorage2D(GL_TEXTURE_2D, 1, GL_RED, m_width, m_height);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_FLOAT, &m_noise_map[0]);
 				glBindTexture(GL_TEXTURE_2D, 0);
