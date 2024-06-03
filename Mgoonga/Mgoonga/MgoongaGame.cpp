@@ -24,8 +24,10 @@ eMgoongaGameContext::eMgoongaGameContext(eInputController*  _input,
                                          std::vector<IWindowImGui*>& _externalGui,
 						                             const std::string& _modelsPath,
 						                             const std::string& _assetsPath, 
-						                             const std::string& _shadersPath)
-: eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
+						                             const std::string& _shadersPath,
+                                         int _width,
+                                         int _height)
+: eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath, _width, _height)
 { 
   ObjectPicked.Subscribe([this](shObject _new_focused, bool _left)
     {
@@ -189,7 +191,7 @@ void eMgoongaGameContext::_InitMainTestSceane()
   shObject wolf = factory.CreateObject(modelManager->Find("wolf"), eObject::RenderType::PHONG, "Wolf");
   wolf->GetTransform()->setRotation(glm::radians(-90.0f), 0.0f, 0.0f);
   wolf->GetTransform()->setTranslation(glm::vec3(4.0f, 3.0f, 0.0f));
-  wolf->SetRigger(new Rigger((eModel*)modelManager->Find("wolf").get())); //@todo improve
+  wolf->SetRigger(new Rigger((eAnimatedModel*)modelManager->Find("wolf").get())); //@todo improve
   wolf->GetRigger()->ChangeName(std::string(), "Running");//@todo improve
   m_objects.push_back(wolf);
 
@@ -204,7 +206,7 @@ void eMgoongaGameContext::_InitMainTestSceane()
   guard->GetTransform()->setScale(glm::vec3(0.03f, 0.03f, 0.03f));
   guard->GetTransform()->setUp(glm::vec3(0.0f, 0.0f, 1.0f));
   guard->GetTransform()->setForward(glm::vec3(0.0f, 1.0f, 0.0f));
-  guard->SetRigger(new Rigger((eModel*)modelManager->Find("guard").get()));//@todo improve
+  guard->SetRigger(new Rigger((eAnimatedModel*)modelManager->Find("guard").get()));//@todo improve
   m_objects.push_back(guard);
 
   //shObject vampire = factory.CreateObject(modelManager->Find("vampire"), "Vampire");

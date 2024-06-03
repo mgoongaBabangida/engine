@@ -24,14 +24,16 @@ Camera::Camera(float			_width,
 , camRay(*this)
 {
 	#define GLM_FORCE_RADIANS
-	projectionMatrix = glm::perspective(glm::radians(zoom), ((float)width) / height, nearPlane, farPlane);
+	projectionMatrix = glm::perspective(glm::radians(zoom), _width/_height, nearPlane, farPlane);
 }
+
 //---------------------------------------------------------------------
 Camera::Camera(const Camera & other)
 	: camRay(*this)
 {
 	*this = other;
 }
+
 //---------------------------------------------------------------------
 Camera& Camera::operator=(const Camera& other)
 {

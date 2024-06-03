@@ -40,8 +40,8 @@ public:
 	void			InitializeBuffers();
 	void			InitializeRenders(eModelManager&, eTextureManager&, const std::string& shadersFolderPath);
 	
-	uint32_t  Width() const { return width; }
-	uint32_t  Height() const { return height; }
+	uint32_t  Width() const { return m_width; }
+	uint32_t  Height() const { return m_height; }
 
 	const std::vector<ShaderInfo>& GetShaderInfos() const;
 	void			UpdateShadersInfo();
@@ -257,8 +257,8 @@ protected:
 	//statistic
 	uint32_t m_draw_calls = 0;
 
-	const uint32_t  width		  = 1200; //@todo make resizable
-	const uint32_t  height		= 600;
+	const uint32_t  m_width		  = 1200; //@todo make resizable
+	const uint32_t  m_height		= 750;
 
 	std::unique_ptr<eRenderManager>	renderManager;
 	eTextureManager* m_texture_manager = nullptr;

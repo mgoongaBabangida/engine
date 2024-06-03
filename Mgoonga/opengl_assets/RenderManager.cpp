@@ -100,13 +100,13 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																				folderPath + "Geometry.glsl"));
 	shader_lambda(m_hexrender.get());
 
-	m_gaussianRender.reset(new eGaussianBlurRender(1200, 600, //@todo
+	m_gaussianRender.reset(new eGaussianBlurRender(1200, 750, //@todo screen width/ height
 																								folderPath + "GaussianVertexShader.glsl", 
-																								folderPath + "GaussianFragmentShader.glsl")); //@todo buffer width height!!!
+																								folderPath + "GaussianFragmentShader.glsl"));
 	shader_lambda(m_gaussianRender.get());
-	m_brightRender.reset(new eBrightFilterRender(1200, 600, //@todo
-																								folderPath + "PostProcessingVertexShader.glsl", 
-																								folderPath + "BrightFilterFragment.glsl"));  //@todo buffer width height!!!
+	m_brightRender.reset(new eBrightFilterRender(1200, 750, //@todo screen width/ height
+																								folderPath + "PostProcessingVertexShader.glsl",
+																								folderPath + "BrightFilterFragment.glsl"));
 	shader_lambda(m_brightRender.get());
 	// Particle Renderer
 	m_particleRender.reset(new eParticleRender(modelManager.FindMesh("square"),

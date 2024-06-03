@@ -29,8 +29,8 @@ const int mysterious_y_border_offset = 20; //@todo
 //***************************************
 //dbGLWindowSDL::~dbGLWindowSDL
 //---------------------------------------
-dbGLWindowSDL::dbGLWindowSDL(const IGameFactory& _factory)
-: inputController()
+dbGLWindowSDL::dbGLWindowSDL(const IGameFactory& _factory, GLint _width, GLint _height)
+: inputController(), WIDTH(_width), HEIGHT(_height)
 {
   guiWnd.push_back(new eWindowImGuiExternal("Lights & Cameras"));//0
   guiWnd.push_back(new eWindowImGuiExternal("Pipeline"));//1
@@ -226,7 +226,11 @@ void dbGLWindowSDL::PaintGL()
 	eImGuiContext::GetInstance(&context, window).NewFrame();
 	ImGuizmo::BeginFrame();
 
-	SDL_ShowCursor(SDL_DISABLE);
+	if(m_disable_system_cursor_under_view)
+		SDL_ShowCursor(SDL_DISABLE);
+	else
+		SDL_ShowCursor(SDL_ENABLE);
+
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 	for (auto* gui : guiWnd)

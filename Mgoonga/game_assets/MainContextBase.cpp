@@ -39,7 +39,9 @@ eMainContextBase::eMainContextBase(eInputController* _input,
 	                               std::vector<IWindowImGui*>& _externalGui,
 	                               const std::string& _modelsPath,
 	                               const std::string& _assetsPath,
-	                               const std::string& _shadersPath)
+	                               const std::string& _shadersPath,
+																 int _width,
+																 int _height)
 : m_input_controller(_input)
 , modelFolderPath(_modelsPath)
 , assetsFolderPath(_assetsPath)
@@ -50,7 +52,7 @@ eMainContextBase::eMainContextBase(eInputController* _input,
 , soundManager(new eSoundManager(_assetsPath))
 , externalGui(_externalGui)
 , m_physics_system(new dbb::PhysicsSystem)
-, pipeline(1200, 600) //@todo should get from outside
+, pipeline(_width, _height)
 {
 	m_cameras.reserve(8); //@todo redesign
 }
@@ -495,7 +497,6 @@ void eMainContextBase::InitializeScripts()
 		if(object->GetScript())
 			object->GetScript()->Initialize();
 	}
-	m_input_controller->AddObserver(this, STRONG);
 }
 
 //--------------------------------------------------------------------------------

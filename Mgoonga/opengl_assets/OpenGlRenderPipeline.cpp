@@ -73,8 +73,8 @@ std::function<void(const TessellationRenderingInfo&)> eOpenGlRenderPipeline::Get
 
 //-------------------------------------------------------------------------------------------
 eOpenGlRenderPipeline::eOpenGlRenderPipeline(uint32_t _width, uint32_t _height)
-: width(_width),
-  height(_height),
+: m_width(_width),
+  m_height(_height),
   renderManager(new eRenderManager)
 {
 }
@@ -119,30 +119,30 @@ void eOpenGlRenderPipeline::Initialize()
 //-------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::InitializeBuffers()
 {
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFAULT, width, height);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SCREEN, width, height);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SCREEN_WITH_SSR, width, height);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_MTS, width, height);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_REFLECTION, width, height);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_REFRACTION, width, height);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SSR, width, height);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SSR_BLUR, width, height);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW_DIR, width*2, height*2);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW_CUBE_MAP, width*2, height*2);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW_CSM, width * 2, height * 2);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SQUERE, height, height); //squere
-  eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_BRIGHT_FILTER, width, height);
-  eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_ONE, 600, 300); //@todo numbers
-  eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_TWO, 600, 300);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFFERED, width, height);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SSAO, width, height);
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SSAO_BLUR, width, height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFAULT, m_width, m_height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SCREEN, m_width, m_height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SCREEN_WITH_SSR, m_width, m_height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_MTS, m_width, m_height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_REFLECTION, m_width, m_height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_REFRACTION, m_width, m_height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SSR, m_width, m_height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SSR_BLUR, m_width, m_height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW_DIR, m_width*2, m_height*2);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW_CUBE_MAP, m_width*2, m_height*2);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SHADOW_CSM, m_width * 2, m_height * 2);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SQUERE, m_height, m_height); //squere
+  eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_BRIGHT_FILTER, m_width, m_height);
+  eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_ONE, m_width/2, m_height/2); //@todo
+  eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_GAUSSIAN_TWO, m_width / 2, m_height / 2);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_DEFFERED, m_width, m_height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SSAO, m_width, m_height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_SSAO_BLUR, m_width, m_height);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_IBL_CUBEMAP, 512, 512);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_IBL_CUBEMAP_IRR, 32, 32);
 	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP, 1024, 1024); // @todo should be the size of current skybox
-	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_BLOOM, width, height);
-	eGlBufferContext::GetInstance().BufferCustomInit("CameraInterpolationCoordsBuffer", width, height);
-	eGlBufferContext::GetInstance().BufferCustomInit("ComputeParticleSystemBuffer", width, height);
+	eGlBufferContext::GetInstance().BufferInit(eBuffer::BUFFER_BLOOM, m_width, m_height);
+	eGlBufferContext::GetInstance().BufferCustomInit("CameraInterpolationCoordsBuffer", m_width, m_height);
+	eGlBufferContext::GetInstance().BufferCustomInit("ComputeParticleSystemBuffer", m_width, m_height);
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -800,9 +800,9 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 			renderManager->ScreenRender()->SetTextureContrast(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SSR_BLUR));
 			renderManager->ScreenRender()->SetTextureMask(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN_MASK));
 			renderManager->ScreenRender()->SetRenderingFunction(GUI::RenderFunc::MaskBlend);
-			renderManager->ScreenRender()->Render({ 0,0 }, { width, height },
-																						{ 0,height }, { width, 0 }, //@todo y is inverted
-																						(float)width, (float)height);
+			renderManager->ScreenRender()->Render({ 0,0 }, { m_width, m_height },
+																						{ 0,m_height }, { m_width, 0 }, //@todo y is inverted
+																						(float)m_width, (float)m_height);
 		}
 
 		Texture screen = ssr ? eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN_WITH_SSR)
@@ -812,7 +812,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		if (m_pb_bloom)//Physicly Based Bloom
 		{
 			RenderBloom();
-			glViewport(0, 0, width, height);
+			glViewport(0, 0, m_width, m_height);
 			contrast = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_BLOOM);
 		}
 		else
@@ -822,7 +822,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		}
 
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
-		glViewport(0, 0, width, height);
+		glViewport(0, 0, m_width, m_height);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glDisable(GL_DEPTH_TEST);
 		RenderContrast(_camera, screen, contrast); // blend screen with gaussian (or pb bloom) -> to default
@@ -858,13 +858,13 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	{
 		renderManager->ScreenRender()->RenderFrame(_camera.getCameraRay().GetFrame().first,
 																							 _camera.getCameraRay().GetFrame().second, 
-																							 static_cast<float>(width), 
-																							 static_cast<float>(height));
+																							 static_cast<float>(m_width), 
+																							 static_cast<float>(m_height));
 	}
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	renderManager->TextRender()->RenderText(_camera, _texts, static_cast<float>(width), static_cast<float>(height));
+	renderManager->TextRender()->RenderText(_camera, _texts, static_cast<float>(m_width), static_cast<float>(m_height));
 	glDisable(GL_BLEND);
 
 	RenderGui(_guis, _camera);
@@ -887,9 +887,9 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	//render final texture to screen
 	/*Texture total_screen = GetDefaultBufferTexture();
 	renderManager->ScreenRender()->SetTexture(total_screen);
-	renderManager->ScreenRender()->Render({ 0,0 }, { width, height },
-																				{ 0,0 }, { width, height },
-																				width, height);*/
+	renderManager->ScreenRender()->Render({ 0,0 }, { m_width, m_height },
+																				{ 0,0 }, { m_width, m_height },
+																				m_width, m_height);*/
 }
 
 void eOpenGlRenderPipeline::RenderShadows(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
@@ -915,7 +915,7 @@ void eOpenGlRenderPipeline::RenderShadows(const Camera& _camera, const Light& _l
 	//glDisable(GL_POLYGON_OFFSET_FILL);
 	glCullFace(GL_BACK);
 
-	glViewport(0, 0, width, height);
+	glViewport(0, 0, m_width, m_height);
 }
 
 void eOpenGlRenderPipeline::RenderShadowsCSM(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
@@ -941,7 +941,7 @@ void eOpenGlRenderPipeline::RenderShadowsCSM(const Camera& _camera, const Light&
 	//glDisable(GL_POLYGON_OFFSET_FILL);
 	glCullFace(GL_BACK);
 
-	glViewport(0, 0, width, height);
+	glViewport(0, 0, m_width, m_height);
 }
 
 void eOpenGlRenderPipeline::RenderSkybox(const Camera& _camera)
@@ -1042,7 +1042,7 @@ void eOpenGlRenderPipeline::RenderBloom()
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_BLOOM);
 	//glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // ?
 	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_SCREEN, GL_TEXTURE0);
-	renderManager->BloomRenderer()->RenderDownsamples(eGlBufferContext::GetInstance().MipChain(), glm::vec2{ (float)width , (float)height });
+	renderManager->BloomRenderer()->RenderDownsamples(eGlBufferContext::GetInstance().MipChain(), glm::vec2{ (float)m_width , (float)m_height });
 
 	// Enable additive blending !!!
 	glEnable(GL_BLEND);
@@ -1073,7 +1073,7 @@ void eOpenGlRenderPipeline::RenderBlur(const Camera& _camera)
 {
 	renderManager->BrightFilterRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_BRIGHT_FILTER);
-	glViewport(0, 0, width, height);
+	glViewport(0, 0, m_width, m_height);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	renderManager->BrightFilterRender()->Render();
 	renderManager->GaussianBlurRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_BRIGHT_FILTER));
@@ -1108,7 +1108,7 @@ void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, c
 			renderManager->ScreenRender()->SetRenderingFunction(gui->GetRenderingFunc());
 			renderManager->ScreenRender()->Render(gui->getTopLeft(),				gui->getBottomRight(),
 																						gui->getTopLeftTexture(), gui->getBottomRightTexture(),
-																						static_cast<float>(width), static_cast<float>(height));
+																						static_cast<float>(m_width), static_cast<float>(m_height));
 		}
 
 		gui->UpdateSync();
@@ -1125,7 +1125,7 @@ void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, c
 				renderManager->ScreenRender()->SetTextureMask(*(child->GetTextureMask()));
 				renderManager->ScreenRender()->Render(child->getTopLeft(), child->getBottomRight(), 
 																							child->getTopLeftTexture(), child->getBottomRightTexture(), 
-																							static_cast<float>(width), static_cast<float>(height));
+																							static_cast<float>(m_width), static_cast<float>(m_height));
 			}
 			child->UpdateSync();
 		}
@@ -1234,7 +1234,7 @@ void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 		//set textures to pbr
 		SetSkyIBL(irr.m_id, prefilter.m_id);
 
-		glViewport(0, 0, width, height);
+		glViewport(0, 0, m_width, m_height);
 
 		m_texture_manager->AddExisting("cube_id"+ std::to_string(i), &cube);
 		m_texture_manager->AddCubeMapId(cube.m_id);
@@ -1260,7 +1260,7 @@ void	eOpenGlRenderPipeline::RenderEnvironmentSnapshot(std::map<eObject::RenderTy
 	int height						= renderManager->SkyBoxRender()->GetSkyBoxTexture()->m_height; // Height of each face of the cube map
 
 	if (width != eGlBufferContext::GetInstance().GetSize(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP).x
-		|| height != eGlBufferContext::GetInstance().GetSize(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP).y)
+			|| height != eGlBufferContext::GetInstance().GetSize(eBuffer::BUFFER_ENVIRONMENT_CUBEMAP).y)
 		return; //@todo regenerate buffer
 
 	GLenum cubeFaces[6] = {
@@ -1505,7 +1505,7 @@ void eOpenGlRenderPipeline::DumpCSMTextures() const
 //-------------------------------------------------------
 void eOpenGlRenderPipeline::RenderCameraInterpolationCompute(const Camera& _camera)
 {
-	glViewport(0, 0, width, height);
+	glViewport(0, 0, m_width, m_height);
 	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_DEFAULT, GL_TEXTURE1);
 	eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_DEFFERED, GL_TEXTURE2);
 	renderManager->CameraInterpolationRender()->DispatchCompute(_camera);
@@ -1526,9 +1526,9 @@ float Lerp(int start, int end, float t)
 //-------------------------------------------------------
 Texture* eOpenGlRenderPipeline::RenderCameraInterpolation(const Camera& _camera)
 {
-	static std::vector<GLfloat> buffer_image(width * height * 4);
-	static std::vector<GLfloat> buffer_coords(width * height * 4);
-	static std::vector<GLfloat> buffer_new_image(width * height * 4);
+	static std::vector<GLfloat> buffer_image(m_width * m_height * 4);
+	static std::vector<GLfloat> buffer_coords(m_width * m_height * 4);
+	static std::vector<GLfloat> buffer_new_image(m_width * m_height * 4);
 	static Texture new_image_texture;
 
 	eGlBufferContext::GetInstance().EnableCustomWrittingBuffer("CameraInterpolationCoordsBuffer");
@@ -1545,33 +1545,33 @@ Texture* eOpenGlRenderPipeline::RenderCameraInterpolation(const Camera& _camera)
 	eGlBufferContext::GetInstance().EnableCustomReadingBuffer("CameraInterpolationCoordsBuffer", GL_TEXTURE3);
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, &buffer_coords[0]);
 
-	for (uint32_t row = 0; row < height; ++row)
+	for (uint32_t row = 0; row < m_height; ++row)
 	{
-		for (uint32_t column = 0; column < width; ++column)
+		for (uint32_t column = 0; column < m_width; ++column)
 		{
-			float r = buffer_image[row * width * 4 + column*4];
-			float g = buffer_image[row * width * 4 + column*4 +1];
-			float b = buffer_image[row * width * 4 + column*4 +2];
+			float r = buffer_image[row * m_width * 4 + column*4];
+			float g = buffer_image[row * m_width * 4 + column*4 +1];
+			float b = buffer_image[row * m_width * 4 + column*4 +2];
 			float a = 1.f;
 
-			float new_coord_x = buffer_coords[row * width * 4 + column * 4];
-			float new_coord_y = buffer_coords[row * width * 4 + column * 4 + 1];
-			float new_coord_z = buffer_coords[row * width * 4 + column * 4 + 2];
-			float new_coord_a = buffer_coords[row * width * 4 + column * 4 + 3];
+			float new_coord_x = buffer_coords[row * m_width * 4 + column * 4];
+			float new_coord_y = buffer_coords[row * m_width * 4 + column * 4 + 1];
+			float new_coord_z = buffer_coords[row * m_width * 4 + column * 4 + 2];
+			float new_coord_a = buffer_coords[row * m_width * 4 + column * 4 + 3];
 
-			int new_coord_x_int = static_cast<int>(std::round(Lerp(0, width, new_coord_x)));
-			int new_coord_y_int = static_cast<int>(std::round(Lerp(0, height, new_coord_y)));
+			int new_coord_x_int = static_cast<int>(std::round(Lerp(0, m_width, new_coord_x)));
+			int new_coord_y_int = static_cast<int>(std::round(Lerp(0, m_height, new_coord_y)));
 
-			int index = new_coord_y_int * width * 4 + new_coord_x_int * 4;
+			int index = new_coord_y_int * m_width * 4 + new_coord_x_int * 4;
 			if (index < buffer_new_image.size()-3 && index >= 0)
 			{
-				buffer_new_image[new_coord_y_int * width * 4 + new_coord_x_int *4] = r;
-				buffer_new_image[new_coord_y_int * width * 4 + new_coord_x_int *4 + 1] = g;
-				buffer_new_image[new_coord_y_int * width * 4 + new_coord_x_int *4 + 2] = b;
-				buffer_new_image[new_coord_y_int * width * 4 + new_coord_x_int *4 + 3] = a;
+				buffer_new_image[new_coord_y_int * m_width * 4 + new_coord_x_int *4] = r;
+				buffer_new_image[new_coord_y_int * m_width * 4 + new_coord_x_int *4 + 1] = g;
+				buffer_new_image[new_coord_y_int * m_width * 4 + new_coord_x_int *4 + 2] = b;
+				buffer_new_image[new_coord_y_int * m_width * 4 + new_coord_x_int *4 + 3] = a;
 			}
 		}
 	}
-	new_image_texture.TextureFromBuffer<GLfloat>((GLfloat*)&buffer_new_image[0], width, height, GL_RGBA);
+	new_image_texture.TextureFromBuffer<GLfloat>((GLfloat*)&buffer_new_image[0], m_width, m_height, GL_RGBA);
 	return &new_image_texture;
 }

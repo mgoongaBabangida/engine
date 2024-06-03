@@ -29,8 +29,10 @@ eSandBoxGame::eSandBoxGame(eInputController*  _input,
 													 std::vector<IWindowImGui*>& _externalGui,
 													 const std::string& _modelsPath,
 													 const std::string& _assetsPath,
-													 const std::string& _shadersPath)
-: eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath)
+													 const std::string& _shadersPath,
+													 int _width,
+													 int _height)
+: eMainContextBase(_input, _externalGui, _modelsPath, _assetsPath, _shadersPath, _width, _height)
 {
 	ObjectPicked.Subscribe([this](shObject _new_focused, bool _left)
 		{

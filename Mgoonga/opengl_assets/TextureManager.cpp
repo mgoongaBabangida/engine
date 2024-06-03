@@ -138,7 +138,7 @@ void eTextureManager::_LoadHardcoded()
 	text.makeImage(1000, 1000); //@todo temp HARDCODING!
 	m_Textures.insert(std::pair<std::string, Texture>("computeImageRW", text));
 
-	text.makeImage(1200, 600); //@todo!!! screen with & height
+	text.makeImage(1200, 750); //@todo!!! screen with & height
 	m_Textures.insert(std::pair<std::string, Texture>("computeImageRWCameraInterpolation", text));
 }
 

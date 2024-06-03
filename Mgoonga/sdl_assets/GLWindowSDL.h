@@ -20,7 +20,7 @@ class IWindowImGui;
 class DLL_SDL_ASSETS dbGLWindowSDL
 {
 public:
-	dbGLWindowSDL(const IGameFactory&);
+	dbGLWindowSDL(const IGameFactory&, GLint _width, GLint _height);
 	~dbGLWindowSDL();
 
 	bool	InitializeGL();
@@ -33,15 +33,16 @@ protected:
 
 	std::unique_ptr<math::Timer>	dTimer;
 	std::vector<IWindowImGui*>		guiWnd;
-	eInputController				inputController;
-	std::unique_ptr<IGame>			mainContext; 
+	eInputController							inputController;
+	std::unique_ptr<IGame>				mainContext; 
 
 	SDL_Window*						window  = nullptr;
 
-	const GLint						WIDTH	= 1200; //@todo
-	const GLint						HEIGHT	= 600;
+	const GLint						WIDTH		= 1200;
+	const GLint						HEIGHT	= 750;
 
 	bool							running = true;
+	bool							m_disable_system_cursor_under_view = true;
 	std::function<void()>			on_close;
 };
 
@@ -50,7 +51,7 @@ class IGameFactory
 {
 public:
 	virtual IGame* CreateGame(eInputController*				_input,
-							  std::vector<IWindowImGui*>&	_imgui_windows) const = 0;
+									std::vector<IWindowImGui*>&	_imgui_windows) const = 0;
 };
 
 #endif

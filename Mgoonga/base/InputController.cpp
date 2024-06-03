@@ -263,6 +263,7 @@ void eInputController::OnMouseRelease(KeyModifiers _modifier)
 //---------------------------------------------------------------------------
 void eInputController::AddObserver(IInputObserver* _obs, ePriority _priority)
 {
+	//@todo check if it is already there
 	switch(_priority)
 	{
 		case MONOPOLY:	observersPriority.push_back(_obs);	break;

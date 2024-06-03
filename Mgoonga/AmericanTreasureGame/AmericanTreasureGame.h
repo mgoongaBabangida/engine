@@ -23,7 +23,9 @@ public:
 		std::vector<IWindowImGui*>& _externalGui,
 		const std::string& modelsPath,
 		const std::string& assetsPath,
-		const std::string& shadersPath);
+		const std::string& shadersPath,
+		int _width,
+		int _height);
 
 	virtual ~AmericanTreasureGame();
 

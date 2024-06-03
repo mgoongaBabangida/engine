@@ -49,7 +49,9 @@ public:
 									 std::vector<IWindowImGui*>& _externalGui,
 									 const std::string& _modelsPath,
 									 const std::string& _assetsPath,
-									 const std::string& _shadersPath);
+									 const std::string& _shadersPath,
+									 int _width,
+									 int _height);
 
 	virtual ~eMainContextBase();
 
