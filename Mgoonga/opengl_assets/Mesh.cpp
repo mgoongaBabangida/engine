@@ -2,6 +2,7 @@
 
 #include "Mesh.h"
 #include "GlDrawContext.h"
+#include "Windows_Related_api.h"
 
 #include <sstream>
 
@@ -35,11 +36,14 @@ eMesh::eMesh(vector<Vertex> _vertices,
   m_material = _material;
   m_name = _name.empty() ? "Default" : _name;
 
-	SetupMesh();
+  if (HasCurrentOpenGLContext())
+  {
+    SetupMesh();
+    ReloadTextures();
+  }
+
   if(_calculate_tangent)
     this->calculatedTangent();
-
-  ReloadTextures();
 
   if (m_material.albedo_texture_id == Texture::GetDefaultTextureId())
     m_material.albedo_texture_id = Texture::GetTexture1x1(GREY).m_id;
@@ -56,9 +60,12 @@ eMesh::eMesh(vector<Vertex> _vertices,
 //-------------------------------------------------------------------------------------------
 eMesh::~eMesh()
 {
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
-  glGenBuffers(1, &EBO);
+  if (HasCurrentOpenGLContext())
+  {
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+  }
 }
 
 //-------------------------------------------------------------------------------------------
@@ -92,11 +99,14 @@ void eMesh::FreeTextures()
 //-------------------------------------------------------------------------------------------
 void eMesh::ReloadVertexBuffer()
 {
-  glBindVertexArray(this->VAO);
-  glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-  glBufferData(GL_ARRAY_BUFFER, this->m_vertices.size() * sizeof(Vertex),
-    &this->m_vertices[0], GL_STATIC_DRAW);
-  glBindVertexArray(0);
+  if (HasCurrentOpenGLContext())
+  {
+    glBindVertexArray(this->VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+    glBufferData(GL_ARRAY_BUFFER, this->m_vertices.size() * sizeof(Vertex),
+      &this->m_vertices[0], GL_STATIC_DRAW);
+    glBindVertexArray(0);
+  }
 }
 
 //-------------------------------------------------------------------------------------------
