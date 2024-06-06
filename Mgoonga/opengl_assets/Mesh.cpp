@@ -23,11 +23,11 @@ I3DMesh* MakeMesh(std::vector<Vertex> _vertices,
 
 //-------------------------------------------------------------------------------------------
 eMesh::eMesh(vector<Vertex> _vertices,
-                       vector<GLuint> _indices,
-                       vector<Texture> _textures,
-                       const Material& _material,
-                       const std::string& _name,
-                       bool _calculate_tangent)
+             vector<GLuint> _indices,
+             vector<Texture> _textures,
+             const Material& _material,
+             const std::string& _name,
+             bool _calculate_tangent)
 {
 	m_vertices = _vertices;
 	m_indices = _indices;
