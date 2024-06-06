@@ -25,7 +25,9 @@
 #include <opengl_assets/SoundManager.h>
 #include <opengl_assets/Sound.h>
 
+#ifndef STANDALONE
 #include <sdl_assets/ImGuiContext.h>
+#endif
 
 #include <math/Clock.h>
 #include <math/Rigger.h>
@@ -188,8 +190,10 @@ void eMainContextBase::InitializeGL()
 		m_cameras[0].setPosition(glm::vec3(0.0f, 4.0f, -4.0f));
 	}
 
+#ifndef STANDALONE
 	for (auto& gui : externalGui)
 		m_input_controller->AddObserver(gui, MONOPOLY);
+#endif
 
 	InitializeTextures();
 
@@ -207,7 +211,9 @@ void eMainContextBase::InitializeGL()
 
 	InitializeModels();
 
+#ifndef STANDALONE
   InitializeExternalGui();
+#endif
 
 	InitializeScripts();
 
@@ -502,6 +508,7 @@ void eMainContextBase::InitializeScripts()
 //--------------------------------------------------------------------------------
 void eMainContextBase::InitializeExternalGui()
 {
+#ifndef STANDALONE
 	// Lights & Cameras
 	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(TEXT, "Light", nullptr);
 	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(GAME, "Game", (void*)&(*this));
@@ -880,6 +887,7 @@ void eMainContextBase::InitializeExternalGui()
 	static std::function<void()> stop_physics = [&physics]() { physics->StopPhysics(); };
 	externalGui[ExternalWindow::PIPELINE_WND]->Add(BUTTON, "Run Physicsa", &run_physics);
 	externalGui[ExternalWindow::PIPELINE_WND]->Add(BUTTON, "Stop Physics", &stop_physics);
+#endif
 }
 
 //------------------------------------------------------------

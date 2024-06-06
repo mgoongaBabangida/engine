@@ -39,7 +39,7 @@ class eRenderManager
 public:
 	friend class eOpenGlRenderPipeline;
 
-	eRenderManager() = default;
+	eRenderManager(uint32_t width, uint32_t height);
 	~eRenderManager() = default;
 
 	void				Initialize(eModelManager& modelManager,
@@ -59,7 +59,7 @@ public:
 	float& GetSsaoStrengthRef() { return m_phongRender->GetSaoStrengthRef(); }
 
 private:
-	eWaterRender*		WaterRender();
+	eWaterRender*			WaterRender();
 	eSkyBoxRender*		SkyBoxRender();
 	eScreenRender*		ScreenRender();
 	eParticleRender*	ParticleRender();
@@ -117,6 +117,8 @@ private:
 	std::unique_ptr <eVolumetricRender>						m_volumetricRender;
 
 	std::string							folderPath;
+	uint32_t								m_width;
+	uint32_t								m_height;
 	std::vector<ShaderInfo>	shaders;
 };
 

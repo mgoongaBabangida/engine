@@ -1,11 +1,15 @@
 #include "stdafx.h"
 #include "GLWindowSDL.h"
 
+#ifndef STANDALONE
 #include "ImGuiContext.h"
 #include "ImGuiWindowExternal.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
+#endif
+
+#include"Windows_Related_API.h"
 
 #include <base/interfaces.h>
 #include <base/Object.h>
@@ -21,17 +25,23 @@
 SDL_GLContext					context;
 ImVec2								viewport_offset;
 
+#ifndef STANDALONE
 const unsigned int ENGINE_CONTROLS_SPACE_X = 575;
 const unsigned int ENGINE_CONTROLS_SPACE_Y = 125;
+#else
+const unsigned int ENGINE_CONTROLS_SPACE_X = 0;
+const unsigned int ENGINE_CONTROLS_SPACE_Y = 0;
+#endif
 
-const int mysterious_y_border_offset = 20; //@todo 
+const int mysterious_y_border_offset = 20; //@todo
 
 //***************************************
-//dbGLWindowSDL::~dbGLWindowSDL
+//dbGLWindowSDL::dbGLWindowSDL
 //---------------------------------------
 dbGLWindowSDL::dbGLWindowSDL(const IGameFactory& _factory, GLint _width, GLint _height)
 : inputController(), WIDTH(_width), HEIGHT(_height)
 {
+#ifndef STANDALONE
   guiWnd.push_back(new eWindowImGuiExternal("Lights & Cameras"));//0
   guiWnd.push_back(new eWindowImGuiExternal("Pipeline"));//1
   guiWnd.push_back(new eWindowImGuiExternal("Object Transform"));//2
@@ -45,14 +55,23 @@ dbGLWindowSDL::dbGLWindowSDL(const IGameFactory& _factory, GLint _width, GLint _
 	guiWnd.push_back(new eWindowImGuiExternal("Particle System Tool"));//10
 	guiWnd.push_back(new eWindowImGuiExternal("Terrain Generation Tool"));//11
 	guiWnd.push_back(new eWindowImGuiExternal("Game Debug"));//12
-	guiWnd.push_back(new eWindowImGuiExternal("Physics Engine Tes"));//13
+	guiWnd.push_back(new eWindowImGuiExternal("Physics Engine Test"));//13
 	guiWnd.push_back(new eWindowImGuiExternal("HDR BLOOM"));//14
 	guiWnd.push_back(new eWindowImGuiExternal("Clouds Generation Tool"));//15
 
   on_close = std::function<void()>{ [this](){this->Close(); } };
   guiWnd[4]->Add(MENU, "Close", reinterpret_cast<void*>(&on_close));
 
-	mainContext.reset(_factory.CreateGame(&inputController, guiWnd));
+	guiWnd[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Disable system cursor", &m_disable_system_cursor_under_view);
+	guiWnd[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "V-sync", &m_vsync);
+	static std::function<void(int)> min_frametime_callback = [this](int _val)
+	{
+		m_min_frametime = (unsigned int)_val;
+	};
+	guiWnd[ExternalWindow::PIPELINE_WND]->Add(SPIN_BOX, "Min frametime", (void*)&min_frametime_callback);
+#endif
+
+	mainContext.reset(_factory.CreateGame(&inputController, guiWnd, WIDTH, HEIGHT));
 }
 
 //======================================
@@ -61,7 +80,9 @@ dbGLWindowSDL::dbGLWindowSDL(const IGameFactory& _factory, GLint _width, GLint _
 dbGLWindowSDL::~dbGLWindowSDL()
 {
   dTimer->stop();
+#ifndef STANDALONE
 	eImGuiContext::GetInstance(&context, window).CleanUp();
+#endif
 	SDL_GL_DeleteContext(context);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
@@ -94,7 +115,8 @@ bool dbGLWindowSDL::InitializeGL()
 	window	= SDL_CreateWindow("Mgoonga", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH + ENGINE_CONTROLS_SPACE_X, HEIGHT + ENGINE_CONTROLS_SPACE_Y,
 		SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL /*| SDL_WINDOW_RESIZABLE*/ | SDL_WINDOW_ALLOW_HIGHDPI);
 	
-	SDL_GL_SetSwapInterval(1); // Enable vsync
+	if(m_vsync)
+		SDL_GL_SetSwapInterval(1); // Enable vsync
 	
 	if(window == nullptr)
 	{
@@ -110,9 +132,9 @@ bool dbGLWindowSDL::InitializeGL()
 	{
 		return false;
 	}
-
+#ifndef STANDALONE
 	eImGuiContext::GetInstance(&context, window).Init();
-
+#endif
 	mainContext->InitializeGL();
 	ImGuizmo::AllowAxisFlip(false);
 
@@ -123,7 +145,7 @@ bool dbGLWindowSDL::InitializeGL()
 									this->PaintGL();
 									return true;
 								}));
-	dTimer->start(15); //~70 fps
+	dTimer->start(m_min_frametime);
 	return true;
 }
 
@@ -132,18 +154,24 @@ bool dbGLWindowSDL::InitializeGL()
 //---------------------------------------
 void dbGLWindowSDL::Run()
 {
+	if (m_vsync)
+		SDL_GL_SetSwapInterval(1);
+	else
+		SDL_GL_SetSwapInterval(0);
+
 	SDL_Event windowEvent;
 	while(running)
 	{
 		if(SDL_PollEvent(&windowEvent))
 		{
+#ifndef STANDALONE
 			ImGuiIO& io = ImGui::GetIO();
 			ImGui_ImplSDL2_ProcessEvent(&windowEvent);
-			
 			/*if (io.WantCaptureMouse)
 				continue;*/
 			if (eImGuiContext::BlockEvents())
 				continue;
+#endif			
 
 			KeyModifiers mod = KeyModifiers::NONE;
 			SDL_Keymod state = SDL_GetModState();
@@ -223,14 +251,18 @@ void dbGLWindowSDL::PaintGL()
 		SDL_GL_MakeCurrent(window, context);
 		flag = true;
 	}
+
+#ifndef STANDALONE
 	eImGuiContext::GetInstance(&context, window).NewFrame();
 	ImGuizmo::BeginFrame();
+#endif			
 
 	if(m_disable_system_cursor_under_view)
 		SDL_ShowCursor(SDL_DISABLE);
 	else
 		SDL_ShowCursor(SDL_ENABLE);
 
+#ifndef STANDALONE
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 	for (auto* gui : guiWnd)
@@ -241,6 +273,7 @@ void dbGLWindowSDL::PaintGL()
 			io.ConfigFlags &= ~ImGuiConfigFlags_NoMouseCursorChange;
 		}
 	}
+#endif
 
 	//ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 	mainContext->PaintGL();
@@ -250,6 +283,8 @@ void dbGLWindowSDL::PaintGL()
 	/*eWindowImGuiDemo demo;
   demo.Render();*/
 
+
+#ifndef STANDALONE
 	for (auto* gui : guiWnd)
 	{
 		int window_x, window_y;
@@ -260,6 +295,7 @@ void dbGLWindowSDL::PaintGL()
 	}
 
 	eImGuiContext::GetInstance(&context, window).Render();
+#endif	
 	SDL_GL_SwapWindow(window);
 }
 
@@ -268,6 +304,7 @@ void dbGLWindowSDL::PaintGL()
 //---------------------------------------
 void dbGLWindowSDL::OnDockSpace()
 {
+#ifndef STANDALONE
 	static bool dockspaceOpen = true;
 	static bool opt_fullscreen = true;
 	static bool opt_padding = false;
@@ -358,4 +395,5 @@ void dbGLWindowSDL::OnDockSpace()
 		ImGui::End(); //Game
 
 	ImGui::End();
+#endif	
 }

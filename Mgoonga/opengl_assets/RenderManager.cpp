@@ -45,6 +45,12 @@ void eRenderManager::AddParticleSystemGPU(glm::vec3 _startPos, const Texture* _t
 	m_particleRenderGPU->AddParticleSystem(_startPos, _texture);
 }
 
+//----------------------------------------------------------------------------------------------------------------
+eRenderManager::eRenderManager(uint32_t width, uint32_t height)
+	:m_width(width), m_height(height)
+{
+}
+
 //---------------------------------------------------------------------------------------------------------------
 void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& texManager, const std::string& _folderPath)
 {
@@ -100,11 +106,11 @@ void eRenderManager::Initialize(eModelManager& modelManager, eTextureManager& te
 																				folderPath + "Geometry.glsl"));
 	shader_lambda(m_hexrender.get());
 
-	m_gaussianRender.reset(new eGaussianBlurRender(1200, 750, //@todo screen width/ height
+	m_gaussianRender.reset(new eGaussianBlurRender(m_width, m_height,
 																								folderPath + "GaussianVertexShader.glsl", 
 																								folderPath + "GaussianFragmentShader.glsl"));
 	shader_lambda(m_gaussianRender.get());
-	m_brightRender.reset(new eBrightFilterRender(1200, 750, //@todo screen width/ height
+	m_brightRender.reset(new eBrightFilterRender(m_width, m_height,
 																								folderPath + "PostProcessingVertexShader.glsl",
 																								folderPath + "BrightFilterFragment.glsl"));
 	shader_lambda(m_brightRender.get());

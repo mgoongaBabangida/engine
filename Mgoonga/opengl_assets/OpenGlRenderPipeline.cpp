@@ -75,7 +75,7 @@ std::function<void(const TessellationRenderingInfo&)> eOpenGlRenderPipeline::Get
 eOpenGlRenderPipeline::eOpenGlRenderPipeline(uint32_t _width, uint32_t _height)
 : m_width(_width),
   m_height(_height),
-  renderManager(new eRenderManager)
+  renderManager(new eRenderManager(_width, _height))
 {
 }
 
@@ -884,12 +884,15 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	}
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+#ifdef STANDALONE
 	//render final texture to screen
-	/*Texture total_screen = GetDefaultBufferTexture();
+	Texture total_screen = GetDefaultBufferTexture();
 	renderManager->ScreenRender()->SetTexture(total_screen);
 	renderManager->ScreenRender()->Render({ 0,0 }, { m_width, m_height },
-																				{ 0,0 }, { m_width, m_height },
-																				m_width, m_height);*/
+																				{ 0,m_height }, { m_width, 0 }, // y->
+																				m_width, m_height);
+#endif
 }
 
 void eOpenGlRenderPipeline::RenderShadows(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects)

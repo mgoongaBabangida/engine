@@ -38,11 +38,14 @@ protected:
 
 	SDL_Window*						window  = nullptr;
 
-	const GLint						WIDTH		= 1200;
-	const GLint						HEIGHT	= 750;
+	/*const*/ GLint						WIDTH		= 1200;
+	/*const*/ GLint						HEIGHT	= 750;
 
 	bool							running = true;
 	bool							m_disable_system_cursor_under_view = true;
+	bool							m_vsync = true;
+	unsigned int			m_min_frametime = 15;  //~70 fps
+
 	std::function<void()>			on_close;
 };
 
@@ -51,7 +54,7 @@ class IGameFactory
 {
 public:
 	virtual IGame* CreateGame(eInputController*				_input,
-									std::vector<IWindowImGui*>&	_imgui_windows) const = 0;
+									std::vector<IWindowImGui*>&	_imgui_windows, int _width, int _height) const = 0;
 };
 
 #endif
