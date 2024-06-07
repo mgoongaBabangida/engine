@@ -6,6 +6,7 @@
 
 #include "GlBufferContext.h"
 #include "GlDrawContext.h"
+#include "GlPipelineState.h"
 
 #include "RenderManager.h"
 #include "TextureManager.h"
@@ -107,12 +108,12 @@ void eOpenGlRenderPipeline::UpdateSharedUniforms()
 //-------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::Initialize()
 {
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_STENCIL_TEST);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_MULTISAMPLE);
-	glEnable(GL_LINE_SMOOTH);
-	/*glEnable(GL_BLEND);
+	eGlPipelineState::GetInstance().EnableDepthTest();
+	eGlPipelineState::GetInstance().EnableStencilTest();
+	eGlPipelineState::GetInstance().EnableCullFace();
+	eGlPipelineState::GetInstance().EnableMultisample();
+	eGlPipelineState::GetInstance().EnableLineSmooth();
+	/*GlPipelineState::GetInstance().EnableBlend();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
 }
 
@@ -485,8 +486,8 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 
 	/*if (skybox)*/ { RenderSkybox(_camera); }
 
-	glEnable(GL_CLIP_DISTANCE0); //?
-	glEnable(GL_DEPTH_TEST);
+	eGlPipelineState::GetInstance().EnableClipDistance0(); //?
+	eGlPipelineState::GetInstance().EnableDepthTest();
 
 	if (water)
 	{
@@ -495,7 +496,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		RenderRefraction(_camera, _light, phong_objs, pbr_objs);
 	}
-  glDisable(GL_CLIP_DISTANCE0);
+	eGlPipelineState::GetInstance().DisableClipDistance0();
 
 	// SSAO
 	if (ssao || ssr || camera_interpolation) // need g - buffer
@@ -524,7 +525,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 
 	if (sky_noise) { RenderSkyNoise(_camera); }
 
-	glEnable(GL_STENCIL_TEST);
+	eGlPipelineState::GetInstance().EnableStencilTest();
 	//4. Rendering to main FBO with stencil
 	if (outline_focused)
 	{
@@ -762,10 +763,10 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		: eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 
 	// Volumetric data
-	glEnable(GL_BLEND);
+	eGlPipelineState::GetInstance().EnableBlend();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	RenderVolumetric(_camera, _light, volumetric_objs);
-	glDisable(GL_BLEND);
+	eGlPipelineState::GetInstance().DisableBlend();
 
 	// Environment cubemaps
 	if(m_environment_map)
@@ -824,7 +825,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 		glViewport(0, 0, m_width, m_height);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
+		eGlPipelineState::GetInstance().DisableDepthTest();
 		RenderContrast(_camera, screen, contrast); // blend screen with gaussian (or pb bloom) -> to default
 	}
 	
@@ -832,15 +833,18 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	if (kernel)
 	{
 		eGlBufferContext::GetInstance().BlitFromTo(eBuffer::BUFFER_SCREEN, eBuffer::BUFFER_DEFAULT, GL_STENCIL_BUFFER_BIT);
-		glEnable(GL_STENCIL_TEST);
+		eGlPipelineState::GetInstance().EnableStencilTest();
+
 		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 		glStencilFunc(GL_EQUAL, 1, 0xFF);
 		glStencilMask(0xFF);
+
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 		renderManager->ScreenRender()->SetTexture(eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SCREEN));
 		renderManager->ScreenRender()->RenderKernel();
 		glClear(GL_STENCIL_BUFFER_BIT);
-		glDisable(GL_STENCIL_TEST);
+		eGlPipelineState::GetInstance().DisableStencilTest();
+
 		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glStencilMask(0xFF);
@@ -852,7 +856,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	//8.1 Texture visualization
 	eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_DEFAULT);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	glDisable(GL_DEPTH_TEST);
+	eGlPipelineState::GetInstance().DisableDepthTest();
 
 	if(mousepress  && _camera.getCameraRay().IsPressed())
 	{
@@ -862,10 +866,10 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 																							 static_cast<float>(m_height));
 	}
 
-	glEnable(GL_BLEND);
+	eGlPipelineState::GetInstance().EnableBlend();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	renderManager->TextRender()->RenderText(_camera, _texts, static_cast<float>(m_width), static_cast<float>(m_height));
-	glDisable(GL_BLEND);
+	eGlPipelineState::GetInstance().DisableBlend();
 
 	RenderGui(_guis, _camera);
 
@@ -878,7 +882,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		// set up buffer for writing
 		eGlBufferContext::GetInstance().EnableCustomWrittingBuffer("ComputeParticleSystemBuffer");
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_BLEND);
+		eGlPipelineState::GetInstance().EnableBlend();
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		renderManager->ComputeShaderRender()->RenderComputeResult(_camera);
 	}
@@ -895,6 +899,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 #endif
 }
 
+//------------------------------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::RenderShadows(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects)
 {
 	// Bind the "depth only" FBO and set the viewport to the size of the depth texture
@@ -902,10 +907,10 @@ void eOpenGlRenderPipeline::RenderShadows(const Camera& _camera, const Light& _l
 																										 : eGlBufferContext::GetInstance().GetSize(eBuffer::BUFFER_SHADOW_DIR);
 	glViewport(0, 0, size.x, size.y);
 	
-	glEnable(GL_CULL_FACE);
+	eGlPipelineState::GetInstance().EnableCullFace();
 	glCullFace(GL_FRONT);
 	// Clear
-	glEnable(GL_DEPTH_TEST);
+	eGlPipelineState::GetInstance().EnableDepthTest();
 	glDepthFunc(GL_LESS);
 
 	//glClearDepth(1.0f);
@@ -926,10 +931,10 @@ void eOpenGlRenderPipeline::RenderShadowsCSM(const Camera& _camera, const Light&
 	glm::ivec2 size = eGlBufferContext::GetInstance().GetSize(eBuffer::BUFFER_SHADOW_CSM);
 	glViewport(0, 0, size.x, size.y);
 
-	glEnable(GL_CULL_FACE);
+	eGlPipelineState::GetInstance().EnableCullFace();
 	glCullFace(GL_FRONT);
 	// Clear
-	glEnable(GL_DEPTH_TEST);
+	eGlPipelineState::GetInstance().EnableDepthTest();
 	glDepthFunc(GL_LESS);
 
 	//glClearDepth(1.0f);
@@ -937,9 +942,9 @@ void eOpenGlRenderPipeline::RenderShadowsCSM(const Camera& _camera, const Light&
 //glEnable(GL_POLYGON_OFFSET_FILL);
 //glPolygonOffset(2.0f, -2000.0f);
 
-	glEnable(GL_DEPTH_CLAMP);
+	eGlPipelineState::GetInstance().EnableDepthClamp();
 	renderManager->CSMRender()->Render(_camera, _light, _objects);
-	glDisable(GL_DEPTH_CLAMP);
+	eGlPipelineState::GetInstance().DisableDepthClamp();
 
 	//glDisable(GL_POLYGON_OFFSET_FILL);
 	glCullFace(GL_BACK);
@@ -980,11 +985,11 @@ void eOpenGlRenderPipeline::RenderRefraction(Camera& _camera, const Light& _ligh
 void eOpenGlRenderPipeline::RenderSkyNoise(const Camera& _camera)
 {
 	//sky noise
-	glDisable(GL_CULL_FACE);
-	glEnable(GL_BLEND);
+	eGlPipelineState::GetInstance().DisableCullFace();
+	eGlPipelineState::GetInstance().EnableBlend();
 	renderManager->SkyNoiseRender()->Render(_camera);
-	glDisable(GL_BLEND);
-	glEnable(GL_CULL_FACE);
+	eGlPipelineState::GetInstance().DisableBlend();
+	eGlPipelineState::GetInstance().EnableCullFace();
 }
 
 void eOpenGlRenderPipeline::RenderMain(const Camera& _camera, const Light& _light, const std::vector<shObject>& _objects)
@@ -1008,14 +1013,16 @@ void eOpenGlRenderPipeline::RenderOutlineFocused(const Camera& _camera, const Li
 
 void eOpenGlRenderPipeline::RenderFlags(const Camera& _camera, const Light& _light, std::vector<shObject> flags)
 {
+	eGlPipelineState::GetInstance().DisableCullFace();
 	renderManager->PhongRender()->RenderWaves(_camera, _light, flags);
+	eGlPipelineState::GetInstance().EnableCullFace();
 }
 
 void eOpenGlRenderPipeline::RenderWater(const Camera& _camera, const Light& _light)
 {
-	glDisable(GL_CULL_FACE);
+	eGlPipelineState::GetInstance().DisableCullFace();
 	renderManager->WaterRender()->Render(_camera, _light);
-	glEnable(GL_CULL_FACE);
+	eGlPipelineState::GetInstance().EnableCullFace();
 }
 
 void eOpenGlRenderPipeline::RenderGeometry(const Camera& _camera, const SimpleGeometryMesh& _mesh)
@@ -1026,15 +1033,17 @@ void eOpenGlRenderPipeline::RenderGeometry(const Camera& _camera, const SimpleGe
 
 void eOpenGlRenderPipeline::RenderParticles(const Camera& _camera)
 {
-	glEnable(GL_BLEND);
+	eGlPipelineState::GetInstance().EnableBlend();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	glDepthMask(GL_FALSE);
 	glCullFace(GL_TRUE);
+
 	renderManager->ParticleRender()->Render(_camera);
 	if(renderManager->ParticleRenderGPU())
 		renderManager->ParticleRenderGPU()->Render(_camera);
+
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_BLEND);
+	eGlPipelineState::GetInstance().DisableBlend();
 	glDepthMask(GL_TRUE);
 }
 
@@ -1048,13 +1057,13 @@ void eOpenGlRenderPipeline::RenderBloom()
 	renderManager->BloomRenderer()->RenderDownsamples(eGlBufferContext::GetInstance().MipChain(), glm::vec2{ (float)m_width , (float)m_height });
 
 	// Enable additive blending !!!
-	glEnable(GL_BLEND);
+	eGlPipelineState::GetInstance().EnableBlend();
 	glBlendFunc(GL_ONE, GL_ONE);
 	glBlendEquation(GL_FUNC_ADD);
 	renderManager->BloomRenderer()->RenderUpsamples(eGlBufferContext::GetInstance().MipChain());
 	// Disable additive blending !!!!!
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // Restore if this was default
-	glDisable(GL_BLEND);
+	eGlPipelineState::GetInstance().DisableBlend();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -1102,9 +1111,9 @@ void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, c
 		if (gui->GetTexture() && gui->IsVisible())
 		{
 			if (gui->IsTransparent())
-				glEnable(GL_BLEND);
+				eGlPipelineState::GetInstance().EnableBlend();
 			else
-				glDisable(GL_BLEND);
+				eGlPipelineState::GetInstance().DisableBlend();
 
 			renderManager->ScreenRender()->SetTexture(*(gui->GetTexture())); //copy texture
 			renderManager->ScreenRender()->SetTextureMask(*(gui->GetTextureMask()));
@@ -1120,9 +1129,9 @@ void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, c
 			if (child->GetTexture() && child->IsVisible())
 			{
 				if (child->IsTransparent())
-					glEnable(GL_BLEND);
+					eGlPipelineState::GetInstance().EnableBlend();
 				else
-					glDisable(GL_BLEND);
+					eGlPipelineState::GetInstance().DisableBlend();
 
 				renderManager->ScreenRender()->SetTexture(*(child->GetTexture())); //copy texture
 				renderManager->ScreenRender()->SetTextureMask(*(child->GetTextureMask()));
@@ -1133,7 +1142,7 @@ void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, c
 			child->UpdateSync();
 		}
 	}
-	glDisable(GL_BLEND);
+	eGlPipelineState::GetInstance().DisableBlend();
 }
 
 //------------------------------------------------
@@ -1174,7 +1183,7 @@ void eOpenGlRenderPipeline::RenderSSR(const Camera& _camera)
 //-------------------------------------------------------
 void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 {
-	glDisable(GL_CULL_FACE);
+	eGlPipelineState::GetInstance().DisableCullFace();
 
 	// @todo should it be this framebuffer ?
 	//Pre-computing the BRDF
@@ -1215,7 +1224,7 @@ void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 		auto irr_id = eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_IBL_CUBEMAP_IRR).m_id;
 		renderManager->IBLRender()->RenderIBLMap(_camera, irr_id); // write irr to irr buffer
 		irr.makeCubemap(32);
-		glCopyImageSubData(irr_id, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+		glCopyImageSubData(irr_id,   GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
 											 irr.m_id, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
 											 32, 32, 6); //copy from buffer to texture
 
@@ -1224,7 +1233,7 @@ void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
-		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		eGlPipelineState::GetInstance().EnableTextureCubmapSeamless();
 
 		// prefilter
 		eGlBufferContext::GetInstance().EnableReadingBuffer(eBuffer::BUFFER_IBL_CUBEMAP, GL_TEXTURE2);
@@ -1248,7 +1257,7 @@ void eOpenGlRenderPipeline::RenderIBL(const Camera& _camera)
 		m_texture_manager->AddIBLId(irr.m_id, prefilter.m_id);
 	}
 
-	glEnable(GL_CULL_FACE);
+	eGlPipelineState::GetInstance().EnableCullFace();
 }
 
 //-------------------------------------------------------
@@ -1505,7 +1514,7 @@ void eOpenGlRenderPipeline::DumpCSMTextures() const
 	csmp5->TextureFromBuffer<GLfloat>((GLfloat*)&buffer[2400 * 1200 * 4], 2400, 1200, GL_RED);
 }
 
-//-------------------------------------------------------
+//------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::RenderCameraInterpolationCompute(const Camera& _camera)
 {
 	glViewport(0, 0, m_width, m_height);

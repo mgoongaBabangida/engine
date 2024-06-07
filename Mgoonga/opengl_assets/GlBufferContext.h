@@ -43,9 +43,7 @@ public:
 	eGlBufferContext(const eGlBufferContext&)		= delete;
 	eGlBufferContext& operator=(eGlBufferContext&)	= delete;
 	
-	/// @todo
 	void BufferInit(eBuffer, unsigned int, unsigned int);
-
 	GLuint BufferCustomInit(const std::string& _name, unsigned int, unsigned int, bool = false, bool = false);
 
 	void EnableWrittingBuffer(eBuffer);

@@ -1,5 +1,7 @@
 #include "ComputeShaderRender.h"
 #include "Texture.h"
+#include "GlPipelineState.h"
+
 #include <math/Random.h>
 #include <math/Utils.h>
 
@@ -24,8 +26,9 @@ eComputeShaderRender::eComputeShaderRender(const std::string& cS, const std::str
   mPSRenderResultShader.GetUniformInfoFromShader();
 
   //**********************************************************************//
-  glEnable(GL_PRIMITIVE_RESTART);
+  eGlPipelineState::GetInstance().EnablePrimitiveRestart();
   glPrimitiveRestartIndex(PRIM_RESTART);
+
   mRenderClothSimulShader.installShaders(ClothvS.c_str(), ClothfS.c_str());
   mRenderClothSimulShader.GetUniformInfoFromShader();
   mComputeClothSimulShader.installShaders(ClothcS.c_str());

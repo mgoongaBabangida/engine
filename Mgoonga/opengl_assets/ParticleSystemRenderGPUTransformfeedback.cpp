@@ -2,6 +2,7 @@
 
 #include "ParticleSystemRenderGPUTransformfeedback.h"
 #include "Texture.h"
+#include "GlPipelineState.h"
 
 //------------------------------------------------------------------------------
 eParticleSystemRenderGPU::eParticleSystemRenderGPU(const std::string& _vertexUpdateShader,
@@ -96,7 +97,7 @@ void eParticleSystemRenderGPU::_UpdateParticles()
   glActiveTexture(GL_TEXTURE6);
   glBindTexture(GL_TEXTURE_2D, m_randomTexture->m_id);
 
-  glEnable(GL_RASTERIZER_DISCARD);
+  eGlPipelineState::GetInstance().EnableRasterizerDiscard();
 
   glBindBuffer(GL_ARRAY_BUFFER, m_particleBuffer[m_currVB]);
   glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, m_transformFeedback[m_currTFB]);
@@ -193,6 +194,7 @@ void eParticleSystemRenderGPU_V2::Render(const Camera& _camera)
   // uniforms H Time
   glUniform1f(m_timeLoc, static_cast<float>(m_clock.timeElapsedMsc())/ 1000.0f);
   glUniform1f(m_HLoc, static_cast<float>(m_clock.newFrame())/ 1000.0f);
+
   // geometry
   glUniform1f(m_BillboardSizeLoc, 0.01f);
   glUniform3f(m_CameraPosLoc, _camera.getPosition()[0], _camera.getPosition()[1], _camera.getPosition()[2]);
@@ -205,7 +207,7 @@ void eParticleSystemRenderGPU_V2::Render(const Camera& _camera)
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, m_particleTexture->m_id);
 
-  glEnable(GL_RASTERIZER_DISCARD);
+  eGlPipelineState::GetInstance().EnableRasterizerDiscard();
   
   glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedback[drawBuf]);
   
@@ -214,7 +216,7 @@ void eParticleSystemRenderGPU_V2::Render(const Camera& _camera)
     glDrawArrays(GL_POINTS, 0, nParticles);
   glEndTransformFeedback();
 
-  glDisable(GL_RASTERIZER_DISCARD);
+  eGlPipelineState::GetInstance().DisableRasterizerDiscard();
   
   // Render pass
   glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &m_renderSubLoc);

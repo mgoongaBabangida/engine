@@ -102,7 +102,6 @@ void ePhongRender::RenderWaves(const Camera& camera, const Light& light, std::ve
 	float dur = (float)msc / 1000.0f;
 	time += dur;
 
-	glDisable(GL_CULL_FACE); //@todo transfer
 	glUniform1i(glGetUniformLocation(waveShader.ID(), "normalMapping"), GL_FALSE);
 
 	glm::mat4 worldToProjectionMatrix = camera.getProjectionMatrix() * camera.getWorldToViewMatrix();
@@ -129,7 +128,6 @@ void ePhongRender::RenderWaves(const Camera& camera, const Light& light, std::ve
 	}
 
 	glUniform1i(glGetUniformLocation(waveShader.ID(), "normalMapping"), GL_TRUE);
-	glEnable(GL_CULL_FACE); //todo transfer
 }
 
 //---------------------------------------------------------------------------
