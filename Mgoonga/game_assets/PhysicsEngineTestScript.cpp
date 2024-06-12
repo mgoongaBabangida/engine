@@ -30,14 +30,28 @@ PhysicsEngineTestScript::PhysicsEngineTestScript(eMainContextBase* _game, IWindo
 
   m_imgui->Add(SLIDER_FLOAT_NERROW, "Projection Percent", &m_projection_percent);
 
-  static std::function<void(int)> slack_callback = [this](int _value)
+  static std::function<void(int, int*&)> slack_callback = [this](int _value, int*& _val) //@todo test default
   {
+    static bool first_call = true;
+    if (first_call)
+    {
+      *_val = int(m_penetration_slack * 100);
+      first_call = false;
+      return;
+    }
     m_penetration_slack = float(_value) / 100.f;
   };
   m_imgui->Add(SPIN_BOX, "Penetration Slack", &slack_callback);
   
-  static std::function<void(int)> impulse_iterations_callback = [this](int _value)
+  static std::function<void(int, int*&)> impulse_iterations_callback = [this](int _value, int*& _val)
   {
+    static bool first_call = true;
+    if (first_call)
+    {
+      *_val = m_impulse_iterations;
+      first_call = false;
+      return;
+    }
     m_impulse_iterations = _value;
   };
   m_imgui->Add(SPIN_BOX, "Impulse Iterations", &impulse_iterations_callback);

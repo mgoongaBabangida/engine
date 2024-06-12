@@ -165,6 +165,7 @@ public:
 
 	//statistic
 	uint32_t& GetDrawCalls() { return m_draw_calls; }
+	size_t&		GetDrawTriangles() { return m_draw_triangles; }
 
 	glm::vec4 debug_float = {0.0f,0.0f,0.0f,0.0f};
 
@@ -256,6 +257,7 @@ protected:
 
 	//statistic
 	uint32_t m_draw_calls = 0;
+	size_t	 m_draw_triangles = 0;
 
 	const uint32_t  m_width		  = 1200; //@todo make resizable
 	const uint32_t  m_height		= 750;

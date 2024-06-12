@@ -10,6 +10,8 @@
 
 #include <assert.h>
 
+#include <base/Log.h>
+
 using glm::vec3;
 using glm::mat4;
 using glm::mat3;
@@ -462,8 +464,8 @@ ShapeData ShapeGenerator::makeTeapot(uint tesselation, const glm::mat4& lidTrans
 		v.normal.z = normals[i * 3 + 2];
 		v.color = randomColor();
 	}
-	std::cout << ret.numIndices << " numIndices" << std::endl;
-	std::cout << ret.numVertices << " numVertices" << std::endl;
+	base::Log(ret.numIndices + " numIndices");
+	base::Log(ret.numVertices + " numVertices");
 	return ret;
 }
 

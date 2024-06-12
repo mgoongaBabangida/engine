@@ -64,9 +64,16 @@ dbGLWindowSDL::dbGLWindowSDL(const IGameFactory& _factory, GLint _width, GLint _
 
 	guiWnd[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Disable system cursor", &m_disable_system_cursor_under_view);
 	guiWnd[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "V-sync", &m_vsync);
-	static std::function<void(int)> min_frametime_callback = [this](int _val)
+	static std::function<void(int, int*&)> min_frametime_callback = [this](int rate, int*& _val)
 	{
-		m_min_frametime = (unsigned int)_val;
+		static bool first_call = true;
+		if (first_call)
+		{
+			*_val = m_min_frametime;
+			first_call = false;
+			return;
+		}
+		m_min_frametime = (unsigned int)rate;
 	};
 	guiWnd[ExternalWindow::PIPELINE_WND]->Add(SPIN_BOX, "Min frametime", (void*)&min_frametime_callback);
 #endif

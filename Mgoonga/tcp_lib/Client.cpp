@@ -4,7 +4,7 @@
 #include "TCPConnection.h"
 #include "Packet.h"
 
-#include <iostream>
+#include <base/Log.h>
 
 //---------------------------------------
 bool Client::Connect(dbb::IPEndPoint ip)
@@ -14,10 +14,10 @@ bool Client::Connect(dbb::IPEndPoint ip)
    {
        if (m_socket.SetBlocking(false) != dbb::PResult::SUCCESS)
            return false;
-       std::cout << "dbb::Socket::Create is successful" << std::endl;
+       base::Log("dbb::Socket::Create is successful");
        if (m_socket.Connect(ip) == dbb::PResult::SUCCESS || m_socket.GetSocketError() == WSAEWOULDBLOCK)
        {
-         std::cout << "socket.Connect is successful" << std::endl;
+         base::Log("socket.Connect is successful");
 		     connection = { m_socket, ip };
 		     master_fd.fd = m_socket.GetHandle();
 		     master_fd.events = POLLRDNORM | POLLWRNORM;
@@ -28,12 +28,12 @@ bool Client::Connect(dbb::IPEndPoint ip)
        }
        else
        {
-           std::cout << "socket.Connect is UNsuccessful" << std::endl;
+         base::Log("socket.Connect is UNsuccessful");
        }
    }
    else
    {
-       std::cout << "socket.Create is fail" << std::endl;
+     base::Log("socket.Create is fail");
    }
     return false;
 }
@@ -96,7 +96,7 @@ bool Client::Frame()
 //------------------------------------------------------------------------
 void Client::CloseConnection(const std::string& reason)
 {
-	std::cout << "[" << reason << "] Connection lost: " << connection.ToString() << "." << std::endl;
+  base::Log("[" + reason + "] Connection lost: " + connection.ToString() + "." );
 	connection.Close();
 }
 

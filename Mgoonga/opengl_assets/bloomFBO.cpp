@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "bloomFBO.h"
+#include <base/Log.h>
 
 //----------------------------------------------------------------------------------------
 BloomFBO::~BloomFBO()
@@ -28,9 +29,10 @@ bool BloomFBO::Init(unsigned int windowWidth, unsigned int windowHeight, unsigne
 
   glm::vec2 mipSize((float)windowWidth, (float)windowHeight);
   glm::ivec2 mipIntSize((int)windowWidth, (int)windowHeight);
+
   // Safety check
   if (windowWidth > (unsigned int)INT_MAX || windowHeight > (unsigned int)INT_MAX) {
-    std::cerr << "Window size conversion overflow - cannot build bloom FBO!\n";
+    base::Log("Window size conversion overflow - cannot build bloom FBO!");
     return false;
   }
 
@@ -68,7 +70,7 @@ bool BloomFBO::Init(unsigned int windowWidth, unsigned int windowHeight, unsigne
   int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
   if (status != GL_FRAMEBUFFER_COMPLETE)
   {
-    std::cout << "Bloom Framebuffer not complete!" << std::endl;
+    base::Log("Bloom Framebuffer not complete!");
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return false;
   }

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GFBO.h"
+#include <base/Log.h>
 
 eGFBO::~eGFBO()
 {
@@ -54,7 +55,7 @@ bool eGFBO::Init(unsigned int WindowWidth, unsigned int WindowHeight, bool multi
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
 	// finally check if framebuffer is complete
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "Framebuffer not complete!" << std::endl;
+		base::Log("Framebuffer not complete!");
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	return true;
 }

@@ -2,12 +2,14 @@
 #include "Sound.h"
 #include <fstream>
 #include <cstdlib>
-#include <iostream>
+
 #include <Windows.h>
+
+#include <base/Log.h>
 
 bool SoundContext::endWithError(std::string str)
 {
-	std::cout << str << std::endl;
+	base::Log(str);
 	return false;
 }
 

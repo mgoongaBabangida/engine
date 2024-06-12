@@ -3,7 +3,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <winsock.h>
 
-#include <iostream>
+#include <base/Log.h>
 
 namespace dbb
 {
@@ -83,7 +83,7 @@ std::pair<bool, dbb::PacketContent> ProcessPacket(dbb::Packet& packet) // should
 		std::string chatmessage;
 		packet >> chatmessage;
 		result.second = chatmessage;
-		std::cout << "Chat Message: " << chatmessage << std::endl;
+		base::Log("Chat Message: " + chatmessage);
 		break;
 	}
 	case dbb::PacketType::PT_Intarray:
@@ -91,19 +91,19 @@ std::pair<bool, dbb::PacketContent> ProcessPacket(dbb::Packet& packet) // should
 		uint32_t arraySize = 0;
 		std::vector<uint32_t> res;
 		packet >> arraySize;
-		std::cout << "Array Size: " << arraySize << std::endl;
+		base::Log("Array Size: " + arraySize);
 		for (uint32_t i = 0; i < arraySize; i++)
 		{
 			uint32_t element = 0;
 			packet >> element;
 			res.push_back(element);
-			std::cout << "Element[" << i << "] - " << element << std::endl;
+			base::Log("Element[" + std::to_string(i) + "] - " + std::to_string(element));
 		}
 		result.second = res;
 		break;
 	}
 	default:
-		std::cout << "Unrecognized packet type: " << (int)packet.GetPacketType() << std::endl;
+		base::Log("Unrecognized packet type: " + (int)packet.GetPacketType());
 		result.first = true;
 	}
 

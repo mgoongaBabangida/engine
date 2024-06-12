@@ -6,7 +6,7 @@
 #include "TCPConnection.h"
 #include "Packet.h"
 
-#include <iostream>
+#include <base/Log.h>
 
 //---------------------------------------------------------------------
 bool Server::Initialize(dbb::IPEndPoint ip)
@@ -14,13 +14,13 @@ bool Server::Initialize(dbb::IPEndPoint ip)
     master_fd.clear();
     connections.clear();
 
-    std::cout << "dbb::NetWork::Initialize is successful" << std::endl;
+    base::Log("dbb::NetWork::Initialize is successful");
     if (listening_socket.Create(); listening_socket.GetSocketError() == 0)
     {
-        std::cout << "dbb::listening_socket::Create is successful" << std::endl;
+        base::Log("dbb::listening_socket::Create is successful");
         if (listening_socket.Listen(ip) == dbb::PResult::SUCCESS)
         {
-            std::cout << "listening_socket.Listen(test) is successful" << std::endl;
+            base::Log("listening_socket.Listen(test) is successful");
 
             WSAPOLLFD listeningSocketFD = {};
             listeningSocketFD.fd = listening_socket.GetHandle();
@@ -33,7 +33,7 @@ bool Server::Initialize(dbb::IPEndPoint ip)
     }
     else
     {
-        std::cout << "listening_socket.Create is fail" << std::endl;
+      base::Log("listening_socket.Create is fail");
     }
     listening_socket.Close();
     return false;
@@ -52,7 +52,7 @@ bool Server::Frame()
             if (auto accepted_socket = listening_socket.Accept(); accepted_socket.has_value())
             {
                 dbb::TCPConnection connection(accepted_socket.value(), listening_socket.GetAcceptedEndPoint());
-                std::cout << listening_socket.GetAcceptedEndPoint().m_ip_string << " listening_socket.Accept is successful" << std::endl;
+                base::Log(listening_socket.GetAcceptedEndPoint().m_ip_string + " listening_socket.Accept is successful");
                 WSAPOLLFD newConnectionFD = {};
                 newConnectionFD.fd = accepted_socket->GetHandle();
                 newConnectionFD.events = POLLRDNORM | POLLWRNORM;
@@ -65,7 +65,7 @@ bool Server::Frame()
             }
             else
             {
-                std::cout << "socket.Accept is UNsuccessful" << std::endl;
+              base::Log("socket.Accept is UNsuccessful");
             }
         }
 
@@ -116,7 +116,7 @@ bool Server::Frame()
 void Server::CloseConnection(int connectionIndex, std::string reason)
 {
 	dbb::TCPConnection& connection = connections[connectionIndex];
-	std::cout << "[" << reason << "] Connection lost: " << connection.ToString() << "." << std::endl;
+  base::Log("[" + reason + "] Connection lost: " + connection.ToString() + ".");
 	master_fd.erase(master_fd.begin() + (connectionIndex + 1));
 	use_fd.erase(use_fd.begin() + (connectionIndex + 1));
 	connection.Close();

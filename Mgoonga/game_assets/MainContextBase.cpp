@@ -585,12 +585,24 @@ void eMainContextBase::InitializeExternalGui()
 
 	//Pipeline
 	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXT_INT32, "Draw calls ", &pipeline.GetDrawCalls());
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(TEXT_INT, "Draw triangles ", &pipeline.GetDrawTriangles());
 	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Show bounding boxes", &pipeline.GetBoundingBoxBoolRef());
 	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Use Multi sampling", &pipeline.GetMultiSamplingBoolRef());
 	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Sky box on", &pipeline.GetSkyBoxOnRef());
 	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Rotate Sky box", &pipeline.GetRotateSkyBoxRef());
-	static std::function<void(int)> change_skybox_callback = [this](int _skybox)
+	static std::function<void(int, int*&)> change_skybox_callback = [this](int _skybox, int*& _val)
 	{
+		static bool first_call = true;
+		if (first_call)
+		{
+			const Texture* skybox = texManager->FindByID(texManager->GetCubeMapIds()[1]);
+			if(skybox)
+				pipeline.SetSkyBoxTexture(skybox);
+			*_val = 1;
+			first_call = false;
+			return;
+		}
+
 		if (texManager->GetCubeMapIds().size() > _skybox)
 		{
 			const Texture* skybox = texManager->FindByID(texManager->GetCubeMapIds()[_skybox]);
@@ -598,7 +610,7 @@ void eMainContextBase::InitializeExternalGui()
 		}
 	};
 	externalGui[ExternalWindow::PIPELINE_WND]->Add(SPIN_BOX, "Sky box", (void*)&change_skybox_callback);
-	static std::function<void(int)> change_ibl_callback = [this](int _ibl)
+	static std::function<void(int, int*&)> change_ibl_callback = [this](int _ibl, int*& _val)
 	{
 		if (texManager->GetIBLIds().size() > _ibl)
 		{

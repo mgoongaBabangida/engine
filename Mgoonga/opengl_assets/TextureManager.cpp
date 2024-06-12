@@ -5,6 +5,8 @@
 #include <fstream>
 #include <sstream>
 
+#include <base/Log.h>
+
 #define DEVIL_IMAGE
 //#define SDL_IMAGE
 
@@ -149,7 +151,7 @@ const Texture* eTextureManager::Find(const std::string& texture_name) const
 		return &m_Textures.find(texture_name)->second;
 	else
 	{
-		std::cout << "texture not found!" << std::endl;
+		base::Log("texture not found!");
 		return nullptr;
 	}
 }

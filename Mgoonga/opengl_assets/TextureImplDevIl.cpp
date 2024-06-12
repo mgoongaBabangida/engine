@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "TextureImplDevIl.h"
-#include <iostream>
+
+#include <base/Log.h>
 
 #ifdef DEVIL_IMAGE
 
@@ -14,26 +15,26 @@ uint8_t eTextureImplDevIl::LoadTexture(const std::string& path, uint32_t& id, in
 
 	//Load image
 	ILboolean success = ilLoadImage((wchar_t*)path.c_str());
-	std::cout << path.c_str() << std::endl;
+	base::Log(path);
 	int i = ilGetError();
 	if (!success)
 	{
-		std::cout << "error loading image" << std::endl;
+		base::Log("error loading image");
 		if (i == IL_COULD_NOT_OPEN_FILE)
 		{
-			std::cout << "IL_COULD_NOT_OPEN_FILE" << std::endl;
+			base::Log("IL_COULD_NOT_OPEN_FILE");
 		}
 		else if (i == IL_ILLEGAL_OPERATION)
 		{
-			std::cout << "IL_ILLEGAL_OPERATION" << std::endl;
+			base::Log("IL_ILLEGAL_OPERATION");
 		}
 		else if (i == IL_INVALID_PARAM)
 		{
-			std::cout << "IL_INVALID_PARAM" << std::endl;
+			base::Log("IL_INVALID_PARAM");
 		}
 		else if (i == IL_INVALID_EXTENSION)
 		{
-			std::cout << "IL_INVALID_EXTENSION" << std::endl;
+			base::Log("IL_INVALID_EXTENSION");
 		}
 	}
 	//Image loaded successfully
@@ -50,7 +51,7 @@ void eTextureImplDevIl::AssignPixels(uint8_t*& buffer, int32_t width, int32_t he
 	//Convert image to RGBA
 	ILboolean success = ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
 	if (!success)
-		std::cout << "error converting image" << std::endl;
+		base::Log("error converting image");
 	ilCopyPixels(0, 0, 0, width, height, 1, IL_RGBA, IL_UNSIGNED_BYTE, buffer);
 }
 

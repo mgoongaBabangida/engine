@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Shader.h"
 
+#include <base/Log.h>
+
 #include <fstream>
 
 //@todo make one function installShaders//
@@ -167,7 +169,7 @@ bool Shader::checkShaderStatus(GLint shaderID)
 
 		GLint bufferSize;
 		glGetShaderInfoLog(shaderID, infologlength, &bufferSize, buffer);
-		std::cout << buffer << std::endl;
+		base::Log(buffer);
 		delete[] buffer;
 	}
 	return true;
@@ -186,7 +188,7 @@ bool Shader::checkProgramStatus()
 
 		GLint bufferSize;
 		glGetProgramInfoLog(id, infologlength, &bufferSize, buffer);
-		std::cout << buffer << std::endl;
+		base::Log(buffer);
 		delete[] buffer;
 	}
 	return true;
@@ -199,7 +201,7 @@ std::string Shader::readShaderCode(const char * filename)
 	std::ifstream meInput(filename);
 	if (!meInput.good())
 	{
-		std::cout << "File failed to load..." << std::endl;
+		base::Log("File failed to load...");
 		exit(1);
 	}
 	return std::string(std::istreambuf_iterator<char>(meInput), std::istreambuf_iterator<char>());
@@ -225,7 +227,7 @@ void	Shader::GetUniformInfoFromShader()
 		GLint numuniforms = 0;
 		glGetProgramInterfaceiv(id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numuniforms);
 
-		std::cout << "Active uniforms " << id << std::endl;
+		base::Log("Active uniforms " + id);
 		GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION, GL_BLOCK_INDEX };
 		for (int i = 0; i < numuniforms; ++i)
 		{
@@ -238,7 +240,7 @@ void	Shader::GetUniformInfoFromShader()
 			glGetProgramResourceName(id, GL_UNIFORM, i, nameBufSize, NULL, name);
 			m_uniforms.push_back(Uniform{ std::string(name),results[2],results[1],{} });
 			delete[] name;
-			std::cout << m_uniforms.back().name << " " << m_uniforms.back().type << " " << m_uniforms.back().location << std::endl;
+			base::Log(m_uniforms.back().name + " " + std::to_string(m_uniforms.back().type) + " " + std::to_string(m_uniforms.back().location));
 		}
 	}
 }
@@ -336,7 +338,7 @@ void	Shader::GetUniformDataFromShader()
 			break;
 			default:
 			{
-				std::cout << "there is not uniform handler for type " << uniform.type << " "<< uniform.name << std::endl;
+				base::Log("there is not uniform handler for type " + std::to_string(uniform.type) + " " + uniform.name);
 			}
 		}
 	}
@@ -445,7 +447,7 @@ void Shader::_SetUniform(const Uniform& _uniform)
 		break;
 		default:
 		{
-			std::cout << "there is not uniform handler for type " << _uniform.type << " " << _uniform.name << std::endl;
+			base::Log("there is not uniform handler for type " + std::to_string(_uniform.type) + " " + _uniform.name);
 		}
 	}
 }		

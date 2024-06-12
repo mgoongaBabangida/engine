@@ -874,6 +874,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 	RenderGui(_guis, _camera);
 
 	m_draw_calls = eGlDrawContext::GetInstance().GetDrawCallsCount();
+	m_draw_triangles = eGlDrawContext::GetInstance().GetDrawTrianglesCount();
 	eGlDrawContext::GetInstance().Flush();
 
 	if (m_compute_shader)

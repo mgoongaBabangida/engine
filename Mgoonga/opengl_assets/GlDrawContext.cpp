@@ -8,7 +8,7 @@ void eGlDrawContext::DrawElements(GLenum _mode, GLsizei _count, GLenum _type, co
 	glDrawElements(_mode, _count, _type, _indices);
 	if (m_debuging)
 	{
-		_Debug(_tag);
+		_Debug(_tag, _count/3);
 	}
 }
 
@@ -18,7 +18,7 @@ void eGlDrawContext::DrawElementsInstanced(GLenum _mode, GLsizei _count, GLenum 
 	glDrawElementsInstanced(_mode, _count, _type, _indices, _instances);
 	if (m_debuging)
 	{
-		_Debug(_tag);
+		_Debug(_tag, _count / 3);
 	}
 }
 
@@ -28,6 +28,6 @@ void eGlDrawContext::DrawArrays(GLenum _mode, GLint _first, GLsizei _count, cons
 	glDrawArrays(_mode, _first, _count);
 	if (m_debuging)
 	{
-		_Debug(_tag);
+		_Debug(_tag, _count / 3);
 	}
 }

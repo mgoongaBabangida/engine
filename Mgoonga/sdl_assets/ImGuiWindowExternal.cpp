@@ -892,7 +892,11 @@ void eWindowImGuiExternal::Add(TypeImGui _type, const std::string& _name, void* 
   }
   else if (_type == SPIN_BOX)
   {
-    spin_box_values.insert_or_assign(_name, 0);
+    std::function<void(int, int*&)> callback = *(reinterpret_cast<std::function<void(int, int*&)>*>(_data));
+    int val = 0;
+    int* value = &val;
+    callback(*value, value); // first call to assign a default value
+    spin_box_values.insert_or_assign(_name, *value);
   }
 
   auto it = std::find_if(lines.begin(), lines.end(), [&_name](const eItem& _item)
