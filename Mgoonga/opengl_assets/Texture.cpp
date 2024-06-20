@@ -16,6 +16,7 @@ unsigned int Texture::textures_in_use = 0;
 std::set<unsigned int> Texture::indexes_in_use = {};
 GLuint Texture::mg_default_texture_id = (GLuint)glm::pow(2, 32) - 1;
 GLuint Texture::mg_empty_texture_id = (GLuint)glm::pow(2, 32) - 1;
+GLuint Texture::mg_light_icon_texture_id = (GLuint)glm::pow(2, 32) - 1;
 bool Texture::m_use_mipmaps = true;
 
 //-----------------------------------------------
@@ -28,6 +29,18 @@ GLuint Texture::GetDefaultTextureId()
 void Texture::SetEmptyTextureId(GLuint _default_id)
 {
 	mg_empty_texture_id = _default_id;
+}
+
+//-----------------------------------------------
+GLuint Texture::GetLightIconTextureId()
+{
+	return mg_light_icon_texture_id;
+}
+
+//-----------------------------------------------
+void Texture::SetLightIconTextureId(GLuint _default_id)
+{
+	mg_light_icon_texture_id = _default_id;
 }
 
 //-----------------------------------------------

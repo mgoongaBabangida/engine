@@ -134,6 +134,13 @@ void eTextureManager::_LoadHardcoded()
 	m_Textures.insert(std::pair<std::string, Texture>("Tempty", text));
 	Texture::SetEmptyTextureId(text.m_id);
 
+	text.loadTextureFromFile(folderPath + "light_icon.png");
+	m_Textures.insert(std::pair<std::string, Texture>("Tlight_icon", text));
+	Texture::SetLightIconTextureId(text.m_id);
+
+	text.loadTextureFromFile(folderPath + "opengl.png");
+	m_Textures.insert(std::pair<std::string, Texture>("Twelcome", text));
+
 	text.generatePerlin(600, 600, true); //@todo HARDCODING!
 	m_Textures.insert(std::pair<std::string, Texture>("Tperlin_n", text));
 

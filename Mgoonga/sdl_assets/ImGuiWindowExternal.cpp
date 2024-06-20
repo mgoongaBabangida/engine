@@ -280,27 +280,32 @@ void eWindowImGuiExternal::Render()
       }
     }
     break;
+
     case LIGHT_TYPE_VISUAL:
     {
       eModelManager* modelManager = static_cast<eModelManager*>(std::get<2>(item));
       shObject lightObj;
-      for (auto& obj : mp_game->GetObjects())
+      std::vector<shObject> objs = mp_game->GetObjects();
+      for (auto& obj : objs)
       {
         if (obj->Name() == "LightObject")
           lightObj = obj;
       }
-      static std::vector<std::string> types{ "Sphere", "Plane" };
+      static std::vector<std::string> types{ "Sphere", "Plane", "Icon"};
       static const char* current_type_item = NULL;
       if (current_type_item == NULL && lightObj.get())
       {
         if (lightObj->GetModel()->GetName() == "white_sphere")
           current_type_item = types[0].c_str();
-        else if (lightObj->GetModel()->GetName() == "white_quad")
+        else if (lightObj->GetModel()->GetName() == "white_quad" && lightObj->GetModel()->GetMaterial()->use_albedo == false)
           current_type_item = types[1].c_str();
+        else if(lightObj->GetModel()->GetName() == "white_quad")
+          current_type_item = types[2].c_str();
         else
           current_type_item = "Unknown";
       }
 
+      // Combo itself 
       if (ImGui::BeginCombo("Light Object", current_type_item)) // The second parameter is the label previewed before opening the combo.
       {
         for (int n = 0; n < types.size(); n++)
@@ -314,11 +319,11 @@ void eWindowImGuiExternal::Render()
         ImGui::EndCombo();
       }
 
-      if (current_type_item == types[0].c_str())
+      if (current_type_item == types[0].c_str()) // logic if choice is sphere
       {
         if (std::shared_ptr<IModel> model = modelManager->Find("white_sphere"); model.get() != nullptr)
         {
-          if (lightObj->GetModel() != model.get())
+          if (lightObj->GetModel() != model.get()) // if the model is not yet correct
           {
             lightObj->SetModel(model);
             lightObj->GetTransform()->setScale(glm::vec3(0.3f, 0.3f, 0.3f));
@@ -331,25 +336,53 @@ void eWindowImGuiExternal::Render()
           }
         }
       }
-      else if (current_type_item == types[1].c_str())
+      else if (current_type_item == types[1].c_str()) // logic if choice is quad (area light etc.)
       {
         if (std::shared_ptr<IModel> model = modelManager->Find("white_quad"); model.get() != nullptr)
         {
-          if (lightObj->GetModel() != model.get())
+          if (lightObj->GetModel() != model.get()) // if the model is not yet correct
           {
             lightObj->SetModel(model);
-            lightObj->GetTransform()->setScale(glm::vec3(1.0f, 1.0f, 1.0f));
             std::array<glm::vec4, 4> points = { // for area light
-            glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f),
-            glm::vec4(1.0f, -1.0f, 0.0f, 1.0f),
-            glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f),
-            glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
+                                                glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f),
+                                                glm::vec4(1.0f, -1.0f, 0.0f, 1.0f),
+                                                glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f),
+                                                glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
             mp_game->GetMainLight().points = points;
           }
+          lightObj->GetTransform()->setScale(glm::vec3(1.0f, 1.0f, 1.0f));
+          Material m = lightObj->GetModel()->GetMaterial().value();
+          m.use_albedo = false;
+          m.emissive_texture_id = Texture::GetTexture1x1(YELLOW).m_id;
+          lightObj->GetModel()->SetMaterial(m);
         }
       }
+      else if (current_type_item == types[2].c_str())
+      {
+        if (std::shared_ptr<IModel> model = modelManager->Find("white_quad"); model.get() != nullptr)
+        {
+          if (lightObj->GetModel() != model.get()) // if the model is not yet correct
+          {
+            lightObj->SetModel(model);
+            std::array<glm::vec4, 4> points = { // for area light
+                                                glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f),
+                                                glm::vec4(1.0f, -1.0f, 0.0f, 1.0f),
+                                                glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f),
+                                                glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
+            mp_game->GetMainLight().points = points;
+          }
+          lightObj->GetTransform()->setScale(glm::vec3(0.3f, 0.3f, 0.3f));
+          Material m = lightObj->GetModel()->GetMaterial().value();
+          m.albedo_texture_id = Texture::GetLightIconTextureId();
+          m.use_albedo = true;
+          m.emissive_texture_id = Texture::GetTexture1x1(BLACK).m_id;
+          lightObj->GetModel()->SetMaterial(m);
+        }
+      }
+
     }
     break;
+
     case OBJECT_REF_MATERIAL:
     {
       shObject* p_object = static_cast<shObject*>(std::get<2>(item));
