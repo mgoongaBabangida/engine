@@ -33,6 +33,7 @@ MyMesh::MyMesh(const std::string& _name, std::vector<Vertex> vertices, std::vect
 	this->setupMesh();
 }
 
+//----------------------------------------------------------------------------------------------
 MyMesh::MyMesh(const std::string& _name, const ShapeData & data)
 	: name(_name)
 {
@@ -94,6 +95,7 @@ MyMesh::MyMesh(const std::string& _name, const ShapeData & data)
 	this->setupMesh();
 }
 
+//---------------------------------------------------------------------------------
 void MyMesh::Draw()
 {
 	if (m_render_mode == RenderMode::DEFAULT)

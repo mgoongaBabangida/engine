@@ -6,7 +6,7 @@ namespace base
   //---------------------------------------------------------------
   void Log(const std::string& _info)
   {
-    if(false)
+    if(true)
       std::cout << _info << std::endl;
   }
 }

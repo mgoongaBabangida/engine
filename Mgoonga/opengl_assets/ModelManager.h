@@ -33,6 +33,7 @@ class DLL_OPENGL_ASSETS eModelManager
 
   	std::shared_ptr<MyMesh>			  FindMesh(const std::string&) const;
   
+    void                          ReloadTextures();
   protected:
   	std::map<std::string, std::shared_ptr<MyMesh> >		myMeshes;
   	std::map<std::string, std::shared_ptr<IModel> >   models;

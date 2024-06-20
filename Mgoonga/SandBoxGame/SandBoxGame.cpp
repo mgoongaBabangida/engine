@@ -64,10 +64,9 @@ void eSandBoxGame::InitializeModels()
 	material.emissive_texture_id = Texture::GetTexture1x1(TColor::BLACK).m_id;
 	modelManager->Add("sphere_red", Primitive::SPHERE, std::move(material));
 
-	_InitializeScene();
-
 	//light
 	GetMainLight().light_position = glm::vec4(0.f, 6.5f, 5.f , 1.f);
+	GetMainLight().type = eLightType::CSM;
 	pipeline.SetUniformData("class ePhongRender", "emission_strength", 5.0f);
 
 	ObjectFactoryBase factory(animationManager.get());
@@ -94,6 +93,8 @@ void eSandBoxGame::InitializeModels()
 
 	hdr_object->GetModel()->SetMaterial(m);
 	m_objects.push_back(hdr_object);
+
+	_InitializeScene();
 
 	//@todo make it dynamic, make clear order
 	//GLOBAL SCRIPTS

@@ -8,8 +8,8 @@ in vec2 blurTextureCoords[11];
 
 void main(void)
 {	
-	out_colour = vec4(0.0);
-	out_colour += texture(originalTexture, blurTextureCoords[0]) * 0.0093f;
+    out_colour = vec4(0.0);
+    out_colour += texture(originalTexture, blurTextureCoords[0]) * 0.0093f;
     out_colour += texture(originalTexture, blurTextureCoords[1]) * 0.028002f;
     out_colour += texture(originalTexture, blurTextureCoords[2]) * 0.065984f;
     out_colour += texture(originalTexture, blurTextureCoords[3]) * 0.121703f;

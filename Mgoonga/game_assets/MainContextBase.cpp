@@ -13,6 +13,7 @@
 #include "VolumetricCloudsTool.h"
 #include "BezierCurveUIController.h"
 #include "CameraSecondScript.h"
+#include "EngineBaseVisualsScript.h"
 #include "SettingsLoadingService.h"
 
 #include <base/InputController.h>
@@ -24,6 +25,7 @@
 #include <opengl_assets/TextureManager.h>
 #include <opengl_assets/SoundManager.h>
 #include <opengl_assets/Sound.h>
+#include <opengl_assets/GUI.h>
 
 #ifndef STANDALONE
 #include <sdl_assets/ImGuiContext.h>
@@ -207,31 +209,34 @@ void eMainContextBase::InitializeGL()
 
 	InitializePipline();
 
-	m_gameState = GameState::LOADING;
-
-	InitializeModels();
-
 #ifndef STANDALONE
-  InitializeExternalGui();
+	InitializeExternalGui();
 #endif
+
+	m_gameState = IGame::GameState::LOADING;
+}
+
+//-------------------------------------------------------------------------------
+void eMainContextBase::InitializeScene()
+{
+	InitializeModels();
+	m_gameState = IGame::GameState::MODEL_RELOAD;
 
 	InitializeScripts();
 
 	m_global_clock.start();
-	
-	m_gameState = GameState::LOADED;
 }
 
 //-------------------------------------------------------------------------------
 void eMainContextBase::PaintGL()
 {
-	if (m_gameState == GameState::LOADED)
+	if (m_gameState == IGame::GameState::LOADED)
 	{
 		int64_t tick = m_global_clock.newFrame();
 		std::map<eObject::RenderType, std::vector<shObject>> objects;
 		std::vector<shObject> phong, pbr, flags, bezier, geometry, lines, arealighted, terrain, volumetric, environment;
 
-		if(!m_texts.empty() && m_show_fps)
+		if (!m_texts.empty() && m_show_fps)
 			m_texts[0]->content = { "FPS " + std::to_string(1000 / tick) };
 
 		float msc = static_cast<float>(tick);
@@ -243,7 +248,7 @@ void eMainContextBase::PaintGL()
 		//@todo this will be slow when we have a lot of objects
 		for (shObject object : m_objects)
 		{
-			if(object.get())
+			if (object.get())
 			{
 				if (!object->IsVisible())
 					continue;
@@ -284,7 +289,7 @@ void eMainContextBase::PaintGL()
 			}
 		}
 
-		if(m_input_strategy)
+		if (m_input_strategy)
 			m_input_strategy->UpdateInRenderThread();
 
 		//@todo to be transfered to some other update
@@ -329,9 +334,37 @@ void eMainContextBase::PaintGL()
 			}
 		}
 	}
-	else if (m_gameState == GameState::LOADING)
+	else if (m_gameState == IGame::GameState::MODEL_RELOAD)
 	{
-		//welcome texture(s)
+		modelManager->ReloadTextures();
+		if (m_welcome)
+			DeleteGUI(m_welcome);
+		m_gameState = IGame::GameState::LOADED;
+	}
+	else if (m_gameState == IGame::GameState::LOADING)
+	{
+		if (m_guis.empty())
+		{
+			m_welcome = std::make_shared<GUI>(Width()/4, Height()/4, Width() / 2, Height() / 2, Width(), Height());
+			const Texture* t = GetTexture("Twelcome");
+			m_welcome->SetTexture(*t, { 0,0 }, { t->m_width, t->m_height });
+			AddGUI(m_welcome);
+		}
+		std::map<eObject::RenderType, std::vector<shObject>> objects;
+		objects.insert({ eObject::RenderType::PHONG, {} });
+		objects.insert({ eObject::RenderType::TERRAIN_TESSELLATION, {} });
+		objects.insert({ eObject::RenderType::OUTLINED, {} });
+		objects.insert({ eObject::RenderType::FLAG, {} });
+		objects.insert({ eObject::RenderType::PBR, {} });
+		objects.insert({ eObject::RenderType::BEZIER_CURVE, {} });
+		objects.insert({ eObject::RenderType::GEOMETRY, {} });
+		objects.insert({ eObject::RenderType::LINES, {} });
+		objects.insert({ eObject::RenderType::AREA_LIGHT_ONLY, {} });
+		objects.insert({ eObject::RenderType::VOLUMETRIC, {} });
+		objects.insert({ eObject::RenderType::ENVIRONMENT_PROBE, {} });
+
+		pipeline.UpdateSharedUniforms();
+		pipeline.RenderFrame(objects, m_cameras, GetMainLight(), m_guis, m_texts);
 	}
 }
 
@@ -892,13 +925,19 @@ void eMainContextBase::InitializeExternalGui()
 
 	//Global Scrips
 	m_global_scripts.push_back(std::make_shared<ParticleSystemToolController>(this, externalGui[ExternalWindow::PARTICLE_SYSTEM_WND], modelManager.get(),texManager.get(), soundManager.get(), pipeline));
+	
+	auto visual = std::make_shared<EngineBaseVisualsScript>(this);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(CHECKBOX, "Show measurement grid", &visual->GetVisibility());
+	m_global_scripts.push_back(visual);
 
 	auto physics = std::make_shared<PhysicsSystemController>(this);
 	m_global_scripts.push_back(physics);
+
 	static std::function<void()> run_physics = [&physics]() { physics->RunPhysics(); };
 	static std::function<void()> stop_physics = [&physics]() { physics->StopPhysics(); };
-	externalGui[ExternalWindow::PIPELINE_WND]->Add(BUTTON, "Run Physicsa", &run_physics);
+	externalGui[ExternalWindow::PIPELINE_WND]->Add(BUTTON, "Run Physics", &run_physics);
 	externalGui[ExternalWindow::PIPELINE_WND]->Add(BUTTON, "Stop Physics", &stop_physics);
+
 #endif
 }
 

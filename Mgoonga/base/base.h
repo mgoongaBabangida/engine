@@ -215,6 +215,7 @@ struct Text
 	float pos_y;
 	float scale;
 	glm::mat4 mvp;
+	bool visible = true;
 };
 
 //--------------------------------------------------------

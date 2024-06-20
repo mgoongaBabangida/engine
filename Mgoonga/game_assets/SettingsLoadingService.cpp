@@ -117,11 +117,11 @@ void SettingsLoadingService::LoadModels(const std::string& _path, const std::str
 			for (auto& fut : tasks) //textures are loaded in main thread only, need to load  them separately in main thread
 			{
 				std::vector<IModel*> models = fut.get();
-				for (IModel* m : models)
+				/*for (IModel* m : models)
 				{
 					m->SetUpMeshes();
 					m->ReloadTextures();
-				}
+				}*/
 			}
 		}
 	}

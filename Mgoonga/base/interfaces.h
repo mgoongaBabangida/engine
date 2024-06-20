@@ -177,9 +177,9 @@ public:
   virtual size_t													GetAnimationCount() const = 0;
   virtual std::vector<const IAnimation*>	GetAnimations() const = 0;
 
-	virtual bool											HasMaterial() const { return false; }
-	virtual void											SetMaterial(const Material&) {}
-	virtual std::optional<Material>		GetMaterial() const { return std::nullopt; }
+	virtual bool														HasMaterial() const { return false; }
+	virtual void														SetMaterial(const Material&) {}
+	virtual std::optional<Material>					GetMaterial() const { return std::nullopt; }
 };
 
 //----------------------------------------------------------------------------------------------
@@ -349,10 +349,22 @@ public:
 class IGame
 {
 public:
+	enum class GameState
+	{
+		UNINITIALIZED = 0,
+		LOADING = 1,
+		MODEL_RELOAD = 2,
+		LOADED = 3,
+	};
+
 	virtual ~IGame() = default;
+
 	virtual void		InitializeGL() = 0;
+	virtual void		InitializeScene() = 0;
 	virtual void		PaintGL() = 0;
 	virtual uint32_t GetFinalImageId() = 0;
+
+	virtual GameState GetState() const = 0;
 
 	virtual std::shared_ptr<eObject> GetFocusedObject() = 0; //const ref?
 	virtual std::vector<std::shared_ptr<eObject>> GetObjects() = 0;

@@ -142,17 +142,20 @@ bool dbGLWindowSDL::InitializeGL()
 #ifndef STANDALONE
 	eImGuiContext::GetInstance(&context, window).Init();
 #endif
+
 	mainContext->InitializeGL();
 	ImGuizmo::AllowAxisFlip(false);
-
 	SDL_GL_MakeCurrent(window, NULL);
 
 	dTimer.reset(new math::Timer([this]()->bool
-								{
-									this->PaintGL();
-									return true;
-								}));
+		{
+			this->PaintGL();
+			return true;
+		}));
 	dTimer->start(m_min_frametime);
+
+	mainContext->InitializeScene();
+
 	return true;
 }
 
@@ -252,10 +255,14 @@ void dbGLWindowSDL::Close()
 //---------------------------------------
 void dbGLWindowSDL::PaintGL()
 {
+	if (mainContext->GetState() == IGame::GameState::UNINITIALIZED)
+		return;
+
 	static bool flag = false;
 	if(!flag)
 	{
-		SDL_GL_MakeCurrent(window, context);
+		if (SDL_GL_MakeCurrent(window, context) != 0)
+			return;
 		flag = true;
 	}
 

@@ -70,6 +70,13 @@ void eModel::DrawInstanced(int32_t _instances)
 }
 
 //---------------------------------------------------------------------------
+void eModel::SetMaterial(const Material& _m)
+{
+	for (auto& mesh : m_meshes)
+		mesh.SetMaterial(_m);
+}
+
+//---------------------------------------------------------------------------
 void	eModel::SetUpMeshes()
 {
 	for (auto& mesh : m_meshes)

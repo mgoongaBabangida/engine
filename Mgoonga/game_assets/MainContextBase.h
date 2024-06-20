@@ -38,13 +38,6 @@ public:
 		SCALE =896
 	};
 
-	enum class GameState
-	{
-		UNINITIALIZED,
-		LOADING,
-		LOADED
-	};
-
 	eMainContextBase(eInputController* _input,
 									 std::vector<IWindowImGui*>& _externalGui,
 									 const std::string& _modelsPath,
@@ -67,7 +60,8 @@ public:
 	virtual bool	OnMouseRelease(KeyModifiers _modifier) override;
 
 	//IGame
-	void			InitializeGL() final;
+	void							InitializeGL() final;
+	virtual void			InitializeScene() final;
 
 	virtual void	PaintGL() override;
 
@@ -82,6 +76,8 @@ public:
 	virtual void DeleteInputObserver(IInputObserver* _observer) override;
 
 	virtual uint32_t																GetFinalImageId() override;
+	virtual GameState																GetState() const { return m_gameState; }
+
 	virtual std::shared_ptr<eObject>								GetFocusedObject() override;
 	std::shared_ptr<eObject>												GetHoveredObject();
 	virtual std::vector<std::shared_ptr<eObject>>		GetObjects() override { return m_objects; }
@@ -136,7 +132,7 @@ protected:
 	void						_PreInitModelManager();
 
 	eOpenGlRenderPipeline		pipeline; //m_
-	GameState								m_gameState = GameState::UNINITIALIZED;
+	GameState								m_gameState = IGame::GameState::UNINITIALIZED;
 
 	eInputController*				m_input_controller;
 	
@@ -189,4 +185,5 @@ protected:
 	bool m_show_fps = true;
 	bool m_debug_csm = false;
 	bool m_load_model_multithreading = true;
+	std::shared_ptr<GUI> m_welcome;
 };

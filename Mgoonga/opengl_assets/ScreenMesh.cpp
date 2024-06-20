@@ -112,6 +112,7 @@ void eScreenMesh::UpdateFrame(float top_x, float top_y,
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_DYNAMIC_DRAW);
 }
 
+//------------------------------------------------------------------------------------------------------------
 void eScreenMesh::SetViewPortToDefault()
 {
 	quadVertices = {
@@ -155,12 +156,14 @@ eFrameMesh::eFrameMesh()
 	glBindVertexArray(0);
 }
 
+//------------------------------------------------------------------------------------------------------------
 eFrameMesh::~eFrameMesh()
 {
   glGenVertexArrays(1, &quadVAO_fr);
   glGenBuffers(1, &quadVBO_fr);
 }
 
+//------------------------------------------------------------------------------------------------------------
 void eFrameMesh::Draw()
 {
 	glBindVertexArray(quadVAO_fr);

@@ -98,3 +98,12 @@ std::shared_ptr<MyMesh> eModelManager::FindMesh(const std::string& name) const
 {
 	return  myMeshes.find(name)->second;
 }
+
+void eModelManager::ReloadTextures()
+{
+	for (auto& m : models)
+	{
+		m.second->SetUpMeshes();
+		m.second->ReloadTextures();
+	}
+}

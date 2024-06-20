@@ -34,6 +34,8 @@ public:
 	virtual void Draw();
 	virtual void DrawInstanced(int32_t _instances) override;
 
+	virtual void	SetMaterial(const Material&);
+
 	virtual void SetUpMeshes() override;
 	virtual void ReloadTextures() override;
 

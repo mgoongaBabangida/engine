@@ -103,6 +103,7 @@ void eSSAORender::RenderSSAO(const Camera& camera)
     //m_main_shader.SetUniformData("samples[" + std::to_string(i) + "]", m_ssao_kernel[i]); //@todo make it work
   }
   m_main_shader.SetUniformData("projection", camera.getProjectionMatrix());
+  m_main_shader.SetUniformData("screenSize", glm::vec2{ 1200, 750 }); //@todo screen size 
 
   glActiveTexture(GL_TEXTURE4);
   glBindTexture(GL_TEXTURE_2D, noiseTexture);
