@@ -14,6 +14,7 @@ ePBRRender::ePBRRender(const std::string& vS, const std::string& fS)
 : matrices(MAX_BONES)
 {
   pbrShader.installShaders(vS.c_str(), fS.c_str());
+  pbrShader.GetUniformInfoFromShader();
   glUseProgram(pbrShader.ID());
 
   albedoLoc         = glGetUniformLocation(pbrShader.ID(), "albedo");
@@ -36,10 +37,6 @@ ePBRRender::ePBRRender(const std::string& vS, const std::string& fS)
   fullTransformationUniformLocation = glGetUniformLocation(pbrShader.ID(), "modelToProjectionMatrix");
   modelToWorldMatrixUniformLocation = glGetUniformLocation(pbrShader.ID(), "modelToWorldMatrix");
   shadowMatrixUniformLocation       = glGetUniformLocation(pbrShader.ID(), "shadowMatrix"); //shadow
-
-  LightingIndexDirectional = glGetSubroutineIndex(pbrShader.ID(), GL_FRAGMENT_SHADER, "calculateDirectional");
-  LightingIndexPoint = glGetSubroutineIndex(pbrShader.ID(), GL_FRAGMENT_SHADER, "calculatePoint");
-  LightingIndexSpot = glGetSubroutineIndex(pbrShader.ID(), GL_FRAGMENT_SHADER, "calculateFlash");
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -106,7 +103,7 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
       glm::vec3(0.0f, 1.0f, 0.0f));
     pbrShader.SetUniformData("shadow_directional", true); //?
     pbrShader.SetUniformData("use_csm_shadows", false);
-    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexSpot);
+    //glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexSpot);
     shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
   }
   else if (_light.type == eLightType::DIRECTION)
@@ -117,7 +114,7 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
       glm::vec3(0.0f, 1.0f, 0.0f));
     pbrShader.SetUniformData("shadow_directional", true);
     pbrShader.SetUniformData("use_csm_shadows", false);
-    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
+    //glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
     shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
   }
   else if (_light.type == eLightType::CSM)
@@ -125,7 +122,7 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
     pbrShader.SetUniformData("shininess", 64.0f);
     pbrShader.SetUniformData("shadow_directional", true);
     pbrShader.SetUniformData("use_csm_shadows", true);
-    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
+    //glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
     pbrShader.SetUniformData("farPlane", camera.getFarPlane());
     pbrShader.SetUniformData("cascadeCount", m_shadowCascadeLevels.size());
     for (size_t i = 0; i < m_shadowCascadeLevels.size(); ++i)

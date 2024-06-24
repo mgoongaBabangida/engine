@@ -1,4 +1,5 @@
 #include "Windows_Related_api.h"
+#include <windows.h>
 
 //-----------------------------------------------------
 bool HasCurrentOpenGLContext()

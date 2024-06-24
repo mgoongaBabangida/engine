@@ -36,10 +36,6 @@ protected:
   GLuint modelToWorldMatrixUniformLocation;
   GLuint shadowMatrixUniformLocation;
 
-  GLuint LightingIndexDirectional;
-  GLuint LightingIndexPoint;
-  GLuint LightingIndexSpot;
-
   glm::mat4 modelToProjectionMatrix;
   glm::mat4	 shadowMatrix;
 
