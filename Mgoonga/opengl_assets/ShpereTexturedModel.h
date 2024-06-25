@@ -66,6 +66,7 @@ class DLL_OPENGL_ASSETS SphereTexturedModel : public IModel
     virtual size_t                          GetAnimationCount() const override { return 0; }
     virtual std::vector<const IAnimation*>  GetAnimations() const override { return {}; }
 
+    virtual void	SetUpMeshes() override;
   protected:
     std::shared_ptr<SphereTexturedMesh> m_mesh;
     std::string                         m_path;

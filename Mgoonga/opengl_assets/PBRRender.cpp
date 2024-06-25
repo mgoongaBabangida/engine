@@ -93,7 +93,6 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
                                               glm::vec3(_light.light_position) + glm::vec3(_light.light_direction),
                                               glm::vec3(0.0f, 1.0f, 0.0f));
     pbrShader.SetUniformData("shadow_directional", false);
-    //glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexPoint);
     shadowMatrix = camera.getProjectionBiasedMatrix() * worldToViewMatrix;
   }
   else if (_light.type == eLightType::SPOT)
@@ -103,7 +102,6 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
       glm::vec3(0.0f, 1.0f, 0.0f));
     pbrShader.SetUniformData("shadow_directional", true); //?
     pbrShader.SetUniformData("use_csm_shadows", false);
-    //glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexSpot);
     shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
   }
   else if (_light.type == eLightType::DIRECTION)
@@ -114,7 +112,6 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
       glm::vec3(0.0f, 1.0f, 0.0f));
     pbrShader.SetUniformData("shadow_directional", true);
     pbrShader.SetUniformData("use_csm_shadows", false);
-    //glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
     shadowMatrix = camera.getProjectionOrthoMatrix() * worldToViewMatrix;
   }
   else if (_light.type == eLightType::CSM)
@@ -122,7 +119,6 @@ void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<s
     pbrShader.SetUniformData("shininess", 64.0f);
     pbrShader.SetUniformData("shadow_directional", true);
     pbrShader.SetUniformData("use_csm_shadows", true);
-    //glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &LightingIndexDirectional);
     pbrShader.SetUniformData("farPlane", camera.getFarPlane());
     pbrShader.SetUniformData("cascadeCount", m_shadowCascadeLevels.size());
     for (size_t i = 0; i < m_shadowCascadeLevels.size(); ++i)
