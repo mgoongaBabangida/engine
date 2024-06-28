@@ -418,11 +418,12 @@ void eOpenGlRenderPipeline::RedoWorleyNoise()
 //-----------------------------------------------------------------------------------------------
 void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vector<shObject>> _objects,
 																				std::vector<Camera>& _cameras,
-																				const Light& _light,
+																				std::vector<Light> _lights,
 																				std::vector<std::shared_ptr<GUI>>& _guis,
 																				std::vector<std::shared_ptr<Text>>& _texts)
 {
 	/*const */Camera& _camera = _cameras[0]; //@todo
+	const Light& _light = _lights[0];
 
 	if (m_first_call) { RenderIBL(_camera); m_first_call = false; }
 
@@ -491,10 +492,10 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 
 	if (water)
 	{
-		RenderReflection(_camera, _light, phong_objs, pbr_objs);
+		RenderReflection(_camera, _lights, phong_objs, pbr_objs);
 		eGlBufferContext::GetInstance().EnableWrittingBuffer(eBuffer::BUFFER_REFRACTION);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		RenderRefraction(_camera, _light, phong_objs, pbr_objs);
+		RenderRefraction(_camera, _lights, phong_objs, pbr_objs);
 	}
 	eGlPipelineState::GetInstance().DisableClipDistance0();
 
@@ -508,14 +509,14 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 		if (ssao)
 		{
 			RenderSSAO(_camera, _light, phong_pbr_objects);
-			glActiveTexture(GL_TEXTURE7);
+			glActiveTexture(GL_TEXTURE14);
 			glBindTexture(GL_TEXTURE_2D, eGlBufferContext::GetInstance().GetTexture(eBuffer::BUFFER_SSAO_BLUR).m_id);
 		}
 	}
 
 	if(!ssao)
 	{
-		glActiveTexture(GL_TEXTURE7);
+		glActiveTexture(GL_TEXTURE14);
 		glBindTexture(GL_TEXTURE_2D, Texture::GetTexture1x1(WHITE).m_id);
 	}
 
@@ -540,7 +541,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 				if (std::find(phong_objs.begin(), phong_objs.end(), obj) != phong_objs.end())
 					RenderMain(_camera, _light, { obj });
 				else if (std::find(pbr_objs.begin(), pbr_objs.end(), obj) != pbr_objs.end())
-					RenderPBR(_camera, _light, { obj });
+					RenderPBR(_camera, _lights, { obj });
 
 				glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 				glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
@@ -571,7 +572,7 @@ void eOpenGlRenderPipeline::RenderFrame(std::map<eObject::RenderType, std::vecto
 												focused.begin(), focused.end(),
 												std::back_inserter(not_outlined), comparator);
 
-		RenderPBR(_camera, _light, not_outlined);
+		RenderPBR(_camera, _lights, not_outlined);
 
 		RenderAreaLightsOnly(_camera, _light, arealighted_objs);
 
@@ -960,7 +961,7 @@ void eOpenGlRenderPipeline::RenderSkybox(const Camera& _camera)
   glDepthFunc(GL_LESS);
 }
 
-void eOpenGlRenderPipeline::RenderReflection(Camera& _camera, const Light& _light, std::vector<shObject>& _phong_objects, std::vector<shObject>& _pbr_objects)
+void eOpenGlRenderPipeline::RenderReflection(Camera& _camera, const std::vector<Light>& _lights, std::vector<shObject>& _phong_objects, std::vector<shObject>& _pbr_objects)
 {
 	renderManager->PhongRender()->SetClipPlane(-waterHeight);
 
@@ -968,16 +969,16 @@ void eOpenGlRenderPipeline::RenderReflection(Camera& _camera, const Light& _ligh
 	_camera.setPosition(glm::vec3(temp_cam.getPosition().x, waterHeight - (temp_cam.getPosition().y - waterHeight), temp_cam.getPosition().z));
 	_camera.setDirection(glm::reflect(_camera.getDirection(), glm::vec3(0, 1, 0))); //water normal
 
-	renderManager->PhongRender()->Render(_camera, _light, _phong_objects);
-	renderManager->PBRRender()->Render(_camera, _light, _pbr_objects);
+	renderManager->PhongRender()->Render(_camera, _lights[0], _phong_objects);
+	renderManager->PBRRender()->Render(_camera, _lights, _pbr_objects);
 	_camera = temp_cam;
 }
 
-void eOpenGlRenderPipeline::RenderRefraction(Camera& _camera, const Light& _light, std::vector<shObject>& _phong_objects, std::vector<shObject>& _pbr_objects)
+void eOpenGlRenderPipeline::RenderRefraction(Camera& _camera, const std::vector<Light>& _lights, std::vector<shObject>& _phong_objects, std::vector<shObject>& _pbr_objects)
 {
 	renderManager->PhongRender()->SetClipPlane(waterHeight);
-	renderManager->PhongRender()->Render(_camera, _light, _phong_objects);
-	renderManager->PBRRender()->Render(_camera, _light, _pbr_objects);
+	renderManager->PhongRender()->Render(_camera, _lights[0], _phong_objects);
+	renderManager->PBRRender()->Render(_camera, _lights, _pbr_objects);
 	renderManager->PhongRender()->SetClipPlane(10);
 
 	//glDisable(GL_CLIP_DISTANCE0);
@@ -1147,11 +1148,11 @@ void eOpenGlRenderPipeline::RenderGui(std::vector<std::shared_ptr<GUI>>& guis, c
 }
 
 //------------------------------------------------
-void eOpenGlRenderPipeline::RenderPBR(const Camera& _camera, const Light& _light, std::vector<shObject> _objs)
+void eOpenGlRenderPipeline::RenderPBR(const Camera& _camera, const std::vector<Light>& _lights, std::vector<shObject> _objs)
 {
 	if (!_objs.empty())
 	{
-		renderManager->PBRRender()->Render(_camera, _light, _objs);
+		renderManager->PBRRender()->Render(_camera, _lights, _objs);
 	}
 }
 

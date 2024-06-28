@@ -23,6 +23,7 @@ protected:
 	Shader mainShader;
 
 	Texture m1, m2;
+
 	GLuint fullTransformationUniformLocation;
 	GLuint modelToWorldMatrixUniformLocation;
 	GLuint eyePositionWorldUniformLocation;

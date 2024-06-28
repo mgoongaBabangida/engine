@@ -55,10 +55,11 @@ layout(binding=3) uniform sampler2D        texture_specular1;
 layout(binding=4) uniform sampler2D        texture_normal1;
 layout(binding=5) uniform sampler2D        texture_depth1;
 layout(binding=6) uniform sampler2D        texture_emissionl;
-layout(binding=7) uniform sampler2D        texture_ssao;
 
 layout(binding=12) uniform sampler2DArray  texture_array_albedo;
 layout(binding=13) uniform sampler2DArray  texture_array_csm;
+
+layout(binding=14) uniform sampler2D        texture_ssao;
 
 uniform vec4 eyePositionWorld;
 uniform bool normalMapping = true;
@@ -74,6 +75,8 @@ uniform float emission_strength = 1.0f;
 
 uniform bool debug_white_color = false;
 uniform bool debug_white_texcoords = false;
+
+uniform vec2 screenSize = vec2(1200.0, 750.0);
 
 //terrain
 const int max_texture_array_size = 8;
@@ -337,8 +340,8 @@ void main()
 	else
 		bNormal = theNormal;
 
-  //Ambient
-  vec2 buf_relative_tex_coord = vec2(gl_FragCoord[0]/ 1200.0f, gl_FragCoord[1] / 600.0f); // @todo magic numbers
+  //Ambient Occlusion
+  vec2 buf_relative_tex_coord = vec2(gl_FragCoord[0]/ screenSize.x, gl_FragCoord[1] / screenSize.y);
   float AmbientOcclusion = 1.0f;
   
   if(gamma_correction)

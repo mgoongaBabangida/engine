@@ -29,7 +29,7 @@ public:
 
 	void			RenderFrame(std::map<eObject::RenderType, std::vector<shObject>> _objects,
 												std::vector<Camera>& _cameras, //@todo const ?
-												const Light& _light,
+												std::vector<Light> _lights,
 												std::vector<std::shared_ptr<GUI>>& _guis,
 												std::vector<std::shared_ptr<Text>>& _texts);
 	//@todo gui should be const latter ?, and camera prob
@@ -203,8 +203,8 @@ protected:
 	void			RenderShadows(const Camera&, const Light&, std::vector<shObject>&);
 	void			RenderShadowsCSM(const Camera& _camera, const Light& _light, std::vector<shObject>& _objects);
 	void			RenderSkybox(const Camera&);
-	void			RenderReflection(Camera&, const Light&, std::vector<shObject>&, std::vector<shObject>&);
-	void			RenderRefraction(Camera&, const Light&, std::vector<shObject>&, std::vector<shObject>&);
+	void			RenderReflection(Camera&, const std::vector<Light>&, std::vector<shObject>&, std::vector<shObject>&);
+	void			RenderRefraction(Camera&, const std::vector<Light>&, std::vector<shObject>&, std::vector<shObject>&);
 	void			RenderSkyNoise(const Camera&);
 	void			RenderMain(const Camera&, const Light&, const std::vector<shObject>&);
 	void			RenderAreaLightsOnly(const Camera& _camera, const Light& _light, const std::vector<shObject>& _objects);
@@ -216,7 +216,7 @@ protected:
 	void			RenderBlur(const Camera&);
 	void			RenderContrast(const Camera& _camera, const Texture& _screen, const Texture& _contrast);
 	void			RenderGui(std::vector<std::shared_ptr<GUI>>&, const Camera&);
-	void			RenderPBR(const Camera&, const Light& _light, std::vector<shObject> _objs);
+	void			RenderPBR(const Camera&, const std::vector<Light>&, std::vector<shObject> _objs);
 	void			RenderSSAO(const Camera&, const Light&, std::vector<shObject>&);
 	void			RenderSSR(const Camera& _camera);
 	void			RenderCameraInterpolationCompute(const Camera& _camera);

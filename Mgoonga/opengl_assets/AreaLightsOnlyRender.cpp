@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "AreaLightsOnlyRender.h"
 #include <math/Transform.h>
 #include <math/Rigger.h>
@@ -36,16 +37,16 @@ void eAreaLightsOnlyRender::Render(const Camera& _camera, const Light& _light, c
 	glUniform4fv(pointsLoc, 4, &_light.points[0][0]);
 
 	mainShader.SetUniformData("areaLight.intensity", _light.intensity.x);
-	mainShader.SetUniformData("areaLight.color", glm::vec4{1.0f, 1.0f, 0.0f, 1.0f});
+	mainShader.SetUniformData("areaLight.color", glm::vec4 {1.0f, 1.0f, 0.0f, 1.0f});
 	mainShader.SetUniformData("areaLight.twoSided", true);
 
 	mainShader.SetUniformData("areaLightTranslate", _light.light_position);
 	mainShader.SetUniformData("eyePositionWorld", glm::vec4(_camera.getPosition(), 1.0f));
 	mainShader.SetUniformData("far_plane", _camera.getFarPlane());
 
-	glActiveTexture(GL_TEXTURE8);
+	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D, m1.m_id);
-	glActiveTexture(GL_TEXTURE9);
+	glActiveTexture(GL_TEXTURE8);
 	glBindTexture(GL_TEXTURE_2D, m2.m_id);
 
 	glm::mat4 worldToProjectionMatrix = _camera.getProjectionMatrix() * _camera.getWorldToViewMatrix();

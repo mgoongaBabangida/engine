@@ -7,6 +7,8 @@
 #include <glm\glm\gtc\quaternion.hpp>
 #include <glm\glm\gtx\quaternion.hpp>
 
+#include "LTC.h"
+
 #include <map>
 
 //-------------------------------------------------------------------
@@ -33,56 +35,82 @@ ePBRRender::ePBRRender(const std::string& vS, const std::string& fS)
   pbrShader.SetUniformData("Fog.gradient", 1.5f);
 
   //vertex shader
-  BonesMatLocation = glGetUniformLocation(pbrShader.ID(), "gBones");
+  BonesMatLocation                  = glGetUniformLocation(pbrShader.ID(), "gBones");
   fullTransformationUniformLocation = glGetUniformLocation(pbrShader.ID(), "modelToProjectionMatrix");
   modelToWorldMatrixUniformLocation = glGetUniformLocation(pbrShader.ID(), "modelToWorldMatrix");
   shadowMatrixUniformLocation       = glGetUniformLocation(pbrShader.ID(), "shadowMatrix"); //shadow
+  //area lights
+  m1.TextureFromBuffer<GLfloat>(LTC1, 64, 64, GL_RGBA, GL_NEAREST);
+  m2.TextureFromBuffer<GLfloat>(LTC2, 64, 64, GL_RGBA, GL_NEAREST);
 }
 
 //-----------------------------------------------------------------------------------------------------------
-void ePBRRender::Render(const Camera& camera, const Light& _light, std::vector<shObject>& objects)
+void ePBRRender::Render(const Camera& camera, const std::vector<Light>& _lights, std::vector<shObject>& objects)
 {
+  const Light& _light = _lights[0];
+
   glUseProgram(pbrShader.ID());
+
+  std::vector<glm::vec4> lpositions;
+  std::vector<glm::vec4> ldirections;
+  std::vector<glm::vec4> lcolors;
+
+  std::vector <float> lconstant;
+  std::vector <float> llinear;
+  std::vector <float> lquadratic;
+
+  std::vector <float> lcutoffs;
+  std::vector <float> louterCutoffs;
+
+  std::vector<glm::mat4> lpoints;
+
+  for(size_t i = 0; i < _lights.size(); ++i)
   {
-    std::vector<glm::vec4> lpositions;
-    std::vector<glm::vec4> ldirections;
-    std::vector<glm::vec4> lcolors;
+    lpositions.push_back(_lights[i].light_position);
+    ldirections.push_back(_lights[i].light_direction);
+    if(_lights[i].type != eLightType::AREA_LIGHT)
+      lcolors.push_back({ _lights[i].ambient });
+    else
+      lcolors.push_back({ glm::normalize(_lights[i].intensity)});
+    lconstant.push_back(_lights[i].constant);
+    llinear.push_back(_lights[i].linear);
+    lquadratic.push_back(_lights[i].quadratic);
+    lcutoffs.push_back(_lights[i].cutOff);
+    louterCutoffs.push_back(_lights[i].outerCutOff);
+    lpoints.push_back({ _lights[i].points[0],_lights[i].points[1],_lights[i].points[2],_lights[i].points[3] });
 
-    std::vector <float> lconstant;
-    std::vector <float> llinear;
-    std::vector <float> lquadratic;
+    pbrShader.SetUniformData("constant[" +std::to_string(i) + "]", lconstant[i]);
+    pbrShader.SetUniformData("linear[" + std::to_string(i) + "]", llinear[i]);
+    pbrShader.SetUniformData("quadratic[" + std::to_string(i) + "]", lquadratic[i]);
 
-    std::vector <float> lcutoffs;
-    std::vector <float> louterCutoffs;
-    std::vector <bool> flashs;
+    pbrShader.SetUniformData("cutOff[" + std::to_string(i) + "]", lcutoffs[i]);
+    pbrShader.SetUniformData("outerCutOff[" + std::to_string(i) + "]", louterCutoffs[i]);
+    pbrShader.SetUniformData("flash[" + std::to_string(i) + "]", _lights[i].type == eLightType::SPOT);
 
-    lpositions.push_back(_light.light_position);
-    ldirections.push_back(_light.light_direction);
-    lcolors.push_back({ _light.intensity });
-    lconstant.push_back(_light.constant);
-    llinear.push_back(_light.linear);
-    lquadratic.push_back(_light.quadratic);
-    lcutoffs.push_back(_light.cutOff);
-    louterCutoffs.push_back(_light.outerCutOff);
-    flashs.push_back(_light.type == eLightType::SPOT);
-
-    GLuint loc_pos = glGetUniformLocation(pbrShader.ID(), "lightPositions");
-    glUniform4fv(loc_pos, 1, &lpositions[0][0]);
-
-    GLuint loc_dir = glGetUniformLocation(pbrShader.ID(), "lightDirections");
-    glUniform4fv(loc_dir, 1, &ldirections[0][0]);
-
-    GLuint loc_col = glGetUniformLocation(pbrShader.ID(), "lightColors");
-    glUniform4fv(loc_col, 1, &lcolors[0][0]);
-
-    pbrShader.SetUniformData("constant[0]", lconstant[0]);
-    pbrShader.SetUniformData("linear[0]", llinear[0]);
-    pbrShader.SetUniformData("quadratic[0]", lquadratic[0]);
-
-    pbrShader.SetUniformData("cutOff[0]", lcutoffs[0]);
-    pbrShader.SetUniformData("outerCutOff[0]", louterCutoffs[0]);
-    pbrShader.SetUniformData("flash[0]", flashs[0]);
+    pbrShader.SetUniformData("intensity[" + std::to_string(i) + "]", _lights[i].intensity.x);
+    pbrShader.SetUniformData("twoSided[" + std::to_string(i) + "]", true); //!@todo
+    pbrShader.SetUniformData("isAreaLight[" + std::to_string(i) + "]", _lights[i].type == eLightType::AREA_LIGHT); //!@todo
+    pbrShader.SetUniformData("radius[" + std::to_string(i) + "]", _lights[i].radius);
   }
+
+  pbrShader.SetUniformData("num_lights", _lights.size());
+
+  GLuint loc_pos = glGetUniformLocation(pbrShader.ID(), "lightPositions");
+  glUniform4fv(loc_pos, _lights.size(), &lpositions[0][0]);
+
+  GLuint loc_dir = glGetUniformLocation(pbrShader.ID(), "lightDirections");
+  glUniform4fv(loc_dir, _lights.size(), &ldirections[0][0]);
+
+  GLuint loc_col = glGetUniformLocation(pbrShader.ID(), "lightColors");
+  glUniform4fv(loc_col, _lights.size(), &lcolors[0][0]);
+
+  GLuint pointsLoc = glGetUniformLocation(pbrShader.ID(), "points");
+  glUniformMatrix4fv(pointsLoc, _lights.size(), GL_FALSE , &lpoints[0][0][0]);
+
+  glActiveTexture(GL_TEXTURE7);
+  glBindTexture(GL_TEXTURE_2D, m1.m_id);
+  glActiveTexture(GL_TEXTURE8);
+  glBindTexture(GL_TEXTURE_2D, m2.m_id);
 
   pbrShader.SetUniformData("view", camera.getWorldToViewMatrix());
 

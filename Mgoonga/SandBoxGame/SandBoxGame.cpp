@@ -76,13 +76,6 @@ void eSandBoxGame::InitializeModels()
 	hdr_object->GetTransform()->setTranslation(GetMainLight().light_position);
 	m_light_object = hdr_object;
 
-	std::array<glm::vec4, 4> points = { // for area light
-		glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f),
-		glm::vec4(1.0f, -1.0f, 0.0f, 1.0f),
-		glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f),
-		glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) };
-	GetMainLight().points = points;
-
 	GetMainCamera().setPosition({-1, 2, 10});
 	GetMainCamera().setDirection({0, 0, -1.f});
 

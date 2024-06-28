@@ -177,14 +177,27 @@ void eMainContextBase::InitializeGL()
 	{
 		//init main light
 		m_lights.push_back({});
-		//m_lights[0].light_position = vec4(0.0f, 4.0f, -1.0f, 1.0f);
 		m_lights[0].light_position = glm::vec4(0.5f, 2.0f, -4.0f, 1.0f);
 		m_lights[0].light_direction = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-		m_lights[0].intensity = glm::vec4{ 10.0f,10.0f ,10.0f, 1.0f };
+		m_lights[0].intensity = glm::vec4{ 10.0f, 10.0f ,10.0f, 1.0f };
 		m_lights[0].type = eLightType::DIRECTION;
 		m_lights[0].constant = 0.9f;
 		m_lights[0].linear = 0.5f;
 		m_lights[0].quadratic = 0.03f;
+		std::array<glm::vec4, 4> points = { // for area light
+		glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f),
+		glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 0.0f, 1.0f),
+		glm::vec4(1.0f, -1.0f, 0.0f, 1.0f) };
+		m_lights[0].points = points;
+
+		//area light
+		m_lights.push_back({ m_lights[0] });
+		m_lights.back().type = eLightType::AREA_LIGHT;
+		m_lights.back().ambient = glm::vec4{ 1.0f, 1.0f , 0.0f, 1.0f };
+		m_lights.back().intensity = glm::vec4{ 0.2f, 0.2f, 0.0f, 1.0f };
+		m_lights.back().light_position = glm::vec4(8.0f, 0.2f, 3.2f, 1.0f);
+		m_lights.back().radius = 5.0f;
 
 		//init main camera
 		m_cameras.emplace_back(pipeline.Width(), pipeline.Height(), 0.1f, 40.0f);
@@ -320,7 +333,7 @@ void eMainContextBase::PaintGL()
 		objects.insert({ eObject::RenderType::ENVIRONMENT_PROBE, environment });
 
 		pipeline.UpdateSharedUniforms();
-		pipeline.RenderFrame(objects, m_cameras, GetMainLight(), m_guis, m_texts);
+		pipeline.RenderFrame(objects, m_cameras, m_lights, m_guis, m_texts);
 
 		if (m_debug_csm)
 		{
@@ -364,7 +377,7 @@ void eMainContextBase::PaintGL()
 		objects.insert({ eObject::RenderType::ENVIRONMENT_PROBE, {} });
 
 		pipeline.UpdateSharedUniforms();
-		pipeline.RenderFrame(objects, m_cameras, GetMainLight(), m_guis, m_texts);
+		pipeline.RenderFrame(objects, m_cameras, m_lights, m_guis, m_texts);
 	}
 }
 
@@ -577,6 +590,14 @@ void eMainContextBase::InitializeExternalGui()
 	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(TEXT, "Light outer cut off", nullptr);
 	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_NERROW, "Outer cut off", &GetMainLight().outerCutOff);
 	
+	if (m_lights.size() > 1)
+	{
+		externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(TEXT, "Area Light", nullptr);
+		externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_3, "Position ", &m_lights[1].light_position);
+		externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_NERROW, "Intensity ", &m_lights[1].intensity[0]);
+		externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT, "Radius ", &m_lights[1].radius);
+	}
+
 	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(TEXT, "Camera", nullptr);
 	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_3, "position", &GetMainCamera().PositionRef());
 	externalGui[ExternalWindow::LIGHT_CAMERA_WND]->Add(SLIDER_FLOAT_3, "direction", &GetMainCamera().ViewDirectionRef());

@@ -80,7 +80,11 @@ struct Light
 	float cutOff		= 0.3f;
 	float outerCutOff = 0.0f;
 
-	std::array<glm::vec4, 4> points; //for area light
+	//for area light
+	std::array<glm::vec4, 4> points;
+	float minRadius = 0.f; //@todo use all this for area light, froward+ rendering
+	float radius = 0.f;
+	float fallOff = 0.f;
 };
 
 //-------------------------------------------------------
